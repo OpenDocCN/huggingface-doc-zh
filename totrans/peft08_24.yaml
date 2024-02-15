@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 适配器
 - en: 'Original text: [https://huggingface.co/docs/peft/conceptual_guides/adapter](https://huggingface.co/docs/peft/conceptual_guides/adapter)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/peft/conceptual_guides/adapter](https://huggingface.co/docs/peft/conceptual_guides/adapter)
 - en: null
   id: totrans-2
   prefs: []
@@ -22,17 +24,20 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 基于适配器的方法在冻结的预训练模型的注意力和全连接层之后添加额外的可训练参数，以减少内存使用量并加快训练速度。适配器的方法因适配器而异，它可能只是添加一个额外的层，也可能将权重更新∆W表示为权重矩阵的低秩分解。无论如何，适配器通常很小，但表现与完全微调模型相当，并且使得用更少资源训练更大模型成为可能。
 - en: This guide will give you a brief overview of the adapter methods supported by
     PEFT (if you’re interested in learning more details about a specific method, take
     a look at the linked paper).
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将简要介绍PEFT支持的适配器方法（如果您对学习特定方法的更多细节感兴趣，请查看链接的论文）。
 - en: Low-Rank Adaptation (LoRA)
   id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 低秩适应（LoRA）
 - en: LoRA is one of the most popular PEFT methods and a good starting point if you’re
     just getting started with PEFT. It was originally developed for large language
     models but it is a tremendously popular training method for diffusion models because
@@ -40,11 +45,13 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRA是最受欢迎的PEFT方法之一，如果您刚开始使用PEFT，这是一个很好的起点。最初是为大型语言模型开发的，但由于其效率和有效性，它成为扩散模型的非常流行的训练方法。
 - en: As mentioned briefly earlier, [LoRA](https://hf.co/papers/2106.09685) is a technique
     that accelerates finetuning large models while consuming less memory.
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前面简要提到的，[LoRA](https://hf.co/papers/2106.09685)是一种加速微调大型模型的技术，同时消耗更少内存。
 - en: LoRA represents the weight updates ∆W with two smaller matrices (called *update
     matrices*) through low-rank decomposition. These new matrices can be trained to
     adapt to the new data while keeping the overall number of parameters low. The
@@ -55,20 +62,24 @@
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRA通过低秩分解用两个较小的矩阵（称为*更新矩阵*）表示权重更新∆W。这些新矩阵可以训练以适应新数据，同时保持总参数数量较低。原始权重矩阵保持冻结，不再接收任何更新。为了生成最终结果，将原始和额外适应的权重组合在一起。您还可以将适配器权重与基础模型合并，以消除推理延迟。
 - en: '![](../Images/cda06893d37810e4cf53c848b789ce47.png)'
   id: totrans-9
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/cda06893d37810e4cf53c848b789ce47.png)'
 - en: 'This approach has a number of advantages:'
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种方法有许多优点：
 - en: LoRA makes finetuning more efficient by drastically reducing the number of trainable
     parameters.
   id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: LoRA通过大幅减少可训练参数的数量，使微调更加高效。
 - en: The original pretrained weights are kept frozen, which means you can have multiple
     lightweight and portable LoRA models for various downstream tasks built on top
     of them.
@@ -76,18 +87,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 原始的预训练权重保持冻结，这意味着您可以基于它们构建多个轻量且便携的LoRA模型，用于各种下游任务。
 - en: LoRA is orthogonal to other parameter-efficient methods and can be combined
     with many of them.
   id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: LoRA与其他参数高效方法正交，并且可以与许多方法结合使用。
 - en: Performance of models finetuned using LoRA is comparable to the performance
     of fully finetuned models.
   id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用LoRA微调的模型的性能与完全微调模型的性能相当。
 - en: In principle, LoRA can be applied to any subset of weight matrices in a neural
     network to reduce the number of trainable parameters. However, for simplicity
     and further parameter efficiency, LoRA is typically only applied to the attention
@@ -97,16 +111,19 @@
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 原则上，LoRA可以应用于神经网络中的任何权重矩阵子集，以减少可训练参数的数量。但是，为了简单起见和进一步的参数效率，LoRA通常仅应用于Transformer模型中的注意力块。LoRA模型中的可训练参数数量取决于更新矩阵的大小，主要由秩`r`和原始权重矩阵的形状确定。
 - en: '![](../Images/9d68304d8b38683336e1572972c45e38.png)[Navigating Text-To-Image
     Customization: From LyCORIS Fine-Tuning to Model Evaluation](https://hf.co/papers/2103.10385)'
   id: totrans-16
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/9d68304d8b38683336e1572972c45e38.png)[导航文本到图像定制：从LyCORIS微调到模型评估](https://hf.co/papers/2103.10385)'
 - en: Low-Rank Hadamard Product (LoHa)
   id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 低秩Hadamard乘积（LoHa）
 - en: Low-rank decomposition can impact performance because the weight updates are
     limited to the low-rank space, which can constrain a model’s expressiveness. However,
     you don’t necessarily want to use a larger rank because it increases the number
@@ -118,6 +135,7 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 低秩分解可能会影响性能，因为权重更新受限于低秩空间，这可能会限制模型的表达能力。但是，您不一定希望使用更大的秩，因为这会增加可训练参数的数量。为了解决这个问题，[LoHa](https://huggingface.co/papers/2108.06098)（最初为计算机视觉开发的方法）被应用于扩散模型，其中生成多样化图像的能力是一个重要考虑因素。LoHa也应该适用于一般的模型类型，但嵌入层目前尚未在PEFT中实现。
 - en: LoHa uses the [Hadamard product](https://en.wikipedia.org/wiki/Hadamard_product_(matrices))
     (element-wise product) instead of the matrix product. ∆W is represented by four
     smaller matrices instead of two - like in LoRA - and each pair of these low-rank
