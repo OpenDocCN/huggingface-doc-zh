@@ -1,23 +1,17 @@
 - en: Depth estimation
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 深度估计
 - en: 'Original text: [https://huggingface.co/docs/datasets/depth_estimation](https://huggingface.co/docs/datasets/depth_estimation)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/datasets/depth_estimation](https://huggingface.co/docs/datasets/depth_estimation)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Depth estimation datasets are used to train a model to approximate the relative
@@ -26,171 +20,263 @@
     perception and perception in robotics. Example applications include mapping streets
     for self-driving cars. This guide will show you how to apply transformations to
     a depth estimation dataset.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 深度估计数据集用于训练模型，以近似图像中每个像素相对于相机的相对距离，也称为深度。这些数据集带来的应用主要涉及视觉机器感知和机器人感知等领域。示例应用包括为自动驾驶汽车绘制街道地图。本指南将向您展示如何将转换应用于深度估计数据集。
 - en: 'Before you start, make sure you have up-to-date versions of `albumentations`
     installed:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装了最新版本的`albumentations`：
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '[Albumentations](https://albumentations.ai/) is a Python library for performing
     data augmentation for computer vision. It supports various computer vision tasks
     such as image classification, object detection, segmentation, and keypoint estimation.'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Albumentations](https://albumentations.ai/)是一个用于计算机视觉数据增强的Python库。它支持各种计算机视觉任务，如图像分类、目标检测、分割和关键点估计。'
 - en: This guide uses the [NYU Depth V2](https://huggingface.co/datasets/sayakpaul/nyu_depth_v2)
     dataset which is comprised of video sequences from various indoor scenes, recorded
     by RGB and depth cameras. The dataset consists of scenes from 3 cities and provides
     images along with their depth maps as labels.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南使用[NYU Depth V2](https://huggingface.co/datasets/sayakpaul/nyu_depth_v2)数据集，该数据集由各种室内场景的视频序列组成，由RGB和深度摄像机记录。该数据集包含来自3个城市的场景，并提供图像以及它们的深度图作为标签。
 - en: 'Load the `train` split of the dataset and take a look at an example:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载数据集的`train`拆分，并查看一个示例：
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'The dataset has two fields:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 数据集有两个字段：
 - en: '`image`: a PIL PNG image object with `uint8` data type.'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image`：具有`uint8`数据类型的PIL PNG图像对象。'
 - en: '`depth_map`: a PIL Tiff image object with `float32` data type which is the
     depth map of the image.'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`depth_map`：具有`float32`数据类型的PIL Tiff图像对象，是图像的深度图。'
 - en: It is mention-worthy that JPEG/PNG format can only store `uint8` or `uint16`
     data. As the depth map is `float32` data, it can’t be stored using PNG/JPEG. However,
     we can save the depth map using TIFF format as it supports a wider range of data
     types, including `float32` data.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 值得一提的是，JPEG/PNG格式只能存储`uint8`或`uint16`数据。由于深度图是`float32`数据，无法使用PNG/JPEG存储。但是，我们可以使用TIFF格式保存深度图，因为它支持更广泛的数据类型，包括`float32`数据。
 - en: 'Next, check out an image with:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，查看一个带有：
 - en: '[PRE2]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '![](../Images/71ff1912abf6cb1b53969d650b8e1e38.png)'
+  id: totrans-16
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/71ff1912abf6cb1b53969d650b8e1e38.png)'
 - en: 'Before we look at the depth map, we need to first convert its data type to
     `uint8` using `.convert(''RGB'')` as PIL can’t display `float32` images. Now take
     a look at its corresponding depth map:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在查看深度图之前，我们需要首先将其数据类型转换为`uint8`，使用`.convert('RGB')`，因为PIL无法显示`float32`图像。现在看一下对应的深度图：
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '![](../Images/ca17bca0d9e9e054ca2a551aa2b513fd.png)'
+  id: totrans-19
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/ca17bca0d9e9e054ca2a551aa2b513fd.png)'
 - en: It’s all black! You’ll need to add some color to the depth map to visualize
     it properly. To do that, either we can apply color automatically during display
     using `plt.imshow()` or create a colored depth map using `plt.cm` and then display
     it. In this example, we have used the latter one, as we can save/write the colored
     depth map later. (the utility below is taken from the [FastDepth repository](https://github.com/dwofk/fast-depth/blob/master/utils.py)).
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 全是黑的！您需要为深度图添加一些颜色，以正确可视化它。为此，我们可以在显示时自动应用颜色，使用`plt.imshow()`，或者使用`plt.cm`创建一个彩色深度图，然后显示它。在本例中，我们使用了后者，因为我们可以稍后保存/写入彩色深度图。（下面的实用程序取自[FastDepth存储库](https://github.com/dwofk/fast-depth/blob/master/utils.py)）。
 - en: '[PRE4]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '![](../Images/3eba4d5736f8742dd55d79d5a1db6247.png)'
+  id: totrans-22
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/3eba4d5736f8742dd55d79d5a1db6247.png)'
 - en: You can also visualize several different images and their corresponding depth
     maps.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以可视化几个不同的图像及其对应的深度图。
 - en: '[PRE5]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '![](../Images/c055f022c963f8db182c88068977b37b.png)'
+  id: totrans-25
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/c055f022c963f8db182c88068977b37b.png)'
 - en: 'Now apply some augmentations with `albumentations`. The augmentation transformations
     include:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在使用`albumentations`应用一些增强。增强转换包括：
 - en: Random horizontal flipping
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 随机水平翻转
 - en: Random cropping
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 随机裁剪
 - en: Random brightness and contrast
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 随机亮度和对比度
 - en: Random gamma correction
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 随机伽马校正
 - en: Random hue saturation
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 随机色调饱和度
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Additionally, define a mapping to better reflect the target key name.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，定义一个映射，以更好地反映目标键名。
 - en: '[PRE7]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: With `additional_targets` defined, you can pass the target depth maps to the
     `depth` argument of `aug` instead of `mask`. You’ll notice this change in the
     `apply_transforms()` function defined below.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 定义了`additional_targets`后，您可以将目标深度图传递给`aug`的`depth`参数，而不是`mask`。您将在下面定义的`apply_transforms()`函数中注意到这种变化。
 - en: 'Create a function to apply the transformation to the images as well as their
     depth maps:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个函数，将转换应用于图像以及它们的深度图：
 - en: '[PRE8]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Use the [set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
     function to apply the transformation on-the-fly to batches of the dataset to consume
     less disk space:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)函数，将转换即时应用于数据集的批次，以减少磁盘空间的使用：
 - en: '[PRE9]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'You can verify the transformation worked by indexing into the `pixel_values`
     and `labels` of an example image:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过索引到示例图像的`pixel_values`和`labels`来验证转换是否有效：
 - en: '[PRE10]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '![](../Images/f53c937bd078c12f6a8933248d397cf1.png)'
+  id: totrans-42
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/f53c937bd078c12f6a8933248d397cf1.png)'
 - en: 'Visualize the same transformation on the image’s corresponding depth map:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 在图像的对应深度图上可视化相同的转换：
 - en: '[PRE11]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '![](../Images/2adebe21475befa1251919d8f6dea797.png)'
+  id: totrans-45
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/2adebe21475befa1251919d8f6dea797.png)'
 - en: 'You can also visualize multiple training samples reusing the previous `random_indices`:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以重复使用先前的`random_indices`可视化多个训练样本：
 - en: '[PRE12]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '![](../Images/994ecffdfcf3bde97b4c834302e56957.png)'
+  id: totrans-48
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/994ecffdfcf3bde97b4c834302e56957.png)'
