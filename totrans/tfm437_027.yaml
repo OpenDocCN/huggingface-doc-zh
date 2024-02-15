@@ -1,318 +1,456 @@
 - en: Audio classification
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 音频分类
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/audio_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/audio_classification)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/audio_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/audio_classification)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[https://www.youtube-nocookie.com/embed/KWwzcmG98Ds](https://www.youtube-nocookie.com/embed/KWwzcmG98Ds)'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://www.youtube-nocookie.com/embed/KWwzcmG98Ds](https://www.youtube-nocookie.com/embed/KWwzcmG98Ds)'
 - en: Audio classification - just like with text - assigns a class label output from
     the input data. The only difference is instead of text inputs, you have raw audio
     waveforms. Some practical applications of audio classification include identifying
     speaker intent, language classification, and even animal species by their sounds.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 音频分类 - 就像文本一样 - 从输入数据中分配一个类标签输出。唯一的区别是，您有原始音频波形而不是文本输入。音频分类的一些实际应用包括识别说话者意图、语言分类，甚至通过声音识别动物物种。
 - en: 'This guide will show you how to:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何：
 - en: Finetune [Wav2Vec2](https://huggingface.co/facebook/wav2vec2-base) on the [MInDS-14](https://huggingface.co/datasets/PolyAI/minds14)
     dataset to classify speaker intent.
+  id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在[MInDS-14](https://huggingface.co/datasets/PolyAI/minds14)数据集上对[Wav2Vec2](https://huggingface.co/facebook/wav2vec2-base)进行微调，以分类说话者意图。
 - en: Use your finetuned model for inference.
+  id: totrans-7
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用您微调的模型进行推断。
 - en: 'The task illustrated in this tutorial is supported by the following model architectures:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程中所示的任务由以下模型架构支持：
 - en: '[Audio Spectrogram Transformer](../model_doc/audio-spectrogram-transformer),
     [Data2VecAudio](../model_doc/data2vec-audio), [Hubert](../model_doc/hubert), [SEW](../model_doc/sew),
     [SEW-D](../model_doc/sew-d), [UniSpeech](../model_doc/unispeech), [UniSpeechSat](../model_doc/unispeech-sat),
     [Wav2Vec2](../model_doc/wav2vec2), [Wav2Vec2-BERT](../model_doc/wav2vec2-bert),
     [Wav2Vec2-Conformer](../model_doc/wav2vec2-conformer), [WavLM](../model_doc/wavlm),
     [Whisper](../model_doc/whisper)'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: '[音频频谱变换器](../model_doc/audio-spectrogram-transformer)、[Data2VecAudio](../model_doc/data2vec-audio)、[Hubert](../model_doc/hubert)、[SEW](../model_doc/sew)、[SEW-D](../model_doc/sew-d)、[UniSpeech](../model_doc/unispeech)、[UniSpeechSat](../model_doc/unispeech-sat)、[Wav2Vec2](../model_doc/wav2vec2)、[Wav2Vec2-BERT](../model_doc/wav2vec2-bert)、[Wav2Vec2-Conformer](../model_doc/wav2vec2-conformer)、[WavLM](../model_doc/wavlm)、[Whisper](../model_doc/whisper)'
 - en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装所有必要的库：
 - en: '[PRE0]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'We encourage you to login to your Hugging Face account so you can upload and
     share your model with the community. When prompted, enter your token to login:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们鼓励您登录您的Hugging Face帐户，这样您就可以上传和分享您的模型给社区。在提示时，输入您的令牌以登录：
 - en: '[PRE1]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Load MInDS-14 dataset
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载MInDS-14数据集
 - en: 'Start by loading the MInDS-14 dataset from the 🤗 Datasets library:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先从🤗数据集库中加载MInDS-14数据集：
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Split the dataset’s `train` split into a smaller train and test set with the
     [train_test_split](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.train_test_split)
     method. This’ll give you a chance to experiment and make sure everything works
     before spending more time on the full dataset.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[train_test_split](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.train_test_split)方法将数据集的`train`拆分为较小的训练集和测试集。这将让您有机会进行实验，并确保一切正常，然后再花更多时间处理完整数据集。
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Then take a look at the dataset:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后查看数据集：
 - en: '[PRE4]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'While the dataset contains a lot of useful information, like `lang_id` and
     `english_transcription`, you’ll focus on the `audio` and `intent_class` in this
     guide. Remove the other columns with the [remove_columns](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.remove_columns)
     method:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然数据集包含许多有用信息，比如`lang_id`和`english_transcription`，但在本指南中，您将专注于`audio`和`intent_class`。使用[remove_columns](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.remove_columns)方法删除其他列：
 - en: '[PRE5]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Take a look at an example now:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在看一个示例：
 - en: '[PRE6]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'There are two fields:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两个领域：
 - en: '`audio`: a 1-dimensional `array` of the speech signal that must be called to
     load and resample the audio file.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`audio`：必须调用的语音信号的一维`array`，以加载和重新采样音频文件。'
 - en: '`intent_class`: represents the class id of the speaker’s intent.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`intent_class`：表示说话者意图的类别ID。'
 - en: 'To make it easier for the model to get the label name from the label id, create
     a dictionary that maps the label name to an integer and vice versa:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了让模型更容易从标签ID中获取标签名称，创建一个将标签名称映射到整数以及反之的字典：
 - en: '[PRE7]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Now you can convert the label id to a label name:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以将标签ID转换为标签名称：
 - en: '[PRE8]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Preprocess
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 预处理
 - en: 'The next step is to load a Wav2Vec2 feature extractor to process the audio
     signal:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 下一步是加载Wav2Vec2特征提取器来处理音频信号：
 - en: '[PRE9]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'The MInDS-14 dataset has a sampling rate of 8000khz (you can find this information
     in it’s [dataset card](https://huggingface.co/datasets/PolyAI/minds14)), which
     means you’ll need to resample the dataset to 16000kHz to use the pretrained Wav2Vec2
     model:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: MInDS-14数据集的采样率为8000khz（您可以在其[数据集卡片](https://huggingface.co/datasets/PolyAI/minds14)中找到此信息），这意味着您需要将数据集重新采样为16000kHz以使用预训练的Wav2Vec2模型：
 - en: '[PRE10]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Now create a preprocessing function that:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在创建一个预处理函数，该函数：
 - en: Calls the `audio` column to load, and if necessary, resample the audio file.
+  id: totrans-38
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 调用`audio`列进行加载，并在必要时重新采样音频文件。
 - en: Checks if the sampling rate of the audio file matches the sampling rate of the
     audio data a model was pretrained with. You can find this information in the Wav2Vec2
     [model card](https://huggingface.co/facebook/wav2vec2-base).
+  id: totrans-39
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检查音频文件的采样率是否与模型预训练时的音频数据的采样率匹配。您可以在Wav2Vec2的[模型卡片](https://huggingface.co/facebook/wav2vec2-base)中找到此信息。
 - en: Set a maximum input length to batch longer inputs without truncating them.
+  id: totrans-40
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 设置最大输入长度以批处理更长的输入而不截断它们。
 - en: '[PRE11]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'To apply the preprocessing function over the entire dataset, use 🤗 Datasets
     [map](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.map)
     function. You can speed up `map` by setting `batched=True` to process multiple
     elements of the dataset at once. Remove the columns you don’t need, and rename
     `intent_class` to `label` because that’s the name the model expects:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在整个数据集上应用预处理函数，请使用🤗 Datasets [map](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.map)函数。您可以通过设置`batched=True`来加速`map`，以一次处理数据集的多个元素。删除您不需要的列，并将`intent_class`重命名为`label`，因为这是模型期望的名称：
 - en: '[PRE12]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Evaluate
+  id: totrans-44
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 评估
 - en: 'Including a metric during training is often helpful for evaluating your model’s
     performance. You can quickly load a evaluation method with the 🤗 [Evaluate](https://huggingface.co/docs/evaluate/index)
     library. For this task, load the [accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)
     metric (see the 🤗 Evaluate [quick tour](https://huggingface.co/docs/evaluate/a_quick_tour)
     to learn more about how to load and compute a metric):'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 在训练过程中包含一个度量通常有助于评估模型的性能。您可以通过🤗 [Evaluate](https://huggingface.co/docs/evaluate/index)库快速加载一个评估方法。对于这个任务，加载[accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)度量（查看🤗
+    Evaluate [quick tour](https://huggingface.co/docs/evaluate/a_quick_tour)以了解如何加载和计算度量）：
 - en: '[PRE13]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Then create a function that passes your predictions and labels to `compute`
     to calculate the accuracy:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后创建一个函数，将您的预测和标签传递给`compute`以计算准确性：
 - en: '[PRE14]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Your `compute_metrics` function is ready to go now, and you’ll return to it
     when you setup your training.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 您的`compute_metrics`函数现在已经准备就绪，当您设置训练时将返回到它。
 - en: Train
+  id: totrans-50
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练
 - en: PytorchHide Pytorch content
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: Pytorch隐藏 Pytorch内容
 - en: If you aren’t familiar with finetuning a model with the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
     take a look at the basic tutorial [here](../training#train-with-pytorch-trainer)!
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您不熟悉使用[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)微调模型，请查看这里的基本教程[../training#train-with-pytorch-trainer]！
 - en: 'You’re ready to start training your model now! Load Wav2Vec2 with [AutoModelForAudioClassification](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForAudioClassification)
     along with the number of expected labels, and the label mappings:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经准备好开始训练您的模型了！使用[AutoModelForAudioClassification](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForAudioClassification)加载Wav2Vec2，以及预期标签的数量和标签映射：
 - en: '[PRE15]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'At this point, only three steps remain:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 此时，只剩下三个步骤：
 - en: Define your training hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
     The only required parameter is `output_dir` which specifies where to save your
     model. You’ll push this model to the Hub by setting `push_to_hub=True` (you need
     to be signed in to Hugging Face to upload your model). At the end of each epoch,
     the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     will evaluate the accuracy and save the training checkpoint.
+  id: totrans-56
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中定义您的训练超参数。唯一必需的参数是`output_dir`，指定保存模型的位置。通过设置`push_to_hub=True`将此模型推送到Hub（您需要登录Hugging
+    Face才能上传模型）。在每个时代结束时，[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)将评估准确性并保存训练检查点。
 - en: Pass the training arguments to [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     along with the model, dataset, tokenizer, data collator, and `compute_metrics`
     function.
+  id: totrans-57
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将训练参数传递给[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)，以及模型、数据集、分词器、数据整理器和`compute_metrics`函数。
 - en: Call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
     to finetune your model.
+  id: totrans-58
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 调用[train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)来微调您的模型。
 - en: '[PRE16]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'Once training is completed, share your model to the Hub with the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
     method so everyone can use your model:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，使用[push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)方法将您的模型共享到Hub，这样每个人都可以使用您的模型：
 - en: '[PRE17]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: For a more in-depth example of how to finetune a model for audio classification,
     take a look at the corresponding [PyTorch notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/audio_classification.ipynb).
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解如何为音频分类微调模型的更深入示例，请查看相应的[PyTorch笔记本](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/audio_classification.ipynb)。
 - en: Inference
+  id: totrans-63
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推理
 - en: Great, now that you’ve finetuned a model, you can use it for inference!
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您已经微调了一个模型，可以用它进行推理了！
 - en: Load an audio file you’d like to run inference on. Remember to resample the
     sampling rate of the audio file to match the sampling rate of the model if you
     need to!
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载您想要进行推理的音频文件。记得重新采样音频文件的采样率，以匹配模型的采样率（如果需要）！
 - en: '[PRE18]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'The simplest way to try out your finetuned model for inference is to use it
     in a [pipeline()](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.pipeline).
     Instantiate a `pipeline` for audio classification with your model, and pass your
     audio file to it:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 尝试使用一个[pipeline()](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.pipeline)来进行推理的最简单方法是在其中使用微调后的模型。使用您的模型实例化一个用于音频分类的`pipeline`，并将音频文件传递给它：
 - en: '[PRE19]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'You can also manually replicate the results of the `pipeline` if you’d like:'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您愿意，也可以手动复制`pipeline`的结果：
 - en: PytorchHide Pytorch content
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: Pytorch隐藏 Pytorch内容
 - en: 'Load a feature extractor to preprocess the audio file and return the `input`
     as PyTorch tensors:'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载一个特征提取器来预处理音频文件，并将`input`返回为PyTorch张量：
 - en: '[PRE20]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'Pass your inputs to the model and return the logits:'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 将您的输入传递给模型并返回logits：
 - en: '[PRE21]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'Get the class with the highest probability, and use the model’s `id2label`
     mapping to convert it to a label:'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 获取具有最高概率的类，并使用模型的`id2label`映射将其转换为标签：
 - en: '[PRE22]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
