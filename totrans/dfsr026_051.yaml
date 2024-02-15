@@ -1,141 +1,191 @@
 - en: Stable Video Diffusion
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 稳定视频扩散
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/svd](https://huggingface.co/docs/diffusers/using-diffusers/svd)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/using-diffusers/svd](https://huggingface.co/docs/diffusers/using-diffusers/svd)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[Stable Video Diffusion (SVD)](https://huggingface.co/papers/2311.15127) is
     a powerful image-to-video generation model that can generate 2-4 second high resolution
     (576x1024) videos conditioned on an input image.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[稳定视频扩散（SVD）](https://huggingface.co/papers/2311.15127)是一个强大的图像到视频生成模型，可以生成基于输入图像的2-4秒高分辨率（576x1024）视频。'
 - en: This guide will show you how to use SVD to generate short videos from images.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何使用SVD从图像生成短视频。
 - en: 'Before you begin, make sure you have the following libraries installed:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装以下库：
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: The are two variants of this model, [SVD](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid)
     and [SVD-XT](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt).
     The SVD checkpoint is trained to generate 14 frames and the SVD-XT checkpoint
     is further finetuned to generate 25 frames.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个模型有两个变体，[SVD](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid)和[SVD-XT](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt)。SVD检查点经过训练，可以生成14帧，而SVD-XT检查点经过进一步微调，可以生成25帧。
 - en: You’ll use the SVD-XT checkpoint for this guide.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将使用SVD-XT检查点。
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '![](../Images/a94676a4f9986b4f5a952953468c1829.png)'
+  id: totrans-10
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/a94676a4f9986b4f5a952953468c1829.png)'
 - en: '"source image of a rocket"'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '"一枚火箭的源图像"'
 - en: '![](../Images/d65879bddc72e398a4fbd137d886bc66.png)'
+  id: totrans-12
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/d65879bddc72e398a4fbd137d886bc66.png)'
 - en: '"generated video from source image"'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '"从源图像生成的视频"'
 - en: torch.compile
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: torch.compile
 - en: You can gain a 20-25% speedup at the expense of slightly increased memory by
     [compiling](../optimization/torch2.0#torchcompile) the UNet.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过[编译](../optimization/torch2.0#torchcompile) UNet，您可以获得20-25%的加速，代价是略微增加内存。
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Reduce memory usage
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 减少内存使用
 - en: 'Video generation is very memory intensive because you’re essentially generating
     `num_frames` all at once, similar to text-to-image generation with a high batch
     size. To reduce the memory requirement, there are multiple options that trade-off
     inference speed for lower memory requirement:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 视频生成非常消耗内存，因为您基本上是一次生成`num_frames`，类似于具有高批量大小的文本到图像生成。为了减少内存需求，有多个选项可以在推理速度和较低内存需求之间进行权衡：
 - en: 'enable model offloading: each component of the pipeline is offloaded to the
     CPU once it’s not needed anymore.'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 启用模型卸载：一旦不再需要管道的每个组件，就将其卸载到CPU。
 - en: 'enable feed-forward chunking: the feed-forward layer runs in a loop instead
     of running a single feed-forward with a huge batch size.'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 启用前馈分块：前馈层循环运行，而不是使用巨大的批量大小运行单个前馈。
 - en: 'reduce `decode_chunk_size`: the VAE decodes frames in chunks instead of decoding
     them all together. Setting `decode_chunk_size=1` decodes one frame at a time and
     uses the least amount of memory (we recommend adjusting this value based on your
     GPU memory) but the video might have some flickering.'
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 减少`decode_chunk_size`：VAE将帧解码为块，而不是一次解码所有帧。设置`decode_chunk_size=1`一次解码一帧，并使用最少的内存（我们建议根据您的GPU内存调整此值），但视频可能会有些闪烁。
 - en: '[PRE3]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Using all these tricks togethere should lower the memory requirement to less
     than 8GB VRAM.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 将所有这些技巧结合在一起应该将内存需求降低到小于8GB VRAM。
 - en: Micro-conditioning
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 微调节
 - en: 'Stable Diffusion Video also accepts micro-conditioning, in addition to the
     conditioning image, which allows more control over the generated video:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 稳定扩散视频还接受微调节，除了调节图像之外，还允许更多控制生成的视频：
 - en: '`fps`: the frames per second of the generated video.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`fps`：生成视频的帧率。'
 - en: '`motion_bucket_id`: the motion bucket id to use for the generated video. This
     can be used to control the motion of the generated video. Increasing the motion
     bucket id increases the motion of the generated video.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`motion_bucket_id`：用于生成视频的运动桶ID。这可以用于控制生成视频的运动。增加运动桶ID会增加生成视频的运动。'
 - en: '`noise_aug_strength`: the amount of noise added to the conditioning image.
     The higher the values the less the video resembles the conditioning image. Increasing
     this value also increases the motion of the generated video.'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`noise_aug_strength`：添加到调节图像的噪声量。值越高，视频越不像调节图像。增加此值还会增加生成视频的运动。'
 - en: 'For example, to generate a video with more motion, use the `motion_bucket_id`
     and `noise_aug_strength` micro-conditioning parameters:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要生成具有更多运动的视频，请使用`motion_bucket_id`和`noise_aug_strength`微调参数：
 - en: '[PRE4]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '![](../Images/a13661013e72a7151cea4ff2f8c2c9b3.png)'
+  id: totrans-31
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/a13661013e72a7151cea4ff2f8c2c9b3.png)'
