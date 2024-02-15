@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在TPU上使用🤗 Accelerate进行训练
 - en: 'Original text: [https://huggingface.co/docs/accelerate/concept_guides/training_tpu](https://huggingface.co/docs/accelerate/concept_guides/training_tpu)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/concept_guides/training_tpu](https://huggingface.co/docs/accelerate/concept_guides/training_tpu)
 - en: null
   id: totrans-2
   prefs: []
@@ -18,11 +20,13 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在TPU上训练可能与在多GPU上训练略有不同，即使使用🤗 Accelerate。本指南旨在向您展示应该注意的地方以及原因，以及一般的最佳实践。
 - en: Training in a Notebook
   id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在笔记本中训练
 - en: The main carepoint when training on TPUs comes from the [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher).
     As mentioned in the [notebook tutorial](../usage_guides/notebook), you need to
     restructure your training code into a function that can get passed to the [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
@@ -30,6 +34,7 @@
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 在TPU上训练时的主要关注点来自[notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)。如在[notebook教程](../usage_guides/notebook)中提到的，您需要将训练代码重构为一个可以传递给[notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)函数的函数，并注意不要在GPU上声明任何张量。
 - en: While on a TPU that last part is not as important, a critical part to understand
     is that when you launch code from a notebook you do so through a process called
     **forking**. When launching from the command-line, you perform **spawning**, where
@@ -39,6 +44,7 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在TPU上，最后一部分并不那么重要，需要理解的一个关键部分是，当您从笔记本启动代码时，您是通过一种称为**forking**的过程进行的。当从命令行启动时，您执行**spawning**，其中python进程当前未运行，您*生成*一个新进程。由于您的Jupyter笔记本已经在使用python进程，因此您需要从中*fork*一个新进程来启动您的代码。
 - en: Where this becomes important is in regard to declaring your model. On forked
     TPU processes, it is recommended that you instantiate your model *once* and pass
     this into your training function. This is different than training on GPUs where
@@ -49,17 +55,21 @@
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 这一点的重要性在于声明您的模型。在分叉的TPU进程中，建议您实例化您的模型*一次*，并将其传递给您的训练函数。这与在GPU上训练时创建`n`个在某些时刻同步梯度并反向传播的模型不同。相反，一个模型实例在所有节点之间共享，并来回传递。这在训练低资源TPU时尤为重要，例如在Kaggle内核或Google
+    Colaboratory中提供的TPU上。
 - en: 'Below is an example of a training function passed to the [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
     if training on CPUs or GPUs:'
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是一个传递给[notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)的训练函数示例，如果在CPU或GPU上训练：
 - en: This code snippet is based off the one from the `simple_nlp_example` notebook
     found [here](https://github.com/huggingface/notebooks/blob/main/examples/accelerate_examples/simple_nlp_example.ipynb)
     with slight modifications for the sake of simplicity
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 此代码片段基于`simple_nlp_example`笔记本中的代码，稍作修改以简化
 - en: '[PRE0]'
   id: totrans-10
   prefs: []
@@ -75,11 +85,13 @@
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果🤗 Accelerate已配置为TPU，则`notebook_launcher`将默认为8个进程
 - en: 'If you use this example and declare the model *inside* the training loop, then
     on a low-resource system you will potentially see an error like:'
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在训练循环中使用此示例并在其中声明模型，则在低资源系统上可能会看到错误，如下所示：
 - en: '[PRE2]'
   id: totrans-14
   prefs: []
@@ -91,6 +103,7 @@
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个错误*极其*难以理解，但基本解释是您的系统RAM用完了。您可以通过重新配置训练函数以接受单个`model`参数并在外部单元格中声明它来完全避免这种情况：
 - en: '[PRE3]'
   id: totrans-16
   prefs: []
@@ -105,6 +118,7 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后调用训练函数：
 - en: '[PRE5]'
   id: totrans-19
   prefs: []
@@ -117,27 +131,32 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述解决方法仅在从Jupyter Notebook启动TPU实例时需要，例如在Google Colaboratory或Kaggle等低资源服务器上。如果使用脚本或在更强大的服务器上启动，则不需要事先声明模型。
 - en: Mixed Precision and Global Variables
   id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 混合精度和全局变量
 - en: As mentioned in the [mixed precision tutorial](../usage_guides/mixed_precision),
     🤗 Accelerate supports fp16 and bf16, both of which can be used on TPUs. That being
     said, ideally `bf16` should be utilized as it is extremely efficient to use.
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 如在[混合精度教程](../usage_guides/mixed_precision)中提到的，🤗 Accelerate支持fp16和bf16，两者都可以在TPU上使用。也就是说，理想情况下应该使用`bf16`，因为它非常高效。
 - en: There are two “layers” when using `bf16` and 🤗 Accelerate on TPUs, at the base
     level and at the operation level.
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 在TPU上使用`bf16`和🤗 Accelerate时，有两个“层”，即基本级别和操作级别。
 - en: 'At the base level, this is enabled when passing `mixed_precision="bf16"` to
     `Accelerator`, such as:'
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 在基本级别上，当将`mixed_precision="bf16"`传递给`Accelerator`时，这是启用的，例如：
 - en: '[PRE6]'
   id: totrans-25
   prefs: []
@@ -149,12 +168,14 @@
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，在TPU上将`torch.float`和`torch.double`转换为`bfloat16`。设置的具体配置是将环境变量`XLA_USE_BF16`设置为`1`。
 - en: There is a further configuration you can perform which is setting the `XLA_DOWNCAST_BF16`
     environmental variable. If set to `1`, then `torch.float` is `bfloat16` and `torch.double`
     is `float32`.
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以执行进一步的配置，即设置`XLA_DOWNCAST_BF16`环境变量。如果设置为`1`，那么`torch.float`是`bfloat16`，`torch.double`是`float32`。
 - en: 'This is performed in the `Accelerator` object when passing `downcast_bf16=True`:'
   id: totrans-28
   prefs: []
