@@ -1,0 +1,217 @@
+- en: Troubleshooting
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/troubleshoot](https://huggingface.co/docs/datasets/troubleshoot)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/48.903d3c10.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide aims to provide you the tools and knowledge required to navigate
+    some common issues. If the suggestions listed in this guide do not cover your
+    such situation, please refer to the [Asking for Help](#asking-for-help) section
+    to learn where to find help with your specific issue.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Issues when uploading datasets with push_to_hub
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Authentication issues
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you are experiencing authentication issues when sharing a dataset on 🤗 Hub
+    using [Dataset.push_to_hub()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.push_to_hub)
+    and a Hugging Face access token:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make sure that the Hugging Face token you’re using to authenticate yourself
+    is a token with **write** permission.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: On OSX, it may help to clean up all the huggingface.co passwords on your keychain
+    access, as well as reconfigure `git config --global credential.helper osxkeychain`,
+    before using `huggingface-cli login`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Alternatively, you can use SSH keys to authenticate yourself - read more in
+    the [🤗 Hub documentation](https://huggingface.co/docs/hub/security-git-ssh).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lost connection on large dataset upload
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When uploading large datasets to Hub, if the number of dataset shards is large,
+    it can create too many commits for the Hub in a short period. This will result
+    in a connection error. The connection error can also be caused by a HTTP 500 error
+    returned by AWS S3 bucket that Hub uses internally. In either situation, you can
+    re-run [Dataset.push_to_hub()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.push_to_hub)
+    to proceed with the dataset upload. Hub will check the SHAs of already uploaded
+    shards to avoid reuploading them. We are working on making upload process more
+    robust to transient errors, so updating to the latest library version is always
+    a good idea.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Too Many Requests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Uploading large datasets via `push_to_hub()` can result in an error:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you encounter this issue, you need to upgrade the `datasets` library to the
+    latest version (or at least `2.15.0`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Issues when creating datasets from custom data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Loading images and audio from a folder
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When creating a dataset from a folder, one of the most common issues is that
+    the file structure does not follow the expected format, or there’s an issue with
+    the metadata file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Learn more about required folder structure in corresponding documentation pages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[AudioFolder](https://huggingface.co/docs/datasets/audio_dataset#audiofolder)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[ImageFolder](https://huggingface.co/docs/datasets/image_dataset#imagefolder)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Pickling issues
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Pickling issues when using Dataset.from_generator
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: When creating a dataset, [IterableDataset.from_generator()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset.from_generator)
+    and [Dataset.from_generator()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.from_generator)
+    expect a “picklable” generator function. This is required to hash the function
+    using [`pickle`](https://docs.python.org/3/library/pickle.html) to be able to
+    cache the dataset on disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'While generator functions are generally “picklable”, note that generator objects
+    are not. So if you’re using a generator object, you will encounter a `TypeError`
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This error can also occur when using a generator function that uses a global
+    object that is not “picklable”, such as a DB connection, for example. If that’s
+    the case, you can initialize such object directly inside the generator function
+    to avoid this error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pickling issues with Dataset.map
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Pickling errors can also happen in the multiprocess [Dataset.map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    - objects are pickled to be passed to child processes. If the objects used in
+    the transformation are not picklable, it’s not possible to cache the result of
+    `map`, which leads to an error being raised.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are some ways to address this issue:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A universal solution to pickle issues is to make sure the objects (or generator
+    classes) are pickable manually by implementing `__getstate__` / `__setstate__`
+    / `__reduce__`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can also provide your own unique hash in `map` with the `new_fingerprint`
+    argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can also disable caching by calling `datasets.disable_caching()`, however,
+    this is undesirable - [read more about importance of cache](cache)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Asking for help
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If the above troubleshooting advice did not help you resolve your issue, reach
+    out for help to the community and the team.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Forums
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Ask for help on the Hugging Face forums - post your question in the [🤗Datasets
+    category](https://discuss.huggingface.co/c/datasets/10) Make sure to write a descriptive
+    post with relevant context about your setup and reproducible code to maximize
+    the likelihood that your problem is solved!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discord
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Post a question on [Discord](http://hf.co/join/discord), and let the team and
+    the community help you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Community Discussions on 🤗 Hub
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you are facing issues creating a custom dataset with a script on Hub, you
+    can ask the Hugging Face team for help by opening a discussion in the Community
+    tab of your dataset with this message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: GitHub Issues
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Finally, if you suspect to have found a bug related to the library itself,
+    create an Issue on the 🤗 Datasets [GitHub repository](https://github.com/huggingface/datasets/issues).
+    Include context regarding the bug: code snippet to reproduce, details about your
+    environment and data, etc. to help us figure out what’s wrong and how we can fix
+    it.'
+  prefs: []
+  type: TYPE_NORMAL

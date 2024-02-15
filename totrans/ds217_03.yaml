@@ -1,0 +1,401 @@
+- en: Quickstart
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/quickstart](https://huggingface.co/docs/datasets/quickstart)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/42.f0215c88.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Tip.31005f7d.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlockFw.777da0b9.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/IconTensorflow.bdd96fa9.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Markdown.1f17db59.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This quickstart is intended for developers who are ready to dive into the code
+    and see an example of how to integrate 🤗 Datasets into their model training workflow.
+    If you’re a beginner, we recommend starting with our [tutorials](./tutorial),
+    where you’ll get a more thorough introduction.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each dataset is unique, and depending on the task, some datasets may require
+    additional steps to prepare it for training. But you can always use 🤗 Datasets
+    tools to load and process a dataset. The fastest and easiest way to get started
+    is by loading an existing dataset from the [Hugging Face Hub](https://huggingface.co/datasets).
+    There are thousands of datasets to choose from, spanning many tasks. Choose the
+    type of dataset you want to work with, and let’s get started!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Audio'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Resample an audio dataset and get it ready for a model to classify what type
+    of banking issue a speaker is calling about.](#audio) [Vision
+  prefs: []
+  type: TYPE_NORMAL
+- en: Apply data augmentation to an image dataset and get it ready for a model to
+    diagnose disease in bean plants.](#vision) [NLP
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tokenize a dataset and get it ready for a model to determine whether a pair
+    of sentences have the same meaning.](#nlp)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out [Chapter 5](https://huggingface.co/course/chapter5/1?fw=pt) of the
+    Hugging Face course to learn more about other important topics such as loading
+    remote or local datasets, tools for cleaning up a dataset, and creating your own
+    dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start by installing 🤗 Datasets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '🤗 Datasets also support audio and image data formats:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To work with audio datasets, install the [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
+    feature:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'To work with image datasets, install the [Image](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
+    feature:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Besides 🤗 Datasets, make sure your preferred machine learning framework is
+    installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Audio
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Audio datasets are loaded just like text datasets. However, an audio dataset
+    is preprocessed a bit differently. Instead of a tokenizer, you’ll need a [feature
+    extractor](https://huggingface.co/docs/transformers/main_classes/feature_extractor#feature-extractor).
+    An audio input may also require resampling its sampling rate to match the sampling
+    rate of the pretrained model you’re using. In this quickstart, you’ll prepare
+    the [MInDS-14](https://huggingface.co/datasets/PolyAI/minds14) dataset for a model
+    train on and classify the banking issue a customer is having.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**1**. Load the MInDS-14 dataset by providing the [load_dataset()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
+    function with the dataset name, dataset configuration (not all datasets will have
+    a configuration), and a dataset split:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**2**. Next, load a pretrained [Wav2Vec2](https://huggingface.co/facebook/wav2vec2-base)
+    model and its corresponding feature extractor from the [🤗 Transformers](https://huggingface.co/transformers/)
+    library. It is totally normal to see a warning after you load the model about
+    some weights not being initialized. This is expected because you are loading this
+    model checkpoint for training with another task.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**3**. The [MInDS-14](https://huggingface.co/datasets/PolyAI/minds14) dataset
+    card indicates the sampling rate is 8kHz, but the Wav2Vec2 model was pretrained
+    on a sampling rate of 16kHZ. You’ll need to upsample the `audio` column with the
+    [cast_column()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.cast_column)
+    function and [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
+    feature to match the model’s sampling rate.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**4**. Create a function to preprocess the audio `array` with the feature extractor,
+    and truncate and pad the sequences into tidy rectangular tensors. The most important
+    thing to remember is to call the audio `array` in the feature extractor since
+    the `array` - the actual speech signal - is the model input.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you have a preprocessing function, use the [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    function to speed up processing by applying the function to batches of examples
+    in the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**5**. Use the [rename_column()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.rename_column)
+    function to rename the `intent_class` column to `labels`, which is the expected
+    input name in [Wav2Vec2ForSequenceClassification](https://huggingface.co/docs/transformers/main/en/model_doc/wav2vec2#transformers.Wav2Vec2ForSequenceClassification):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**6**. Set the dataset format according to the machine learning framework you’re
+    using.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the [set_format()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_format)
+    function to set the dataset format to `torch` and specify the columns you want
+    to format. This function applies formatting on-the-fly. After converting to PyTorch
+    tensors, wrap the dataset in [`torch.utils.data.DataLoader`](https://alband.github.io/doc_view/data.html?highlight=torch%20utils%20data%20dataloader#torch.utils.data.DataLoader):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the [prepare_tf_dataset](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.prepare_tf_dataset)
+    method from 🤗 Transformers to prepare the dataset to be compatible with TensorFlow,
+    and ready to train/fine-tune a model, as it wraps a HuggingFace [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    as a `tf.data.Dataset` with collation and batching, so one can pass it directly
+    to Keras methods like `fit()` without further modification.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**7**. Start training with your machine learning framework! Check out the 🤗
+    Transformers [audio classification guide](https://huggingface.co/docs/transformers/tasks/audio_classification)
+    for an end-to-end example of how to train a model on an audio dataset.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Vision
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Image datasets are loaded just like text datasets. However, instead of a tokenizer,
+    you’ll need a [feature extractor](https://huggingface.co/docs/transformers/main_classes/feature_extractor#feature-extractor)
+    to preprocess the dataset. Applying data augmentation to an image is common in
+    computer vision to make the model more robust against overfitting. You’re free
+    to use any data augmentation library you want, and then you can apply the augmentations
+    with 🤗 Datasets. In this quickstart, you’ll load the [Beans](https://huggingface.co/datasets/beans)
+    dataset and get it ready for the model to train on and identify disease from the
+    leaf images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**1**. Load the Beans dataset by providing the [load_dataset()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
+    function with the dataset name and a dataset split:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**2**. Now you can add some data augmentations with any library ([Albumentations](https://albumentations.ai/),
+    [imgaug](https://imgaug.readthedocs.io/en/latest/), [Kornia](https://kornia.readthedocs.io/en/latest/))
+    you like. Here, you’ll use [torchvision](https://pytorch.org/vision/stable/transforms.html)
+    to randomly change the color properties of an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**3**. Create a function to apply your transform to the dataset and generate
+    the model input: `pixel_values`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**4**. Use the [with_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.with_transform)
+    function to apply the data augmentations on-the-fly:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**5**. Set the dataset format according to the machine learning framework you’re
+    using.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Wrap the dataset in [`torch.utils.data.DataLoader`](https://alband.github.io/doc_view/data.html?highlight=torch%20utils%20data%20dataloader#torch.utils.data.DataLoader).
+    You’ll also need to create a collate function to collate the samples into batches:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the [prepare_tf_dataset](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.prepare_tf_dataset)
+    method from 🤗 Transformers to prepare the dataset to be compatible with TensorFlow,
+    and ready to train/fine-tune a model, as it wraps a HuggingFace [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    as a `tf.data.Dataset` with collation and batching, so one can pass it directly
+    to Keras methods like `fit()` without further modification.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you start, make sure you have up-to-date versions of `albumentations`
+    and `cv2` installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**6**. Start training with your machine learning framework! Check out the 🤗
+    Transformers [image classification guide](https://huggingface.co/docs/transformers/tasks/image_classification)
+    for an end-to-end example of how to train a model on an image dataset.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: NLP
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Text needs to be tokenized into individual tokens by a [tokenizer](https://huggingface.co/docs/transformers/main_classes/tokenizer).
+    For the quickstart, you’ll load the [Microsoft Research Paraphrase Corpus (MRPC)](https://huggingface.co/datasets/glue/viewer/mrpc)
+    training dataset to train a model to determine whether a pair of sentences mean
+    the same thing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**1**. Load the MRPC dataset by providing the [load_dataset()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
+    function with the dataset name, dataset configuration (not all datasets will have
+    a configuration), and dataset split:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**2**. Next, load a pretrained [BERT](https://huggingface.co/bert-base-uncased)
+    model and its corresponding tokenizer from the [🤗 Transformers](https://huggingface.co/transformers/)
+    library. It is totally normal to see a warning after you load the model about
+    some weights not being initialized. This is expected because you are loading this
+    model checkpoint for training with another task.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '>>> def encode(examples):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...     return tokenizer(examples["sentence1"], examples["sentence2"], truncation=True,
+    padding="max_length")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '>>> dataset = dataset.map(encode, batched=True)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '>>> dataset[0]'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '{''sentence1'': ''Amrozi accused his brother , whom he called " the witness
+    " , of deliberately distorting his evidence .'','
+  prefs: []
+  type: TYPE_NORMAL
+- en: '''sentence2'': ''Referring to him as only " the witness " , Amrozi accused
+    his brother of deliberately distorting his evidence .'','
+  prefs: []
+  type: TYPE_NORMAL
+- en: '''label'': 1,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '''idx'': 0,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '''input_ids'': array([  101,  7277,  2180,  5303,  4806,  1117,  1711,   117,  2292,
+    1119,  1270,   107,  1103,  7737,   107,   117,  1104,  9938, 4267, 12223, 21811,  1117,  2554,   119,   102,
+    11336,  6732, 3384,  1106,  1140,  1112,  1178,   107,  1103,  7737,   107, 117,  7277,  2180,  5303,  4806,  1117,  1711,  1104,  9938,
+    4267, 12223, 21811,  1117,  2554,   119,   102]),'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '''token_type_ids'': array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '''attention_mask'': array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1])}'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '>>> dataset = dataset.map(lambda examples: {"labels": examples["label"]}, batched=True)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '>>> import torch'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '>>> dataset.set_format(type="torch", columns=["input_ids", "token_type_ids",
+    "attention_mask", "labels"])'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '>>> dataloader = torch.utils.data.DataLoader(dataset, batch_size=32)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: '>>> import tensorflow as tf'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '>>> tf_dataset = model.prepare_tf_dataset('
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...     dataset,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...     batch_size=4,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...     shuffle=True,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '... )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE

@@ -1,0 +1,247 @@
+- en: Differences between Dataset and IterableDataset
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/about_mapstyle_vs_iterable](https://huggingface.co/docs/datasets/about_mapstyle_vs_iterable)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/7.f43d7333.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are two types of dataset objects, a [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    and an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset).
+    Whichever type of dataset you choose to use or create depends on the size of the
+    dataset. In general, an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset)
+    is ideal for big datasets (think hundreds of GBs!) due to its lazy behavior and
+    speed advantages, while a [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    is great for everything else. This page will compare the differences between a
+    [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    and an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset)
+    to help you pick the right dataset object for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading and streaming
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When you have a regular [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset),
+    you can access it using `my_dataset[0]`. This provides random access to the rows.
+    Such datasets are also called “map-style” datasets. For example you can download
+    ImageNet-1k like this and access any row:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: But one caveat is that you must have the entire dataset stored on your disk
+    or in memory, which blocks you from accessing datasets bigger than the disk. Because
+    it can become inconvenient for big datasets, there exists another type of dataset,
+    the [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset).
+    When you have an `IterableDataset`, you can access it using a `for` loop to load
+    the data progressively as you iterate over the dataset. This way, only a small
+    fraction of examples is loaded in memory, and you don’t write anything on disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, you can stream the ImageNet-1k dataset without downloading it
+    on disk:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Streaming can read online data without writing any file to disk. For example,
+    you can stream datasets made out of multiple shards, each of which is hundreds
+    of gigabytes like [C4](https://huggingface.co/datasets/c4), [OSCAR](https://huggingface.co/datasets/oscar)
+    or [LAION-2B](https://huggingface.co/datasets/laion/laion2B-en). Learn more about
+    how to stream a dataset in the [Dataset Streaming Guide](./stream).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is not the only difference though, because the “lazy” behavior of an `IterableDataset`
+    is also present when it comes to dataset creation and processing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating map-style datasets and iterable datasets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can create a [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    using lists or dictionaries, and the data is entirely converted to Arrow so you
+    can easily access any row:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To create an `IterableDataset` on the other hand, you must provide a “lazy”
+    way to load the data. In Python, we generally use generator functions. These functions
+    `yield` one example at a time, which means you can’t access a row by slicing it
+    like a regular `Dataset`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Loading local files entirely and progressively
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'It is possible to convert local or remote data files to an Arrow [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    using [load_dataset()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: However, this requires a conversion step from CSV to Arrow format, which takes
+    time and disk space if your dataset is big.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To save disk space and skip the conversion step, you can define an `IterableDataset`
+    by streaming from the local files directly. This way, the data is read progressively
+    from the local files as you iterate over the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Many file formats are supported, like CSV, JSONL, and Parquet, as well as image
+    and audio files. You can find more information in the corresponding guides for
+    loading [tabular](./tabular_load), [text](./nlp_load), [vision](./image_load),
+    and [audio](./audio_load%5D) datasets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eager data processing and lazy data processing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When you process a [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    object using [Dataset.map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map),
+    the entire dataset is processed immediately and returned. This is similar to how
+    `pandas` works for example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: On the other hand, due to the “lazy” nature of an `IterableDataset`, calling
+    [IterableDataset.map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset.map)
+    does not apply your `map` function over the full dataset. Instead, your `map`
+    function is applied on-the-fly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Because of that, you can chain multiple processing steps and they will all
+    run at once when you start iterating over the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Exact and fast approximate shuffling
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When you shuffle a [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    using [Dataset.shuffle()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.shuffle),
+    you apply an exact shuffling of the dataset. It works by taking a list of indices
+    `[0, 1, 2, ... len(my_dataset) - 1]` and shuffling this list. Then, accessing
+    `my_dataset[0]` returns the row and index defined by the first element of the
+    indices mapping that has been shuffled:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Since we don’t have random access to the rows in the case of an `IterableDataset`,
+    we can’t use a shuffled list of indices and access a row at an arbitrary position.
+    This prevents the use of exact shuffling. Instead, a fast approximate shuffling
+    is used in [IterableDataset.shuffle()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset.shuffle).
+    It uses a shuffle buffer to sample random examples iteratively from the dataset.
+    Since the dataset is still read iteratively, it provides excellent speed performance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'But using a shuffle buffer is not enough to provide a satisfactory shuffling
+    for machine learning model training. So [IterableDataset.shuffle()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset.shuffle)
+    also shuffles the dataset shards if your dataset is made of multiple files or
+    sources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Speed differences
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Regular [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    objects are based on Arrow which provides fast random access to the rows. Thanks
+    to memory mapping and the fact that Arrow is an in-memory format, reading data
+    from disk doesn’t do expensive system calls and deserialization. It provides even
+    faster data loading when iterating using a `for` loop by iterating on contiguous
+    Arrow record batches.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'However as soon as your [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    has an indices mapping (via [Dataset.shuffle()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.shuffle)
+    for example), the speed can become 10x slower. This is because there is an extra
+    step to get the row index to read using the indices mapping, and most importantly,
+    you aren’t reading contiguous chunks of data anymore. To restore the speed, you’d
+    need to rewrite the entire dataset on your disk again using [Dataset.flatten_indices()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.flatten_indices),
+    which removes the indices mapping. This may take a lot of time depending of the
+    size of your dataset though:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this case, we recommend switching to an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset)
+    and leveraging its fast approximate shuffling method [IterableDataset.shuffle()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset.shuffle).
+    It only shuffles the shards order and adds a shuffle buffer to your dataset, which
+    keeps the speed of your dataset optimal. You can also reshuffle the dataset easily:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’re using your dataset on multiple epochs, the effective seed to shuffle
+    the shards order in the shuffle buffer is `seed + epoch`. It makes it easy to
+    reshuffle a dataset between epochs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Switch from map-style to iterable
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you want to benefit from the “lazy” behavior of an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset)
+    or their speed advantages, you can switch your map-style [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    to an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to shuffle your dataset or [use it with a PyTorch DataLoader](./use_with_pytorch#stream-data),
+    we recommend generating a sharded [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE

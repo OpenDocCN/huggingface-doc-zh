@@ -1,0 +1,207 @@
+- en: Use with PyTorch
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/use_with_pytorch](https://huggingface.co/docs/datasets/use_with_pytorch)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/53.4cd32246.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Tip.31005f7d.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This document is a quick introduction to using `datasets` with PyTorch, with
+    a particular focus on how to get `torch.Tensor` objects out of our datasets, and
+    how to use a PyTorch `DataLoader` and a Hugging Face `Dataset` with the best performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dataset format
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'By default, datasets return regular python objects: integers, floats, strings,
+    lists, etc.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To get PyTorch tensors instead, you can set the format of the dataset to `pytorch`
+    using [Dataset.with_format()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.with_format):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: A [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    object is a wrapper of an Arrow table, which allows fast zero-copy reads from
+    arrays in the dataset to PyTorch tensors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To load the data as tensors on a GPU, specify the `device` argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: N-dimensional arrays
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If your dataset consists of N-dimensional arrays, you will see that by default
+    they are considered as nested lists. In particular, a PyTorch formatted dataset
+    outputs nested lists instead of a single tensor:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To get a single tensor, you must explicitly use the `Array` feature type and
+    specify the shape of your tensors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Other feature types
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[ClassLabel](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.ClassLabel)
+    data are properly converted to tensors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: String and binary objects are unchanged, since PyTorch only supports numbers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Image](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
+    and [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
+    feature types are also supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To use the [Image](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
+    feature type, you’ll need to install the `vision` extra as `pip install datasets[vision]`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: To use the [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
+    feature type, you’ll need to install the `audio` extra as `pip install datasets[audio]`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Data loading
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Like `torch.utils.data.Dataset` objects, a [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    can be passed directly to a PyTorch `DataLoader`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Optimize data loading
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are several ways you can increase the speed your data is loaded which
+    can save you time, especially if you are working with large datasets. PyTorch
+    offers parallelized data loading, retrieving batches of indices instead of individually,
+    and streaming to iterate over the dataset without downloading it on disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use multiple Workers
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: You can parallelize data loading with the `num_workers` argument of a PyTorch
+    `DataLoader` and get a higher throughput.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Under the hood, the `DataLoader` starts `num_workers` processes. Each process
+    reloads the dataset passed to the `DataLoader` and is used to query examples.
+    Reloading the dataset inside a worker doesn’t fill up your RAM, since it simply
+    memory-maps the dataset again from your disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Stream data
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Stream a dataset by loading it as an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset).
+    This allows you to progressively iterate over a remote dataset without downloading
+    it on disk and or over local data files. Learn more about which type of dataset
+    is best for your use case in the [choosing between a regular dataset or an iterable
+    dataset](./about_mapstyle_vs_iterable) guide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An iterable dataset from `datasets` inherits from `torch.utils.data.IterableDataset`
+    so you can pass it to a `torch.utils.data.DataLoader`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If the dataset is split in several shards (i.e. if the dataset consists of
+    multiple data files), then you can stream in parallel using `num_workers`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case each worker is given a subset of the list of shards to stream from.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distributed
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To split your dataset across your training nodes, you can use [datasets.distributed.split_dataset_by_node()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.distributed.split_dataset_by_node):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: This works for both map-style datasets and iterable datasets. The dataset is
+    split for the node at rank `rank` in a pool of nodes of size `world_size`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For map-style datasets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each node is assigned a chunk of data, e.g. rank 0 is given the first chunk
+    of the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For iterable datasets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the dataset has a number of shards that is a factor of `world_size` (i.e.
+    if `dataset.n_shards % world_size == 0`), then the shards are evenly assigned
+    across the nodes, which is the most optimized. Otherwise, each node keeps 1 example
+    out of `world_size`, skipping the other examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This can also be combined with a `torch.utils.data.DataLoader` if you want each
+    node to use multiple workers to load the data.
+  prefs: []
+  type: TYPE_NORMAL

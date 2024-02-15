@@ -1,0 +1,166 @@
+- en: Use with JAX
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/use_with_jax](https://huggingface.co/docs/datasets/use_with_jax)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/52.c78479d8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Tip.31005f7d.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This document is a quick introduction to using `datasets` with JAX, with a particular
+    focus on how to get `jax.Array` objects out of our datasets, and how to use them
+    to train JAX models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`jax` and `jaxlib` are required to reproduce to code above, so please make
+    sure you install them as `pip install datasets[jax]`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dataset format
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'By default, datasets return regular Python objects: integers, floats, strings,
+    lists, etc., and string and binary objects are unchanged, since JAX only supports
+    numbers.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To get JAX arrays (numpy-like) instead, you can set the format of the dataset
+    to `jax`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: A [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    object is a wrapper of an Arrow table, which allows fast reads from arrays in
+    the dataset to JAX arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that the exact same procedure applies to `DatasetDict` objects, so that
+    when setting the format of a `DatasetDict` to `jax`, all the `Dataset`s there
+    will be formatted as `jax`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Another thing you’ll need to take into consideration is that the formatting
+    is not applied until you actually access the data. So if you want to get a JAX
+    array out of a dataset, you’ll need to access the data first, otherwise the format
+    will remain the same.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, to load the data in the device of your choice, you can specify the
+    `device` argument, but note that `jaxlib.xla_extension.Device` is not supported
+    as it’s not serializable with neither `pickle` not `dill`, so you’ll need to use
+    its string identifier instead:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that if the `device` argument is not provided to `with_format` then it
+    will use the default device which is `jax.devices()[0]`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: N-dimensional arrays
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If your dataset consists of N-dimensional arrays, you will see that by default
+    they are considered as nested lists. In particular, a JAX formatted dataset outputs
+    a `DeviceArray` object, which is a numpy-like array, so it does not need the `Array`
+    feature type to be specified as opposed to PyTorch or TensorFlow formatters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Other feature types
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[ClassLabel](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.ClassLabel)
+    data is properly converted to arrays:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: String and binary objects are unchanged, since JAX only supports numbers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Image](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
+    and [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
+    feature types are also supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To use the [Image](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
+    feature type, you’ll need to install the `vision` extra as `pip install datasets[vision]`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: To use the [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
+    feature type, you’ll need to install the `audio` extra as `pip install datasets[audio]`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Data loading
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'JAX doesn’t have any built-in data loading capabilities, so you’ll need to
+    use a library such as [PyTorch](https://pytorch.org/) to load your data using
+    a `DataLoader` or [TensorFlow](https://www.tensorflow.org/) using a `tf.data.Dataset`.
+    Citing the [JAX documentation](https://jax.readthedocs.io/en/latest/notebooks/Neural_Network_and_Data_Loading.html#data-loading-with-pytorch)
+    on this topic: “JAX is laser-focused on program transformations and accelerator-backed
+    NumPy, so we don’t include data loading or munging in the JAX library. There are
+    already a lot of great data loaders out there, so let’s just use them instead
+    of reinventing anything. We’ll grab PyTorch’s data loader, and make a tiny shim
+    to make it work with NumPy arrays.”.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: So that’s the reason why JAX-formatting in `datasets` is so useful, because
+    it lets you use any model from the HuggingFace Hub with JAX, without having to
+    worry about the data loading part.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using with_format('jax')
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The easiest way to get JAX arrays out of a dataset is to use the `with_format('jax')`
+    method. Lets assume that we want to train a neural network on the [MNIST dataset](http://yann.lecun.com/exdb/mnist/)
+    available at the HuggingFace Hub at [https://huggingface.co/datasets/mnist](https://huggingface.co/datasets/mnist).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once the format is set we can feed the dataset to the JAX model in batches
+    using the `Dataset.iter()` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE

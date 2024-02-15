@@ -1,0 +1,197 @@
+- en: Depth estimation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/depth_estimation](https://huggingface.co/docs/datasets/depth_estimation)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/18.48dee55b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Depth estimation datasets are used to train a model to approximate the relative
+    distance of every pixel in an image from the camera, also known as depth. The
+    applications enabled by these datasets primarily lie in areas like visual machine
+    perception and perception in robotics. Example applications include mapping streets
+    for self-driving cars. This guide will show you how to apply transformations to
+    a depth estimation dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you start, make sure you have up-to-date versions of `albumentations`
+    installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Albumentations](https://albumentations.ai/) is a Python library for performing
+    data augmentation for computer vision. It supports various computer vision tasks
+    such as image classification, object detection, segmentation, and keypoint estimation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide uses the [NYU Depth V2](https://huggingface.co/datasets/sayakpaul/nyu_depth_v2)
+    dataset which is comprised of video sequences from various indoor scenes, recorded
+    by RGB and depth cameras. The dataset consists of scenes from 3 cities and provides
+    images along with their depth maps as labels.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load the `train` split of the dataset and take a look at an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The dataset has two fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`image`: a PIL PNG image object with `uint8` data type.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`depth_map`: a PIL Tiff image object with `float32` data type which is the
+    depth map of the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It is mention-worthy that JPEG/PNG format can only store `uint8` or `uint16`
+    data. As the depth map is `float32` data, it can’t be stored using PNG/JPEG. However,
+    we can save the depth map using TIFF format as it supports a wider range of data
+    types, including `float32` data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, check out an image with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/71ff1912abf6cb1b53969d650b8e1e38.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Before we look at the depth map, we need to first convert its data type to
+    `uint8` using `.convert(''RGB'')` as PIL can’t display `float32` images. Now take
+    a look at its corresponding depth map:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/ca17bca0d9e9e054ca2a551aa2b513fd.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: It’s all black! You’ll need to add some color to the depth map to visualize
+    it properly. To do that, either we can apply color automatically during display
+    using `plt.imshow()` or create a colored depth map using `plt.cm` and then display
+    it. In this example, we have used the latter one, as we can save/write the colored
+    depth map later. (the utility below is taken from the [FastDepth repository](https://github.com/dwofk/fast-depth/blob/master/utils.py)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/3eba4d5736f8742dd55d79d5a1db6247.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: You can also visualize several different images and their corresponding depth
+    maps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/c055f022c963f8db182c88068977b37b.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Now apply some augmentations with `albumentations`. The augmentation transformations
+    include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Random horizontal flipping
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Random cropping
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Random brightness and contrast
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Random gamma correction
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Random hue saturation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Additionally, define a mapping to better reflect the target key name.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: With `additional_targets` defined, you can pass the target depth maps to the
+    `depth` argument of `aug` instead of `mask`. You’ll notice this change in the
+    `apply_transforms()` function defined below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Create a function to apply the transformation to the images as well as their
+    depth maps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use the [set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    function to apply the transformation on-the-fly to batches of the dataset to consume
+    less disk space:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can verify the transformation worked by indexing into the `pixel_values`
+    and `labels` of an example image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/f53c937bd078c12f6a8933248d397cf1.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Visualize the same transformation on the image’s corresponding depth map:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/2adebe21475befa1251919d8f6dea797.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'You can also visualize multiple training samples reusing the previous `random_indices`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/994ecffdfcf3bde97b4c834302e56957.png)'
+  prefs: []
+  type: TYPE_IMG

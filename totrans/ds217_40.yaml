@@ -1,0 +1,154 @@
+- en: Object detection
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/object_detection](https://huggingface.co/docs/datasets/object_detection)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/34.2b76a915.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Tip.31005f7d.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Object detection models identify something in an image, and object detection
+    datasets are used for applications such as autonomous driving and detecting natural
+    hazards like wildfire. This guide will show you how to apply transformations to
+    an object detection dataset following the [tutorial](https://albumentations.ai/docs/examples/example_bboxes/)
+    from [Albumentations](https://albumentations.ai/docs/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To run these examples, make sure you have up-to-date versions of `albumentations`
+    and `cv2` installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, you’ll use the [`cppe-5`](https://huggingface.co/datasets/cppe-5)
+    dataset for identifying medical personal protective equipment (PPE) in the context
+    of the COVID-19 pandemic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load the dataset and take a look at an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The dataset has the following fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`image`: PIL.Image.Image object containing the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`image_id`: The image ID.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`height`: The image height.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`width`: The image width.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`objects`: A dictionary containing bounding box metadata for the objects in
+    the image:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`id`: The annotation id.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`area`: The area of the bounding box.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`bbox`: The object’s bounding box (in the [coco](https://albumentations.ai/docs/getting_started/bounding_boxes_augmentation/#coco)
+    format).'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`category`: The object’s category, with possible values including `Coverall
+    (0)`, `Face_Shield (1)`, `Gloves (2)`, `Goggles (3)` and `Mask (4)`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'You can visualize the `bboxes` on the image using some internal torch utilities.
+    To do that, you will need to reference the [ClassLabel](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.ClassLabel)
+    feature associated with the category IDs so you can look up the string labels:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/a9d40d74ee60f02e6a49d5f578270811.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: With `albumentations`, you can apply transforms that will affect the image while
+    also updating the `bboxes` accordingly. In this case, the image is resized to
+    (480, 480), flipped horizontally, and brightened.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now when you visualize the result, the image should be flipped, but the `bboxes`
+    should still be in the right places.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/3ae1b1880287c632536e2bedf5d6330c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Create a function to apply the transform to a batch of examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use the [set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    function to apply the transform on-the-fly which consumes less disk space. The
+    randomness of data augmentation may return a different image if you access the
+    same example twice. It is especially useful when training a model for several
+    epochs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can verify the transform works by visualizing the 10th example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/42946c738ac9cdd770f982346f8f9290.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Now that you know how to process a dataset for object detection, learn [how
+    to train an object detection model](https://colab.research.google.com/github/NielsRogge/Transformers-Tutorials/blob/master/YOLOS/Fine_tuning_YOLOS_for_object_detection_on_custom_dataset_(balloon).ipynb)
+    and use it for inference.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,148 @@
+- en: Semantic segmentation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/semantic_segmentation](https://huggingface.co/docs/datasets/semantic_segmentation)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/44.3c12d4e6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Tip.31005f7d.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Semantic segmentation datasets are used to train a model to classify every pixel
+    in an image. There are a wide variety of applications enabled by these datasets
+    such as background removal from images, stylizing images, or scene understanding
+    for autonomous driving. This guide will show you how to apply transformations
+    to an image segmentation dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you start, make sure you have up-to-date versions of `albumentations`
+    and `cv2` installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Albumentations](https://albumentations.ai/) is a Python library for performing
+    data augmentation for computer vision. It supports various computer vision tasks
+    such as image classification, object detection, segmentation, and keypoint estimation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide uses the [Scene Parsing](https://huggingface.co/datasets/scene_parse_150)
+    dataset for segmenting and parsing an image into different image regions associated
+    with semantic categories, such as sky, road, person, and bed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load the `train` split of the dataset and take a look at an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The dataset has three fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`image`: a PIL image object.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`annotation`: segmentation mask of the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`scene_category`: the label or scene category of the image (like “kitchen”
+    or “office”).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Next, check out an image with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/801b925be58fde47ab832b7270ff9024.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Similarly, you can check out the respective segmentation mask:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/0d18bd94d7b74e5d9e463aca0bd8c2c2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'We can also add a [color palette](https://github.com/tensorflow/models/blob/3f1ca33afe3c1631b733ea7e40c294273b9e406d/research/deeplab/utils/get_dataset_colormap.py#L51)
+    on the segmentation mask and overlay it on top of the original image to visualize
+    the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After defining the color palette, you should be ready to visualize some overlays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/924483b9a1c47be43a2b8471ff229d38.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Now apply some augmentations with `albumentations`. You’ll first resize the
+    image and adjust its brightness.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Create a function to apply the transformation to the images:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use the [set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    function to apply the transformation on-the-fly to batches of the dataset to consume
+    less disk space:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can verify the transformation worked by indexing into the `pixel_values`
+    and `label` of an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/0e48d6f015aab9011f476a321307a70a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: In this guide, you have used `albumentations` for augmenting the dataset. It’s
+    also possible to use `torchvision` to apply some similar transforms.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/cef6cac569929e789bf7b6c643174dd6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Now that you know how to process a dataset for semantic segmentation, learn
+    [how to train a semantic segmentation model](https://huggingface.co/docs/transformers/tasks/semantic_segmentation)
+    and use it for inference.
+  prefs: []
+  type: TYPE_NORMAL

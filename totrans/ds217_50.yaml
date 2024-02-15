@@ -1,0 +1,366 @@
+- en: Create a dataset loading script
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/dataset_script](https://huggingface.co/docs/datasets/dataset_script)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/17.53621cd2.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Tip.31005f7d.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The dataset loading script is likely not needed if your dataset is in one of
+    the following formats: CSV, JSON, JSON lines, text, images, audio or Parquet.
+    With those formats, you should be able to load your dataset automatically with
+    [load_dataset()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset),
+    as long as your dataset repository has a [required structure](./repository_structure).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next major release, the new safety features of 🤗 Datasets will disable
+    running dataset loading scripts by default, and you will have to pass `trust_remote_code=True`
+    to load datasets that require running a dataset script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Write a dataset script to load and share datasets that consist of data files
+    in unsupported formats or require more complex data preparation. This is a more
+    advanced way to define a dataset than using [YAML metadata in the dataset card](./repository_structure#define-your-splits-in-yaml).
+    A dataset script is a Python file that defines the different configurations and
+    splits of your dataset, as well as how to download and process the data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The script can download data files from any website, or from the same dataset
+    repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A dataset loading script should have the same name as a dataset repository
+    or directory. For example, a repository named `my_dataset` should contain `my_dataset.py`
+    script. This way it can be loaded with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The following guide includes instructions for dataset scripts for how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Add dataset metadata.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Download data files.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generate samples.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generate dataset metadata.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Upload a dataset to the Hub.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Open the [SQuAD dataset loading script](https://huggingface.co/datasets/squad/blob/main/squad.py)
+    template to follow along on how to share a dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To help you get started, try beginning with the dataset loading script [template](https://github.com/huggingface/datasets/blob/main/templates/new_dataset_script.py)!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Add dataset attributes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The first step is to add some information, or attributes, about your dataset
+    in `DatasetBuilder._info()`. The most important attributes you should specify
+    are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`DatasetInfo.description` provides a concise description of your dataset. The
+    description informs the user what’s in the dataset, how it was collected, and
+    how it can be used for a NLP task.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`DatasetInfo.features` defines the name and type of each column in your dataset.
+    This will also provide the structure for each example, so it is possible to create
+    nested subfields in a column if you want. Take a look at [Features](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Features)
+    for a full list of feature types you can use.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`DatasetInfo.homepage` contains the URL to the dataset homepage so users can
+    find more details about the dataset.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`DatasetInfo.citation` contains a BibTeX citation for the dataset.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'After you’ve filled out all these fields in the template, it should look like
+    the following example from the SQuAD loading script:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Multiple configurations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In some cases, your dataset may have multiple configurations. For example, the
+    [SuperGLUE](https://huggingface.co/datasets/super_glue) dataset is a collection
+    of 5 datasets designed to evaluate language understanding tasks. 🤗 Datasets provides
+    [BuilderConfig](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.BuilderConfig)
+    which allows you to create different configurations for the user to select from.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s study the [SuperGLUE loading script](https://huggingface.co/datasets/super_glue/blob/main/super_glue.py)
+    to see how you can define several configurations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a [BuilderConfig](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.BuilderConfig)
+    subclass with attributes about your dataset. These attributes can be the features
+    of your dataset, label classes, and a URL to the data files.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Create instances of your config to specify the values of the attributes of
+    each configuration. This gives you the flexibility to specify all the name and
+    description of each configuration. These sub-class instances should be listed
+    under `DatasetBuilder.BUILDER_CONFIGS`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, users can load a specific configuration of the dataset with the configuration
+    `name`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Additionally, users can instantiate a custom builder configuration by passing
+    the builder configuration arguments to [load_dataset()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Default configurations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Users must specify a configuration name when they load a dataset with multiple
+    configurations. Otherwise, 🤗 Datasets will raise a `ValueError`, and prompt the
+    user to select a configuration name. You can avoid this by setting a default dataset
+    configuration with the `DEFAULT_CONFIG_NAME` attribute:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Only use a default configuration when it makes sense. Don’t set one because
+    it may be more convenient for the user to not specify a configuration when they
+    load your dataset. For example, multi-lingual datasets often have a separate configuration
+    for each language. An appropriate default may be an aggregated configuration that
+    loads all the languages of the dataset if the user doesn’t request a particular
+    one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Download data files and organize splits
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: After you’ve defined the attributes of your dataset, the next step is to download
+    the data files and organize them according to their splits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Create a dictionary of URLs in the loading script that point to the original
+    SQuAD data files:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the data files live in the same folder or repository of the dataset script,
+    you can just pass the relative paths to the files instead of URLs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[DownloadManager.download_and_extract()](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.DownloadManager.download_and_extract)
+    takes this dictionary and downloads the data files. Once the files are downloaded,
+    use [SplitGenerator](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.SplitGenerator)
+    to organize each split in the dataset. This is a simple class that contains:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The `name` of each split. You should use the standard split names: `Split.TRAIN`,
+    `Split.TEST`, and `Split.VALIDATION`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`gen_kwargs` provides the file paths to the data files to load for each split.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Your `DatasetBuilder._split_generator()` should look like this now:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generate samples
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'At this point, you have:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Added the dataset attributes.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Provided instructions for how to download the data files.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Organized the splits.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The next step is to actually generate the samples in each split.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`DatasetBuilder._generate_examples` takes the file path provided by `gen_kwargs`
+    to read and parse the data files. You need to write a function that loads the
+    data files and extracts the columns.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Your function should yield a tuple of an `id_`, and an example from the dataset.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: (Optional) Generate dataset metadata
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Adding dataset metadata is a great way to include information about your dataset.
+    The metadata is stored in the dataset card `README.md` in YAML. It includes information
+    like the number of examples required to confirm the dataset was correctly generated,
+    and information about the dataset like its `features`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Run the following command to generate your dataset metadata in `README.md`
+    and make sure your new dataset loading script works correctly:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: If your dataset loading script passed the test, you should now have a `README.md`
+    file in your dataset folder containing a `dataset_info` field with some metadata.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Upload to the Hub
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once your script is ready, [create a dataset card](dataset_card) and [upload
+    it to the Hub](share).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Congratulations, you can now load your dataset from the Hub! 🥳
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Advanced features
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sharding
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If your dataset is made of many big files, 🤗 Datasets automatically runs your
+    script in parallel to make it super fast! It can help if you have hundreds or
+    thousands of TAR archives, or JSONL files like [oscar](https://huggingface.co/datasets/oscar/blob/main/oscar.py)
+    for example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make it work, we consider lists of files in `gen_kwargs` to be shards. Therefore
+    🤗 Datasets can automatically spawn several workers to run `_generate_examples`
+    in parallel, and each worker is given a subset of shards to process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Users can also specify `num_proc=` in `load_dataset()` to specify the number
+    of processes to use as workers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ArrowBasedBuilder
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For some datasets it can be much faster to yield batches of data rather than
+    examples one by one. You can speed up the dataset generation by yielding Arrow
+    tables directly, instead of examples. This is especially useful if your data comes
+    from Pandas DataFrames for example, since the conversion from Pandas to Arrow
+    is as simple as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To yield Arrow tables instead of single examples, make your dataset builder
+    inherit from [ArrowBasedBuilder](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.ArrowBasedBuilder)
+    instead of [GeneratorBasedBuilder](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.GeneratorBasedBuilder),
+    and use `_generate_tables` instead of `_generate_examples`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Don’t forget to keep your script memory efficient, in case users run them on
+    machines with a low amount of RAM.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,680 @@
+- en: Process
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/process](https://huggingface.co/docs/datasets/process)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/41.11d45112.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Tip.31005f7d.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🤗 Datasets provides many tools for modifying the structure and content of a
+    dataset. These tools are important for tidying up a dataset, creating additional
+    columns, converting between features and formats, and much more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This guide will show you how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reorder rows and split the dataset.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Rename and remove columns, and other common column operations.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Apply processing functions to each example in a dataset.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Concatenate datasets.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Apply a custom formatting transform.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Save and export processed datasets.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For more details specific to processing other dataset modalities, take a look
+    at the [process audio dataset guide](./audio_process), the [process image dataset
+    guide](./image_process), or the [process text dataset guide](./nlp_process).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The examples in this guide use the MRPC dataset, but feel free to load any dataset
+    of your choice and follow along!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: All processing methods in this guide return a new [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    object. Modification is not done in-place. Be careful about overriding your previous
+    dataset!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sort, shuffle, select, split, and shard
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are several functions for rearranging the structure of a dataset. These
+    functions are useful for selecting only the rows you want, creating train and
+    test splits, and sharding very large datasets into smaller chunks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sort
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Use [sort()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.sort)
+    to sort column values according to their numerical values. The provided column
+    must be NumPy compatible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Under the hood, this creates a list of indices that is sorted according to values
+    of the column. This indices mapping is then used to access the right rows in the
+    underlying Arrow table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shuffle
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The [shuffle()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.shuffle)
+    function randomly rearranges the column values. You can specify the `generator`
+    parameter in this function to use a different `numpy.random.Generator` if you
+    want more control over the algorithm used to shuffle the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Shuffling takes the list of indices `[0:len(my_dataset)]` and shuffles it to
+    create an indices mapping. However as soon as your [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    has an indices mapping, the speed can become 10x slower. This is because there
+    is an extra step to get the row index to read using the indices mapping, and most
+    importantly, you aren’t reading contiguous chunks of data anymore. To restore
+    the speed, you’d need to rewrite the entire dataset on your disk again using [Dataset.flatten_indices()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.flatten_indices),
+    which removes the indices mapping. Alternatively, you can switch to an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset)
+    and leverage its fast approximate shuffling [IterableDataset.shuffle()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset.shuffle):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Select and Filter
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There are two options for filtering rows in a dataset: [select()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.select)
+    and [filter()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.filter).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[select()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.select)
+    returns rows according to a list of indices:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[filter()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.filter)
+    returns rows that match a specified condition:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[filter()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.filter)
+    can also filter by indices if you set `with_indices=True`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unless the list of indices to keep is contiguous, those methods also create
+    an indices mapping under the hood.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Split
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The [train_test_split()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.train_test_split)
+    function creates train and test splits if your dataset doesn’t already have them.
+    This allows you to adjust the relative proportions or an absolute number of samples
+    in each split. In the example below, use the `test_size` parameter to create a
+    test split that is 10% of the original dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The splits are shuffled by default, but you can set `shuffle=False` to prevent
+    shuffling.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shard
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 🤗 Datasets supports sharding to divide a very large dataset into a predefined
+    number of chunks. Specify the `num_shards` parameter in [shard()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.shard)
+    to determine the number of shards to split the dataset into. You’ll also need
+    to provide the shard you want to return with the `index` parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, the [imdb](https://huggingface.co/datasets/imdb) dataset has 25000
+    examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After sharding the dataset into four chunks, the first shard will only have
+    6250 examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Rename, remove, cast, and flatten
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The following functions allow you to modify the columns of a dataset. These
+    functions are useful for renaming or removing columns, changing columns to a new
+    set of features, and flattening nested column structures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rename
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Use [rename_column()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.rename_column)
+    when you need to rename a column in your dataset. Features associated with the
+    original column are actually moved under the new column name, instead of just
+    replacing the original column in-place.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Provide [rename_column()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.rename_column)
+    with the name of the original column, and the new column name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Remove
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When you need to remove one or more columns, provide the column name to remove
+    to the [remove_columns()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.remove_columns)
+    function. Remove more than one column by providing a list of column names:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Conversely, [select_columns()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.select_columns)
+    selects one or more columns to keep and removes the rest. This function takes
+    either one or a list of column names:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Cast
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The [cast()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.cast)
+    function transforms the feature type of one or more columns. This function accepts
+    your new [Features](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Features)
+    as its argument. The example below demonstrates how to change the [ClassLabel](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.ClassLabel)
+    and [Value](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Value)
+    features:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Casting only works if the original feature type and new feature type are compatible.
+    For example, you can cast a column with the feature type `Value("int32")` to `Value("bool")`
+    if the original column only contains ones and zeros.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the [cast_column()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.cast_column)
+    function to change the feature type of a single column. Pass the column name and
+    its new feature type as arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Flatten
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Sometimes a column can be a nested structure of several types. Take a look
+    at the nested structure below from the SQuAD dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `answers` field contains two subfields: `text` and `answer_start`. Use
+    the [flatten()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.flatten)
+    function to extract the subfields into their own separate columns:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Notice how the subfields are now their own independent columns: `answers.text`
+    and `answers.answer_start`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Map
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Some of the more powerful applications of 🤗 Datasets come from using the [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    function. The primary purpose of [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    is to speed up processing functions. It allows you to apply a processing function
+    to each example in a dataset, independently or in batches. This function can even
+    create new rows and columns.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the following example, prefix each `sentence1` value in the dataset with
+    `''My sentence: ''`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start by creating a function that adds `''My sentence: ''` to the beginning
+    of each sentence. The function needs to accept and output a `dict`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now use [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    to apply the `add_prefix` function to the entire dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s take a look at another example, except this time, you’ll remove a column
+    with [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map).
+    When you remove a column, it is only removed after the example has been provided
+    to the mapped function. This allows the mapped function to use the content of
+    the columns before they are removed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Specify the column to remove with the `remove_columns` parameter in [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 🤗 Datasets also has a [remove_columns()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.remove_columns)
+    function which is faster because it doesn’t copy the data of the remaining columns.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also use [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    with indices if you set `with_indices=True`. The example below adds the index
+    to the beginning of each sentence:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Multiprocessing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Multiprocessing significantly speeds up processing by parallelizing processes
+    on the CPU. Set the `num_proc` parameter in [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    to set the number of processes to use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: The [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    also works with the rank of the process if you set `with_rank=True`. This is analogous
+    to the `with_indices` parameter. The `with_rank` parameter in the mapped function
+    goes after the `index` one if it is already present.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The main use-case for rank is to parallelize computation across several GPUs.
+    This requires setting `multiprocess.set_start_method("spawn")`. If you don’t you’ll
+    receive the following CUDA error:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Batch processing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    function supports working with batches of examples. Operate on batches by setting
+    `batched=True`. The default batch size is 1000, but you can adjust it with the
+    `batch_size` parameter. Batch processing enables interesting applications such
+    as splitting long sentences into shorter chunks and data augmentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Split long examples
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'When examples are too long, you may want to split them into several smaller
+    chunks. Begin by creating a function that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Splits the `sentence1` field into chunks of 50 characters.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Stacks all the chunks together to create the new dataset.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Apply the function with [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Notice how the sentences are split into shorter chunks now, and there are more
+    rows in the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Data augmentation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    function could also be used for data augmentation. The following example generates
+    additional words for a masked token in a sentence.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load and use the [RoBERTA](https://huggingface.co/roberta-base) model in 🤗
+    Transformers’ [FillMaskPipeline](https://huggingface.co/transformers/main_classes/pipelines#transformers.FillMaskPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Create a function to randomly select a word to mask in the sentence. The function
+    should also return the original sentence and the top two replacements generated
+    by RoBERTA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    to apply the function over the whole dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: For each original sentence, RoBERTA augmented a random word with three alternatives.
+    The original word `distorting` is supplemented by `withholding`, `suppressing`,
+    and `destroying`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Process multiple splits
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Many datasets have splits that can be processed simultaneously with [DatasetDict.map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.DatasetDict.map).
+    For example, tokenize the `sentence1` field in the train and test split by:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Distributed usage
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When you use [map()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    in a distributed setting, you should also use [torch.distributed.barrier](https://pytorch.org/docs/stable/distributed?highlight=barrier#torch.distributed.barrier).
+    This ensures the main process performs the mapping, while the other processes
+    load the results, thereby avoiding duplicate work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following example shows how you can use `torch.distributed.barrier` to
+    synchronize the processes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: Concatenate
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Separate datasets can be concatenated if they share the same column types.
+    Concatenate datasets with [concatenate_datasets()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.concatenate_datasets):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also concatenate two datasets horizontally by setting `axis=1` as long
+    as the datasets have the same number of rows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Interleave
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can also mix several datasets together by taking alternating examples from
+    each one to create a new dataset. This is known as *interleaving*, which is enabled
+    by the [interleave_datasets()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.interleave_datasets)
+    function. Both [interleave_datasets()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.interleave_datasets)
+    and [concatenate_datasets()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.concatenate_datasets)
+    work with regular [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    and [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset)
+    objects. Refer to the [Stream](./stream#interleave) guide for an example of how
+    to interleave [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset)
+    objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can define sampling probabilities for each of the original datasets to specify
+    how to interleave the datasets. In this case, the new dataset is constructed by
+    getting examples one by one from a random dataset until one of the datasets runs
+    out of samples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also specify the `stopping_strategy`. The default strategy, `first_exhausted`,
+    is a subsampling strategy, i.e the dataset construction is stopped as soon one
+    of the dataset runs out of samples. You can specify `stopping_strategy=all_exhausted`
+    to execute an oversampling strategy. In this case, the dataset construction is
+    stopped as soon as every samples in every dataset has been added at least once.
+    In practice, it means that if a dataset is exhausted, it will return to the beginning
+    of this dataset until the stop criterion has been reached. Note that if no sampling
+    probabilities are specified, the new dataset will have `max_length_datasets*nb_dataset
+    samples`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Format
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [set_format()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_format)
+    function changes the format of a column to be compatible with some common data
+    formats. Specify the output you’d like in the `type` parameter and the columns
+    you want to format. Formatting is applied on-the-fly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, create PyTorch tensors by setting `type="torch"`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The [with_format()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.with_format)
+    function also changes the format of a column, except it returns a new [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
+    object:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 🤗 Datasets also provides support for other common data formats such as NumPy,
+    Pandas, and JAX. Check out the [Using Datasets with TensorFlow](https://huggingface.co/docs/datasets/master/en/use_with_tensorflow#using-totfdataset)
+    guide for more details on how to efficiently create a TensorFlow dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you need to reset the dataset to its original format, use the [reset_format()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.reset_format)
+    function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: Format transform
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The [set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    function applies a custom formatting transform on-the-fly. This function replaces
+    any previously specified format. For example, you can use this function to tokenize
+    and pad tokens on-the-fly. Tokenization is only applied when examples are accessed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also use the [set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    function to decode formats not supported by [Features](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Features).
+    For example, the [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
+    feature uses [`soundfile`](https://python-soundfile.readthedocs.io/en/0.11.0/)
+    - a fast and simple library to install - but it does not provide support for less
+    common audio formats. Here is where you can use [set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    to apply a custom decoding transform on the fly. You’re free to use any library
+    you like to decode the audio files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The example below uses the [`pydub`](http://pydub.com/) package to open an
+    audio format not supported by `soundfile`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Save
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once you are done processing your dataset, you can save and reuse it later with
+    [save_to_disk()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Save your dataset by providing the path to the directory you wish to save it
+    to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use the [load_from_disk()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_from_disk)
+    function to reload the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Want to save your dataset to a cloud storage provider? Read our [Cloud Storage](./filesystems)
+    guide to learn how to save your dataset to AWS or Google Cloud Storage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Export
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '🤗 Datasets supports exporting as well so you can work with your dataset in
+    other applications. The following table shows currently supported file formats
+    you can export to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| File type | Export method |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| CSV | [Dataset.to_csv()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.to_csv)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| JSON | [Dataset.to_json()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.to_json)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Parquet | [Dataset.to_parquet()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.to_parquet)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SQL | [Dataset.to_sql()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.to_sql)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| In-memory Python object | [Dataset.to_pandas()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.to_pandas)
+    or [Dataset.to_dict()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.to_dict)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: 'For example, export your dataset to a CSV file like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE

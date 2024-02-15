@@ -1,0 +1,497 @@
+- en: Create an image dataset
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets/image_dataset](https://huggingface.co/docs/datasets/image_dataset)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets/v2.17.0/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/start.146395b0.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/scheduler.bdbef820.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/singletons.98dc5b8b.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.8a885b74.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/paths.a483fec8.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/entry/app.e612c4fb.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/index.c0aea24a.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/0.5e8dbda6.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/nodes/24.fc57e2e7.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Tip.31005f7d.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/CodeBlock.6ccca92e.js">
+    <link rel="modulepreload" href="/docs/datasets/v2.17.0/en/_app/immutable/chunks/Heading.2eb892cb.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two methods for creating and sharing an image dataset. This guide
+    will show you how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create an image dataset with `ImageFolder` and some metadata. This is a no-code
+    solution for quickly creating an image dataset with several thousand images.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Create an image dataset by writing a loading script. This method is a bit more
+    involved, but you have greater flexibility over how a dataset is defined, downloaded,
+    and generated which can be useful for more complex or large scale image datasets.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can control access to your dataset by requiring users to share their contact
+    information first. Check out the [Gated datasets](https://huggingface.co/docs/hub/datasets-gated)
+    guide for more information about how to enable this feature on the Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ImageFolder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `ImageFolder` is a dataset builder designed to quickly load an image dataset
+    with several thousand images without requiring you to write any code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 💡 Take a look at the [Split pattern hierarchy](repository_structure#split-pattern-hierarchy)
+    to learn more about how `ImageFolder` creates dataset splits based on your dataset
+    repository structure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ImageFolder` automatically infers the class labels of your dataset based on
+    the directory name. Store your dataset in a directory structure like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then users can load your dataset by specifying `imagefolder` in [load_dataset()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
+    and the directory in `data_dir`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also use `imagefolder` to load datasets involving multiple splits.
+    To do so, your dataset directory should have the following structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: If all image files are contained in a single directory or if they are not on
+    the same level of directory structure, `label` column won’t be added automatically.
+    If you need it, set `drop_labels=False` explicitly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If there is additional information you’d like to include about your dataset,
+    like text captions or bounding boxes, add it as a `metadata.csv` file in your
+    folder. This lets you quickly create datasets for different computer vision tasks
+    like text captioning or object detection. You can also use a JSONL file `metadata.jsonl`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also zip your images:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Your `metadata.csv` file must have a `file_name` column which links image files
+    with their metadata:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or using `metadata.jsonl`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: If metadata files are present, the inferred labels based on the directory name
+    are dropped by default. To include those labels, set `drop_labels=False` in `load_dataset`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image captioning
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Image captioning datasets have text describing an image. An example `metadata.csv`
+    may look like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load the dataset with `ImageFolder`, and it will create a `text` column for
+    the image captions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Object detection
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Object detection datasets have bounding boxes and categories identifying objects
+    in an image. An example `metadata.jsonl` may look like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load the dataset with `ImageFolder`, and it will create a `objects` column
+    with the bounding boxes and the categories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Upload dataset to the Hub
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Once you’ve created a dataset, you can share it to the Hub with the [push_to_hub()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.DatasetDict.push_to_hub)
+    method. Make sure you have the [huggingface_hub](https://huggingface.co/docs/huggingface_hub/index)
+    library installed and you’re logged in to your Hugging Face account (see the [Upload
+    with Python tutorial](upload_dataset#upload-with-python) for more details).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Upload your dataset with [push_to_hub()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.DatasetDict.push_to_hub):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: WebDataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The [WebDataset](https://github.com/webdataset/webdataset) format is based
+    on TAR archives and is suitable for big image datasets. Indeed you can group your
+    images in TAR archives (e.g. 1GB of images per TAR archive) and have thousands
+    of TAR archives:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the archives, each example is made of files sharing the same prefix:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can put your images labels/captions/bounding boxes using JSON or text files
+    for example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more details on the WebDataset format and the python library, please check
+    the [WebDataset documentation](https://webdataset.github.io/webdataset).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load your WebDataset and it will create on column per file suffix (here “jpg”
+    and “json”):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Loading script
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Write a dataset loading script to share a dataset. It defines a dataset’s splits
+    and configurations, and handles downloading and generating a dataset. The script
+    is located in the same folder or repository as the dataset and should have the
+    same name.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This structure allows your dataset to be loaded in one line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This guide will show you how to create a dataset loading script for image datasets,
+    which is a bit different from [creating a loading script for text datasets](./dataset_script).
+    You’ll learn how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a dataset builder class.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Create dataset configurations.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Add dataset metadata.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Download and define the dataset splits.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generate the dataset.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generate the dataset metadata (optional).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Upload the dataset to the Hub.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The best way to learn is to open up an existing image dataset loading script,
+    like [Food-101](https://huggingface.co/datasets/food101/blob/main/food101.py),
+    and follow along!
+  prefs: []
+  type: TYPE_NORMAL
+- en: To help you get started, we created a loading script [template](https://github.com/huggingface/datasets/blob/main/templates/new_dataset_script.py)
+    you can copy and use as a starting point!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a dataset builder class
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[GeneratorBasedBuilder](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.GeneratorBasedBuilder)
+    is the base class for datasets generated from a dictionary generator. Within this
+    class, there are three methods to help create your dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`info` stores information about your dataset like its description, license,
+    and features.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`split_generators` downloads the dataset and defines its splits.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`generate_examples` generates the images and labels for each split.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Start by creating your dataset class as a subclass of [GeneratorBasedBuilder](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.GeneratorBasedBuilder)
+    and add the three methods. Don’t worry about filling in each of these methods
+    yet, you’ll develop those over the next few sections:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Multiple configurations
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: In some cases, a dataset may have more than one configuration. For example,
+    if you check out the [Imagenette dataset](https://huggingface.co/datasets/frgfm/imagenette),
+    you’ll notice there are three subsets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To create different configurations, use the [BuilderConfig](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.BuilderConfig)
+    class to create a subclass for your dataset. Provide the links to download the
+    images and labels in `data_url` and `metadata_urls`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now you can define your subsets at the top of [GeneratorBasedBuilder](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.GeneratorBasedBuilder).
+    Imagine you want to create two subsets in the Food-101 dataset based on whether
+    it is a breakfast or dinner food.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Define your subsets with `Food101Config` in a list in `BUILDER_CONFIGS`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: For each configuration, provide a name, description, and where to download the
+    images and labels from.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now if users want to load the `breakfast` configuration, they can use the configuration
+    name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Add dataset metadata
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Adding information about your dataset is useful for users to learn more about
+    it. This information is stored in the [DatasetInfo](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.DatasetInfo)
+    class which is returned by the `info` method. Users can access this information
+    by:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There is a lot of information you can specify about your dataset, but some
+    important ones to include are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`description` provides a concise description of the dataset.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`features` specify the dataset column types. Since you’re creating an image
+    loading script, you’ll need to include the [Image](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
+    feature.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`supervised_keys` specify the input feature and label.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`homepage` provides a link to the dataset homepage.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`citation` is a BibTeX citation of the dataset.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`license` states the dataset’s license.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: You’ll notice a lot of the dataset information is defined earlier in the loading
+    script which makes it easier to read. There are also other `~Datasets.Features`
+    you can input, so be sure to check out the full list for more details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Download and define the dataset splits
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Now that you’ve added some information about your dataset, the next step is
+    to download the dataset and generate the splits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the [DownloadManager.download()](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.DownloadManager.download)
+    method to download the dataset and any other metadata you’d like to associate
+    with it. This method accepts:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: a name to a file inside a Hub dataset repository (in other words, the `data/`
+    folder)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a URL to a file hosted somewhere else
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a list or dictionary of file names or URLs
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In the Food-101 loading script, you’ll notice again the URLs are defined earlier
+    in the script.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'After you’ve downloaded the dataset, use the [SplitGenerator](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.SplitGenerator)
+    to organize the images and labels in each split. Name each split with a standard
+    name like: `Split.TRAIN`, `Split.TEST`, and `SPLIT.Validation`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In the `gen_kwargs` parameter, specify the file paths to the `images` to iterate
+    over and load. If necessary, you can use [DownloadManager.iter_archive()](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.DownloadManager.iter_archive)
+    to iterate over images in TAR archives. You can also specify the associated labels
+    in the `metadata_path`. The `images` and `metadata_path` are actually passed onto
+    the next step where you’ll actually generate the dataset.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: To stream a TAR archive file, you need to use [DownloadManager.iter_archive()](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.DownloadManager.iter_archive)!
+    The [DownloadManager.download_and_extract()](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.DownloadManager.download_and_extract)
+    function does not support TAR archives in streaming mode.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generate the dataset
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The last method in the [GeneratorBasedBuilder](/docs/datasets/v2.17.0/en/package_reference/builder_classes#datasets.GeneratorBasedBuilder)
+    class actually generates the images and labels in the dataset. It yields a dataset
+    according to the stucture specified in `features` from the `info` method. As you
+    can see, `generate_examples` accepts the `images` and `metadata_path` from the
+    previous method as arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To stream a TAR archive file, the `metadata_path` needs to be opened and read
+    first. TAR files are accessed and yielded sequentially. This means you need to
+    have the metadata information in hand first so you can yield it with its corresponding
+    image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now you can write a function for opening and loading examples from the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generate the dataset metadata (optional)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The dataset metadata can be generated and stored in the dataset card (`README.md`
+    file).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Run the following command to generate your dataset metadata in `README.md`
+    and make sure your new loading script works correctly:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: If your loading script passed the test, you should now have the `dataset_info`
+    YAML fields in the header of the `README.md` file in your dataset folder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Upload the dataset to the Hub
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Once your script is ready, [create a dataset card](./dataset_card) and [upload
+    it to the Hub](./share).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Congratulations, you can now load your dataset from the Hub! 🥳
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
