@@ -1,29 +1,21 @@
 - en: Building custom models
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/custom_models](https://huggingface.co/docs/transformers/v4.37.2/en/custom_models)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The 🤗 Transformers library is designed to be easily extensible. Every model
     is fully coded in a given subfolder of the repository with no abstraction, so
     you can easily copy a modeling file and tweak it to your needs.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: If you are writing a brand new model, it might be easier to start from scratch.
@@ -32,14 +24,17 @@
     (with the code it relies on) so that anyone can use it, even if it’s not present
     in the 🤗 Transformers library. We’ll see how to build upon transformers and extend
     the framework with your hooks and custom code.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: We will illustrate all of this on a ResNet model, by wrapping the ResNet class
     of the [timm library](https://github.com/rwightman/pytorch-image-models) into
     a [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: Writing a custom configuration
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -47,30 +42,38 @@
     of a model is an object that will contain all the necessary information to build
     the model. As we will see in the next section, the model can only take a `config`
     to be initialized, so we really need that object to be as complete as possible.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: In our example, we will take a couple of arguments of the ResNet class that
     we might want to tweak. Different configurations will then give us the different
     types of ResNets that are possible. We then just store those arguments, after
     checking the validity of a few of them.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'The three important things to remember when writing you own configuration are
     the following:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: you have to inherit from `PretrainedConfig`,
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: the `__init__` of your `PretrainedConfig` must accept any kwargs,
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: those `kwargs` need to be passed to the superclass `__init__`.
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -79,34 +82,44 @@
     has more fields than the ones you are setting. When reloading a config with the
     `from_pretrained` method, those fields need to be accepted by your config and
     then sent to the superclass.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: Defining a `model_type` for your configuration (here `model_type="resnet"`)
     is not mandatory, unless you want to register your model with the auto classes
     (see last section).
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: 'With this done, you can easily create and save your configuration like you
     would do with any other model config of the library. Here is how we can create
     a resnet50d config and save it:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'This will save a file named `config.json` inside the folder `custom-resnet`.
     You can then reload your config with the `from_pretrained` method:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: You can also use any other method of the [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     class, like [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)
     to directly upload your config to the Hub.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: Writing a custom model
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -114,101 +127,141 @@
     We will actually write two: one that extracts the hidden features from a batch
     of images (like [BertModel](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertModel))
     and one that is suitable for image classification (like [BertForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertForSequenceClassification)).'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: 'As we mentioned before, we’ll only write a loose wrapper of the model to keep
     it simple for this example. The only thing we need to do before writing this class
     is a map between the block types and actual block classes. Then the model is defined
     from the configuration by passing everything to the `ResNet` class:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'For the model that will classify images, we just change the forward method:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于将对图像进行分类的模型，我们只需更改前向方法：
 - en: '[PRE4]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: In both cases, notice how we inherit from `PreTrainedModel` and call the superclass
     initialization with the `config` (a bit like when you write a regular `torch.nn.Module`).
     The line that sets the `config_class` is not mandatory, unless you want to register
     your model with the auto classes (see last section).
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这两种情况下，请注意我们如何从`PreTrainedModel`继承并使用`config`调用超类初始化（有点像当您编写常规`torch.nn.Module`时）。设置`config_class`的行不是强制性的，除非您想将您的模型注册到自动类（请参见最后一节）。
 - en: If your model is very similar to a model inside the library, you can re-use
     the same configuration as this model.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的模型与库中的模型非常相似，您可以重用与该模型相同的配置。
 - en: You can have your model return anything you want, but returning a dictionary
     like we did for `ResnetModelForImageClassification`, with the loss included when
     labels are passed, will make your model directly usable inside the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     class. Using another output format is fine as long as you are planning on using
     your own training loop or another library for training.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以让您的模型返回任何您想要的内容，但是像我们为`ResnetModelForImageClassification`所做的那样返回一个包含损失的字典，当传递标签时，将使您的模型可以直接在[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)类中使用。只要您打算使用自己的训练循环或其他库进行训练，使用另一种输出格式也是可以的。
 - en: 'Now that we have our model class, let’s create one:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们有了我们的模型类，让我们创建一个：
 - en: '[PRE5]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Again, you can use any of the methods of [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel),
     like [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)
     or [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub).
     We will use the second in the next section, and see how to push the model weights
     with the code of our model. But first, let’s load some pretrained weights inside
     our model.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，您可以使用[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)的任何方法，例如[save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)或[push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)。我们将在下一节中使用第二种方法，并看看如何将模型权重与我们模型的代码一起推送。但首先，让我们在模型中加载一些预训练权重。
 - en: 'In your own use case, you will probably be training your custom model on your
     own data. To go fast for this tutorial, we will use the pretrained version of
     the resnet50d. Since our model is just a wrapper around it, it’s going to be easy
     to transfer those weights:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在您自己的用例中，您可能会在自己的数据上训练自定义模型。为了在本教程中快速进行，我们将使用resnet50d的预训练版本。由于我们的模型只是它的一个包装器，所以转移这些权重将会很容易：
 - en: '[PRE6]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Now let’s see how to make sure that when we do [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)
     or [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub),
     the code of the model is saved.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们看看如何确保在执行[save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)或[push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)时，模型的代码被保存。
 - en: Registering a model with custom code to the auto classes
+  id: totrans-36
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将带有自定义代码的模型注册到自动类
 - en: If you are writing a library that extends 🤗 Transformers, you may want to extend
     the auto classes to include your own model. This is different from pushing the
     code to the Hub in the sense that users will need to import your library to get
     the custom models (contrarily to automatically downloading the model code from
     the Hub).
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在编写一个扩展🤗 Transformers的库，您可能希望扩展自动类以包括您自己的模型。这与将代码推送到Hub不同，用户需要导入您的库才能获取自定义模型（与自动从Hub下载模型代码相反）。
 - en: 'As long as your config has a `model_type` attribute that is different from
     existing model types, and that your model classes have the right `config_class`
     attributes, you can just add them to the auto classes like this:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 只要您的配置具有与现有模型类型不同的`model_type`属性，并且您的模型类具有正确的`config_class`属性，您就可以像这样将它们添加到自动类中：
 - en: '[PRE7]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Note that the first argument used when registering your custom config to [AutoConfig](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoConfig)
     needs to match the `model_type` of your custom config, and the first argument
     used when registering your custom models to any auto model class needs to match
     the `config_class` of those models.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意，在将自定义配置注册到[AutoConfig](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoConfig)时使用的第一个参数需要与自定义配置的`model_type`匹配，并且在将自定义模型注册到任何自动模型类时使用的第一个参数需要与这些模型的`config_class`匹配。
 - en: Sending the code to the Hub
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将代码发送到Hub
 - en: This API is experimental and may have some slight breaking changes in the next
     releases.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 此API是实验性的，可能在下一个版本中有一些轻微的破坏性更改。
 - en: First, make sure your model is fully defined in a `.py` file. It can rely on
     relative imports to some other files as long as all the files are in the same
     directory (we don’t support submodules for this feature yet). For our example,
@@ -216,112 +269,169 @@
     in a folder of the current working directory named `resnet_model`. The configuration
     file contains the code for `ResnetConfig` and the modeling file contains the code
     of `ResnetModel` and `ResnetModelForImageClassification`.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，请确保您的模型在一个`.py`文件中完全定义。它可以依赖于一些其他文件的相对导入，只要所有文件都在同一个目录中（我们目前还不支持此功能的子模块）。对于我们的示例，我们将在当前工作目录中的一个名为`resnet_model`的文件夹中定义一个`modeling_resnet.py`文件和一个`configuration_resnet.py`文件。配置文件包含`ResnetConfig`的代码，建模文件包含`ResnetModel`和`ResnetModelForImageClassification`的代码。
 - en: '[PRE8]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The `__init__.py` can be empty, it’s just there so that Python detects `resnet_model`
     can be use as a module.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '`__init__.py`可以为空，只是为了让Python检测`resnet_model`可以用作模块。'
 - en: If copying a modeling files from the library, you will need to replace all the
     relative imports at the top of the file to import from the `transformers` package.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果从库中复制建模文件，则需要将文件顶部的所有相对导入替换为从`transformers`包导入。
 - en: Note that you can re-use (or subclass) an existing configuration/model.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，您可以重复使用（或子类化）现有的配置/模型。
 - en: 'To share your model with the community, follow those steps: first import the
     ResNet model and config from the newly created files:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 要与社区共享您的模型，请按照以下步骤操作：首先从新创建的文件中导入ResNet模型和配置：
 - en: '[PRE9]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Then you have to tell the library you want to copy the code files of those
     objects when using the `save_pretrained` method and properly register them with
     a given Auto class (especially for models), just run:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，当使用`save_pretrained`方法时，您必须告诉库您要复制这些对象的代码文件，并使用给定的Auto类正确注册它们（特别是对于模型），只需运行：
 - en: '[PRE10]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Note that there is no need to specify an auto class for the configuration (there
     is only one auto class for them, [AutoConfig](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoConfig))
     but it’s different for models. Your custom model could be suitable for many different
     tasks, so you have to specify which one of the auto classes is the correct one
     for your model.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，无需为配置指定自动类（它们只有一个自动类，[AutoConfig](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoConfig)），但对于模型来说情况不同。您的自定义模型可能适用于许多不同的任务，因此您必须指定哪个自动类是您模型的正确类。
 - en: 'Use `register_for_auto_class()` if you want the code files to be copied. If
     you instead prefer to use code on the Hub from another repo, you don’t need to
     call it. In cases where there’s more than one auto class, you can modify the `config.json`
     directly using the following structure:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果要将代码文件复制，可以使用`register_for_auto_class()`。如果您更喜欢从另一个存储库中的Hub使用代码，则无需调用它。在存在多个自动类的情况下，可以直接修改`config.json`，使用以下结构：
 - en: '[PRE11]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Next, let’s create the config and models as we did before:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们像以前一样创建配置和模型：
 - en: '[PRE12]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Now to send the model to the Hub, make sure you are logged in. Either run in
     your terminal:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在要将模型发送到Hub，请确保您已登录。在终端中运行：
 - en: '[PRE13]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'or from a notebook:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者从笔记本中：
 - en: '[PRE14]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'You can then push to your own namespace (or an organization you are a member
     of) like this:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，您可以像这样推送到您自己的命名空间（或您是其成员的组织）：
 - en: '[PRE15]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: On top of the modeling weights and the configuration in json format, this also
     copied the modeling and configuration `.py` files in the folder `custom-resnet50d`
     and uploaded the result to the Hub. You can check the result in this [model repo](https://huggingface.co/sgugger/custom-resnet50d).
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了以json格式复制建模权重和配置外，还将建模和配置的`.py`文件复制到`custom-resnet50d`文件夹中，并将结果上传到Hub。您可以在此[model
+    repo](https://huggingface.co/sgugger/custom-resnet50d)中查看结果。
 - en: See the [sharing tutorial](model_sharing) for more information on the push to
     Hub method.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关将模型推送到Hub的方法的更多信息，请参阅[共享教程](model_sharing)。
 - en: Using a model with custom code
+  id: totrans-65
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用具有自定义代码的模型
 - en: 'You can use any configuration, model or tokenizer with custom code files in
     its repository with the auto-classes and the `from_pretrained` method. All files
     and code uploaded to the Hub are scanned for malware (refer to the [Hub security](https://huggingface.co/docs/hub/security#malware-scanning)
     documentation for more information), but you should still review the model code
     and author to avoid executing malicious code on your machine. Set `trust_remote_code=True`
     to use a model with custom code:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在其存储库中使用任何配置、模型或分词器与自定义代码文件，使用自动类和`from_pretrained`方法。所有上传到Hub的文件和代码都会被扫描以检测恶意软件（有关更多信息，请参阅[Hub安全](https://huggingface.co/docs/hub/security#malware-scanning)文档），但您仍应查看模型代码和作者，以避免在您的计算机上执行恶意代码。设置`trust_remote_code=True`以使用具有自定义代码的模型：
 - en: '[PRE16]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: It is also strongly encouraged to pass a commit hash as a `revision` to make
     sure the author of the models did not update the code with some malicious new
     lines (unless you fully trust the authors of the models).
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 强烈建议传递提交哈希作为`revision`，以确保模型的作者没有使用一些恶意的新代码更新代码（除非您完全信任模型的作者）。
 - en: '[PRE17]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Note that when browsing the commit history of the model repo on the Hub, there
     is a button to easily copy the commit hash of any commit.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，在Hub上浏览模型存储库的提交历史时，有一个按钮可以轻松复制任何提交的提交哈希。
