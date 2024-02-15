@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 计算机视觉知识蒸馏
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/knowledge_distillation_for_image_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/knowledge_distillation_for_image_classification)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/knowledge_distillation_for_image_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/knowledge_distillation_for_image_classification)
 - en: null
   id: totrans-2
   prefs: []
@@ -25,6 +27,9 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 知识蒸馏是一种技术，用于将知识从一个更大、更复杂的模型（教师）转移到一个更小、更简单的模型（学生）。为了从一个模型中提取知识到另一个模型，我们采用一个在特定任务上（本例中为图像分类）训练过的预训练教师模型，并随机初始化一个学生模型用于图像分类训练。接下来，我们训练学生模型以最小化其输出与教师输出之间的差异，从而使其模仿行为。这最初是由
+    [Hinton 等人在神经网络中提取知识](https://arxiv.org/abs/1503.02531) 中首次引入的。在这个指南中，我们将进行特定任务的知识蒸馏。我们将使用
+    [beans 数据集](https://huggingface.co/datasets/beans)。
 - en: This guide demonstrates how you can distill a [fine-tuned ViT model](https://huggingface.co/merve/vit-mobilenet-beans-224)
     (teacher model) to a [MobileNet](https://huggingface.co/google/mobilenet_v2_1.4_224)
     (student model) using the [Trainer API](https://huggingface.co/docs/transformers/en/main_classes/trainer#trainer)
@@ -32,10 +37,14 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个指南演示了如何使用 🤗 Transformers 的 [Trainer API](https://huggingface.co/docs/transformers/en/main_classes/trainer#trainer)
+    将一个 [fine-tuned ViT 模型](https://huggingface.co/merve/vit-mobilenet-beans-224)（教师模型）蒸馏到一个
+    [MobileNet](https://huggingface.co/google/mobilenet_v2_1.4_224)（学生模型）。
 - en: Let’s install the libraries needed for distillation and evaluating the process.
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们安装进行蒸馏和评估过程所需的库。
 - en: '[PRE0]'
   id: totrans-6
   prefs: []
@@ -48,10 +57,13 @@
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，我们使用 `merve/beans-vit-224` 模型作为教师模型。这是一个基于 `google/vit-base-patch16-224-in21k`
+    在 beans 数据集上微调的图像分类模型。我们将将这个模型蒸馏到一个随机初始化的 MobileNetV2。
 - en: We will now load the dataset.
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们现在将加载数据集。
 - en: '[PRE1]'
   id: totrans-9
   prefs: []
@@ -63,6 +75,7 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以从任一模型中使用图像处理器，因为在这种情况下它们返回相同分辨率的相同输出。我们将使用 `dataset` 的 `map()` 方法将预处理应用于数据集的每个拆分。
 - en: '[PRE2]'
   id: totrans-11
   prefs: []
@@ -82,6 +95,11 @@
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 基本上，我们希望学生模型（随机初始化的 MobileNet）模仿教师模型（微调的视觉变换器）。为了实现这一点，我们首先从教师和学生中获取 logits
+    输出。然后，我们将它们中的每一个除以控制每个软目标重要性的参数 `temperature`。一个称为 `lambda` 的参数权衡了蒸馏损失的重要性。在这个例子中，我们将使用
+    `temperature=5` 和 `lambda=0.5`。我们将使用 Kullback-Leibler 散度损失来计算学生和教师之间的差异。给定两个数据
+    P 和 Q，KL 散度解释了我们需要多少额外信息来用 Q 表示 P。如果两者相同，它们的 KL 散度为零，因为不需要其他信息来解释 P。因此，在知识蒸馏的背景下，KL
+    散度是有用的。
 - en: '[PRE3]'
   id: totrans-13
   prefs: []
@@ -92,6 +110,7 @@
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们现在将登录到 Hugging Face Hub，这样我们就可以通过 `Trainer` 将我们的模型推送到 Hugging Face Hub。
 - en: '[PRE4]'
   id: totrans-15
   prefs: []
@@ -101,6 +120,7 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们设置 `TrainingArguments`、教师模型和学生模型。
 - en: '[PRE5]'
   id: totrans-17
   prefs: []
@@ -112,6 +132,7 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以使用 `compute_metrics` 函数在测试集上评估我们的模型。这个函数将在训练过程中用于计算我们模型的 `准确率` 和 `f1`。
 - en: '[PRE6]'
   id: totrans-19
   prefs: []
@@ -122,6 +143,7 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们使用我们定义的训练参数初始化 `Trainer`。我们还将初始化我们的数据收集器。
 - en: '[PRE7]'
   id: totrans-21
   prefs: []
@@ -131,6 +153,7 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们现在可以训练我们的模型。
 - en: '[PRE8]'
   id: totrans-23
   prefs: []
@@ -140,6 +163,7 @@
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以在测试集上评估模型。
 - en: '[PRE9]'
   id: totrans-25
   prefs: []
