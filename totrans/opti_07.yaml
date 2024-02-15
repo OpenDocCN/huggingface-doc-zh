@@ -1,0 +1,539 @@
+- en: Quantization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/optimum/concept_guides/quantization](https://huggingface.co/docs/optimum/concept_guides/quantization)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/optimum/main/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/entry/start.e5b4068c.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/chunks/scheduler.6062bdaf.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/chunks/singletons.c19f6c5d.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/chunks/paths.ce537b49.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/entry/app.ea538469.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/chunks/index.4bca734e.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/nodes/0.fbcd9eed.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/nodes/5.ec5b2665.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/chunks/Tip.b9ac1f03.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/chunks/CodeBlock.fa01571c.js">
+    <link rel="modulepreload" href="/docs/optimum/main/en/_app/immutable/chunks/Heading.723dceba.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quantization is a technique to reduce the computational and memory costs of
+    running inference by representing the weights and activations with low-precision
+    data types like 8-bit integer (`int8`) instead of the usual 32-bit floating point
+    (`float32`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reducing the number of bits means the resulting model requires less memory storage,
+    consumes less energy (in theory), and operations like matrix multiplication can
+    be performed much faster with integer arithmetic. It also allows to run models
+    on embedded devices, which sometimes only support integer data types.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Theory
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The basic idea behind quantization is quite easy: going from high-precision
+    representation (usually the regular 32-bit floating-point) for weights and activations
+    to a lower precision data type. The most common lower precision data types are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`float16`, accumulation data type `float16`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`bfloat16`, accumulation data type `float32`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`int16`, accumulation data type `int32`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`int8`, accumulation data type `int32`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The accumulation data type specifies the type of the result of accumulating
+    (adding, multiplying, etc) values of the data type in question. For example, let’s
+    consider two `int8` values `A = 127`, `B = 127`, and let’s define `C` as the sum
+    of `A` and `B`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here the result is much bigger than the biggest representable value in `int8`,
+    which is `127`. Hence the need for a larger precision data type to avoid a huge
+    precision loss that would make the whole quantization process useless.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quantization
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The two most common quantization cases are `float32 -> float16` and `float32
+    -> int8`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quantization to float16
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Performing quantization to go from `float32` to `float16` is quite straightforward
+    since both data types follow the same representation scheme. The questions to
+    ask yourself when quantizing an operation to `float16` are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Does my operation have a `float16` implementation?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Does my hardware suport `float16`? For instance, Intel CPUs [have been supporting
+    `float16` as a storage type, but computation is done after converting to `float32`](https://scicomp.stackexchange.com/a/35193).
+    Full support will come in Cooper Lake and Sapphire Rapids.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Is my operation sensitive to lower precision? For instance the value of epsilon
+    in `LayerNorm` is usually very small (~ `1e-12`), but the smallest representable
+    value in `float16` is ~ `6e-5`, this can cause `NaN` issues. The same applies
+    for big values.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Quantization to int8
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Performing quantization to go from `float32` to `int8` is more tricky. Only
+    256 values can be represented in `int8`, while `float32` can represent a very
+    wide range of values. The idea is to find the best way to project our range `[a,
+    b]` of `float32` values to the `int8` space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s consider a float `x` in `[a, b]`, then we can write the following quantization
+    scheme, also called the *affine quantization scheme*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'where:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`x_q` is the quantized `int8` value associated to `x`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`S` and `Z` are the quantization parameters'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`S` is the scale, and is a positive `float32`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Z` is called the zero-point, it is the `int8` value corresponding to the value
+    `0` in the `float32` realm. This is important to be able to represent exactly
+    the value `0` because it is used everywhere throughout machine learning models.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The quantized value `x_q` of `x` in `[a, b]` can be computed as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And `float32` values outside of the `[a, b]` range are clipped to the closest
+    representable value, so for any floating-point number `x`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Usually `round(a/S + Z)` corresponds to the smallest representable value in
+    the considered data type, and `round(b/S + Z)` to the biggest one. But this can
+    vary, for instance when using a *symmetric quantization scheme* as you will see
+    in the next paragraph.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Symmetric and affine quantization schemes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The equation above is called the *affine quantization sheme* because the mapping
+    from `[a, b]` to `int8` is an affine one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A common special case of this scheme is the *symmetric quantization scheme*,
+    where we consider a symmetric range of float values `[-a, a]`. In this case the
+    integer space is usally `[-127, 127]`, meaning that the `-128` is opted out of
+    the regular `[-128, 127]` signed `int8` range. The reason being that having both
+    ranges symmetric allows to have `Z = 0`. While one value out of the 256 representable
+    values is lost, it can provide a speedup since a lot of addition operations can
+    be skipped.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Note**: To learn how the quantization parameters `S` and `Z` are computed,
+    you can read the [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only
+    Inference](https://arxiv.org/abs/1712.05877) paper, or [Lei Mao’s blog post](https://leimao.github.io/article/Neural-Networks-Quantization)
+    on the subject.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Per-tensor and per-channel quantization
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Depending on the accuracy / latency trade-off you are targetting you can play
+    with the granularity of the quantization parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quantization parameters can be computed on a *per-tensor* basis, meaning that
+    one pair of `(S, Z)` will be used per tensor.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Quantization parameters can be computed on a *per-channel* basis, meaning that
+    it is possible to store a pair of `(S, Z)` per element along one of the dimensions
+    of a tensor. For example for a tensor of shape `[N, C, H, W]`, having *per-channel*
+    quantization parameters for the second dimension would result in having `C` pairs
+    of `(S, Z)`. While this can give a better accuracy, it requires more memory.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Calibration
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The section above described how quantization from `float32` to `int8` works,
+    but one question remains: how is the `[a, b]` range of `float32` values determined?
+    That is where calibration comes in to play.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Calibration is the step during quantization where the `float32` ranges are
+    computed. For weights it is quite easy since the actual range is known at *quantization-time*.
+    But it is less clear for activations, and different approaches exist:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Post training **dynamic quantization**: the range for each activation is computed
+    on the fly at *runtime*. While this gives great results without too much work,
+    it can be a bit slower than static quantization because of the overhead introduced
+    by computing the range each time. It is also not an option on certain hardware.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Post training **static quantization**: the range for each activation is computed
+    in advance at *quantization-time*, typically by passing representative data through
+    the model and recording the activation values. In practice, the steps are:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Observers are put on activations to record their values.
+  prefs:
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: A certain number of forward passes on a calibration dataset is done (around
+    `200` examples is enough).
+  prefs:
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The ranges for each computation are computed according to some *calibration
+    technique*.
+  prefs:
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Quantization aware training**: the range for each activation is computed
+    at *training-time*, following the same idea than post training static quantization.
+    But “fake quantize” operators are used instead of observers: they record values
+    just as observers do, but they also simulate the error induced by quantization
+    to let the model adapt to it.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'For both post training static quantization and quantization aware training,
+    it is necessary to define calibration techniques, the most common are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Min-max: the computed range is `[min observed value, max observed value]`,
+    this works well with weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Moving average min-max: the computed range is `[moving average min observed
+    value, moving average max observed value]`, this works well with activations.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Histogram: records a histogram of values along with min and max values, then
+    chooses according to some criterion:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Entropy: the range is computed as the one minimizing the error between the
+    full-precision and the quantized data.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Mean Square Error: the range is computed as the one minimizing the mean square
+    error between the full-precision and the quantized data.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Percentile: the range is computed using a given percentile value `p` on the
+    observed values. The idea is to try to have `p%` of the observed values in the
+    computed range. While this is possible when doing affine quantization, it is not
+    always possible to exactly match that when doing symmetric quantization. You can
+    check [how it is done in ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/2cb12caf9317f1ded37f6db125cb03ba99320c40/onnxruntime/python/tools/quantization/calibrate.py#L698)
+    for more details.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Pratical steps to follow to quantize a model to int8
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To effectively quantize a model to `int8`, the steps to follow are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Choose which operators to quantize. Good operators to quantize are the one dominating
+    it terms of computation time, for instance linear projections and matrix multiplications.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Try post-training dynamic quantization, if it is fast enough stop here, otherwise
+    continue to step 3.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Try post-training static quantization which can be faster than dynamic quantization
+    but often with a drop in terms of accuracy. Apply observers to your models in
+    places where you want to quantize.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Choose a calibration technique and perform it.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Convert the model to its quantized form: the observers are removed and the
+    `float32` operators are converted to their `int8` coutnerparts.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Evaluate the quantized model: is the accuracy good enough? If yes, stop here,
+    otherwise start again at step 3 but with quantization aware training this time.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Supported tools to perform quantization in 🤗 Optimum
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '🤗 Optimum provides APIs to perform quantization using different tools for different
+    targets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `optimum.onnxruntime` package allows to [quantize and run ONNX models](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/quantization)
+    using the ONNX Runtime tool.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `optimum.intel` package enables to [quantize](https://huggingface.co/docs/optimum/intel/optimization_inc)
+    🤗 Transformers models while respecting accuracy and latency constraints.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `optimum.fx` package provides wrappers around the [PyTorch quantization
+    functions](https://pytorch.org/docs/stable/quantization-support.html#torch-quantization-quantize-fx)
+    to allow graph-mode quantization of 🤗 Transformers models in PyTorch. This is
+    a lower-level API compared to the two mentioned above, giving more flexibility,
+    but requiring more work on your end.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `optimum.gptq` package allows to [quantize and run LLM models](../llm_quantization/usage_guides/quantization)
+    with GPTQ.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Going further: How do machines represent numbers?'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The section is not fundamental to understand the rest. It explains in brief
+    how numbers are represented in computers. Since quantization is about going from
+    one representation to another, it can be useful to have some basics, but it is
+    definitely not mandatory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most fundamental unit of representation for computers is the bit. Everything
+    in computers is represented as a sequence of bits, including numbers. But the
+    representation varies whether the numbers in question are integers or real numbers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Integer representation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Integers are usually represented with the following bit lengths: `8`, `16`,
+    `32`, `64`. When representing integers, two cases are considered:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unsigned (positive) integers: they are simply represented as a sequence of
+    bits. Each bit corresponds to a power of two (from `0` to `n-1` where `n` is the
+    bit-length), and the resulting number is the sum of those powers of two.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Example: `19` is represented as an unsigned int8 as `00010011` because :'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Signed integers: it is less straightforward to represent signed integers, and
+    multiple approachs exist, the most common being the *two’s complement*. For more
+    information, you can check the [Wikipedia page](https://en.wikipedia.org/wiki/Signed_number_representations)
+    on the subject.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Real numbers representation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Real numbers are usually represented with the following bit lengths: `16`,
+    `32`, `64`. The two main ways of representing real numbers are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Fixed-point: there are fixed number of digits reserved for representing the
+    integer part and the fractional part.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Floating-point: the number of digits for representing the integer and the fractional
+    parts can vary.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The floating-point representation can represent bigger ranges of values, and
+    this is the one we will be focusing on since it is the most commonly used. There
+    are three components in the floating-point representation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The sign bit: this is the bit specifying the sign of the number.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The exponent part
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 5 bits in `float16`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 8 bits in `bfloat16`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 8 bits in `float32`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 11 bits in `float64`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The mantissa
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 11 bits in `float16` (10 explictly stored)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 8 bits in `bfloat16` (7 explicitly stored)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 24 bits in `float32` (23 explictly stored)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 53 bits in `float64` (52 explictly stored)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For more information on the bits allocation for each data type, check the nice
+    illustration on the Wikipedia page about the [bfloat16 floating-point format](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For a real number `x` we have:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only
+    Inference](https://arxiv.org/abs/1712.05877) paper
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [Basics of Quantization in Machine Learning (ML) for Beginners](https://iq.opengenus.org/basics-of-quantization-in-ml/)
+    blog post
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [How to accelerate and compress neural networks with quantization](https://tivadardanka.com/blog/neural-networks-quantization)
+    blog post
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Wikipedia pages on integers representation [here](https://en.wikipedia.org/wiki/Integer_(computer_science))
+    and [here](https://en.wikipedia.org/wiki/Signed_number_representations)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Wikipedia pages on
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[bfloat16 floating-point format](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Half-precision floating-point format](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Single-precision floating-point format](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Double-precision floating-point format](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
