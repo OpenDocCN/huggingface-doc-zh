@@ -1,167 +1,238 @@
 - en: Train and deploy Hugging Face on Amazon SageMaker
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在Amazon SageMaker上训练和部署Hugging Face
 - en: 'Original text: [https://huggingface.co/docs/sagemaker/getting-started](https://huggingface.co/docs/sagemaker/getting-started)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/sagemaker/getting-started](https://huggingface.co/docs/sagemaker/getting-started)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The get started guide will show you how to quickly use Hugging Face on Amazon
     SageMaker. Learn how to fine-tune and deploy a pretrained 🤗 Transformers model
     on SageMaker for a binary text classification task.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 入门指南将向您展示如何在Amazon SageMaker上快速使用Hugging Face。学习如何在SageMaker上为二进制文本分类任务微调和部署预训练的🤗
+    Transformers模型。
 - en: 💡 If you are new to Hugging Face, we recommend first reading the 🤗 Transformers
     [quick tour](https://huggingface.co/docs/transformers/quicktour).
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 如果您是Hugging Face的新手，我们建议先阅读🤗 Transformers的[快速入门](https://huggingface.co/docs/transformers/quicktour)。
 - en: '[https://www.youtube.com/embed/pYqjCzoyWyo](https://www.youtube.com/embed/pYqjCzoyWyo)'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://www.youtube.com/embed/pYqjCzoyWyo](https://www.youtube.com/embed/pYqjCzoyWyo)'
 - en: 📓 Open the [notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/sagemaker-notebook.ipynb)
     to follow along!
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/sagemaker-notebook.ipynb)进行跟随！
 - en: Installation and setup
+  id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 安装和设置
 - en: Get started by installing the necessary Hugging Face libraries and SageMaker.
     You will also need to install [PyTorch](https://pytorch.org/get-started/locally/)
     and [TensorFlow](https://www.tensorflow.org/install/pip#tensorflow-2-packages-are-available)
     if you don’t already have it installed.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过安装必要的Hugging Face库和SageMaker来开始。如果您尚未安装，还需要安装[PyTorch](https://pytorch.org/get-started/locally/)和[TensorFlow](https://www.tensorflow.org/install/pip#tensorflow-2-packages-are-available)。
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'If you want to run this example in [SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/studio.html),
     upgrade [ipywidgets](https://ipywidgets.readthedocs.io/en/latest/) for the 🤗 Datasets
     library and restart the kernel:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想在[SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/studio.html)中运行此示例，请升级[ipywidgets](https://ipywidgets.readthedocs.io/en/latest/)以配合🤗
+    Datasets库，并重新启动内核：
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Next, you should set up your environment: a SageMaker session and an S3 bucket.
     The S3 bucket will store data, models, and logs. You will need access to an [IAM
     execution role](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)
     with the required permissions.'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您应该设置您的环境：一个SageMaker会话和一个S3存储桶。S3存储桶将存储数据、模型和日志。您需要访问一个具有所需权限的[IAM执行角色](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)。
 - en: If you are planning on using SageMaker in a local environment, you need to provide
     the `role` yourself. Learn more about how to set this up [here](https://huggingface.co/docs/sagemaker/train#installation-and-setup).
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您计划在本地环境中使用SageMaker，您需要自己提供`role`。了解如何设置请查看[这里](https://huggingface.co/docs/sagemaker/train#installation-and-setup)。
 - en: ⚠️ The execution role is only available when you run a notebook within SageMaker.
     If you try to run `get_execution_role` in a notebook not on SageMaker, you will
     get a region error.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: ⚠️ 只有在SageMaker内运行笔记本时才可用执行角色。如果您尝试在不在SageMaker上运行的笔记本中运行`get_execution_role`，您将收到区域错误。
 - en: '[PRE2]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Preprocess
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 预处理
 - en: 'The 🤗 Datasets library makes it easy to download and preprocess a dataset for
     training. Download and tokenize the [IMDb](https://huggingface.co/datasets/imdb)
     dataset:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Datasets库使下载和预处理数据集变得容易。下载和标记[IMDb](https://huggingface.co/datasets/imdb)数据集：
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Upload dataset to S3 bucket
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将数据集上传到S3存储桶
 - en: 'Next, upload the preprocessed dataset to your S3 session bucket with 🤗 Datasets
     S3 [filesystem](https://huggingface.co/docs/datasets/filesystems.html) implementation:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，使用🤗 Datasets S3 [文件系统](https://huggingface.co/docs/datasets/filesystems.html)实现将预处理的数据集上传到您的S3会话存储桶中：
 - en: '[PRE4]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Start a training job
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 开始训练作业
 - en: 'Create a Hugging Face Estimator to handle end-to-end SageMaker training and
     deployment. The most important parameters to pay attention to are:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个Hugging Face Estimator来处理端到端的SageMaker训练和部署。需要注意的最重要的参数是：
 - en: '`entry_point` refers to the fine-tuning script which you can find [here](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py).'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`entry_point`指的是您可以在[这里](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py)找到的微调脚本。'
 - en: '`instance_type` refers to the SageMaker instance that will be launched. Take
     a look [here](https://aws.amazon.com/sagemaker/pricing/) for a complete list of
     instance types.'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`instance_type`指的是将启动的SageMaker实例。查看[这里](https://aws.amazon.com/sagemaker/pricing/)以获取完整的实例类型列表。'
 - en: '`hyperparameters` refers to the training hyperparameters the model will be
     fine-tuned with.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`超参数`指的是模型将进行微调的训练超参数。'
 - en: '[PRE5]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Begin training with one line of code:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 一行代码开始训练：
 - en: '[PRE6]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Deploy model
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 部署模型
 - en: 'Once the training job is complete, deploy your fine-tuned model by calling
     `deploy()` with the number of instances and instance type:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦训练作业完成，通过调用`deploy()`部署您的微调模型，指定实例数量和实例类型：
 - en: '[PRE7]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Call `predict()` on your data:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在您的数据上调用`predict()`：
 - en: '[PRE8]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'After running your request, delete the endpoint:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 运行完您的请求后，删除端点：
 - en: '[PRE9]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: What’s next?
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 接下来做什么？
 - en: Congratulations, you’ve just fine-tuned and deployed a pretrained 🤗 Transformers
     model on SageMaker! 🎉
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 恭喜，您刚刚在SageMaker上微调和部署了一个预训练的🤗 Transformers模型！🎉
 - en: For your next steps, keep reading our documentation for more details about training
     and deployment. There are many interesting features such as [distributed training](/docs/sagemaker/train#distributed-training)
     and [Spot instances](/docs/sagemaker/train#spot-instances).
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，继续阅读我们的文档，了解更多关于训练和部署的细节。有许多有趣的功能，如[分布式训练](/docs/sagemaker/train#distributed-training)和[Spot实例](/docs/sagemaker/train#spot-instances)。

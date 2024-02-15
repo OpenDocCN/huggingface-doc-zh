@@ -1,170 +1,240 @@
 - en: Run training on Amazon SageMaker
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在Amazon SageMaker上运行训练
 - en: 'Original text: [https://huggingface.co/docs/sagemaker/train](https://huggingface.co/docs/sagemaker/train)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/sagemaker/train](https://huggingface.co/docs/sagemaker/train)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[https://www.youtube.com/embed/ok3hetb42gU](https://www.youtube.com/embed/ok3hetb42gU)'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://www.youtube.com/embed/ok3hetb42gU](https://www.youtube.com/embed/ok3hetb42gU)'
 - en: 'This guide will show you how to train a 🤗 Transformers model with the `HuggingFace`
     SageMaker Python SDK. Learn how to:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何使用`HuggingFace` SageMaker Python SDK训练一个🤗 Transformers模型。学习如何：
 - en: '[Install and setup your training environment](#installation-and-setup).'
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[安装和设置您的训练环境](#installation-and-setup)。'
 - en: '[Prepare a training script](#prepare-a-transformers-fine-tuning-script).'
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[准备一个训练脚本](#prepare-a-transformers-fine-tuning-script)。'
 - en: '[Create a Hugging Face Estimator](#create-a-hugging-face-estimator).'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[创建一个Hugging Face Estimator](#create-a-hugging-face-estimator)。'
 - en: '[Run training with the `fit` method](#execute-training).'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[使用`fit`方法运行训练](#execute-training)。'
 - en: '[Access your trained model](#access-trained-model).'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[访问您训练的模型](#access-trained-model)。'
 - en: '[Perform distributed training](#distributed-training).'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[进行分布式训练](#distributed-training)。'
 - en: '[Create a spot instance](#spot-instances).'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[创建一个spot实例](#spot-instances)。'
 - en: '[Load a training script from a GitHub repository](#git-repository).'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[从GitHub存储库加载训练脚本](#git-repository)。'
 - en: '[Collect training metrics](#sagemaker-metrics).'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[收集训练指标](#sagemaker-metrics)。'
 - en: Installation and setup
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 安装和设置
 - en: Before you can train a 🤗 Transformers model with SageMaker, you need to sign
     up for an AWS account. If you don’t have an AWS account yet, learn more [here](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-set-up.html).
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 在您可以使用SageMaker训练🤗 Transformers模型之前，您需要注册AWS账户。如果您还没有AWS账户，请在[这里](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-set-up.html)了解更多信息。
 - en: 'Once you have an AWS account, get started using one of the following:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您拥有AWS账户，可以通过以下方式之一开始使用：
 - en: '[SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-studio-onboard.html)'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-studio-onboard.html)'
 - en: '[SageMaker notebook instance](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-console.html)'
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[SageMaker笔记本实例](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-console.html)'
 - en: Local environment
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 本地环境
 - en: To start training locally, you need to setup an appropriate [IAM role](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html).
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在本地开始训练，您需要设置适当的[IAM角色](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)。
 - en: 'Upgrade to the latest `sagemaker` version:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 升级到最新的`sagemaker`版本：
 - en: '[PRE0]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '**SageMaker environment**'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '**SageMaker环境**'
 - en: 'Setup your SageMaker environment as shown below:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 按照下面所示设置您的SageMaker环境：
 - en: '[PRE1]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '*Note: The execution role is only available when running a notebook within
     SageMaker. If you run `get_execution_role` in a notebook not on SageMaker, expect
     a `region` error.*'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：执行角色仅在SageMaker内运行笔记本时可用。如果在非SageMaker笔记本中运行`get_execution_role`，则会出现`region`错误。*'
 - en: '**Local environment**'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '**本地环境**'
 - en: 'Setup your local environment as shown below:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 按照下面所示设置您的本地环境：
 - en: '[PRE2]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Prepare a 🤗 Transformers fine-tuning script
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 准备一个🤗 Transformers微调脚本
 - en: 'Our training script is very similar to a training script you might run outside
     of SageMaker. However, you can access useful properties about the training environment
     through various environment variables (see [here](https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md)
     for a complete list), such as:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们的训练脚本与您可能在SageMaker之外运行的训练脚本非常相似。但是，您可以通过各种环境变量访问有关训练环境的有用属性（请参阅[这里](https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md)获取完整列表），例如：
 - en: '`SM_MODEL_DIR`: A string representing the path to which the training job writes
     the model artifacts. After training, artifacts in this directory are uploaded
     to S3 for model hosting. `SM_MODEL_DIR` is always set to `/opt/ml/model`.'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`SM_MODEL_DIR`: 一个表示训练作业写入模型工件的路径的字符串。训练后，此目录中的工件将上传到S3以进行模型托管。`SM_MODEL_DIR`始终设置为`/opt/ml/model`。'
 - en: '`SM_NUM_GPUS`: An integer representing the number of GPUs available to the
     host.'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`SM_NUM_GPUS`: 一个表示主机可用GPU数量的整数。'
 - en: '`SM_CHANNEL_XXXX:` A string representing the path to the directory that contains
     the input data for the specified channel. For example, when you specify `train`
     and `test` in the Hugging Face Estimator `fit` method, the environment variables
     are set to `SM_CHANNEL_TRAIN` and `SM_CHANNEL_TEST`.'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`SM_CHANNEL_XXXX:` 一个表示包含指定通道输入数据的目录路径的字符串。例如，当您在Hugging Face Estimator的`fit`方法中指定`train`和`test`时，环境变量设置为`SM_CHANNEL_TRAIN`和`SM_CHANNEL_TEST`。'
 - en: The `hyperparameters` defined in the [Hugging Face Estimator](#create-an-huggingface-estimator)
     are passed as named arguments and processed by `ArgumentParser()`.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[Hugging Face Estimator](#create-an-huggingface-estimator)中定义的`hyperparameters`作为命名参数传递，并由`ArgumentParser()`处理。
 - en: '[PRE3]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '*Note that SageMaker doesn’t support argparse actions. For example, if you
     want to use a boolean hyperparameter, specify `type` as `bool` in your script
     and provide an explicit `True` or `False` value.*'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '*请注意，SageMaker不支持argparse操作。例如，如果您想使用布尔超参数，请在脚本中将`type`指定为`bool`并提供明确的`True`或`False`值。*'
 - en: Look [here](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py)
     for a complete example of a 🤗 Transformers training script.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看[这里](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py)完整的🤗
+    Transformers训练脚本示例。
 - en: Training Output Management
+  id: totrans-39
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练输出管理
 - en: If `output_dir` in the `TrainingArguments` is set to ‘/opt/ml/model’ the Trainer
     saves all training artifacts, including logs, checkpoints, and models. Amazon
     SageMaker archives the whole ‘/opt/ml/model’ directory as `model.tar.gz` and uploads
@@ -175,8 +245,15 @@
     For example by providing `save_total_limit` as `TrainingArgument` you can control
     the limit of the total amount of checkpoints. Deletes the older checkpoints in
     `output_dir` if new ones are saved and the maximum limit is reached.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 `TrainingArguments` 中的 `output_dir` 设置为 ‘/opt/ml/model’，则 Trainer 会保存所有训练工件，包括日志、检查点和模型。Amazon
+    SageMaker 将整个 ‘/opt/ml/model’ 目录存档为 `model.tar.gz`，并在训练作业结束时将其上传到 Amazon S3。根据您的超参数和
+    `TrainingArguments`，这可能导致一个大的工件（> 5GB），这可能会减慢 Amazon SageMaker 推理的部署速度。您可以通过自定义
+    [TrainingArguments](https://huggingface.co/docs/transformers/main/en/main_classes/trainer#transformers.TrainingArguments)
+    控制检查点、日志和工件的保存方式。例如，通过提供 `save_total_limit` 作为 `TrainingArgument`，您可以控制检查点的总量限制。如果保存了新的检查点并且达到了最大限制，则删除
+    `output_dir` 中的旧检查点。
 - en: 'In addition to the options already mentioned above, there is another option
     to save the training artifacts during the training session. Amazon SageMaker supports
     [Checkpointing](https://docs.aws.amazon.com/sagemaker/latest/dg/model-checkpoints.html),
@@ -188,187 +265,289 @@
     or model.save_pretrained(“/opt/ml/model”)/`tokenizer.save_pretrained("/opt/ml/model")`
     at the end of your training to be able to deploy your model seamlessly to Amazon
     SageMaker for Inference.*'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了上面已经提到的选项之外，还有另一个选项可以在训练会话期间保存训练工件。Amazon SageMaker 支持[Checkpointing](https://docs.aws.amazon.com/sagemaker/latest/dg/model-checkpoints.html)，允许您在训练期间持续将您的工件保存到
+    Amazon S3，而不是在训练结束时保存。要启用[Checkpointing](https://docs.aws.amazon.com/sagemaker/latest/dg/model-checkpoints.html)，您需要提供指向
+    Amazon S3 位置的 `checkpoint_s3_uri` 参数，该参数位于 `HuggingFace` estimator 中，并将 `output_dir`
+    设置为 `/opt/ml/checkpoints`。*注意：如果将 `output_dir` 设置为 `/opt/ml/checkpoints`，请确保在训练结束时调用
+    `trainer.save_model("/opt/ml/model")` 或 model.save_pretrained(“/opt/ml/model”)/`tokenizer.save_pretrained("/opt/ml/model")`，以便能够无缝地将您的模型部署到
+    Amazon SageMaker 进行推理。*
 - en: Create a Hugging Face Estimator
+  id: totrans-42
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建一个 Hugging Face Estimator
 - en: 'Run 🤗 Transformers training scripts on SageMaker by creating a [Hugging Face
     Estimator](https://sagemaker.readthedocs.io/en/stable/frameworks/huggingface/sagemaker.huggingface.html#huggingface-estimator).
     The Estimator handles end-to-end SageMaker training. There are several parameters
     you should define in the Estimator:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过创建[Hugging Face Estimator](https://sagemaker.readthedocs.io/en/stable/frameworks/huggingface/sagemaker.huggingface.html#huggingface-estimator)在
+    SageMaker 上运行 🤗 Transformers 训练脚本。Estimator 处理端到端的 SageMaker 训练。您应该在 Estimator
+    中定义几个参数：
 - en: '`entry_point` specifies which fine-tuning script to use.'
+  id: totrans-44
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`entry_point` 指定要使用的微调脚本。'
 - en: '`instance_type` specifies an Amazon instance to launch. Refer [here](https://aws.amazon.com/sagemaker/pricing/)
     for a complete list of instance types.'
+  id: totrans-45
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`instance_type` 指定要启动的 Amazon 实例。请参考[这里](https://aws.amazon.com/sagemaker/pricing/)获取完整的实例类型列表。'
 - en: '`hyperparameters` specifies training hyperparameters. View additional available
     hyperparameters [here](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py).'
+  id: totrans-46
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`hyperparameters` 指定训练超参数。查看其他可用的超参数[这里](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py)。'
 - en: 'The following code sample shows how to train with a custom script `train.py`
     with three hyperparameters (`epochs`, `per_device_train_batch_size`, and `model_name_or_path`):'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下代码示例显示如何使用自定义脚本 `train.py` 进行训练，其中包含三个超参数（`epochs`、`per_device_train_batch_size`
+    和 `model_name_or_path`）：
 - en: '[PRE4]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: If you are running a `TrainingJob` locally, define `instance_type='local'` or
     `instance_type='local_gpu'` for GPU usage. Note that this will not work with SageMaker
     Studio.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在本地运行 `TrainingJob`，请定义 `instance_type='local'` 或 `instance_type='local_gpu'`
+    以使用 GPU。请注意，这在 SageMaker Studio 中不起作用。
 - en: Execute training
+  id: totrans-50
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 执行训练
 - en: 'Start your `TrainingJob` by calling `fit` on a Hugging Face Estimator. Specify
     your input training data in `fit`. The input training data can be a:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过在 Hugging Face Estimator 上调用 `fit` 来启动您的 `TrainingJob`。在 `fit` 中指定您的输入训练数据。输入训练数据可以是：
 - en: S3 URI such as `s3://my-bucket/my-training-data`.
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: S3 URI，例如 `s3://my-bucket/my-training-data`。
 - en: '`FileSystemInput` for Amazon Elastic File System or FSx for Lustre. See [here](https://sagemaker.readthedocs.io/en/stable/overview.html?highlight=FileSystemInput#use-file-systems-as-training-inputs)
     for more details about using these file systems as input.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于 Amazon 弹性文件系统或 FSx for Lustre，运行 `FileSystemInput`。请参考[这里](https://sagemaker.readthedocs.io/en/stable/overview.html?highlight=FileSystemInput#use-file-systems-as-training-inputs)获取有关将这些文件系统用作输入的更多详细信息。
 - en: 'Call `fit` to begin training:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用 `fit` 开始训练：
 - en: '[PRE5]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'SageMaker starts and manages all the required EC2 instances and initiates the
     `TrainingJob` by running:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: SageMaker 启动并管理所有必需的 EC2 实例，并通过运行以下内容来启动 `TrainingJob`：
 - en: '[PRE6]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Access trained model
+  id: totrans-58
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 访问训练模型
 - en: Once training is complete, you can access your model through the [AWS console](https://console.aws.amazon.com/console/home?nc2=h_ct&src=header-signin)
     or download it directly from S3.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以通过[AWS 控制台](https://console.aws.amazon.com/console/home?nc2=h_ct&src=header-signin)访问您的模型，或直接从
+    S3 下载。
 - en: '[PRE7]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Distributed training
+  id: totrans-61
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 分布式训练
 - en: 'SageMaker provides two strategies for distributed training: data parallelism
     and model parallelism. Data parallelism splits a training set across several GPUs,
     while model parallelism splits a model across several GPUs.'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: SageMaker提供了两种分布式训练策略：数据并行ism和模型并行ism。数据并行ism将训练集分割到多个GPU上，而模型并行ism将模型分割到多个GPU上。
 - en: Data parallelism
+  id: totrans-63
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 数据并行ism
 - en: 'The Hugging Face [Trainer](https://huggingface.co/docs/transformers/main_classes/trainer)
     supports SageMaker’s data parallelism library. If your training script uses the
     Trainer API, you only need to define the distribution parameter in the Hugging
     Face Estimator:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: Hugging Face的[Trainer](https://huggingface.co/docs/transformers/main_classes/trainer)支持SageMaker的数据并行ism库。如果您的训练脚本使用Trainer
+    API，您只需要在Hugging Face Estimator中定义分布参数：
 - en: '[PRE8]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 📓 Open the [notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/07_tensorflow_distributed_training_data_parallelism/sagemaker-notebook.ipynb)
     for an example of how to run the data parallelism library with TensorFlow.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/07_tensorflow_distributed_training_data_parallelism/sagemaker-notebook.ipynb)以查看如何使用TensorFlow运行数据并行ism库的示例。
 - en: Model parallelism
+  id: totrans-67
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 模型并行ism
 - en: 'The Hugging Face [Trainer] also supports SageMaker’s model parallelism library.
     If your training script uses the Trainer API, you only need to define the distribution
     parameter in the Hugging Face Estimator (see [here](https://sagemaker.readthedocs.io/en/stable/api/training/smd_model_parallel_general.html?highlight=modelparallel#required-sagemaker-python-sdk-parameters)
     for more detailed information about using model parallelism):'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: Hugging Face的[Trainer]还支持SageMaker的模型并行ism库。如果您的训练脚本使用Trainer API，您只需要在Hugging
+    Face Estimator中定义分布参数（有关使用模型并行ism的更详细信息，请参见[此处](https://sagemaker.readthedocs.io/en/stable/api/training/smd_model_parallel_general.html?highlight=modelparallel#required-sagemaker-python-sdk-parameters)）：
 - en: '[PRE9]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 📓 Open the [notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/04_distributed_training_model_parallelism/sagemaker-notebook.ipynb)
     for an example of how to run the model parallelism library.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/04_distributed_training_model_parallelism/sagemaker-notebook.ipynb)以查看如何运行模型并行ism库的示例。
 - en: Spot instances
+  id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Spot实例
 - en: The Hugging Face extension for the SageMaker Python SDK means we can benefit
     from [fully-managed EC2 spot instances](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html).
     This can help you save up to 90% of training costs!
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: Hugging Face扩展了SageMaker Python SDK，这意味着我们可以从[完全托管的EC2 spot实例](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html)中受益。这可以帮助您节省高达90%的训练成本！
 - en: '*Note: Unless your training job completes quickly, we recommend you use [checkpointing](https://docs.aws.amazon.com/sagemaker/latest/dg/model-checkpoints.html)
     with managed spot training. In this case, you need to define the `checkpoint_s3_uri`.*'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：除非您的训练作业完成得很快，我们建议您使用[checkpointing](https://docs.aws.amazon.com/sagemaker/latest/dg/model-checkpoints.html)与托管的spot训练。在这种情况下，您需要定义`checkpoint_s3_uri`。*'
 - en: 'Set `use_spot_instances=True` and define your `max_wait` and `max_run` time
     in the Estimator to use spot instances:'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置`use_spot_instances=True`并在Estimator中定义您的`max_wait`和`max_run`时间以使用spot实例：
 - en: '[PRE10]'
+  id: totrans-75
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 📓 Open the [notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/05_spot_instances/sagemaker-notebook.ipynb)
     for an example of how to use spot instances.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/05_spot_instances/sagemaker-notebook.ipynb)以查看如何使用spot实例的示例。
 - en: Git repository
+  id: totrans-77
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Git存储库
 - en: The Hugging Face Estimator can load a training script [stored in a GitHub repository](https://sagemaker.readthedocs.io/en/stable/overview.html#use-scripts-stored-in-a-git-repository).
     Provide the relative path to the training script in `entry_point` and the relative
     path to the directory in `source_dir`.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: Hugging Face Estimator可以加载存储在GitHub存储库中的训练脚本（https://sagemaker.readthedocs.io/en/stable/overview.html#use-scripts-stored-in-a-git-repository）。在`entry_point`中提供训练脚本的相对路径，在`source_dir`中提供目录的相对路径。
 - en: If you are using `git_config` to run the [🤗 Transformers example scripts](https://github.com/huggingface/transformers/tree/main/examples),
     you need to configure the correct `'branch'` in `transformers_version` (e.g. if
     you use `transformers_version='4.4.2` you have to use `'branch':'v4.4.2'`).
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在使用`git_config`来运行[🤗 Transformers示例脚本](https://github.com/huggingface/transformers/tree/main/examples)，您需要在`transformers_version`中配置正确的`'branch'`（例如，如果您使用`transformers_version='4.4.2'`，您必须使用`'branch':'v4.4.2'`）。
 - en: '*Tip: Save your model to S3 by setting `output_dir=/opt/ml/model` in the hyperparameter
     of your training script.*'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: '*提示：通过在训练脚本的超参数中设置`output_dir=/opt/ml/model`将您的模型保存到S3中。*'
 - en: '[PRE11]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: SageMaker metrics
+  id: totrans-82
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: SageMaker指标
 - en: '[SageMaker metrics](https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html#define-train-metrics)
     automatically parses training job logs for metrics and sends them to CloudWatch.
     If you want SageMaker to parse the logs, you must specify the metric’s name and
     a regular expression for SageMaker to use to find the metric.'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: '[SageMaker指标](https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html#define-train-metrics)自动解析训练作业日志以获取指标并将其发送到CloudWatch。如果您希望SageMaker解析日志，您必须指定指标的名称和SageMaker用于查找指标的正则表达式。'
 - en: '[PRE12]'
+  id: totrans-84
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 📓 Open the [notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/06_sagemaker_metrics/sagemaker-notebook.ipynb)
     for an example of how to capture metrics in SageMaker.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/06_sagemaker_metrics/sagemaker-notebook.ipynb)以查看如何在SageMaker中捕获指标的示例。
