@@ -1,26 +1,17 @@
 - en: Improve image quality with deterministic generation
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 通过确定性生成提高图像质量
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/reusing_seeds](https://huggingface.co/docs/diffusers/using-diffusers/reusing_seeds)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/using-diffusers/reusing_seeds](https://huggingface.co/docs/diffusers/using-diffusers/reusing_seeds)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: A common way to improve the quality of generated images is with *deterministic
@@ -29,68 +20,104 @@
     a list of [`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html#generator)’s
     to the pipeline for batched image generation, and tie each `Generator` to a seed
     so you can reuse it for an image.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 提高生成图像质量的常见方法是使用*确定性批量生成*，生成一批图像并选择一张图像，在第二轮推理中使用更详细的提示来改进。关键是将[`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html#generator)的列表传递给流水线进行批量图像生成，并将每个`Generator`绑定到一个种子，以便您可以重复使用它来生成图像。
 - en: 'Let’s use [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)
     for example, and generate several versions of the following prompt:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们以[`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)为例，并生成以下提示的几个版本：
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Instantiate a pipeline with [DiffusionPipeline.from_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.from_pretrained)
     and place it on a GPU (if available):'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[DiffusionPipeline.from_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.from_pretrained)实例化一个流水线，并将其放置在GPU上（如果可用）：
 - en: '[PRE1]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Now, define four different `Generator`s and assign each `Generator` a seed
     (`0` to `3`) so you can reuse a `Generator` later for a specific image:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，定义四个不同的`Generator`，并为每个`Generator`分配一个种子（`0`到`3`），以便您稍后可以为特定图像重复使用一个`Generator`：
 - en: '[PRE2]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: To create a batched seed, you should use a list comprehension that iterates
     over the length specified in `range()`. This creates a unique `Generator` object
     for each image in the batch. If you only multiply the `Generator` by the batch
     size, this only creates one `Generator` object that is used sequentially for each
     image in the batch.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 要创建一个批量种子，您应该使用一个列表推导式，该推导式遍历`range()`中指定的长度。这为批处理中的每个图像创建了一个唯一的`Generator`对象。如果您只将`Generator`乘以批量大小，这只会创建一个`Generator`对象，该对象按顺序用于批处理中的每个图像。
 - en: 'For example, if you want to use the same seed to create 4 identical images:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，如果您想使用相同的种子创建4张相同的图像：
 - en: '[PRE3]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Generate the images and have a look:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成图像并查看：
 - en: '[PRE4]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '![img](../Images/aa02b8f33d0288676abcc7b175d1bd54.png)'
+  id: totrans-15
   prefs: []
   type: TYPE_IMG
+  zh: '![img](../Images/aa02b8f33d0288676abcc7b175d1bd54.png)'
 - en: 'In this example, you’ll improve upon the first image - but in reality, you
     can use any image you want (even the image with double sets of eyes!). The first
     image used the `Generator` with seed `0`, so you’ll reuse that `Generator` for
     the second round of inference. To improve the quality of the image, add some additional
     text to the prompt:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，您将改进第一张图像 - 但实际上，您可以使用任何您想要的图像（甚至是具有双眼睛的图像！）。第一张图像使用了种子为`0`的`Generator`，因此您将在第二轮推理中重复使用该`Generator`来改进图像的质量。为了改进图像的质量，向提示添加一些额外的文本：
 - en: '[PRE5]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Create four generators with seed `0`, and generate another batch of images,
     all of which should look like the first image from the previous round!
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建种子为`0`的四个生成器，并生成另一批图像，所有这些图像应该看起来像上一轮的第一张图像！
 - en: '[PRE6]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '![img](../Images/8bf79e71eae0527dff810dfe053b2b85.png)'
+  id: totrans-20
   prefs: []
   type: TYPE_IMG
+  zh: '![img](../Images/8bf79e71eae0527dff810dfe053b2b85.png)'

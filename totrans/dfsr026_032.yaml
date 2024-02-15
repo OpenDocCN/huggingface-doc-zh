@@ -1,112 +1,148 @@
 - en: Distributed inference with multiple GPUs
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用多个GPU进行分布式推理
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/distributed_inference](https://huggingface.co/docs/diffusers/training/distributed_inference)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/training/distributed_inference](https://huggingface.co/docs/diffusers/training/distributed_inference)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: On distributed setups, you can run inference across multiple GPUs with 🤗 [Accelerate](https://huggingface.co/docs/accelerate/index)
     or [PyTorch Distributed](https://pytorch.org/tutorials/beginner/dist_overview.html),
     which is useful for generating with multiple prompts in parallel.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在分布式设置中，您可以使用🤗 [Accelerate](https://huggingface.co/docs/accelerate/index)或[PyTorch
+    Distributed](https://pytorch.org/tutorials/beginner/dist_overview.html)在多个GPU上运行推理，这对于并行生成多个提示很有用。
 - en: This guide will show you how to use 🤗 Accelerate and PyTorch Distributed for
     distributed inference.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何使用🤗 Accelerate和PyTorch Distributed进行分布式推理。
 - en: 🤗 Accelerate
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate
 - en: 🤗 [Accelerate](https://huggingface.co/docs/accelerate/index) is a library designed
     to make it easy to train or run inference across distributed setups. It simplifies
     the process of setting up the distributed environment, allowing you to focus on
     your PyTorch code.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 [Accelerate](https://huggingface.co/docs/accelerate/index)是一个旨在简化跨分布式设置训练或运行推理的库。它简化了设置分布式环境的过程，让您可以专注于您的PyTorch代码。
 - en: To begin, create a Python file and initialize an [accelerate.PartialState](https://huggingface.co/docs/accelerate/v0.27.0/en/package_reference/state#accelerate.PartialState)
     to create a distributed environment; your setup is automatically detected so you
     don’t need to explicitly define the `rank` or `world_size`. Move the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
     to `distributed_state.device` to assign a GPU to each process.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，创建一个Python文件并初始化一个[accelerate.PartialState](https://huggingface.co/docs/accelerate/v0.27.0/en/package_reference/state#accelerate.PartialState)来创建一个分布式环境；您的设置会自动检测，因此不需要显式定义`rank`或`world_size`。将[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)移动到`distributed_state.device`以为每个进程分配一个GPU。
 - en: Now use the [split_between_processes](https://huggingface.co/docs/accelerate/v0.27.0/en/package_reference/state#accelerate.PartialState.split_between_processes)
     utility as a context manager to automatically distribute the prompts between the
     number of processes.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在使用[split_between_processes](https://huggingface.co/docs/accelerate/v0.27.0/en/package_reference/state#accelerate.PartialState.split_between_processes)实用程序作为上下文管理器，自动在进程数量之间分发提示。
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Use the `--num_processes` argument to specify the number of GPUs to use, and
     call `accelerate launch` to run the script:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`--num_processes`参数指定要使用的GPU数量，并调用`accelerate launch`来运行脚本：
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: To learn more, take a look at the [Distributed Inference with 🤗 Accelerate](https://huggingface.co/docs/accelerate/en/usage_guides/distributed_inference#distributed-inference-with-accelerate)
     guide.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解更多，请查看[使用🤗 Accelerate进行分布式推理](https://huggingface.co/docs/accelerate/en/usage_guides/distributed_inference#distributed-inference-with-accelerate)指南。
 - en: PyTorch Distributed
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: PyTorch Distributed
 - en: PyTorch supports [`DistributedDataParallel`](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html)
     which enables data parallelism.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch支持[`DistributedDataParallel`](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html)，它实现了数据并行。
 - en: 'To start, create a Python file and import `torch.distributed` and `torch.multiprocessing`
     to set up the distributed process group and to spawn the processes for inference
     on each GPU. You should also initialize a [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline):'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，创建一个Python文件，导入`torch.distributed`和`torch.multiprocessing`来设置分布式进程组，并在每个GPU上生成推理进程。您还应该初始化一个[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)：
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: You’ll want to create a function to run inference; [`init_process_group`](https://pytorch.org/docs/stable/distributed.html?highlight=init_process_group#torch.distributed.init_process_group)
     handles creating a distributed environment with the type of backend to use, the
     `rank` of the current process, and the `world_size` or the number of processes
     participating. If you’re running inference in parallel over 2 GPUs, then the `world_size`
     is 2.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 您需要创建一个运行推理的函数；[`init_process_group`](https://pytorch.org/docs/stable/distributed.html?highlight=init_process_group#torch.distributed.init_process_group)用于创建一个分布式环境，指定要使用的后端类型、当前进程的`rank`和参与的进程数量`world_size`。如果您要在2个GPU上并行运行推理，则`world_size`为2。
 - en: 'Move the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
     to `rank` and use `get_rank` to assign a GPU to each process, where each process
     handles a different prompt:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 将[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)移动到`rank`并使用`get_rank`为每个进程分配一个GPU，每个进程处理不同的提示：
 - en: '[PRE3]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'To run the distributed inference, call [`mp.spawn`](https://pytorch.org/docs/stable/multiprocessing.html#torch.multiprocessing.spawn)
     to run the `run_inference` function on the number of GPUs defined in `world_size`:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 要运行分布式推理，调用[`mp.spawn`](https://pytorch.org/docs/stable/multiprocessing.html#torch.multiprocessing.spawn)在`world_size`中定义的GPU数量上运行`run_inference`函数：
 - en: '[PRE4]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Once you’ve completed the inference script, use the `--nproc_per_node` argument
     to specify the number of GPUs to use and call `torchrun` to run the script:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 完成推理脚本后，使用`--nproc_per_node`参数指定要使用的GPU数量，并调用`torchrun`来运行脚本：
 - en: '[PRE5]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
