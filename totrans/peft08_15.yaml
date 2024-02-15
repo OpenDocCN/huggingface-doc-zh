@@ -1,174 +1,240 @@
 - en: Custom models
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 自定义模型
 - en: 'Original text: [https://huggingface.co/docs/peft/developer_guides/custom_models](https://huggingface.co/docs/peft/developer_guides/custom_models)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/peft/developer_guides/custom_models](https://huggingface.co/docs/peft/developer_guides/custom_models)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Some fine-tuning techniques, such as prompt tuning, are specific to language
     models. That means in 🤗 PEFT, it is assumed a 🤗 Transformers model is being used.
     However, other fine-tuning techniques - like [LoRA](../conceptual_guides/lora)
     - are not restricted to specific model types.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些微调技术，如提示微调，是特定于语言模型的。这意味着在🤗 PEFT中，假定正在使用🤗 Transformers模型。然而，其他微调技术 - 如[LoRA](../conceptual_guides/lora)
+    - 不限于特定的模型类型。
 - en: In this guide, we will see how LoRA can be applied to a multilayer perceptron,
     a computer vision model from the [timm](https://huggingface.co/docs/timm/index)
     library, or a new 🤗 Transformers architecture.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，我们将看到LoRA如何应用于多层感知器，来自[timm](https://huggingface.co/docs/timm/index)库的计算机视觉模型，或者一个新的🤗
+    Transformers架构。
 - en: Multilayer perceptron
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 多层感知器
 - en: 'Let’s assume that we want to fine-tune a multilayer perceptron with LoRA. Here
     is the definition:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设我们想要用LoRA微调一个多层感知器。这是定义：
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: This is a straightforward multilayer perceptron with an input layer, a hidden
     layer, and an output layer.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个简单的多层感知器，有一个输入层，一个隐藏层和一个输出层。
 - en: For this toy example, we choose an exceedingly large number of hidden units
     to highlight the efficiency gains from PEFT, but those gains are in line with
     more realistic examples.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于这个玩具示例，我们选择了一个非常大的隐藏单元数，以突出PEFT的效率提升，但这些提升与更现实的示例一致。
 - en: 'There are a few linear layers in this model that could be tuned with LoRA.
     When working with common 🤗 Transformers models, PEFT will know which layers to
     apply LoRA to, but in this case, it is up to us as a user to choose the layers.
     To determine the names of the layers to tune:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个模型中有一些线性层可以用LoRA调整。当使用常见的🤗 Transformers模型时，PEFT会知道要将LoRA应用于哪些层，但在这种情况下，我们作为用户需要选择层。要确定要调整的层的名称：
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'This should print:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 这应该打印：
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Let’s say we want to apply LoRA to the input layer and to the hidden layer,
     those are `''seq.0''` and `''seq.2''`. Moreover, let’s assume we want to update
     the output layer without LoRA, that would be `''seq.4''`. The corresponding config
     would be:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设我们想将LoRA应用于输入层和隐藏层，它们分别是`'seq.0'`和`'seq.2'`。此外，假设我们想要更新输出层而不使用LoRA，那将是`'seq.4'`。相应的配置将是：
 - en: '[PRE3]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'With that, we can create our PEFT model and check the fraction of parameters
     trained:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这个，我们可以创建我们的PEFT模型并检查训练参数的比例：
 - en: '[PRE4]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Finally, we can use any training framework we like, or write our own fit loop,
     to train the `peft_model`.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，我们可以使用任何我们喜欢的训练框架，或者编写我们自己的拟合循环，来训练`peft_model`。
 - en: For a complete example, check out [this notebook](https://github.com/huggingface/peft/blob/main/examples/multilayer_perceptron/multilayer_perceptron_lora.ipynb).
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看完整示例，请查看[此笔记本](https://github.com/huggingface/peft/blob/main/examples/multilayer_perceptron/multilayer_perceptron_lora.ipynb)。
 - en: timm models
+  id: totrans-20
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: timm模型
 - en: The [timm](https://huggingface.co/docs/timm/index) library contains a large
     number of pretrained computer vision models. Those can also be fine-tuned with
     PEFT. Let’s check out how this works in practice.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '[timm](https://huggingface.co/docs/timm/index)库包含大量预训练的计算机视觉模型。这些模型也可以用PEFT进行微调。让我们看看这在实践中是如何工作的。'
 - en: 'To start, ensure that timm is installed in the Python environment:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先确保timm已安装在Python环境中：
 - en: '[PRE5]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Next we load a timm model for an image classification task:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们为图像分类任务加载一个timm模型：
 - en: '[PRE6]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Again, we need to make a decision about what layers to apply LoRA to. Since
     LoRA supports 2D conv layers, and since those are a major building block of this
     model, we should apply LoRA to the 2D conv layers. To identify the names of those
     layers, let’s look at all the layer names:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 再次，我们需要决定要将LoRA应用于哪些层。由于LoRA支持2D卷积层，并且这些层是该模型的主要构建模块，我们应该将LoRA应用于2D卷积层。为了确定这些层的名称，让我们看看所有的层名称：
 - en: '[PRE7]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'This will print a very long list, we’ll only show the first few:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将打印一个非常长的列表，我们只显示前几个：
 - en: '[PRE8]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Upon closer inspection, we see that the 2D conv layers have names such as `"stages.0.blocks.0.mlp.fc1"`
     and `"stages.0.blocks.0.mlp.fc2"`. How can we match those layer names specifically?
     You can write a [regular expressions](https://docs.python.org/3/library/re.html)
     to match the layer names. For our case, the regex `r".*\.mlp\.fc\d"` should do
     the job.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 仔细检查后，我们看到2D卷积层的名称如`"stages.0.blocks.0.mlp.fc1"`和`"stages.0.blocks.0.mlp.fc2"`。我们如何匹配这些层的名称？您可以编写一个正则表达式来匹配层的名称。对于我们的情况，正则表达式`r".*\.mlp\.fc\d"`应该可以胜任。
 - en: 'Furthermore, as in the first example, we should ensure that the output layer,
     in this case the classification head, is also updated. Looking at the end of the
     list printed above, we can see that it’s named `''head.fc''`. With that in mind,
     here is our LoRA config:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，与第一个示例一样，我们应该确保输出层，即分类头，在这种情况下也被更新。查看上面打印列表的末尾，我们可以看到它的名称是`'head.fc'`。考虑到这一点，这是我们的LoRA配置：
 - en: '[PRE9]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Then we only need to create the PEFT model by passing our base model and the
     config to `get_peft_model`:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后我们只需要通过将基本模型和配置传递给`get_peft_model`来创建PEFT模型：
 - en: '[PRE10]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: This shows us that we only need to train less than 2% of all parameters, which
     is a huge efficiency gain.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 这向我们表明，我们只需要训练不到所有参数的2％，这是一个巨大的效率提升。
 - en: For a complete example, check out [this notebook](https://github.com/huggingface/peft/blob/main/examples/image_classification/image_classification_timm_peft_lora.ipynb).
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看完整示例，请查看[此笔记本](https://github.com/huggingface/peft/blob/main/examples/image_classification/image_classification_timm_peft_lora.ipynb)。
 - en: New transformers architectures
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 新的transformers架构
 - en: When new popular transformers architectures are released, we do our best to
     quickly add them to PEFT. If you come across a transformers model that is not
     supported out of the box, don’t worry, it will most likely still work if the config
     is set correctly. Specifically, you have to identify the layers that should be
     adapted and set them correctly when initializing the corresponding config class,
     e.g. `LoraConfig`. Here are some tips to help with this.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 当发布新的热门transformers架构时，我们会尽快将它们添加到PEFT中。如果您遇到一个不支持的transformers模型，不用担心，只要配置正确，它很可能仍然可以工作。具体来说，您必须识别应该适应的层，并在初始化相应的配置类时正确设置它们，例如`LoraConfig`。以下是一些帮助的提示。
 - en: 'As a first step, it is a good idea is to check the existing models for inspiration.
     You can find them inside of [constants.py](https://github.com/huggingface/peft/blob/main/src/peft/utils/constants.py)
     in the PEFT repository. Often, you’ll find a similar architecture that uses the
@@ -177,54 +243,77 @@
     `TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING` contains `["q_proj", "v_proj"]`.
     This tells you that for “mistral” models, the `target_modules` for LoRA should
     be `["q_proj", "v_proj"]`:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，检查现有模型以获取灵感是个好主意。您可以在PEFT存储库的[constants.py](https://github.com/huggingface/peft/blob/main/src/peft/utils/constants.py)中找到它们。通常，您会发现一个类似的架构使用相同的名称。例如，如果新模型架构是“mistral”模型的变体，并且您想应用LoRA，您可以看到`TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING`中“mistral”条目包含`["q_proj",
+    "v_proj"]`。这告诉您对于“mistral”模型，LoRA的`target_modules`应该是`["q_proj", "v_proj"]`：
 - en: '[PRE11]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: If that doesn’t help, check the existing modules in your model architecture
     with the `named_modules` method and try to identify the attention layers, especially
     the key, query, and value layers. Those will often have names such as `c_attn`,
     `query`, `q_proj`, etc. The key layer is not always adapted, and ideally, you
     should check whether including it results in better performance.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果这没有帮助，请使用`named_modules`方法检查模型架构中的现有模块，并尝试识别注意力层，特别是关键、查询和值层。这些通常会有名称，如`c_attn`、`query`、`q_proj`等。关键层并不总是适应的，理想情况下，您应该检查包括它是否会导致更好的性能。
 - en: Additionally, linear layers are common targets to be adapted (e.g. in [QLoRA
     paper](https://arxiv.org/abs/2305.14314), authors suggest to adapt them as well).
     Their names will often contain the strings `fc` or `dense`.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，线性层是常见的适应目标（例如，在[QLoRA论文](https://arxiv.org/abs/2305.14314)中，作者建议也对其进行适应）。它们的名称通常会包含字符串`fc`或`dense`。
 - en: If you want to add a new model to PEFT, please create an entry in [constants.py](https://github.com/huggingface/peft/blob/main/src/peft/utils/constants.py)
     and open a pull request on the [repository](https://github.com/huggingface/peft/pulls).
     Don’t forget to update the [README](https://github.com/huggingface/peft#models-support-matrix)
     as well.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想将新模型添加到PEFT，请在[constants.py](https://github.com/huggingface/peft/blob/main/src/peft/utils/constants.py)中创建一个条目，并在[存储库](https://github.com/huggingface/peft/pulls)上打开一个拉取请求。不要忘记更新[README](https://github.com/huggingface/peft#models-support-matrix)。
 - en: Verify parameters and layers
+  id: totrans-44
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 验证参数和层
 - en: You can verify whether you’ve correctly applied a PEFT method to your model
     in a few ways.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过几种方式验证是否已正确将PEFT方法应用于您的模型。
 - en: Check the fraction of parameters that are trainable with the [print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)
     method. If this number is lower or higher than expected, check the model `repr`
     by printing the model. This shows the names of all the layer types in the model.
     Ensure that only the intended target layers are replaced by the adapter layers.
     For example, if LoRA is applied to `nn.Linear` layers, then you should only see
     `lora.Linear` layers being used.
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用[print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)方法检查可训练参数的比例。如果此数字低于或高于预期，请通过打印模型来检查模型的`repr`。这将显示模型中所有层类型的名称。确保只有预期的目标层被适配层替换。例如，如果LoRA应用于`nn.Linear`层，则应只看到使用`lora.Linear`层。
 - en: '[PRE12]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Another way you can view the adapted layers is to use the `targeted_module_names`
     attribute to list the name of each module that was adapted.
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您可以查看适应的层的另一种方法是使用`targeted_module_names`属性列出每个已适应模块的名称。
 - en: '[PRE13]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'

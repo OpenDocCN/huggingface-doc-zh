@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: LoRA
 - en: 'Original text: [https://huggingface.co/docs/peft/developer_guides/lora](https://huggingface.co/docs/peft/developer_guides/lora)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/peft/developer_guides/lora](https://huggingface.co/docs/peft/developer_guides/lora)
 - en: null
   id: totrans-2
   prefs: []
@@ -20,15 +22,18 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRA是一种低秩分解方法，可以减少可训练参数的数量，加快微调大型模型的速度并减少内存使用。在PEFT中，使用LoRA就像设置[LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)并将其与[get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)结合使用，以创建可训练的[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)一样简单。
 - en: This guide explores in more detail other options and features for using LoRA.
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南更详细地探讨了使用LoRA的其他选项和功能。
 - en: Initialization
   id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 初始化
 - en: The initialization of LoRA weights is controlled by the parameter `init_lora_weights`
     in [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig).
     By default, PEFT initializes LoRA weights with Kaiming-uniform for weight A and
@@ -36,6 +41,7 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRA权重的初始化由[LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)中的参数`init_lora_weights`控制。默认情况下，PEFT使用Kaiming-uniform初始化LoRA权重A，并使用零初始化权重B，从而产生恒等变换（与参考[实现](https://github.com/microsoft/LoRA)相同）。
 - en: It is also possible to pass `init_lora_weights="gaussian"`. As the name suggests,
     this initializes weight A with a Gaussian distribution and zeros for weight B
     (this is how [Diffusers](https://huggingface.co/docs/diffusers/index) initializes
@@ -43,6 +49,7 @@
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 也可以传递`init_lora_weights="gaussian"`。正如名称所示，这将使用高斯分布初始化权重A，并将权重B初始化为零（这是[Diffusers](https://huggingface.co/docs/diffusers/index)初始化LoRA权重的方式）。
 - en: '[PRE0]'
   id: totrans-8
   prefs: []
@@ -55,6 +62,7 @@
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有一个选项可以设置`init_lora_weights=False`，这对调试和测试很有用。这应该是您使用此选项的唯一时机。选择此选项时，LoRA权重将被初始化，使其*不*导致恒等变换。
 - en: '[PRE1]'
   id: totrans-10
   prefs: []
@@ -65,6 +73,7 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: LoftQ
 - en: 'When quantizing the base model for QLoRA training, consider using the [LoftQ
     initialization](https://arxiv.org/abs/2310.08659), which has been shown to improve
     performance when training quantized models. The idea is that the LoRA weights
@@ -73,6 +82,7 @@
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 在为QLoRA训练量化基础模型时，考虑使用[LoftQ初始化](https://arxiv.org/abs/2310.08659)，已经证明在训练量化模型时可以提高性能。其思想是初始化LoRA权重，使量化误差最小化。如果使用LoftQ，*不要*量化基础模型。您应该设置`LoftQConfig`：
 - en: '[PRE2]'
   id: totrans-13
   prefs: []
@@ -83,11 +93,13 @@
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 了解有关PEFT如何与量化一起工作的更多信息，请参阅[量化](quantization)指南。
 - en: Rank-stabilized LoRA
   id: totrans-15
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 秩稳定的LoRA
 - en: Another way to initialize [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
     is with the [rank-stabilized LoRA (rsLoRA)](https://huggingface.co/papers/2312.03732)
     method. The LoRA architecture scales each adapter during every forward pass by
@@ -98,6 +110,8 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种初始化[LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)的方法是使用[rank-stabilized
+    LoRA (rsLoRA)](https://huggingface.co/papers/2312.03732)方法。LoRA架构在每次前向传递期间通过固定标量按比例缩放每个适配器，该标量在初始化时设置，并取决于秩`r`。标量由原始实现中的`lora_alpha/r`给出，但rsLoRA使用`lora_alpha/math.sqrt(r)`，这稳定了适配器并增加了使用更高`r`的性能潜力。
 - en: '[PRE3]'
   id: totrans-17
   prefs: []
@@ -108,6 +122,7 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: QLoRA风格的训练
 - en: The default LoRA settings in PEFT add trainable weights to the query and value
     layers of each attention block. But [QLoRA](https://hf.co/papers/2305.14314),
     which adds trainable weights to all the linear layers of a transformer model,
@@ -117,6 +132,7 @@
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: PEFT中的默认LoRA设置会向每个注意力块的查询和值层添加可训练权重。但是[QLoRA](https://hf.co/papers/2305.14314)会向变压器模型的所有线性层添加可训练权重，可以提供与完全微调模型相等的性能。要将LoRA应用于所有线性层，就像在QLoRA中一样，请设置`target_modules="all-linear"`（比根据架构的不同而变化的单独指定模块名称更容易）。
 - en: '[PRE4]'
   id: totrans-20
   prefs: []
@@ -127,6 +143,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 合并适配器
 - en: While LoRA is significantly smaller and faster to train, you may encounter latency
     issues during inference due to separately loading the base model and the LoRA
     adapter. To eliminate latency, use the [merge_and_unload()](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraModel.merge_and_unload)
@@ -136,6 +153,7 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然LoRA明显更小更快，但在推理过程中可能会遇到延迟问题，因为需要分别加载基础模型和LoRA适配器。为了消除延迟，使用[merge_and_unload()](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraModel.merge_and_unload)函数将适配器权重与基础模型合并。这样可以将新合并的模型用作独立模型。[merge_and_unload()](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraModel.merge_and_unload)函数不会在内存中保留适配器权重。
 - en: '[PRE5]'
   id: totrans-23
   prefs: []
