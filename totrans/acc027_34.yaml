@@ -1,56 +1,59 @@
 - en: Gradient Synchronization
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/accelerate/concept_guides/gradient_synchronization](https://huggingface.co/docs/accelerate/concept_guides/gradient_synchronization)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: PyTorch’s distributed module operates by communicating back and forth between
     all of the GPUs in your system. This communication takes time, and ensuring all
     processes know the states of each other happens at particular triggerpoints when
     using the `ddp` module.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: 'These triggerpoints are added to the PyTorch model, specifically their `forward()`
     and `backward()` methods. This happens when the model is wrapped with `DistributedDataParallel`:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: In 🤗 Accelerate this conversion happens automatically when calling [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
     and passing in your model.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: The slowdown in gradient accumulation
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: You now understand that PyTorch adds hooks to the `forward` and `backward` method
     of your PyTorch model when training in a distributed setup. But how does this
     risk slowing down your code?
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: In DDP (distributed data parallel), the specific order in which processes are
     performed and ran are expected at specific points and these must also occur at
     roughly the same time before moving on.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: The most direct example is when you update model parameters through `optimizer.step()`.
@@ -61,12 +64,15 @@
     processes only need to synchronize by the time `optimizer.step()` is called, without
     any modification to your training step, this needless inter-process communication
     can cause a significant slowdown.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: How can you avoid this overhead?
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: Solving the slowdown problem
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -75,117 +81,163 @@
     is actually called. PyTorch cannot automagically tell when you need to do this,
     but they do provide a tool to help through the [`no_sync`](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel.no_sync)
     context manager that is added to your model after converting it to DDP.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: 'Under this context manager, PyTorch will skip synchronizing the gradients when
     `.backward()` is called, and the first call to `.backward()` outside this context
     manager will trigger the synchronization. See an example below:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'In 🤗 Accelerate to make this an API that can be called no matter the training
     device (though it may not do anything if you are not in a distributed system!),
     `ddp_model.no_sync` gets replaced with [no_sync()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.no_sync)
     and operates the same way:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'As you may expect, the [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
     function wraps around this conditional check by keeping track of the current batch
     number, leaving you with the final gradient accumulation API:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: As a result, you should either use *`accelerator.accumulate` or `accelerator.no_sync`*
     when it comes to API choice.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: Just how much of a slowdown is there, and easy mistakes you can make
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'To set up a realistic example, consider the following setup:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: Two single-GPU T4 nodes and one node with two GPUs
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Each GPU is a T4, and are hosted on GCP
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The script used is a modification of the [NLP Example](https://github.com/muellerzr/timing_experiments/blob/main/baseline.py)
     script
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Batch size per GPU is 16, and gradients are accumulated every 4 steps
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: All scripts are available in [this repository](https://github.com/muellerzr/timing_experiments).
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: If not careful about gradient synchronization and GPU communication, a *large*
     amount of time can be wasted from when these GPUs communicate to each other during
     unnecessary periods.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果不注意梯度同步和GPU通信，那么这些GPU在不必要的时期进行通信时会浪费大量时间。
 - en: By how much?
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 多少？
 - en: 'Reference:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 参考：
 - en: 'Baseline: uses no synchronization practices discussed here'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基线：不使用此处讨论的任何同步实践
 - en: '`no_sync` improperly: `no_sync` only around the `backward` call, not the `forward`'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`no_sync`不正确：`no_sync`仅在`backward`调用周围，而不是`forward`'
 - en: '`no_sync`: using the `no_sync` pattern properly'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`no_sync`: 正确使用`no_sync`模式'
 - en: '`accumulate`: using [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
     properly'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`accumulate`: 使用[accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)正确地'
 - en: 'Below are the average seconds per batch iterating over 29 batches of data for
     each setup on both a single node and on the dual-node setup:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是在单节点和双节点设置上迭代29批数据的平均秒数，对比每种设置：
 - en: '|  | Baseline | `no_sync` improperly | `no_sync` | `accumulate` |'
+  id: totrans-37
   prefs: []
   type: TYPE_TB
+  zh: '|  | 基线 | `no_sync`不正确 | `no_sync` | `accumulate` |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-38
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| Multi-Node | 2±0.01s | 2.13±0.08s | **0.91±0.11s** | **0.91±0.11s** |'
+  id: totrans-39
   prefs: []
   type: TYPE_TB
+  zh: '| 多节点 | 2±0.01秒 | 2.13±0.08秒 | **0.91±0.11秒** | **0.91±0.11秒** |'
 - en: '| Single Node | 0.50±0.01s | 0.50±0.01s | **0.41±0.015s** | **0.41±0.015s**
     |'
+  id: totrans-40
   prefs: []
   type: TYPE_TB
+  zh: '| 单节点 | 0.50±0.01秒 | 0.50±0.01秒 | **0.41±0.015秒** | **0.41±0.015秒** |'
 - en: As you can see, if you are not careful about how you set up your gradient synchronization,
     you can get upwards of more than a 2x slowdown during training!
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，如果不注意如何设置梯度同步，训练期间可能会出现超过2倍的减速！
 - en: If you are worried about making sure everything is done properly, we highly
     recommend utilizing the [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
     function and passing in `gradient_accumulation_steps` or `gradient_accumulation_plugin`
     to the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     object so Accelerate can handle this for you.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您担心确保一切都做得正确，我们强烈建议利用[accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)函数，并向[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)对象传递`gradient_accumulation_steps`或`gradient_accumulation_plugin`，以便Accelerate可以为您处理这些。
