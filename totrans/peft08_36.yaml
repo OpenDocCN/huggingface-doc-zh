@@ -1,37 +1,32 @@
 - en: IA3
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: IA3
 - en: 'Original text: [https://huggingface.co/docs/peft/package_reference/ia3](https://huggingface.co/docs/peft/package_reference/ia3)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/peft/package_reference/ia3](https://huggingface.co/docs/peft/package_reference/ia3)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Infused Adapter by Inhibiting and Amplifying Inner Activations, or [IA3](https://hf.co/papers/2205.05638),
     is a method that adds three learned vectors to rescale the keys and values of
     the self-attention and encoder-decoder attention layers, and the intermediate
     activation of the position-wise feed-forward network.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过抑制和放大内部激活的注入适配器，或[IA3](https://hf.co/papers/2205.05638)，是一种方法，通过添加三个学习向量来重新调整自注意力和编码器-解码器注意力层的键和值，以及位置逐层前馈网络的中间激活。
 - en: 'The abstract from the paper is:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 论文摘要如下：
 - en: '*Few-shot in-context learning (ICL) enables pre-trained language models to
     perform a previously-unseen task without any gradient-based training by feeding
     a small number of training examples as part of the input. ICL incurs substantial
@@ -50,24 +45,36 @@
     benchmark, attaining super-human performance for the first time and outperforming
     the state-of-the-art by 6% absolute. All of the code used in our experiments is
     publicly available*.'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '*少样本上下文学习（ICL）使预训练语言模型能够在没有任何基于梯度的训练的情况下执行以前未见过的任务，只需将少量训练示例作为输入的一部分。ICL会产生大量的计算、内存和存储成本，因为它涉及每次进行预测时都要处理所有训练示例。参数高效微调（PEFT）（例如适配器模块、提示微调、稀疏更新方法等）提供了一种替代范式，其中训练一小组参数以使模型能够执行新任务。在本文中，我们严格比较了少样本ICL和PEFT，并证明后者提供了更好的准确性以及显著更低的计算成本。在此过程中，我们介绍了一种名为（IA）³的新PEFT方法，通过学习向量扩展激活，实现更强的性能，同时只引入了相对较少的新参数。我们还提出了一种基于T0模型的简单配方，称为T-Few，可以应用于新任务，而无需特定于任务的微调或修改。我们通过将其应用于RAFT基准测试中完全未见过的任务，验证了T-Few的有效性，首次实现了超人类性能，并超过了现有技术水平6个百分点。我们在实验中使用的所有代码都是公开可用的*。'
 - en: IA3Config
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IA3Config
 - en: '### `class peft.IA3Config`'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class peft.IA3Config`'
 - en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/config.py#L22)'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/config.py#L22)'
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Parameters
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`target_modules` (`Optional[Union[List[str], str]]`) — The names of the modules
     to apply the adapter to. If this is specified, only the modules with the specified
     names will be replaced. When passing a string, a regex match will be performed.
@@ -77,216 +84,340 @@
     the output layer. If this is not specified, modules will be chosen according to
     the model architecture. If the architecture is not known, an error will be raised
     — in this case, you should specify the target modules manually.'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`target_modules` (`Optional[Union[List[str], str]]`) — 要应用适配器的模块的名称。如果指定了这个参数，只有指定名称的模块将被替换。当传递一个字符串时，将执行正则匹配。当传递一个字符串列表时，将执行精确匹配或检查模块的名称是否以任何传递的字符串结尾。如果指定为''all-linear''，则选择所有线性/Conv1D模块，不包括输出层。如果未指定，将根据模型架构选择模块。如果架构未知，将引发错误
+    — 在这种情况下，您应该手动指定目标模块。'
 - en: '`feedforward_modules` (`Optional[Union[List[str], str]]`) — The names of the
     modules to be treated as feedforward modules, as in the original paper. These
     modules will have (IA)³ vectors multiplied to the input, instead of the output.
     `feedforward_modules` must be a name or a subset of names present in `target_modules`.'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`feedforward_modules` (`Optional[Union[List[str], str]]`) — 要作为前馈模块处理的模块的名称，就像原始论文中一样。这些模块将对输入进行（IA）³向量乘法，而不是对输出进行乘法。`feedforward_modules`必须是`target_modules`中存在的名称或名称子集。'
 - en: '`fan_in_fan_out` (`bool`) — Set this to True if the layer to replace stores
     weight like (fan_in, fan_out). For example, gpt-2 uses `Conv1D` which stores weights
     like (fan_in, fan_out) and hence this should be set to `True`.'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`fan_in_fan_out` (`bool`) — 如果要替换的层存储类似于（fan_in，fan_out）的权重，请将此设置为True。例如，gpt-2使用存储类似于（fan_in，fan_out）的`Conv1D`，因此应将其设置为`True`。'
 - en: '`modules_to_save` (`Optional[List[str]]`) — List of modules apart from (IA)³
     layers to be set as trainable and saved in the final checkpoint.'
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`modules_to_save` (`Optional[List[str]]`) — 除了（IA）³层之外要设置为可训练并保存在最终检查点中的模块列表。'
 - en: '`init_ia3_weights` (`bool`) — Whether to initialize the vectors in the (IA)³
     layers, defaults to `True`. Setting this to `False` is discouraged.'
+  id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`init_ia3_weights` (`bool`) — 是否初始化（IA）³层中的向量，默认为`True`。不建议将此设置为`False`。'
 - en: This is the configuration class to store the configuration of a [IA3Model](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Model).
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个配置类，用于存储[IA3Model](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Model)的配置。
 - en: IA3Model
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IA3Model
 - en: '### `class peft.IA3Model`'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class peft.IA3Model`'
 - en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L38)'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L38)'
 - en: '[PRE1]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Parameters
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` ([PreTrainedModel](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel))
     — The model to be adapted.'
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model` ([PreTrainedModel](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel))
+    — 要适配的模型。'
 - en: '`config` ([IA3Config](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Config))
     — The configuration of the (IA)^3 model.'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config` ([IA3Config](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Config))
+    — (IA)^3模型的配置。'
 - en: '`adapter_name` (`str`) — The name of the adapter, defaults to `"default"`.'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`adapter_name` (`str`) — 适配器的名称，默认为`"default"`。'
 - en: Returns
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`torch.nn.Module`'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.nn.Module`'
 - en: The (IA)^3 model.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: (IA)^3模型。
 - en: Creates a Infused Adapter by Inhibiting and Amplifying Inner Activations ((IA)^3)
     model from a pretrained transformers model. The method is described in detail
     in [https://arxiv.org/abs/2205.05638](https://arxiv.org/abs/2205.05638)
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 从预训练的transformers模型创建一个通过抑制和放大内部激活来注入适配器的(IA)^3模型。该方法在[https://arxiv.org/abs/2205.05638](https://arxiv.org/abs/2205.05638)中有详细描述。
 - en: 'Example:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '示例:'
 - en: '[PRE2]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '**Attributes**:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '**属性**:'
 - en: '`model` ([PreTrainedModel](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel))
     — The model to be adapted.'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model` ([PreTrainedModel](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel))
+    — 要适配的模型。'
 - en: '`peft_config` (`ia3Config`): The configuration of the (IA)^3 model.'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`peft_config` (`ia3Config`): (IA)^3模型的配置。'
 - en: '#### `delete_adapter`'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `delete_adapter`'
 - en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L368)'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L368)'
 - en: '[PRE3]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Parameters
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`adapter_name` (str) — Name of the adapter to be deleted.'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`adapter_name` (str) — 要删除的适配器的名称。'
 - en: Deletes an existing adapter.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 删除现有的适配器。
 - en: '#### `disable_adapter_layers`'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `disable_adapter_layers`'
 - en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L252)'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L252)'
 - en: '[PRE4]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Disable all adapters.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 禁用所有适配器。
 - en: When disabling all adapters, the model output corresponds to the output of the
     base model.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 当禁用所有适配器时，模型输出对应于基础模型的输出。
 - en: '#### `enable_adapter_layers`'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `enable_adapter_layers`'
 - en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L245)'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L245)'
 - en: '[PRE5]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Enable all adapters.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 启用所有适配器。
 - en: Call this if you have previously disabled all adapters and want to re-enable
     them.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果之前禁用了所有适配器并希望重新启用它们，请调用此方法。
 - en: '#### `merge_and_unload`'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `merge_and_unload`'
 - en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L334)'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L334)'
 - en: '[PRE6]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Parameters
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`safe_merge` (`bool`) — whether to activate the safe merging check to check
     if there is any potential Nan in the adapter weights'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`safe_merge` (`bool`) — 是否激活安全合并检查以检查适配器权重中是否存在任何潜在的NaN'
 - en: '`adapter_names` (`List[str]`, *optional*) — The list of adapter names that
     should be merged. If None, all active adapters will be merged. Defaults to `None`.'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`adapter_names` (`List[str]`, *可选*) — 应合并的适配器名称列表。如果为None，则将合并所有活动适配器。默认为`None`。'
 - en: This method merges the IA³ layers into the base model. This is needed if someone
     wants to use the base model as a standalone model.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 此方法将IA³层合并到基础模型中。如果有人想要将基础模型用作独立模型，则需要这样做。
 - en: 'Example:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '示例:'
 - en: '[PRE7]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '#### `set_adapter`'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `set_adapter`'
 - en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L259)'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L259)'
 - en: '[PRE8]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Parameters
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`adapter_name` (`str` or `list[str]`) — Name of the adapter(s) to be activated.'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`adapter_name` (`str`或`list[str]`) — 要激活的适配器的名称。'
 - en: Set the active adapter(s).
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置活动适配器。
 - en: Additionally, this function will set the specified adapters to trainable (i.e.,
     requires_grad=True). If this is not desired, use the following code.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，此函数将设置指定的适配器为可训练的（即，requires_grad=True）。如果不需要这样做，请使用以下代码。
 - en: '[PRE9]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '#### `unload`'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `卸载`'
 - en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L361)'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L361)'
 - en: '[PRE10]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Gets back the base model by removing all the IA³ modules without merging. This
     gives back the original base model.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过删除所有IA³模块而获得基础模型。这将还原原始基础模型。
