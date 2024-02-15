@@ -1,39 +1,47 @@
 - en: 'Hands-on: advanced Deep Reinforcement Learning. Using Sample Factory to play
     Doom from pixels'
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/learn/deep-rl-course/unit8/hands-on-sf](https://huggingface.co/learn/deep-rl-course/unit8/hands-on-sf)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: '[![Ask
-    a Question](../Images/255e59f8542cbd6d3f1c72646b2fff13.png)](http://hf.co/join/discord)
+- en: '[![Ask a Question](../Images/255e59f8542cbd6d3f1c72646b2fff13.png)](http://hf.co/join/discord)
     [![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit8/unit8_part2.ipynb)'
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'The colab notebook: [![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit8/unit8_part2.ipynb)'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: 'Unit 8 Part 2: Advanced Deep Reinforcement Learning. Using Sample Factory to
     play Doom from pixels'
+  id: totrans-4
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: '![Thumbnail](../Images/1636e0752d93a1e41c70f4a1147a2563.png)'
+  id: totrans-5
   prefs: []
   type: TYPE_IMG
 - en: In this notebook, we will learn how to train a Deep Neural Network to collect
     objects in a 3D environment based on the game of Doom, a video of the resulting
     policy is shown below. We train this policy using [Sample Factory](https://www.samplefactory.dev/),
     an asynchronous implementation of the PPO algorithm.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: 'Please note the following points:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: '[Sample Factory](https://www.samplefactory.dev/) is an advanced RL framework
     and **only functions on Linux and Mac** (not Windows).'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -41,328 +49,443 @@
     it can achieve speeds of 100k interactions per second. The resources available
     on a standard Colab notebook **limit the performance of this library**. So the
     speed in this setting **does not reflect the real-world performance**.
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Benchmarks for Sample Factory are available in a number of settings, check out
     the [examples](https://github.com/alex-petrenko/sample-factory/tree/master/sf_examples)
     if you want to find out more.
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'To validate this hands-on for the [certification process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process),
     you need to push one model:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: '`doom_health_gathering_supreme` get a result of >= 5.'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: To find your result, go to the [leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
     and find your model, **the result = mean_reward - std of reward**
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: If you don’t find your model, **go to the bottom of the page and click on the
     refresh button**
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: For more information about the certification process, check this section 👉 [https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: Set the GPU 💪
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: To **accelerate the agent’s training, we’ll use a GPU**. To do that, go to `Runtime
     > Change Runtime type`
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '![GPU Step 1](../Images/5378127c314cdd92729aa31b7e11ca44.png)'
+  id: totrans-19
   prefs: []
   type: TYPE_IMG
 - en: '`Hardware Accelerator > GPU`'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '![GPU Step 2](../Images/e0fec252447f98378386ccca8e57a80a.png)'
+  id: totrans-21
   prefs: []
   type: TYPE_IMG
 - en: Before starting to train our agent, let’s **study the library and environments
     we’re going to use**.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: Sample Factory
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '[Sample Factory](https://www.samplefactory.dev/) is one of the **fastest RL
     libraries focused on very efficient synchronous and asynchronous implementations
     of policy gradients (PPO)**.'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: Sample Factory is thoroughly **tested, used by many researchers and practitioners**,
     and is actively maintained. Our implementation is known to **reach SOTA performance
     in a variety of domains while minimizing RL experiment training time and hardware
     requirements**.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: '![Sample factory](../Images/cec8dbebc3e783f8e71a5698f72f4450.png)'
+  id: totrans-26
   prefs: []
   type: TYPE_IMG
 - en: Key features
+  id: totrans-27
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: Highly optimized algorithm [architecture](https://www.samplefactory.dev/06-architecture/overview/) for
     maximum learning throughput
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[Synchronous and asynchronous](https://www.samplefactory.dev/07-advanced-topics/sync-async/) training
     regimes'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[Serial (single-process) mode](https://www.samplefactory.dev/07-advanced-topics/serial-mode/) for
     easy debugging'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Optimal performance in both CPU-based and [GPU-accelerated environments](https://www.samplefactory.dev/09-environment-integrations/isaacgym/)
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在基于CPU和[GPU加速环境](https://www.samplefactory.dev/09-environment-integrations/isaacgym/)中实现最佳性能
 - en: Single- & multi-agent training, self-play, supports [training multiple policies](https://www.samplefactory.dev/07-advanced-topics/multi-policy-training/) at
     once on one or many GPUs
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 单一和多代理训练，自我对弈，支持一次在一个或多个GPU上[训练多个策略](https://www.samplefactory.dev/07-advanced-topics/multi-policy-training/)
 - en: Population-Based Training ([PBT](https://www.samplefactory.dev/07-advanced-topics/pbt/))
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基于人口的训练（[PBT](https://www.samplefactory.dev/07-advanced-topics/pbt/)）
 - en: Discrete, continuous, hybrid action spaces
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 离散、连续、混合动作空间
 - en: Vector-based, image-based, dictionary observation spaces
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基于向量、基于图像、基于字典的观察空间
 - en: Automatically creates a model architecture by parsing action/observation space
     specification. Supports [custom model architectures](https://www.samplefactory.dev/03-customization/custom-models/)
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过解析动作/观察空间规范自动创建模型架构。支持[自定义模型架构](https://www.samplefactory.dev/03-customization/custom-models/)
 - en: Designed to be imported into other projects, [custom environments](https://www.samplefactory.dev/03-customization/custom-environments/) are
     first-class citizens
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 设计为可导入其他项目，[自定义环境](https://www.samplefactory.dev/03-customization/custom-environments/)是一等公民
 - en: Detailed [WandB and Tensorboard summaries](https://www.samplefactory.dev/05-monitoring/metrics-reference/), [custom
     metrics](https://www.samplefactory.dev/05-monitoring/custom-metrics/)
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 详细的[WandB和Tensorboard摘要](https://www.samplefactory.dev/05-monitoring/metrics-reference/)，[自定义指标](https://www.samplefactory.dev/05-monitoring/custom-metrics/)
 - en: '[HuggingFace 🤗 integration](https://www.samplefactory.dev/10-huggingface/huggingface/) (upload
     trained models and metrics to the Hub)'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[HuggingFace 🤗 集成](https://www.samplefactory.dev/10-huggingface/huggingface/)（上传训练模型和指标到Hub）'
 - en: '[Multiple](https://www.samplefactory.dev/09-environment-integrations/mujoco/) [example](https://www.samplefactory.dev/09-environment-integrations/atari/) [environment](https://www.samplefactory.dev/09-environment-integrations/vizdoom/) [integrations](https://www.samplefactory.dev/09-environment-integrations/dmlab/) with
     tuned parameters and trained models'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[多个](https://www.samplefactory.dev/09-environment-integrations/mujoco/) [示例](https://www.samplefactory.dev/09-environment-integrations/atari/)
+    [环境](https://www.samplefactory.dev/09-environment-integrations/vizdoom/) [集成](https://www.samplefactory.dev/09-environment-integrations/dmlab/)，具有调整参数和训练模型'
 - en: All of the above policies are available on the 🤗 hub. Search for the tag [sample-factory](https://huggingface.co/models?library=sample-factory&sort=downloads)
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 以上所有策略都可以在🤗 hub上找到。搜索标签[sample-factory](https://huggingface.co/models?library=sample-factory&sort=downloads)
 - en: How sample-factory works
+  id: totrans-42
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Sample-factory的工作原理
 - en: Sample-factory is one of the **most highly optimized RL implementations available
     to the community**.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: Sample-factory是**社区中最高度优化的RL实现之一**。
 - en: It works by **spawning multiple processes that run rollout workers, inference
     workers and a learner worker**.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 它通过**生成多个进程来运行推出工作者、推理工作者和学习者工作者**。
 - en: The *workers* **communicate through shared memory, which lowers the communication
     cost between processes**.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '*工作者* **通过共享内存进行通信，降低了进程之间的通信成本**。'
 - en: The *rollout workers* interact with the environment and send observations to
     the *inference workers*.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '*推出工作者* 与环境交互并将观察发送给*推理工作者*。'
 - en: The *inferences workers* query a fixed version of the policy and **send actions
     back to the rollout worker**.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '*推理工作者* 查询策略的固定版本并**将动作发送回推出工作者**。'
 - en: After *k* steps the rollout works send a trajectory of experience to the learner
     worker, **which it uses to update the agent’s policy network**.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 在*k*步骤之后，推出工作发送一条经验轨迹给学习者工作者，**用于更新代理的策略网络**。
 - en: '![Sample factory](../Images/dbf151279f91bb01f87ae6359c6f520f.png)'
+  id: totrans-49
   prefs: []
   type: TYPE_IMG
+  zh: '![Sample factory](../Images/dbf151279f91bb01f87ae6359c6f520f.png)'
 - en: Actor Critic models in Sample-factory
+  id: totrans-50
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Sample-factory中的Actor Critic模型
 - en: 'Actor Critic models in Sample Factory are composed of three components:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: Sample Factory中的Actor Critic模型由三个组件组成：
 - en: '**Encoder** - Process input observations (images, vectors) and map them to
     a vector. This is the part of the model you will most likely want to customize.'
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**编码器** - 处理输入观察（图像、向量）并将它们映射到一个向量。这是您最有可能想要自定义的模型的部分。'
 - en: '**Core** - Intergrate vectors from one or more encoders, can optionally include
     a single- or multi-layer LSTM/GRU in a memory-based agent.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**核心** - 集成来自一个或多个编码器的向量，可以选择包括一个单层或多层LSTM/GRU在基于内存的代理中。'
 - en: '**Decoder** - Apply additional layers to the output of the model core before
     computing the policy and value outputs.'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**解码器** - 在计算策略和价值输出之前，对模型核心的输出应用额外层。'
 - en: The library has been designed to automatically support any observation and action
     spaces. Users can easily add their custom models. You can find out more in the
     [documentation](https://www.samplefactory.dev/03-customization/custom-models/#actor-critic-models-in-sample-factory).
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 该库已被设计为自动支持任何观察和动作空间。用户可以轻松添加自定义模型。您可以在[文档](https://www.samplefactory.dev/03-customization/custom-models/#actor-critic-models-in-sample-factory)中找到更多信息。
 - en: ViZDoom
+  id: totrans-56
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ViZDoom
 - en: '[ViZDoom](https://vizdoom.cs.put.edu.pl/) is an **open-source python interface
     for the Doom Engine**.'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '[ViZDoom](https://vizdoom.cs.put.edu.pl/)是一个**Doom引擎的开源Python接口**。'
 - en: The library was created in 2016 by Marek Wydmuch, Michal Kempka at the Institute
     of Computing Science, Poznan University of Technology, Poland.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 该库由波兰波兹南理工大学计算科学研究所的Marek Wydmuch、Michal Kempka于2016年创建。
 - en: The library enables the **training of agents directly from the screen pixels
     in a number of scenarios**, including team deathmatch, shown in the video below.
     Because the ViZDoom environment is based on a game the was created in the 90s,
     it can be run on modern hardware at accelerated speeds, **allowing us to learn
     complex AI behaviors fairly quickly**.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 该库使得**直接从屏幕像素训练代理在许多场景中成为可能**，包括在下面的视频中展示的团队死斗。由于ViZDoom环境基于90年代创建的游戏，它可以在现代硬件上以加速速度运行，**使我们能够相当快速地学习复杂的AI行为**。
 - en: 'The library includes feature such as:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 该库包括以下功能：
 - en: Multi-platform (Linux, macOS, Windows),
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 多平台（Linux、macOS、Windows），
 - en: API for Python and C++,
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Python和C++的API，
 - en: '[OpenAI Gym](https://www.gymlibrary.dev/) environment wrappers'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Easy-to-create custom scenarios (visual editors, scripting language, and examples
     available),
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Async and sync single-player and multiplayer modes,
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Lightweight (few MBs) and fast (up to 7000 fps in sync mode, single-threaded),
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Customizable resolution and rendering parameters,
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Access to the depth buffer (3D vision),
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Automatic labeling of game objects visible in the frame,
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Access to the audio buffer
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Access to the list of actors/objects and map geometry,
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Off-screen rendering and episode recording,
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Time scaling in async mode.
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: We first need to install some dependencies that are required for the ViZDoom
     environment
+  id: totrans-74
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Now that our Colab runtime is set up, we can start by installing the dependencies
     required to run ViZDoom on linux.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
 - en: If you are following on your machine on Mac, you will want to follow the installation
     instructions on the [github page](https://github.com/Farama-Foundation/ViZDoom/blob/master/doc/Quickstart.md#-quickstart-for-macos-and-anaconda3-python-36).
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Then we can install Sample Factory and ViZDoom
+  id: totrans-78
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: This can take 7min
+  id: totrans-79
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Setting up the Doom Environment in sample-factory
+  id: totrans-81
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Now that the setup if complete, we can train the agent. We have chosen here
     to learn a ViZDoom task called `Health Gathering Supreme`.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
 - en: 'The scenario: Health Gathering Supreme'
+  id: totrans-84
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: '![Health-Gathering-Supreme](../Images/08a1a85695f5485b036e974dd75dc6b6.png)'
+  id: totrans-85
   prefs: []
   type: TYPE_IMG
 - en: The objective of this scenario is to **teach the agent how to survive without
     knowing what makes it survive**. The Agent know only that **life is precious**
     and death is bad so **it must learn what prolongs its existence and that its health
     is connected with survival**.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
 - en: The map is a rectangle containing walls and with a green, acidic floor which
@@ -370,164 +493,226 @@
     over the map. A new medkit falls from the skies every now and then. **Medkits
     heal some portions of player’s health** - to survive, the agent needs to pick
     them up. The episode finishes after the player’s death or on timeout.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
 - en: 'Further configuration:'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
 - en: Living_reward = 1
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '3 available buttons: turn left, turn right, move forward'
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '1 available game variable: HEALTH'
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: death penalty = 100
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: You can find out more about the scenarios available in ViZDoom [here](https://github.com/Farama-Foundation/ViZDoom/tree/master/scenarios).
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
 - en: There are also a number of more complex scenarios that have been create for
     ViZDoom, such as the ones detailed on [this github page](https://github.com/edbeeching/3d_control_deep_rl).
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
 - en: Training the agent
+  id: totrans-95
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: We’re going to train the agent for 4000000 steps. It will take approximately
     20min
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-97
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Let’s take a look at the performance of the trained policy and output a video
     of the agent.
+  id: totrans-98
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-99
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Now lets visualize the performance of the agent
+  id: totrans-100
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-101
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: The agent has learned something, but its performance could be better. We would
     clearly need to train for longer. But let’s upload this model to the Hub.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
 - en: Now lets upload your checkpoint and video to the Hugging Face Hub
+  id: totrans-103
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'To be able to share your model with the community there are three more steps
     to follow:'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
 - en: 1️⃣ (If it’s not already done) create an account to HF ➡ [https://huggingface.co/join](https://huggingface.co/join)
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
 - en: 2️⃣ Sign in and get your authentication token from the Hugging Face website.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
 - en: Create a new token ([https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens))
     **with write role**
+  id: totrans-107
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '![Create HF Token](../Images/d21a97c736edaab9119d2d1c1da9deac.png)'
+  id: totrans-108
   prefs: []
   type: TYPE_IMG
 - en: Copy the token
+  id: totrans-109
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Run the cell below and paste the token
+  id: totrans-110
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'If you don’t want to use Google Colab or a Jupyter Notebook, you need to use
     this command instead: `huggingface-cli login`'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-112
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '[PRE8]'
+  id: totrans-113
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Let’s load another model
+  id: totrans-114
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: This agent’s performance was good, but we can do better! Let’s download and
     visualize an agent trained for 10B timesteps from the hub.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-116
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '[PRE10]'
+  id: totrans-117
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '[PRE11]'
+  id: totrans-118
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '[PRE12]'
+  id: totrans-119
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Some additional challenges 🏆: Doom Deathmatch'
+  id: totrans-120
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Training an agent to play a Doom deathmatch **takes many hours on a more beefy
     machine than is available in Colab**.
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
 - en: Fortunately, we have have **already trained an agent in this scenario and it
     is available in the 🤗 Hub!** Let’s download the model and visualize the agent’s
     performance.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，在这种情况下，我们已经训练过一个代理，并且它可以在🤗 Hub中使用！让我们下载模型并可视化代理的表现。
 - en: '[PRE13]'
+  id: totrans-123
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Given the agent plays for a long time the video generation can take **10 minutes**.
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 考虑到代理玩了很长时间，视频生成可能需要10分钟。
 - en: '[PRE14]'
+  id: totrans-125
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: You **can try to train your agent in this environment** using the code above,
     but not on colab. **Good luck 🤞**
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以尝试使用上面的代码在这个环境中训练你的代理，但不要在colab上。祝你好运🤞
 - en: If you prefer an easier scenario, **why not try training in another ViZDoom
     scenario such as `doom_deadly_corridor` or `doom_defend_the_center`.**
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你更喜欢一个更简单的情景，为什么不尝试在另一个ViZDoom情景中训练，比如`doom_deadly_corridor`或`doom_defend_the_center`。
 - en: '* * *'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: '* * *'
 - en: This concludes the last unit. But we are not finished yet! 🤗 The following **bonus
     section include some of the most interesting, advanced, and cutting edge work
     in Deep Reinforcement Learning**.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 这结束了最后一个单元。但我们还没有完成！🤗 接下来的**奖励部分包括一些最有趣、先进和尖端的深度强化学习工作**。
 - en: Keep learning, stay awesome 🤗
+  id: totrans-130
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 继续学习，保持出色🤗
