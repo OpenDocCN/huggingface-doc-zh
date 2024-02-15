@@ -1,26 +1,17 @@
 - en: Document Question Answering
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 文档问答
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/document_question_answering](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/document_question_answering)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/document_question_answering](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/document_question_answering)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Document Question Answering, also referred to as Document Visual Question Answering,
@@ -29,120 +20,183 @@
     and a question, and the output is an answer expressed in natural language. These
     models utilize multiple modalities, including text, the positions of words (bounding
     boxes), and the image itself.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 文档问答，也称为文档视觉问答，是一个涉及提供关于文档图像的问题的答案的任务。支持此任务的模型的输入通常是图像和问题的组合，输出是用自然语言表达的答案。这些模型利用多种模态，包括文本、单词的位置（边界框）和图像本身。
 - en: 'This guide illustrates how to:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南说明了如何：
 - en: Fine-tune [LayoutLMv2](../model_doc/layoutlmv2) on the [DocVQA dataset](https://huggingface.co/datasets/nielsr/docvqa_1200_examples_donut).
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在 [DocVQA 数据集](https://huggingface.co/datasets/nielsr/docvqa_1200_examples_donut)
+    上对 [LayoutLMv2](../model_doc/layoutlmv2) 进行微调。
 - en: Use your fine-tuned model for inference.
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用您微调的模型进行推断。
 - en: 'The task illustrated in this tutorial is supported by the following model architectures:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程中演示的任务由以下模型架构支持：
 - en: '[LayoutLM](../model_doc/layoutlm), [LayoutLMv2](../model_doc/layoutlmv2), [LayoutLMv3](../model_doc/layoutlmv3)'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '[LayoutLM](../model_doc/layoutlm), [LayoutLMv2](../model_doc/layoutlmv2), [LayoutLMv3](../model_doc/layoutlmv3)'
 - en: 'LayoutLMv2 solves the document question-answering task by adding a question-answering
     head on top of the final hidden states of the tokens, to predict the positions
     of the start and end tokens of the answer. In other words, the problem is treated
     as extractive question answering: given the context, extract which piece of information
     answers the question. The context comes from the output of an OCR engine, here
     it is Google’s Tesseract.'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: LayoutLMv2 通过在标记的最终隐藏状态之上添加一个问题-回答头来解决文档问答任务，以预测答案的开始和结束标记的位置。换句话说，这个问题被视为抽取式问答：在给定上下文的情况下，提取哪个信息片段回答问题。上下文来自
+    OCR 引擎的输出，这里是 Google 的 Tesseract。
 - en: Before you begin, make sure you have all the necessary libraries installed.
     LayoutLMv2 depends on detectron2, torchvision and tesseract.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装所有必要的库。LayoutLMv2 依赖于 detectron2、torchvision 和 tesseract。
 - en: '[PRE0]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Once you have installed all of the dependencies, restart your runtime.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装完所有依赖项后，请重新启动您的运行时。
 - en: 'We encourage you to share your model with the community. Log in to your Hugging
     Face account to upload it to the 🤗 Hub. When prompted, enter your token to log
     in:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们鼓励您与社区分享您的模型。登录到您的 Hugging Face 账户，将其上传到 🤗 Hub。在提示时，输入您的令牌以登录：
 - en: '[PRE3]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Let’s define some global variables.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们定义一些全局变量。
 - en: '[PRE4]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Load the data
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载数据
 - en: In this guide we use a small sample of preprocessed DocVQA that you can find
     on 🤗 Hub. If you’d like to use the full DocVQA dataset, you can register and download
     it on [DocVQA homepage](https://rrc.cvc.uab.es/?ch=17). If you do so, to proceed
     with this guide check out [how to load files into a 🤗 dataset](https://huggingface.co/docs/datasets/loading#local-and-remote-files).
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，我们使用了一个小样本的预处理 DocVQA，您可以在 🤗 Hub 上找到。如果您想使用完整的 DocVQA 数据集，您可以在 [DocVQA
+    主页](https://rrc.cvc.uab.es/?ch=17) 上注册并下载。如果您这样做了，要继续本指南，请查看 [如何将文件加载到 🤗 数据集](https://huggingface.co/docs/datasets/loading#local-and-remote-files)。
 - en: '[PRE5]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: As you can see, the dataset is split into train and test sets already. Take
     a look at a random example to familiarize yourself with the features.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 如您所见，数据集已经分为训练集和测试集。查看一个随机示例，以熟悉特征。
 - en: '[PRE6]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Here’s what the individual fields represent:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里是各个字段代表的含义：
 - en: '`id`: the example’s id'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`id`：示例的 id'
 - en: '`image`: a PIL.Image.Image object containing the document image'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image`：包含文档图像的 PIL.Image.Image 对象'
 - en: '`query`: the question string - natural language asked question, in several
     languages'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`query`：问题字符串 - 自然语言提出的问题，可以是多种语言'
 - en: '`answers`: a list of correct answers provided by human annotators'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`answers`：人类注释者提供的正确答案列表'
 - en: '`words` and `bounding_boxes`: the results of OCR, which we will not use here'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`words` 和 `bounding_boxes`：OCR 的结果，我们这里不会使用'
 - en: '`answer`: an answer matched by a different model which we will not use here'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`answer`：由另一个模型匹配的答案，我们这里不会使用'
 - en: Let’s leave only English questions, and drop the `answer` feature which appears
     to contain predictions by another model. We’ll also take the first of the answers
     from the set provided by the annotators. Alternatively, you can randomly sample
     it.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们只保留英文问题，并且删除包含另一个模型预测的 `answer` 特征。我们还将从注释者提供的答案集中取第一个答案。或者，您可以随机抽样。
 - en: '[PRE7]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Note that the LayoutLMv2 checkpoint that we use in this guide has been trained
     with `max_position_embeddings = 512` (you can find this information in the [checkpoint’s
     `config.json` file](https://huggingface.co/microsoft/layoutlmv2-base-uncased/blob/main/config.json#L18)).
@@ -152,11 +206,18 @@
     of the documents in your dataset are long, you can implement a sliding window
     strategy - check out [this notebook](https://github.com/huggingface/notebooks/blob/main/examples/question_answering.ipynb)
     for details.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，本指南中使用的 LayoutLMv2 检查点已经训练了 `max_position_embeddings = 512`（您可以在 [检查点的 `config.json`
+    文件](https://huggingface.co/microsoft/layoutlmv2-base-uncased/blob/main/config.json#L18)
+    中找到此信息）。我们可以截断示例，但为了避免答案可能在大型文档的末尾并最终被截断的情况，这里我们将删除几个示例，其中嵌入可能会超过 512。如果您的数据集中大多数文档很长，您可以实现一个滑动窗口策略
+    - 详细信息请查看 [此笔记本](https://github.com/huggingface/notebooks/blob/main/examples/question_answering.ipynb)。
 - en: '[PRE8]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: At this point let’s also remove the OCR features from this dataset. These are
     a result of OCR for fine-tuning a different model. They would still require some
     processing if we wanted to use them, as they do not match the input requirements
@@ -165,80 +226,116 @@
     that match model’s expected input. If you want to process images manually, check
     out the [`LayoutLMv2` model documentation](../model_doc/layoutlmv2) to learn what
     input format the model expects.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 此时让我们还从数据集中删除OCR特征。这些是OCR的结果，用于微调不同的模型。如果我们想要使用它们，它们仍然需要一些处理，因为它们不符合我们在本指南中使用的模型的输入要求。相反，我们可以在原始数据上同时使用[LayoutLMv2Processor](/docs/transformers/v4.37.2/en/model_doc/layoutlmv2#transformers.LayoutLMv2Processor)进行OCR和标记化。这样我们将得到与模型预期输入匹配的输入。如果您想手动处理图像，请查看[`LayoutLMv2`模型文档](../model_doc/layoutlmv2)以了解模型期望的输入格式。
 - en: '[PRE9]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Finally, the data exploration won’t be complete if we don’t peek at an image
     example.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，如果我们不查看一个图像示例，数据探索就不会完成。
 - en: '[PRE10]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '![DocVQA Image Example](../Images/b537ce4132491f7d258df4f7e115b34a.png)'
+  id: totrans-39
   prefs: []
   type: TYPE_IMG
+  zh: '![DocVQA图像示例](../Images/b537ce4132491f7d258df4f7e115b34a.png)'
 - en: Preprocess the data
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 预处理数据
 - en: The Document Question Answering task is a multimodal task, and you need to make
     sure that the inputs from each modality are preprocessed according to the model’s
     expectations. Let’s start by loading the [LayoutLMv2Processor](/docs/transformers/v4.37.2/en/model_doc/layoutlmv2#transformers.LayoutLMv2Processor),
     which internally combines an image processor that can handle image data and a
     tokenizer that can encode text data.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 文档问答任务是一个多模态任务，您需要确保每种模态的输入都按照模型的期望进行预处理。让我们从加载[LayoutLMv2Processor](/docs/transformers/v4.37.2/en/model_doc/layoutlmv2#transformers.LayoutLMv2Processor)开始，它内部结合了一个可以处理图像数据的图像处理器和一个可以编码文本数据的标记器。
 - en: '[PRE11]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Preprocessing document images
+  id: totrans-43
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 预处理文档图像
 - en: First, let’s prepare the document images for the model with the help of the
     `image_processor` from the processor. By default, image processor resizes the
     images to 224x224, makes sure they have the correct order of color channels, applies
     OCR with tesseract to get words and normalized bounding boxes. In this tutorial,
     all of these defaults are exactly what we need. Write a function that applies
     the default image processing to a batch of images and returns the results of OCR.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，让我们通过处理器中的`image_processor`来为模型准备文档图像。默认情况下，图像处理器将图像调整大小为224x224，确保它们具有正确的颜色通道顺序，应用OCR与tesseract获取单词和归一化边界框。在本教程中，所有这些默认设置正是我们所需要的。编写一个函数，将默认图像处理应用于一批图像，并返回OCR的结果。
 - en: '[PRE12]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: To apply this preprocessing to the entire dataset in a fast way, use [map](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.map).
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了以快速的方式将此预处理应用于整个数据集，请使用[map](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.map)。
 - en: '[PRE13]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Preprocessing text data
+  id: totrans-48
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 预处理文本数据
 - en: Once we have applied OCR to the images, we need to encode the text part of the
     dataset to prepare it for the model. This involves converting the words and boxes
     that we got in the previous step to token-level `input_ids`, `attention_mask`,
     `token_type_ids` and `bbox`. For preprocessing text, we’ll need the `tokenizer`
     from the processor.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦我们对图像应用了OCR，我们需要对数据集的文本部分进行编码，以准备模型使用。这涉及将我们在上一步中获得的单词和框转换为标记级别的`input_ids`、`attention_mask`、`token_type_ids`和`bbox`。对于文本预处理，我们将需要处理器中的`tokenizer`。
 - en: '[PRE14]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: On top of the preprocessing mentioned above, we also need to add the labels
     for the model. For `xxxForQuestionAnswering` models in 🤗 Transformers, the labels
     consist of the `start_positions` and `end_positions`, indicating which token is
     at the start and which token is at the end of the answer.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了上述预处理之外，我们还需要为模型添加标签。对于🤗 Transformers中的`xxxForQuestionAnswering`模型，标签包括`start_positions`和`end_positions`，指示答案的起始和结束的标记在哪里。
 - en: Let’s start with that. Define a helper function that can find a sublist (the
     answer split into words) in a larger list (the words list).
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从这里开始。定义一个辅助函数，可以在较大的列表（单词列表）中找到一个子列表（答案拆分为单词）。
 - en: This function will take two lists as input, `words_list` and `answer_list`.
     It will then iterate over the `words_list` and check if the current word in the
     `words_list` (words_list[i]) is equal to the first word of answer_list (answer_list[0])
@@ -248,66 +345,101 @@
     its starting index (idx), and its ending index (idx + len(answer_list) - 1). If
     more than one match was found, the function will return only the first one. If
     no match is found, the function returns (`None`, 0, and 0).
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 此函数将接受两个列表作为输入，`words_list`和`answer_list`。然后，它将遍历`words_list`，检查`words_list`中当前单词（words_list[i]）是否等于`answer_list`的第一个单词（answer_list[0])，以及从当前单词开始且与`answer_list`相同长度的`words_list`子列表是否等于`answer_list`。如果这个条件为真，表示找到了匹配，函数将记录匹配及其起始索引（idx）和结束索引（idx
+    + len(answer_list) - 1）。如果找到了多个匹配，函数将仅返回第一个。如果没有找到匹配，函数将返回（`None`，0和0）。
 - en: '[PRE15]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'To illustrate how this function finds the position of the answer, let’s use
     it on an example:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了说明此函数如何找到答案的位置，让我们在一个示例上使用它：
 - en: '[PRE16]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'Once examples are encoded, however, they will look like this:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，一旦示例被编码，它们将看起来像这样：
 - en: '[PRE17]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: We’ll need to find the position of the answer in the encoded input.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们需要找到编码输入中答案的位置。
 - en: '`token_type_ids` tells us which tokens are part of the question, and which
     ones are part of the document’s words.'
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids`告诉我们哪些标记属于问题，哪些属于文档的单词。'
 - en: '`tokenizer.cls_token_id` will help find the special token at the beginning
     of the input.'
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`tokenizer.cls_token_id`将帮助找到输入开头的特殊标记。'
 - en: '`word_ids` will help match the answer found in the original `words` to the
     same answer in the full encoded input and determine the start/end position of
     the answer in the encoded input.'
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`word_ids`将帮助将原始`words`中找到的答案与完全编码输入中的相同答案进行匹配，并确定编码输入中答案的起始/结束位置。'
 - en: 'With that in mind, let’s create a function to encode a batch of examples in
     the dataset:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这个想法，让我们创建一个函数来对数据集中的一批示例进行编码：
 - en: '[PRE18]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'Now that we have this preprocessing function, we can encode the entire dataset:'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们有了这个预处理函数，我们可以对整个数据集进行编码：
 - en: '[PRE19]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'Let’s check what the features of the encoded dataset look like:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看编码数据集的特征是什么样子的：
 - en: '[PRE20]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Evaluation
+  id: totrans-69
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 评估
 - en: Evaluation for document question answering requires a significant amount of
     postprocessing. To avoid taking up too much of your time, this guide skips the
     evaluation step. The [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
@@ -316,122 +448,184 @@
     evaluated using F1/exact match. If you’d like to implement it yourself, check
     out the [Question Answering chapter](https://huggingface.co/course/chapter7/7?fw=pt#postprocessing)
     of the Hugging Face course for inspiration.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 文档问题回答的评估需要大量的后处理。为了避免占用太多时间，本指南跳过了评估步骤。[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)在训练过程中仍会计算评估损失，因此您不会完全不了解模型的性能。提取式问答通常使用F1/完全匹配进行评估。如果您想自己实现，请查看Hugging
+    Face课程的[问答章节](https://huggingface.co/course/chapter7/7?fw=pt#postprocessing)获取灵感。
 - en: Train
+  id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练
 - en: 'Congratulations! You’ve successfully navigated the toughest part of this guide
     and now you are ready to train your own model. Training involves the following
     steps:'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 恭喜！您已成功完成本指南中最困难的部分，现在您已经准备好训练自己的模型。训练包括以下步骤：
 - en: Load the model with [AutoModelForDocumentQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForDocumentQuestionAnswering)
     using the same checkpoint as in the preprocessing.
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用与预处理相同的检查点加载[AutoModelForDocumentQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForDocumentQuestionAnswering)模型。
 - en: Define your training hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中定义您的训练超参数。
 - en: Define a function to batch examples together, here the [DefaultDataCollator](/docs/transformers/v4.37.2/en/main_classes/data_collator#transformers.DefaultDataCollator)
     will do just fine
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 定义一个将示例批处理在一起的函数，这里[DefaultDataCollator](/docs/transformers/v4.37.2/en/main_classes/data_collator#transformers.DefaultDataCollator)将做得很好
 - en: Pass the training arguments to [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     along with the model, dataset, and data collator.
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将训练参数传递给[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)，以及模型、数据集和数据收集器。
 - en: Call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
     to finetune your model.
+  id: totrans-77
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 调用[train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)来微调您的模型。
 - en: '[PRE21]'
+  id: totrans-78
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: In the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
     use `output_dir` to specify where to save your model, and configure hyperparameters
     as you see fit. If you wish to share your model with the community, set `push_to_hub`
     to `True` (you must be signed in to Hugging Face to upload your model). In this
     case the `output_dir` will also be the name of the repo where your model checkpoint
     will be pushed.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中使用`output_dir`指定保存模型的位置，并根据需要配置超参数。如果希望与社区分享模型，请将`push_to_hub`设置为`True`（您必须登录Hugging
+    Face才能上传模型）。在这种情况下，`output_dir`也将是将推送模型检查点的存储库的名称。
 - en: '[PRE22]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Define a simple data collator to batch examples together.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 定义一个简单的数据收集器来将示例批处理在一起。
 - en: '[PRE23]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'Finally, bring everything together, and call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train):'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，将所有内容汇总，并调用[train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)：
 - en: '[PRE24]'
+  id: totrans-84
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'To add the final model to 🤗 Hub, create a model card and call `push_to_hub`:'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将最终模型添加到🤗 Hub，创建一个模型卡并调用`push_to_hub`：
 - en: '[PRE25]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: Inference
+  id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推理
 - en: Now that you have finetuned a LayoutLMv2 model, and uploaded it to the 🤗 Hub,
     you can use it for inference. The simplest way to try out your finetuned model
     for inference is to use it in a [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline).
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经微调了一个LayoutLMv2模型，并将其上传到🤗 Hub，您可以用它进行推理。尝试使用微调模型进行推理的最简单方法是在[Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)中使用它。
 - en: 'Let’s take an example:'
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们举个例子：
 - en: '[PRE26]'
+  id: totrans-90
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Next, instantiate a pipeline for document question answering with your model,
     and pass the image + question combination to it.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，使用您的模型为文档问题回答实例化一个流水线，并将图像+问题组合传递给它。
 - en: '[PRE27]'
+  id: totrans-92
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'You can also manually replicate the results of the pipeline if you’d like:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果愿意，也可以手动复制流水线的结果：
 - en: Take an image and a question, prepare them for the model using the processor
     from your model.
+  id: totrans-94
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将一张图片和一个问题，使用模型的处理器为其准备好。
 - en: Forward the result or preprocessing through the model.
+  id: totrans-95
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将结果或预处理通过模型前向传递。
 - en: The model returns `start_logits` and `end_logits`, which indicate which token
     is at the start of the answer and which token is at the end of the answer. Both
     have shape (batch_size, sequence_length).
+  id: totrans-96
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 模型返回`start_logits`和`end_logits`，指示答案起始处和答案结束处的标记。两者的形状都是(batch_size, sequence_length)。
 - en: Take an argmax on the last dimension of both the `start_logits` and `end_logits`
     to get the predicted `start_idx` and `end_idx`.
+  id: totrans-97
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 对`start_logits`和`end_logits`的最后一个维度进行argmax操作，以获取预测的`start_idx`和`end_idx`。
 - en: Decode the answer with the tokenizer.
+  id: totrans-98
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用分词器解码答案。
 - en: '[PRE28]'
+  id: totrans-99
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'

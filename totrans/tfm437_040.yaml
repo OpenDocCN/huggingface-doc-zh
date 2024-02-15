@@ -1,214 +1,313 @@
 - en: Image captioning
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 图像字幕
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/image_captioning](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/image_captioning)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/image_captioning](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/image_captioning)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Image captioning is the task of predicting a caption for a given image. Common
     real world applications of it include aiding visually impaired people that can
     help them navigate through different situations. Therefore, image captioning helps
     to improve content accessibility for people by describing images to them.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像字幕是预测给定图像的字幕的任务。它的常见实际应用包括帮助视觉障碍人士，帮助他们在不同情况下导航。因此，图像字幕通过向人们描述图像来帮助提高人们对内容的可访问性。
 - en: 'This guide will show you how to:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何：
 - en: Fine-tune an image captioning model.
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 微调图像字幕模型。
 - en: Use the fine-tuned model for inference.
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于推理的微调模型。
 - en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装所有必要的库：
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'We encourage you to log in to your Hugging Face account so you can upload and
     share your model with the community. When prompted, enter your token to log in:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们鼓励您登录您的Hugging Face账户，这样您就可以上传并与社区分享您的模型。在提示时，输入您的令牌以登录：
 - en: '[PRE1]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Load the Pokémon BLIP captions dataset
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载Pokemon BLIP字幕数据集
 - en: Use the 🤗 Dataset library to load a dataset that consists of {image-caption}
     pairs. To create your own image captioning dataset in PyTorch, you can follow
     [this notebook](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/GIT/Fine_tune_GIT_on_an_image_captioning_dataset.ipynb).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用🤗数据集库加载一个由{图像-标题}对组成的数据集。要在PyTorch中创建自己的图像字幕数据集，您可以参考[此笔记本](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/GIT/Fine_tune_GIT_on_an_image_captioning_dataset.ipynb)。
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '[PRE3]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: The dataset has two features, `image` and `text`.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 数据集有两个特征，`图像`和`文本`。
 - en: Many image captioning datasets contain multiple captions per image. In those
     cases, a common strategy is to randomly sample a caption amongst the available
     ones during training.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多图像字幕数据集包含每个图像的多个字幕。在这种情况下，一个常见的策略是在训练过程中在可用的字幕中随机抽取一个字幕。
 - en: 'Split the dataset’s train split into a train and test set with the [~datasets.Dataset.train_test_split]
     method:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[~datasets.Dataset.train_test_split]方法将数据集的训练集拆分为训练集和测试集：
 - en: '[PRE4]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Let’s visualize a couple of samples from the training set.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从训练集中可视化几个样本。
 - en: '[PRE5]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '![Sample training images](../Images/465bc374aa742ae3c24da1893b1ca2b5.png)'
+  id: totrans-21
   prefs: []
   type: TYPE_IMG
+  zh: '![样本训练图像](../Images/465bc374aa742ae3c24da1893b1ca2b5.png)'
 - en: Preprocess the dataset
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 预处理数据集
 - en: Since the dataset has two modalities (image and text), the pre-processing pipeline
     will preprocess images and the captions.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于数据集具有两种模态（图像和文本），预处理流水线将预处理图像和标题。
 - en: To do so, load the processor class associated with the model you are about to
     fine-tune.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 为此，加载与您即将微调的模型相关联的处理器类。
 - en: '[PRE6]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: The processor will internally pre-process the image (which includes resizing,
     and pixel scaling) and tokenize the caption.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理器将在内部预处理图像（包括调整大小和像素缩放）并对标题进行标记。
 - en: '[PRE7]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: With the dataset ready, you can now set up the model for fine-tuning.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了准备好的数据集，您现在可以为微调设置模型。
 - en: Load a base model
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载基础模型
 - en: Load the [“microsoft/git-base”](https://huggingface.co/microsoft/git-base) into
     a [`AutoModelForCausalLM`](https://huggingface.co/docs/transformers/model_doc/auto#transformers.AutoModelForCausalLM)
     object.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 将[“microsoft/git-base”](https://huggingface.co/microsoft/git-base)加载到[`AutoModelForCausalLM`](https://huggingface.co/docs/transformers/model_doc/auto#transformers.AutoModelForCausalLM)对象中。
 - en: '[PRE8]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Evaluate
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 评估
 - en: Image captioning models are typically evaluated with the [Rouge Score](https://huggingface.co/spaces/evaluate-metric/rouge)
     or [Word Error Rate](https://huggingface.co/spaces/evaluate-metric/wer). For this
     guide, you will use the Word Error Rate (WER).
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像字幕模型通常使用[Rouge Score](https://huggingface.co/spaces/evaluate-metric/rouge)或[Word
+    Error Rate](https://huggingface.co/spaces/evaluate-metric/wer)进行评估。在本指南中，您将使用Word
+    Error Rate (WER)。
 - en: We use the 🤗 Evaluate library to do so. For potential limitations and other
     gotchas of the WER, refer to [this guide](https://huggingface.co/spaces/evaluate-metric/wer).
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们使用🤗评估库来做到这一点。有关WER的潜在限制和其他注意事项，请参考[此指南](https://huggingface.co/spaces/evaluate-metric/wer)。
 - en: '[PRE9]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Train!
+  id: totrans-36
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练！
 - en: Now, you are ready to start fine-tuning the model. You will use the 🤗 [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     for this.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您已经准备好开始微调模型了。您将使用🤗[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)来进行此操作。
 - en: First, define the training arguments using [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，使用[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)定义训练参数。
 - en: '[PRE10]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Then pass them along with the datasets and the model to 🤗 Trainer.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后将它们与数据集和模型一起传递给🤗 Trainer。
 - en: '[PRE11]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: To start training, simply call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
     on the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     object.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 要开始训练，只需在[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)对象上调用[train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)。
 - en: '[PRE12]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: You should see the training loss drop smoothly as training progresses.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应该看到随着训练的进行，训练损失平稳下降。
 - en: 'Once training is completed, share your model to the Hub with the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
     method so everyone can use your model:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦训练完成，使用[push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)方法将您的模型共享到Hub，以便每个人都可以使用您的模型：
 - en: '[PRE13]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Inference
+  id: totrans-47
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推理
 - en: Take a sample image from `test_ds` to test the model.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 从`test_ds`中取一个样本图像来测试模型。
 - en: '[PRE14]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '![Test image](../Images/8106832a19bcb32bb4f42e5d637f0640.png)Prepare image
     for the model.'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '![测试图片](../Images/8106832a19bcb32bb4f42e5d637f0640.png)为模型准备图像。'
 - en: '[PRE15]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Call `generate` and decode the predictions.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用`generate`并解码预测。
 - en: '[PRE16]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '[PRE17]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Looks like the fine-tuned model generated a pretty good caption!
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 看起来微调的模型生成了一个相当不错的字幕！
