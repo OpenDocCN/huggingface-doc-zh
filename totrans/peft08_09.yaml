@@ -1,26 +1,17 @@
 - en: Prompt-based methods
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 基于提示的方法
 - en: 'Original text: [https://huggingface.co/docs/peft/task_guides/prompt_based_methods](https://huggingface.co/docs/peft/task_guides/prompt_based_methods)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/peft/task_guides/prompt_based_methods](https://huggingface.co/docs/peft/task_guides/prompt_based_methods)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: A prompt can describe a task or provide an example of a task you want the model
@@ -29,176 +20,266 @@
     task while keeping the pretrained model’s parameters frozen. This makes it both
     faster and easier to finetune large language models (LLMs) for new downstream
     tasks.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示可以描述一个任务或提供一个您希望模型学习的任务示例。软提示方法不是手动创建这些提示，而是向输入嵌入添加可学习的参数，这些参数可以针对特定任务进行优化，同时保持预训练模型的参数冻结。这使得对大型语言模型（LLMs）进行微调以用于新的下游任务变得更快更容易。
 - en: The PEFT library supports several types of prompting methods (p-tuning, prefix
     tuning, prompt tuning) and you can learn more about how these methods work conceptually
     in the [Soft prompts](../conceptual_guides/prompting) guide. If you’re interested
     in applying these methods to other tasks and use cases, take a look at our [notebook
     collection](https://huggingface.co/spaces/PEFT/soft-prompting)!
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: PEFT库支持几种提示方法（p-tuning、prefix tuning、prompt tuning），您可以在[Soft prompts](../conceptual_guides/prompting)指南中了解这些方法的概念工作方式。如果您有兴趣将这些方法应用于其他任务和用例，请查看我们的[notebook
+    collection](https://huggingface.co/spaces/PEFT/soft-prompting)!
 - en: This guide will show you how to train a causal language model - with a soft
     prompting method - to *generate a classification* for whether a tweet is a complaint
     or not.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何训练一个因果语言模型 - 使用软提示方法 - 为推文是否为投诉生成一个分类。
 - en: Some familiarity with the general process of training a causal language model
     would be really helpful and allow you to focus on the soft prompting methods.
     If you’re new, we recommend taking a look at the [Causal language modeling](https://huggingface.co/docs/transformers/tasks/language_modeling)
     guide first from the Transformers documentation. When you’re ready, come back
     and see how easy it is to drop PEFT in to your training!
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 对训练因果语言模型的一般过程有一些了解将非常有帮助，并让您能够专注于软提示方法。如果您是新手，我们建议首先查看Transformers文档中的[Causal
+    language modeling](https://huggingface.co/docs/transformers/tasks/language_modeling)指南。当您准备好时，回来看看将PEFT轻松应用到您的训练中有多简单！
 - en: Before you begin, make sure you have all the necessary libraries installed.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装所有必要的库。
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Dataset
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数据集
 - en: For this guide, you’ll use the `twitter_complaints` subset of the [RAFT](https://huggingface.co/datasets/ought/raft)
     dataset. The `twitter_complaints` subset contains tweets labeled as `complaint`
     and `no complaint` and you can check out the [dataset viewer](https://huggingface.co/datasets/ought/raft/viewer/twitter_complaints)
     for a better idea of what the data looks like.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，您将使用[RAFT](https://huggingface.co/datasets/ought/raft)数据集的`twitter_complaints`子集。`twitter_complaints`子集包含标记为`complaint`和`no
+    complaint`的推文，您可以查看[数据集查看器](https://huggingface.co/datasets/ought/raft/viewer/twitter_complaints)以更好地了解数据的外观。
 - en: Use the [load_dataset](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
     function to load the dataset and create a new `text_label` column so it is easier
     to understand what the `Label` values, `1` and `2` mean.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[load_dataset](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)函数加载数据集，并创建一个新的`text_label`列，以便更容易理解`Label`值`1`和`2`代表什么。
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Load a tokenizer, define the padding token to use, and determine the maximum
     length of the tokenized label.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载一个分词器，定义要使用的填充标记，并确定标记化标签的最大长度。
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Create a preprocessing function that tokenizes the tweet text and labels, pad
     the inputs and labels in each batch, create an attention mask, and truncate sequences
     to the `max_length`. Then convert the `input_ids`, `attention_mask`, and `labels`
     to PyTorch tensors.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个预处理函数，对推文文本和标签进行标记化，对每个批次中的输入和标签进行填充，创建一个注意力蒙版，并将序列截断到`max_length`。然后将`input_ids`、`attention_mask`和`labels`转换为PyTorch张量。
 - en: '[PRE3]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Apply the preprocessing function to the entire dataset with the [map](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
     function, and remove the unprocessed columns because the model won’t need them.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[map](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)函数将预处理函数应用于整个数据集，并删除未处理的列，因为模型不需要它们。
 - en: '[PRE4]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Finally, create a training and evaluation [`DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader).
     You can set `pin_memory=True` to speed up the data transfer to the GPU during
     training if the samples in your dataset are on a CPU.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，创建一个训练和评估[`DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader)。如果数据集中的样本在CPU上，您可以设置`pin_memory=True`以加快数据传输到GPU的速度。
 - en: '[PRE5]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Model
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模型
 - en: Now let’s load a pretrained model to use as the base model for the soft prompt
     method. This guide uses the [bigscience/bloomz-560m](https://huggingface.co/bigscience/bloomz-560m)
     model, but you can use any causal language model you want.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们加载一个预训练模型，用作软提示方法的基础模型。本指南使用[bigscience/bloomz-560m](https://huggingface.co/bigscience/bloomz-560m)模型，但您可以使用任何您想要的因果语言模型。
 - en: '[PRE6]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: PEFT configuration and model
+  id: totrans-24
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: PEFT配置和模型
 - en: For any PEFT method, you’ll need to create a configuration which contains all
     the parameters that specify how the PEFT method should be applied. Once the configuration
     is setup, pass it to the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
     function along with the base model to create a trainable [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel).
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于任何PEFT方法，您需要创建一个包含指定PEFT方法应如何应用的所有参数的配置。一旦设置了配置，将其传递给[get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)函数，同时将基础模型传递给可训练的[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)。
 - en: Call the [print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)
     method to compare the number of trainable parameters of [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
     versus the number of parameters in the base model!
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用[print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)方法，比较[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)中可训练参数的数量与基础模型中参数的数量！
 - en: p-tuningprefix tuningprompt tuning
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: p-tuning前缀调整提示调整
 - en: '[P-tuning](../conceptual_guides/prompting#p-tuning) adds a trainable embedding
     tensor where the prompt tokens can be added anywhere in the input sequence. Create
     a [PromptEncoderConfig](/docs/peft/v0.8.2/en/package_reference/p_tuning#peft.PromptEncoderConfig)
     with the task type, the number of virtual tokens to add and learn, and the hidden
     size of the encoder for learning the prompt parameters.'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: '[P-tuning](../conceptual_guides/prompting#p-tuning)添加一个可训练的嵌入张量，其中提示标记可以添加到输入序列的任何位置。创建一个[PromptEncoderConfig](/docs/peft/v0.8.2/en/package_reference/p_tuning#peft.PromptEncoderConfig)，包括任务类型、要添加和学习的虚拟标记数量，以及用于学习提示参数的编码器的隐藏大小。'
 - en: '[PRE7]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Training
+  id: totrans-30
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 训练
 - en: Set up an optimizer and learning rate scheduler.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置优化器和学习率调度器。
 - en: '[PRE8]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Move the model to the GPU and create a training loop that reports the loss and
     perplexity for each epoch.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 将模型移至GPU，并创建一个训练循环，报告每个时期的损失和困惑度。
 - en: '[PRE9]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Share your model
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 分享你的模型
 - en: Once training is complete, you can upload your model to the Hub with the [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
     method. You’ll need to login to your Hugging Face account first and enter your
     token when prompted.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用[push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)方法将模型上传到Hub。您需要先登录到您的Hugging
+    Face帐户，并在提示时输入您的令牌。
 - en: '[PRE10]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: If you check the model file size in the repository, you’ll see that it is a
     lot smaller than a full sized model!
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在存储库中检查模型文件大小，您会发现它比完整大小的模型要小得多！
 - en: '![](../Images/5e34ae8912ca7fcb5554d98cb511bc58.png)'
+  id: totrans-39
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/5e34ae8912ca7fcb5554d98cb511bc58.png)'
 - en: For example, the adapter weights for a opt-350m model stored on the Hub are
     only ~6MB compared to the full model size which can be ~700MB.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，存储在Hub上的opt-350m模型的适配器权重仅约6MB，而完整模型的大小可能约为700MB。
 - en: Inference
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推理
 - en: Let’s load the model for inference and test it out on a tweet!
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们加载模型进行推理，并在一条推文上测试它！
 - en: '[PRE11]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Call the [generate](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
     method to generate the predicted classification label.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用[generate](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)方法生成预测的分类标签。
 - en: '[PRE12]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'

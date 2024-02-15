@@ -1,26 +1,17 @@
 - en: LoRA methods
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: LoRA方法
 - en: 'Original text: [https://huggingface.co/docs/peft/task_guides/lora_based_methods](https://huggingface.co/docs/peft/task_guides/lora_based_methods)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/peft/task_guides/lora_based_methods](https://huggingface.co/docs/peft/task_guides/lora_based_methods)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: A popular way to efficiently train large models is to insert (typically in the
@@ -29,8 +20,10 @@
     original weight matrix is frozen and only the smaller matrices are updated during
     training. This reduces the number of trainable parameters, reducing memory usage
     and training time which can be very expensive for large models.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练大型模型的一种流行方法是在（通常在注意力块中）插入较小的可训练矩阵，这些矩阵是要在微调期间学习的增量权重矩阵的低秩分解。预训练模型的原始权重矩阵被冻结，只有较小的矩阵在训练期间更新。这减少了可训练参数的数量，减少了内存使用和训练时间，对于大型模型来说这可能非常昂贵。
 - en: There are several different ways to express the weight matrix as a low-rank
     decomposition, but [Low-Rank Adaptation (LoRA)](../conceptual_guides/adapter#low-rank-adaptation-lora)
     is the most common method. The PEFT library supports several other LoRA variants,
@@ -41,112 +34,164 @@
     guide. If you’re interested in applying these methods to other tasks and use cases
     like semantic segmentation, token classification, take a look at our [notebook
     collection](https://huggingface.co/collections/PEFT/notebooks-6573b28b33e5a4bf5b157fc1)!
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 有几种不同的方法可以将权重矩阵表示为低秩分解，但[低秩适应（LoRA）](../conceptual_guides/adapter#low-rank-adaptation-lora)是最常见的方法。PEFT库支持其他几种LoRA变体，如[低秩Hadamard乘积（LoHa）](../conceptual_guides/adapter#low-rank-hadamard-product-loha)、[低秩Kronecker乘积（LoKr）](../conceptual_guides/adapter#low-rank-kronecker-product-lokr)和[自适应低秩适应（AdaLoRA）](../conceptual_guides/adapter#adaptive-low-rank-adaptation-adalora)。您可以在[适配器](../conceptual_guides/adapter)指南中了解这些方法的概念工作原理。如果您有兴趣将这些方法应用于其他任务和用例，如语义分割、标记分类，请查看我们的[笔记本集合](https://huggingface.co/collections/PEFT/notebooks-6573b28b33e5a4bf5b157fc1)！
 - en: This guide will show you how to quickly train an image classification model
     - with a low-rank decomposition method - to identify the class of food shown in
     an image.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何快速训练一个图像分类模型 - 使用低秩分解方法 - 以识别图像中显示的食物类别。
 - en: Some familiarity with the general process of training an image classification
     model would be really helpful and allow you to focus on the low-rank decomposition
     methods. If you’re new, we recommend taking a look at the [Image classification](https://huggingface.co/docs/transformers/tasks/image_classification)
     guide first from the Transformers documentation. When you’re ready, come back
     and see how easy it is to drop PEFT in to your training!
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 对训练图像分类模型的一般过程有一定了解将非常有帮助，这样可以让您专注于低秩分解方法。如果您是新手，我们建议先查看来自Transformers文档的[图像分类](https://huggingface.co/docs/transformers/tasks/image_classification)指南。当您准备好时，回来看看将PEFT应用到您的训练中有多么容易！
 - en: Before you begin, make sure you have all the necessary libraries installed.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装所有必要的库。
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Dataset
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数据集
 - en: In this guide, you’ll use the [Food-101](https://huggingface.co/datasets/food101)
     dataset which contains images of 101 food classes (take a look at the [dataset
     viewer](https://huggingface.co/datasets/food101/viewer/default/train) to get a
     better idea of what the dataset looks like).
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，您将使用包含101种食物类别图像的[Food-101](https://huggingface.co/datasets/food101)数据集（查看[数据集查看器](https://huggingface.co/datasets/food101/viewer/default/train)以更好地了解数据集的外观）。
 - en: Load the dataset with the [load_dataset](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
     function.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[load_dataset](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)函数加载数据集。
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Each food class is labeled with an integer, so to make it easier to understand
     what these integers represent, you’ll create a `label2id` and `id2label` dictionary
     to map the integer to its class label.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个食物类别都用一个整数标记，为了更容易理解这些整数代表什么，您将创建一个`label2id`和`id2label`字典，将整数映射到其类别标签。
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Load an image processor to properly resize and normalize the pixel values of
     the training and evaluation images.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载一个图像处理器，正确调整训练和评估图像的像素值大小。
 - en: '[PRE3]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: You can also use the image processor to prepare some transformation functions
     for data augmentation and pixel scaling.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用图像处理器准备一些转换函数，用于数据增强和像素缩放。
 - en: '[PRE4]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Define the training and validation datasets, and use the [set_transform](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
     function to apply the transformations on-the-fly.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 定义训练和验证数据集，并使用[set_transform](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)函数在运行时应用转换。
 - en: '[PRE5]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Finally, you’ll need a data collator to create a batch of training and evaluation
     data and convert the labels to `torch.tensor` objects.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，您将需要一个数据整理器来创建一批训练和评估数据，并将标签转换为`torch.tensor`对象。
 - en: '[PRE6]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Model
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模型
 - en: Now let’s load a pretrained model to use as the base model. This guide uses
     the [google/vit-base-patch16-224-in21k](https://huggingface.co/google/vit-base-patch16-224-in21k)
     model, but you can use any image classification model you want. Pass the `label2id`
     and `id2label` dictionaries to the model so it knows how to map the integer labels
     to their class labels, and you can optionally pass the `ignore_mismatched_sizes=True`
     parameter if you’re finetuning a checkpoint that has already been finetuned.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们加载一个预训练模型作为基础模型。本指南使用[google/vit-base-patch16-224-in21k](https://huggingface.co/google/vit-base-patch16-224-in21k)模型，但您可以使用任何您想要的图像分类模型。将`label2id`和`id2label`字典传递给模型，以便它知道如何将整数标签映射到它们的类标签，并且如果您正在微调已经微调过的检查点，则可以选择传递`ignore_mismatched_sizes=True`参数。
 - en: '[PRE7]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: PEFT configuration and model
+  id: totrans-26
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: PEFT配置和模型
 - en: Every PEFT method requires a configuration that holds all the parameters specifying
     how the PEFT method should be applied. Once the configuration is setup, pass it
     to the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
     function along with the base model to create a trainable [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel).
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 每种PEFT方法都需要一个配置，其中包含指定PEFT方法应如何应用的所有参数。一旦设置了配置，将其传递给[get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)函数，同时传递基础模型，以创建一个可训练的[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)。
 - en: Call the [print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)
     method to compare the number of parameters of [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
     versus the number of parameters in the base model!
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用[print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)方法，比较[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)的参数数量与基础模型的参数数量！
 - en: LoRALoHaLoKrAdaLoRA
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRALoHaLoKrAdaLoRA
 - en: '[LoRA](../conceptual_guides/adapter#low-rank-adaptation-lora) decomposes the
     weight update matrix into *two* smaller matrices. The size of these low-rank matrices
     is determined by its *rank* or `r`. A higher rank means the model has more parameters
@@ -157,15 +202,22 @@
     factor), `bias` (whether `none`, `all` or only the LoRA bias parameters should
     be trained), and `modules_to_save` (the modules apart from the LoRA layers to
     be trained and saved). All of these parameters - and more - are found in the [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig).'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '[LoRA](../conceptual_guides/adapter#low-rank-adaptation-lora)将权重更新矩阵分解为*两个*较小的矩阵。这些低秩矩阵的大小由其*秩*或`r`确定。更高的秩意味着模型有更多参数要训练，但也意味着模型有更多的学习能力。您还需要指定`target_modules`，以确定较小矩阵应插入的位置。对于本指南，您将针对注意力块的*query*和*value*矩阵。设置的其他重要参数包括`lora_alpha`（缩放因子）、`bias`（是否应训练`none`、`all`或仅训练LoRA偏置参数）、以及`modules_to_save`（除LoRA层之外要训练和保存的模块）。所有这些参数
+    - 以及更多 - 都可以在[LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)中找到。'
 - en: '[PRE8]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Training
+  id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 训练
 - en: For training, let’s use the [Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     class from Transformers. The `Trainer` contains a PyTorch training loop, and when
     you’re ready, call [train](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
@@ -173,66 +225,103 @@
     in the [TrainingArguments](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
     class. With LoRA-like methods, you can afford to use a higher batch size and learning
     rate.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于训练，让我们使用Transformers中的[Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)类。`Trainer`包含一个PyTorch训练循环，当您准备好时，调用[train](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)开始训练。要自定义训练运行，请在[TrainingArguments](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)类中配置训练超参数。使用类似LoRA的方法，您可以承受更高的批量大小和学习率。
 - en: AdaLoRA has an [update_and_allocate()](/docs/peft/v0.8.2/en/package_reference/adalora#peft.AdaLoraModel.update_and_allocate)
     method that should be called at each training step to update the parameter budget
     and mask, otherwise the adaptation step is not performed. This requires writing
     a custom training loop or subclassing the [Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     to incorporate this method. As an example, take a look at this [custom training
     loop](https://github.com/huggingface/peft/blob/912ad41e96e03652cabf47522cd876076f7a0c4f/examples/conditional_generation/peft_adalora_seq2seq.py#L120).
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: AdaLoRA有一个[update_and_allocate()](/docs/peft/v0.8.2/en/package_reference/adalora#peft.AdaLoraModel.update_and_allocate)方法，应在每个训练步骤中调用以更新参数预算和掩码，否则将不执行适应步骤。这需要编写一个自定义训练循环或对[Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)进行子类化以包含此方法。例如，请查看这个[自定义训练循环](https://github.com/huggingface/peft/blob/912ad41e96e03652cabf47522cd876076f7a0c4f/examples/conditional_generation/peft_adalora_seq2seq.py#L120)。
 - en: '[PRE9]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Begin training with [train](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train).
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 开始使用[train](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)进行训练。
 - en: '[PRE10]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Share your model
+  id: totrans-38
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 分享您的模型
 - en: Once training is complete, you can upload your model to the Hub with the [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
     method. You’ll need to login to your Hugging Face account first and enter your
     token when prompted.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用[push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)方法将模型上传到Hub。您需要先登录到您的Hugging
+    Face帐户，并在提示时输入您的令牌。
 - en: '[PRE11]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Call [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
     to save your model to your repositoy.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用[push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)将您的模型保存到您的存储库中。
 - en: '[PRE12]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Inference
+  id: totrans-43
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推断
 - en: Let’s load the model from the Hub and test it out on a food image.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从Hub加载模型并在食物图像上进行测试。
 - en: '[PRE13]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '![](../Images/e7384973c0a1457da0f0be34f4e94f38.png)'
+  id: totrans-46
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/e7384973c0a1457da0f0be34f4e94f38.png)'
 - en: Convert the image to RGB and return the underlying PyTorch tensors.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 将图像转换为RGB并返回底层的PyTorch张量。
 - en: '[PRE14]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Now run the model and return the predicted class!
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在运行模型并返回预测的类别！
 - en: '[PRE15]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
