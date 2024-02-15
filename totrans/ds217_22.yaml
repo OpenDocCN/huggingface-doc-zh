@@ -1,94 +1,122 @@
 - en: Use with Spark
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 与Spark一起使用
 - en: 'Original text: [https://huggingface.co/docs/datasets/use_with_spark](https://huggingface.co/docs/datasets/use_with_spark)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/datasets/use_with_spark](https://huggingface.co/docs/datasets/use_with_spark)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This document is a quick introduction to using 🤗 Datasets with Spark, with a
     particular focus on how to load a Spark DataFrame into a [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
     object.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 本文是关于如何将Spark DataFrame加载到[Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)对象中的🤗
+    Datasets的快速介绍。
 - en: From there, you have fast access to any element and you can use it as a data
     loader to train models.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 从那里，您可以快速访问任何元素，并将其用作数据加载器来训练模型。
 - en: Load from Spark
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 从Spark加载
 - en: A [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
     object is a wrapper of an Arrow table, which allows fast reads from arrays in
     the dataset to PyTorch, TensorFlow and JAX tensors. The Arrow table is memory
     mapped from disk, which can load datasets bigger than your available RAM.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)对象是Arrow表的包装器，允许从数据集中的数组快速读取到PyTorch、TensorFlow和JAX张量。Arrow表是从磁盘内存映射的，可以加载比您可用RAM更大的数据集。'
 - en: 'You can get a [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
     from a Spark DataFrame using `Dataset.from_spark()`:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用`Dataset.from_spark()`从Spark DataFrame获取[Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)：
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: The Spark workers write the dataset on disk in a cache directory as Arrow files,
     and the [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
     is loaded from there.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: Spark工作节点将数据集写入缓存目录中的Arrow文件中，然后从那里加载[Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)。
 - en: 'Alternatively, you can skip materialization by using `IterableDataset.from_spark()`,
     which returns an [IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset):'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，您可以通过使用`IterableDataset.from_spark()`来跳过实体化，它返回一个[IterableDataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.IterableDataset)：
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Caching
+  id: totrans-12
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 缓存
 - en: When using `Dataset.from_spark()`, the resulting [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
     is cached; if you call `Dataset.from_spark()` multiple times on the same DataFrame
     it won’t re-run the Spark job that writes the dataset as Arrow files on disk.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 当使用`Dataset.from_spark()`时，生成的[Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)会被缓存；如果在相同的DataFrame上多次调用`Dataset.from_spark()`，它不会重新运行写入Arrow文件的Spark作业。
 - en: You can set the cache location by passing `cache_dir=` to `Dataset.from_spark()`.
     Make sure to use a disk that is available to both your workers and your current
     machine (the driver).
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过将`cache_dir=`传递给`Dataset.from_spark()`来设置缓存位置。确保使用一个对您的工作节点和当前机器（驱动程序）都可用的磁盘。
 - en: In a different session, a Spark DataFrame doesn’t have the same [semantic hash](https://spark.apache.org/docs/3.2.0/api/python/reference/api/pyspark.sql.DataFrame.semanticHash.html),
     and it will rerun a Spark job and store it in a new cache.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 在另一个会话中，Spark DataFrame没有相同的[语义哈希](https://spark.apache.org/docs/3.2.0/api/python/reference/api/pyspark.sql.DataFrame.semanticHash.html)，它将重新运行一个Spark作业并将其存储在新的缓存中。
 - en: Feature types
+  id: totrans-16
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 特征类型
 - en: 'If your dataset is made of images, audio data or N-dimensional arrays, you
     can specify the `features=` argument in `Dataset.from_spark()` (or `IterableDataset.from_spark()`):'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的数据集由图像、音频数据或N维数组组成，您可以在`Dataset.from_spark()`（或`IterableDataset.from_spark()`）中指定`features=`参数：
 - en: '[PRE2]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: You can check the [Features](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Features)
     documentation to know about all the feature types available.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以查看[Features](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Features)文档，了解所有可用的特征类型。
