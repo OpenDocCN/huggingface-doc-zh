@@ -1,25 +1,15 @@
 - en: Knowledge Distillation for Computer Vision
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/knowledge_distillation_for_image_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/knowledge_distillation_for_image_classification)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Knowledge distillation is a technique used to transfer knowledge from a larger,
@@ -32,40 +22,52 @@
     Knowledge in a Neural Network by Hinton et al](https://arxiv.org/abs/1503.02531).
     In this guide, we will do task-specific knowledge distillation. We will use the
     [beans dataset](https://huggingface.co/datasets/beans) for this.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: This guide demonstrates how you can distill a [fine-tuned ViT model](https://huggingface.co/merve/vit-mobilenet-beans-224)
     (teacher model) to a [MobileNet](https://huggingface.co/google/mobilenet_v2_1.4_224)
     (student model) using the [Trainer API](https://huggingface.co/docs/transformers/en/main_classes/trainer#trainer)
     of 🤗 Transformers.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: Let’s install the libraries needed for distillation and evaluating the process.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: In this example, we are using the `merve/beans-vit-224` model as teacher model.
     It’s an image classification model, based on `google/vit-base-patch16-224-in21k`
     fine-tuned on beans dataset. We will distill this model to a randomly initialized
     MobileNetV2.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: We will now load the dataset.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: We can use an image processor from either of the models, as in this case they
     return the same output with same resolution. We will use the `map()` method of
     `dataset` to apply the preprocessing to every split of the dataset.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Essentially, we want the student model (a randomly initialized MobileNet) to
     mimic the teacher model (fine-tuned vision transformer). To achieve this, we first
     get the logits output from the teacher and the student. Then, we divide each of
@@ -77,51 +79,72 @@
     we need to represent P using Q. If two are identical, their KL divergence is zero,
     as there’s no other information needed to explain P from Q. Thus, in the context
     of knowledge distillation, KL divergence is useful.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: We will now login to Hugging Face Hub so we can push our model to the Hugging
     Face Hub through the `Trainer`.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Let’s set the `TrainingArguments`, the teacher model and the student model.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: We can use `compute_metrics` function to evaluate our model on the test set.
     This function will be used during the training process to compute the `accuracy`
     & `f1` of our model.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Let’s initialize the `Trainer` with the training arguments we defined. We will
     also initialize our data collator.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: We can now train our model.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: We can evaluate the model on the test set.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: On test set, our model reaches 72 percent accuracy. To have a sanity check over
     efficiency of distillation, we also trained MobileNet on the beans dataset from
     scratch with the same hyperparameters and observed 63 percent accuracy on the
@@ -129,5 +152,7 @@
     architectures, distillation parameters and report their findings. The training
     logs and checkpoints for distilled model can be found in [this repository](https://huggingface.co/merve/vit-mobilenet-beans-224),
     and MobileNetV2 trained from scratch can be found in this [repository](https://huggingface.co/merve/resnet-mobilenet-beans-5).
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 在测试集上，我们的模型达到了72％的准确率。为了对蒸馏效率进行合理性检查，我们还使用相同的超参数从头开始在豆类数据集上训练MobileNet，并观察到测试集上的63％准确率。我们邀请读者尝试不同的预训练教师模型、学生架构、蒸馏参数，并报告他们的发现。蒸馏模型的训练日志和检查点可以在[此存储库](https://huggingface.co/merve/vit-mobilenet-beans-224)中找到，从头开始训练的MobileNetV2可以在此[存储库](https://huggingface.co/merve/resnet-mobilenet-beans-5)中找到。
