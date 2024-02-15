@@ -1,24 +1,15 @@
 - en: Wuerstchen
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/wuerstchen](https://huggingface.co/docs/diffusers/training/wuerstchen)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The [Wuerstchen](https://hf.co/papers/2306.00637) model drastically reduces
@@ -27,68 +18,90 @@
     models (VQGAN + autoencoder) to compress the latents, and then a third model (text-conditioned
     latent diffusion model) is conditioned on this highly compressed space to generate
     an image.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: To fit the prior model into GPU memory and to speedup training, try enabling
     `gradient_accumulation_steps`, `gradient_checkpointing`, and `mixed_precision`
     respectively.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: This guide explores the [train_text_to_image_prior.py](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_prior.py)
     script to help you become more familiar with it, and how you can adapt it for
     your own use-case.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: 'Before running the script, make sure you install the library from source:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then navigate to the example folder containing the training script and install
     the required dependencies for the script you’re using:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 🤗 Accelerate is a library for helping you train on multiple GPUs/TPUs or with
     mixed-precision. It’ll automatically configure your training setup based on your
     hardware and environment. Take a look at the 🤗 Accelerate [Quick tour](https://huggingface.co/docs/accelerate/quicktour)
     to learn more.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: 'Initialize an 🤗 Accelerate environment:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To setup a default 🤗 Accelerate environment without choosing any configurations:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Or if your environment doesn’t support an interactive shell, like a notebook,
     you can use:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Lastly, if you want to train a model on your own dataset, take a look at the
     [Create a dataset for training](create_dataset) guide to learn how to create a
     dataset that works with the training script.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: The following sections highlight parts of the training scripts that are important
     for understanding how to modify it, but it doesn’t cover every aspect of the [script](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_prior.py)
     in detail. If you’re interested in learning more, feel free to read through the
     scripts and let us know if you have any questions or concerns.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: Script parameters
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -97,104 +110,147 @@
     function. It provides default values for each parameter, such as the training
     batch size and learning rate, but you can also set your own values in the training
     command if you’d like.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: 'For example, to speedup training with mixed precision using the fp16 format,
     add the `--mixed_precision` parameter to the training command:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Most of the parameters are identical to the parameters in the [Text-to-image](text2image#script-parameters)
     training guide, so let’s dive right into the Wuerstchen training script!
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: Training script
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: The training script is also similar to the [Text-to-image](text2image#training-script)
     training guide, but it’s been modified to support Wuerstchen. This guide focuses
     on the code that is unique to the Wuerstchen training script.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: The [`main()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L441)
     function starts by initializing the image encoder - an [EfficientNet](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/modeling_efficient_net_encoder.py)
     - in addition to the usual scheduler and tokenizer.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: You’ll also load the `WuerstchenPrior` model for optimization.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Next, you’ll apply some [transforms](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L656)
     to the images and [tokenize](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L637)
     the captions:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您将对图像应用一些[转换](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L656)，并[标记化](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L637)标题：
 - en: '[PRE8]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Finally, the [training loop](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L656)
     handles compressing the images to latent space with the `EfficientNetEncoder`,
     adding noise to the latents, and predicting the noise residual with the `WuerstchenPrior`
     model.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，[训练循环](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L656)处理将图像压缩到潜在空间中，使用`EfficientNetEncoder`向潜在空间添加噪声，并使用`WuerstchenPrior`模型预测噪声残差。
 - en: '[PRE9]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: If you want to learn more about how the training loop works, check out the [Understanding
     pipelines, models and schedulers](../using-diffusers/write_own_pipeline) tutorial
     which breaks down the basic pattern of the denoising process.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想了解训练循环的工作原理，请查看[了解管道、模型和调度器](../using-diffusers/write_own_pipeline)教程，该教程详细介绍了去噪过程的基本模式。
 - en: Launch the script
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 启动脚本
 - en: Once you’ve made all your changes or you’re okay with the default configuration,
     you’re ready to launch the training script! 🚀
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您完成所有更改或对默认配置满意，您就可以启动训练脚本了！🚀
 - en: Set the `DATASET_NAME` environment variable to the dataset name from the Hub.
     This guide uses the [Pokémon BLIP captions](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)
     dataset, but you can create and train on your own datasets as well (see the [Create
     a dataset for training](create_dataset) guide).
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 将`DATASET_NAME`环境变量设置为Hub中的数据集名称。本指南使用[Pokémon BLIP captions](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)数据集，但您也可以创建和训练自己的数据集（请参阅[创建用于训练的数据集](create_dataset)指南）。
 - en: To monitor training progress with Weights & Biases, add the `--report_to=wandb`
     parameter to the training command. You’ll also need to add the `--validation_prompt`
     to the training command to keep track of results. This can be really useful for
     debugging the model and viewing intermediate results.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用Weights & Biases监控训练进度，请在训练命令中添加`--report_to=wandb`参数。您还需要在训练命令中添加`--validation_prompt`以跟踪结果。这对于调试模型和查看中间结果非常有用。
 - en: '[PRE10]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Once training is complete, you can use your newly trained model for inference!
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用新训练的模型进行推断！
 - en: '[PRE11]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Next steps
+  id: totrans-42
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'Congratulations on training a Wuerstchen model! To learn more about how to
     use your new model, the following may be helpful:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 祝贺您训练了一个Wuerstchen模型！要了解如何使用您的新模型，以下内容可能会有所帮助：
 - en: Take a look at the [Wuerstchen](../api/pipelines/wuerstchen#text-to-image-generation)
     API documentation to learn more about how to use the pipeline for text-to-image
     generation and its limitations.
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 查看[Wuerstchen](../api/pipelines/wuerstchen#text-to-image-generation) API文档，了解如何使用文本到图像生成的管道及其限制。

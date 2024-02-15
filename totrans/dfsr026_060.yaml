@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Kandinsky 2.2
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/kandinsky](https://huggingface.co/docs/diffusers/training/kandinsky)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/training/kandinsky](https://huggingface.co/docs/diffusers/training/kandinsky)
 - en: null
   id: totrans-2
   prefs: []
@@ -18,6 +20,7 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个脚本是实验性的，很容易过拟合并遇到像灾难性遗忘这样的问题。尝试探索不同的超参数，以获得您数据集的最佳结果。
 - en: Kandinsky 2.2 is a multilingual text-to-image model capable of producing more
     photorealistic images. The model includes an image prior model for creating image
     embeddings from text prompts, and a decoder model that generates images based
@@ -28,6 +31,8 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: Kandinsky 2.2是一个多语言文本到图像模型，能够生成更逼真的图像。该模型包括一个图像先验模型，用于从文本提示创建图像嵌入，以及一个解码器模型，根据先验模型的嵌入生成图像。这就是为什么在Diffusers中为Kandinsky
+    2.2提供了两个单独的脚本，一个用于训练先验模型，一个用于训练解码器模型。您可以分别训练这两个模型，但为了获得最佳结果，您应该同时训练先验和解码器模型。
 - en: Depending on your GPU, you may need to enable `gradient_checkpointing` (⚠️ not
     supported for the prior model!), `mixed_precision`, and `gradient_accumulation_steps`
     to help fit the model into memory and to speedup training. You can reduce your
@@ -38,6 +43,7 @@
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据您的GPU，您可能需要启用`gradient_checkpointing`（⚠️不支持先前模型！），`mixed_precision`和`gradient_accumulation_steps`来帮助将模型适应内存并加速训练。您还可以通过启用[xFormers](../optimization/xformers)的内存高效注意力来进一步减少内存使用量（版本[v0.0.16](https://github.com/huggingface/diffusers/issues/2234#issuecomment-1416931212)在某些GPU上训练失败，因此您可能需要安装开发版本）。
 - en: This guide explores the [train_text_to_image_prior.py](https://github.com/huggingface/diffusers/blob/main/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py)
     and the [train_text_to_image_decoder.py](https://github.com/huggingface/diffusers/blob/main/examples/kandinsky2_2/text_to_image/train_text_to_image_decoder.py)
     scripts to help you become more familiar with it, and how you can adapt it for
@@ -45,10 +51,12 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南探讨了[train_text_to_image_prior.py](https://github.com/huggingface/diffusers/blob/main/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py)和[train_text_to_image_decoder.py](https://github.com/huggingface/diffusers/blob/main/examples/kandinsky2_2/text_to_image/train_text_to_image_decoder.py)脚本，以帮助您更熟悉它，并了解如何为您自己的用例进行调整。
 - en: 'Before running the scripts, make sure you install the library from source:'
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在运行脚本之前，请确保您从源代码安装库：
 - en: '[PRE0]'
   id: totrans-8
   prefs: []
@@ -59,6 +67,7 @@
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后导航到包含训练脚本的示例文件夹，并为您正在使用的脚本安装所需的依赖项：
 - en: '[PRE1]'
   id: totrans-10
   prefs: []
@@ -71,10 +80,13 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate是一个帮助您在多个GPU/TPU上进行训练或使用混合精度的库。它将根据您的硬件和环境自动配置您的训练设置。查看🤗 Accelerate
+    [快速入门](https://huggingface.co/docs/accelerate/quicktour)以了解更多。
 - en: 'Initialize an 🤗 Accelerate environment:'
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 初始化🤗 Accelerate环境：
 - en: '[PRE2]'
   id: totrans-13
   prefs: []
@@ -84,6 +96,7 @@
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置默认🤗 Accelerate环境而不选择任何配置：
 - en: '[PRE3]'
   id: totrans-15
   prefs: []
@@ -94,6 +107,7 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，如果您的环境不支持交互式shell，比如笔记本，您可以使用：
 - en: '[PRE4]'
   id: totrans-17
   prefs: []
@@ -105,6 +119,7 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，如果您想在自己的数据集上训练模型，请查看[创建用于训练的数据集](create_dataset)指南，了解如何创建一个适用于训练脚本的数据集。
 - en: The following sections highlight parts of the training scripts that are important
     for understanding how to modify it, but it doesn’t cover every aspect of the scripts
     in detail. If you’re interested in learning more, feel free to read through the
@@ -112,11 +127,13 @@
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下部分突出显示了训练脚本的一些重要部分，以帮助您了解如何修改它，但并未详细涵盖脚本的每个方面。如果您有兴趣了解更多，请随时阅读脚本，并告诉我们您是否有任何问题或疑虑。
 - en: Script parameters
   id: totrans-20
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 脚本参数
 - en: The training scripts provides many parameters to help you customize your training
     run. All of the parameters and their descriptions are found in the [`parse_args()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L190)
     function. The training scripts provides default values for each parameter, such
@@ -125,11 +142,13 @@
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本提供了许多参数，帮助您自定义训练运行。所有参数及其描述都可以在[`parse_args()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L190)函数中找到。训练脚本为每个参数提供了默认值，如训练批量大小和学习率，但如果您愿意，也可以在训练命令中设置自己的值。
 - en: 'For example, to speedup training with mixed precision using the fp16 format,
     add the `--mixed_precision` parameter to the training command:'
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要使用fp16格式加速混合精度训练，请在训练命令中添加`--mixed_precision`参数：
 - en: '[PRE5]'
   id: totrans-23
   prefs: []
@@ -141,11 +160,13 @@
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数参数与[文本到图像](text2image#script-parameters)训练指南中的参数相同，因此让我们直接开始Kandinsky训练脚本的演练！
 - en: Min-SNR weighting
   id: totrans-25
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 最小-SNR加权
 - en: The [Min-SNR](https://huggingface.co/papers/2303.09556) weighting strategy can
     help with training by rebalancing the loss to achieve faster convergence. The
     training script supports predicting `epsilon` (noise) or `v_prediction`, but Min-SNR
@@ -154,10 +175,12 @@
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Min-SNR](https://huggingface.co/papers/2303.09556)加权策略可以通过重新平衡损失来帮助训练，以实现更快的收敛。训练脚本支持预测`epsilon`（噪声）或`v_prediction`，但Min-SNR与两种预测类型兼容。这种加权策略仅受PyTorch支持，在Flax训练脚本中不可用。'
 - en: 'Add the `--snr_gamma` parameter and set it to the recommended value of 5.0:'
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 添加`--snr_gamma`参数，并将其设置为推荐值5.0：
 - en: '[PRE6]'
   id: totrans-28
   prefs: []
@@ -168,6 +191,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练脚本
 - en: The training script is also similar to the [Text-to-image](text2image#training-script)
     training guide, but it’s been modified to support training the prior and decoder
     models. This guide focuses on the code that is unique to the Kandinsky 2.2 training
@@ -175,15 +199,19 @@
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本也类似于[文本到图像](text2image#training-script)训练指南，但已经修改以支持训练先验和解码器模型。本指南侧重于Kandinsky
+    2.2训练脚本中独特的代码。
 - en: prior modeldecoder model
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 先验模型解码器模型
 - en: The [`main()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L441)
     function contains the code for preparing the dataset and training the model.
   id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`main()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L441)函数包含准备数据集和训练模型的代码。'
 - en: 'One of the main differences you’ll notice right away is that the training script
     also loads a [CLIPImageProcessor](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPImageProcessor)
     - in addition to a scheduler and tokenizer - for preprocessing images and a [CLIPVisionModelWithProjection](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPVisionModelWithProjection)
@@ -191,6 +219,8 @@
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 您立即注意到的主要区别之一是，训练脚本还加载了一个[CLIPImageProcessor](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPImageProcessor)
+    - 除了调度器和标记器之外 - 用于预处理图像，以及一个[CLIPVisionModelWithProjection](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPVisionModelWithProjection)模型用于编码图像：
 - en: '[PRE7]'
   id: totrans-34
   prefs: []
@@ -202,6 +232,7 @@
   id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: Kandinsky使用[PriorTransformer](/docs/diffusers/v0.26.3/en/api/models/prior_transformer#diffusers.PriorTransformer)生成图像嵌入，因此您需要设置优化器来学习先验模式的参数。
 - en: '[PRE8]'
   id: totrans-36
   prefs: []
@@ -212,6 +243,7 @@
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，输入标题被标记化，图像由[CLIPImageProcessor](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPImageProcessor)进行[预处理](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L632)：
 - en: '[PRE9]'
   id: totrans-38
   prefs: []
@@ -223,6 +255,7 @@
   id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，[训练循环](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L718)将输入图像转换为潜变量，向图像嵌入添加噪声，并进行预测：
 - en: '[PRE10]'
   id: totrans-40
   prefs: []
@@ -234,16 +267,19 @@
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想了解训练循环的工作原理，请查看[了解管道、模型和调度器](../using-diffusers/write_own_pipeline)教程，该教程详细介绍了去噪过程的基本模式。
 - en: Launch the script
   id: totrans-42
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 启动脚本
 - en: Once you’ve made all your changes or you’re okay with the default configuration,
     you’re ready to launch the training script! 🚀
   id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您完成所有更改或对默认配置满意，您就可以启动训练脚本！🚀
 - en: You’ll train on the [Pokémon BLIP captions](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)
     dataset to generate your own Pokémon, but you can also create and train on your
     own dataset by following the [Create a dataset for training](create_dataset) guide.
@@ -253,11 +289,14 @@
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将在[Pokémon BLIP标题](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)数据集上进行训练，以生成您自己的
+    Pokémon，但您也可以通过按照[创建用于训练的数据集](create_dataset)指南来创建和训练自己的数据集。将环境变量`DATASET_NAME`设置为Hub上数据集的名称，或者如果您在自己的文件上进行训练，请将环境变量`TRAIN_DIR`设置为数据集的路径。
 - en: If you’re training on more than one GPU, add the `--multi_gpu` parameter to
     the `accelerate launch` command.
   id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在多个GPU上进行训练，请在`accelerate launch`命令中添加`--multi_gpu`参数。
 - en: To monitor training progress with Weights & Biases, add the `--report_to=wandb`
     parameter to the training command. You’ll also need to add the `--validation_prompt`
     to the training command to keep track of results. This can be really useful for
@@ -265,10 +304,12 @@
   id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用Weights & Biases监视训练进度，请在训练命令中添加`--report_to=wandb`参数。您还需要在训练命令中添加`--validation_prompt`以跟踪结果。这对于调试模型和查看中间结果非常有用。
 - en: prior modeldecoder model
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 先验模型解码器模型
 - en: '[PRE11]'
   id: totrans-48
   prefs: []
@@ -278,10 +319,12 @@
   id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用新训练的模型进行推断！
 - en: prior modeldecoder model
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 先验模型解码器模型
 - en: '[PRE12]'
   id: totrans-51
   prefs: []
@@ -292,16 +335,19 @@
   id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 请随意将`kandinsky-community/kandinsky-2-2-decoder`替换为您自己训练的解码器检查点！
 - en: Next steps
   id: totrans-53
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'Congratulations on training a Kandinsky 2.2 model! To learn more about how
     to use your new model, the following guides may be helpful:'
   id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 祝贺您训练了一个Kandinsky 2.2模型！要了解如何使用您的新模型，以下指南可能会有所帮助：
 - en: Read the [Kandinsky](../using-diffusers/kandinsky) guide to learn how to use
     it for a variety of different tasks (text-to-image, image-to-image, inpainting,
     interpolation), and how it can be combined with a ControlNet.
