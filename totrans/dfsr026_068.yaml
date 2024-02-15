@@ -1,31 +1,24 @@
 - en: LoRA
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: LoRA
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/lora](https://huggingface.co/docs/diffusers/training/lora)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/training/lora](https://huggingface.co/docs/diffusers/training/lora)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This is experimental and the API may change in the future.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是实验性的，API可能会在将来更改。
 - en: '[LoRA (Low-Rank Adaptation of Large Language Models)](https://hf.co/papers/2106.09685)
     is a popular and lightweight training technique that significantly reduces the
     number of trainable parameters. It works by inserting a smaller number of new
@@ -33,193 +26,295 @@
     much faster, memory-efficient, and produces smaller model weights (a few hundred
     MBs), which are easier to store and share. LoRA can also be combined with other
     training techniques like DreamBooth to speedup training.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '[LoRA（大型语言模型的低秩适应）](https://hf.co/papers/2106.09685)是一种流行且轻量级的训练技术，可以显著减少可训练参数的数量。它通过向模型插入较少数量的新权重，并仅对这些权重进行训练来工作。这使得使用LoRA进行训练更快速、内存效率更高，并且产生更小的模型权重（几百MB），更容易存储和共享。LoRA还可以与其他训练技术（如DreamBooth）结合以加快训练速度。'
 - en: LoRA is very versatile and supported for [DreamBooth](https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth_lora.py),
     [Kandinsky 2.2](https://github.com/huggingface/diffusers/blob/main/examples/kandinsky2_2/text_to_image/train_text_to_image_lora_decoder.py),
     [Stable Diffusion XL](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_lora_sdxl.py),
     [text-to-image](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_lora.py),
     and [Wuerstchen](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_lora_prior.py).
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRA非常灵活，并支持[DreamBooth](https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth_lora.py)、[Kandinsky
+    2.2](https://github.com/huggingface/diffusers/blob/main/examples/kandinsky2_2/text_to_image/train_text_to_image_lora_decoder.py)、[Stable
+    Diffusion XL](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_lora_sdxl.py)、[text-to-image](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_lora.py)和[Wuerstchen](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_lora_prior.py)。
 - en: This guide will explore the [train_text_to_image_lora.py](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_lora.py)
     script to help you become more familiar with it, and how you can adapt it for
     your own use-case.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个指南将探讨[train_text_to_image_lora.py](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_lora.py)脚本，帮助您更熟悉它，以及如何为自己的用例进行调整。
 - en: 'Before running the script, make sure you install the library from source:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在运行脚本之前，请确保您从源代码安装库：
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Navigate to the example folder with the training script and install the required
     dependencies for the script you’re using:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 导航到包含训练脚本的示例文件夹，并安装您正在使用的脚本所需的依赖项：
 - en: PyTorchFlax
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorchFlax
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 🤗 Accelerate is a library for helping you train on multiple GPUs/TPUs or with
     mixed-precision. It’ll automatically configure your training setup based on your
     hardware and environment. Take a look at the 🤗 Accelerate [Quick tour](https://huggingface.co/docs/accelerate/quicktour)
     to learn more.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate是一个帮助您在多个GPU/TPU上进行训练或使用混合精度的库。它将根据您的硬件和环境自动配置您的训练设置。查看🤗 Accelerate
+    [快速入门](https://huggingface.co/docs/accelerate/quicktour)以了解更多。
 - en: 'Initialize an 🤗 Accelerate environment:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 初始化🤗 Accelerate环境：
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To setup a default 🤗 Accelerate environment without choosing any configurations:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 要设置默认的🤗 Accelerate环境而不选择任何配置：
 - en: '[PRE3]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Or if your environment doesn’t support an interactive shell, like a notebook,
     you can use:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者如果您的环境不支持交互式shell，比如笔记本，您可以使用：
 - en: '[PRE4]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Lastly, if you want to train a model on your own dataset, take a look at the
     [Create a dataset for training](create_dataset) guide to learn how to create a
     dataset that works with the training script.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，如果您想在自己的数据集上训练模型，请查看[创建用于训练的数据集](create_dataset)指南，了解如何创建与训练脚本兼容的数据集。
 - en: The following sections highlight parts of the training script that are important
     for understanding how to modify it, but it doesn’t cover every aspect of the script
     in detail. If you’re interested in learning more, feel free to read through the
     [script](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/text_to_image_lora.py)
     and let us know if you have any questions or concerns.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下部分突出显示了训练脚本的一些重要部分，以帮助您了解如何修改它，但并未详细涵盖脚本的每个方面。如果您有兴趣了解更多，请随时阅读[脚本](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/text_to_image_lora.py)，并告诉我们您是否有任何问题或疑虑。
 - en: Script parameters
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 脚本参数
 - en: The training script has many parameters to help you customize your training
     run. All of the parameters and their descriptions are found in the [`parse_args()`](https://github.com/huggingface/diffusers/blob/dd9a5caf61f04d11c0fa9f3947b69ab0010c9a0f/examples/text_to_image/train_text_to_image_lora.py#L85)
     function. Default values are provided for most parameters that work pretty well,
     but you can also set your own values in the training command if you’d like.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本有许多参数可帮助您自定义训练运行。所有参数及其描述都可以在[`parse_args()`](https://github.com/huggingface/diffusers/blob/dd9a5caf61f04d11c0fa9f3947b69ab0010c9a0f/examples/text_to_image/train_text_to_image_lora.py#L85)函数中找到。大多数参数都提供了默认值，但如果您愿意，也可以在训练命令中设置自己的值。
 - en: 'For example, to increase the number of epochs to train:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要增加训练的时代数：
 - en: '[PRE5]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Many of the basic and important parameters are described in the [Text-to-image](text2image#script-parameters)
     training guide, so this guide just focuses on the LoRA relevant parameters:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多基本和重要的参数在[Text-to-image](text2image#script-parameters)训练指南中有描述，因此本指南只关注与LoRA相关的参数：
 - en: '`--rank`: the inner dimension of the low-rank matrices to train; a higher rank
     means more trainable parameters'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--rank`：要训练的低秩矩阵的内部维度；更高的秩意味着更多的可训练参数'
 - en: '`--learning_rate`: the default learning rate is 1e-4, but with LoRA, you can
     use a higher learning rate'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--learning_rate`：默认学习率为1e-4，但使用LoRA时，您可以使用更高的学习率'
 - en: Training script
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练脚本
 - en: The dataset preprocessing code and training loop are found in the [`main()`](https://github.com/huggingface/diffusers/blob/dd9a5caf61f04d11c0fa9f3947b69ab0010c9a0f/examples/text_to_image/train_text_to_image_lora.py#L371)
     function, and if you need to adapt the training script, this is where you’ll make
     your changes.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 数据集预处理代码和训练循环可以在 [`main()`](https://github.com/huggingface/diffusers/blob/dd9a5caf61f04d11c0fa9f3947b69ab0010c9a0f/examples/text_to_image/train_text_to_image_lora.py#L371)
+    函数中找到，如果您需要调整训练脚本，这就是您需要进行更改的地方。
 - en: As with the script parameters, a walkthrough of the training script is provided
     in the [Text-to-image](text2image#training-script) training guide. Instead, this
     guide takes a look at the LoRA relevant parts of the script.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 与脚本参数一样，[文本到图像](text2image#training-script)训练指南中提供了训练脚本的详细步骤。而这份指南则着眼于脚本中与 LoRA
+    相关的部分。
 - en: 'The script begins by adding the [new LoRA weights](https://github.com/huggingface/diffusers/blob/dd9a5caf61f04d11c0fa9f3947b69ab0010c9a0f/examples/text_to_image/train_text_to_image_lora.py#L447)
     to the attention layers. This involves correctly configuring the weight size for
     each block in the UNet. You’ll see the `rank` parameter is used to create the
     [LoRAAttnProcessor](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.LoRAAttnProcessor):'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 脚本首先通过将 [新的 LoRA 权重](https://github.com/huggingface/diffusers/blob/dd9a5caf61f04d11c0fa9f3947b69ab0010c9a0f/examples/text_to_image/train_text_to_image_lora.py#L447)
+    添加到注意力层来开始。这涉及正确配置 UNet 中每个块的权重大小。您会看到 `rank` 参数被用来创建 [LoRAAttnProcessor](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.LoRAAttnProcessor)：
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'The [optimizer](https://github.com/huggingface/diffusers/blob/dd9a5caf61f04d11c0fa9f3947b69ab0010c9a0f/examples/text_to_image/train_text_to_image_lora.py#L519)
     is initialized with the `lora_layers` because these are the only weights that’ll
     be optimized:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '[优化器](https://github.com/huggingface/diffusers/blob/dd9a5caf61f04d11c0fa9f3947b69ab0010c9a0f/examples/text_to_image/train_text_to_image_lora.py#L519)
+    使用 `lora_layers` 进行初始化，因为这些是唯一会被优化的权重：'
 - en: '[PRE7]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Aside from setting up the LoRA layers, the training script is more or less the
     same as train_text_to_image.py!
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了设置 LoRA 层之外，训练脚本基本上与 train_text_to_image.py 相同！
 - en: Launch the script
+  id: totrans-36
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 启动脚本
 - en: Once you’ve made all your changes or you’re okay with the default configuration,
     you’re ready to launch the training script! 🚀
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您完成了所有更改或者您对默认配置满意，您就可以启动训练脚本！🚀
 - en: 'Let’s train on the [Pokémon BLIP captions](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)
     dataset to generate our yown Pokémon. Set the environment variables `MODEL_NAME`
     and `DATASET_NAME` to the model and dataset respectively. You should also specify
     where to save the model in `OUTPUT_DIR`, and the name of the model to save to
     on the Hub with `HUB_MODEL_ID`. The script creates and saves the following files
     to your repository:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们在 [Pokémon BLIP 标题](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)
+    数据集上进行训练，以生成我们自己的 Pokémon。将环境变量 `MODEL_NAME` 和 `DATASET_NAME` 分别设置为模型和数据集。您还应该指定在
+    `OUTPUT_DIR` 中保存模型的位置，并使用 `HUB_MODEL_ID` 指定要保存到 Hub 上的模型的名称。脚本将创建并保存以下文件到您的存储库中：
 - en: saved model checkpoints
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 保存的模型检查点
 - en: '`pytorch_lora_weights.safetensors` (the trained LoRA weights)'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pytorch_lora_weights.safetensors`（训练的 LoRA 权重）'
 - en: If you’re training on more than one GPU, add the `--multi_gpu` parameter to
     the `accelerate launch` command.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在多个 GPU 上进行训练，请在 `accelerate launch` 命令中添加 `--multi_gpu` 参数。
 - en: A full training run takes ~5 hours on a 2080 Ti GPU with 11GB of VRAM.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 在拥有 11GB VRAM 的 2080 Ti GPU 上进行完整训练大约需要 5 小时。
 - en: '[PRE8]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Once training has been completed, you can use your model for inference:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用您的模型进行推理：
 - en: '[PRE9]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Next steps
+  id: totrans-46
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'Congratulations on training a new model with LoRA! To learn more about how
     to use your new model, the following guides may be helpful:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 恭喜您使用 LoRA 训练了一个新模型！要了解如何使用您的新模型，以下指南可能会有所帮助：
 - en: Learn how to [load different LoRA formats](../using-diffusers/loading_adapters#LoRA)
     trained using community trainers like Kohya and TheLastBen.
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 学习如何 [加载不同的 LoRA 格式](../using-diffusers/loading_adapters#LoRA) ，这些格式是使用 Kohya
+    和 TheLastBen 等社区训练者训练的。
 - en: Learn how to use and [combine multiple LoRA’s](../tutorials/using_peft_for_inference)
     with PEFT for inference.
+  id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 学习如何使用 [结合多个 LoRA](../tutorials/using_peft_for_inference) 与 PEFT 进行推理。

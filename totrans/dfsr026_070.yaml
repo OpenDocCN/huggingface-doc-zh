@@ -1,24 +1,15 @@
 - en: Latent Consistency Distillation
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/lcm_distill](https://huggingface.co/docs/diffusers/training/lcm_distill)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[Latent Consistency Models (LCMs)](https://hf.co/papers/2310.04378) are able
@@ -29,6 +20,7 @@
     and incorporating a *skipping-step* method to consistently skip timesteps to accelerate
     the distillation process (refer to section 4.1, 4.2, and 4.3 of the paper for
     more details).'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: If you’re training on a GPU with limited vRAM, try enabling `gradient_checkpointing`,
@@ -36,58 +28,78 @@
     speedup training. You can reduce your memory-usage even more by enabling memory-efficient
     attention with [xFormers](../optimization/xformers) and [bitsandbytes’](https://github.com/TimDettmers/bitsandbytes)
     8-bit optimizer.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: This guide will explore the [train_lcm_distill_sd_wds.py](https://github.com/huggingface/diffusers/blob/main/examples/consistency_distillation/train_lcm_distill_sd_wds.py)
     script to help you become more familiar with it, and how you can adapt it for
     your own use-case.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: 'Before running the script, make sure you install the library from source:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then navigate to the example folder containing the training script and install
     the required dependencies for the script you’re using:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 🤗 Accelerate is a library for helping you train on multiple GPUs/TPUs or with
     mixed-precision. It’ll automatically configure your training setup based on your
     hardware and environment. Take a look at the 🤗 Accelerate [Quick tour](https://huggingface.co/docs/accelerate/quicktour)
     to learn more.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: 'Initialize an 🤗 Accelerate environment (try enabling `torch.compile` to significantly
     speedup training):'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To setup a default 🤗 Accelerate environment without choosing any configurations:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Or if your environment doesn’t support an interactive shell, like a notebook,
     you can use:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Lastly, if you want to train a model on your own dataset, take a look at the
     [Create a dataset for training](create_dataset) guide to learn how to create a
     dataset that works with the training script.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: Script parameters
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -96,6 +108,7 @@
     in detail. If you’re interested in learning more, feel free to read through the
     [script](https://github.com/huggingface/diffusers/blob/main/examples/consistency_distillation/train_lcm_distill_sd_wds.py)
     and let us know if you have any questions or concerns.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: The training script provides many parameters to help you customize your training
@@ -103,22 +116,28 @@
     function. This function provides default values for each parameter, such as the
     training batch size and learning rate, but you can also set your own values in
     the training command if you’d like.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: 'For example, to speedup training with mixed precision using the fp16 format,
     add the `--mixed_precision` parameter to the training command:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Most of the parameters are identical to the parameters in the [Text-to-image](text2image#script-parameters)
     training guide, so you’ll focus on the parameters that are relevant to latent
     consistency distillation in this guide.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: '`--pretrained_teacher_model`: the path to a pretrained latent diffusion model
     to use as the teacher model'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -126,99 +145,129 @@
     is known to suffer from numerical instability, so this parameter allows you to
     specify an alternative VAE (like this [VAE]((https://huggingface.co/madebyollin/sdxl-vae-fp16-fix))
     by madebyollin which works in fp16)'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--w_min` and `--w_max`: the minimum and maximum guidance scale values for
     guidance scale sampling'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--num_ddim_timesteps`: the number of timesteps for DDIM sampling'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--loss_type`: the type of loss (L2 or Huber) to calculate for latent consistency
     distillation; Huber loss is generally preferred because it’s more robust to outliers'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--huber_c`: the Huber loss parameter'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Training script
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: The training script starts by creating a dataset class - [`Text2ImageDataset`](https://github.com/huggingface/diffusers/blob/3b37488fa3280aed6a95de044d7a42ffdcb565ef/examples/consistency_distillation/train_lcm_distill_sd_wds.py#L141)
     - for preprocessing the images and creating a training dataset.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: For improved performance on reading and writing large datasets stored in the
     cloud, this script uses the [WebDataset](https://github.com/webdataset/webdataset)
     format to create a preprocessing pipeline to apply transforms and create a dataset
     and dataloader for training. Images are processed and fed to the training loop
     without having to download the full dataset first.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: In the [`main()`](https://github.com/huggingface/diffusers/blob/3b37488fa3280aed6a95de044d7a42ffdcb565ef/examples/consistency_distillation/train_lcm_distill_sd_wds.py#L768)
     function, all the necessary components like the noise scheduler, tokenizers, text
     encoders, and VAE are loaded. The teacher UNet is also loaded here and then you
     can create a student UNet from the teacher UNet. The student UNet is updated by
     the optimizer during training.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Now you can create the [optimizer](https://github.com/huggingface/diffusers/blob/3b37488fa3280aed6a95de044d7a42ffdcb565ef/examples/consistency_distillation/train_lcm_distill_sd_wds.py#L979)
     to update the UNet parameters:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Create the [dataset](https://github.com/huggingface/diffusers/blob/3b37488fa3280aed6a95de044d7a42ffdcb565ef/examples/consistency_distillation/train_lcm_distill_sd_wds.py#L994):'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Next, you’re ready to setup the [training loop](https://github.com/huggingface/diffusers/blob/3b37488fa3280aed6a95de044d7a42ffdcb565ef/examples/consistency_distillation/train_lcm_distill_sd_wds.py#L1049)
     and implement the latent consistency distillation method (see Algorithm 1 in the
     paper for more details). This section of the script takes care of adding noise
     to the latents, sampling and creating a guidance scale embedding, and predicting
     the original image from the noise.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: It gets the [teacher model predictions](https://github.com/huggingface/diffusers/blob/3b37488fa3280aed6a95de044d7a42ffdcb565ef/examples/consistency_distillation/train_lcm_distill_sd_wds.py#L1172)
     and the [LCM predictions](https://github.com/huggingface/diffusers/blob/3b37488fa3280aed6a95de044d7a42ffdcb565ef/examples/consistency_distillation/train_lcm_distill_sd_wds.py#L1209)
     next, calculates the loss, and then backpropagates it to the LCM.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: If you want to learn more about how the training loop works, check out the [Understanding
     pipelines, models and schedulers tutorial](../using-diffusers/write_own_pipeline)
     which breaks down the basic pattern of the denoising process.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
 - en: Launch the script
+  id: totrans-46
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Now you’re ready to launch the training script and start distilling!
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
 - en: For this guide, you’ll use the `--train_shards_path_or_url` to specify the path
@@ -226,18 +275,25 @@
     dataset stored on the Hub [here](https://huggingface.co/datasets/laion/conceptual-captions-12m-webdataset).
     Set the `MODEL_DIR` environment variable to the name of the teacher model and
     `OUTPUT_DIR` to where you want to save the model.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE13]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Once training is complete, you can use your new LCM for inference.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE14]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: LoRA
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -246,42 +302,61 @@
     weights because they are a lot smaller (~100MBs). Use the [train_lcm_distill_lora_sd_wds.py](https://github.com/huggingface/diffusers/blob/main/examples/consistency_distillation/train_lcm_distill_lora_sd_wds.py)
     or [train_lcm_distill_lora_sdxl.wds.py](https://github.com/huggingface/diffusers/blob/main/examples/consistency_distillation/train_lcm_distill_lora_sdxl_wds.py)
     script to train with LoRA.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRA是一种显著减少可训练参数数量的训练技术。因此，训练速度更快，存储结果权重更容易，因为它们要小得多（~100MB）。使用[train_lcm_distill_lora_sd_wds.py](https://github.com/huggingface/diffusers/blob/main/examples/consistency_distillation/train_lcm_distill_lora_sd_wds.py)或[train_lcm_distill_lora_sdxl.wds.py](https://github.com/huggingface/diffusers/blob/main/examples/consistency_distillation/train_lcm_distill_lora_sdxl_wds.py)脚本来进行LoRA训练。
 - en: The LoRA training script is discussed in more detail in the [LoRA training](lora)
     guide.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关LoRA训练脚本的详细讨论，请参阅[LoRA训练](lora)指南。
 - en: Stable Diffusion XL
+  id: totrans-55
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 稳定扩散XL
 - en: Stable Diffusion XL (SDXL) is a powerful text-to-image model that generates
     high-resolution images, and it adds a second text-encoder to its architecture.
     Use the [train_lcm_distill_sdxl_wds.py](https://github.com/huggingface/diffusers/blob/main/examples/consistency_distillation/train_lcm_distill_sdxl_wds.py)
     script to train a SDXL model with LoRA.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 稳定扩散XL（SDXL）是一个强大的文本到图像模型，可以生成高分辨率图像，并在其架构中添加了第二个文本编码器。使用[train_lcm_distill_sdxl_wds.py](https://github.com/huggingface/diffusers/blob/main/examples/consistency_distillation/train_lcm_distill_sdxl_wds.py)脚本来训练一个带有LoRA的SDXL模型。
 - en: The SDXL training script is discussed in more detail in the [SDXL training](sdxl)
     guide.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关SDXL训练脚本的详细讨论，请参阅[SDXL训练](sdxl)指南。
 - en: Next steps
+  id: totrans-58
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'Congratulations on distilling a LCM model! To learn more about LCM, the following
     may be helpful:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 恭喜您精炼LCM模型！要了解更多关于LCM的信息，以下内容可能会有所帮助：
 - en: Learn how to use [LCMs for inference](../using-diffusers/lcm) for text-to-image,
     image-to-image, and with LoRA checkpoints.
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 学习如何使用[LCMs进行推理](../using-diffusers/lcm)用于文本到图像、图像到图像以及带有LoRA检查点。
 - en: Read the [SDXL in 4 steps with Latent Consistency LoRAs](https://huggingface.co/blog/lcm_lora)
     blog post to learn more about SDXL LCM-LoRA’s for super fast inference, quality
     comparisons, benchmarks, and more.
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 阅读[SDXL在4个步骤中使用潜在一致性LoRAs](https://huggingface.co/blog/lcm_lora)博客文章，了解更多关于SDXL
+    LCM-LoRA的信息，用于超快推理、质量比较、基准测试等。

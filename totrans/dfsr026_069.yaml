@@ -1,26 +1,17 @@
 - en: Custom Diffusion
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 自定义扩散
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/custom_diffusion](https://huggingface.co/docs/diffusers/training/custom_diffusion)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/training/custom_diffusion](https://huggingface.co/docs/diffusers/training/custom_diffusion)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[Custom Diffusion](https://huggingface.co/papers/2212.04488) is a training
@@ -29,285 +20,420 @@
     works by only training weights in the cross-attention layers, and it uses a special
     word to represent the newly learned concept. Custom Diffusion is unique because
     it can also learn multiple concepts at the same time.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Custom Diffusion](https://huggingface.co/papers/2212.04488)是一种用于个性化图像生成模型的训练技术。与文本反转、DreamBooth和LoRA一样，自定义扩散只需要几个（~4-5）示例图像。这种技术通过仅训练交叉注意力层中的权重来工作，并使用特殊词来表示新学习的概念。自定义扩散是独特的，因为它还可以同时学习多个概念。'
 - en: If you’re training on a GPU with limited vRAM, you should try enabling xFormers
     with `--enable_xformers_memory_efficient_attention` for faster training with lower
     vRAM requirements (16GB). To save even more memory, add `--set_grads_to_none`
     in the training argument to set the gradients to `None` instead of zero (this
     option can cause some issues, so if you experience any, try removing this parameter).
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在具有有限vRAM的GPU上进行训练，您应该尝试使用`--enable_xformers_memory_efficient_attention`启用xFormers，以实现更快的训练和更低的vRAM要求（16GB）。为了节省更多内存，可以在训练参数中添加`--set_grads_to_none`，将梯度设置为`None`而不是零（此选项可能会导致一些问题，如果您遇到任何问题，请尝试删除此参数）。
 - en: This guide will explore the [train_custom_diffusion.py](https://github.com/huggingface/diffusers/blob/main/examples/custom_diffusion/train_custom_diffusion.py)
     script to help you become more familiar with it, and how you can adapt it for
     your own use-case.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将探讨[train_custom_diffusion.py](https://github.com/huggingface/diffusers/blob/main/examples/custom_diffusion/train_custom_diffusion.py)脚本，帮助您更熟悉它，以及如何为自己的用例进行调整。
 - en: 'Before running the script, make sure you install the library from source:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在运行脚本之前，请确保您从源代码安装库：
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Navigate to the example folder with the training script and install the required
     dependencies:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 导航到包含训练脚本的示例文件夹并安装所需的依赖项：
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 🤗 Accelerate is a library for helping you train on multiple GPUs/TPUs or with
     mixed-precision. It’ll automatically configure your training setup based on your
     hardware and environment. Take a look at the 🤗 Accelerate [Quick tour](https://huggingface.co/docs/accelerate/quicktour)
     to learn more.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate是一个帮助您在多个GPU/TPU上训练或使用混合精度的库。它将根据您的硬件和环境自动配置您的训练设置。查看🤗 Accelerate
+    [快速入门](https://huggingface.co/docs/accelerate/quicktour)以了解更多。
 - en: 'Initialize an 🤗 Accelerate environment:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 初始化🤗 Accelerate环境：
 - en: '[PRE2]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To setup a default 🤗 Accelerate environment without choosing any configurations:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 要设置默认的🤗 Accelerate环境而不选择任何配置：
 - en: '[PRE3]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Or if your environment doesn’t support an interactive shell, like a notebook,
     you can use:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者如果您的环境不支持交互式shell，比如笔记本，您可以使用：
 - en: '[PRE4]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Lastly, if you want to train a model on your own dataset, take a look at the
     [Create a dataset for training](create_dataset) guide to learn how to create a
     dataset that works with the training script.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，如果您想在自己的数据集上训练模型，请查看[创建用于训练的数据集](create_dataset)指南，了解如何创建适用于训练脚本的数据集。
 - en: The following sections highlight parts of the training script that are important
     for understanding how to modify it, but it doesn’t cover every aspect of the script
     in detail. If you’re interested in learning more, feel free to read through the
     [script](https://github.com/huggingface/diffusers/blob/main/examples/custom_diffusion/train_custom_diffusion.py)
     and let us know if you have any questions or concerns.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下部分突出显示了训练脚本的重要部分，有助于了解如何修改它，但并未详细涵盖脚本的每个方面。如果您有兴趣了解更多，请随时阅读[脚本](https://github.com/huggingface/diffusers/blob/main/examples/custom_diffusion/train_custom_diffusion.py)，并告诉我们您是否有任何问题或疑虑。
 - en: Script parameters
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 脚本参数
 - en: The training script contains all the parameters to help you customize your training
     run. These are found in the [`parse_args()`](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L319)
     function. The function comes with default values, but you can also set your own
     values in the training command if you’d like.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本包含所有参数，帮助您定制训练运行。这些参数在[`parse_args()`](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L319)函数中找到。该函数带有默认值，但如果您愿意，也可以在训练命令中设置自己的值。
 - en: 'For example, to change the resolution of the input image:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要更改输入图像的分辨率：
 - en: '[PRE5]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Many of the basic parameters are described in the [DreamBooth](dreambooth#script-parameters)
     training guide, so this guide focuses on the parameters unique to Custom Diffusion:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多基本参数在[DreamBooth](dreambooth#script-parameters)训练指南中有描述，因此本指南重点介绍了自定义扩散的独特参数：
 - en: '`--freeze_model`: freezes the key and value parameters in the cross-attention
     layer; the default is `crossattn_kv`, but you can set it to `crossattn` to train
     all the parameters in the cross-attention layer'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--freeze_model`：冻结交叉注意力层中的键和值参数；默认值为`crossattn_kv`，但您也可以将其设置为`crossattn`以训练交叉注意力层中的所有参数'
 - en: '`--concepts_list`: to learn multiple concepts, provide a path to a JSON file
     containing the concepts'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--concepts_list`：要学习多个概念，请提供包含概念的JSON文件的路径'
 - en: '`--modifier_token`: a special word used to represent the learned concept'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--modifier_token`：用于表示学习概念的特殊词'
 - en: '`--initializer_token`:'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--initializer_token`：'
 - en: Prior preservation loss
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 先前的保留损失
 - en: Prior preservation loss is a method that uses a model’s own generated samples
     to help it learn how to generate more diverse images. Because these generated
     sample images belong to the same class as the images you provided, they help the
     model retain what it has learned about the class and how it can use what it already
     knows about the class to make new compositions.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 先前保存损失是一种方法，它利用模型生成的样本来帮助模型学习如何生成更多样化的图像。由于这些生成的样本图像属于您提供的图像相同的类别，它们有助于模型保留其对类别的学习以及如何利用其已知的类别知识来生成新构图的内容。
 - en: Many of the parameters for prior preservation loss are described in the [DreamBooth](dreambooth#prior-preservation-loss)
     training guide.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多有关先前保存损失的参数在[DreamBooth](dreambooth#prior-preservation-loss)培训指南中有描述。
 - en: Regularization
+  id: totrans-31
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 正则化
 - en: Custom Diffusion includes training the target images with a small set of real
     images to prevent overfitting. As you can imagine, this can be easy to do when
     you’re only training on a few images! Download 200 real images with `clip_retrieval`.
     The `class_prompt` should be the same category as the target images. These images
     are stored in `class_data_dir`.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 自定义扩散包括使用少量真实图像训练目标图像，以防止过拟合。可以想象，当您只对少量图像进行训练时，这可能很容易做到！使用`clip_retrieval`下载200张真实图像。`class_prompt`应该是与目标图像相同类别。这些图像存储在`class_data_dir`中。
 - en: '[PRE6]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'To enable regularization, add the following parameters:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 要启用正则化，请添加以下参数：
 - en: '`--with_prior_preservation`: whether to use prior preservation loss'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--with_prior_preservation`：是否使用先前保存损失'
 - en: '`--prior_loss_weight`: controls the influence of the prior preservation loss
     on the model'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--prior_loss_weight`：控制先前保存损失对模型的影响'
 - en: '`--real_prior`: whether to use a small set of real images to prevent overfitting'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--real_prior`：是否使用少量真实图像以防止过拟合'
 - en: '[PRE7]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Training script
+  id: totrans-39
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练脚本
 - en: A lot of the code in the Custom Diffusion training script is similar to the
     [DreamBooth](dreambooth#training-script) script. This guide instead focuses on
     the code that is relevant to Custom Diffusion.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 自定义扩散训练脚本中的许多代码与[DreamBooth](dreambooth#training-script)脚本相似。本指南重点介绍与自定义扩散相关的代码。
 - en: 'The Custom Diffusion training script has two dataset classes:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 自定义扩散训练脚本有两个数据集类：
 - en: '[`CustomDiffusionDataset`](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L165):
     preprocesses the images, class images, and prompts for training'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[`CustomDiffusionDataset`](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L165)：对图像、类图像和提示进行预处理以进行训练'
 - en: '[`PromptDataset`](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L148):
     prepares the prompts for generating class images'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[`PromptDataset`](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L148)：准备用于生成类图像的提示'
 - en: Next, the `modifier_token` is [added to the tokenizer](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L811),
     converted to token ids, and the token embeddings are resized to account for the
     new `modifier_token`. Then the `modifier_token` embeddings are initialized with
     the embeddings of the `initializer_token`. All parameters in the text encoder
     are frozen, except for the token embeddings since this is what the model is trying
     to learn to associate with the concepts.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，`modifier_token`被添加到分词器中，转换为标记id，并且标记嵌入被调整大小以适应新的`modifier_token`。然后，`modifier_token`的嵌入被初始化为`initializer_token`的嵌入。文本编码器中的所有参数都被冻结，除了标记嵌入，因为这是模型试图学习与概念相关联的内容。
 - en: '[PRE8]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Now you’ll need to add the [Custom Diffusion weights](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L911C3-L911C3)
     to the attention layers. This is a really important step for getting the shape
     and size of the attention weights correct, and for setting the appropriate number
     of attention processors in each UNet block.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您需要将[自定义扩散权重](https://github.com/huggingface/diffusers/blob/64603389da01082055a901f2883c4810d1144edb/examples/custom_diffusion/train_custom_diffusion.py#L911C3-L911C3)添加到注意力层中。这是确保注意力权重的形状和大小正确的一个非常重要的步骤，也是为每个UNet块设置适当数量的注意力处理器的关键。
 - en: '[PRE9]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'The [optimizer](https://github.com/huggingface/diffusers/blob/84cd9e8d01adb47f046b1ee449fc76a0c32dc4e2/examples/custom_diffusion/train_custom_diffusion.py#L982)
     is initialized to update the cross-attention layer parameters:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 优化器被初始化以更新交叉注意力层参数：
 - en: '[PRE10]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'In the [training loop](https://github.com/huggingface/diffusers/blob/84cd9e8d01adb47f046b1ee449fc76a0c32dc4e2/examples/custom_diffusion/train_custom_diffusion.py#L1048),
     it is important to only update the embeddings for the concept you’re trying to
     learn. This means setting the gradients of all the other token embeddings to zero:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[训练循环](https://github.com/huggingface/diffusers/blob/84cd9e8d01adb47f046b1ee449fc76a0c32dc4e2/examples/custom_diffusion/train_custom_diffusion.py#L1048)中，只更新您要学习的概念的嵌入是很重要的。这意味着将所有其他标记嵌入的梯度设置为零：
 - en: '[PRE11]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Launch the script
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 启动脚本
 - en: Once you’ve made all your changes or you’re okay with the default configuration,
     you’re ready to launch the training script! 🚀
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您完成了所有更改或对默认配置感到满意，您就可以启动训练脚本了！🚀
 - en: In this guide, you’ll download and use these example [cat images](https://www.cs.cmu.edu/~custom-diffusion/assets/data.zip).
     You can also create and use your own dataset if you want (see the [Create a dataset
     for training](create_dataset) guide).
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，您将下载并使用这些示例[猫图像](https://www.cs.cmu.edu/~custom-diffusion/assets/data.zip)。如果您愿意，也可以创建并使用自己的数据集（请参阅[创建用于训练的数据集](create_dataset)指南）。
 - en: Set the environment variable `MODEL_NAME` to a model id on the Hub or a path
     to a local model, `INSTANCE_DIR` to the path where you just downloaded the cat
     images to, and `OUTPUT_DIR` to where you want to save the model. You’ll use `<new1>`
     as the special word to tie the newly learned embeddings to. The script creates
     and saves model checkpoints and a pytorch_custom_diffusion_weights.bin file to
     your repository.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 将环境变量`MODEL_NAME`设置为Hub上的模型ID或本地模型的路径，将`INSTANCE_DIR`设置为您刚下载猫图片的路径，将`OUTPUT_DIR`设置为您想要保存模型的路径。您将使用`<new1>`作为将新学习的嵌入与之关联的特殊词。该脚本将创建并保存模型检查点和一个pytorch_custom_diffusion_weights.bin文件到您的存储库中。
 - en: To monitor training progress with Weights and Biases, add the `--report_to=wandb`
     parameter to the training command and specify a validation prompt with `--validation_prompt`.
     This is useful for debugging and saving intermediate results.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用Weights and Biases监视训练进度，请在训练命令中添加`--report_to=wandb`参数，并使用`--validation_prompt`指定验证提示。这对于调试和保存中间结果很有用。
 - en: 'If you’re training on human faces, the Custom Diffusion team has found the
     following parameters to work well:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在训练人脸，Custom Diffusion团队发现以下参数效果很好：
 - en: '`--learning_rate=5e-6`'
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--learning_rate=5e-6`'
 - en: '`--max_train_steps` can be anywhere between 1000 and 2000'
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--max_train_steps`可以在1000和2000之间任意选择'
 - en: '`--freeze_model=crossattn`'
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--freeze_model=crossattn`'
 - en: use at least 15-20 images to train with
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 至少使用15-20张图片进行训练
 - en: single conceptmultiple concepts
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 单一概念多个概念
 - en: '[PRE12]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Once training is finished, you can use your new Custom Diffusion model for inference.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用您的新Custom Diffusion模型进行推断。
 - en: single conceptmultiple concepts
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 单一概念多个概念
 - en: '[PRE13]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Next steps
+  id: totrans-67
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'Congratulations on training a model with Custom Diffusion! 🎉 To learn more:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 恭喜您训练了一个Custom Diffusion模型！🎉 要了解更多：
 - en: Read the [Multi-Concept Customization of Text-to-Image Diffusion](https://www.cs.cmu.edu/~custom-diffusion/)
     blog post to learn more details about the experimental results from the Custom
     Diffusion team.
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 阅读[文本到图像扩散的多概念定制](https://www.cs.cmu.edu/~custom-diffusion/)博文，了解有关Custom Diffusion团队实验结果的更多详细信息。
