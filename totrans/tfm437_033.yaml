@@ -1,26 +1,17 @@
 - en: Object detection
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 目标检测
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/object_detection](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/object_detection)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/object_detection](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/object_detection)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Object detection is the computer vision task of detecting instances (such as
@@ -32,134 +23,200 @@
     cars). This task is commonly used in autonomous driving for detecting things like
     pedestrians, road signs, and traffic lights. Other applications include counting
     objects in images, image search, and more.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 目标检测是计算机视觉任务，用于检测图像中的实例（如人类、建筑物或汽车）。目标检测模型接收图像作为输入，并输出检测到的对象的边界框的坐标和相关标签。一幅图像可以包含多个对象，每个对象都有自己的边界框和标签（例如，它可以有一辆汽车和一座建筑物），每个对象可以出现在图像的不同部分（例如，图像可以有几辆汽车）。这个任务通常用于自动驾驶，用于检测行人、道路标志和交通灯等。其他应用包括在图像中计数对象、图像搜索等。
 - en: 'In this guide, you will learn how to:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，您将学习如何：
 - en: Finetune [DETR](https://huggingface.co/docs/transformers/model_doc/detr), a
     model that combines a convolutional backbone with an encoder-decoder Transformer,
     on the [CPPE-5](https://huggingface.co/datasets/cppe-5) dataset.
+  id: totrans-5
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 对[DETR](https://huggingface.co/docs/transformers/model_doc/detr)进行微调，这是一个将卷积主干与编码器-解码器Transformer结合的模型，在[CPPE-5](https://huggingface.co/datasets/cppe-5)数据集上进行训练。
 - en: Use your finetuned model for inference.
+  id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用您微调的模型进行推断。
 - en: 'The task illustrated in this tutorial is supported by the following model architectures:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程中所示的任务由以下模型架构支持：
 - en: '[Conditional DETR](../model_doc/conditional_detr), [Deformable DETR](../model_doc/deformable_detr),
     [DETA](../model_doc/deta), [DETR](../model_doc/detr), [Table Transformer](../model_doc/table-transformer),
     [YOLOS](../model_doc/yolos)'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '[条件DETR](../model_doc/conditional_detr), [可变DETR](../model_doc/deformable_detr),
+    [DETA](../model_doc/deta), [DETR](../model_doc/detr), [表格Transformer](../model_doc/table-transformer),
+    [YOLOS](../model_doc/yolos)'
 - en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装所有必要的库：
 - en: '[PRE0]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: You’ll use 🤗 Datasets to load a dataset from the Hugging Face Hub, 🤗 Transformers
     to train your model, and `albumentations` to augment the data. `timm` is currently
     required to load a convolutional backbone for the DETR model.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将使用🤗数据集从Hugging Face Hub加载数据集，🤗转换器来训练您的模型，并使用`albumentations`来增强数据。目前需要使用`timm`来加载DETR模型的卷积主干。
 - en: 'We encourage you to share your model with the community. Log in to your Hugging
     Face account to upload it to the Hub. When prompted, enter your token to log in:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们鼓励您与社区分享您的模型。登录到您的Hugging Face帐户并将其上传到Hub。在提示时，输入您的令牌以登录：
 - en: '[PRE1]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Load the CPPE-5 dataset
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载CPPE-5数据集
 - en: The [CPPE-5 dataset](https://huggingface.co/datasets/cppe-5) contains images
     with annotations identifying medical personal protective equipment (PPE) in the
     context of the COVID-19 pandemic.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '[CPPE-5数据集](https://huggingface.co/datasets/cppe-5)包含带有注释的图像，用于识别COVID-19大流行背景下的医疗个人防护装备（PPE）。'
 - en: 'Start by loading the dataset:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先加载数据集：
 - en: '[PRE2]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: You’ll see that this dataset already comes with a training set containing 1000
     images and a test set with 29 images.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将看到这个数据集已经带有一个包含1000张图像的训练集和一个包含29张图像的测试集。
 - en: To get familiar with the data, explore what the examples look like.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 熟悉数据，探索示例的外观。
 - en: '[PRE3]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'The examples in the dataset have the following fields:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 数据集中的示例具有以下字段：
 - en: '`image_id`: the example image id'
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_id`：示例图像id'
 - en: '`image`: a `PIL.Image.Image` object containing the image'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image`：包含图像的`PIL.Image.Image`对象'
 - en: '`width`: width of the image'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`width`：图像的宽度'
 - en: '`height`: height of the image'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`height`：图像的高度'
 - en: '`objects`: a dictionary containing bounding box metadata for the objects in
     the image:'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`objects`：包含图像中对象的边界框元数据的字典：'
 - en: '`id`: the annotation id'
+  id: totrans-27
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`id`：注释id'
 - en: '`area`: the area of the bounding box'
+  id: totrans-28
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`area`：边界框的面积'
 - en: '`bbox`: the object’s bounding box (in the [COCO format](https://albumentations.ai/docs/getting_started/bounding_boxes_augmentation/#coco)
     )'
+  id: totrans-29
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`bbox`：对象的边界框（以[COCO格式](https://albumentations.ai/docs/getting_started/bounding_boxes_augmentation/#coco)）'
 - en: '`category`: the object’s category, with possible values including `Coverall
     (0)`, `Face_Shield (1)`, `Gloves (2)`, `Goggles (3)` and `Mask (4)`'
+  id: totrans-30
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`category`：对象的类别，可能的值包括`防护服（0）`、`面罩（1）`、`手套（2）`、`护目镜（3）`和`口罩（4）`'
 - en: You may notice that the `bbox` field follows the COCO format, which is the format
     that the DETR model expects. However, the grouping of the fields inside `objects`
     differs from the annotation format DETR requires. You will need to apply some
     preprocessing transformations before using this data for training.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能会注意到`bbox`字段遵循COCO格式，这是DETR模型期望的格式。然而，`objects`内部字段的分组与DETR所需的注释格式不同。在使用此数据进行训练之前，您需要应用一些预处理转换。
 - en: To get an even better understanding of the data, visualize an example in the
     dataset.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了更好地理解数据，可视化数据集中的一个示例。
 - en: '[PRE4]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '![CPPE-5 Image Example](../Images/dc3ce9ec7d52953b62801d6b8b583148.png)'
+  id: totrans-34
   prefs: []
   type: TYPE_IMG
+  zh: '![CPPE-5图像示例](../Images/dc3ce9ec7d52953b62801d6b8b583148.png)'
 - en: To visualize the bounding boxes with associated labels, you can get the labels
     from the dataset’s metadata, specifically the `category` field. You’ll also want
     to create dictionaries that map a label id to a label class (`id2label`) and the
@@ -168,62 +225,89 @@
     the Hugging Face Hub. Please note that, the part of above code that draws the
     bounding boxes assume that it is in `XYWH` (x,y co-ordinates and width and height
     of the box) format. It might not work for other formats like `(x1, y1, x2, y2)`.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 要可视化带有关联标签的边界框，您可以从数据集的元数据中获取标签，特别是`category`字段。您还需要创建映射标签id到标签类别（`id2label`）以及反向映射（`label2id`）的字典。在设置模型时，您可以稍后使用它们。包括这些映射将使您的模型在Hugging
+    Face Hub上共享时可以被其他人重复使用。请注意，上述代码中绘制边界框的部分假定它是以`XYWH`（x，y坐标和框的宽度和高度）格式。对于其他格式如`(x1，y1，x2，y2)`可能无法正常工作。
 - en: As a final step of getting familiar with the data, explore it for potential
     issues. One common problem with datasets for object detection is bounding boxes
     that “stretch” beyond the edge of the image. Such “runaway” bounding boxes can
     raise errors during training and should be addressed at this stage. There are
     a few examples with this issue in this dataset. To keep things simple in this
     guide, we remove these images from the data.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为熟悉数据的最后一步，探索可能存在的问题。目标检测数据集的一个常见问题是边界框“拉伸”到图像边缘之外。这种“失控”的边界框可能会在训练过程中引发错误，应在此阶段加以解决。在这个数据集中有一些示例存在这个问题。为了简化本指南中的操作，我们将这些图像从数据中删除。
 - en: '[PRE5]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Preprocess the data
+  id: totrans-38
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 预处理数据
 - en: 'To finetune a model, you must preprocess the data you plan to use to match
     precisely the approach used for the pre-trained model. [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)
     takes care of processing image data to create `pixel_values`, `pixel_mask`, and
     `labels` that a DETR model can train with. The image processor has some attributes
     that you won’t have to worry about:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 要微调模型，您必须预处理您计划使用的数据，以精确匹配预训练模型使用的方法。[AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)负责处理图像数据以创建`pixel_values`，`pixel_mask`和`labels`，供DETR模型训练。图像处理器具有一些属性，您无需担心：
 - en: '`image_mean = [0.485, 0.456, 0.406 ]`'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_mean = [0.485, 0.456, 0.406 ]`'
 - en: '`image_std = [0.229, 0.224, 0.225]`'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_std = [0.229, 0.224, 0.225]`'
 - en: These are the mean and standard deviation used to normalize images during the
     model pre-training. These values are crucial to replicate when doing inference
     or finetuning a pre-trained image model.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些是用于在模型预训练期间对图像进行归一化的均值和标准差。在进行推理或微调预训练图像模型时，这些值至关重要。
 - en: Instantiate the image processor from the same checkpoint as the model you want
     to finetune.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 从要微调的模型相同的检查点实例化图像处理器。
 - en: '[PRE6]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Before passing the images to the `image_processor`, apply two preprocessing
     transformations to the dataset:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 在将图像传递给`image_processor`之前，对数据集应用两个预处理转换：
 - en: Augmenting images
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 增强图像
 - en: Reformatting annotations to meet DETR expectations
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 重新格式化注释以满足DETR的期望
 - en: 'First, to make sure the model does not overfit on the training data, you can
     apply image augmentation with any data augmentation library. Here we use [Albumentations](https://albumentations.ai/docs/)
     … This library ensures that transformations affect the image and update the bounding
@@ -231,91 +315,132 @@
     on how to augment images for object detection](https://huggingface.co/docs/datasets/object_detection),
     and it uses the exact same dataset as an example. Apply the same approach here,
     resize each image to (480, 480), flip it horizontally, and brighten it:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，为了确保模型不会在训练数据上过拟合，您可以使用任何数据增强库进行图像增强。这里我们使用[Albumentations](https://albumentations.ai/docs/)...此库确保转换影响图像并相应更新边界框。🤗数据集库文档有一个详细的[关于如何为目标检测增强图像的指南](https://huggingface.co/docs/datasets/object_detection)，它使用相同的数据集作为示例。在这里应用相同的方法，将每个图像调整为(480,
+    480)，水平翻转并增加亮度：
 - en: '[PRE7]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'The `image_processor` expects the annotations to be in the following format:
     `{''image_id'': int, ''annotations'': List[Dict]}`, where each dictionary is a
     COCO object annotation. Let’s add a function to reformat annotations for a single
     example:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '`image_processor`期望注释采用以下格式：`{''image_id'': int, ''annotations'': List[Dict]}`，其中每个字典是一个COCO对象注释。让我们添加一个函数来为单个示例重新格式化注释：'
 - en: '[PRE8]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Now you can combine the image and annotation transformations to use on a batch
     of examples:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您可以将图像和注释转换组合在一起，用于一批示例：
 - en: '[PRE9]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Apply this preprocessing function to the entire dataset using 🤗 Datasets [with_transform](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.with_transform)
     method. This method applies transformations on the fly when you load an element
     of the dataset.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用🤗数据集的[with_transform](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.with_transform)方法将此预处理函数应用于整个数据集。此方法在加载数据集元素时动态应用转换。
 - en: At this point, you can check what an example from the dataset looks like after
     the transformations. You should see a tensor with `pixel_values`, a tensor with
     `pixel_mask`, and `labels`.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 此时，您可以检查数据集经过转换后的示例是什么样子。您应该看到一个带有`pixel_values`的张量，一个带有`pixel_mask`的张量和`labels`。
 - en: '[PRE10]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: You have successfully augmented the individual images and prepared their annotations.
     However, preprocessing isn’t complete yet. In the final step, create a custom
     `collate_fn` to batch images together. Pad images (which are now `pixel_values`)
     to the largest image in a batch, and create a corresponding `pixel_mask` to indicate
     which pixels are real (1) and which are padding (0).
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 您已成功增强了单个图像并准备好它们的注释。然而，预处理还没有完成。在最后一步中，创建一个自定义的`collate_fn`来将图像批量处理在一起。将图像（现在是`pixel_values`）填充到批次中最大的图像，并创建一个相应的`pixel_mask`来指示哪些像素是真实的（1），哪些是填充的（0）。
 - en: '[PRE11]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Training the DETR model
+  id: totrans-59
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练DETR模型
 - en: You have done most of the heavy lifting in the previous sections, so now you
     are ready to train your model! The images in this dataset are still quite large,
     even after resizing. This means that finetuning this model will require at least
     one GPU.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 在前几节中，您已经完成了大部分繁重的工作，现在您已经准备好训练您的模型了！即使在调整大小后，此数据集中的图像仍然相当大。这意味着微调此模型将需要至少一个GPU。
 - en: 'Training involves the following steps:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练包括以下步骤：
 - en: Load the model with [AutoModelForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForObjectDetection)
     using the same checkpoint as in the preprocessing.
+  id: totrans-62
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用与预处理中相同的检查点加载模型[AutoModelForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForObjectDetection)。
 - en: Define your training hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+  id: totrans-63
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中定义您的训练超参数。
 - en: Pass the training arguments to [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     along with the model, dataset, image processor, and data collator.
+  id: totrans-64
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将训练参数传递给[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)，以及模型、数据集、图像处理器和数据整理器。
 - en: Call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
     to finetune your model.
+  id: totrans-65
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 调用[train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)来微调您的模型。
 - en: When loading the model from the same checkpoint that you used for the preprocessing,
     remember to pass the `label2id` and `id2label` maps that you created earlier from
     the dataset’s metadata. Additionally, we specify `ignore_mismatched_sizes=True`
     to replace the existing classification head with a new one.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 在从用于预处理的相同检查点加载模型时，请记住传递您从数据集元数据中创建的`label2id`和`id2label`映射。此外，我们指定`ignore_mismatched_sizes=True`以用新的替换现有的分类头。
 - en: '[PRE12]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: In the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
     use `output_dir` to specify where to save your model, then configure hyperparameters
     as you see fit. It is important you do not remove unused columns because this
@@ -323,92 +448,141 @@
     For this reason, set `remove_unused_columns` to `False`. If you wish to share
     your model by pushing to the Hub, set `push_to_hub` to `True` (you must be signed
     in to Hugging Face to upload your model).
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中使用`output_dir`指定保存模型的位置，然后根据需要配置超参数。重要的是不要删除未使用的列，因为这将删除图像列。没有图像列，您无法创建`pixel_values`。因此，将`remove_unused_columns`设置为`False`。如果希望通过将其推送到Hub来共享您的模型，请将`push_to_hub`设置为`True`（您必须登录到Hugging
+    Face才能上传您的模型）。
 - en: '[PRE13]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Finally, bring everything together, and call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train):'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，将所有内容汇总，并调用[train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)：
 - en: '[PRE14]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: If you have set `push_to_hub` to `True` in the `training_args`, the training
     checkpoints are pushed to the Hugging Face Hub. Upon training completion, push
     the final model to the Hub as well by calling the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
     method.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果在`training_args`中将`push_to_hub`设置为`True`，则训练检查点将被推送到Hugging Face Hub。在训练完成后，通过调用[push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)方法将最终模型也推送到Hub。
 - en: '[PRE15]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Evaluate
+  id: totrans-74
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 评估
 - en: Object detection models are commonly evaluated with a set of [COCO-style metrics](https://cocodataset.org/#detection-eval).
     You can use one of the existing metrics implementations, but here you’ll use the
     one from `torchvision` to evaluate the final model that you pushed to the Hub.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 目标检测模型通常使用一组[COCO风格指标](https://cocodataset.org/#detection-eval)进行评估。您可以使用现有的指标实现之一，但在这里，您将使用来自`torchvision`的指标来评估推送到Hub的最终模型。
 - en: To use the `torchvision` evaluator, you’ll need to prepare a ground truth COCO
     dataset. The API to build a COCO dataset requires the data to be stored in a certain
     format, so you’ll need to save images and annotations to disk first. Just like
     when you prepared your data for training, the annotations from the `cppe5["test"]`
     need to be formatted. However, images should stay as they are.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用`torchvision`评估器，您需要准备一个真实的COCO数据集。构建COCO数据集的API要求数据以特定格式存储，因此您需要首先将图像和注释保存到磁盘上。就像您为训练准备数据时一样，来自`cppe5["test"]`的注释需要进行格式化。但是，图像应保持原样。
 - en: 'The evaluation step requires a bit of work, but it can be split in three major
     steps. First, prepare the `cppe5["test"]` set: format the annotations and save
     the data to disk.'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 评估步骤需要一些工作，但可以分为三个主要步骤。首先，准备`cppe5["test"]`集：格式化注释并将数据保存到磁盘上。
 - en: '[PRE16]'
+  id: totrans-78
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Next, prepare an instance of a `CocoDetection` class that can be used with `cocoevaluator`.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，准备一个可以与`cocoevaluator`一起使用的`CocoDetection`类的实例。
 - en: '[PRE17]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Finally, load the metrics and run the evaluation.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，加载指标并运行评估。
 - en: '[PRE18]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: These results can be further improved by adjusting the hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
     Give it a go!
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过调整[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中的超参数，这些结果可以进一步改善。试一试吧！
 - en: Inference
+  id: totrans-84
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推断
 - en: 'Now that you have finetuned a DETR model, evaluated it, and uploaded it to
     the Hugging Face Hub, you can use it for inference. The simplest way to try out
     your finetuned model for inference is to use it in a [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline).
     Instantiate a pipeline for object detection with your model, and pass an image
     to it:'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经微调了一个DETR模型，对其进行了评估，并将其上传到Hugging Face Hub，您可以将其用于推断。尝试使用您微调的模型进行推断的最简单方法是在[Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)中使用它。使用您的模型实例化一个用于目标检测的流水线，并将图像传递给它：
 - en: '[PRE19]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'You can also manually replicate the results of the pipeline if you’d like:'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您愿意，也可以手动复制流水线的结果：
 - en: '[PRE20]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'Let’s plot the result:'
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们绘制结果：
 - en: '[PRE21]'
+  id: totrans-90
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '![Object detection result on a new image](../Images/b288908d50f68ec172bde6778dc19ead.png)'
+  id: totrans-91
   prefs: []
   type: TYPE_IMG
+  zh: 在一张新图片上的目标检测结果

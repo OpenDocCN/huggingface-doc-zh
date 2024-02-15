@@ -1,26 +1,17 @@
 - en: Video classification
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 视频分类
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/video_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/video_classification)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/video_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/video_classification)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Video classification is the task of assigning a label or class to an entire
@@ -30,189 +21,284 @@
     A real-world application of video classification is action / activity recognition,
     which is useful for fitness applications. It is also helpful for vision-impaired
     individuals, especially when they are commuting.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 视频分类是将标签或类别分配给整个视频的任务。预期每个视频只有一个类别。视频分类模型将视频作为输入，并返回关于视频属于哪个类别的预测。这些模型可用于对视频内容进行分类。视频分类的现实应用是动作/活动识别，对于健身应用非常有用。对于视力受损的个体，尤其是在通勤时，这也是有帮助的。
 - en: 'This guide will show you how to:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何：
 - en: Fine-tune [VideoMAE](https://huggingface.co/docs/transformers/main/en/model_doc/videomae)
     on a subset of the [UCF101](https://www.crcv.ucf.edu/data/UCF101.php) dataset.
+  id: totrans-5
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在[UCF101](https://www.crcv.ucf.edu/data/UCF101.php)数据集的子集上对[VideoMAE](https://huggingface.co/docs/transformers/main/en/model_doc/videomae)进行微调。
 - en: Use your fine-tuned model for inference.
+  id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用您微调的模型进行推断。
 - en: 'The task illustrated in this tutorial is supported by the following model architectures:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程中所示的任务由以下模型架构支持：
 - en: '[TimeSformer](../model_doc/timesformer), [VideoMAE](../model_doc/videomae),
     [ViViT](../model_doc/vivit)'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '[TimeSformer](../model_doc/timesformer), [VideoMAE](../model_doc/videomae),
+    [ViViT](../model_doc/vivit)'
 - en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装所有必要的库：
 - en: '[PRE0]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: You will use [PyTorchVideo](https://pytorchvideo.org/) (dubbed `pytorchvideo`)
     to process and prepare the videos.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将使用[PyTorchVideo](https://pytorchvideo.org/)（称为`pytorchvideo`）来处理和准备视频。
 - en: 'We encourage you to log in to your Hugging Face account so you can upload and
     share your model with the community. When prompted, enter your token to log in:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们鼓励您登录您的Hugging Face帐户，这样您就可以上传和与社区分享您的模型。提示时，请输入您的令牌以登录：
 - en: '[PRE1]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Load UCF101 dataset
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载UCF101数据集
 - en: Start by loading a subset of the [UCF-101 dataset](https://www.crcv.ucf.edu/data/UCF101.php).
     This will give you a chance to experiment and make sure everything works before
     spending more time training on the full dataset.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先加载[UCF-101数据集](https://www.crcv.ucf.edu/data/UCF101.php)的子集。这将让您有机会进行实验，并确保一切正常，然后再花更多时间在完整数据集上进行训练。
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'After the subset has been downloaded, you need to extract the compressed archive:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下载子集后，您需要提取压缩存档：
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'At a high level, the dataset is organized like so:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 在高层次上，数据集的组织方式如下：
 - en: '[PRE4]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'The (`sorted`) video paths appear like so:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: （排序后的）视频路径看起来像这样：
 - en: '[PRE5]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: You will notice that there are video clips belonging to the same group / scene
     where group is denoted by `g` in the video file paths. `v_ApplyEyeMakeup_g07_c04.avi`
     and `v_ApplyEyeMakeup_g07_c06.avi`, for example.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 您会注意到有属于同一组/场景的视频片段，其中组在视频文件路径中用`g`表示。例如，`v_ApplyEyeMakeup_g07_c04.avi`和`v_ApplyEyeMakeup_g07_c06.avi`。
 - en: For the validation and evaluation splits, you wouldn’t want to have video clips
     from the same group / scene to prevent [data leakage](https://www.kaggle.com/code/alexisbcook/data-leakage).
     The subset that you are using in this tutorial takes this information into account.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于验证和评估拆分，您不希望从同一组/场景中获取视频片段，以防止[数据泄漏](https://www.kaggle.com/code/alexisbcook/data-leakage)。本教程中使用的子集考虑了这些信息。
 - en: 'Next up, you will derive the set of labels present in the dataset. Also, create
     two dictionaries that’ll be helpful when initializing the model:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您将推导数据集中存在的标签集。还要创建两个在初始化模型时有用的字典：
 - en: '`label2id`: maps the class names to integers.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`label2id`：将类名映射到整数。'
 - en: '`id2label`: maps the integers to class names.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`id2label`：将整数映射到类名。'
 - en: '[PRE6]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: There are 10 unique classes. For each class, there are 30 videos in the training
     set.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 有10个独特的类别。每个类别在训练集中有30个视频。
 - en: Load a model to fine-tune
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载一个模型进行微调
 - en: Instantiate a video classification model from a pretrained checkpoint and its
     associated image processor. The model’s encoder comes with pre-trained parameters,
     and the classification head is randomly initialized. The image processor will
     come in handy when writing the preprocessing pipeline for our dataset.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 从预训练的检查点和其关联的图像处理器实例化一个视频分类模型。模型的编码器带有预训练参数，分类头是随机初始化的。当为我们的数据集编写预处理流水线时，图像处理器会派上用场。
 - en: '[PRE7]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'While the model is loading, you might notice the following warning:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 当模型加载时，您可能会注意到以下警告：
 - en: '[PRE8]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The warning is telling us we are throwing away some weights (e.g. the weights
     and bias of the `classifier` layer) and randomly initializing some others (the
     weights and bias of a new `classifier` layer). This is expected in this case,
     because we are adding a new head for which we don’t have pretrained weights, so
     the library warns us we should fine-tune this model before using it for inference,
     which is exactly what we are going to do.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 警告告诉我们，我们正在丢弃一些权重（例如`classifier`层的权重和偏差），并随机初始化其他一些权重和偏差（新`classifier`层的权重和偏差）。在这种情况下，这是预期的，因为我们正在添加一个新的头部，我们没有预训练的权重，所以库警告我们在使用它进行推断之前应该微调这个模型，这正是我们要做的。
 - en: '**Note** that [this checkpoint](https://huggingface.co/MCG-NJU/videomae-base-finetuned-kinetics)
     leads to better performance on this task as the checkpoint was obtained fine-tuning
     on a similar downstream task having considerable domain overlap. You can check
     out [this checkpoint](https://huggingface.co/sayakpaul/videomae-base-finetuned-kinetics-finetuned-ucf101-subset)
     which was obtained by fine-tuning `MCG-NJU/videomae-base-finetuned-kinetics`.'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '**请注意**，[此检查点](https://huggingface.co/MCG-NJU/videomae-base-finetuned-kinetics)在此任务上表现更好，因为该检查点是在一个具有相当大领域重叠的类似下游任务上微调得到的。您可以查看[此检查点](https://huggingface.co/sayakpaul/videomae-base-finetuned-kinetics-finetuned-ucf101-subset)，该检查点是通过微调`MCG-NJU/videomae-base-finetuned-kinetics`获得的。'
 - en: Prepare the datasets for training
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 为训练准备数据集
 - en: For preprocessing the videos, you will leverage the [PyTorchVideo library](https://pytorchvideo.org/).
     Start by importing the dependencies we need.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了对视频进行预处理，您将利用[PyTorchVideo库](https://pytorchvideo.org/)。首先导入我们需要的依赖项。
 - en: '[PRE9]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: For the training dataset transformations, use a combination of uniform temporal
     subsampling, pixel normalization, random cropping, and random horizontal flipping.
     For the validation and evaluation dataset transformations, keep the same transformation
     chain except for random cropping and horizontal flipping. To learn more about
     the details of these transformations check out the [official documentation of
     PyTorchVideo](https://pytorchvideo.org).
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于训练数据集的转换，使用统一的时间子采样、像素归一化、随机裁剪和随机水平翻转的组合。对于验证和评估数据集的转换，保持相同的转换链，除了随机裁剪和水平翻转。要了解这些转换的详细信息，请查看[PyTorchVideo的官方文档](https://pytorchvideo.org)。
 - en: 'Use the `image_processor` associated with the pre-trained model to obtain the
     following information:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用与预训练模型相关联的`image_processor`来获取以下信息：
 - en: Image mean and standard deviation with which the video frame pixels will be
     normalized.
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于归一化视频帧像素的图像均值和标准差。
 - en: Spatial resolution to which the video frames will be resized.
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将视频帧调整为的空间分辨率。
 - en: Start by defining some constants.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先定义一些常量。
 - en: '[PRE10]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Now, define the dataset-specific transformations and the datasets respectively.
     Starting with the training set:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，分别定义数据集特定的转换和数据集。从训练集开始：
 - en: '[PRE11]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'The same sequence of workflow can be applied to the validation and evaluation
     sets:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 相同的工作流程顺序可以应用于验证集和评估集：
 - en: '[PRE12]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '**Note**: The above dataset pipelines are taken from the [official PyTorchVideo
     example](https://pytorchvideo.org/docs/tutorial_classification#dataset). We’re
     using the [`pytorchvideo.data.Ucf101()`](https://pytorchvideo.readthedocs.io/en/latest/api/data/data.html#pytorchvideo.data.Ucf101)
@@ -224,29 +310,44 @@
     accordingly. Refer to the `data` API [documentation to](https://pytorchvideo.readthedocs.io/en/latest/api/data/data.html)
     learn more. Also, if your dataset follows a similar structure (as shown above),
     then using the `pytorchvideo.data.Ucf101()` should work just fine.'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '**注意**：上述数据集管道取自[官方PyTorchVideo示例](https://pytorchvideo.org/docs/tutorial_classification#dataset)。我们使用[`pytorchvideo.data.Ucf101()`](https://pytorchvideo.readthedocs.io/en/latest/api/data/data.html#pytorchvideo.data.Ucf101)函数，因为它专为UCF-101数据集定制。在内部，它返回一个[`pytorchvideo.data.labeled_video_dataset.LabeledVideoDataset`](https://pytorchvideo.readthedocs.io/en/latest/api/data/data.html#pytorchvideo.data.LabeledVideoDataset)对象。`LabeledVideoDataset`类是PyTorchVideo数据集中所有视频相关内容的基类。因此，如果您想使用PyTorchVideo不支持的自定义数据集，可以相应地扩展`LabeledVideoDataset`类。请参考`data`
+    API [文档](https://pytorchvideo.readthedocs.io/en/latest/api/data/data.html)以了解更多。此外，如果您的数据集遵循类似的结构（如上所示），那么使用`pytorchvideo.data.Ucf101()`应该可以正常工作。'
 - en: You can access the `num_videos` argument to know the number of videos in the
     dataset.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以访问`num_videos`参数以了解数据集中的视频数量。
 - en: '[PRE13]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Visualize the preprocessed video for better debugging
+  id: totrans-53
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 可视化预处理后的视频以进行更好的调试
 - en: '[PRE14]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '![Person playing basketball](../Images/094cb43675960282973ed2c77587e204.png)'
+  id: totrans-55
   prefs: []
   type: TYPE_IMG
+  zh: '![打篮球的人](../Images/094cb43675960282973ed2c77587e204.png)'
 - en: Train the model
+  id: totrans-56
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练模型
 - en: Leverage [`Trainer`](https://huggingface.co/docs/transformers/main_classes/trainer)
     from 🤗 Transformers for training the model. To instantiate a `Trainer`, you need
     to define the training configuration and an evaluation metric. The most important
@@ -255,8 +356,11 @@
     requires an output folder name, which will be used to save the checkpoints of
     the model. It also helps sync all the information in the model repository on 🤗
     Hub.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 利用🤗 Transformers中的[`Trainer`](https://huggingface.co/docs/transformers/main_classes/trainer)来训练模型。要实例化一个`Trainer`，您需要定义训练配置和一个评估指标。最重要的是[`TrainingArguments`](https://huggingface.co/transformers/main_classes/trainer.html#transformers.TrainingArguments)，这是一个包含所有属性以配置训练的类。它需要一个输出文件夹名称，用于保存模型的检查点。它还有助于将模型存储库中的所有信息同步到🤗
+    Hub中。
 - en: Most of the training arguments are self-explanatory, but one that is quite important
     here is `remove_unused_columns=False`. This one will drop any features not used
     by the model’s call function. By default it’s `True` because usually it’s ideal
@@ -264,104 +368,162 @@
     call function. But, in this case, you need the unused features (‘video’ in particular)
     in order to create `pixel_values` (which is a mandatory key our model expects
     in its inputs).
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数训练参数都是不言自明的，但这里有一个非常重要的参数是`remove_unused_columns=False`。这个参数将删除模型调用函数未使用的任何特征。默认情况下是`True`，因为通常最好删除未使用的特征列，这样更容易将输入解压缩到模型的调用函数中。但是，在这种情况下，您需要未使用的特征（特别是‘video’）以便创建`pixel_values`（这是我们的模型在输入中期望的一个必需键）。
 - en: '[PRE15]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: The dataset returned by `pytorchvideo.data.Ucf101()` doesn’t implement the `__len__`
     method. As such, we must define `max_steps` when instantiating `TrainingArguments`.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '`pytorchvideo.data.Ucf101()`返回的数据集没有实现`__len__`方法。因此，在实例化`TrainingArguments`时，我们必须定义`max_steps`。'
 - en: 'Next, you need to define a function to compute the metrics from the predictions,
     which will use the `metric` you’ll load now. The only preprocessing you have to
     do is to take the argmax of our predicted logits:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您需要定义一个函数来计算从预测中得出的指标，该函数将使用您现在将加载的`metric`。您唯一需要做的预处理是取出我们预测的logits的argmax：
 - en: '[PRE16]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '**A note on evaluation**:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: '**关于评估的说明**：'
 - en: In the [VideoMAE paper](https://arxiv.org/abs/2203.12602), the authors use the
     following evaluation strategy. They evaluate the model on several clips from test
     videos and apply different crops to those clips and report the aggregate score.
     However, in the interest of simplicity and brevity, we don’t consider that in
     this tutorial.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[VideoMAE论文](https://arxiv.org/abs/2203.12602)中，作者使用以下评估策略。他们在测试视频的几个剪辑上评估模型，并对这些剪辑应用不同的裁剪，并报告聚合得分。然而，出于简单和简洁的考虑，我们在本教程中不考虑这一点。
 - en: Also, define a `collate_fn`, which will be used to batch examples together.
     Each batch consists of 2 keys, namely `pixel_values` and `labels`.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，定义一个`collate_fn`，用于将示例批处理在一起。每个批次包括2个键，即`pixel_values`和`labels`。
 - en: '[PRE17]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'Then you just pass all of this along with the datasets to `Trainer`:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，将所有这些与数据集一起传递给`Trainer`：
 - en: '[PRE18]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: You might wonder why you passed along the `image_processor` as a tokenizer when
     you preprocessed the data already. This is only to make sure the image processor
     configuration file (stored as JSON) will also be uploaded to the repo on the Hub.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能想知道为什么在预处理数据时将`image_processor`作为标记器传递。这只是为了确保图像处理器配置文件（存储为JSON）也将上传到Hub上的存储库中。
 - en: 'Now fine-tune our model by calling the `train` method:'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在通过调用`train`方法对我们的模型进行微调：
 - en: '[PRE19]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'Once training is completed, share your model to the Hub with the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
     method so everyone can use your model:'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，使用[push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)方法将您的模型共享到Hub，以便每个人都可以使用您的模型：
 - en: '[PRE20]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Inference
+  id: totrans-74
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推断
 - en: Great, now that you have fine-tuned a model, you can use it for inference!
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 很好，现在您已经对模型进行了微调，可以将其用于推断！
 - en: 'Load a video for inference:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载视频进行推断：
 - en: '[PRE21]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '![Teams playing basketball](../Images/27c05b85bfaaba1e373898da43772d52.png)'
+  id: totrans-78
   prefs: []
   type: TYPE_IMG
+  zh: '![篮球比赛的队伍](../Images/27c05b85bfaaba1e373898da43772d52.png)'
 - en: 'The simplest way to try out your fine-tuned model for inference is to use it
     in a [`pipeline`](https://huggingface.co/docs/transformers/main/en/main_classes/pipelines#transformers.VideoClassificationPipeline).
     Instantiate a `pipeline` for video classification with your model, and pass your
     video to it:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 尝试使用您微调的模型进行推断的最简单方法是在[`pipeline`](https://huggingface.co/docs/transformers/main/en/main_classes/pipelines#transformers.VideoClassificationPipeline)中使用它。使用您的模型实例化一个视频分类的`pipeline`，并将视频传递给它：
 - en: '[PRE22]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: You can also manually replicate the results of the `pipeline` if you’d like.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果愿意，您也可以手动复制`pipeline`的结果。
 - en: '[PRE23]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'Now, pass your input to the model and return the `logits`:'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，将您的输入传递给模型并返回`logits`：
 - en: '[PRE24]'
+  id: totrans-84
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'Decoding the `logits`, we get:'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 解码`logits`，我们得到：
 - en: '[PRE25]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
