@@ -1,0 +1,379 @@
+- en: Quicktour
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/tokenizers/quicktour](https://huggingface.co/docs/tokenizers/quicktour)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/assets/pages/__layout.svelte-hf-doc-builder.css">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/start-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/vendor-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/paths-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/pages/__layout.svelte-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/pages/quicktour.mdx-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/Tip-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/IconCopyLink-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/CodeBlock-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/TokenizersLanguageContent-hf-doc-builder.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s have a quick look at the 🤗 Tokenizers library features. The library provides
+    an implementation of today’s most used tokenizers that is both easy to use and
+    blazing fast.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build a tokenizer from scratch
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To illustrate how fast the 🤗 Tokenizers library is, let’s train a new tokenizer
+    on [wikitext-103](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/)
+    (516M of text) in just a few seconds. First things first, you will need to download
+    this dataset and unzip it with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Training the tokenizer
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In this tour, we will build and train a Byte-Pair Encoding (BPE) tokenizer.
+    For more information about the different type of tokenizers, check out this [guide](https://huggingface.co/transformers/tokenizer_summary.html)
+    in the 🤗 Transformers documentation. Here, training the tokenizer means it will
+    learn merge rules by:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Start with all the characters present in the training corpus as tokens.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Identify the most common pair of tokens and merge it into one token.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Repeat until the vocabulary (e.g., the number of tokens) has reached the size
+    we want.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The main API of the library is the `class` `Tokenizer`, here is how we instantiate
+    one with a BPE model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: To train our tokenizer on the wikitext files, we will need to instantiate a
+    [trainer]{.title-ref}, in this case a `BpeTrainer`
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can set the training arguments like `vocab_size` or `min_frequency` (here
+    left at their default values of 30,000 and 0) but the most important part is to
+    give the `special_tokens` we plan to use later on (they are not used at all during
+    training) so that they get inserted in the vocabulary.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The order in which you write the special tokens list matters: here `"[UNK]"`
+    will get the ID 0, `"[CLS]"` will get the ID 1 and so forth.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We could train our tokenizer right now, but it wouldn’t be optimal. Without
+    a pre-tokenizer that will split our inputs into words, we might get tokens that
+    overlap several words: for instance we could get an `"it is"` token since those
+    two words often appear next to each other. Using a pre-tokenizer will ensure no
+    token is bigger than a word returned by the pre-tokenizer. Here we want to train
+    a subword BPE tokenizer, and we will use the easiest pre-tokenizer possible by
+    splitting on whitespace.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, we can just call the `Tokenizer.train` method with any list of files we
+    want to use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This should only take a few seconds to train our tokenizer on the full wikitext
+    dataset! To save the tokenizer in one file that contains all its configuration
+    and vocabulary, just use the `Tokenizer.save` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'and you can reload your tokenizer from that file with the `Tokenizer.from_file`
+    `classmethod`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using the tokenizer
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Now that we have trained a tokenizer, we can use it on any text we want with
+    the `Tokenizer.encode` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: This applied the full pipeline of the tokenizer on the text, returning an `Encoding`
+    object. To learn more about this pipeline, and how to apply (or customize) parts
+    of it, check out [this page](pipeline).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This `Encoding` object then has all the attributes you need for your deep learning
+    model (or other). The `tokens` attribute contains the segmentation of your text
+    in tokens:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Similarly, the `ids` attribute will contain the index of each of those tokens
+    in the tokenizer’s vocabulary:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'An important feature of the 🤗 Tokenizers library is that it comes with full
+    alignment tracking, meaning you can always get the part of your original sentence
+    that corresponds to a given token. Those are stored in the `offsets` attribute
+    of our `Encoding` object. For instance, let’s assume we would want to find back
+    what caused the `"[UNK]"` token to appear, which is the token at index 9 in the
+    list, we can just ask for the offset at the index:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'and those are the indices that correspond to the emoji in the original sentence:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Post-processing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We might want our tokenizer to automatically add special tokens, like `"[CLS]"`
+    or `"[SEP]"`. To do this, we use a post-processor. `TemplateProcessing` is the
+    most commonly used, you just have to specify a template for the processing of
+    single sentences and pairs of sentences, along with the special tokens and their
+    IDs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When we built our tokenizer, we set `"[CLS]"` and `"[SEP]"` in positions 1
+    and 2 of our list of special tokens, so this should be their IDs. To double-check,
+    we can use the `Tokenizer.token_to_id` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here is how we can set the post-processing to give us the traditional BERT
+    inputs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s go over this snippet of code in more details. First we specify the template
+    for single sentences: those should have the form `"[CLS] $A [SEP]"` where `$A`
+    represents our sentence.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Then, we specify the template for sentence pairs, which should have the form
+    `"[CLS] $A [SEP] $B [SEP]"` where `$A` represents the first sentence and `$B`
+    the second one. The `:1` added in the template represent the `type IDs` we want
+    for each part of our input: it defaults to 0 for everything (which is why we don’t
+    have `$A:0`) and here we set it to 1 for the tokens of the second sentence and
+    the last `"[SEP]"` token.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lastly, we specify the special tokens we used and their IDs in our tokenizer’s
+    vocabulary.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To check out this worked properly, let’s try to encode the same sentence as
+    before:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To check the results on a pair of sentences, we just pass the two sentences
+    to `Tokenizer.encode`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can then check the type IDs attributed to each token is correct with
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you save your tokenizer with `Tokenizer.save`, the post-processor will be
+    saved along.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encoding multiple sentences in a batch
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To get the full speed of the 🤗 Tokenizers library, it’s best to process your
+    texts by batches by using the `Tokenizer.encode_batch` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: The output is then a list of `Encoding` objects like the ones we saw before.
+    You can process together as many texts as you like, as long as it fits in memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To process a batch of sentences pairs, pass two lists to the `Tokenizer.encode_batch`
+    method: the list of sentences A and the list of sentences B:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When encoding multiple sentences, you can automatically pad the outputs to
+    the longest sentence present by using `Tokenizer.enable_padding`, with the `pad_token`
+    and its ID (which we can double-check the id for the padding token with `Tokenizer.token_to_id`
+    like before):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can set the `direction` of the padding (defaults to the right) or a given
+    `length` if we want to pad every sample to that specific number (here we leave
+    it unset to pad to the size of the longest text).
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this case, the `attention mask` generated by the tokenizer takes the padding
+    into account:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pretrained
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a pretrained tokenizer
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can load any tokenizer from the Hugging Face Hub as long as a `tokenizer.json`
+    file is available in the repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Importing a pretrained tokenizer from legacy vocabulary files
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can also import a pretrained tokenizer directly in, as long as you have
+    its vocabulary file. For instance, here is how to import the classic pretrained
+    BERT tokenizer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: as long as you have downloaded the file `bert-base-uncased-vocab.txt` with
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE

@@ -1,0 +1,306 @@
+- en: The tokenization pipeline
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/tokenizers/pipeline](https://huggingface.co/docs/tokenizers/pipeline)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/assets/pages/__layout.svelte-hf-doc-builder.css">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/start-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/vendor-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/paths-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/pages/__layout.svelte-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/pages/pipeline.mdx-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/IconCopyLink-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/CodeBlock-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/tokenizers/v0.13.4.rc2/en/_app/chunks/TokenizersLanguageContent-hf-doc-builder.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When calling `Tokenizer.encode` or `Tokenizer.encode_batch`, the input text(s)
+    go through the following pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`normalization`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`pre-tokenization`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`model`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`post-processing`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We’ll see in details what happens during each of those steps in detail, as well
+    as when you want to `decode <decoding>` some token ids, and how the 🤗 Tokenizers
+    library allows you to customize each of those steps to your needs. If you’re already
+    familiar with those steps and want to learn by seeing some code, jump to `our
+    BERT from scratch example <example>`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For the examples that require a `Tokenizer` we will use the tokenizer we trained
+    in the `quicktour`, which you can load with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Normalization
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Normalization is, in a nutshell, a set of operations you apply to a raw string
+    to make it less random or “cleaner”. Common operations include stripping whitespace,
+    removing accented characters or lowercasing all text. If you’re familiar with
+    [Unicode normalization](https://unicode.org/reports/tr15), it is also a very common
+    normalization operation applied in most tokenizers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each normalization operation is represented in the 🤗 Tokenizers library by
+    a `Normalizer`, and you can combine several of those by using a `normalizers.Sequence`.
+    Here is a normalizer applying NFD Unicode normalization and removing accents as
+    an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can manually test that normalizer by applying it to any string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When building a `Tokenizer`, you can customize its normalizer by just changing
+    the corresponding attribute:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Of course, if you change the way a tokenizer applies normalization, you should
+    probably retrain it from scratch afterward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pre-Tokenization
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Pre-tokenization is the act of splitting a text into smaller objects that give
+    an upper bound to what your tokens will be at the end of training. A good way
+    to think of this is that the pre-tokenizer will split your text into “words” and
+    then, your final tokens will be parts of those words.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An easy way to pre-tokenize inputs is to split on spaces and punctuations,
+    which is done by the `pre_tokenizers.Whitespace` pre-tokenizer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The output is a list of tuples, with each tuple containing one word and its
+    span in the original sentence (which is used to determine the final `offsets`
+    of our `Encoding`). Note that splitting on punctuation will split contractions
+    like `"I'm"` in this example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can combine together any `PreTokenizer` together. For instance, here is
+    a pre-tokenizer that will split on space, punctuation and digits, separating numbers
+    in their individual digits:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As we saw in the `quicktour`, you can customize the pre-tokenizer of a `Tokenizer`
+    by just changing the corresponding attribute:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Of course, if you change the way the pre-tokenizer, you should probably retrain
+    your tokenizer from scratch afterward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once the input texts are normalized and pre-tokenized, the `Tokenizer` applies
+    the model on the pre-tokens. This is the part of the pipeline that needs training
+    on your corpus (or that has been trained if you are using a pretrained tokenizer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The role of the model is to split your “words” into tokens, using the rules
+    it has learned. It’s also responsible for mapping those tokens to their corresponding
+    IDs in the vocabulary of the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This model is passed along when intializing the `Tokenizer` so you already
+    know how to customize this part. Currently, the 🤗 Tokenizers library supports:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`models.BPE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`models.Unigram`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`models.WordLevel`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`models.WordPiece`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For more details about each model and its behavior, you can check [here](components#models)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Post-Processing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Post-processing is the last step of the tokenization pipeline, to perform any
+    additional transformation to the `Encoding` before it’s returned, like adding
+    potential special tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As we saw in the quick tour, we can customize the post processor of a `Tokenizer`
+    by setting the corresponding attribute. For instance, here is how we can post-process
+    to make the inputs suitable for the BERT model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that contrarily to the pre-tokenizer or the normalizer, you don’t need
+    to retrain a tokenizer after changing its post-processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'All together: a BERT tokenizer from scratch'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s put all those pieces together to build a BERT tokenizer. First, BERT
+    relies on WordPiece, so we instantiate a new `Tokenizer` with this model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then we know that BERT preprocesses texts by removing accents and lowercasing.
+    We also use a unicode normalizer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The pre-tokenizer is just splitting on whitespace and punctuation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And the post-processing uses the template we saw in the previous section:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can use this tokenizer and train on it on wikitext like in the `quicktour`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Decoding
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: On top of encoding the input texts, a `Tokenizer` also has an API for decoding,
+    that is converting IDs generated by your model back to a text. This is done by
+    the methods `Tokenizer.decode` (for one predicted text) and `Tokenizer.decode_batch`
+    (for a batch of predictions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `decoder` will first convert the IDs back to tokens (using the tokenizer’s
+    vocabulary) and remove all special tokens, then join those tokens with spaces:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you used a model that added special characters to represent subtokens of
+    a given “word” (like the `"##"` in WordPiece) you will need to customize the `decoder`
+    to treat them properly. If we take our previous `bert_tokenizer` for instance
+    the default decoding will give:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'But by changing it to a proper decoder, we get:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonRustNode
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
