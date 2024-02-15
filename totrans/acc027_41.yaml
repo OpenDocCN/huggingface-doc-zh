@@ -1,0 +1,521 @@
+- en: Wrapper classes for torch Dataloaders, Optimizers, and Schedulers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/package_reference/torch_wrappers](https://huggingface.co/docs/accelerate/package_reference/torch_wrappers)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/27.736a806b.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Docstring.ae1a1e2d.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The internal classes Accelerate uses to prepare objects for distributed training
+    when calling [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Datasets and DataLoaders
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '#### `accelerate.data_loader.prepare_data_loader`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L745)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`dataloader` (`torch.utils.data.dataloader.DataLoader`) — The data loader to
+    split across several devices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device` (`torch.device`) — The target device for the returned `DataLoader`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_processes` (`int`, *optional*) — The number of processes running concurrently.
+    Will default to the value given by [AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`process_index` (`int`, *optional*) — The index of the current process. Will
+    default to the value given by [AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether the resulting
+    `DataLoader` should split the batches of the original data loader across devices
+    or yield full batches (in which case it will yield batches starting at the `process_index`-th
+    and advancing of `num_processes` batches at each iteration).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Another way to see this is that the observed batch size will be the same as
+    the initial `dataloader` if this option is set to `True`, the batch size of the
+    initial `dataloader` multiplied by `num_processes` otherwise.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Setting this option to `True` requires that the batch size of the `dataloader`
+    is a round multiple of `batch_size`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '`put_on_device` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to put the batches on `device` (only works if the batches are nested list, tuples
+    or dictionaries of tensors).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rng_types` (list of `str` or [RNGType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.RNGType))
+    — The list of random number generators to synchronize at the beginning of each
+    iteration. Should be one or several of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"torch"`: the base torch random number generator'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"cuda"`: the CUDA random number generator (GPU only)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"xla"`: the XLA random number generator (TPU only)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"generator"`: the `torch.Generator` of the sampler (or batch sampler if there
+    is no sampler in your dataloader) or of the iterable dataset (if it exists) if
+    the underlying dataset is of that type.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dispatch_batches` (`bool`, *optional*) — If set to `True`, the datalaoder
+    prepared is only iterated through on the main process and then the batches are
+    split and broadcast to each process. Will default to `True` when the underlying
+    dataset is an `IterableDataset`, `False` otherwise.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`even_batches` (`bool`, *optional*, defaults to `True`) — If set to `True`,
+    in cases where the total batch size across all processes does not exactly divide
+    the dataset, samples at the start of the dataset will be duplicated so the batch
+    can be divided equally among all workers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`slice_fn_for_dispatch` (`Callable`, *optional*`) -- If passed, this function
+    will be used to slice tensors across` num_processes`. Will default to [slice_tensors()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.slice_tensors).
+    This argument is used only when` dispatch_batches`is set to`True` and will be
+    ignored otherwise.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`use_seedable_sampler` (`bool`, *optional*, defaults to `False`) — Whether
+    to use the `SeedableRandomSampler` instead of a `RandomSampler` for better reproducability.
+    Comes at a cost of potentially different performances due to different shuffling
+    algorithms but ensures results will be the *exact* same. Should be paired with
+    `set_seed()` at every `self.set_epoch`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.utils.data.dataloader.DataLoader`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A new data loader that will yield the portion of the batches
+  prefs: []
+  type: TYPE_NORMAL
+- en: Wraps a PyTorch `DataLoader` to generate batches for one of the processes only.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Depending on the value of the `drop_last` attribute of the `dataloader` passed,
+    it will either stop the iteration at the first batch that would be too small /
+    not present on all processes or loop with indices from the beginning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`BatchSampler`s with varying batch sizes are not enabled by default. To enable
+    this behaviour, set `even_batches` equal to `False`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.skip_first_batches`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L1019)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Creates a `torch.utils.data.DataLoader` that will efficiently skip the first
+    `num_batches`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### `class accelerate.data_loader.BatchSamplerShard`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L100)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`batch_sampler` (`torch.utils.data.sampler.BatchSampler`) — The batch sampler
+    to split in several shards.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_processes` (`int`, *optional*, defaults to 1) — The number of processes
+    running concurrently.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`process_index` (`int`, *optional*, defaults to 0) — The index of the current
+    process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether the shards
+    should be created by splitting a batch to give a piece of it on each process,
+    or by yielding different full batches on each process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'On two processes with a sampler of `[[0, 1, 2, 3], [4, 5, 6, 7]]`, this will
+    result in:'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: the sampler on process 0 to yield `[0, 1, 2, 3]` and the sampler on process
+    1 to yield `[4, 5, 6, 7]` if this argument is set to `False`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: the sampler on process 0 to yield `[0, 1]` then `[4, 5]` and the sampler on
+    process 1 to yield `[2, 3]` then `[6, 7]` if this argument is set to `True`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`even_batches` (`bool`, *optional*, defaults to `True`) — Whether or not to
+    loop back at the beginning of the sampler when the number of samples is not a
+    round multiple of (original batch size / number of processes).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Wraps a PyTorch `BatchSampler` to generate batches for one of the processes
+    only. Instances of this class will always yield a number of batches that is a
+    round multiple of `num_processes` and that all have the same size. Depending on
+    the value of the `drop_last` attribute of the batch sampler passed, it will either
+    stop the iteration at the first batch that would be too small / not present on
+    all processes or loop with indices from the beginning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`BatchSampler`s with varying batch sizes are not enabled by default. To enable
+    this behaviour, set `even_batches` equal to `False`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### `class accelerate.data_loader.IterableDatasetShard`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L256)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`dataset` (`torch.utils.data.dataset.IterableDataset`) — The batch sampler
+    to split in several shards.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`batch_size` (`int`, *optional*, defaults to 1) — The size of the batches per
+    shard (if `split_batches=False`) or the size of the batches (if `split_batches=True`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`drop_last` (`bool`, *optional*, defaults to `False`) — Whether or not to drop
+    the last incomplete batch or complete the last batches by using the samples from
+    the beginning.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_processes` (`int`, *optional*, defaults to 1) — The number of processes
+    running concurrently.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`process_index` (`int`, *optional*, defaults to 0) — The index of the current
+    process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether the shards
+    should be created by splitting a batch to give a piece of it on each process,
+    or by yielding different full batches on each process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'On two processes with an iterable dataset yielding of `[0, 1, 2, 3, 4, 5, 6,
+    7]`, this will result in:'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: the shard on process 0 to yield `[0, 1, 2, 3]` and the shard on process 1 to
+    yield `[4, 5, 6, 7]` if this argument is set to `False`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: the shard on process 0 to yield `[0, 1, 4, 5]` and the sampler on process 1
+    to yield `[2, 3, 6, 7]` if this argument is set to `True`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Wraps a PyTorch `IterableDataset` to generate samples for one of the processes
+    only. Instances of this class will always yield a number of samples that is a
+    round multiple of the actual batch size (depending of the value of `split_batches`,
+    this is either `batch_size` or `batch_size x num_processes`). Depending on the
+    value of the `drop_last` attribute of the batch sampler passed, it will either
+    stop the iteration at the first batch that would be too small or loop with indices
+    from the beginning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### `class accelerate.data_loader.DataLoaderShard`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L391)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`dataset` (`torch.utils.data.dataset.Dataset`) — The dataset to use to build
+    this datalaoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device` (`torch.device`, *optional*) — If passed, the device to put all batches
+    on.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rng_types` (list of `str` or [RNGType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.RNGType))
+    — The list of random number generators to synchronize at the beginning of each
+    iteration. Should be one or several of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"torch"`: the base torch random number generator'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"cuda"`: the CUDA random number generator (GPU only)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"xla"`: the XLA random number generator (TPU only)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"generator"`: an optional `torch.Generator`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`synchronized_generator` (`torch.Generator`, *optional*) — A random number
+    generator to keep synchronized across processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`skip_batches` (`int`, *optional*, defaults to 0) — The number of batches to
+    skip at the beginning. kwargs — All other keyword arguments to pass to the regular
+    `DataLoader` initialization.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Subclass of a PyTorch `DataLoader` that will deal with device placement and
+    current distributed setup.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Available attributes:**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`total_batch_size` (`int`) — Total batch size of the dataloader across all
+    processes. Equal to the original batch size when `split_batches=True`; otherwise
+    the original batch size * the total number of processes'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`total_dataset_length` (`int`) — Total length of the inner dataset across all
+    processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '### `class accelerate.data_loader.DataLoaderDispatcher`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L548)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether the resulting
+    `DataLoader` should split the batches of the original data loader across devices
+    or yield full batches (in which case it will yield batches starting at the `process_index`-th
+    and advancing of `num_processes` batches at each iteration). Another way to see
+    this is that the observed batch size will be the same as the initial `dataloader`
+    if this option is set to `True`, the batch size of the initial `dataloader` multiplied
+    by `num_processes` otherwise. Setting this option to `True` requires that the
+    batch size of the `dataloader` is a round multiple of `batch_size`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`skip_batches` (`int`, *optional*, defaults to 0) — The number of batches to
+    skip at the beginning of an iteration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Subclass of a PyTorch `DataLoader` that will iterate and preprocess on process
+    0 only, then dispatch on each process their part of the batch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Available attributes:**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`total_batch_size` (`int`) — Total batch size of the dataloader across all
+    processes. Equal to the original batch size when `split_batches=True`; otherwise
+    the original batch size * the total number of processes'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`total_dataset_length` (`int`) — Total length of the inner dataset across all
+    processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Optimizers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class accelerate.optimizer.AcceleratedOptimizer`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/optimizer.py#L38)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`optimizer` (`torch.optim.optimizer.Optimizer`) — The optimizer to wrap.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device_placement` (`bool`, *optional*, defaults to `True`) — Whether or not
+    the optimizer should handle device placement. If so, it will place the state dictionary
+    of `optimizer` on the right device.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`scaler` (`torch.cuda.amp.grad_scaler.GradScaler`, *optional*) — The scaler
+    to use in the step function if training with mixed precision.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Internal wrapper around a torch optimizer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditionally will perform `step` and `zero_grad` if gradients should be synchronized
+    when performing gradient accumulation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Schedulers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class accelerate.scheduler.AcceleratedScheduler`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/scheduler.py#L25)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`scheduler` (`torch.optim.lr_scheduler._LRScheduler`) — The scheduler to wrap.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`optimizers` (one or a list of `torch.optim.Optimizer`) — The optimizers used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`step_with_optimizer` (`bool`, *optional*, defaults to `True`) — Whether or
+    not the scheduler should be stepped at each optimizer step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether or not
+    the dataloaders split one batch across the different processes (so batch size
+    is the same regardless of the number of processes) or create batches on each process
+    (so batch size is the original batch size multiplied by the number of processes).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A wrapper around a learning rate scheduler that will only step when the optimizer(s)
+    have a training step. Useful to avoid making a scheduler step too fast when gradients
+    went overflow and there was no training step (in mixed precision training)
+  prefs: []
+  type: TYPE_NORMAL
+- en: When performing gradient accumulation scheduler lengths should not be changed
+    accordingly, Accelerate will always step the scheduler to account for it.
+  prefs: []
+  type: TYPE_NORMAL

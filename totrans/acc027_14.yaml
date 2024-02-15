@@ -1,0 +1,173 @@
+- en: Handling big models for inference
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/usage_guides/big_modeling](https://huggingface.co/docs/accelerate/usage_guides/big_modeling)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/31.32b3b580.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Youtube.b682de5d.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the biggest advancements 🤗 Accelerate provides is the concept of [large
+    model inference](../concept_guides/big_model_inference) wherein you can perform
+    *inference* on models that cannot fully fit on your graphics card.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This tutorial will be broken down into two parts showcasing how to use both
+    🤗 Accelerate and 🤗 Transformers (a higher API-level) to make use of this idea.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using 🤗 Accelerate
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For these tutorials, we’ll assume a typical workflow for loading your model
+    in such that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that here we assume that `ModelClass` is a model that takes up more video-card
+    memory than what can fit on your device (be it `mps` or `cuda`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first step is to init an empty skeleton of the model which won’t take up
+    any RAM using the [init_empty_weights()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.init_empty_weights)
+    context manager:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: With this `my_model` currently is “parameterless”, hence leaving the smaller
+    footprint than what one would normally get loading this onto the CPU directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next we need to load in the weights to our model so we can perform inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this we will use [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch),
+    which as the name implies will load a checkpoint inside your empty model and dispatch
+    the weights for each layer across all the devices you have available (GPU/MPS
+    and CPU RAM).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To determine how this `dispatch` can be performed, generally specifying `device_map="auto"`
+    will be good enough as 🤗 Accelerate will attempt to fill all the space in your
+    GPU(s), then loading them to the CPU, and finally if there is not enough RAM it
+    will be loaded to the disk (the absolute slowest option).
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more details on designing your own device map, see this section of the [concept
+    guide](../concept_guide/big_model_inference#designing-a-device-map)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'See an example below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: If there are certain “chunks” of layers that shouldn’t be split, you can pass
+    them in as `no_split_module_classes`. Read more about it [here](../concept_guides/big_model_inference#loading-weights)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also to save on memory (such as if the `state_dict` will not fit in RAM), a
+    model’s weights can be divided and split into multiple checkpoint files. Read
+    more about it [here](../concept_guides/big_model_inference#sharded-checkpoints)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now that the model is dispatched fully, you can perform inference as normal
+    with the model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: What will happen now is each time the input gets passed through a layer, it
+    will be sent from the CPU to the GPU (or disk to CPU to GPU), the output is calculated,
+    and then the layer is pulled back off the GPU going back down the line. While
+    this adds some overhead to the inference being performed, through this method
+    it is possible to run **any size model** on your system, as long as the largest
+    layer is capable of fitting on your GPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multiple GPUs can be utilized, however this is considered “model parallelism”
+    and as a result only one GPU will be active at a given moment, waiting for the
+    prior one to send it the output. You should launch your script normally with `python`
+    and not need `torchrun`, `accelerate launch`, etc.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For a visual representation of this, check out the animation below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://www.youtube-nocookie.com/embed/MWCSGj9jEAo](https://www.youtube-nocookie.com/embed/MWCSGj9jEAo)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Complete Example
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Below is the full example showcasing what we performed above:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using 🤗 Transformers, 🤗 Diffusers, and other 🤗 Open Source Libraries
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Libraries that support 🤗 Accelerate big model inference include all of the earlier
+    logic in their `from_pretrained` constructors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These operate by specifying a string representing the model to download from
+    the [🤗 Hub](https://hf.co/models) and then denoting `device_map="auto"` along
+    with a few extra parameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a brief example, we will look at using `transformers` and loading in Big
+    Science’s T0pp model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After loading the model in, the initial steps from before to prepare a model
+    have all been done and the model is fully ready to make use of all the resources
+    in your machine. Through these constructors, you can also save *more* memory by
+    specifying the precision the model is loaded into as well, through the `torch_dtype`
+    parameter, such as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: To learn more about this, check out the 🤗 Transformers documentation available
+    [here](https://huggingface.co/docs/transformers/main/en/main_classes/model#large-model-loading).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where to go from here
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For a much more detailed look at big model inference, be sure to check out the
+    [Conceptual Guide on it](../concept_guides/big_model_inference)
+  prefs: []
+  type: TYPE_NORMAL

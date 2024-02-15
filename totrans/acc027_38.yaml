@@ -1,0 +1,1908 @@
+- en: Accelerator
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/package_reference/accelerator](https://huggingface.co/docs/accelerate/package_reference/accelerator)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/16.eadd3cac.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Docstring.ae1a1e2d.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/ExampleCodeBlock.e7a3d5fe.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    is the main class provided by 🤗 Accelerate. It serves at the main entry point
+    for the API.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quick adaptation of your code
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To quickly adapt your script to work on any kind of setup with 🤗 Accelerate
+    just:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Initialize an [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    object (that we will call `accelerator` throughout this page) as early as possible
+    in your script.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Pass your dataloader(s), model(s), optimizer(s), and scheduler(s) to the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    method.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Remove all the `.cuda()` or `.to(device)` from your code and let the `accelerator`
+    handle the device placement for you.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Step three is optional, but considered a best practice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Replace `loss.backward()` in your code with `accelerator.backward(loss)`
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Gather your predictions and labels before storing them or using them for metric
+    computation using [gather()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Step five is mandatory when using distributed evaluation
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In most cases this is all that is needed. The next section lists a few more
+    advanced use cases and nice features you should search for and replace by the
+    corresponding methods of your `accelerator`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Advanced recommendations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Printing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`print` statements should be replaced by [print()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.print)
+    to be printed once per process:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Executing processes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Once on a single server
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'For statements that should be executed once per server, use `is_local_main_process`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A function can be wrapped using the [on_local_main_process()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.on_local_main_process)
+    function to achieve the same behavior on a function’s execution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Only ever once across all servers
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'For statements that should only ever be executed once, use `is_main_process`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A function can be wrapped using the [on_main_process()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.on_main_process)
+    function to achieve the same behavior on a function’s execution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: On specific processes
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'If a function should be ran on a specific overall or local process index, there
+    are similar decorators to achieve this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Synchronicity control
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Use [wait_for_everyone()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.wait_for_everyone)
+    to make sure all processes join that point before continuing. (Useful before a
+    model save for instance).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Saving and loading
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use [save_model()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_model)
+    instead of `torch.save` to save a model. It will remove all model wrappers added
+    during the distributed process, get the state_dict of the model and save it. The
+    state_dict will be in the same precision as the model being trained.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[save_model()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_model)
+    can also save a model into sharded checkpoints or with safetensors format. Here
+    is an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 🤗 Transformers models
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: If you are using models from the [🤗 Transformers](https://huggingface.co/docs/transformers/)
+    library, you can use the `.save_pretrained()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will ensure your model stays compatible with other 🤗 Transformers functionality
+    like the `.from_pretrained()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Operations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Use [clip*grad_norm*()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.clip_grad_norm_)
+    instead of `torch.nn.utils.clip_grad_norm_` and [clip*grad_value*()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.clip_grad_value_)
+    instead of `torch.nn.utils.clip_grad_value`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gradient Accumulation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To perform gradient accumulation use [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
+    and specify a gradient_accumulation_steps. This will also automatically ensure
+    the gradients are synced or unsynced when on multi-device training, check if the
+    step should actually be performed, and auto-scale the loss:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: GradientAccumulationPlugin
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '### `class accelerate.utils.GradientAccumulationPlugin`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/utils/dataclasses.py#L505)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: A plugin to configure gradient accumulation behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instead of passing `gradient_accumulation_steps` you can instantiate a GradientAccumulationPlugin
+    and pass it to the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)’s
+    `__init__` as `gradient_accumulation_plugin`. You can only pass either one of
+    `gradient_accumulation_plugin` or `gradient_accumulation_steps` passing both will
+    raise an error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: In addition to the number of steps, this also lets you configure whether or
+    not you adjust your learning rate scheduler to account for the change in steps
+    due to accumulation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Overall API documentation:'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class accelerate.Accelerator`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L153)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`device_placement` (`bool`, *optional*, defaults to `True`) — Whether or not
+    the accelerator should put objects on device (tensors yielded by the dataloader,
+    model, etc…).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether or not
+    the accelerator should split the batches yielded by the dataloaders across the
+    devices. If `True` the actual batch size used will be the same on any kind of
+    distributed processes, but it must be a round multiple of the `num_processes`
+    you are using. If `False`, actual batch size used will be the one set in your
+    script multiplied by the number of processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`mixed_precision` (`str`, *optional*) — Whether or not to use mixed precision
+    training. Choose from ‘no’,‘fp16’,‘bf16 or ‘fp8’. Will default to the value in
+    the environment variable `ACCELERATE_MIXED_PRECISION`, which will use the default
+    value in the accelerate config of the current system or the flag passed with the
+    `accelerate.launch` command. ‘fp8’ requires the installation of transformers-engine.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`gradient_accumulation_steps` (`int`, *optional*, default to 1) — The number
+    of steps that should pass before gradients are accumulated. A number > 1 should
+    be combined with `Accelerator.accumulate`. If not passed, will default to the
+    value in the environment variable `ACCELERATE_GRADIENT_ACCUMULATION_STEPS`. Can
+    also be configured through a `GradientAccumulationPlugin`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cpu` (`bool`, *optional*) — Whether or not to force the script to execute
+    on CPU. Will ignore GPU available if set to `True` and force the execution on
+    one process only.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`deepspeed_plugin` (`DeepSpeedPlugin`, *optional*) — Tweak your DeepSpeed related
+    args using this argument. This argument is optional and can be configured directly
+    using *accelerate config*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`fsdp_plugin` (`FullyShardedDataParallelPlugin`, *optional*) — Tweak your FSDP
+    related args using this argument. This argument is optional and can be configured
+    directly using *accelerate config*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`megatron_lm_plugin` (`MegatronLMPlugin`, *optional*) — Tweak your MegatronLM
+    related args using this argument. This argument is optional and can be configured
+    directly using *accelerate config*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rng_types` (list of `str` or [RNGType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.RNGType))
+    — The list of random number generators to synchronize at the beginning of each
+    iteration in your prepared dataloaders. Should be one or several of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"torch"`: the base torch random number generator'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"cuda"`: the CUDA random number generator (GPU only)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"xla"`: the XLA random number generator (TPU only)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"generator"`: the `torch.Generator` of the sampler (or batch sampler if there
+    is no sampler in your dataloader) or of the iterable dataset (if it exists) if
+    the underlying dataset is of that type.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Will default to `["torch"]` for PyTorch versions <=1.5.1 and `["generator"]`
+    for PyTorch versions >= 1.6.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '`log_with` (list of `str`, [LoggerType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.LoggerType)
+    or [GeneralTracker](/docs/accelerate/v0.27.2/en/package_reference/tracking#accelerate.tracking.GeneralTracker),
+    *optional*) — A list of loggers to be setup for experiment tracking. Should be
+    one or several of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"all"`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"tensorboard"`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"wandb"`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"comet_ml"` If `"all"` is selected, will pick up all available trackers in
+    the environment and initialize them. Can also accept implementations of `GeneralTracker`
+    for custom trackers, and can be combined with `"all"`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`project_config` (`ProjectConfiguration`, *optional*) — A configuration for
+    how saving the state can be handled.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`project_dir` (`str`, `os.PathLike`, *optional*) — A path to a directory for
+    storing data such as logs of locally-compatible loggers and potentially saved
+    checkpoints.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dispatch_batches` (`bool`, *optional*) — If set to `True`, the dataloader
+    prepared by the Accelerator is only iterated through on the main process and then
+    the batches are split and broadcast to each process. Will default to `True` for
+    `DataLoader` whose underlying dataset is an `IterableDataset`, `False` otherwise.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`even_batches` (`bool`, *optional*, defaults to `True`) — If set to `True`,
+    in cases where the total batch size across all processes does not exactly divide
+    the dataset, samples at the start of the dataset will be duplicated so the batch
+    can be divided equally among all workers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`use_seedable_sampler` (`bool`, *optional*, defaults to `False`) — Whether
+    or not use a fully seedable random sampler (`SeedableRandomSampler`). Ensures
+    training results are fully reproducable using a different sampling technique.
+    While seed-to-seed results may differ, on average the differences are neglible
+    when using multiple different seeds to compare. Should also be ran with [set_seed()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.set_seed)
+    each time for the best results.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`step_scheduler_with_optimizer` (`bool`, *optional`, defaults to` True`) --
+    Set` True`if the learning rate scheduler is stepped at the same time as the optimizer,`False`
+    if only done under certain circumstances (at the end of each epoch, for instance).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`kwargs_handlers` (`list[KwargHandler]`, *optional*) — A list of `KwargHandler`
+    to customize how the objects related to distributed training or mixed precision
+    are created. See [kwargs](kwargs) for more information.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dynamo_backend` (`str` or `DynamoBackend`, *optional*, defaults to `"no"`)
+    — Set to one of the possible dynamo backends to optimize your training with torch
+    dynamo.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`gradient_accumulation_plugin` (`GradientAccumulationPlugin`, *optional*) —
+    A configuration for how gradient accumulation should be handled, if more tweaking
+    than just the `gradient_accumulation_steps` is needed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Creates an instance of an accelerator for distributed training (on multi-GPU,
+    TPU) or mixed precision training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Available attributes:**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`device` (`torch.device`) — The device to use.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`distributed_type` ([DistributedType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.DistributedType))
+    — The distributed training configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`local_process_index` (`int`) — The process index on the current machine.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`mixed_precision` (`str`) — The configured mixed precision mode.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_processes` (`int`) — The total number of processes used for training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`optimizer_step_was_skipped` (`bool`) — Whether or not the optimizer update
+    was skipped (because of gradient overflow in mixed precision), in which case the
+    learning rate should not be changed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`process_index` (`int`) — The overall index of the current process among all
+    processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`state` ([AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState))
+    — The distributed setup state.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`sync_gradients` (`bool`) — Whether the gradients are currently being synced
+    across all processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`use_distributed` (`bool`) — Whether the current configuration is for distributed
+    training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### `accumulate`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L967)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`*models` (list of `torch.nn.Module`) — PyTorch Modules that were prepared
+    with `Accelerator.prepare`. Models passed to `accumulate()` will skip gradient
+    syncing during backward pass in distributed training'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A context manager that will lightly wrap around and perform gradient accumulation
+    automatically
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `autocast`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L3109)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Will apply automatic mixed-precision inside the block inside this context manager,
+    if it is enabled. Nothing different will happen otherwise.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A different `autocast_handler` can be passed in to override the one set in the
+    `Accelerator` object. This is useful in blocks under `autocast` where you want
+    to revert to fp32.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `backward`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1938)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Scales the gradients in accordance to the `GradientAccumulationPlugin` and calls
+    the correct `backward()` based on the configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Should be used in lieu of `loss.backward()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `check_trigger`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1994)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Checks if the internal trigger tensor has been set to 1 in any of the processes.
+    If so, will return `True` and reset the trigger tensor to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: Does not require `wait_for_everyone()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `clear`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2973)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Alias for `Accelerate.free_memory`, releases all references to the internal
+    objects stored and call the garbage collector. You should call this method between
+    two trainings with different models/optimizers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `clip_grad_norm_`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2066)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.Tensor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Total norm of the parameter gradients (viewed as a single vector).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Should be used in place of `torch.nn.utils.clip_grad_norm_`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `clip_grad_value_`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2104)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Should be used in place of `torch.nn.utils.clip_grad_value_`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `free_memory`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2948)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Will release all references to the internal objects stored and call the garbage
+    collector. You should call this method between two trainings with different models/optimizers.
+    Also will reset `Accelerator.step` to 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `gather`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2131)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tensor` (`torch.Tensor`, or a nested tuple/list/dictionary of `torch.Tensor`)
+    — The tensors to gather across all processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.Tensor`, or a nested tuple/list/dictionary of `torch.Tensor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The gathered tensor(s). Note that the first dimension of the result is *num_processes*
+    multiplied by the first dimension of the input tensors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gather the values in *tensor* across all processes and concatenate them on the
+    first dimension. Useful to regroup the predictions from all processes when doing
+    evaluation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: This gather happens in all processes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `gather_for_metrics`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2163)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input` (`torch.Tensor`, `object`, a nested tuple/list/dictionary of `torch.Tensor`,
+    or a nested tuple/list/dictionary of `object`) — The tensors or objects for calculating
+    metrics across all processes'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Gathers `input_data` and potentially drops duplicates in the last batch if on
+    a distributed system. Should be used for gathering the inputs and targets for
+    metric calculation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `get_state_dict`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L3017)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — A PyTorch model sent through [Accelerator.prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`unwrap` (`bool`, *optional*, defaults to `True`) — Whether to return the original
+    underlying state_dict of `model` or to return the wrapped state_dict'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`dict`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The state dictionary of the model potentially without full precision.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the state dictionary of a model sent through [Accelerator.prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    potentially without full precision.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `get_tracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2400)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`name` (`str`) — The name of a tracker, corresponding to the `.name` property.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`unwrap` (`bool`) — Whether to return the internal tracking mechanism or to
+    return the wrapped tracker instead (recommended).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GeneralTracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The tracker corresponding to `name` if it exists.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns a `tracker` from `self.trackers` based on `name` on the main process
+    only.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `join_uneven_inputs`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1001)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`joinables` (`list[torch.distributed.algorithms.Joinable]`) — A list of models
+    or optimizers that subclass `torch.distributed.algorithms.Joinable`. Most commonly,
+    a PyTorch Module that was prepared with `Accelerator.prepare` for DistributedDataParallel
+    training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`even_batches` (`bool`, *optional*) — If set, this will override the value
+    of `even_batches` set in the `Accelerator`. If it is not provided, the default
+    `Accelerator` value wil be used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A context manager that facilitates distributed training or evaluation on uneven
+    inputs, which acts as a wrapper around `torch.distributed.algorithms.join`. This
+    is useful when the total batch size does not evenly divide the length of the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`join_uneven_inputs` is only supported for Distributed Data Parallel training
+    on multiple GPUs. For any other configuration, this method will have no effect.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overidding `even_batches` will not affect iterable-style data loaders.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `load_state`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2816)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input_dir` (`str` or `os.PathLike`) — The name of the folder all relevant
+    weights and states were saved in. Can be `None` if `automatic_checkpoint_naming`
+    is used, and will pick up from the latest checkpoint.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`load_model_func_kwargs` (`dict`, *optional*) — Additional keyword arguments
+    for loading model which can be passed to the underlying load function, such as
+    optional arguments for DeepSpeed’s `load_checkpoint` function or a `map_location`
+    to load the model and optimizer on.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Loads the current states of the model, optimizer, scaler, RNG generators, and
+    registered objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Should only be used in conjunction with [Accelerator.save_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_state).
+    If a file is not registered for checkpointing, it will not be loaded if stored
+    in the directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `local_main_process_first`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L830)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: Lets the local main process go inside a with block.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The other processes will enter the with block after the main process exits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `main_process_first`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L808)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Lets the main process go first inside a with block.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The other processes will enter the with block after the main process exits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `no_sync`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L852)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — PyTorch Module that was prepared with `Accelerator.prepare`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A context manager to disable gradient synchronizations across DDP processes
+    by calling `torch.nn.parallel.DistributedDataParallel.no_sync`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `model` is not in DDP, this context manager does nothing
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `on_last_process`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L676)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`function` (`Callable`) — The function to decorate.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A decorator that will run the decorated function on the last process only. Can
+    also be called using the `PartialState` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `on_local_main_process`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L634)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`function` (`Callable`) — The function to decorate.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A decorator that will run the decorated function on the local main process only.
+    Can also be called using the `PartialState` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `on_local_process`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L760)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`function` (`Callable`, *optional*) — The function to decorate.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`local_process_index` (`int`, *optional*) — The index of the local process
+    on which to run the function.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A decorator that will run the decorated function on a given local process index
+    only. Can also be called using the `PartialState` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `on_main_process`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L595)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`function` (`Callable`) — The function to decorate.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A decorator that will run the decorated function on the main process only. Can
+    also be called using the `PartialState` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `on_process`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L715)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`function` (`Callable`, `optional`) — The function to decorate.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`process_index` (`int`, `optional`) — The index of the process on which to
+    run the function.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A decorator that will run the decorated function on a given process index only.
+    Can also be called using the `PartialState` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `pad_across_processes`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2261)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tensor` (nested list/tuple/dictionary of `torch.Tensor`) — The data to gather.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dim` (`int`, *optional*, defaults to 0) — The dimension on which to pad.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`pad_index` (`int`, *optional*, defaults to 0) — The value with which to pad.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`pad_first` (`bool`, *optional*, defaults to `False`) — Whether to pad at the
+    beginning or the end.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.Tensor`, or a nested tuple/list/dictionary of `torch.Tensor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The padded tensor(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Recursively pad the tensors in a nested list/tuple/dictionary of tensors from
+    all devices to the same size so they can safely be gathered.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `prepare`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1116)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`*args` (list of objects) — Any of the following type of objects:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`torch.utils.data.DataLoader`: PyTorch Dataloader'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`torch.nn.Module`: PyTorch Module'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`torch.optim.Optimizer`: PyTorch Optimizer'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`torch.optim.lr_scheduler.LRScheduler`: PyTorch LR Scheduler'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device_placement` (`list[bool]`, *optional*) — Used to customize whether automatic
+    device placement should be performed for each object passed. Needs to be a list
+    of the same length as `args`. Not compatible with DeepSpeed or FSDP.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prepare all objects passed in `args` for distributed training and mixed precision,
+    then return them in the same order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You don’t need to prepare a model if you only use it for inference without any
+    kind of mixed precision
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `prepare_data_loader`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1812)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE65]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`data_loader` (`torch.utils.data.DataLoader`) — A vanilla PyTorch DataLoader
+    to prepare'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device_placement` (`bool`, *optional*) — Whether or not to place the batches
+    on the proper device in the prepared dataloader. Will default to `self.device_placement`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`slice_fn_for_dispatch` (`Callable`, *optional*`) -- If passed, this function
+    will be used to slice tensors across` num_processes`. Will default to [slice_tensors()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.slice_tensors).
+    This argument is used only when` dispatch_batches`is set to`True` and will be
+    ignored otherwise.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prepares a PyTorch DataLoader for training in any distributed setup. It is recommended
+    to use [Accelerator.prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE66]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `prepare_model`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1252)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE67]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — A PyTorch model to prepare. You don’t need to
+    prepare a model if it is used only for inference without any kind of mixed precision'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device_placement` (`bool`, *optional*) — Whether or not to place the model
+    on the proper device. Will default to `self.device_placement`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`evaluation_mode` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to set the model for evaluation only, by just applying mixed precision and `torch.compile`
+    (if configured in the `Accelerator` object).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prepares a PyTorch model for training in any distributed setup. It is recommended
+    to use [Accelerator.prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE68]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `prepare_optimizer`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1864)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE69]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`optimizer` (`torch.optim.Optimizer`) — A vanilla PyTorch optimizer to prepare'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device_placement` (`bool`, *optional*) — Whether or not to place the optimizer
+    on the proper device. Will default to `self.device_placement`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prepares a PyTorch Optimizer for training in any distributed setup. It is recommended
+    to use [Accelerator.prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE70]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `prepare_scheduler`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1897)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE71]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`scheduler` (`torch.optim.lr_scheduler.LRScheduler`) — A vanilla PyTorch scheduler
+    to prepare'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prepares a PyTorch Scheduler for training in any distributed setup. It is recommended
+    to use [Accelerator.prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE72]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `print`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1084)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE73]'
+  prefs: []
+  type: TYPE_PRE
+- en: Drop in replacement of `print()` to only print once per server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE74]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `reduce`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2225)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE75]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tensor` (`torch.Tensor`, or a nested tuple/list/dictionary of `torch.Tensor`)
+    — The tensors to reduce across all processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`reduction` (`str`, *optional*, defaults to “sum”) — A reduction type, can
+    be one of ‘sum’, ‘mean’, or ‘none’. If ‘none’, will not perform any operation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`scale` (`float`, *optional*, defaults to 1.0) — A default scaling value to
+    be applied after the reduce, only valied on XLA.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.Tensor`, or a nested tuple/list/dictionary of `torch.Tensor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The reduced tensor(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reduce the values in *tensor* across all processes based on *reduction*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: All processes get the reduced value.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE76]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `register_for_checkpointing`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L3073)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE77]'
+  prefs: []
+  type: TYPE_PRE
+- en: Makes note of `objects` and will save or load them in during `save_state` or
+    `load_state`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These should be utilized when the state is being loaded or saved in the same
+    script. It is not designed to be used in different scripts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every `object` must have a `load_state_dict` and `state_dict` function to be
+    stored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE78]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `register_load_state_pre_hook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2785)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE79]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`hook` (`Callable`) — A function to be called in [Accelerator.load_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.load_state)
+    before `load_checkpoint`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.utils.hooks.RemovableHandle`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: a handle that can be used to remove the added hook by calling `handle.remove()`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Registers a pre hook to be run before `load_checkpoint` is called in [Accelerator.load_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.load_state).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The hook should have the following signature:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`hook(models: list[torch.nn.Module], input_dir: str) -> None`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `models` argument are the models as saved in the accelerator state under
+    `accelerator._models`, and the `input_dir` argument is the `input_dir` argument
+    passed to [Accelerator.load_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.load_state).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Should only be used in conjunction with [Accelerator.register_save_state_pre_hook()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.register_save_state_pre_hook).
+    Can be useful to load configurations in addition to model weights. Can also be
+    used to overwrite model loading with a customized method. In this case, make sure
+    to remove already loaded models from the models list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `register_save_state_pre_hook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2619)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE80]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`hook` (`Callable`) — A function to be called in [Accelerator.save_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_state)
+    before `save_checkpoint`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.utils.hooks.RemovableHandle`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: a handle that can be used to remove the added hook by calling `handle.remove()`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Registers a pre hook to be run before `save_checkpoint` is called in [Accelerator.save_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_state).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The hook should have the following signature:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`hook(models: list[torch.nn.Module], weights: list[dict[str, torch.Tensor]],
+    input_dir: str) -> None`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `models` argument are the models as saved in the accelerator state under
+    `accelerator._models`, `weigths` argument are the state dicts of the `models`,
+    and the `input_dir` argument is the `input_dir` argument passed to [Accelerator.load_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.load_state).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Should only be used in conjunction with [Accelerator.register_load_state_pre_hook()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.register_load_state_pre_hook).
+    Can be useful to save configurations in addition to model weights. Can also be
+    used to overwrite model saving with a customized method. In this case, make sure
+    to remove already loaded weights from the weights list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `save`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2482)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE81]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`obj` (`object`) — The object to save.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`f` (`str` or `os.PathLike`) — Where to save the content of `obj`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`safe_serialization` (`bool`, *optional*, defaults to `False`) — Whether to
+    save `obj` using `safetensors`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Save the object passed to disk once per machine. Use in place of `torch.save`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: If `save_on_each_node` was passed in as a `ProjectConfiguration`, will
+    save the object once per node, rather than only once on the main node.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE82]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `save_model`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2512)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE83]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`save_directory` (`str` or `os.PathLike`) — Directory to which to save. Will
+    be created if it doesn’t exist.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`max_shard_size` (`int` or `str`, *optional*, defaults to `"10GB"`) — The maximum
+    size for a checkpoint before being sharded. Checkpoints shard will then be each
+    of size lower than this size. If expressed as a string, needs to be digits followed
+    by a unit (like `"5MB"`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If a single weight of the model is bigger than `max_shard_size`, it will be
+    in its own checkpoint shard which will be bigger than `max_shard_size`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '`safe_serialization` (`bool`, *optional*, defaults to `True`) — Whether to
+    save the model using `safetensors` or the traditional PyTorch way (that uses `pickle`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Save a model so that it can be re-loaded using load_checkpoint_in_model
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE84]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `save_state`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2651)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE85]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`output_dir` (`str` or `os.PathLike`) — The name of the folder to save all
+    relevant weights and states.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`safe_serialization` (`bool`, *optional*, defaults to `True`) — Whether to
+    save the model using `safetensors` or the traditional PyTorch way (that uses `pickle`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`save_model_func_kwargs` (`dict`, *optional*) — Additional keyword arguments
+    for saving model which can be passed to the underlying save function, such as
+    optional arguments for DeepSpeed’s `save_checkpoint` function.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Saves the current states of the model, optimizer, scaler, RNG generators, and
+    registered objects to a folder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a `ProjectConfiguration` was passed to the `Accelerator` object with `automatic_checkpoint_naming`
+    enabled then checkpoints will be saved to `self.project_dir/checkpoints`. If the
+    number of current saves is greater than `total_limit` then the oldest save is
+    deleted. Each checkpoint is saved in seperate folders named `checkpoint_<iteration>`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Otherwise they are just saved to `output_dir`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Should only be used when wanting to save a checkpoint during training and restoring
+    the state in the same environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE86]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `set_trigger`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L1968)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE87]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sets the internal trigger tensor to 1 on the current process. A latter check
+    should follow using this which will check across all processes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: Does not require `wait_for_everyone()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE88]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `skip_first_batches`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L3156)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE89]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`dataloader` (`torch.utils.data.DataLoader`) — The data loader in which to
+    skip batches.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_batches` (`int`, *optional*, defaults to 0) — The number of batches to
+    skip'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Creates a new `torch.utils.data.DataLoader` that will efficiently skip the first
+    `num_batches`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE90]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `split_between_processes`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L553)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE91]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`inputs` (`list`, `tuple`, `torch.Tensor`, or `dict` of `list`/`tuple`/`torch.Tensor`)
+    — The input to split between processes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`apply_padding` (`bool`, `optional`, defaults to `False`) — Whether to apply
+    padding by repeating the last element of the input so that all processes have
+    the same number of elements. Useful when trying to perform actions such as `Accelerator.gather()`
+    on the outputs or passing in less inputs than there are processes. If so, just
+    remember to drop the padded elements afterwards.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Splits `input` between `self.num_processes` quickly and can be then used on
+    that process. Useful when doing distributed inference, such as with different
+    prompts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that when using a `dict`, all keys need to have the same number of elements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE92]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `trigger_sync_in_backward`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L893)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE93]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model for which to trigger the gradient synchronization.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Trigger the sync of the gradients in the next backward pass of the model after
+    multiple forward passes under `Accelerator.no_sync` (only applicable in multi-GPU
+    scenarios).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the script is not launched in distributed mode, this context manager does
+    nothing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE94]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `unscale_gradients`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2027)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE95]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`optimizer` (`torch.optim.Optimizer` or `list[torch.optim.Optimizer]`, *optional*)
+    — The optimizer(s) for which to unscale gradients. If not set, will unscale gradients
+    on all optimizers that were passed to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Unscale the gradients in mixed precision training with AMP. This is a noop in
+    all other settings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Likely should be called through [Accelerator.clip*grad_norm*()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.clip_grad_norm_)
+    or [Accelerator.clip*grad_value*()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.clip_grad_value_)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE96]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `unwrap_model`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2296)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE97]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model to unwrap.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`keep_fp32_wrapper` (`bool`, *optional*, defaults to `True`) — Whether to not
+    remove the mixed precision hook if it was added.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.nn.Module`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The unwrapped model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unwraps the `model` from the additional layer possible added by [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).
+    Useful before saving the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE98]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `verify_device_map`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L3192)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE99]'
+  prefs: []
+  type: TYPE_PRE
+- en: Verifies that `model` has not been prepared with big model inference with a
+    device-map resembling `auto`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `wait_for_everyone`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/accelerator.py#L2329)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE100]'
+  prefs: []
+  type: TYPE_PRE
+- en: Will stop the execution of the current process until every other process has
+    reached that point (so this does nothing when the script is only run in one process).
+    Useful to do before saving a model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE101]'
+  prefs: []
+  type: TYPE_PRE

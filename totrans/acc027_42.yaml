@@ -1,0 +1,349 @@
+- en: Experiment Tracking
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/package_reference/tracking](https://huggingface.co/docs/accelerate/package_reference/tracking)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/28.7531c98a.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Docstring.ae1a1e2d.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Base Tracker Class
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class accelerate.tracking.GeneralTracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L91)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: A base Tracker class to be used for all logging integration implementations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each function should take in `**kwargs` that will automatically be passed in
+    from a base dictionary provided to [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Should implement `name`, `requires_logging_directory`, and `tracker` properties
+    such that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`name` (`str`): String representation of the tracker class name, such as “TensorBoard”
+    `requires_logging_directory` (`bool`): Whether the logger requires a directory
+    to store their logs. `tracker` (`object`): Should return internal tracking mechanism
+    used by a tracker class (such as the `run` for wandb)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Implementations can also include a `main_process_only` (`bool`) attribute to
+    toggle if relevent logging, init, and other functions should occur on the main
+    process or across all processes (by default will use `True`)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `finish`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L157)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Should run any finalizing functions within the tracking API. If the API should
+    not have one, just don’t overwrite that method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `log`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L144)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`values` (Dictionary `str` to `str`, `float`, or `int`) — Values to be logged
+    as key-value pairs. The values need to have type `str`, `float`, or `int`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`step` (`int`, *optional*) — The run step. If included, the log will be affiliated
+    with this step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Logs `values` to the current run. Base `log` implementations of a tracking API
+    should go in here, along with special behavior for the `step parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `store_init_configuration`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L132)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`values` (Dictionary `str` to `bool`, `str`, `float` or `int`) — Values to
+    be stored as initial hyperparameters as key-value pairs. The values need to have
+    type `bool`, `str`, `float`, `int`, or `None`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Logs `values` as hyperparameters for the run. Implementations should use the
+    experiment configuration functionality of a tracking API.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Integrated Trackers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class accelerate.tracking.TensorBoardTracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L165)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`run_name` (`str`) — The name of the experiment run'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`logging_dir` (`str`, `os.PathLike`) — Location for TensorBoard logs to be
+    stored. kwargs — Additional key word arguments passed along to the `tensorboard.SummaryWriter.__init__`
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A `Tracker` class that supports `tensorboard`. Should be initialized at the
+    start of your script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `__init__`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L181)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '### `class accelerate.tracking.WandBTracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L276)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`run_name` (`str`) — The name of the experiment run. kwargs — Additional key
+    word arguments passed along to the `wandb.init` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A `Tracker` class that supports `wandb`. Should be initialized at the start
+    of your script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `__init__`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L291)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '### `class accelerate.tracking.CometMLTracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L399)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`run_name` (`str`) — The name of the experiment run. kwargs — Additional key
+    word arguments passed along to the `Experiment.__init__` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A `Tracker` class that supports `comet_ml`. Should be initialized at the start
+    of your script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: API keys must be stored in a Comet config file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `__init__`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L415)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '### `class accelerate.tracking.AimTracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L480)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`run_name` (`str`) — The name of the experiment run. kwargs — Additional key
+    word arguments passed along to the `Run.__init__` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A `Tracker` class that supports `aim`. Should be initialized at the start of
+    your script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `__init__`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L494)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '### `class accelerate.tracking.MLflowTracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L579)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`experiment_name` (`str`, *optional*) — Name of the experiment. Environment
+    variable MLFLOW_EXPERIMENT_NAME has priority over this argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`logging_dir` (`str` or `os.PathLike`, defaults to `"."`) — Location for mlflow
+    logs to be stored.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`run_id` (`str`, *optional*) — If specified, get the run with the specified
+    UUID and log parameters and metrics under that run. The run’s end time is unset
+    and its status is set to running, but the run’s other attributes (source_version,
+    source_type, etc.) are not changed. Environment variable MLFLOW_RUN_ID has priority
+    over this argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tags` (`Dict[str, str]`, *optional*) — An optional `dict` of `str` keys and
+    values, or a `str` dump from a `dict`, to set as tags on the run. If a run is
+    being resumed, these tags are set on the resumed run. If a new run is being created,
+    these tags are set on the new run. Environment variable MLFLOW_TAGS has priority
+    over this argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nested_run` (`bool`, *optional*, defaults to `False`) — Controls whether run
+    is nested in parent run. True creates a nested run. Environment variable MLFLOW_NESTED_RUN
+    has priority over this argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`run_name` (`str`, *optional*) — Name of new run (stored as a mlflow.runName
+    tag). Used only when `run_id` is unspecified.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`description` (`str`, *optional*) — An optional string that populates the description
+    box of the run. If a run is being resumed, the description is set on the resumed
+    run. If a new run is being created, the description is set on the new run.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A `Tracker` class that supports `mlflow`. Should be initialized at the start
+    of your script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `__init__`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L610)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '### `class accelerate.tracking.ClearMLTracker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L724)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`run_name` (`str`, *optional*) — Name of the experiment. Environment variables
+    `CLEARML_PROJECT` and `CLEARML_TASK` have priority over this argument. kwargs
+    — Kwargs passed along to the `Task.__init__` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A `Tracker` class that supports `clearml`. Should be initialized at the start
+    of your script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `__init__`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/tracking.py#L739)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE

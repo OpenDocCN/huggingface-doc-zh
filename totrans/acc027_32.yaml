@@ -1,0 +1,138 @@
+- en: Comparing performance between different device setups
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/concept_guides/performance](https://huggingface.co/docs/accelerate/concept_guides/performance)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/13.dd550d08.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Evaluating and comparing the performance from different setups can be quite
+    tricky if you don’t know what to look for. For example, you cannot run the same
+    script with the same batch size across TPU, multi-GPU, and single-GPU with Accelerate
+    and expect your results to line up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But why?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are three reasons for this that this tutorial will cover:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Setting the right seeds**'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Observed Batch Sizes**'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Learning Rates**'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Setting the Seed
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'While this issue has not come up as much, make sure to use [utils.set_seed()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.set_seed)
+    to fully set the seed in all distributed cases so training will be reproducible:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Why is this important? Under the hood this will set **5** different seed settings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The random state, numpy’s state, torch, torch’s cuda state, and if TPUs are
+    available torch_xla’s cuda state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Observed Batch Sizes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When training with Accelerate, the batch size passed to the dataloader is the
+    **batch size per GPU**. What this entails is a batch size of 64 on two GPUs is
+    truly a batch size of 128\. As a result, when testing on a single GPU this needs
+    to be accounted for, as well as similarly for TPUs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The below table can be used as a quick reference to try out different batch
+    sizes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this example, there are two GPUs for “Multi-GPU” and a TPU pod with 8 workers
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Single GPU Batch Size | Multi-GPU Equivalent Batch Size | TPU Equivalent
+    Batch Size |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 256 | 128 | 32 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 128 | 64 | 16 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 64 | 32 | 8 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 32 | 16 | 4 |'
+  prefs: []
+  type: TYPE_TB
+- en: Learning Rates
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As noted in multiple sources[[1](https://aws.amazon.com/blogs/machine-learning/scalable-multi-node-deep-learning-training-using-gpus-in-the-aws-cloud/)][[2](https://docs.nvidia.com/clara/clara-train-sdk/pt/model.html#classification-models-multi-gpu-training)],
+    the learning rate should be scaled *linearly* based on the number of devices present.
+    The below snippet shows doing so with Accelerate:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since users can have their own learning rate schedulers defined, we leave this
+    up to the user to decide if they wish to scale their learning rate or not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: You will also find that `accelerate` will step the learning rate based on the
+    number of processes being trained on. This is because of the observed batch size
+    noted earlier. So in the case of 2 GPUs, the learning rate will be stepped twice
+    as often as a single GPU to account for the batch size being twice as large (if
+    no changes to the batch size on the single GPU instance are made).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gradient Accumulation and Mixed Precision
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When using gradient accumulation and mixed precision, due to how gradient averaging
+    works (accumulation) and the precision loss (mixed precision), some degradation
+    in performance is expected. This will be explicitly seen when comparing the batch-wise
+    loss between different compute setups. However, the overall loss, metric, and
+    general performance at the end of training should be *roughly* the same.
+  prefs: []
+  type: TYPE_NORMAL

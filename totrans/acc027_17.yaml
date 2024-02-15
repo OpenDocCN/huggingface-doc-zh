@@ -1,0 +1,262 @@
+- en: Distributed Inference with 🤗 Accelerate
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/usage_guides/distributed_inference](https://huggingface.co/docs/accelerate/usage_guides/distributed_inference)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/34.ccbb1b4f.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Distributed inference can fall into three brackets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Loading an entire model onto each GPU and sending chunks of a batch through
+    each GPU’s model copy at a time
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Loading parts of a model onto each GPU and processing a single input at one
+    time
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Loading parts of a model onto each GPU and using what is called scheduled Pipeline
+    Parallelism to combine the two prior techniques.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We’re going to go through the first and the last bracket, showcasing how to
+    do each as they are more realistic scenarios.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sending chunks of a batch automatically to each loaded model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This is the most memory-intensive solution, as it requires each GPU to keep
+    a full copy of the model in memory at a given time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Normally when doing this, users send the model to a specific device to load
+    it from the CPU, and then move each prompt to a different device.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A basic pipeline using the `diffusers` library might look something like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Followed then by performing inference based on the specific prompt:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: One will notice how we have to check the rank to know what prompt to send, which
+    can be a bit tedious.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A user might then also think that with 🤗 Accelerate, using the `Accelerator`
+    to prepare a dataloader for such a task might also be a simple way to manage this.
+    (To learn more, check out the relevant section in the [Quick Tour](../quicktour#distributed-evaluation))
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Can it manage it? Yes. Does it add unneeded extra code however: also yes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With 🤗 Accelerate, we can simplify this process by using the [Accelerator.split_between_processes()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.split_between_processes)
+    context manager (which also exists in `PartialState` and `AcceleratorState`).
+    This function will automatically split whatever data you pass to it (be it a prompt,
+    a set of tensors, a dictionary of the prior data, etc.) across all the processes
+    (with a potential to be padded) for you to use right away.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s rewrite the above example using this context manager:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And then to launch the code, we can use the 🤗 Accelerate:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you have generated a config file to be used using `accelerate config`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you have a specific config file you want to use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or if don’t want to make any config files and launch on two GPUs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: You will get some warnings about values being guessed based on your system.
+    To remove these you can do `accelerate config default` or go through `accelerate
+    config` to create a config file.'
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’ve now reduced the boilerplate code needed to split this data to a few lines
+    of code quite easily.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But what if we have an odd distribution of prompts to GPUs? For example, what
+    if we have 3 prompts, but only 2 GPUs?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Under the context manager, the first GPU would receive the first two prompts
+    and the second GPU the third, ensuring that all prompts are split and no overhead
+    is needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*However*, what if we then wanted to do something with the results of *all
+    the GPUs*? (Say gather them all and perform some kind of post processing) You
+    can pass in `apply_padding=True` to ensure that the lists of prompts are padded
+    to the same length, with extra data being taken from the last sample. This way
+    all GPUs will have the same number of prompts, and you can then gather the results.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is only needed when trying to perform an action such as gathering the results,
+    where the data on each device needs to be the same length. Basic inference does
+    not require this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For instance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: On the first GPU, the prompts will be `["a dog", "a cat"]`, and on the second
+    GPU it will be `["a chicken", "a chicken"]`. Make sure to drop the final sample,
+    as it will be a duplicate of the previous one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Memory-efficient pipeline parallelism (experimental)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This next part will discuss using *pipeline parallelism*. This is an **experimental**
+    API utilizing the [PiPPy library by PyTorch](https://github.com/pytorch/PiPPy/)
+    as a native solution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The general idea with pipeline parallelism is: say you have 4 GPUs and a model
+    big enough it can be *split* on four GPUs using `device_map="auto"`. With this
+    method you can send in 4 inputs at a time (for example here, any amount works)
+    and each model chunk will work on an input, then receive the next input once the
+    prior chunk finished, making it *much* more efficient **and faster** than the
+    method described earlier. Here’s a visual taken from the PyTorch repository:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![PiPPy example](../Images/0d96d7f73aed95a927cf10c18cd407b8.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: To illustrate how you can use this with Accelerate, we have created an [example
+    zoo](https://github.com/huggingface/accelerate/tree/main/examples/inference) showcasing
+    a number of different models and situations. In this tutorial, we’ll show this
+    method for GPT2 across two GPUs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you proceed, please make sure you have the latest pippy installed by
+    running the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: We require at least version 0.2.0\. To confirm that you have the correct version,
+    run `pip show torchpippy`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start by creating the model on the CPU:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next you’ll need to create some example inputs to use. These help PiPPy trace
+    the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However you make this example will determine the relative batch size that will
+    be used/passed through the model at a given time, so make sure to remember how
+    many items there are!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next we need to actually perform the tracing and get the model ready. To do
+    so, use the [inference.prepare_pippy()](/docs/accelerate/v0.27.2/en/package_reference/inference#accelerate.prepare_pippy)
+    function and it will fully wrap the model for pipeline parallelism automatically:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There are a variety of parameters you can pass through to `prepare_pippy`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`split_points` lets you determine what layers to split the model at. By default
+    we use wherever `device_map="auto" declares, such as` fc`or`conv1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_chunks` determines how the batch will be split and sent to the model itself
+    (so `num_chunks=1` with four split points/four GPUs will have a naive MP where
+    a single input gets passed between the four layer split points)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: From here, all that’s left is to actually perform the distributed inference!
+  prefs: []
+  type: TYPE_NORMAL
+- en: When passing inputs, we highly recommend to pass them in as a tuple of arguments.
+    Using `kwargs` is supported, however, this approach is experimental.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When finished all the data will be on the last process only:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you pass in `gather_output=True` to [inference.prepare_pippy()](/docs/accelerate/v0.27.2/en/package_reference/inference#accelerate.prepare_pippy),
+    the output will be sent across to all the GPUs afterwards without needing the
+    `is_last_process` check. This is `False` by default as it incurs a communication
+    call.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And that’s it! To explore more, please check out the inference examples in the
+    [Accelerate repo](https://github.com/huggingface/accelerate/tree/main/examples/inference)
+    and our [documentation](../package_reference/inference) as we work to improving
+    this integration.
+  prefs: []
+  type: TYPE_NORMAL

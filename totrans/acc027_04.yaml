@@ -1,0 +1,564 @@
+- en: Quick tour
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/quicktour](https://huggingface.co/docs/accelerate/quicktour)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/30.7341dcc7.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide aims to help you get started with 🤗 Accelerate quickly. It covers
+    the essential steps you need to take to enable distributed training, as well as
+    the adjustments that you need to make in some common scenarios.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To help you navigate, the guide is split into two sections:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Getting Started with 🤗 Accelerate](#getting-started-with--accelerate): start
+    here to learn how to modify your script to enable distributed training with 🤗
+    Accelerate'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Common adaptations to the base case](#common-adaptations-to-the-base-case):
+    check out this section for common deviations from the baseline scenario and what
+    adjustments may need to be made to support them.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Getting started with 🤗 Accelerate
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Enable distributed training in your script
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To use 🤗 Accelerate in your own training script, you have to modify four things:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Import the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    main class and instantiate one in an `accelerator` object.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Add this at the beginning of your training script as it will initialize everything
+    necessary for distributed training. You don’t need to indicate the kind of environment
+    you are in (a single machine with a GPU, a machine with several GPUs, or several
+    machines with multiple GPUs or a TPU), the library will detect this automatically.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Remove the `.to(device)` or `.cuda()` calls for your model and input data.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The `accelerator` object will handle placing these objects on the right device
+    for you. If you choose to leave those `.to(device)` calls, make sure to use the
+    device provided by the `accelerator` object: `accelerator.device`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can fully deactivate the automatic device placement by passing along `device_placement=False`
+    when initializing the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator).
+    However, if you place your objects manually on the proper device, be careful to
+    create your optimizer after putting your model on `accelerator.device` or your
+    training will fail on TPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Pass all PyTorch objects relevant to training (optimizer, model, dataloader(s),
+    learning rate scheduler) to the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    method as soon as these objects are created, before starting your actual training
+    loop:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**Important notes**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You should always pass the the learning rate scheduler to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare),
+    however if the scheduler should *not* be stepped at each optimization step, pass
+    `step_with_optimizer=False` to the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    init.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: While you can send your dataloader to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    on its own (and there are cases for doing so, such as distributed inference),
+    it’s best to send it to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    together with the model and optimizer.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you wish to run distributed evaluation, send your validation dataloader to
+    [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    as well. There are some nuances to distributed validation, check the [Distributed
+    evaluation](#add-distributed-evaluation) section of the guide.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Any instruction using your training dataloader length (for instance if you want
+    to log the number of total training steps) should go after the call to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Passing `DataLoader` objects to the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    method ensures that your dataloader will be sharded across all GPUs/TPU cores
+    available so that each one sees a different portion of the training dataset. In
+    other words, if there are 8 processes and a dataset of 64 items, each process
+    will see 8 of these items per iteration. Also, the random states of all processes
+    will be synchronized at the beginning of each iteration through your dataloader,
+    to make sure the data is shuffled the same way (if you decided to use `shuffle=True`
+    or any kind of random sampler).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The actual batch size for your training will be the number of devices used
+    multiplied by the batch size you set in your script. For instance, training on
+    4 GPUs with a batch size of 16 set when creating the training dataloader will
+    train at an actual batch size of 64 (4 * 16). If you want the batch size remain
+    the same regardless of how many GPUs the script is run on, you can use the option
+    `split_batches=True` when creating and initializing [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator).
+    Your training dataloader may change length when going through this method: if
+    you run on X GPUs, it will have its length divided by X (since your actual batch
+    size will be multiplied by X), unless you set `split_batches=True`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Replace the `loss.backward()` line with `accelerator.backward(loss)`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: And you’re all set! With all these changes, your script will run on your local
+    machine as well as on multiple GPUs or a TPU! You can either use your favorite
+    tool to launch the distributed training, or you can use the 🤗 Accelerate launcher.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Add distributed evaluation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can perform regular evaluation in your training script if you leave your
+    validation dataloader out of the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    method. In this case, you will need to put the input data on the `accelerator.device`
+    manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To perform distributed evaluation, send along your validation dataloader to
+    the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Same as with your training dataloader, each device will only see part of the
+    evaluation data should you run your script on multiple devices. This means you
+    will need to group your predictions together which you can do with the [gather_for_metrics()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather_for_metrics)
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Similar to the training dataloader, passing your validation dataloader through
+    [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    may change it: if you run on X GPUs, it will have its length divided by X (since
+    your actual batch size will be multiplied by X), unless you set `split_batches=True`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some data at the end of the dataset may be duplicated so the batch can be divided
+    equally among all workers. As a result, metrics should be calculated through the
+    [gather_for_metrics()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather_for_metrics)
+    method to automatically remove the duplicated data while gathering and provide
+    a more accurate metric.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If for some reason you don’t wish to have this automatically done, [gather()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather)
+    can be used instead to gather the data across all processes and this can manually
+    be done instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [gather()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather)
+    and [gather_for_metrics()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather_for_metrics)
+    methods require the tensors to be all the same size on each process. If you have
+    tensors of different sizes on each process (for instance when dynamically padding
+    to the maximum length in a batch), you should use the [pad_across_processes()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.pad_across_processes)
+    method to pad you tensor to the biggest size across processes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Launch your distributed script
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can use the regular commands to launch your distributed training (like `torch.distributed.run`
+    for PyTorch) - they are fully compatible with 🤗 Accelerate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Alternatively, 🤗 Accelerate provides a CLI tool that unifies all launchers,
+    so you only have to remember one command. \ To use it, run a quick configuration
+    setup first on your machine and answer the questions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'At the end of the setup, a *default_config.yaml* file will be saved in your
+    cache folder for 🤗 Accelerate. That cache folder is (with decreasing order of
+    priority):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The content of your environment variable `HF_HOME` suffixed with *accelerate*.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If it does not exist, the content of your environment variable `XDG_CACHE_HOME`
+    suffixed with *huggingface/accelerate*.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If this does not exist either, the folder *~/.cache/huggingface/accelerate*.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'By specifying the `--config_file` flag you can specify an alternative location
+    of the configuration file. Once the configuration setup is complete, you can test
+    your setup by running:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will launch a short script that will test the distributed environment.
+    If it runs without issues, you are ready for the next step!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that if you specified a location for the config file in the previous step,
+    you need to pass it here as well:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now that this is done, you can run your script with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you stored the config file in a non-default location, you can indicate it
+    to the launcher like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can override any of the arguments determined by your config file. To see
+    the complete list of parameters that you can pass in, run `accelerate launch -h`.
+    (And further niche argument help by passing in partial commands, such as `accelerate
+    launch --multi_gpu -h` for all `multi_gpu` args)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out the [Launch tutorial](basic_tutorials/launch) for more information
+    about launching your scripts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Common modifications of the base case
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The previous section covers the minimal essential steps to move a training script
+    into a distributed setup with 🤗 Accelerate. Here we describe common modifications/deviations
+    from the base case scenario and the adjustments you need to make to accommodate
+    for them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Launch distributed training from a notebook
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Accelerate has a [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
+    to help you launch your training function from a notebook. This launcher supports
+    launching a training with TPUs on Colab or Kaggle, as well as training on several
+    GPUs and machines (if the machine on which you are running your notebook has them).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Define a function responsible for your whole training and/or evaluation in
+    a cell of the notebook, then execute a cell with the following code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Your [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    object should only be defined inside the training function. This is because the
+    initialization should be done inside the launcher only.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out the [Notebook Launcher tutorial](basic_tutorials/notebook) for more
+    information about training on TPUs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Specifics of training on TPU
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you want to launch your script on TPUs, there are a few caveats you should
+    be aware of. Behind the scenes, the TPUs will create a graph of all the operations
+    happening in your training step (forward pass, backward pass and optimizer step).
+    This is why your first step of training will always be very long as building and
+    compiling this graph for optimizations takes some time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The good news is that this compilation will be cached so the second step and
+    all the following will be much faster. The bad news is that it only applies if
+    all of your steps do exactly the same operations, which implies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all tensors of the same length in all your batches
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having static code (i.e., not a for loop of length that could change from step
+    to step)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Having any of the things above change between two steps will trigger a new compilation
+    which will, once again, take a lot of time. In practice, that means you must take
+    special care to have all your tensors in your inputs of the same shape (so no
+    dynamic padding for instance if you are in an NLP problem) and should not use
+    layers with for loops that have different lengths depending on the inputs (such
+    as an LSTM) or the training will be excruciatingly slow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To introduce special behavior in your script for TPUs you can check the `distributed_type`
+    of your `accelerator`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: The [NLP example](https://github.com/huggingface/accelerate/blob/main/examples/nlp_example.py)
+    shows an example in a situation with dynamic padding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'One last thing to pay close attention to: if your model has tied weights (such
+    as language models which tie the weights of the embedding matrix with the weights
+    of the decoder), moving this model to the TPU (either yourself or after you passed
+    your model to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare))
+    will break the tying. You will need to retie the weights after. You can find an
+    example of this in the [run_clm_no_trainer](https://github.com/huggingface/transformers/blob/master/examples/pytorch/language-modeling/run_clm.py)
+    script in the Transformers repository.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out the [TPU tutorial](concept_guides/training_tpu) for more information
+    about training on TPUs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Execute a statement only on one processes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Some of your instructions only need to run for one process on a given server:
+    for instance a data download or a log statement. To do this, wrap the statement
+    in a test like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Another example is progress bars: to avoid having multiple progress bars in
+    your output, you should only display one on the local main process:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The *local* means per machine: if you are running your training on two servers
+    with several GPUs, the instruction will be executed once on each of those servers.
+    If you need to execute something only once for all processes (and not per machine)
+    for instance, uploading the final model to the 🤗 model hub, wrap it in a test
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: For printing statements you only want executed once per machine, you can just
+    replace the `print` function by `accelerator.print`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defer execution on multiple GPUs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When you run your usual script, instructions are executed in order. Using 🤗
+    Accelerate to deploy your script on several GPUs at the same time introduces a
+    complication: while each process executes all instructions in order, some may
+    be faster than others.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You might need to wait for all processes to have reached a certain point before
+    executing a given instruction. For instance, you shouldn’t save a model before
+    making sure every process is done with training. To do this, add the following
+    line in your code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: This instruction will block all the processes that arrive first until all the
+    other processes have reached that point (if you run your script on just one GPU
+    or CPU, this won’t do anything).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Save/load a model in a distributed setup
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Saving the model you trained might need a bit of adjustment: first you should
+    wait for all processes to reach that point in the script as shown above, and then,
+    you should unwrap your model before saving it. This is because when going through
+    the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    method, your model may have been placed inside a bigger model, which deals with
+    the distributed training. This in turn means that saving your model state dictionary
+    without taking any precaution will take that potential extra layer into account,
+    and you will end up with weights you can’t load back in your base model. The [save_model()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_model)
+    method will help you to achieve that. It will unwrap your model and save the model
+    state dictionary.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The [save_model()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_model)
+    method can also save a model into sharded checkpoints or with safetensors format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If your script contains logic to load a checkpoint, we also recommend you load
+    your weights in the unwrapped model (this is only useful if you use the load function
+    after making your model go through [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)).
+    Here is an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that since all the model parameters are references to tensors, this will
+    load your weights inside `model`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you want to load a sharded checkpoint or a checkpoint with safetensors format
+    into the model with a specific `device`, we recommend you to load it with [load_checkpoint_in_model()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.load_checkpoint_in_model)
+    function. Here’s an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Save/load entire states
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When training your model, you may want to save the current state of the model,
+    optimizer, random generators, and potentially learning rate schedulers to be restored
+    in the *same script*. You can use [save_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_state)
+    and [load_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.load_state)
+    respectively to do so.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To further customize where and how states saved through [save_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_state)
+    the [ProjectConfiguration](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.ProjectConfiguration)
+    class can be used. For example if `automatic_checkpoint_naming` is enabled each
+    saved checkpoint will be located then at `Accelerator.project_dir/checkpoints/checkpoint_{checkpoint_number}`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you have registered any other stateful items to be stored through [register_for_checkpointing()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.register_for_checkpointing)
+    they will also be saved and/or loaded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every object passed to [register_for_checkpointing()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.register_for_checkpointing)
+    must have a `load_state_dict` and `state_dict` function to be stored
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use gradient clipping
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you are using gradient clipping in your script, you should replace the calls
+    to `torch.nn.utils.clip_grad_norm_` or `torch.nn.utils.clip_grad_value_` with
+    [clip*grad_norm*()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.clip_grad_norm_)
+    and [clip*grad_value*()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.clip_grad_value_)
+    respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train with mixed precision
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you are running your training in Mixed Precision with 🤗 Accelerate, you
+    will get the best result with your loss being computed inside your model (like
+    in Transformer models for instance). Every computation outside of the model will
+    be executed in full precision (which is generally what you want for loss computation,
+    especially if it involves a softmax). However, you might want to put your loss
+    computation inside the [autocast()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.autocast)
+    context manager:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Another caveat with Mixed Precision training is that the gradient will skip
+    a few updates at the beginning and sometimes during training: because of the dynamic
+    loss scaling strategy, there are points during training where the gradients have
+    overflown, and the loss scaling factor is reduced to avoid this happening again
+    at the next step.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This means that you may update your learning rate scheduler when there was
+    no update, which is fine in general, but may have an impact when you have very
+    little training data, or if the first learning rate values of your scheduler are
+    very important. In this case, you can skip the learning rate scheduler updates
+    when the optimizer step was not done like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use gradient accumulation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To perform gradient accumulation use [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
+    and specify a `gradient_accumulation_steps`. This will also automatically ensure
+    the gradients are synced or unsynced when on multi-device training, check if the
+    step should actually be performed, and auto-scale the loss:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE

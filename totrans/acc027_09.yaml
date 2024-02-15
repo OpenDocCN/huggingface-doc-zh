@@ -1,0 +1,346 @@
+- en: Launching Multi-GPU Training from a Jupyter Environment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/basic_tutorials/notebook](https://huggingface.co/docs/accelerate/basic_tutorials/notebook)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/5.b99d68b1.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This tutorial teaches you how to fine tune a computer vision model with 🤗 Accelerate
+    from a Jupyter Notebook on a distributed system. You will also learn how to setup
+    a few requirements needed for ensuring your environment is configured properly,
+    your data has been prepared properly, and finally how to launch training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This tutorial is also available as a Jupyter Notebook [here](https://github.com/huggingface/notebooks/blob/main/examples/accelerate_examples/simple_cv_example.ipynb)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring the Environment
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Before any training can be performed, a 🤗 Accelerate config file must exist
+    in the system. Usually this can be done by running the following in a terminal
+    and answering the prompts:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: However, if general defaults are fine and you are *not* running on a TPU, 🤗Accelerate
+    has a utility to quickly write your GPU configuration into a config file via [utils.write_basic_config()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.commands.config.default.write_basic_config).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following code will restart Jupyter after writing the configuration, as
+    CUDA code was called to perform this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CUDA can’t be initialized more than once on a multi-GPU system. It’s fine to
+    debug in the notebook and have calls to CUDA, but in order to finally train a
+    full cleanup and restart will need to be performed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Preparing the Dataset and Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Next you should prepare your dataset. As mentioned at earlier, great care should
+    be taken when preparing the `DataLoaders` and model to make sure that **nothing**
+    is put on *any* GPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you do, it is recommended to put that specific code into a function and call
+    that from within the notebook launcher interface, which will be shown later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make sure the dataset is downloaded based on the directions [here](https://github.com/huggingface/accelerate/tree/main/examples#simple-vision-example)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'First you need to create a function to extract the class name based on a filename:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the case here, the label is `beagle`. Using regex you can extract the label
+    from the filename:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And you can see it properly returned the right name for our file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next a `Dataset` class should be made to handle grabbing the image and the
+    label:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now to build the dataset. Outside the training function you can find and declare
+    all the filenames and labels and use them as references inside the launched function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next gather all the labels:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, you should make a `get_dataloaders` function that will return your built
+    dataloaders for you. As mentioned earlier, if data is automatically sent to the
+    GPU or a TPU device when building your `DataLoaders`, they must be built using
+    this method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, you should import the scheduler to be used later:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Writing the Training Function
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now you can build the training loop. [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
+    works by passing in a function to call that will be ran across the distributed
+    system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is a basic training loop for the animal classification problem:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The code has been split up to allow for explanations on each section. A full
+    version that can be copy and pasted will be available at the end
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: First you should set the seed and create an [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    object as early in the training loop as possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If training on the TPU, your training loop should take in the model as a parameter
+    and it should be instantiated outside of the training loop function. See the [TPU
+    best practices](../concept_guides/training_tpu) to learn why
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next you should build your dataloaders and create your model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: You build the model here so that the seed also controls the new weight initialization
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As you are performing transfer learning in this example, the encoder of the
+    model starts out frozen so the head of the model can be trained only initially:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Normalizing the batches of images will make training a little faster:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To make these constants available on the active device, you should set it to
+    the Accelerator’s device:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next instantiate the rest of the PyTorch classes used for training:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Before passing everything to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is no specific order to remember, you just need to unpack the objects
+    in the same order you gave them to the prepare method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now train the model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The evaluation loop will look slightly different compared to the training loop.
+    The number of elements passed as well as the overall total accuracy of each batch
+    will be added to two constants:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next you have the rest of your standard PyTorch loop:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Before finally the last major difference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When performing distributed evaluation, the predictions and labels need to
+    be passed through [gather()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather)
+    so that all of the data is available on the current device and a properly calculated
+    metric can be achieved:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you just need to calculate the actual metric for this problem, and you
+    can print it on the main process using [print()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.print):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A full version of this training loop is available below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using the notebook_launcher
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: All that’s left is to use the [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You pass in the function, the arguments (as a tuple), and the number of processes
+    to train on. (See the [documentation](../package_reference/launchers) for more
+    information)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the case of running on multiple nodes, you need to set up a Jupyter session
+    at each node and run the launching cell at the same time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For an environment containing 2 nodes (computers) with 8 GPUs each and the
+    main computer with an IP address of “172.31.43.8”, it would look like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And in the second Jupyter session on the other machine:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Notice how the `node_rank` has changed
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the case of running on the TPU, it would look like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As it’s running it will print the progress as well as state how many devices
+    you ran on. This tutorial was ran with two GPUs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: And that’s it!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Debugging
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A common issue when running the `notebook_launcher` is receiving a CUDA has
+    already been initialized issue. This usually stems from an import or prior code
+    in the notebook that makes a call to the PyTorch `torch.cuda` sublibrary. To help
+    narrow down what went wrong, you can launch the `notebook_launcher` with `ACCELERATE_DEBUG_MODE=yes`
+    in your environment and an additional check will be made when spawning that a
+    regular process can be created and utilize CUDA without issue. (Your CUDA code
+    can still be ran afterwards).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conclusion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'This notebook showed how to perform distributed training from inside of a Jupyter
+    Notebook. Some key notes to remember:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make sure to save any code that use CUDA (or CUDA imports) for the function
+    passed to [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Set the `num_processes` to be the number of devices used for training (such
+    as number of GPUs, CPUs, TPUs, etc)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If using the TPU, declare your model outside the training loop function
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

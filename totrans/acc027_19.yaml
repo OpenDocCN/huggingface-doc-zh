@@ -1,0 +1,101 @@
+- en: Using Local SGD with 🤗 Accelerate
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/usage_guides/local_sgd](https://huggingface.co/docs/accelerate/usage_guides/local_sgd)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/39.963e341c.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Local SGD is a technique for distributed training where gradients are not synchronized
+    every step. Thus, each process updates its own version of the model weights and
+    after a given number of steps these weights are synchronized by averaging across
+    all processes. This improves communication efficiency and can lead to substantial
+    training speed up especially when a computer lacks a faster interconnect such
+    as NVLink. Unlike gradient accumulation (where improving communication efficiency
+    requires increasing the effective batch size), Local SGD does not require changing
+    a batch size or a learning rate / schedule. However, if necessary, Local SGD can
+    be combined with gradient accumulation as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this tutorial you will see how to quickly setup Local SGD 🤗 Accelerate. Compared
+    to a standard Accelerate setup, this requires only two extra lines of code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This example will use a very simplistic PyTorch training loop that performs
+    gradient accumulation every two batches:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Converting it to 🤗 Accelerate
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'First the code shown earlier will be converted to use 🤗 Accelerate with neither
+    a LocalSGD or a gradient accumulation helper:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Letting 🤗 Accelerate handle model synchronization
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'All that is left now is to let 🤗 Accelerate handle model parameter synchronization
+    **and** the gradient accumulation for us. For simplicity let us assume we need
+    to synchronize every 8 steps. This is achieved by adding one `with LocalSGD` statement
+    and one call `local_sgd.step()` after every optimizer step:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Under the hood, the Local SGD code **disables** automatic gradient synchornization
+    (but accumulation still works as expected!). Instead it averages model parameters
+    every `local_sgd_steps` steps (as well as in the end of the training loop).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Limitations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The current implementation works only with basic multi-GPU (or multi-CPU) training
+    without, e.g., [DeepSpeed.](https://github.com/microsoft/DeepSpeed).
+  prefs: []
+  type: TYPE_NORMAL
+- en: References
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Although we are not aware of the true origins of this simple approach, the
+    idea of local SGD is quite old and goes back to at least:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Zhang, J., De Sa, C., Mitliagkas, I., & Ré, C. (2016). [Parallel SGD: When
+    does averaging help?. arXiv preprint arXiv:1606.07365.](https://arxiv.org/abs/1606.07365)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We credit the term Local SGD to the following paper (but there might be earlier
+    references we are not aware of).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stich, Sebastian Urban. [“Local SGD Converges Fast and Communicates Little.”
+    ICLR 2019-International Conference on Learning Representations. No. CONF. 2019.](https://arxiv.org/abs/1805.09767)
+  prefs: []
+  type: TYPE_NORMAL

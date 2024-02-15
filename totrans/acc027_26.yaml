@@ -1,0 +1,431 @@
+- en: Megatron-LM
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/usage_guides/megatron_lm](https://huggingface.co/docs/accelerate/usage_guides/megatron_lm)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/41.19267161.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Megatron-LM](https://github.com/NVIDIA/Megatron-LM) enables training large
+    transformer language models at scale. It provides efficient tensor, pipeline and
+    sequence based model parallelism for pre-training transformer based Language Models
+    such as [GPT](https://arxiv.org/abs/2005.14165) (Decoder Only), [BERT](https://arxiv.org/pdf/1810.04805.pdf)
+    (Encoder Only) and [T5](https://arxiv.org/abs/1910.10683) (Encoder-Decoder). For
+    detailed information and how things work behind the scene please refer the github
+    [repo](https://github.com/NVIDIA/Megatron-LM).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is integrated?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Accelerate integrates following feature of Megatron-LM to enable large scale
+    pre-training/finetuning of BERT (Encoder), GPT (Decoder) or T5 models (Encoder
+    and Decoder):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a. **Tensor Parallelism (TP)**: Reduces memory footprint without much additional
+    communication on intra-node ranks. Each tensor is split into multiple chunks with
+    each shard residing on separate GPU. At each step, the same mini-batch of data
+    is processed independently and in parallel by each shard followed by syncing across
+    all GPUs (`all-reduce` operation). In a simple transformer layer, this leads to
+    2 `all-reduces` in the forward path and 2 in the backward path. For more details,
+    please refer research paper [Megatron-LM: Training Multi-Billion Parameter Language
+    Models Using Model Parallelism](https://arxiv.org/pdf/1909.08053.pdf) and this
+    section of 🤗 blogpost [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed#tensor-parallelism).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'b. **Pipeline Parallelism (PP)**: Reduces memory footprint and enables large
+    scale training via inter-node parallelization. Reduces the bubble of naive PP
+    via PipeDream-Flush schedule/1F1B schedule and Interleaved 1F1B schedule. Layers
+    are distributed uniformly across PP stages. For example, if a model has `24` layers
+    and we have `4` GPUs for pipeline parallelism, each GPU will have `6` layers (24/4).
+    For more details on schedules to reduce the idle time of PP, please refer to the
+    research paper [Efficient Large-Scale Language Model Training on GPU Clusters
+    Using Megatron-LM](https://arxiv.org/pdf/2104.04473.pdf) and this section of 🤗
+    blogpost [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed#pipeline-parallelism).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'c. **Sequence Parallelism (SP)**: Reduces memory footprint without any additional
+    communication. Only applicable when using TP. It reduces activation memory required
+    as it prevents the same copies to be on the tensor parallel ranks post `all-reduce`
+    by replacing then with `reduce-scatter` and `no-op` operation would be replaced
+    by `all-gather`. As `all-reduce = reduce-scatter + all-gather`, this saves a ton
+    of activation memory at no added communication cost. To put it simply, it shards
+    the outputs of each transformer layer along sequence dimension, e.g., if the sequence
+    length is `1024` and the TP size is `4`, each GPU will have `256` tokens (1024/4)
+    for each sample. This increases the batch size that can be supported for training.
+    For more details, please refer to the research paper [Reducing Activation Recomputation
+    in Large Transformer Models](https://arxiv.org/pdf/2205.05198.pdf).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'd. **Data Parallelism (DP)** via Distributed Optimizer: Reduces the memory
+    footprint by sharding optimizer states and gradients across DP ranks (versus the
+    traditional method of replicating the optimizer state across data parallel ranks).
+    For example, when using Adam optimizer with mixed-precision training, each parameter
+    accounts for 12 bytes of memory. This gets distributed equally across the GPUs,
+    i.e., each parameter would account for 3 bytes (12/4) if we have 4 GPUs. For more
+    details, please refer the research paper [ZeRO: Memory Optimizations Toward Training
+    Trillion Parameter Models](https://arxiv.org/pdf/1910.02054.pdf) and following
+    section of 🤗 blog [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed#zero-data-parallelism).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'e. **Selective Activation Recomputation**: Reduces the memory footprint of
+    activations significantly via smart activation checkpointing. It doesn’t store
+    activations occupying large memory while being fast to recompute thereby achieving
+    great tradeoff between memory and recomputation. For example, for GPT-3, this
+    leads to 70% reduction in required memory for activations at the expense of only
+    2.7% FLOPs overhead for recomputation of activations. For more details, please
+    refer to the research paper [Reducing Activation Recomputation in Large Transformer
+    Models](https://arxiv.org/pdf/2205.05198.pdf).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'f. **Fused Kernels**: Fused Softmax, Mixed Precision Fused Layer Norm and Fused
+    gradient accumulation to weight gradient computation of linear layer. PyTorch
+    JIT compiled Fused GeLU and Fused Bias+Dropout+Residual addition.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'g. **Support for Indexed datasets**: Efficient binary format of datasets for
+    large scale training. Support for the `mmap`, `cached` index file and the `lazy`
+    loader format.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'h. **Checkpoint reshaping and interoperability**: Utility for reshaping Megatron-LM
+    checkpoints of variable tensor and pipeline parallel sizes to the beloved 🤗 Transformers
+    sharded checkpoints as it has great support with plethora of tools such as 🤗 Accelerate
+    Big Model Inference, Megatron-DeepSpeed Inference etc. Support is also available
+    for converting 🤗 Transformers sharded checkpoints to Megatron-LM checkpoint of
+    variable tensor and pipeline parallel sizes for large scale training.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pre-Requisites
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You will need to install the latest pytorch, cuda, nccl, and NVIDIA [APEX](https://github.com/NVIDIA/apex#quick-start)
+    releases and the nltk library. See [documentation](https://github.com/NVIDIA/Megatron-LM#setup)
+    for more details. Another way to setup the environment is to pull an NVIDIA PyTorch
+    Container that comes with all the required installations from NGC.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Below is a step-by-step method to set up the conda environment:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a virtual environment
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Assuming that the machine has CUDA 11.3 installed, installing the corresponding
+    PyTorch GPU Version
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Install Nvidia APEX
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Installing Megatron-LM
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Accelerate Megatron-LM Plugin
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Important features are directly supported via the `accelerate config` command.
+    An example of the corresponding questions for using Megatron-LM features is shown
+    below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The resulting config is shown below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will take the example of GPT pre-training. The minimal changes required
+    to the official `run_clm_no_trainer.py` to use Megatron-LM are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As Megatron-LM uses its own implementation of Optimizer, the corresponding
+    scheduler compatible with it needs to be used. As such, support for only the Megatron-LM’s
+    scheduler is present. User will need to create `accelerate.utils.MegatronLMDummyScheduler`.
+    Example is given below:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Getting the details of the total batch size now needs to be cognization of
+    tensor and pipeline parallel sizes. Example of getting the effective total batch
+    size is shown below:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: When using Megatron-LM, the losses are already averaged across the data parallel
+    group
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: For Megatron-LM, we need to save the model using `accelerator.save_state`
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: That’s it! We are good to go 🚀. Please find the example script in the examples
+    folder at the path `accelerate/examples/by_feature/megatron_lm_gpt_pretraining.py`.
+    Let’s run it for `gpt-large` model architecture using 4 A100-80GB GPUs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Below are some important excerpts from the output logs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: There are a large number of other options/features that one can set using `accelerate.utils.MegatronLMPlugin`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Advanced features to leverage writing custom train step and Megatron-LM Indexed
+    Datasets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For leveraging more features, please go through below details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Below is an example of changes required to customize the Train Step while using
+    Megatron-LM. You will implement the `accelerate.utils.AbstractTrainStep` or inherit
+    from their corresponding children `accelerate.utils.GPTTrainStep`, `accelerate.utils.BertTrainStep`
+    or `accelerate.utils.T5TrainStep`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: For using the Megatron-LM datasets, a few more changes are required. Dataloaders
+    for these datasets are available only on rank 0 of each tensor parallel group.
+    As such, there are rank where dataloader won’t be available and this requires
+    tweaks to the training loop. Being able to do all this shows how flexible and
+    extensible 🤗 Accelerate is. The changes required are as follows.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: a. For Megatron-LM indexed datasets, we need to use `MegatronLMDummyDataLoader`
+    and pass the required dataset args to it such as `data_path`, `seq_length` etc.
+    See [here](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/arguments.py#L804)
+    for the list of available args.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: b. `megatron_dataloader` is repeated 3 times to get training, validation and
+    test dataloaders as per the `args.splits_string` proportions
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: c. Changes to training and evaluation loops as dataloader is only available
+    on tensor parallel ranks 0 So, we need to iterate only if the dataloader isn’t
+    `None` else provide empty dict As such, we loop using `while` loop and break when
+    `completed_steps` is equal to `args.max_train_steps` This is similar to the Megatron-LM
+    setup wherein user has to provide `max_train_steps` when using Megaton-LM indexed
+    datasets. This displays how flexible and extensible 🤗 Accelerate is.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Utility for Checkpoint reshaping and interoperability
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The scripts for these are present in 🤗 Transformers library under respective
+    models. Currently, it is available for GPT model [checkpoint_reshaping_and_interoperability.py](https://github.com/huggingface/transformers/blob/main/src/transformers/models/megatron_gpt2/checkpoint_reshaping_and_interoperability.py)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Below is an example of conversion of checkpoint from Megatron-LM to universal
+    🤗 Transformers sharded checkpoint.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Conversion of checkpoint from transformers to megatron with `tp_size=2`, `pp_size=2`
+    and `dp_size=2`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Megatron-LM GPT models support returning logits and megatron_generate function
+    for text generation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Returning logits require setting `require_logits=True` in MegatronLMPlugin as
+    shown below. These would be available on the in the last stage of pipeline.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`megatron_generate` method for Megatron-LM GPT model: This will use Tensor
+    and Pipeline Parallelism to complete generations for a batch of inputs when using
+    greedy with/without top_k/top_p sampling and for individual prompt inputs when
+    using beam search decoding. Only a subset of features of transformers generate
+    is supported. This will help in using large models via tensor and pipeline parallelism
+    for generation (already does key-value caching and uses fused kernels by default).
+    This requires data parallel size to be 1, sequence parallelism and activation
+    checkpointing to be disabled. It also requires specifying path to tokenizer’s
+    vocab file and merges file. Below example shows how to configure and use `megatron_generate`
+    method for Megatron-LM GPT model.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: An end-to-end example of using `megatron_generate` method for Megatron-LM GPT
+    model is available at [megatron_gpt2_generation.py](https://github.com/pacman100/accelerate-megatron-test/blob/main/src/inference/megatron_gpt2_generation.py)
+    with config file [megatron_lm_gpt_generate_config.yaml](https://github.com/pacman100/accelerate-megatron-test/blob/main/src/Configs/megatron_lm_gpt_generate_config.yaml).
+    The bash script with accelerate launch command is available at [megatron_lm_gpt_generate.sh](https://github.com/pacman100/accelerate-megatron-test/blob/main/megatron_lm_gpt_generate.sh).
+    The output logs of the script are available at [megatron_lm_gpt_generate.log](https://github.com/pacman100/accelerate-megatron-test/blob/main/output_logs/megatron_lm_gpt_generate.log).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Support for ROPE and ALiBi Positional embeddings and Multi-Query Attention
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For ROPE/ALiBi attention, pass `position_embedding_type` with `("absolute" |
+    "rotary" | "alibi")` to `MegatronLMPlugin` as shown below.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: For Multi-Query Attention, pass `attention_head_type` with `("multihead" | "multiquery")`
+    to `MegatronLMPlugin` as shown below.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Caveats
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Supports Transformers GPT2, Megatron-BERT and T5 models. This covers Decoder
+    only, Encode only and Encoder-Decoder model classes.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Only loss is returned from model forward pass as there is quite complex interplay
+    of pipeline, tensor and data parallelsim behind the scenes. The `model(**batch_data)`
+    call return loss(es) averaged across the data parallel ranks. This is fine for
+    most cases wherein pre-training jobs are run using Megatron-LM features and you
+    can easily compute the `perplexity` using the loss. For GPT model, returning logits
+    in addition to loss(es) is supported. These logits aren’t gathered across data
+    parallel ranks. Use `accelerator.utils.gather_across_data_parallel_groups` to
+    gather logits across data parallel ranks. These logits along with labels can be
+    used for computing various performance metrics.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The main process is the last rank as the losses/logits are available in the
+    last stage of pipeline. `accelerator.is_main_process` and `accelerator.is_local_main_process`
+    return `True` for last rank when using Megatron-LM integration.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In `accelerator.prepare` call, a Megatron-LM model corresponding to a given
+    Transformers model is created with random weights. Please use `accelerator.load_state`
+    to load the Megatron-LM checkpoint with matching TP, PP and DP partitions.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Currently, checkpoint reshaping and interoperability support is only available
+    for GPT. Soon it will be extended to BERT and T5.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`gradient_accumulation_steps` needs to be 1\. When using Megatron-LM, micro
+    batches in pipeline parallelism setting is synonymous with gradient accumulation.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When using Megatron-LM, use `accelerator.save_state` and `accelerator.load_state`
+    for saving and loading checkpoints.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Below are the mapping from Megatron-LM model architectures to the the equivalent
+    🤗 transformers model architectures. Only these 🤗 transformers model architectures
+    are supported.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'a. Megatron-LM [BertModel](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/bert_model.py)
+    : 🤗 transformers models with `megatron-bert` in config’s model type, e.g., [MegatronBERT](https://huggingface.co/docs/transformers/model_doc/megatron-bert)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'b. Megatron-LM [GPTModel](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/gpt_model.py)
+    : 🤗 transformers models with `gpt2` in config’s model type, e.g., [OpenAI GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'c. Megatron-LM [T5Model](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/t5_model.py)
+    : 🤗 transformers models with `t5` in config’s model type, e.g., [T5](https://huggingface.co/docs/transformers/model_doc/t5)
+    and [MT5](https://huggingface.co/docs/transformers/model_doc/mt5)'
+  prefs: []
+  type: TYPE_NORMAL

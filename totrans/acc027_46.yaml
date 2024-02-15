@@ -1,0 +1,1040 @@
+- en: Working with large models
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/package_reference/big_modeling](https://huggingface.co/docs/accelerate/package_reference/big_modeling)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/17.19c36a1b.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Docstring.ae1a1e2d.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/ExampleCodeBlock.e7a3d5fe.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dispatching and Offloading Models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '#### `accelerate.init_empty_weights`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L53)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`include_buffers` (`bool`, *optional*) — Whether or not to also put all buffers
+    on the meta device while initializing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A context manager under which models are initialized with all parameters on
+    the meta device, therefore creating an empty model. Useful when just initializing
+    the model would blow the available RAM.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Any model created under this context manager has no weights. As such you can’t
+    do something like `model.to(some_device)` with it. To load weights inside your
+    empty model, see [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch).
+    Make sure to overwrite the default device_map param for [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch),
+    otherwise dispatch is not called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.cpu_offload`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L167)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model to offload.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`execution_device` (`torch.device`, *optional*) — The device on which the forward
+    pass of the model will be executed (should be a GPU). Will default to the model
+    first parameter device.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to offload the buffers with the model parameters.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`state_dict` (`Dict[str, torch.Tensor]`, *optional*) — The state dict of the
+    model that will be kept on CPU.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
+    instances should load all their weights (even in the submodules) at the beginning
+    of the forward. This should only be used for classes that have submodules which
+    are registered but not called directly during the forward, for instance if a `dense`
+    linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
+    used in some operations instead of calling `dense` directly.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Activates full CPU offload for a model. As a result, all parameters of the model
+    will be offloaded and only one copy of the state dict of the model will be kept.
+    During the forward pass, parameters will be extracted from that state dict and
+    put on the execution device passed as they are needed, then offloaded again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.cpu_offload_with_hook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L213)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model to offload.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`execution_device(str,` `int` or `torch.device`, *optional*) — The device on
+    which the model should be executed. Will default to the MPS device if it’s available,
+    then GPU 0 if there is a GPU, and finally to the CPU.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`prev_module_hook` (`UserCpuOffloadHook`, *optional*) — The hook sent back
+    by this function for a previous model in the pipeline you are running. If passed,
+    its offload method will be called just before the forward of the model to which
+    this hook is attached.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Offloads a model on the CPU and puts it back to an execution device when executed.
+    The difference with [cpu_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload)
+    is that the model stays on the execution device after the forward and is only
+    offloaded again when the `offload` method of the returned `hook` is called. Useful
+    for pipelines running a model in a loop.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `accelerate.disk_offload`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L257)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model to offload.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_dir` (`str` or `os.PathLike`) — The folder in which to offload the
+    model weights (or where the model weights are already offloaded).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`execution_device` (`torch.device`, *optional*) — The device on which the forward
+    pass of the model will be executed (should be a GPU). Will default to the model’s
+    first parameter device.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to offload the buffers with the model parameters.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
+    instances should load all their weights (even in the submodules) at the beginning
+    of the forward. This should only be used for classes that have submodules which
+    are registered but not called directly during the forward, for instance if a `dense`
+    linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
+    used in some operations instead of calling `dense` directly.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Activates full disk offload for a model. As a result, all parameters of the
+    model will be offloaded as memory-mapped array in a given folder. During the forward
+    pass, parameters will be accessed from that folder and put on the execution device
+    passed as they are needed, then offloaded again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.dispatch_model`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L303)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model to dispatch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device_map` (`Dict[str, Union[str, int, torch.device]]`) — A dictionary mapping
+    module names in the models `state_dict` to the device they should go to. Note
+    that `"disk"` is accepted even if it’s not a proper value for `torch.device`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`main_device` (`str`, `int` or `torch.device`, *optional*) — The main execution
+    device. Will default to the first device in the `device_map` different from `"cpu"`
+    or `"disk"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`state_dict` (`Dict[str, torch.Tensor]`, *optional*) — The state dict of the
+    part of the model that will be kept on CPU.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_dir` (`str` or `os.PathLike`) — The folder in which to offload the
+    model weights (or where the model weights are already offloaded).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_index` (`Dict`, *optional*) — A dictionary from weight name to their
+    information (`dtype`/ `shape` or safetensors filename). Will default to the index
+    saved in `save_folder`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to offload the buffers with the model parameters.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
+    moving inputs or outputs between devices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
+    instances should load all their weights (even in the submodules) at the beginning
+    of the forward. This should only be used for classes that have submodules which
+    are registered but not called directly during the forward, for instance if a `dense`
+    linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
+    used in some operations instead of calling `dense` directly.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`force_hooks` (`bool`, *optional*, defaults to `False`) — Whether or not to
+    force device hooks to be attached to the model even if all layers are dispatched
+    to a single device.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Dispatches a model according to a given device map. Layers of the model might
+    be spread across GPUs, offloaded on the CPU or even the disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.load_checkpoint_and_dispatch`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L478)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model in which we want to load a checkpoint.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`checkpoint` (`str` or `os.PathLike`) — The folder checkpoint to load. It can
+    be:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a file containing a whole model state dict
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a `.json` file containing the index to a sharded checkpoint
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a folder containing a unique `.index.json` file and the shards of
+    a checkpoint.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device_map` (`Dict[str, Union[int, str, torch.device]]`, *optional*) — A map
+    that specifies where each submodule should go. It doesn’t need to be refined to
+    each parameter/buffer name, once a given module name is inside, every submodule
+    of it will be sent to the same device.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To have Accelerate compute the most optimized `device_map` automatically, set
+    `device_map="auto"`. For more information about each option see [here](../concept_guides/big_model_inference#designing-a-device-map).
+    Defaults to None, which means [dispatch_model()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.dispatch_model)
+    will not be called.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '`max_memory` (`Dict`, *optional*) — A dictionary device identifier to maximum
+    memory. Will default to the maximum memory available for each GPU and the available
+    CPU RAM if unset.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`no_split_module_classes` (`List[str]`, *optional*) — A list of layer class
+    names that should never be split across device (for instance any layer that has
+    a residual connection).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_folder` (`str` or `os.PathLike`, *optional*) — If the `device_map`
+    contains any value `"disk"`, the folder where we will offload weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — In the layers
+    that are offloaded on the CPU or the hard drive, whether or not to offload the
+    buffers as well as the parameters.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dtype` (`str` or `torch.dtype`, *optional*) — If provided, the weights will
+    be converted to that type when loaded.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_state_dict` (`bool`, *optional*) — If `True`, will temporarily offload
+    the CPU state dict on the hard drive to avoid getting out of CPU RAM if the weight
+    of the CPU state dict + the biggest shard does not fit. Will default to `True`
+    if the device map picked contains `"disk"` values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
+    moving inputs or outputs between devices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
+    instances should load all their weights (even in the submodules) at the beginning
+    of the forward. This should only be used for classes that have submodules which
+    are registered but not called directly during the forward, for instance if a `dense`
+    linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
+    used in some operations instead of calling `dense` directly.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`force_hooks` (`bool`, *optional*, defaults to `False`) — Whether or not to
+    force device hooks to be attached to the model even if all layers are dispatched
+    to a single device.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Loads a (potentially sharded) checkpoint inside a model, potentially sending
+    weights to a given device as they are loaded and adds the various hooks that will
+    make this model run properly (even if split across devices).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `accelerate.load_checkpoint_in_model`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/utils/modeling.py#L1442)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model in which we want to load a checkpoint.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`checkpoint` (`str` or `os.PathLike`) — The folder checkpoint to load. It can
+    be:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a file containing a whole model state dict
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a `.json` file containing the index to a sharded checkpoint
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a folder containing a unique `.index.json` file and the shards of
+    a checkpoint.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a folder containing a unique pytorch_model.bin or a model.safetensors
+    file.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`device_map` (`Dict[str, Union[int, str, torch.device]]`, *optional*) — A map
+    that specifies where each submodule should go. It doesn’t need to be refined to
+    each parameter/buffer name, once a given module name is inside, every submodule
+    of it will be sent to the same device.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_folder` (`str` or `os.PathLike`, *optional*) — If the `device_map`
+    contains any value `"disk"`, the folder where we will offload weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dtype` (`str` or `torch.dtype`, *optional*) — If provided, the weights will
+    be converted to that type when loaded.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_state_dict` (`bool`, *optional*, defaults to `False`) — If `True`,
+    will temporarily offload the CPU state dict on the hard drive to avoid getting
+    out of CPU RAM if the weight of the CPU state dict + the biggest shard does not
+    fit.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to include the buffers in the weights offloaded to disk.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`keep_in_fp32_modules(List[str],` *optional*) — A list of the modules that
+    we keep in `torch.float32` dtype.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_8bit_bnb` (`bool`, *optional*) — Whether or not to enable offload
+    of 8-bit modules on cpu/disk.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Loads a (potentially sharded) checkpoint inside a model, potentially sending
+    weights to a given device as they are loaded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once loaded across devices, you still need to call [dispatch_model()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.dispatch_model)
+    on your model to make it able to run. To group the checkpoint loading and dispatch
+    in one single call, use [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.infer_auto_device_map`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/utils/modeling.py#L1022)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model to analyze.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`max_memory` (`Dict`, *optional*) — A dictionary device identifier to maximum
+    memory. Will default to the maximum memory available if unset. Example: `max_memory={0:
+    "1GB"}`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`no_split_module_classes` (`List[str]`, *optional*) — A list of layer class
+    names that should never be split across device (for instance any layer that has
+    a residual connection).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dtype` (`str` or `torch.dtype`, *optional*) — If provided, the weights will
+    be converted to that type when loaded.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`special_dtypes` (`Dict[str, Union[str, torch.device]]`, *optional*) — If provided,
+    special dtypes to consider for some specific weights (will override dtype used
+    as default for all weights).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`verbose` (`bool`, *optional*, defaults to `False`) — Whether or not to provide
+    debugging statements as the function builds the device_map.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`clean_result` (`bool`, *optional*, defaults to `True`) — Clean the resulting
+    device_map by grouping all submodules that go on the same device together.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Compute a device map for a given model giving priority to GPUs, then offload
+    on CPU and finally offload to disk, such that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: we don’t exceed the memory available of any of the GPU.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: if offload to the CPU is needed, there is always room left on GPU 0 to put back
+    the layer offloaded on CPU that has the largest size.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: if offload to the CPU is needed,we don’t exceed the RAM available on the CPU.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: if offload to the disk is needed, there is always room left on the CPU to put
+    back the layer offloaded on disk that has the largest size.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All computation is done analyzing sizes and dtypes of the model parameters.
+    As a result, the model can be on the meta device (as it would if initialized within
+    the `init_empty_weights` context manager).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Model Hooks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Hook Classes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '### `class accelerate.hooks.ModelHook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L33)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: A hook that contains callbacks to be executed just before and after the forward
+    method of a model. The difference with PyTorch existing hooks is that they get
+    passed along the kwargs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Class attribute:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`no_grad` (`bool`, *optional*, defaults to `False`) — Whether or not to execute
+    the actual forward pass under the `torch.no_grad()` context manager.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### `detach_hook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L81)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module detached from this hook.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To be executed when the hook is detached from a module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `init_hook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L45)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module attached to this hook.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To be executed when the hook is attached to the module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `post_forward`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L68)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module whose forward pass been executed
+    just before this event.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`output` (`Any`) — The output of the module.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Any`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The processed `output`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To be executed just after the forward method of the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `pre_forward`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L54)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module whose forward pass will be executed
+    just after this event.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`args` (`Tuple[Any]`) — The positional arguments passed to the module.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`kwargs` (`Dict[Str, Any]`) — The keyword arguments passed to the module.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Tuple[Tuple[Any], Dict[Str, Any]]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A tuple with the treated `args` and `kwargs`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To be executed just before the forward method of the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### `class accelerate.hooks.AlignDevicesHook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L212)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`execution_device` (`torch.device`, *optional*) — The device on which inputs
+    and model weights should be placed before the forward pass.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload` (`bool`, *optional*, defaults to `False`) — Whether or not the weights
+    should be offloaded after the forward pass.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`io_same_device` (`bool`, *optional*, defaults to `False`) — Whether or not
+    the output should be placed on the same device as the input was.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`weights_map` (`Mapping[str, torch.Tensor]`, *optional*) — When the model weights
+    are offloaded, a (potentially lazy) map from param names to the tensor values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to include the associated module’s buffers when offloading.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`place_submodules` (`bool`, *optional*, defaults to `False`) — Whether to place
+    the submodules on `execution_device` during the `init_hook` event.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A generic `ModelHook` that ensures inputs and model weights are on the same
+    device for the forward pass of the associated module, potentially offloading the
+    weights after the forward pass.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### `class accelerate.hooks.SequentialHook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L91)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: A hook that can contain several hooks and iterates through them at each event.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding Hooks
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '#### `accelerate.hooks.add_hook_to_module`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L120)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module to attach a hook to.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`hook` (`ModelHook`) — The hook to attach.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`append` (`bool`, *optional*, defaults to `False`) — Whether the hook should
+    be chained with an existing one (if module already contains a hook) or not.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.nn.Module`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The same module, with the hook attached (the module is modified in place, so
+    the result can be discarded).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a hook to a given module. This will rewrite the `forward` method of the
+    module to include the hook, to remove this behavior and restore the original `forward`
+    method, use `remove_hook_from_module`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the module already contains a hook, this will replace it with the new hook
+    passed by default. To chain two hooks together, pass `append=True`, so it chains
+    the current and new hook into an instance of the `SequentialHook` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.hooks.attach_execution_device_hook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L392)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module where we want to attach the hooks.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`execution_device` (`int`, `str` or `torch.device`) — The device on which inputs
+    and model weights should be placed before the forward pass.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
+    moving inputs or outputs between devices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
+    instances should load all their weights (even in the submodules) at the beginning
+    of the forward. This should only be used for classes that have submodules which
+    are registered but not called directly during the forward, for instance if a `dense`
+    linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
+    used in some operations instead of calling `dense` directly.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *optional*,
+    defaults to `None`) — A map of data pointers to dictionaries of devices to already
+    dispatched tied weights. For a given execution device, this parameter is useful
+    to reuse the first available pointer of a shared weight for all others, instead
+    of duplicating memory.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Recursively attaches `AlignDevicesHook` to all submodules of a given model to
+    make sure they have the right execution device
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.hooks.attach_align_device_hook`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L434)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module where we want to attach the hooks.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`execution_device` (`torch.device`, *optional*) — The device on which inputs
+    and model weights should be placed before the forward pass.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload` (`bool`, *optional*, defaults to `False`) — Whether or not the weights
+    should be offloaded after the forward pass.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`weights_map` (`Mapping[str, torch.Tensor]`, *optional*) — When the model weights
+    are offloaded, a (potentially lazy) map from param names to the tensor values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to include the associated module’s buffers when offloading.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`module_name` (`str`, *optional*, defaults to `""`) — The name of the module.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
+    moving inputs or outputs between devices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
+    instances should load all their weights (even in the submodules) at the beginning
+    of the forward. This should only be used for classes that have submodules which
+    are registered but not called directly during the forward, for instance if a `dense`
+    linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
+    used in some operations instead of calling `dense` directly.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *optional*,
+    defaults to `None`) — A map of data pointers to dictionaries of devices to already
+    dispatched tied weights. For a given execution device, this parameter is useful
+    to reuse the first available pointer of a shared weight for all others, instead
+    of duplicating memory.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Recursively attaches `AlignDevicesHook` to all submodules of a given model that
+    have direct parameters and/or buffers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.hooks.attach_align_device_hook_on_blocks`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L529)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module where we want to attach the hooks.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`execution_device` (`torch.device` or `Dict[str, torch.device]`, *optional*)
+    — The device on which inputs and model weights should be placed before the forward
+    pass. It can be one device for the whole module, or a dictionary mapping module
+    name to device.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload` (`bool`, *optional*, defaults to `False`) — Whether or not the weights
+    should be offloaded after the forward pass. It can be one boolean for the whole
+    module, or a dictionary mapping module name to boolean.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`weights_map` (`Mapping[str, torch.Tensor]`, *optional*) — When the model weights
+    are offloaded, a (potentially lazy) map from param names to the tensor values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
+    to include the associated module’s buffers when offloading.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`module_name` (`str`, *optional*, defaults to `""`) — The name of the module.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
+    moving inputs or outputs between devices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
+    instances should load all their weights (even in the submodules) at the beginning
+    of the forward. This should only be used for classes that have submodules which
+    are registered but not called directly during the forward, for instance if a `dense`
+    linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
+    used in some operations instead of calling `dense` directly.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *optional*,
+    defaults to `None`) — A map of data pointers to dictionaries of devices to already
+    dispatched tied weights. For a given execution device, this parameter is useful
+    to reuse the first available pointer of a shared weight for all others, instead
+    of duplicating memory.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attaches `AlignDevicesHook` to all blocks of a given model as needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Removing Hooks
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '#### `accelerate.hooks.remove_hook_from_module`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L179)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module to attach a hook to.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`recurse` (`bool`, **optional**) — Whether to remove the hooks recursively'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.nn.Module`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The same module, with the hook detached (the module is modified in place, so
+    the result can be discarded).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Removes any hook attached to a module via `add_hook_to_module`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `accelerate.hooks.remove_hook_from_submodules`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L517)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`module` (`torch.nn.Module`) — The module on which to remove all hooks.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Recursively removes all hooks attached on the submodules of a given model.
+  prefs: []
+  type: TYPE_NORMAL

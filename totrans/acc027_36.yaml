@@ -1,0 +1,164 @@
+- en: Training on TPUs with 🤗 Accelerate
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/concept_guides/training_tpu](https://huggingface.co/docs/accelerate/concept_guides/training_tpu)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/14.6c338e69.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Tip.22e79575.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Training on TPUs can be slightly different from training on multi-gpu, even
+    with 🤗 Accelerate. This guide aims to show you where you should be careful and
+    why, as well as the best practices in general.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Training in a Notebook
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The main carepoint when training on TPUs comes from the [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher).
+    As mentioned in the [notebook tutorial](../usage_guides/notebook), you need to
+    restructure your training code into a function that can get passed to the [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
+    function and be careful about not declaring any tensors on the GPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While on a TPU that last part is not as important, a critical part to understand
+    is that when you launch code from a notebook you do so through a process called
+    **forking**. When launching from the command-line, you perform **spawning**, where
+    a python process is not currently running and you *spawn* a new process in. Since
+    your Jupyter notebook is already utilizing a python process, you need to *fork*
+    a new process from it to launch your code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where this becomes important is in regard to declaring your model. On forked
+    TPU processes, it is recommended that you instantiate your model *once* and pass
+    this into your training function. This is different than training on GPUs where
+    you create `n` models that have their gradients synced and back-propagated at
+    certain moments. Instead, one model instance is shared between all the nodes and
+    it is passed back and forth. This is important especially when training on low-resource
+    TPUs such as those provided in Kaggle kernels or on Google Colaboratory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Below is an example of a training function passed to the [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
+    if training on CPUs or GPUs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This code snippet is based off the one from the `simple_nlp_example` notebook
+    found [here](https://github.com/huggingface/notebooks/blob/main/examples/accelerate_examples/simple_nlp_example.ipynb)
+    with slight modifications for the sake of simplicity
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `notebook_launcher` will default to 8 processes if 🤗 Accelerate has been
+    configured for a TPU
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you use this example and declare the model *inside* the training loop, then
+    on a low-resource system you will potentially see an error like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This error is *extremely* cryptic but the basic explanation is you ran out
+    of system RAM. You can avoid this entirely by reconfiguring the training function
+    to accept a single `model` argument, and declare it in an outside cell:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And finally calling the training function with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: The above workaround is only needed when launching a TPU instance from a Jupyter
+    Notebook on a low-resource server such as Google Colaboratory or Kaggle. If using
+    a script or launching on a much beefier server declaring the model beforehand
+    is not needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mixed Precision and Global Variables
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As mentioned in the [mixed precision tutorial](../usage_guides/mixed_precision),
+    🤗 Accelerate supports fp16 and bf16, both of which can be used on TPUs. That being
+    said, ideally `bf16` should be utilized as it is extremely efficient to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are two “layers” when using `bf16` and 🤗 Accelerate on TPUs, at the base
+    level and at the operation level.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'At the base level, this is enabled when passing `mixed_precision="bf16"` to
+    `Accelerator`, such as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: By default, this will cast `torch.float` and `torch.double` to `bfloat16` on
+    TPUs. The specific configuration being set is an environmental variable of `XLA_USE_BF16`
+    is set to `1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is a further configuration you can perform which is setting the `XLA_DOWNCAST_BF16`
+    environmental variable. If set to `1`, then `torch.float` is `bfloat16` and `torch.double`
+    is `float32`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is performed in the `Accelerator` object when passing `downcast_bf16=True`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using downcasting instead of bf16 everywhere is good for when you are trying
+    to calculate metrics, log values, and more where raw bf16 tensors would be unusable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Training Times on TPUs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As you launch your script, you may notice that training seems exceptionally
+    slow at first. This is because TPUs first run through a few batches of data to
+    see how much memory to allocate before finally utilizing this configured memory
+    allocation extremely efficiently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you notice that your evaluation code to calculate the metrics of your model
+    takes longer due to a larger batch size being used, it is recommended to keep
+    the batch size the same as the training data if it is too slow. Otherwise the
+    memory will reallocate to this new batch size after the first few iterations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just because the memory is allocated does not mean it will be used or that the
+    batch size will increase when going back to your training dataloader.
+  prefs: []
+  type: TYPE_NORMAL

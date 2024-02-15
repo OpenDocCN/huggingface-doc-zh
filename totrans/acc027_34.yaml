@@ -1,0 +1,192 @@
+- en: Gradient Synchronization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/accelerate/concept_guides/gradient_synchronization](https://huggingface.co/docs/accelerate/concept_guides/gradient_synchronization)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/accelerate/v0.27.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/start.6e0fb178.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/scheduler.69131cc3.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/singletons.ac467c20.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/paths.b2f3aeca.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/entry/app.67e11fc0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/index.e1f30d73.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/0.bfeed9f0.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/nodes/10.50ed387d.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/CodeBlock.30cef355.js">
+    <link rel="modulepreload" href="/docs/accelerate/v0.27.2/en/_app/immutable/chunks/Heading.0aab6758.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: PyTorch’s distributed module operates by communicating back and forth between
+    all of the GPUs in your system. This communication takes time, and ensuring all
+    processes know the states of each other happens at particular triggerpoints when
+    using the `ddp` module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'These triggerpoints are added to the PyTorch model, specifically their `forward()`
+    and `backward()` methods. This happens when the model is wrapped with `DistributedDataParallel`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: In 🤗 Accelerate this conversion happens automatically when calling [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    and passing in your model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The slowdown in gradient accumulation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You now understand that PyTorch adds hooks to the `forward` and `backward` method
+    of your PyTorch model when training in a distributed setup. But how does this
+    risk slowing down your code?
+  prefs: []
+  type: TYPE_NORMAL
+- en: In DDP (distributed data parallel), the specific order in which processes are
+    performed and ran are expected at specific points and these must also occur at
+    roughly the same time before moving on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most direct example is when you update model parameters through `optimizer.step()`.
+    Without gradient accumulation, all instances of the model need to have updated
+    their gradients computed, collated, and updated before moving on to the next batch
+    of data. When performing gradient accumulation, you accumulate `n` loss gradients
+    and skip `optimizer.step()` until `n` batches have been reached. As all training
+    processes only need to synchronize by the time `optimizer.step()` is called, without
+    any modification to your training step, this needless inter-process communication
+    can cause a significant slowdown.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How can you avoid this overhead?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solving the slowdown problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Since you are skipping model parameter updates when training on these batches,
+    their gradients do not need to be synchronized until the point where `optimizer.step()`
+    is actually called. PyTorch cannot automagically tell when you need to do this,
+    but they do provide a tool to help through the [`no_sync`](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel.no_sync)
+    context manager that is added to your model after converting it to DDP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Under this context manager, PyTorch will skip synchronizing the gradients when
+    `.backward()` is called, and the first call to `.backward()` outside this context
+    manager will trigger the synchronization. See an example below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In 🤗 Accelerate to make this an API that can be called no matter the training
+    device (though it may not do anything if you are not in a distributed system!),
+    `ddp_model.no_sync` gets replaced with [no_sync()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.no_sync)
+    and operates the same way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you may expect, the [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
+    function wraps around this conditional check by keeping track of the current batch
+    number, leaving you with the final gradient accumulation API:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: As a result, you should either use *`accelerator.accumulate` or `accelerator.no_sync`*
+    when it comes to API choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just how much of a slowdown is there, and easy mistakes you can make
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To set up a realistic example, consider the following setup:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Two single-GPU T4 nodes and one node with two GPUs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Each GPU is a T4, and are hosted on GCP
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The script used is a modification of the [NLP Example](https://github.com/muellerzr/timing_experiments/blob/main/baseline.py)
+    script
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Batch size per GPU is 16, and gradients are accumulated every 4 steps
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All scripts are available in [this repository](https://github.com/muellerzr/timing_experiments).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If not careful about gradient synchronization and GPU communication, a *large*
+    amount of time can be wasted from when these GPUs communicate to each other during
+    unnecessary periods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By how much?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Reference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Baseline: uses no synchronization practices discussed here'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`no_sync` improperly: `no_sync` only around the `backward` call, not the `forward`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`no_sync`: using the `no_sync` pattern properly'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`accumulate`: using [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
+    properly'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Below are the average seconds per batch iterating over 29 batches of data for
+    each setup on both a single node and on the dual-node setup:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '|  | Baseline | `no_sync` improperly | `no_sync` | `accumulate` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Multi-Node | 2±0.01s | 2.13±0.08s | **0.91±0.11s** | **0.91±0.11s** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Single Node | 0.50±0.01s | 0.50±0.01s | **0.41±0.015s** | **0.41±0.015s**
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: As you can see, if you are not careful about how you set up your gradient synchronization,
+    you can get upwards of more than a 2x slowdown during training!
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you are worried about making sure everything is done properly, we highly
+    recommend utilizing the [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
+    function and passing in `gradient_accumulation_steps` or `gradient_accumulation_plugin`
+    to the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    object so Accelerate can handle this for you.
+  prefs: []
+  type: TYPE_NORMAL
