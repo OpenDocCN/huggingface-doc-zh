@@ -1,41 +1,39 @@
 - en: PixArt-α
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: PixArt-α
 - en: 'Original text: [https://huggingface.co/docs/diffusers/api/pipelines/pixart](https://huggingface.co/docs/diffusers/api/pipelines/pixart)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/api/pipelines/pixart](https://huggingface.co/docs/diffusers/api/pipelines/pixart)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '![](../Images/5a666bb8097e14b9e3eb092b69530169.png)'
+  id: totrans-3
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/5a666bb8097e14b9e3eb092b69530169.png)'
 - en: '[PixArt-α: Fast Training of Diffusion Transformer for Photorealistic Text-to-Image
     Synthesis](https://huggingface.co/papers/2310.00426) is Junsong Chen, Jincheng
     Yu, Chongjian Ge, Lewei Yao, Enze Xie, Yue Wu, Zhongdao Wang, James Kwok, Ping
     Luo, Huchuan Lu, and Zhenguo Li.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PixArt-α：用于逼真文本到图像合成的扩散Transformer快速训练](https://huggingface.co/papers/2310.00426)
+    作者是Junsong Chen、Jincheng Yu、Chongjian Ge、Lewei Yao、Enze Xie、Yue Wu、Zhongdao Wang、James
+    Kwok、Ping Luo、Huchuan Lu和Zhenguo Li。'
 - en: 'The abstract from the paper is:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 论文摘要如下：
 - en: '*The most advanced text-to-image (T2I) models require significant training
     costs (e.g., millions of GPU hours), seriously hindering the fundamental innovation
     for the AIGC community while increasing CO2 emissions. This paper introduces PIXART-α,
@@ -59,393 +57,577 @@
     excels in image quality, artistry, and semantic control. We hope PIXART-α will
     provide new insights to the AIGC community and startups to accelerate building
     their own high-quality yet low-cost generative models from scratch.*'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '*最先进的文本到图像（T2I）模型需要巨大的训练成本（例如，数百万GPU小时），严重阻碍了AIGC社区的基本创新，同时增加了CO2排放。本文介绍了PIXART-α，一种基于Transformer的T2I扩散模型，其图像生成质量与最先进的图像生成器（例如Imagen、SDXL，甚至Midjourney）竞争力相当，达到接近商业应用标准。此外，它支持高分辨率图像合成，最高可达1024像素分辨率，训练成本低，如图1和2所示。为了实现这一目标，提出了三个核心设计：（1）训练策略分解：我们设计了三个不同的训练步骤，分别优化像素依赖性、文本-图像对齐和图像美学质量；（2）高效的T2I
+    Transformer：我们将交叉注意力模块整合到扩散Transformer（DiT）中，注入文本条件并简化计算密集型的类条件分支；（3）高信息量数据：我们强调文本-图像对中概念密度的重要性，并利用大型视觉语言模型自动标记密集的伪标题，以帮助文本-图像对齐学习。因此，PIXART-α的训练速度明显超过现有的大规模T2I模型，例如，PIXART-α仅占稳定扩散v1.5的训练时间的10.8%（675
+    vs. 6,250 A100 GPU天），节省近30万美元（26,000 vs. 320,000美元），减少90%的CO2排放。此外，与更大的SOTA模型RAPHAEL相比，我们的训练成本仅为1%。大量实验证明PIXART-α在图像质量、艺术性和语义控制方面表现出色。我们希望PIXART-α能为AIGC社区和初创公司提供新的见解，加速他们从零开始构建自己的高质量低成本生成模型。*'
 - en: You can find the original codebase at [PixArt-alpha/PixArt-alpha](https://github.com/PixArt-alpha/PixArt-alpha)
     and all the available checkpoints at [PixArt-alpha](https://huggingface.co/PixArt-alpha).
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在[PixArt-alpha/PixArt-alpha](https://github.com/PixArt-alpha/PixArt-alpha)找到原始代码库，以及在[PixArt-alpha](https://huggingface.co/PixArt-alpha)找到所有可用的检查点。
 - en: 'Some notes about this pipeline:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于这个管道的一些注意事项：
 - en: It uses a Transformer backbone (instead of a UNet) for denoising. As such it
     has a similar architecture as [DiT](./dit).
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它使用Transformer骨干（而不是UNet）进行去噪。因此，它与[DiT](./dit)具有相似的架构。
 - en: It was trained using text conditions computed from T5\. This aspect makes the
     pipeline better at following complex text prompts with intricate details.
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它是使用从T5计算得出的文本条件进行训练的。这一方面使得该管道更擅长遵循具有复杂细节的文本提示。
 - en: It is good at producing high-resolution images at different aspect ratios. To
     get the best results, the authors recommend some size brackets which can be found
     [here](https://github.com/PixArt-alpha/PixArt-alpha/blob/08fbbd281ec96866109bdd2cdb75f2f58fb17610/diffusion/data/datasets/utils.py).
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它擅长以不同的宽高比生成高分辨率图像。为了获得最佳结果，作者建议一些大小范围，可以在[这里](https://github.com/PixArt-alpha/PixArt-alpha/blob/08fbbd281ec96866109bdd2cdb75f2f58fb17610/diffusion/data/datasets/utils.py)找到。
 - en: It rivals the quality of state-of-the-art text-to-image generation systems (as
     of this writing) such as Stable Diffusion XL, Imagen, and DALL-E 2, while being
     more efficient than them.
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它与最先进的文本到图像生成系统（截至目前）如Stable Diffusion XL、Imagen和DALL-E 2的质量相媲美，同时比它们更高效。
 - en: Make sure to check out the Schedulers [guide](../../using-diffusers/schedulers)
     to learn how to explore the tradeoff between scheduler speed and quality, and
     see the [reuse components across pipelines](../../using-diffusers/loading#reuse-components-across-pipelines)
     section to learn how to efficiently load the same components into multiple pipelines.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保查看调度器[指南](../../using-diffusers/schedulers)以了解如何探索调度器速度和质量之间的权衡，并查看[跨管道重用组件](../../using-diffusers/loading#reuse-components-across-pipelines)部分，以了解如何有效地将相同组件加载到多个管道中。
 - en: Inference with under 8GB GPU VRAM
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在8GB GPU VRAM以下进行推理
 - en: Run the [PixArtAlphaPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/pixart#diffusers.PixArtAlphaPipeline)
     with under 8GB GPU VRAM by loading the text encoder in 8-bit precision. Let’s
     walk through a full-fledged example.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过在8GB GPU VRAM下加载8位精度的文本编码器来运行[PixArtAlphaPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/pixart#diffusers.PixArtAlphaPipeline)。让我们通过一个完整的示例来了解一下。
 - en: 'First, install the [bitsandbytes](https://github.com/TimDettmers/bitsandbytes)
     library:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，安装[bitsandbytes](https://github.com/TimDettmers/bitsandbytes)库：
 - en: '[PRE0]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then load the text encoder in 8-bit:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后以8位加载文本编码器：
 - en: '[PRE1]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Now, use the `pipe` to encode a prompt:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，使用`pipe`来编码一个提示：
 - en: '[PRE2]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Since text embeddings have been computed, remove the `text_encoder` and `pipe`
     from the memory, and free up som GPU VRAM:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 自从文本嵌入已经计算出来后，从内存中删除`text_encoder`和`pipe`，并释放一些GPU VRAM：
 - en: '[PRE3]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Then compute the latents with the prompt embeddings as inputs:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后使用提示嵌入计算潜变量作为输入：
 - en: '[PRE4]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Notice that while initializing `pipe`, you’re setting `text_encoder` to `None`
     so that it’s not loaded.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，在初始化`pipe`时，您将`text_encoder`设置为`None`，以便不加载它。
 - en: 'Once the latents are computed, pass it off to the VAE to decode into a real
     image:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦计算出潜变量，将其传递给VAE以解码为真实图像：
 - en: '[PRE5]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: By deleting components you aren’t using and flushing the GPU VRAM, you should
     be able to run [PixArtAlphaPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/pixart#diffusers.PixArtAlphaPipeline)
     with under 8GB GPU VRAM.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过删除未使用的组件并刷新GPU VRAM，您应该能够在不到8GB的GPU VRAM下运行[PixArtAlphaPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/pixart#diffusers.PixArtAlphaPipeline)。
 - en: '![](../Images/f9bdd252908e7f92b9ab48ae4b8febe6.png)'
+  id: totrans-30
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/f9bdd252908e7f92b9ab48ae4b8febe6.png)'
 - en: If you want a report of your memory-usage, run this [script](https://gist.github.com/sayakpaul/3ae0f847001d342af27018a96f467e4e).
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要报告内存使用情况，请运行此[脚本](https://gist.github.com/sayakpaul/3ae0f847001d342af27018a96f467e4e)。
 - en: Text embeddings computed in 8-bit can impact the quality of the generated images
     because of the information loss in the representation space caused by the reduced
     precision. It’s recommended to compare the outputs with and without 8-bit.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 在8位计算的文本嵌入可能会影响生成图像的质量，因为由于减少的精度导致的表示空间中的信息丢失。建议比较有和没有8位的输出。
 - en: While loading the `text_encoder`, you set `load_in_8bit` to `True`. You could
     also specify `load_in_4bit` to bring your memory requirements down even further
     to under 7GB.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在加载`text_encoder`时，将`load_in_8bit`设置为`True`。您还可以指定`load_in_4bit`，以进一步减少内存需求至7GB以下。
 - en: PixArtAlphaPipeline
+  id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: PixArtAlphaPipeline
 - en: '### `class diffusers.PixArtAlphaPipeline`'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class diffusers.PixArtAlphaPipeline`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py#L182)'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py#L182)'
 - en: '[PRE6]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Parameters
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`vae` ([AutoencoderKL](/docs/diffusers/v0.26.3/en/api/models/autoencoderkl#diffusers.AutoencoderKL))
     — Variational Auto-Encoder (VAE) Model to encode and decode images to and from
     latent representations.'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`vae`（[AutoencoderKL](/docs/diffusers/v0.26.3/en/api/models/autoencoderkl#diffusers.AutoencoderKL)）—
+    变分自动编码器（VAE）模型，用于将图像编码和解码为潜在表示。'
 - en: '`text_encoder` (`T5EncoderModel`) — Frozen text-encoder. PixArt-Alpha uses
     [T5](https://huggingface.co/docs/transformers/model_doc/t5#transformers.T5EncoderModel),
     specifically the [t5-v1_1-xxl](https://huggingface.co/PixArt-alpha/PixArt-alpha/tree/main/t5-v1_1-xxl)
     variant.'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`text_encoder`（`T5EncoderModel`）— 冻结的文本编码器。PixArt-Alpha使用[T5](https://huggingface.co/docs/transformers/model_doc/t5#transformers.T5EncoderModel)，具体来说是[t5-v1_1-xxl](https://huggingface.co/PixArt-alpha/PixArt-alpha/tree/main/t5-v1_1-xxl)变体。'
 - en: '`tokenizer` (`T5Tokenizer`) — Tokenizer of class [T5Tokenizer](https://huggingface.co/docs/transformers/model_doc/t5#transformers.T5Tokenizer).'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`tokenizer`（`T5Tokenizer`）— 类[T5Tokenizer](https://huggingface.co/docs/transformers/model_doc/t5#transformers.T5Tokenizer)的分词器。'
 - en: '`transformer` ([Transformer2DModel](/docs/diffusers/v0.26.3/en/api/models/transformer2d#diffusers.Transformer2DModel))
     — A text conditioned `Transformer2DModel` to denoise the encoded image latents.'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`transformer`（[Transformer2DModel](/docs/diffusers/v0.26.3/en/api/models/transformer2d#diffusers.Transformer2DModel））—
+    一个文本条件的`Transformer2DModel`，用于去噪编码图像潜变量。'
 - en: '`scheduler` ([SchedulerMixin](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin))
     — A scheduler to be used in combination with `transformer` to denoise the encoded
     image latents.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`scheduler`（[SchedulerMixin](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin)）—
+    一个调度器，用于与`transformer`结合使用以去噪编码的图像潜变量。'
 - en: Pipeline for text-to-image generation using PixArt-Alpha.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于使用PixArt-Alpha进行文本到图像生成的管道。
 - en: This model inherits from [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline).
     Check the superclass documentation for the generic methods the library implements
     for all the pipelines (such as downloading or saving, running on a particular
     device, etc.)
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个模型继承自[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)。查看超类文档以了解库为所有管道实现的通用方法（例如下载或保存，运行在特定设备上等）。
 - en: '#### `__call__`'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `__call__`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py#L666)'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py#L666)'
 - en: '[PRE7]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Parameters
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`prompt` (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
     the image generation. If not defined, one has to pass `prompt_embeds`. instead.'
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prompt`（`str`或`List[str]`，*可选*）— 用于指导图像生成的提示。如果未定义，则必须传递`prompt_embeds`。'
 - en: '`negative_prompt` (`str` or `List[str]`, *optional*) — The prompt or prompts
     not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
     instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
     less than `1`).'
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`negative_prompt`（`str`或`List[str]`，*可选*）— 不用于指导图像生成的提示。如果未定义，则必须传递`negative_prompt_embeds`。当不使用指导时（即，如果`guidance_scale`小于`1`，则忽略）。'
 - en: '`num_inference_steps` (`int`, *optional*, defaults to 100) — The number of
     denoising steps. More denoising steps usually lead to a higher quality image at
     the expense of slower inference.'
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_inference_steps`（`int`，*可选*，默认为100）— 去噪步骤的数量。更多的去噪步骤通常会导致更高质量的图像，但会降低推理速度。'
 - en: '`timesteps` (`List[int]`, *optional*) — Custom timesteps to use for the denoising
     process. If not defined, equal spaced `num_inference_steps` timesteps are used.
     Must be in descending order.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`timesteps`（`List[int]`，*可选*）— 用于去噪过程的自定义时间步。如果未定义，则使用等间距的`num_inference_steps`时间步。必须按降序排列。'
 - en: '`guidance_scale` (`float`, *optional*, defaults to 4.5) — Guidance scale as
     defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
     `guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
     Guidance scale is enabled by setting `guidance_scale > 1`. Higher guidance scale
     encourages to generate images that are closely linked to the text `prompt`, usually
     at the expense of lower image quality.'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`guidance_scale` (`float`, *可选*, 默认为4.5) — 在[Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598)中定义的指导尺度。`guidance_scale`定义为[Imagen
+    Paper](https://arxiv.org/pdf/2205.11487.pdf)中方程2的`w`。通过设置`guidance_scale > 1`启用指导尺度。更高的指导尺度鼓励生成与文本`prompt`密切相关的图像，通常以降低图像质量为代价。'
 - en: '`num_images_per_prompt` (`int`, *optional*, defaults to 1) — The number of
     images to generate per prompt.'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_images_per_prompt` (`int`, *可选*, 默认为1) — 每个提示生成的图像数量。'
 - en: '`height` (`int`, *optional*, defaults to self.unet.config.sample_size) — The
     height in pixels of the generated image.'
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`height` (`int`, *可选*, 默认为self.unet.config.sample_size) — 生成图像的像素高度。'
 - en: '`width` (`int`, *optional*, defaults to self.unet.config.sample_size) — The
     width in pixels of the generated image.'
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`width` (`int`, *可选*, 默认为self.unet.config.sample_size) — 生成图像的像素宽度。'
 - en: '`eta` (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
     (η) in the DDIM paper: [https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502).
     Only applies to [schedulers.DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
     will be ignored for others.'
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`eta` (`float`, *可选*, 默认为0.0) — 对应于DDIM论文中的参数eta (η)：[https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502)。仅适用于[schedulers.DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler)，对其他情况将被忽略。'
 - en: '`generator` (`torch.Generator` or `List[torch.Generator]`, *optional*) — One
     or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
     to make generation deterministic.'
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`generator` (`torch.Generator` 或 `List[torch.Generator]`, *可选*) — 一个或多个[torch生成器](https://pytorch.org/docs/stable/generated/torch.Generator.html)列表，使生成过程确定性。'
 - en: '`latents` (`torch.FloatTensor`, *optional*) — Pre-generated noisy latents,
     sampled from a Gaussian distribution, to be used as inputs for image generation.
     Can be used to tweak the same generation with different prompts. If not provided,
     a latents tensor will ge generated by sampling using the supplied random `generator`.'
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`latents` (`torch.FloatTensor`, *可选*) — 预生成的嘈杂潜变量，从高斯分布中采样，用作图像生成的输入。可用于使用不同提示调整相同生成。如果未提供，将使用提供的随机`generator`进行采样生成潜变量张量。'
 - en: '`prompt_embeds` (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
     Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
     text embeddings will be generated from `prompt` input argument.'
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prompt_embeds` (`torch.FloatTensor`, *可选*) — 预生成的文本嵌入。可用于轻松调整文本输入，例如提示加权。如果未提供，将从`prompt`输入参数生成文本嵌入。'
 - en: '`prompt_attention_mask` (`torch.FloatTensor`, *optional*) — Pre-generated attention
     mask for text embeddings.'
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prompt_attention_mask` (`torch.FloatTensor`, *可选*) — 针对文本嵌入的预生成注意力掩码。'
 - en: '`negative_prompt_embeds` (`torch.FloatTensor`, *optional*) — Pre-generated
     negative text embeddings. For PixArt-Alpha this negative prompt should be "".
     If not provided, negative_prompt_embeds will be generated from `negative_prompt`
     input argument.'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`negative_prompt_embeds` (`torch.FloatTensor`, *可选*) — 预生成的负面文本嵌入。对于PixArt-Alpha，此负面提示应为""。如果未提供，将从`negative_prompt`输入参数生成负面提示嵌入。'
 - en: '`negative_prompt_attention_mask` (`torch.FloatTensor`, *optional*) — Pre-generated
     attention mask for negative text embeddings.'
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`negative_prompt_attention_mask` (`torch.FloatTensor`, *可选*) — 针对负面文本嵌入的预生成注意力掩码。'
 - en: '`output_type` (`str`, *optional*, defaults to `"pil"`) — The output format
     of the generate image. Choose between [PIL](https://pillow.readthedocs.io/en/stable/):
     `PIL.Image.Image` or `np.array`.'
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_type` (`str`, *可选*, 默认为`"pil"`) — 生成图像的输出格式。可选择[PIL](https://pillow.readthedocs.io/en/stable/)：`PIL.Image.Image`
+    或 `np.array`。'
 - en: '`return_dict` (`bool`, *optional*, defaults to `True`) — Whether or not to
     return a `~pipelines.stable_diffusion.IFPipelineOutput` instead of a plain tuple.'
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *可选*, 默认为`True`) — 是否返回`~pipelines.stable_diffusion.IFPipelineOutput`而不是普通元组。'
 - en: '`callback` (`Callable`, *optional*) — A function that will be called every
     `callback_steps` steps during inference. The function will be called with the
     following arguments: `callback(step: int, timestep: int, latents: torch.FloatTensor)`.'
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`callback` (`Callable`, *可选*) — 在推断过程中每`callback_steps`步调用的函数。该函数将使用以下参数调用：`callback(step:
+    int, timestep: int, latents: torch.FloatTensor)`。'
 - en: '`callback_steps` (`int`, *optional*, defaults to 1) — The frequency at which
     the `callback` function will be called. If not specified, the callback will be
     called at every step.'
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`callback_steps` (`int`, *可选*, 默认为1) — `callback`函数将被调用的频率。如果未指定，将在每一步调用回调。'
 - en: '`clean_caption` (`bool`, *optional*, defaults to `True`) — Whether or not to
     clean the caption before creating embeddings. Requires `beautifulsoup4` and `ftfy`
     to be installed. If the dependencies are not installed, the embeddings will be
     created from the raw prompt.'
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`clean_caption` (`bool`, *可选*, 默认为`True`) — 在创建嵌入之前是否清理标题。需要安装`beautifulsoup4`和`ftfy`。如果未安装依赖项，将从原始提示创建嵌入。'
 - en: '`use_resolution_binning` (`bool` defaults to `True`) — If set to `True`, the
     requested height and width are first mapped to the closest resolutions using `ASPECT_RATIO_1024_BIN`.
     After the produced latents are decoded into images, they are resized back to the
     requested resolution. Useful for generating non-square images.'
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`use_resolution_binning` (`bool` 默认为`True`) — 如果设置为`True`，则首先将请求的高度和宽度映射到最接近的分辨率，使用`ASPECT_RATIO_1024_BIN`。在生成的潜变量解码为图像后，它们将被调整回请求的分辨率。适用于生成非正方形图像。'
 - en: Returns
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
     or `tuple`'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: '[ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    或 `tuple`'
 - en: If `return_dict` is `True`, [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
     is returned, otherwise a `tuple` is returned where the first element is a list
     with the generated images
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果`return_dict`为`True`，则返回[ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)，否则返回一个`tuple`，其中第一个元素是包含生成图像的列表
 - en: Function invoked when calling the pipeline for generation.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用管道生成时调用的函数。
 - en: 'Examples:'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE8]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '#### `classify_height_width_bin`'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `classify_height_width_bin`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py#L634)'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py#L634)'
 - en: '[PRE9]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Returns binned height and width.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回分箱的高度和宽度。
 - en: '#### `encode_prompt`'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `encode_prompt`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py#L251)'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py#L251)'
 - en: '[PRE10]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Parameters
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`prompt` (`str` or `List[str]`, *optional*) — prompt to be encoded'
+  id: totrans-85
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prompt` (`str` or `List[str]`, *optional*) — 要编码的提示'
 - en: '`negative_prompt` (`str` or `List[str]`, *optional*) — The prompt not to guide
     the image generation. If not defined, one has to pass `negative_prompt_embeds`
     instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
     less than `1`). For PixArt-Alpha, this should be "".'
+  id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`negative_prompt` (`str` or `List[str]`, *optional*) — 不用来指导图像生成的提示。如果未定义，则必须传递`negative_prompt_embeds`。在不使用指导时被忽略（即如果`guidance_scale`小于`1`，则被忽略）。对于PixArt-Alpha，应该是""。'
 - en: '`do_classifier_free_guidance` (`bool`, *optional*, defaults to `True`) — whether
     to use classifier free guidance or not'
+  id: totrans-87
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_classifier_free_guidance` (`bool`, *optional*, 默认为`True`) — 是否使用分类器自由指导。'
 - en: '`num_images_per_prompt` (`int`, *optional*, defaults to 1) — number of images
     that should be generated per prompt device — (`torch.device`, *optional*): torch
     device to place the resulting embeddings on'
+  id: totrans-88
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_images_per_prompt` (`int`, *optional*, 默认为1) — 每个提示生成的图像数量 device — (`torch.device`,
+    *optional*): 放置生成的嵌入的torch设备'
 - en: '`prompt_embeds` (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
     Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
     text embeddings will be generated from `prompt` input argument.'
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prompt_embeds` (`torch.FloatTensor`, *optional*) — 预生成的文本嵌入。可用于轻松调整文本输入，例如提示加权。如果未提供，则将从`prompt`输入参数生成文本嵌入。'
 - en: '`negative_prompt_embeds` (`torch.FloatTensor`, *optional*) — Pre-generated
     negative text embeddings. For PixArt-Alpha, it’s should be the embeddings of the
     "" string.'
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`negative_prompt_embeds` (`torch.FloatTensor`, *optional*) — 预生成的负面文本嵌入。对于PixArt-Alpha，应该是""字符串的嵌入。'
 - en: '`clean_caption` (bool, defaults to `False`) — If `True`, the function will
     preprocess and clean the provided caption before encoding.'
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`clean_caption`（bool，默认为`False`）— 如果为`True`，函数将在编码之前对提供的标题进行预处理和清理。'
 - en: Encodes the prompt into text encoder hidden states.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 将提示编码为文本编码器隐藏状态。
