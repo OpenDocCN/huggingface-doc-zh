@@ -177,33 +177,39 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`save_steps`参数中保存新对手之前的**训练步数。**较大的`save_steps`值将产生一组涵盖更广泛技能水平和可能的游戏风格的对手，因为策略接受了更多的训练。
 - en: To get more details about these hyperparameters, you definitely need [to check
     out this part of the documentation](https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Training-Configuration-File.md#self-play)
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解更多关于这些超参数的详细信息，您绝对需要[查看文档的这一部分](https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Training-Configuration-File.md#self-play)
 - en: The ELO Score to evaluate our agent
   id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ELO分数用于评估我们的代理
 - en: What is ELO Score?
   id: totrans-29
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 什么是ELO分数？
 - en: In adversarial games, tracking the **cumulative reward is not always a meaningful
     metric to track the learning progress:** because this metric is **dependent only
     on the skill of the opponent.**
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 在对抗性游戏中，跟踪**累积奖励并不总是一个有意义的度量标准：**因为这个度量标准**仅取决于对手的技能。**
 - en: Instead, we’re using an ***ELO rating system*** (named after Arpad Elo) that
     calculates the **relative skill level** between 2 players from a given population
     in a zero-sum game.
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 相反，我们使用一个名为***ELO评分系统***（以Arpad Elo命名）来计算给定人群中2名玩家之间的**相对技能水平**。
 - en: 'In a zero-sum game: one agent wins, and the other agent loses. It’s a mathematical
     representation of a situation in which each participant’s gain or loss of utility
     **is exactly balanced by the gain or loss of the utility of the other participants.**
@@ -211,27 +217,32 @@
   id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 在零和游戏中：一个代理赢，另一个代理输。这是一种数学表示，其中每个参与者的效用增减**正好被其他参与者的效用增减所平衡。**我们谈论零和游戏，因为效用的总和等于零。
 - en: 'This ELO (starting at a specific score: frequently 1200) can decrease initially
     but should increase progressively during the training.'
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个ELO（从特定分数开始：通常为1200）最初可能会下降，但在训练过程中应逐渐增加。
 - en: The Elo system is **inferred from the losses and draws against other players.**
     It means that player ratings depend **on the ratings of their opponents and the
     results scored against them.**
   id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: Elo系统是**从与其他玩家的失败和平局中推断出来的。**这意味着玩家的评分取决于**他们的对手的评分以及对他们的比赛结果。**
 - en: Elo defines an Elo score that is the relative skills of a player in a zero-sum
     game. **We say relative because it depends on the performance of opponents.**
   id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: Elo定义了一个Elo分数，表示玩家在零和游戏中的相对技能。**我们说相对是因为它取决于对手的表现。**
 - en: The central idea is to think of the performance of a player **as a random variable
     that is normally distributed.**
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 中心思想是将玩家的表现**视为一个正态分布的随机变量。**
 - en: The difference in rating between 2 players serves as **the predictor of the
     outcomes of a match.** If the player wins, but the probability of winning is high,
     it will only win a few points from its opponent since it means that it is much
@@ -239,21 +250,25 @@
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 两名玩家之间的评分差异作为**比赛结果的预测器。**如果玩家赢了，但获胜的概率很高，它只会从对手那里赢得一些分数，因为这意味着它比对手强得多。
 - en: 'After every game:'
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 每场比赛结束后：
 - en: The winning player takes **points from the losing one.**
   id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 获胜的玩家从失败的玩家**那里获得分数。**
 - en: The number of points is determined **by the difference in the 2 players ratings
     (hence relative).**
   id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 得分的数量由**两名玩家评分的差异（因此是相对的）**决定。
 - en: If the higher-rated player wins → few points will be taken from the lower-rated
     player.
   id: totrans-41
@@ -261,6 +276,7 @@
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果高分玩家获胜→将从低分玩家那里获得一些分数。
 - en: If the lower-rated player wins → a lot of points will be taken from the high-rated
     player.
   id: totrans-42
@@ -268,67 +284,81 @@
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果低分玩家获胜→将从高分玩家那里获得很多分数。
 - en: If it’s a draw → the lower-rated player gains a few points from the higher.
   id: totrans-43
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果是平局→低分玩家从高分玩家那里获得一些分数。
 - en: 'So if A and B have rating Ra, and Rb, then the **expected scores are** given
     by:'
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，如果A和B的评分分别为Ra和Rb，则**预期得分为**：
 - en: '![ELO Score](../Images/170b63d61ac8a30759838921d82860c5.png)'
   id: totrans-45
   prefs: []
   type: TYPE_IMG
+  zh: '![ELO分数](../Images/170b63d61ac8a30759838921d82860c5.png)'
 - en: Then, at the end of the game, we need to update the player’s actual Elo score.
     We use a linear adjustment **proportional to the amount by which the player over-performed
     or under-performed.**
   id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，在游戏结束时，我们需要更新玩家的实际Elo分数。我们使用线性调整**与玩家表现超出或不足的量成比例。**
 - en: 'We also define a maximum adjustment rating per game: K-factor.'
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还定义了每场比赛的最大调整等级：K因子。
 - en: K=16 for master.
   id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: K=16适用于大师。
 - en: K=32 for weaker players.
   id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: K=32适用于较弱的玩家。
 - en: 'If Player A has Ea points but scored Sa points, then the player’s rating is
     updated using the formula:'
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果玩家A有Ea分，但得到了Sa分，那么玩家的评分将使用以下公式进行更新：
 - en: '![ELO Score](../Images/1e0296c75fde41fbfd850f8d5b2c8cdd.png)'
   id: totrans-51
   prefs: []
   type: TYPE_IMG
+  zh: '![ELO分数](../Images/1e0296c75fde41fbfd850f8d5b2c8cdd.png)'
 - en: Example
   id: totrans-52
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 例子
 - en: 'If we take an example:'
   id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们举个例子：
 - en: Player A has a rating of 2600
   id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 玩家A的评分为2600
 - en: Player B has a rating of 2300
   id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 玩家B的评分为2300
 - en: 'We first calculate the expected score: <math><semantics><mrow><msub><mi>E</mi><mi>A</mi></msub><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mn>1</mn><msup><mn>0</mn><mrow><mo
     stretchy="false">(</mo><mn>2300</mn><mo>−</mo><mn>2600</mn><mo stretchy="false">)</mo><mi
     mathvariant="normal">/</mi><mn>400</mn></mrow></msup></mrow></mfrac><mo>=</mo><mn>0.849</mn></mrow><annotation
