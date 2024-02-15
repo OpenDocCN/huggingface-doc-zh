@@ -168,17 +168,20 @@
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 稳定扩散是一种文本到图像的*潜在扩散*模型。它被称为潜在扩散模型，因为它使用图像的较低维表示而不是实际的像素空间，这使其更节省内存。编码器将图像压缩为较小的表示，解码器将压缩表示转换回图像。对于文本到图像模型，您将需要一个分词器和一个编码器来生成文本嵌入。从前面的示例中，您已经知道需要一个UNet模型和一个调度器。
 - en: As you can see, this is already more complex than the DDPM pipeline which only
     contains a UNet model. The Stable Diffusion model has three separate pretrained
     models.
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，这已经比仅包含UNet模型的DDPM管线更复杂。稳定扩散模型有三个单独的预训练模型。
 - en: 💡 Read the [How does Stable Diffusion work?](https://huggingface.co/blog/stable_diffusion#how-does-stable-diffusion-work)
     blog for more details about how the VAE, UNet, and text encoder models work.
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 阅读[稳定扩散是如何工作的？](https://huggingface.co/blog/stable_diffusion#how-does-stable-diffusion-work)博客，了解有关VAE、UNet和文本编码器模型如何工作的更多细节。
 - en: 'Now that you know what you need for the Stable Diffusion pipeline, load all
     these components with the [from_pretrained()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.from_pretrained)
     method. You can find them in the pretrained [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)
@@ -186,6 +189,7 @@
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您知道稳定扩散管线所需的内容，使用[from_pretrained()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.from_pretrained)方法加载所有这些组件。您可以在预训练的[`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)检查点中找到它们，每个组件都存储在一个单独的子文件夹中：
 - en: '[PRE7]'
   id: totrans-32
   prefs: []
@@ -197,6 +201,7 @@
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 将默认的[PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler)替换为[UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler)，看看如何轻松地插入不同的调度器：
 - en: '[PRE8]'
   id: totrans-34
   prefs: []
@@ -207,6 +212,7 @@
   id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了加快推理速度，将模型移动到GPU上，因为与调度器不同，它们具有可训练的权重：
 - en: '[PRE9]'
   id: totrans-36
   prefs: []
@@ -217,21 +223,25 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 创建文本嵌入
 - en: The next step is to tokenize the text to generate embeddings. The text is used
     to condition the UNet model and steer the diffusion process towards something
     that resembles the input prompt.
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 下一步是对文本进行标记化以生成嵌入。文本用于调节UNet模型并引导扩散过程朝着类似于输入提示的方向发展。
 - en: 💡 The `guidance_scale` parameter determines how much weight should be given
     to the prompt when generating an image.
   id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 `guidance_scale`参数确定在生成图像时应给予提示的权重有多大。
 - en: Feel free to choose any prompt you like if you want to generate something else!
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想生成其他内容，请随意选择任何提示！
 - en: '[PRE10]'
   id: totrans-41
   prefs: []
@@ -241,6 +251,7 @@
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 标记化文本并从提示生成嵌入：
 - en: '[PRE11]'
   id: totrans-43
   prefs: []
@@ -252,6 +263,7 @@
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还需要生成*无条件文本嵌入*，这些是填充令牌的嵌入。这些需要与条件`text_embeddings`具有相同的形状（`batch_size`和`seq_length`）：
 - en: '[PRE12]'
   id: totrans-45
   prefs: []
@@ -262,6 +274,7 @@
   id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们将条件和无条件嵌入连接成一个批次，以避免进行两次前向传递：
 - en: '[PRE13]'
   id: totrans-47
   prefs: []
@@ -272,6 +285,7 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 创建随机噪声
 - en: Next, generate some initial random noise as a starting point for the diffusion
     process. This is the latent representation of the image, and it’ll be gradually
     denoised. At this point, the `latent` image is smaller than the final image size
@@ -280,11 +294,13 @@
   id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，生成一些初始随机噪声作为扩散过程的起点。这是图像的潜在表示，它将逐渐去噪。此时，`latent`图像比最终图像尺寸要小，但这没关系，因为模型稍后会将其转换为最终的512x512图像尺寸。
 - en: '💡 The height and width are divided by 8 because the `vae` model has 3 down-sampling
     layers. You can check by running the following:'
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 高度和宽度除以8，因为`vae`模型有3个下采样层。您可以通过运行以下内容来检查：
 - en: '[PRE14]'
   id: totrans-51
   prefs: []
@@ -300,11 +316,13 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 去噪图像
 - en: 'Start by scaling the input with the initial noise distribution, *sigma*, the
     noise scale value, which is required for improved schedulers like [UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler):'
   id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，通过初始噪声分布*sigma*对输入进行缩放，噪声比例值，这对于改进的调度器如[UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler)是必需的：
 - en: '[PRE16]'
   id: totrans-55
   prefs: []
@@ -316,22 +334,26 @@
   id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后一步是创建去噪循环，逐渐将`latents`中的纯噪声转换为由您的提示描述的图像。记住，去噪循环需要做三件事：
 - en: Set the scheduler’s timesteps to use during denoising.
   id: totrans-57
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 设置调度器在去噪过程中要使用的时间步长。
 - en: Iterate over the timesteps.
   id: totrans-58
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 迭代时间步长。
 - en: At each timestep, call the UNet model to predict the noise residual and pass
     it to the scheduler to compute the previous noisy sample.
   id: totrans-59
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在每个时间步骤中，调用UNet模型来预测噪声残差，并将其传递给调度器以计算先前的嘈杂样本。
 - en: '[PRE17]'
   id: totrans-60
   prefs: []
@@ -342,11 +364,13 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 解码图像
 - en: 'The final step is to use the `vae` to decode the latent representation into
     an image and get the decoded output with `sample`:'
   id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后一步是使用`vae`将潜在表示解码为图像，并使用`sample`获取解码输出：
 - en: '[PRE18]'
   id: totrans-63
   prefs: []
@@ -356,6 +380,7 @@
   id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，将图像转换为`PIL.Image`以查看生成的图像！
 - en: '[PRE19]'
   id: totrans-65
   prefs: []
@@ -365,11 +390,13 @@
   id: totrans-66
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/4e7ad063cb2c61e9b5a381072c11e2f2.png)'
 - en: Next steps
   id: totrans-67
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: From basic to complex pipelines, you’ve seen that all you really need to write
     your own diffusion system is a denoising loop. The loop should set the scheduler’s
     timesteps, iterate over them, and alternate between calling the UNet model to
