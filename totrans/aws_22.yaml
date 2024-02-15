@@ -1,134 +1,185 @@
 - en: Inference pipelines with AWS Neuron (Inf2/Trn1)
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用AWS Neuron（Inf2/Trn1）进行推理管道
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/guides/pipelines](https://huggingface.co/docs/optimum-neuron/guides/pipelines)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/optimum-neuron/guides/pipelines](https://huggingface.co/docs/optimum-neuron/guides/pipelines)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The `pipeline()` function makes it simple to use models from the [Model Hub](https://huggingface.co/models)
     for accelerated inference on a variety of tasks such as text classification, question
     answering and image classification.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '`pipeline()`函数使得在各种任务上使用[Model Hub](https://huggingface.co/models)中的模型进行加速推理变得简单，例如文本分类、问答和图像分类。'
 - en: You can also use the [pipeline()](https://huggingface.co/docs/transformers/main/en/main_classes/pipelines#pipelines)
     function from Transformers and provide your NeurModel model class.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用Transformers中的[pipeline()](https://huggingface.co/docs/transformers/main/en/main_classes/pipelines#pipelines)函数，并提供您的NeurModel模型类。
 - en: 'Currently the supported tasks are:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 目前支持的任务有：
 - en: '`feature-extraction`'
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`feature-extraction`'
 - en: '`fill-mask`'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`fill-mask`'
 - en: '`text-classification`'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`text-classification`'
 - en: '`token-classification`'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token-classification`'
 - en: '`question-answering`'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`question-answering`'
 - en: '`zero-shot-classification`'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`zero-shot-classification`'
 - en: Optimum pipeline usage
+  id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 最佳管道使用
 - en: While each task has an associated pipeline class, it is simpler to use the general
     `pipeline()` function which wraps all the task-specific pipelines in one object.
     The `pipeline()` function automatically loads a default model and tokenizer/feature-extractor
     capable of performing inference for your task.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然每个任务都有一个相关的pipeline类，但使用通用的`pipeline()`函数更简单，它将所有特定任务的pipeline封装在一个对象中。`pipeline()`函数会自动加载一个默认模型和能够执行任务推理的分词器/特征提取器。
 - en: 'Start by creating a pipeline by specifying an inference task:'
+  id: totrans-14
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通过指定推理任务来创建一个pipeline：
 - en: '[PRE0]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Pass your input text/image to the `pipeline()` function:'
+  id: totrans-16
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将输入文本/图像传递给`pipeline()`函数：
 - en: '[PRE1]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '*Note: The default models used in the `pipeline()` function are not optimized
     for inference or quantized, so there won’t be a performance improvement compared
     to their PyTorch counterparts.*'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：`pipeline()`函数中使用的默认模型未经过优化或量化，因此与它们的PyTorch对应物相比不会有性能提升。*'
 - en: Using vanilla Transformers model and converting to AWS Neuron
+  id: totrans-19
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用原始Transformers模型并转换为AWS Neuron
 - en: The `pipeline()` function accepts any supported model from the [Hugging Face
     Hub](https://huggingface.co/models). There are tags on the Model Hub that allow
     you to filter for a model you’d like to use for your task.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '`pipeline()`函数接受来自[Hugging Face Hub](https://huggingface.co/models)的任何支持的模型。在Model
+    Hub上有标签，可以用来筛选您想要用于任务的模型。'
 - en: To be able to load the model with the Neuron Runtime, the export to neuron needs
     to be supported for the considered architecture.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了能够使用Neuron Runtime加载模型，需要支持将模型导出到neuron以考虑的架构。
 - en: You can check the list of supported architectures [here](../package_reference/configuration#supported-architectures).
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在[这里](../package_reference/configuration#supported-architectures)查看支持的架构列表。
 - en: 'Once you have picked an appropriate model, you can create the `pipeline()`
     by specifying the model repo:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦选择了合适的模型，可以通过指定模型存储库来创建`pipeline()`：
 - en: '[PRE2]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: It is also possible to load it with the `from_pretrained(model_name_or_path,
     export=True)` method associated with the `NeuronModelForXXX` class.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 还可以使用与`NeuronModelForXXX`类相关联的`from_pretrained(model_name_or_path, export=True)`方法加载它。
 - en: 'For example, here is how you can load the `~neuron.NeuronModelForQuestionAnswering`
     class for question answering:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，这里是如何加载用于问答的`~neuron.NeuronModelForQuestionAnswering`类：
 - en: '[PRE3]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Defining Input Shapes
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 定义输入形状
 - en: NeuronModels currently require static `input_shapes` to run inference. The default
     input shapes will be used if you are not providing input shapes when providing
     the `export=True` parameter. Below is an example of how to specify the input shapes
     for the sequence length and batch size.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: NeuronModels目前需要静态的`input_shapes`来运行推理。如果在提供`export=True`参数时没有提供输入形状，则将使用默认输入形状。以下是如何指定序列长度和批量大小的输入形状的示例。
 - en: '[PRE4]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'

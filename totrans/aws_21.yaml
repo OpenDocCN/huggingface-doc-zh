@@ -1,231 +1,321 @@
 - en: Neuron Model Inference
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 神经元模型推理
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/guides/models](https://huggingface.co/docs/optimum-neuron/guides/models)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/optimum-neuron/guides/models](https://huggingface.co/docs/optimum-neuron/guides/models)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '*The APIs presented in the following documentation are relevant for the inference
     on [inf2](https://aws.amazon.com/ec2/instance-types/inf2/), [trn1](https://aws.amazon.com/ec2/instance-types/trn1/)
     and [inf1](https://aws.amazon.com/ec2/instance-types/inf1/).*'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '*以下文档中介绍的API适用于[inf2](https://aws.amazon.com/ec2/instance-types/inf2/)、[trn1](https://aws.amazon.com/ec2/instance-types/trn1/)和[inf1](https://aws.amazon.com/ec2/instance-types/inf1/)上的推理。*'
 - en: '`NeuronModelForXXX` classes help to load models from the [Hugging Face Hub](hf.co/models)
     and compile them to a serialized format optimized for neuron devices. You will
     then be able to load the model and run inference with the acceleration powered
     by AWS Neuron devices.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '`NeuronModelForXXX`类有助于从[Hugging Face Hub](hf.co/models)加载模型并将其编译为针对神经元设备优化的序列化格式。然后，您将能够加载模型并通过AWS
+    Neuron设备提供的加速运行推理。'
 - en: Switching from Transformers to Optimum
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 从Transformers切换到Optimum
 - en: The `optimum.neuron.NeuronModelForXXX` model classes are APIs compatible with
     Hugging Face Transformers models. This means seamless integration with Hugging
     Face’s ecosystem. You can just replace your `AutoModelForXXX` class with the corresponding
     `NeuronModelForXXX` class in `optimum.neuron`.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '`optimum.neuron.NeuronModelForXXX`模型类是与Hugging Face Transformers模型兼容的API。这意味着与Hugging
+    Face的生态系统无缝集成。您只需在`optimum.neuron`中用相应的`NeuronModelForXXX`类替换您的`AutoModelForXXX`类。'
 - en: 'If you already use Transformers, you will be able to reuse your code just by
     replacing model classes:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您已经使用Transformers，您将能够通过替换模型类来重用您的代码：
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: As shown above, when you use `NeuronModelForXXX` for the first time, you will
     need to set `export=True` to compile your model from PyTorch to a neuron-compatible
     format.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 如上所示，当您第一次使用`NeuronModelForXXX`时，您需要设置`export=True`将您的模型从PyTorch编译为神经元兼容格式。
 - en: You will also need to pass Neuron specific parameters to configure the export.
     Each model architecture has its own set of parameters, as detailed in the next
     paragraphs.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还需要传递神经元特定的参数来配置导出。每个模型架构都有自己的一组参数，如下一段详细说明。
 - en: 'Once your model has been exported, you can save it either on your local or
     in the [Hugging Face Model Hub](https://hf.co/models):'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您的模型被导出，您可以将其保存在本地或[Hugging Face Model Hub](https://hf.co/models)中：
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'And the next time when you want to run inference, just load your compiled model
     which will save you the compilation time:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 下次当您想要运行推理时，只需加载您编译的模型，这将节省您的编译时间：
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: As you see, there is no need to pass the neuron arguments used during the export
     as they are saved in a `config.json` file, and will be restored automatically
     by `NeuronModelForXXX` class.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所见，无需传递导出期间使用的神经元参数，因为它们保存在`config.json`文件中，并将由`NeuronModelForXXX`类自动恢复。
 - en: When running inference for the first time, there is a warmup phase when you
     run the pipeline for the first time. This run would take 3x-4x higher latency
     than a regular run.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一次运行推理时，当您第一次运行管道时会有一个预热阶段。这次运行的延迟比常规运行高3倍至4倍。
 - en: Discriminative NLP models
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 歧视性NLP模型
 - en: 'As explained in the previous section, you will need only few modifications
     to your Transformers code to export and run NLP models:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，您只需要对Transformers代码进行少量修改，即可导出和运行NLP模型：
 - en: '[PRE3]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '`compiler_args` are optional arguments for the compiler, these arguments usually
     control how the compiler makes tradeoff between the inference performance (latency
     and throughput) and the accuracy. Here we cast FP32 operations to BF16 using the
     Neuron matrix-multiplication engine.'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '`compiler_args`是编译器的可选参数，这些参数通常控制编译器在推理性能（延迟和吞吐量）和准确性之间做出权衡。在这里，我们使用神经元矩阵乘法引擎将FP32操作转换为BF16。'
 - en: '`input_shapes` are mandatory static shape information that you need to send
     to the neuron compiler. Wondering what shapes are mandatory for your model? Check
     it out with the following code:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '`input_shapes`是您需要发送给神经元编译器的强制静态形状信息。想知道您的模型需要哪些强制形状？使用以下代码查看：'
 - en: '[PRE4]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Be careful, the input shapes used for compilation should be inferior than the
     size of inputs that you will feed into the model during the inference.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，用于编译的输入形状应该小于您在推理过程中将馈送到模型中的输入大小。
 - en: What if input sizes are smaller than compilation input shapes?
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果输入大小小于编译输入形状怎么办？
 - en: No worries, `NeuronModelForXXX` class will pad your inputs to an eligible shape.
     Besides you can set `dynamic_batch_size=True` in the `from_pretrained` method
     to enable dynamic batching, which means that your inputs can have variable batch
     size.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 别担心，`NeuronModelForXXX`类将填充您的输入到一个合适的形状。此外，您可以在`from_pretrained`方法中设置`dynamic_batch_size=True`来启用动态批处理，这意味着您的输入可以具有可变的批处理大小。
 - en: '*(Just keep in mind: dynamicity and padding comes with not only flexibility
     but also performance drop. Fair enough!)*'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: （只需记住：动态性和填充不仅带来了灵活性，还带来了性能下降。够公平！）
 - en: Generative NLP models
+  id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 生成性NLP模型
 - en: 'As explained before, you will need only a few modifications to your Transformers
     code to export and run NLP models:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，您只需要对Transformers代码进行少量修改，即可导出和运行NLP模型：
 - en: Configuring the export of a generative model
+  id: totrans-29
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 配置生成模型的导出
 - en: 'As for non-generative models, two sets of parameters can be passed to the `from_pretrained()`
     method to configure how a transformers checkpoint is exported to a neuron optimized
     model:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于非生成模型，可以传递两组参数给`from_pretrained()`方法，以配置如何将transformers检查点导出为神经元优化模型：
 - en: '`compiler_args = { num_cores, auto_cast_type }` are optional arguments for
     the compiler, these arguments usually control how the compiler makes tradeoff
     between the inference latency and throughput and the accuracy.'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`compiler_args = { num_cores, auto_cast_type }`是编译器的可选参数，这些参数通常控制编译器在推理延迟、吞吐量和准确性之间做出权衡。'
 - en: '`input_shapes = { batch_size, sequence_length }` correspond to the static shape
     of the model input and the KV-cache (attention keys and values for past tokens).'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_shapes = { batch_size, sequence_length }`对应于模型输入和KV-cache（过去标记的注意力键和值）的静态形状。'
 - en: '`num_cores` is the number of neuron cores used when instantiating the model.
     Each neuron core has 16 Gb of memory, which means that bigger models need to be
     split on multiple cores. Defaults to 1,'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_cores`是实例化模型时使用的神经元核心数量。每个神经元核心有16Gb的内存，这意味着更大的模型需要分割到多个核心上。默认为1，'
 - en: '`auto_cast_type` specifies the format to encode the weights. It can be one
     of `fp32` (`float32`), `fp16` (`float16`) or `bf16` (`bfloat16`). Defaults to
     `fp32`.'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`auto_cast_type`指定编码权重的格式。可以是`fp32`（`float32`），`fp16`（`float16`）或`bf16`（`bfloat16`）。默认为`fp32`。'
 - en: '`batch_size` is the number of input sequences that the model will accept. Defaults
     to 1,'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`batch_size`是模型将接受的输入序列的数量。默认为1，'
 - en: '`sequence_length` is the maximum number of tokens in an input sequence. Defaults
     to `max_position_embeddings` (`n_positions` for older models).'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sequence_length`是输入序列中标记的最大数量。默认为`max_position_embeddings`（旧模型的`n_positions`）。'
 - en: '[PRE5]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'As explained before, these parameters can only be configured during export.
     This means in particular that during inference:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，这些参数只能在导出期间配置。这意味着在推理期间：
 - en: the `batch_size` of the inputs should be equal to the `batch_size` used during
     export,
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 输入的`batch_size`应等于导出时使用的`batch_size`，
 - en: the `length` of the input sequences should be lower than the `sequence_length`
     used during export,
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 输入序列的`length`应低于导出时使用的`sequence_length`，
 - en: the maximum number of tokens (input + generated) cannot exceed the `sequence_length`
     used during export.
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 最大标记数（输入+生成）不能超过导出时使用的`sequence_length`。
 - en: Text generation inference
+  id: totrans-42
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 文本生成推理
 - en: As with the original transformers models, use `generate()` instead of `forward()`
     to generate text sequences.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 与原始transformers模型一样，使用`generate()`而不是`forward()`来生成文本序列。
 - en: '[PRE6]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: The generation is highly configurable. Please refer to [https://huggingface.co/docs/transformers/generation_strategies](https://huggingface.co/docs/transformers/generation_strategies)
     for details.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成是高度可配置的。请参考[https://huggingface.co/docs/transformers/generation_strategies](https://huggingface.co/docs/transformers/generation_strategies)获取详细信息。
 - en: 'Please be aware that:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意：
 - en: for each model architecture, default values are provided for all parameters,
     but values passed to the `generate` method will take precedence,
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于每个模型架构，为所有参数提供了默认值，但传递给`generate`方法的值将优先考虑，
 - en: the generation parameters can be stored in a `generation_config.json` file.
     When such a file is present in model directory, it will be parsed to set the default
     parameters (the values passed to the `generate` method still take precedence).
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 生成参数可以存储在`generation_config.json`文件中。当模型目录中存在这样一个文件时，将解析它以设置默认参数（传递给`generate`方法的值仍然优先）。
 - en: Happy inference with Neuron! 🚀
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 祝您在Neuron中进行愉快的推理！🚀
