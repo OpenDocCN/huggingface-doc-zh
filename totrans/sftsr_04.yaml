@@ -1,120 +1,155 @@
 - en: Torch shared tensors
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Torch共享张量
 - en: 'Original text: [https://huggingface.co/docs/safetensors/torch_shared_tensors](https://huggingface.co/docs/safetensors/torch_shared_tensors)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/safetensors/torch_shared_tensors](https://huggingface.co/docs/safetensors/torch_shared_tensors)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: TL;DR
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TL;DR
 - en: Using specific functions, which should work in most cases for you. This is not
     without side effects.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用特定函数，这应该在大多数情况下为您工作。这并非没有副作用。
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: What are shared tensors ?
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 什么是共享张量？
 - en: Pytorch uses shared tensors for some computation. This is extremely interesting
     to reduce memory usage in general.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: Pytorch在某些计算中使用共享张量。这对于通常减少内存使用非常有趣。
 - en: One very classic use case is in transformers the `embeddings` are shared with
     `lm_head`. By using the same matrix, the model uses less parameters, and gradients
     flow much better to the `embeddings` (which is the start of the model, so they
     don’t flow easily there, whereas `lm_head` is at the tail of the model, so gradients
     are extremely good over there, since they are the same tensors, they both benefit)
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个非常经典的用例是在transformers中，`embeddings`与`lm_head`共享。通过使用相同的矩阵，模型使用更少的参数，并且梯度更好地流向`embeddings`（这是模型的起始点，所以它们不容易流向那里，而`lm_head`在模型的末尾，所以梯度在那里非常好，因为它们是相同的张量，它们都受益）
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Why are shared tensors not saved in safetensors ?
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 为什么共享张量没有保存在safetensors中？
 - en: 'Multiple reasons for that:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 有多个原因：
 - en: '*Not all frameworks support them* for instance `tensorflow` does not. So if
     someone saves shared tensors in torch, there is no way to load them in a similar
     fashion so we could not keep the same `Dict[str, Tensor]` API.'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*并非所有框架都支持*，例如`tensorflow`不支持。因此，如果有人在torch中保存共享张量，就没有办法以类似的方式加载它们，因此我们无法保持相同的`Dict[str,
+    Tensor]` API。'
 - en: '*It makes lazy loading very quickly.* Lazy loading is the ability to load only
     some tensors, or part of tensors for a given file. This is trivial to do without
     sharing tensors but with tensor sharing'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*它使惰性加载非常快速*。惰性加载是仅加载给定文件的一些张量或张量部分的能力。这在没有共享张量的情况下是微不足道的，但是通过张量共享'
 - en: '[PRE2]'
+  id: totrans-14
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Now it’s impossible with this given code to “reshare” buffers after the fact.
     Once we give the `a` tensor we have no way to give back the same memory when you
     ask for `b`. (In this particular example we could keep track of given buffers
     but this is not the case in general, since you could do arbitrary work with `a`
     like sending it to another device before asking for `b`)
+  id: totrans-15
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 现在使用这个给定的代码“重新共享”缓冲区是不可能的。一旦我们给出了`a`张量，当您要求`b`时，我们无法将相同的内存还给您。（在这个特定的示例中，我们可以跟踪给定的缓冲区，但这在一般情况下并非如此，因为您可以对`a`执行任意工作，比如在请求`b`之前将其发送到另一个设备）
 - en: '*It can lead to much larger file than necessary*. If you are saving a shared
     tensor which is only a fraction of a larger tensor, then saving it with pytorch
     leads to saving the entire buffer instead of saving just what is needed.'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*可能导致比必要更大的文件*。如果您保存的是一个只是较大张量的一部分的共享张量，那么使用pytorch保存它会导致保存整个缓冲区，而不仅仅保存所需的部分。'
 - en: '[PRE3]'
+  id: totrans-17
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Now with all those reasons being mentioned, nothing is set in stone in there.
     Shared tensors do not cause unsafety, or denial of service potential, so this
     decision could be revisited if current workarounds are not satisfactory.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在提到所有这些原因，没有什么是一成不变的。共享张量不会导致不安全性或拒绝服务潜力，因此如果当前的解决方法不令人满意，这个决定可以重新审视。
 - en: How does it work ?
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 它是如何工作的？
 - en: The design is rather simple. We’re going to look for all shared tensors, then
     looking for all tensors covering the entire buffer (there can be multiple such
     tensors). That gives us multiple names which can be saved, we simply choose the
     first one
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 设计相当简单。我们将寻找所有共享张量，然后寻找覆盖整个缓冲区的所有张量（可能有多个这样的张量）。这给我们提供了可以保存的多个名称，我们只是选择第一个
 - en: During `load_model`, we are loading a bit like `load_state_dict` does, except
     we’re looking into the model itself, to check for shared buffers, and ignoring
     the “missed keys” which were actually covered by virtue of buffer sharing (they
     were properly loaded since there was a buffer that loaded under the hood). Every
     other error is raised as-is
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 在`load_model`期间，我们加载类似于`load_state_dict`的方式，除了我们查看模型本身，以检查共享缓冲区，并忽略“丢失的键”，这些键实际上是由于缓冲区共享而被覆盖的（它们已经正确加载，因为在幕后加载了一个缓冲区）。其他任何错误都会按原样引发
 - en: '**Caveat**: This means we’re dropping some keys within the file. meaning if
     you’re checking for the keys saved on disk, you will see some “missing tensors”
     or if you’re using `load_state_dict`. Unless we start supporting shared tensors
     directly in the format there’s no real way around it.'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '**注意**：这意味着我们在文件中删除了一些键。这意味着如果您正在检查磁盘上保存的键，您将看到一些“丢失的张量”，或者如果您正在使用`load_state_dict`。除非我们开始直接支持共享张量的格式，否则没有真正的解决方法。'
