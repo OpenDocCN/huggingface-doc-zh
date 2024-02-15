@@ -1,92 +1,115 @@
 - en: Metal Performance Shaders (MPS)
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 金属性能着色器（MPS）
 - en: 'Original text: [https://huggingface.co/docs/diffusers/optimization/mps](https://huggingface.co/docs/diffusers/optimization/mps)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/optimization/mps](https://huggingface.co/docs/diffusers/optimization/mps)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '🤗 Diffusers is compatible with Apple silicon (M1/M2 chips) using the PyTorch
     [`mps`](https://pytorch.org/docs/stable/notes/mps.html) device, which uses the
     Metal framework to leverage the GPU on MacOS devices. You’ll need to have:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Diffusers兼容使用PyTorch [`mps`](https://pytorch.org/docs/stable/notes/mps.html)设备的苹果硅（M1/M2芯片），该设备使用Metal框架来利用MacOS设备上的GPU。您需要：
 - en: macOS computer with Apple silicon (M1/M2) hardware
+  id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 具有苹果硅（M1/M2）硬件的macOS计算机
 - en: macOS 12.6 or later (13.0 or later recommended)
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: macOS 12.6或更高版本（建议使用13.0或更高版本）
 - en: arm64 version of Python
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Python的arm64版本
 - en: '[PyTorch 2.0](https://pytorch.org/get-started/locally/) (recommended) or 1.13
     (minimum version supported for `mps`)'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[PyTorch 2.0](https://pytorch.org/get-started/locally/)（建议）或1.13（`mps`支持的最低版本）'
 - en: 'The `mps` backend uses PyTorch’s `.to()` interface to move the Stable Diffusion
     pipeline on to your M1 or M2 device:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '`mps`后端使用PyTorch的`.to()`接口将稳定扩散管道移动到您的M1或M2设备上：'
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Generating multiple prompts in a batch can [crash](https://github.com/huggingface/diffusers/issues/363)
     or fail to work reliably. We believe this is related to the [`mps`](https://github.com/pytorch/pytorch/issues/84039)
     backend in PyTorch. While this is being investigated, you should iterate instead
     of batching.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在批处理中生成多个提示可能会[崩溃](https://github.com/huggingface/diffusers/issues/363)或无法可靠工作。我们认为这与PyTorch中的[`mps`](https://github.com/pytorch/pytorch/issues/84039)后端有关。在调查此问题时，您应该迭代而不是批处理。
 - en: If you’re using **PyTorch 1.13**, you need to “prime” the pipeline with an additional
     one-time pass through it. This is a temporary workaround for an issue where the
     first inference pass produces slightly different results than subsequent ones.
     You only need to do this pass once, and after just one inference step you can
     discard the result.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您使用**PyTorch 1.13**，您需要通过额外的一次通过“prime”管道。这是一个临时解决方法，用于解决第一次推理通过产生与后续推理通过略有不同结果的问题。您只需要执行此步骤一次，仅经过一次推理步骤后，您可以丢弃结果。
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Troubleshoot
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 故障排除
 - en: M1/M2 performance is very sensitive to memory pressure. When this occurs, the
     system automatically swaps if it needs to which significantly degrades performance.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: M1/M2的性能对内存压力非常敏感。当发生这种情况时，系统会自动进行交换，如果需要的话，这会显著降低性能。
 - en: 'To prevent this from happening, we recommend *attention slicing* to reduce
     memory pressure during inference and prevent swapping. This is especially relevant
     if your computer has less than 64GB of system RAM, or if you generate images at
     non-standard resolutions larger than 512×512 pixels. Call the [enable_attention_slicing()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline.enable_attention_slicing)
     function on your pipeline:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 为防止这种情况发生，我们建议*注意力切片*以减少推理过程中的内存压力并防止交换。如果您的计算机系统RAM少于64GB，或者生成的图像分辨率大于512×512像素的非标准分辨率，则这一点尤为重要。在您的管道上调用[enable_attention_slicing()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline.enable_attention_slicing)函数：
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Attention slicing performs the costly attention operation in multiple steps
     instead of all at once. It usually improves performance by ~20% in computers without
     universal memory, but we’ve observed *better performance* in most Apple silicon
     computers unless you have 64GB of RAM or more.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意力切片将昂贵的注意力操作分为多个步骤，而不是一次性完成。在没有通用内存的计算机上，这通常可以提高约20%的性能，但我们观察到在大多数苹果硅计算机上有更好的性能，除非您有64GB或更多的RAM。
