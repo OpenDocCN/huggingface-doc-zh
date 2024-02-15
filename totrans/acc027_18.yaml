@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用🤗 Accelerate执行梯度累积
 - en: 'Original text: [https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation](https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation](https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation)
 - en: null
   id: totrans-2
   prefs: []
@@ -19,23 +21,27 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 梯度累积是一种技术，您可以在比您的机器通常能够容纳的更大批次大小上进行训练。这是通过在几个批次上累积梯度，并且只有在执行了一定数量的批次之后才会调整优化器。
 - en: While technically standard gradient accumulation code would work fine in a distributed
     setup, it is not the most efficient method for doing so and you may experience
     considerable slowdowns!
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管在技术上，标准的梯度累积代码在分布式设置中可以正常工作，但这并不是最有效的方法，您可能会遇到相当大的减速！
 - en: In this tutorial you will see how to quickly setup gradient accumulation and
     perform it with the utilities provided in 🤗 Accelerate, which can total to adding
     just one new line of code!
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本教程中，您将看到如何快速设置梯度累积并使用🤗 Accelerate提供的实用程序执行梯度累积，这可能只需要添加一行新代码！
 - en: 'This example will use a very simplistic PyTorch training loop that performs
     gradient accumulation every two batches:'
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 本示例将使用一个非常简单的PyTorch训练循环，每两个批次执行一次梯度累积：
 - en: '[PRE0]'
   id: totrans-7
   prefs: []
@@ -46,11 +52,13 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将其转换为🤗 Accelerate
 - en: 'First the code shown earlier will be converted to utilize 🤗 Accelerate without
     the special gradient accumulation helper:'
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，先前显示的代码将被转换为利用🤗 Accelerate而不使用特殊的梯度累积助手：
 - en: '[PRE1]'
   id: totrans-10
   prefs: []
@@ -62,11 +70,13 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 在当前状态下，由于梯度同步的过程，这段代码不会有效地执行梯度累积。在[Concepts tutorial](../concept_guides/gradient_synchronization)中了解更多信息！
 - en: Letting 🤗 Accelerate handle gradient accumulation
   id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 让🤗 Accelerate处理梯度累积
 - en: 'All that is left now is to let 🤗 Accelerate handle the gradient accumulation
     for us. To do so you should pass in a `gradient_accumulation_steps` parameter
     to [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator),
@@ -75,6 +85,7 @@
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在剩下的就是让🤗 Accelerate为我们处理梯度累积。为此，您应该在[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)中传入一个`gradient_accumulation_steps`参数，指定在每次调用`step()`之前执行的步数以及如何在调用[backward()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.backward)期间自动调整损失：
 - en: '[PRE2]'
   id: totrans-14
   prefs: []
@@ -88,6 +99,7 @@
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，您可以在[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)对象的`__init__`中传入一个`gradient_accumulation_plugin`参数，这将允许您进一步自定义梯度累积行为。在[GradientAccumulationPlugin](../package_reference/accelerator#accelerate.utils.GradientAccumulationPlugin)文档中了解更多信息。
 - en: 'From here you can use the [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
     context manager from inside your training loop to automatically perform the gradient
     accumulation for you! You just wrap it around the entire training part of our
@@ -95,6 +107,7 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 从这里开始，您可以在训练循环中使用[accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)上下文管理器，自动为您执行梯度累积！您只需将其包装在我们代码的整个训练部分周围：
 - en: '[PRE3]'
   id: totrans-17
   prefs: []
@@ -104,6 +117,7 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以删除所有关于步数和损失调整的特殊检查：
 - en: '[PRE4]'
   id: totrans-19
   prefs: []
@@ -115,6 +129,7 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 如您所见，[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)能够跟踪您所在的批次号，并且它将自动知道是否要通过准备好的优化器进行步进以及如何调整损失。
 - en: Typically with gradient accumulation, you would need to adjust the number of
     steps to reflect the change in total batches you are training on. 🤗 Accelerate
     automagically does this for you by default. Behind the scenes we instantiate a
@@ -122,6 +137,7 @@
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，使用梯度累积，您需要调整步数以反映您正在训练的总批次的变化。🤗 Accelerate默认会自动为您执行此操作。在幕后，我们实例化了一个配置为执行此操作的`GradientAccumulationPlugin`。
 - en: 'The [state.GradientState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.GradientState)
     is sync’d with the active dataloader being iterated upon. As such it assumes naively
     that when we have reached the end of the dataloader everything will sync and a
@@ -130,6 +146,7 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '[state.GradientState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.GradientState)与正在迭代的活动数据加载器进行同步。因此，它天真地假设当我们到达数据加载器的末尾时，一切都会同步并执行一步。要禁用此功能，请在`GradientAccumulationPlugin`中将`sync_with_dataloader`设置为`False`：'
 - en: '[PRE5]'
   id: totrans-23
   prefs: []
@@ -140,11 +157,13 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 完成的代码
 - en: Below is the finished implementation for performing gradient accumulation with
     🤗 Accelerate
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是使用🤗 Accelerate执行梯度累积的完成实现
 - en: '[PRE6]'
   id: totrans-26
   prefs: []
@@ -155,6 +174,7 @@
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '**在加速器.accumulate(model)的上下文管理器中只应该执行一次前向/后向操作**。'
 - en: To learn more about what magic this wraps around, read the [Gradient Synchronization
     concept guide](../concept_guides/gradient_synchronization)
   id: totrans-28

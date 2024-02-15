@@ -1,22 +1,17 @@
 - en: Using Local SGD with 🤗 Accelerate
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用Local SGD与🤗 Accelerate
 - en: 'Original text: [https://huggingface.co/docs/accelerate/usage_guides/local_sgd](https://huggingface.co/docs/accelerate/usage_guides/local_sgd)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/usage_guides/local_sgd](https://huggingface.co/docs/accelerate/usage_guides/local_sgd)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Local SGD is a technique for distributed training where gradients are not synchronized
@@ -28,73 +23,112 @@
     requires increasing the effective batch size), Local SGD does not require changing
     a batch size or a learning rate / schedule. However, if necessary, Local SGD can
     be combined with gradient accumulation as well.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Local SGD是一种分布式训练技术，其中梯度不是每一步同步的。因此，每个进程更新自己的模型权重版本，并在一定数量的步骤之后通过对所有进程进行平均来同步这些权重。这提高了通信效率，尤其是在计算机缺乏更快的互连（如NVLink）时，可以显著加快训练速度。与梯度累积不同（其中提高通信效率需要增加有效批量大小），Local
+    SGD不需要更改批量大小或学习率/调度。但是，如果必要，Local SGD也可以与梯度累积结合使用。
 - en: In this tutorial you will see how to quickly setup Local SGD 🤗 Accelerate. Compared
     to a standard Accelerate setup, this requires only two extra lines of code.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本教程中，您将看到如何快速设置Local SGD 🤗 Accelerate。与标准的Accelerate设置相比，这只需要额外两行代码。
 - en: 'This example will use a very simplistic PyTorch training loop that performs
     gradient accumulation every two batches:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个例子将使用一个非常简单的PyTorch训练循环，每两个批次执行一次梯度累积：
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Converting it to 🤗 Accelerate
+  id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 转换为🤗 Accelerate
 - en: 'First the code shown earlier will be converted to use 🤗 Accelerate with neither
     a LocalSGD or a gradient accumulation helper:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，之前显示的代码将被转换为使用🤗 Accelerate，既不使用LocalSGD也不使用梯度累积助手：
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Letting 🤗 Accelerate handle model synchronization
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 让🤗 Accelerate处理模型同步
 - en: 'All that is left now is to let 🤗 Accelerate handle model parameter synchronization
     **and** the gradient accumulation for us. For simplicity let us assume we need
     to synchronize every 8 steps. This is achieved by adding one `with LocalSGD` statement
     and one call `local_sgd.step()` after every optimizer step:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在剩下的就是让🤗 Accelerate处理模型参数同步**和**梯度累积。为简单起见，让我们假设我们需要每8步同步一次。通过添加一个`with LocalSGD`语句和在每个优化器步骤之后调用`local_sgd.step()`来实现：
 - en: '[PRE2]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Under the hood, the Local SGD code **disables** automatic gradient synchornization
     (but accumulation still works as expected!). Instead it averages model parameters
     every `local_sgd_steps` steps (as well as in the end of the training loop).
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 在底层，Local SGD代码**禁用**了自动梯度同步（但累积仍然按预期工作！）。相反，它每`local_sgd_steps`步平均模型参数（以及在训练循环结束时）。
 - en: Limitations
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 限制
 - en: The current implementation works only with basic multi-GPU (or multi-CPU) training
     without, e.g., [DeepSpeed.](https://github.com/microsoft/DeepSpeed).
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 当前实现仅适用于基本的多GPU（或多CPU）训练，不包括例如[DeepSpeed.](https://github.com/microsoft/DeepSpeed)。
 - en: References
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参考资料
 - en: 'Although we are not aware of the true origins of this simple approach, the
     idea of local SGD is quite old and goes back to at least:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管我们不清楚这种简单方法的真正起源，但本地SGD的想法非常古老，至少可以追溯到：
 - en: 'Zhang, J., De Sa, C., Mitliagkas, I., & Ré, C. (2016). [Parallel SGD: When
     does averaging help?. arXiv preprint arXiv:1606.07365.](https://arxiv.org/abs/1606.07365)'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 'Zhang, J., De Sa, C., Mitliagkas, I., & Ré, C. (2016). [Parallel SGD: When
+    does averaging help?. arXiv preprint arXiv:1606.07365.](https://arxiv.org/abs/1606.07365)'
 - en: We credit the term Local SGD to the following paper (but there might be earlier
     references we are not aware of).
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将Local SGD这个术语归功于以下论文（但可能有我们不知道的更早的参考文献）。
 - en: Stich, Sebastian Urban. [“Local SGD Converges Fast and Communicates Little.”
     ICLR 2019-International Conference on Learning Representations. No. CONF. 2019.](https://arxiv.org/abs/1805.09767)
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: Stich, Sebastian Urban. [“Local SGD Converges Fast and Communicates Little.”
+    ICLR 2019-International Conference on Learning Representations. No. CONF. 2019.](https://arxiv.org/abs/1805.09767)
