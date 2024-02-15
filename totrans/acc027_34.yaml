@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 梯度同步
 - en: 'Original text: [https://huggingface.co/docs/accelerate/concept_guides/gradient_synchronization](https://huggingface.co/docs/accelerate/concept_guides/gradient_synchronization)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/accelerate/concept_guides/gradient_synchronization](https://huggingface.co/docs/accelerate/concept_guides/gradient_synchronization)
 - en: null
   id: totrans-2
   prefs: []
@@ -19,11 +21,13 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch的分布式模块通过在系统中的所有GPU之间来回通信来运行。这种通信需要时间，并且确保所有进程在使用`ddp`模块时在特定触发点知道彼此的状态。
 - en: 'These triggerpoints are added to the PyTorch model, specifically their `forward()`
     and `backward()` methods. This happens when the model is wrapped with `DistributedDataParallel`:'
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些触发点被添加到PyTorch模型中，特别是它们的`forward()`和`backward()`方法。当模型被包装为`DistributedDataParallel`时会发生这种情况：
 - en: '[PRE0]'
   id: totrans-5
   prefs: []
@@ -34,6 +38,7 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在🤗 Accelerate中，当调用[prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)并传入您的模型时，此转换会自动发生。
 - en: '[PRE1]'
   id: totrans-7
   prefs: []
@@ -44,18 +49,21 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 梯度累积中的减速
 - en: You now understand that PyTorch adds hooks to the `forward` and `backward` method
     of your PyTorch model when training in a distributed setup. But how does this
     risk slowing down your code?
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 您现在了解到，在分布式设置中训练时，PyTorch会向您的PyTorch模型的`forward`和`backward`方法添加钩子。但是这如何会导致您的代码减速呢？
 - en: In DDP (distributed data parallel), the specific order in which processes are
     performed and ran are expected at specific points and these must also occur at
     roughly the same time before moving on.
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在DDP（分布式数据并行）中，执行和运行进程的特定顺序预期在特定点发生，并且在继续之前必须大致同时发生。
 - en: The most direct example is when you update model parameters through `optimizer.step()`.
     Without gradient accumulation, all instances of the model need to have updated
     their gradients computed, collated, and updated before moving on to the next batch
@@ -67,15 +75,18 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 最直接的例子是当您通过`optimizer.step()`更新模型参数时。没有梯度累积，所有模型实例需要在继续下一个数据批次之前更新它们的梯度计算、整合和更新。进行梯度累积时，您累积`n`个损失梯度，并在达到`n`个批次之前跳过`optimizer.step()`。由于所有训练过程只需要在调用`optimizer.step()`时同步，而不需要对训练步骤进行任何修改，这种不必要的进程间通信可能会导致显著的减速。
 - en: How can you avoid this overhead?
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 如何避免这种开销？
 - en: Solving the slowdown problem
   id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决减速问题
 - en: Since you are skipping model parameter updates when training on these batches,
     their gradients do not need to be synchronized until the point where `optimizer.step()`
     is actually called. PyTorch cannot automagically tell when you need to do this,
@@ -84,12 +95,14 @@
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于在这些批次上训练时跳过模型参数更新，它们的梯度不需要在实际调用`optimizer.step()`时同步。PyTorch无法自动判断何时需要执行此操作，但他们提供了一个工具来帮助，通过在将模型转换为DDP后添加到您的模型的[`no_sync`](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel.no_sync)上下文管理器。
 - en: 'Under this context manager, PyTorch will skip synchronizing the gradients when
     `.backward()` is called, and the first call to `.backward()` outside this context
     manager will trigger the synchronization. See an example below:'
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个上下文管理器下，当调用`.backward()`时，PyTorch将跳过同步梯度，并且在此上下文管理器之外第一次调用`.backward()`时将触发同步。请参见下面的示例：
 - en: '[PRE2]'
   id: totrans-16
   prefs: []
@@ -102,6 +115,7 @@
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在🤗 Accelerate中，使其成为一个可以调用的API，无论训练设备如何（尽管如果您不在分布式系统中可能不会执行任何操作！），`ddp_model.no_sync`被替换为[no_sync()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.no_sync)，并且操作方式相同：
 - en: '[PRE3]'
   id: totrans-18
   prefs: []
@@ -113,6 +127,7 @@
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所期望的那样，[accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)函数通过跟踪当前批次号码来包装这个条件检查，使您得到最终的梯度累积API：
 - en: '[PRE4]'
   id: totrans-20
   prefs: []
@@ -123,40 +138,48 @@
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，在选择API时，您应该使用*`accelerator.accumulate`或`accelerator.no_sync`*。
 - en: Just how much of a slowdown is there, and easy mistakes you can make
   id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 有多少减速，以及您可能犯的简单错误
 - en: 'To set up a realistic example, consider the following setup:'
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 建立一个现实的例子，考虑以下设置：
 - en: Two single-GPU T4 nodes and one node with two GPUs
   id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 两个单GPU T4节点和一个有两个GPU的节点
 - en: Each GPU is a T4, and are hosted on GCP
   id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 每个GPU都是T4，并且托管在GCP上
 - en: The script used is a modification of the [NLP Example](https://github.com/muellerzr/timing_experiments/blob/main/baseline.py)
     script
   id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用的脚本是[NLP示例](https://github.com/muellerzr/timing_experiments/blob/main/baseline.py)脚本的修改
 - en: Batch size per GPU is 16, and gradients are accumulated every 4 steps
   id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 每个GPU的批量大小为16，并且每4步累积梯度。
 - en: All scripts are available in [this repository](https://github.com/muellerzr/timing_experiments).
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有脚本都在[此存储库](https://github.com/muellerzr/timing_experiments)中可用。
 - en: If not careful about gradient synchronization and GPU communication, a *large*
     amount of time can be wasted from when these GPUs communicate to each other during
     unnecessary periods.

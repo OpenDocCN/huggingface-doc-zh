@@ -1,179 +1,247 @@
 - en: Low Precision Training Methods
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 低精度训练方法
 - en: 'Original text: [https://huggingface.co/docs/accelerate/concept_guides/low_precision_training](https://huggingface.co/docs/accelerate/concept_guides/low_precision_training)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/concept_guides/low_precision_training](https://huggingface.co/docs/accelerate/concept_guides/low_precision_training)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The release of new kinds of hardware led to the emergence of new training paradigms
     that better utilize them. Currently, this is in the form of training in 8-bit
     precision using packages such as [TransformersEngine](https://github.com/NVIDIA/TransformerEngine)
     (TE) or [MS-AMP](https://github.com/Azure/MS-AMP/tree/main).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 新型硬件的发布导致了新的训练范式的出现，更好地利用它们。目前，这以使用诸如 [TransformersEngine](https://github.com/NVIDIA/TransformerEngine)（TE）或
+    [MS-AMP](https://github.com/Azure/MS-AMP/tree/main) 等软件包进行 8 位精度训练的形式存在。
 - en: For an introduction to the topics discussed today, we recommend reviewing the
     [low-precision usage guide](../usage_guides/low_precision_training.md) as this
     documentation will reference it regularly.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于今天讨论的主题的介绍，我们建议查看 [低精度使用指南](../usage_guides/low_precision_training.md)，因为本文档将经常引用它。
 - en: A Quick Chart
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 快速图表
 - en: 'Below is a quick chart from the MS-AMP documentation showing the different
     bit-precisions for each solution during training:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是 MS-AMP 文档中显示训练过程中每个解决方案的不同位精度的快速图表：
 - en: '| Optimization Level | Computation(GEMM) | Comm | Weight | Master Weight |
     Weight Gradient | Optimizer States |'
+  id: totrans-7
   prefs: []
   type: TYPE_TB
+  zh: '| 优化级别 | 计算（GEMM） | 通信 | 权重 | 主权重 | 权重梯度 | 优化器状态 |'
 - en: '| --- | --- | --- | --- | --- | --- | --- |'
+  id: totrans-8
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- | --- |'
 - en: '| FP16 AMP | FP16 | FP32 | FP32 | N/A | FP32 | FP32+FP32 |'
+  id: totrans-9
   prefs: []
   type: TYPE_TB
+  zh: '| FP16 AMP | FP16 | FP32 | FP32 | N/A | FP32 | FP32+FP32 |'
 - en: '| Nvidia TE | FP8 | FP32 | FP32 | N/A | FP32 | FP32+FP32 |'
+  id: totrans-10
   prefs: []
   type: TYPE_TB
+  zh: '| Nvidia TE | FP8 | FP32 | FP32 | N/A | FP32 | FP32+FP32 |'
 - en: '| MS-AMP O1 | FP8 | FP8 | FP16 | N/A | FP8 | FP32+FP32 |'
+  id: totrans-11
   prefs: []
   type: TYPE_TB
+  zh: '| MS-AMP O1 | FP8 | FP8 | FP16 | N/A | FP8 | FP32+FP32 |'
 - en: '| MS-AMP O2 | FP8 | FP8 | FP16 | N/A | FP8 | FP8+FP16 |'
+  id: totrans-12
   prefs: []
   type: TYPE_TB
+  zh: '| MS-AMP O2 | FP8 | FP8 | FP16 | N/A | FP8 | FP8+FP16 |'
 - en: '| MS-AMP O3 | FP8 | FP8 | FP8 | FP16 | FP8 | FP8+FP16 |'
+  id: totrans-13
   prefs: []
   type: TYPE_TB
+  zh: '| MS-AMP O3 | FP8 | FP8 | FP8 | FP16 | FP8 | FP8+FP16 |'
 - en: TransformersEngine
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TransformersEngine
 - en: '`TransformersEngine` is the first solution to trying to train in 8-bit floating
     point. It works by using drop-in replacement layers for certain ones in a model
     that utilize their FP8-engine to reduce the number of bits (such as 32 to 8) without
     degrading the final accuracy of the model.'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '`TransformersEngine` 是尝试在 8 位浮点数中进行训练的第一个解决方案。它通过使用模型中某些层的替换层来工作，这些替换层利用它们的
+    FP8 引擎来减少位数（例如从 32 到 8），而不会降低模型的最终准确性。'
 - en: 'Specifically, 🤗 Accelerate will find and replace the following layers with
     `TransformersEngine` versions:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 具体来说，🤗 Accelerate 将使用 `TransformersEngine` 版本找到并替换以下层：
 - en: '`nn.LayerNorm` for `te.LayerNorm`'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`nn.LayerNorm` 替换为 `te.LayerNorm`'
 - en: '`nn.Linear` for `te.Linear`'
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`nn.Linear` 替换为 `te.Linear`'
 - en: As a result we wind up with a model that has most of its layers in BF16, while
     some layers are in FP8 reducing some of the memory.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，我们最终得到一个模型，其中大部分层都是 BF16，而一些层是 FP8，从而减少了一些内存。
 - en: Anecdotally, we have noticed that performance gains don’t really start showing
     when using `TransformerEngine` until a large majority of the layers in the model
     are made up of those two layers to replace. As a result, only larger models have
     shown performance improvements when the number of parameters is around and upwards
     of a few billion.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 据我们观察，当模型中的大多数层由这两个层组成以进行替换时，使用 `TransformerEngine` 才会开始显示性能提升。因此，只有较大的模型在参数数量约为几十亿及以上时才显示出性能改进。
 - en: 'The `TransformerEngine` can receive many different arguments that customize
     how it performs FP8 calculations and what they do. A full list of the arguments
     is available below:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '`TransformerEngine` 可以接收许多不同的参数，定制它如何执行 FP8 计算以及它们的功能。下面是参数的完整列表：'
 - en: '`margin`: The margin to use for the gradient scaling.'
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`margin`：用于梯度缩放的边距。'
 - en: '`interval`: The interval to use for how often the scaling factor is recomputed.'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`interval`：用于重新计算缩放因子的间隔。'
 - en: '`fp8_format``: The format to use for the FP8 recipe. Must be one of` E4M3`or`HYBRID`.'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`fp8_format`：用于 FP8 配方的格式。必须是`E4M3`或`HYBRID`之一。'
 - en: '`amax_history_len`: The length of the history to use for the scaling factor
     computation'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`amax_history_len`：用于缩放因子计算的历史长度'
 - en: '`amax_compute_algo`: The algorithm to use for the scaling factor computation.
     Must be one of `max` or `most_recent`.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`amax_compute_algo`：用于缩放因子计算的算法。必须是`max`或`most_recent`之一。'
 - en: '`override_linear_precision`: Whether or not to execute `fprop`, `dgrad`, and
     `wgrad` GEMMS in higher precision.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`override_linear_precision`：是否在更高精度中执行 `fprop`、`dgrad` 和 `wgrad` GEMMS。'
 - en: You can customize each of these as part of [utils.FP8RecipeKwargs](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.FP8RecipeKwargs)
     to help optimize performance of your models.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以将这些参数作为 [utils.FP8RecipeKwargs](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.FP8RecipeKwargs)
+    的一部分进行定制，以帮助优化模型的性能。
 - en: If we notice in the chart mentioned earlier, TE simply casts the computation
     layers into FP8, while everything else is in FP32\. As a result this winds up
     utilizing the most memory but does so with the benefit of guaranteeing the least
     amount of loss in end accuracy during training.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们注意到前面提到的图表，TE 简单地将计算层转换为 FP8，而其他所有内容都是 FP32。因此，这最终利用了大部分内存，但在训练过程中保证了最少的最终准确性损失。
 - en: MS-AMP
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: MS-AMP
 - en: MS-AMP takes a different approach to `TransformersEngine` by providing three
     different optimization levels to convert more operations in FP8 or FP16.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: MS-AMP 通过提供三种不同的优化级别来采用不同的方法来使用 `TransformersEngine`，以将更多操作转换为 FP8 或 FP16。
 - en: The base optimization level (`O1`), passes communications of the weights (such
     as in DDP) in FP8, stores the weights of the model in FP16, and leaves the optimizer
     states in FP32\. The main benefit of this optimization level is that we can reduce
     the communication bandwidth by essentially half. Additionally, more GPU memory
     is saved due to 1/2 of everything being cast in FP8, and the weights being cast
     to FP16\. Notably, both the optimizer states remain in FP32.
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基本优化级别（`O1`）将权重的通信（如在DDP中）传递为FP8，在FP16中存储模型的权重，并将优化器状态保留在FP32中。这种优化级别的主要好处是我们可以将通信带宽减少一半。此外，由于一半的内容都是FP8，权重被转换为FP16，因此可以节省更多的GPU内存。值得注意的是，优化器状态仍保留在FP32中。
 - en: The second optimization level (`O2`) improves upon this by also reducing the
     precision of the optimizer states. One is in FP8 while the other is in FP16\.
     Generally it’s been shown that this will only provide a net-gain of no degraded
     end accuracy, increased training speed, and reduced memory as now every state
     is either in FP16 or FP8.
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 第二个优化级别（`O2`）通过降低优化器状态的精度来改进。一个是FP8，另一个是FP16。通常已经表明，这只会提供一个净增益，不会降低最终的准确性，提高训练速度，并减少内存，因为现在每个状态都是FP16或FP8。
 - en: Finally, MS-AMP has a third optimization level (`O3`) which helps during DDP
     scenarios such as DeepSpeed. The weights of the model in memory are fully cast
     to FP8, and the master weights are now stored in FP16\. This fully reduces memory
     by the highest factor as now not only is almost everything in FP8, only two states
     are left in FP16\. Currently, only DeepSpeed versions up through 0.9.2 are supported,
     so this capability is not included in the 🤗 Accelerate integration
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 最后，MS-AMP有第三个优化级别（`O3`），在DDP场景（如DeepSpeed）中有所帮助。模型的权重在内存中完全转换为FP8，主权重现在存储在FP16中。这样可以通过最高因子完全减少内存，因为现在几乎所有内容都是FP8，只有两个状态留在FP16中。目前，只支持DeepSpeed版本0.9.2及以下，因此这种能力不包括在🤗
+    Accelerate集成中。
 - en: Combining the two
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 结合两者
 - en: More experiments need to be performed but it’s been noted that combining both
     MS-AMP and TransformersEngine can lead to the highest throughput by relying on
     NVIDIA’s optimized FP8 operators and utilizing how MS-AMP reduces the memory overhead.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 需要进行更多实验，但已经注意到，结合MS-AMP和TransformersEngine可以依靠NVIDIA优化的FP8运算符以及利用MS-AMP减少内存开销来实现最高吞吐量。
