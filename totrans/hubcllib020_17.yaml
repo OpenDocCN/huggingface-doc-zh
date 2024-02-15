@@ -1,0 +1,484 @@
+- en: Manage huggingface_hub cache-system
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/huggingface_hub/guides/manage-cache](https://huggingface.co/docs/huggingface_hub/guides/manage-cache)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/entry/start.81f0ceaa.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/scheduler.6062bdaf.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/singletons.3c2729d2.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/paths.566d2d8a.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/entry/app.77e31cee.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/index.4bca734e.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/nodes/0.d6dfa8c0.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/nodes/11.958c5fd8.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/Tip.b9ac1f03.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/CodeBlock.fa01571c.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/Heading.723dceba.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understand caching
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Hugging Face Hub cache-system is designed to be the central cache shared
+    across libraries that depend on the Hub. It has been updated in v0.8.0 to prevent
+    re-downloading same files between revisions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The caching system is designed as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `<CACHE_DIR>` is usually your user’s home directory. However, it is customizable
+    with the `cache_dir` argument on all methods, or by specifying either `HF_HOME`
+    or `HF_HUB_CACHE` environment variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Models, datasets and spaces share a common root. Each of these repositories
+    contains the repository type, the namespace (organization or username) if it exists
+    and the repository name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is within these folders that all files will now be downloaded from the Hub.
+    Caching ensures that a file isn’t downloaded twice if it already exists and wasn’t
+    updated; but if it was updated, and you’re asking for the latest file, then it
+    will download the latest file (while keeping the previous file intact in case
+    you need it again).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In order to achieve this, all folders contain the same skeleton:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Each folder is designed to contain the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Refs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `refs` folder contains files which indicates the latest revision of the
+    given reference. For example, if we have previously fetched a file from the `main`
+    branch of a repository, the `refs` folder will contain a file named `main`, which
+    will itself contain the commit identifier of the current head.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the latest commit of `main` has `aaaaaa` as identifier, then it will contain
+    `aaaaaa`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If that same branch gets updated with a new commit, that has `bbbbbb` as an
+    identifier, then re-downloading a file from that reference will update the `refs/main`
+    file to contain `bbbbbb`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Blobs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `blobs` folder contains the actual files that we have downloaded. The name
+    of each file is their hash.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Snapshots
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `snapshots` folder contains symlinks to the blobs mentioned above. It is
+    itself made up of several folders: one per known revision!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the explanation above, we had initially fetched a file from the `aaaaaa`
+    revision, before fetching a file from the `bbbbbb` revision. In this situation,
+    we would now have two folders in the `snapshots` folder: `aaaaaa` and `bbbbbb`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In each of these folders, live symlinks that have the names of the files that
+    we have downloaded. For example, if we had downloaded the `README.md` file at
+    revision `aaaaaa`, we would have the following path:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: That `README.md` file is actually a symlink linking to the blob that has the
+    hash of the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'By creating the skeleton this way we open the mechanism to file sharing: if
+    the same file was fetched in revision `bbbbbb`, it would have the same hash and
+    the file would not need to be re-downloaded.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: .no_exist (advanced)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In addition to the `blobs`, `refs` and `snapshots` folders, you might also
+    find a `.no_exist` folder in your cache. This folder keeps track of files that
+    you’ve tried to download once but don’t exist on the Hub. Its structure is the
+    same as the `snapshots` folder with 1 subfolder per known revision:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unlike the `snapshots` folder, files are simple empty files (no symlinks). In
+    this example, the file `"config_that_does_not_exist.json"` does not exist on the
+    Hub for the revision `"aaaaaa"`. As it only stores empty files, this folder is
+    neglectable is term of disk usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So now you might wonder, why is this information even relevant? In some cases,
+    a framework tries to load optional files for a model. Saving the non-existence
+    of optional files makes it faster to load a model as it saves 1 HTTP call per
+    possible optional file. This is for example the case in `transformers` where each
+    tokenizer can support additional files. The first time you load the tokenizer
+    on your machine, it will cache which optional files exists (and which doesn’t)
+    to make the loading time faster for the next initializations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To test if a file is cached locally (without making any HTTP request), you can
+    use the [try_to_load_from_cache()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.try_to_load_from_cache)
+    helper. It will either return the filepath (if exists and cached), the object
+    `_CACHED_NO_EXIST` (if non-existence is cached) or `None` (if we don’t know).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: In practice
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In practice, your cache should look like the following tree:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Limitations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In order to have an efficient cache-system, `huggingface-hub` uses symlinks.
+    However, symlinks are not supported on all machines. This is a known limitation
+    especially on Windows. When this is the case, `huggingface_hub` do not use the
+    `blobs/` directory but directly stores the files in the `snapshots/` directory
+    instead. This workaround allows users to download and cache files from the Hub
+    exactly the same way. Tools to inspect and delete the cache (see below) are also
+    supported. However, the cache-system is less efficient as a single file might
+    be downloaded several times if multiple revisions of the same repo is downloaded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to benefit from the symlink-based cache-system on a Windows machine,
+    you either need to [activate Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
+    or to run Python as an administrator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When symlinks are not supported, a warning message is displayed to the user
+    to alert them they are using a degraded version of the cache-system. This warning
+    can be disabled by setting the `HF_HUB_DISABLE_SYMLINKS_WARNING` environment variable
+    to true.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Caching assets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In addition to caching files from the Hub, downstream libraries often requires
+    to cache other files related to HF but not handled directly by `huggingface_hub`
+    (example: file downloaded from GitHub, preprocessed data, logs,…). In order to
+    cache those files, called `assets`, one can use [cached_assets_path()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.cached_assets_path).
+    This small helper generates paths in the HF cache in a unified way based on the
+    name of the library requesting it and optionally on a namespace and a subfolder
+    name. The goal is to let every downstream libraries manage its assets its own
+    way (e.g. no rule on the structure) as long as it stays in the right assets folder.
+    Those libraries can then leverage tools from `huggingface_hub` to manage the cache,
+    in particular scanning and deleting parts of the assets from a CLI command.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[cached_assets_path()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.cached_assets_path)
+    is the recommended way to store assets but is not mandatory. If your library already
+    uses its own cache, feel free to use it!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assets in practice
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In practice, your assets cache should look like the following tree:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Scan your cache
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'At the moment, cached files are never deleted from your local directory: when
+    you download a new revision of a branch, previous files are kept in case you need
+    them again. Therefore it can be useful to scan your cache directory in order to
+    know which repos and revisions are taking the most disk space. `huggingface_hub`
+    provides an helper to do so that can be used via `huggingface-cli` or in a python
+    script.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scan cache from the terminal
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The easiest way to scan your HF cache-system is to use the `scan-cache` command
+    from `huggingface-cli` tool. This command scans the cache and prints a report
+    with information like repo id, repo type, disk usage, refs and full local path.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The snippet below shows a scan report in a folder in which 4 models and 2 datasets
+    are cached.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: To get a more detailed report, use the `--verbose` option. For each repo, you
+    get a list of all revisions that have been downloaded. As explained above, the
+    files that don’t change between 2 revisions are shared thanks to the symlinks.
+    This means that the size of the repo on disk is expected to be less than the sum
+    of the size of each of its revisions. For example, here `bert-base-cased` has
+    2 revisions of 1.4G and 1.5G but the total disk usage is only 1.9G.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Grep example
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Since the output is in tabular format, you can combine it with any `grep`-like
+    tools to filter the entries. Here is an example to filter only revisions from
+    the “t5-small” model on a Unix-based machine.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Scan cache from Python
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For a more advanced usage, use [scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir)
+    which is the python utility called by the CLI tool.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can use it to get a detailed report structured around 4 dataclasses:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo):
+    complete report returned by [scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[CachedRepoInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRepoInfo):
+    information about a cached repo'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[CachedRevisionInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRevisionInfo):
+    information about a cached revision (e.g. “snapshot”) inside a repo'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[CachedFileInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedFileInfo):
+    information about a cached file in a snapshot'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Here is a simple usage example. See reference for details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Clean your cache
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Scanning your cache is interesting but what you really want to do next is usually
+    to delete some portions to free up some space on your drive. This is possible
+    using the `delete-cache` CLI command. One can also programmatically use the [delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions)
+    helper from [HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo)
+    object returned when scanning the cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Delete strategy
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To delete some cache, you need to pass a list of revisions to delete. The tool
+    will define a strategy to free up the space based on this list. It returns a [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)
+    object that describes which files and folders will be deleted. The [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)
+    allows give you how much space is expected to be freed. Once you agree with the
+    deletion, you must execute it to make the deletion effective. In order to avoid
+    discrepancies, you cannot edit a strategy object manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The strategy to delete revisions is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: the `snapshot` folder containing the revision symlinks is deleted.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: blobs files that are targeted only by revisions to be deleted are deleted as
+    well.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: if a revision is linked to 1 or more `refs`, references are deleted.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: if all revisions from a repo are deleted, the entire cached repository is deleted.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Revision hashes are unique across all repositories. This means you don’t need
+    to provide any `repo_id` or `repo_type` when removing revisions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a revision is not found in the cache, it will be silently ignored. Besides,
+    if a file or folder cannot be found while trying to delete it, a warning will
+    be logged but no error is thrown. The deletion continues for other paths contained
+    in the [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)
+    object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Clean cache from the terminal
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The easiest way to delete some revisions from your HF cache-system is to use
+    the `delete-cache` command from `huggingface-cli` tool. The command has two modes.
+    By default, a TUI (Terminal User Interface) is displayed to the user to select
+    which revisions to delete. This TUI is currently in beta as it has not been tested
+    on all platforms. If the TUI doesn’t work on your machine, you can disable it
+    using the `--disable-tui` flag.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the TUI
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'This is the default mode. To use it, you first need to install extra dependencies
+    by running the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then run the command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You should now see a list of revisions that you can select/deselect:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/aafc157d3819eea90ace56496a84b8e6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Instructions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Press keyboard arrow keys `<up>` and `<down>` to move the cursor.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Press `<space>` to toggle (select/unselect) an item.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When a revision is selected, the first line is updated to show you how much
+    space will be freed.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Press `<enter>` to confirm your selection.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you want to cancel the operation and quit, you can select the first item
+    (“None of the following”). If this item is selected, the delete process will be
+    cancelled, no matter what other items are selected. Otherwise you can also press
+    `<ctrl+c>` to quit the TUI.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Once you’ve selected the revisions you want to delete and pressed `<enter>`,
+    a last confirmation message will be prompted. Press `<enter>` again and the deletion
+    will be effective. If you want to cancel, enter `n`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Without TUI
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: As mentioned above, the TUI mode is currently in beta and is optional. It may
+    be the case that it doesn’t work on your machine or that you don’t find it convenient.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another approach is to use the `--disable-tui` flag. The process is very similar
+    as you will be asked to manually review the list of revisions to delete. However,
+    this manual step will not take place in the terminal directly but in a temporary
+    file generated on the fly and that you can manually edit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This file has all the instructions you need in the header. Open it in your favorite
+    text editor. To select/deselect a revision, simply comment/uncomment it with a
+    `#`. Once the manual review is done and the file is edited, you can save it. Go
+    back to your terminal and press `<enter>`. By default it will compute how much
+    space would be freed with the updated list of revisions. You can continue to edit
+    the file or confirm with `"y"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Example of command file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Clean cache from Python
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For more flexibility, you can also use the [delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions)
+    method programmatically. Here is a simple example. See reference for details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE

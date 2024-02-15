@@ -1,0 +1,266 @@
+- en: Inference Endpoints
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/huggingface_hub/guides/inference_endpoints](https://huggingface.co/docs/huggingface_hub/guides/inference_endpoints)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/entry/start.81f0ceaa.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/scheduler.6062bdaf.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/singletons.3c2729d2.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/paths.566d2d8a.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/entry/app.77e31cee.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/index.4bca734e.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/nodes/0.d6dfa8c0.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/nodes/9.84cd9d48.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/Tip.b9ac1f03.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/CodeBlock.fa01571c.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/Heading.723dceba.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inference Endpoints provides a secure production solution to easily deploy any
+    `transformers`, `sentence-transformers`, and `diffusers` models on a dedicated
+    and autoscaling infrastructure managed by Hugging Face. An Inference Endpoint
+    is built from a model from the [Hub](https://huggingface.co/models). In this guide,
+    we will learn how to programmatically manage Inference Endpoints with `huggingface_hub`.
+    For more information about the Inference Endpoints product itself, check out its
+    [official documentation](https://huggingface.co/docs/inference-endpoints/index).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide assumes `huggingface_hub` is correctly installed and that your machine
+    is logged in. Check out the [Quick Start guide](https://huggingface.co/docs/huggingface_hub/quick-start#quickstart)
+    if that’s not the case yet. The minimal version supporting Inference Endpoints
+    API is `v0.19.0`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create an Inference Endpoint
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The first step is to create an Inference Endpoint using [create_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_inference_endpoint):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, we created a `protected` Inference Endpoint named `"my-endpoint-name"`,
+    to serve [gpt2](https://huggingface.co/gpt2) for `text-generation`. A `protected`
+    Inference Endpoint means your token is required to access the API. We also need
+    to provide additional information to configure the hardware requirements, such
+    as vendor, region, accelerator, instance type, and size. You can check out the
+    list of available resources [here](https://api.endpoints.huggingface.cloud/#/v2%3A%3Aprovider/list_vendors).
+    Alternatively, you can create an Inference Endpoint manually using the [Web interface](https://ui.endpoints.huggingface.co/new)
+    for convenience. Refer to this [guide](https://huggingface.co/docs/inference-endpoints/guides/advanced)
+    for details on advanced settings and their usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The value returned by [create_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_inference_endpoint)
+    is an [InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+    object:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: It’s a dataclass that holds information about the endpoint. You can access important
+    attributes such as `name`, `repository`, `status`, `task`, `created_at`, `updated_at`,
+    etc. If you need it, you can also access the raw response from the server with
+    `endpoint.raw`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once your Inference Endpoint is created, you can find it on your [personal dashboard](https://ui.endpoints.huggingface.co/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/96374d759ddf771bc762082295683dbf.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Using a custom image
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'By default the Inference Endpoint is built from a docker image provided by
+    Hugging Face. However, it is possible to specify any docker image using the `custom_image`
+    parameter. A common use case is to run LLMs using the [text-generation-inference](https://github.com/huggingface/text-generation-inference)
+    framework. This can be done like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The value to pass as `custom_image` is a dictionary containing a url to the
+    docker container and configuration to run it. For more details about it, checkout
+    the [Swagger documentation](https://api.endpoints.huggingface.cloud/#/v2%3A%3Aendpoint/create_endpoint).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Get or list existing Inference Endpoints
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In some cases, you might need to manage Inference Endpoints you created previously.
+    If you know the name, you can fetch it using [get_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_inference_endpoint),
+    which returns an [InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+    object. Alternatively, you can use [list_inference_endpoints()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_inference_endpoints)
+    to retrieve a list of all Inference Endpoints. Both methods accept an optional
+    `namespace` parameter. You can set the `namespace` to any organization you are
+    a part of. Otherwise, it defaults to your username.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Check deployment status
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In the rest of this guide, we will assume that we have a [InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+    object called `endpoint`. You might have noticed that the endpoint has a `status`
+    attribute of type [InferenceEndpointStatus](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpointStatus).
+    When the Inference Endpoint is deployed and accessible, the status should be `"running"`
+    and the `url` attribute is set:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Before reaching a `"running"` state, the Inference Endpoint typically goes
+    through an `"initializing"` or `"pending"` phase. You can fetch the new state
+    of the endpoint by running [fetch()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.fetch).
+    Like every other method from [InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+    that makes a request to the server, the internal attributes of `endpoint` are
+    mutated in place:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Instead of fetching the Inference Endpoint status while waiting for it to run,
+    you can directly call [wait()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.wait).
+    This helper takes as input a `timeout` and a `fetch_every` parameter (in seconds)
+    and will block the thread until the Inference Endpoint is deployed. Default values
+    are respectively `None` (no timeout) and `5` seconds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: If `timeout` is set and the Inference Endpoint takes too much time to load,
+    a `InferenceEndpointTimeoutError` timeout error is raised.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Run inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once your Inference Endpoint is up and running, you can finally run inference
+    on it!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+    has two properties `client` and `async_client` returning respectively an [InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient)
+    and an [AsyncInferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.AsyncInferenceClient)
+    objects.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If the Inference Endpoint is not running, an [InferenceEndpointError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpointError)
+    exception is raised:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: For more details about how to use the [InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient),
+    check out the [Inference guide](../guides/inference).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Manage lifecycle
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we saw how to create an Inference Endpoint and run inference on it,
+    let’s see how to manage its lifecycle.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this section, we will see methods like [pause()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.pause),
+    [resume()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.resume),
+    [scale_to_zero()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.scale_to_zero),
+    [update()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.update)
+    and [delete()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.delete).
+    All of those methods are aliases added to [InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+    for convenience. If you prefer, you can also use the generic methods defined in
+    `HfApi`: [pause_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.pause_inference_endpoint),
+    [resume_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.resume_inference_endpoint),
+    [scale_to_zero_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.scale_to_zero_inference_endpoint),
+    [update_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.update_inference_endpoint),
+    and [delete_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.delete_inference_endpoint).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pause or scale to zero
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To reduce costs when your Inference Endpoint is not in use, you can choose to
+    either pause it using [pause()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.pause)
+    or scale it to zero using [scale_to_zero()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.scale_to_zero).
+  prefs: []
+  type: TYPE_NORMAL
+- en: An Inference Endpoint that is *paused* or *scaled to zero* doesn’t cost anything.
+    The difference between those two is that a *paused* endpoint needs to be explicitly
+    *resumed* using [resume()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.resume).
+    On the contrary, a *scaled to zero* endpoint will automatically start if an inference
+    call is made to it, with an additional cold start delay. An Inference Endpoint
+    can also be configured to scale to zero automatically after a certain period of
+    inactivity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Update model or hardware requirements
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In some cases, you might also want to update your Inference Endpoint without
+    creating a new one. You can either update the hosted model or the hardware requirements
+    to run the model. You can do this using [update()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.update):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Delete the endpoint
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Finally if you won’t use the Inference Endpoint anymore, you can simply call
+    `~InferenceEndpoint.delete()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is a non-revertible action that will completely remove the endpoint, including
+    its configuration, logs and usage metrics. You cannot restore a deleted Inference
+    Endpoint.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An end-to-end example
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'A typical use case of Inference Endpoints is to process a batch of jobs at
+    once to limit the infrastructure costs. You can automate this process using what
+    we saw in this guide:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or if your Inference Endpoint already exists and is paused:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE

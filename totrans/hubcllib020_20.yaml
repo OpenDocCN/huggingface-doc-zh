@@ -1,0 +1,337 @@
+- en: Integrate any ML framework with the Hub
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/huggingface_hub/guides/integrations](https://huggingface.co/docs/huggingface_hub/guides/integrations)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/entry/start.81f0ceaa.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/scheduler.6062bdaf.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/singletons.3c2729d2.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/paths.566d2d8a.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/entry/app.77e31cee.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/index.4bca734e.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/nodes/0.d6dfa8c0.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/nodes/10.bdc6e6c8.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/CodeBlock.fa01571c.js">
+    <link rel="modulepreload" href="/docs/huggingface_hub/v0.20.3/en/_app/immutable/chunks/Heading.723dceba.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Hugging Face Hub makes hosting and sharing models with the community easy.
+    It supports [dozens of libraries](https://huggingface.co/docs/hub/models-libraries)
+    in the Open Source ecosystem. We are always working on expanding this support
+    to push collaborative Machine Learning forward. The `huggingface_hub` library
+    plays a key role in this process, allowing any Python script to easily push and
+    load files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are four main ways to integrate a library with the Hub:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Push to Hub:** implement a method to upload a model to the Hub. This includes
+    the model weights, as well as [the model card](https://huggingface.co/docs/huggingface_hub/how-to-model-cards)
+    and any other relevant information or data necessary to run the model (for example,
+    training logs). This method is often called `push_to_hub()`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Download from Hub:** implement a method to load a model from the Hub. The
+    method should download the model configuration/weights and load the model. This
+    method is often called `from_pretrained` or `load_from_hub()`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Inference API:** use our servers to run inference on models supported by
+    your library for free.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Widgets:** display a widget on the landing page of your models on the Hub.
+    It allows users to quickly try a model from the browser.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In this guide, we will focus on the first two topics. We will present the two
+    main approaches you can use to integrate a library, with their advantages and
+    drawbacks. Everything is summarized at the end of the guide to help you choose
+    between the two. Please keep in mind that these are only guidelines that you are
+    free to adapt to you requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you are interested in Inference and Widgets, you can follow [this guide](https://huggingface.co/docs/hub/models-adding-libraries#set-up-the-inference-api).
+    In both cases, you can reach out to us if you are integrating a library with the
+    Hub and want to be listed [in our docs](https://huggingface.co/docs/hub/models-libraries).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A flexible approach: helpers'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The first approach to integrate a library to the Hub is to actually implement
+    the `push_to_hub` and `from_pretrained` methods by yourself. This gives you full
+    flexibility on which files you need to upload/download and how to handle inputs
+    specific to your framework. You can refer to the two [upload files](./upload)
+    and [download files](./download) guides to learn more about how to do that. This
+    is, for example how the FastAI integration is implemented (see [push_to_hub_fastai()](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.push_to_hub_fastai)
+    and [from_pretrained_fastai()](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.from_pretrained_fastai)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Implementation can differ between libraries, but the workflow is often similar.
+  prefs: []
+  type: TYPE_NORMAL
+- en: from_pretrained
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'This is how a `from_pretrained` method usually look like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: push_to_hub
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `push_to_hub` method often requires a bit more complexity to handle repo
+    creation, generate the model card and save weights. A common approach is to save
+    all of these files in a temporary folder, upload it and then delete it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is of course only an example. If you are interested in more complex manipulations
+    (delete remote files, upload weights on the fly, persist weights locally, etc.)
+    please refer to the [upload files](./upload) guide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Limitations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'While being flexible, this approach has some drawbacks, especially in terms
+    of maintenance. Hugging Face users are often used to additional features when
+    working with `huggingface_hub`. For example, when loading files from the Hub,
+    it is common to offer parameters like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`token`: to download from a private repo'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`revision`: to download from a specific branch'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cache_dir`: to cache files in a specific directory'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`force_download`/`resume_download`/`local_files_only`: to reuse the cache or
+    not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`api_endpoint`/`proxies`: configure HTTP session'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'When pushing models, similar parameters are supported:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`commit_message`: custom commit message'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`private`: create a private repo if missing'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`create_pr`: create a PR instead of pushing to `main`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`branch`: push to a branch instead of the `main` branch'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`allow_patterns`/`ignore_patterns`: filter which files to upload'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`token`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`api_endpoint`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: …
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All of these parameters can be added to the implementations we saw above and
+    passed to the `huggingface_hub` methods. However, if a parameter changes or a
+    new feature is added, you will need to update your package. Supporting those parameters
+    also means more documentation to maintain on your side. To see how to mitigate
+    these limitations, let’s jump to our next section **class inheritance**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A more complex approach: class inheritance'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As we saw above, there are two main methods to include in your library to integrate
+    it with the Hub: upload files (`push_to_hub`) and download files (`from_pretrained`).
+    You can implement those methods by yourself but it comes with caveats. To tackle
+    this, `huggingface_hub` provides a tool that uses class inheritance. Let’s see
+    how it works!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In a lot of cases, a library already implements its model using a Python class.
+    The class contains the properties of the model and methods to load, run, train,
+    and evaluate it. Our approach is to extend this class to include upload and download
+    features using mixins. A [Mixin](https://stackoverflow.com/a/547714) is a class
+    that is meant to extend an existing class with a set of specific features using
+    multiple inheritance. `huggingface_hub` provides its own mixin, the [ModelHubMixin](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.ModelHubMixin).
+    The key here is to understand its behavior and how to customize it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The [ModelHubMixin](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.ModelHubMixin)
+    class implements 3 *public* methods (`push_to_hub`, `save_pretrained` and `from_pretrained`).
+    Those are the methods that your users will call to load/save models with your
+    library. [ModelHubMixin](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.ModelHubMixin)
+    also defines 2 *private* methods (`_save_pretrained` and `_from_pretrained`).
+    Those are the ones you must implement. So to integrate your library, you should:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make your Model class inherit from [ModelHubMixin](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.ModelHubMixin).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Implement the private methods:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[_save_pretrained()](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.ModelHubMixin._save_pretrained):
+    method taking as input a path to a directory and saving the model to it. You must
+    write all the logic to dump your model in this method: model card, model weights,
+    configuration files, training logs, and figures. Any relevant information for
+    this model must be handled by this method. [Model Cards](https://huggingface.co/docs/hub/model-cards)
+    are particularly important to describe your model. Check out [our implementation
+    guide](./model-cards) for more details.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[_from_pretrained()](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.ModelHubMixin._from_pretrained):
+    **class method** taking as input a `model_id` and returning an instantiated model.
+    The method must download the relevant files and load them.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You are done!
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The advantage of using [ModelHubMixin](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.ModelHubMixin)
+    is that once you take care of the serialization/loading of the files, you are
+    ready to go. You don’t need to worry about stuff like repo creation, commits,
+    PRs, or revisions. All of this is handled by the mixin and is available to your
+    users. The Mixin also ensures that public methods are well documented and type
+    annotated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A concrete example: PyTorch'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A good example of what we saw above is [PyTorchModelHubMixin](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.PyTorchModelHubMixin),
+    our integration for the PyTorch framework. This is a ready-to-use integration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to use it?
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Here is how any user can load/save a PyTorch model from/to the Hub:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Implementation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The implementation is actually very straightforward, and the full implementation
+    can be found [here](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/hub_mixin.py).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, inherit your class from `ModelHubMixin`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Implement the `_save_pretrained` method:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Implement the `_from_pretrained` method:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: And that’s it! Your library now enables users to upload and download files to
+    and from the Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quick comparison
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s quickly sum up the two approaches we saw with their advantages and drawbacks.
+    The table below is only indicative. Your framework might have some specificities
+    that you need to address. This guide is only here to give guidelines and ideas
+    on how to handle integration. In any case, feel free to contact us if you have
+    any questions!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Integration | Using helpers | Using [ModelHubMixin](/docs/huggingface_hub/v0.20.3/en/package_reference/mixins#huggingface_hub.ModelHubMixin)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| User experience | `model = load_from_hub(...)` `push_to_hub(model, ...)`
+    | `model = MyModel.from_pretrained(...)` `model.push_to_hub(...)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Flexibility | Very flexible. You fully control the implementation. | Less
+    flexible. Your framework must have a model class. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Maintenance | More maintenance to add support for configuration, and new
+    features. Might also require fixing issues reported by users. | Less maintenance
+    as most of the interactions with the Hub are implemented in `huggingface_hub`.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Documentation / Type annotation | To be written manually. | Partially handled
+    by `huggingface_hub`. |'
+  prefs: []
+  type: TYPE_TB
