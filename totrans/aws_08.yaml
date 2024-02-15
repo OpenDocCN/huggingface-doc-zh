@@ -1,247 +1,360 @@
 - en: Fine-tune BERT for Text Classification on AWS Trainium
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在AWS Trainium上为文本分类微调BERT
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/tutorials/fine_tune_bert](https://huggingface.co/docs/optimum-neuron/tutorials/fine_tune_bert)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/optimum-neuron/tutorials/fine_tune_bert](https://huggingface.co/docs/optimum-neuron/tutorials/fine_tune_bert)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '*There is a notebook version of that tutorial [here](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-classification/notebook.ipynb)*.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '*这个教程有一个笔记本版本[在这里](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-classification/notebook.ipynb)*。'
 - en: This tutorial will help you to get started with [AWS Trainium](https://aws.amazon.com/machine-learning/trainium/?nc1=h_ls)
     and Hugging Face Transformers. It will cover how to set up a Trainium instance
     on AWS, load & fine-tune a transformers model for text-classification
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个教程将帮助您开始使用[AWS Trainium](https://aws.amazon.com/machine-learning/trainium/?nc1=h_ls)和Hugging
+    Face Transformers。它将涵盖如何在AWS上设置Trainium实例，加载和微调一个用于文本分类的transformers模型
 - en: 'You will learn how to:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将学习如何：
 - en: '[Setup AWS environment](#1-setup-aws-environment)'
+  id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[设置AWS环境](#1-setup-aws-environment)'
 - en: '[Load and process the dataset](#2-load-and-process-the-dataset)'
+  id: totrans-7
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[加载和处理数据集](#2-load-and-process-the-dataset)'
 - en: '[Fine-tune BERT using Hugging Face Transformers and Optimum Neuron](#3-fine-tune-bert-using-hugging-face-transformers)'
+  id: totrans-8
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[使用Hugging Face Transformers和Optimum Neuron微调BERT](#3-fine-tune-bert-using-hugging-face-transformers)'
 - en: Before we can start, make sure you have a [Hugging Face Account](https://huggingface.co/join)
     to save artifacts and experiments.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您有一个[Hugging Face账户](https://huggingface.co/join)以保存工件和实验。
 - en: 'Quick intro: AWS Trainium'
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 快速介绍：AWS Trainium
 - en: '[AWS Trainium (Trn1)](https://aws.amazon.com/de/ec2/instance-types/trn1/) is
     a purpose-built EC2 for deep learning (DL) training workloads. Trainium is the
     successor of [AWS Inferentia](https://aws.amazon.com/ec2/instance-types/inf1/?nc1=h_ls)
     focused on high-performance training workloads claiming up to 50% cost-to-train
     savings over comparable GPU-based instances.'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '[AWS Trainium (Trn1)](https://aws.amazon.com/de/ec2/instance-types/trn1/)是专为深度学习（DL）训练工作负载而构建的EC2。Trainium是[AWS
+    Inferentia](https://aws.amazon.com/ec2/instance-types/inf1/?nc1=h_ls)的继任者，专注于高性能训练工作负载，声称与可比较的基于GPU的实例相比，训练成本节省高达50%。'
 - en: Trainium has been optimized for training natural language processing, computer
     vision, and recommender models used. The accelerator supports a wide range of
     data types, including FP32, TF32, BF16, FP16, UINT8, and configurable FP8.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: Trainium已经针对训练自然语言处理、计算机视觉和推荐模型进行了优化。该加速器支持广泛的数据类型，包括FP32、TF32、BF16、FP16、UINT8和可配置的FP8。
 - en: 'The biggest Trainium instance, the `trn1.32xlarge` comes with over 500GB of
     memory, making it easy to fine-tune ~10B parameter models on a single instance.
     Below you will find an overview of the available instance types. More details
     [here](https://aws.amazon.com/de/ec2/instance-types/trn1/#Product_details):'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 最大的Trainium实例，`trn1.32xlarge`拥有超过500GB的内存，使得在单个实例上轻松微调约10B参数模型变得容易。下面是可用实例类型的概述。更多细节[在这里](https://aws.amazon.com/de/ec2/instance-types/trn1/#Product_details)：
 - en: '| instance size | accelerators | accelerator memory | vCPU | CPU Memory | price
     per hour |'
+  id: totrans-14
   prefs: []
   type: TYPE_TB
+  zh: '| 实例大小 | 加速器 | 加速器内存 | vCPU | CPU内存 | 每小时价格 |'
 - en: '| --- | --- | --- | --- | --- | --- |'
+  id: totrans-15
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- |'
 - en: '| trn1.2xlarge | 1 | 32 | 8 | 32 | $1.34 |'
+  id: totrans-16
   prefs: []
   type: TYPE_TB
+  zh: '| trn1.2xlarge | 1 | 32 | 8 | 32 | $1.34 |'
 - en: '| trn1.32xlarge | 16 | 512 | 128 | 512 | $21.50 |'
+  id: totrans-17
   prefs: []
   type: TYPE_TB
+  zh: '| trn1.32xlarge | 16 | 512 | 128 | 512 | $21.50 |'
 - en: '| trn1n.32xlarge (2x bandwidth) | 16 | 512 | 128 | 512 | $24.78 |'
+  id: totrans-18
   prefs: []
   type: TYPE_TB
+  zh: '| trn1n.32xlarge (2x bandwidth) | 16 | 512 | 128 | 512 | $24.78 |'
 - en: '* * *'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '* * *'
 - en: Now we know what Trainium offers, let’s get started. 🚀
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们知道Trainium提供了什么，让我们开始吧。🚀
 - en: '*Note: This tutorial was created on a trn1.2xlarge AWS EC2 Instance.*'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：这个教程是在一个trn1.2xlarge的AWS EC2实例上创建的。*'
 - en: 1\. Setup AWS environment
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 1\. 设置AWS环境
 - en: In this example, we will use the `trn1.2xlarge` instance on AWS with 1 Accelerator,
     including two Neuron Cores and the [Hugging Face Neuron Deep Learning AMI](https://aws.amazon.com/marketplace/pp/prodview-gr3e6yiscria2).
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，我们将在AWS上使用`trn1.2xlarge`实例，包括1个加速器，包括两个Neuron Cores和[Hugging Face Neuron
+    Deep Learning AMI](https://aws.amazon.com/marketplace/pp/prodview-gr3e6yiscria2)。
 - en: This blog post doesn’t cover how to create the instance in detail. You can check
     out my previous blog about [“Setting up AWS Trainium for Hugging Face Transformers”](https://www.philschmid.de/setup-aws-trainium),
     which includes a step-by-step guide on setting up the environment.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 这篇博文不详细介绍如何创建实例。您可以查看我的之前关于[“为Hugging Face Transformers设置AWS Trainium”](https://www.philschmid.de/setup-aws-trainium)的博客，其中包括关于设置环境的逐步指南。
 - en: Once the instance is up and running, we can ssh into it. But instead of developing
     inside a terminal we want to use a `Jupyter` environment, which we can use for
     preparing our dataset and launching the training. For this, we need to add a port
     for forwarding in the `ssh` command, which will tunnel our localhost traffic to
     the Trainium instance.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦实例启动运行，我们可以ssh进入它。但是，我们不想在终端内开发，而是想使用一个`Jupyter`环境，我们可以用来准备数据集和启动训练。为此，我们需要在`ssh`命令中添加一个用于转发的端口，这将把我们的本地主机流量隧道到Trainium实例。
 - en: '[PRE0]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: We can now start our **`jupyter`** server.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们现在可以启动我们的**`jupyter`**服务器。
 - en: '[PRE1]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: You should see a familiar **`jupyter`** output with a URL to the notebook.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应该看到一个熟悉的**`jupyter`**输出，其中包含一个指向笔记本的URL。
 - en: '**`http://localhost:8080/?token=8c1739aff1755bd7958c4cfccc8d08cb5da5234f61f129a9`**'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '**`http://localhost:8080/?token=8c1739aff1755bd7958c4cfccc8d08cb5da5234f61f129a9`**'
 - en: We can click on it, and a **`jupyter`** environment opens in our local browser.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以点击它，在我们的本地浏览器中打开一个**`jupyter`**环境。
 - en: '![jupyter.webp](../Images/f3e7326719a8cc7f67122b89fb3e1dc1.png)'
+  id: totrans-32
   prefs: []
   type: TYPE_IMG
+  zh: '![jupyter.webp](../Images/f3e7326719a8cc7f67122b89fb3e1dc1.png)'
 - en: We are going to use the Jupyter environment only for preparing the dataset and
     then `torchrun` for launching our training script on both neuron cores for distributed
     training. Lets create a new notebook and get started.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将仅使用Jupyter环境准备数据集，然后使用`torchrun`在两个Neuron Cores上启动我们的训练脚本进行分布式训练。让我们创建一个新的笔记本并开始吧。
 - en: 2\. Load and process the dataset
+  id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 2\. 加载和处理数据集
 - en: 'We are training a Text Classification model on the [emotion](https://huggingface.co/datasets/philschmid/emotion)
     dataset to keep the example straightforward. The `emotion` is a dataset of English
     Twitter messages with six basic emotions: anger, fear, joy, love, sadness, and
     surprise.'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们正在对[情感](https://huggingface.co/datasets/philschmid/emotion)数据集上的文本分类模型进行训练，以保持示例简单。`emotion`是一个包含六种基本情绪（愤怒、恐惧、喜悦、爱、悲伤和惊讶）的英文Twitter消息数据集。
 - en: We will use the `load_dataset()` method from the [🤗 Datasets](https://huggingface.co/docs/datasets/index)
     library to load the `emotion`.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将使用[🤗 Datasets](https://huggingface.co/docs/datasets/index)库中的`load_dataset()`方法加载`emotion`。
 - en: '[PRE2]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Let’s check out an example of the dataset.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一个数据集的示例。
 - en: '[PRE3]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: We must convert our “Natural Language” to token IDs to train our model. This
     is done by a Tokenizer, which tokenizes the inputs (including converting the tokens
     to their corresponding IDs in the pre-trained vocabulary). if you want to learn
     more about this, out [chapter 6](https://huggingface.co/course/chapter6/1?fw=pt)
     of the [Hugging Face Course](https://huggingface.co/course/chapter1/1).
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们必须将我们的“自然语言”转换为标记ID以训练我们的模型。这是通过一个分词器完成的，它对输入进行分词（包括将标记转换为预训练词汇表中对应的ID）。如果您想了解更多信息，请查看[Hugging
+    Face课程](https://huggingface.co/course/chapter1/1)中的[第6章](https://huggingface.co/course/chapter6/1?fw=pt)。
 - en: Our Neuron Accelerator expects a fixed shape of inputs. We need to truncate
     or pad all samples to the same length.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们的Neuron加速器期望输入具有固定的形状。我们需要将所有样本截断或填充到相同的长度。
 - en: '[PRE4]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 3\. Fine-tune BERT using Hugging Face Transformers
+  id: totrans-43
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 3. 使用Hugging Face Transformers微调BERT
 - en: Normally you would use the [Trainer](https://huggingface.co/docs/transformers/v4.19.4/en/main_classes/trainer#transformers.Trainer)
     and [TrainingArguments](https://huggingface.co/docs/transformers/v4.19.4/en/main_classes/trainer#transformers.TrainingArguments)
     to fine-tune PyTorch-based transformer models.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常情况下，您会使用[Trainer](https://huggingface.co/docs/transformers/v4.19.4/en/main_classes/trainer#transformers.Trainer)和[TrainingArguments](https://huggingface.co/docs/transformers/v4.19.4/en/main_classes/trainer#transformers.TrainingArguments)来微调基于PyTorch的transformer模型。
 - en: But together with AWS, we have developed a [NeuronTrainer](https://huggingface.co/docs/optimum-neuron/package_reference/trainer)
     to improve performance, robustness, and safety when training on Trainium or Inferentia2
     instances. The `NeuronTrainer` also comes with a [model cache](https://www.notion.so/Getting-started-with-AWS-Trainium-and-Hugging-Face-Transformers-8428c72556194aed9c393de101229dcf),
     which allows us to use precompiled models and configuration from Hugging Face
     Hub to skip the compilation step, which would be needed at the beginning of training.
     This can reduce the training time by ~3x.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，与AWS一起，我们开发了一个[NeuronTrainer](https://huggingface.co/docs/optimum-neuron/package_reference/trainer)，以提高在Trainium或Inferentia2实例上训练时的性能、稳健性和安全性。`NeuronTrainer`还配备了一个[模型缓存](https://www.notion.so/Getting-started-with-AWS-Trainium-and-Hugging-Face-Transformers-8428c72556194aed9c393de101229dcf)，允许我们使用Hugging
+    Face Hub中的预编译模型和配置，跳过训练开始时需要的编译步骤。这可以将训练时间缩短约3倍。
 - en: The `NeuronTrainer` is part of the `optimum-neuron` library and can be used
     as a 1-to-1 replacement for the `Trainer`. You only have to adjust the import
     in your training script.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '`NeuronTrainer`是`optimum-neuron`库的一部分，可以作为`Trainer`的一对一替代品使用。您只需调整训练脚本中的导入即可。'
 - en: '[PRE5]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: We prepared a simple [train.py](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-classification/scripts/train.py)
     training script based on the [“Getting started with Pytorch 2.0 and Hugging Face
     Transformers”](https://www.philschmid.de/getting-started-pytorch-2-0-transformers#3-fine-tune--evaluate-bert-model-with-the-hugging-face-trainer)
     blog post with the `NeuronTrainer`. Below is an excerpt
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们准备了一个简单的[train.py](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-classification/scripts/train.py)训练脚本，基于[“Getting
+    started with Pytorch 2.0 and Hugging Face Transformers”](https://www.philschmid.de/getting-started-pytorch-2-0-transformers#3-fine-tune--evaluate-bert-model-with-the-hugging-face-trainer)博客文章，使用`NeuronTrainer`。以下是摘录
 - en: '[PRE6]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: We can load the training script into our environment using the `wget` command
     or manually copy it into the notebook from [here](https://github.com/huggingface/optimum-neuron/blob/notebooks/text-classification/scripts/train.py).
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以使用`wget`命令将训练脚本加载到我们的环境中，也可以从[这里](https://github.com/huggingface/optimum-neuron/blob/notebooks/text-classification/scripts/train.py)手动复制到笔记本中。
 - en: '[PRE7]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: We will use `torchrun` to launch our training script on both neuron cores for
     distributed training. `torchrun` is a tool that automatically distributes a PyTorch
     model across multiple accelerators. We can pass the number of accelerators as
     `nproc_per_node` arguments alongside our hyperparameters.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将使用`torchrun`在两个神经元核心上启动我们的训练脚本进行分布式训练。`torchrun`是一个工具，可以自动将PyTorch模型分布到多个加速器上。我们可以在超参数旁边传递加速器数量作为`nproc_per_node`参数。
 - en: 'We’ll use the following command to launch training:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将使用以下命令启动训练：
 - en: '[PRE8]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '***Note**: If you see bad, bad accuracy, you might want to deactivate `bf16`
     for now.*'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: '***注意**：如果您看到糟糕的准确率，您可能希望暂时停用`bf16`。*'
 - en: After 9 minutes the training was completed and achieved an excellent f1 score
     of `0.914`.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 经过9分钟的训练，获得了出色的`0.914`的f1分数。
 - en: '[PRE9]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Last but not least, terminate the EC2 instance to avoid unnecessary charges.
     Looking at the price-performance, our training only cost **`20ct`** (**`1.34$/h
     * 0.15h = 0.20$`**)
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，终止EC2实例以避免不必要的费用。从性价比来看，我们的训练只花费了**`20ct`**（**`1.34$/h * 0.15h = 0.20$`**）
