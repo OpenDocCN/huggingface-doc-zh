@@ -1,0 +1,306 @@
+- en: Building a Vanilla JavaScript Application
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers.js/tutorials/vanilla-js](https://huggingface.co/docs/transformers.js/tutorials/vanilla-js)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers.js/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/entry/start.d68a6d16.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/scheduler.b108d059.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/singletons.e4b794f0.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/paths.0114e475.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/entry/app.c6513cb2.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/index.008de539.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/nodes/0.7513fd35.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/nodes/29.69fc24bb.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/Tip.aeb15ab7.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/CodeBlock.3968c746.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/Heading.88bfeb84.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this tutorial, you’ll build a simple web application that detects objects
+    in images using Transformers.js! To follow along, all you need is a code editor,
+    a browser, and a simple server (e.g., VS Code Live Server).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s how it works: the user clicks “Upload image” and selects an image using
+    an input dialog. After analysing the image with an object detection model, the
+    predicted bounding boxes are overlaid on top of the image, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Demo](../Images/8e870417c611226e6f69a9e332776a4e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Useful links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Demo site](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Interactive code walk-through (scrim)](https://scrimba.com/scrim/cKm9bDAg)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Source code](https://github.com/xenova/transformers.js/tree/main/examples/vanilla-js)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Step 1: HTML and CSS setup'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Before we start building with Transformers.js, we first need to lay the groundwork
+    with some markup and styling. Create an `index.html` file with a basic HTML skeleton,
+    and add the following `<main>` tag to the `<body>`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: <details data-svelte-h="svelte-m0rku7"><summary>Click here to see a breakdown
+    of this markup.</summary>
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’re adding an `<input>` element with `type="file"` that accepts images. This
+    allows the user to select an image from their local file system using a popup
+    dialog. The default styling for this element looks quite bad, so let’s add some
+    styling. The easiest way to achieve this is to wrap the `<input>` element in a
+    `<label>`, hide the input, and then style the label as a button.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’re also adding an empty `<div>` container for displaying the image, plus
+    an empty `<p>` tag that we’ll use to give status updates to the user while we
+    download and run the model, since both of these operations take some time.</details>
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, add the following CSS rules in a `style.css` file and and link it to
+    the HTML:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s how the UI looks at this point:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Demo](../Images/8b9eb54c5ffe79961986480e9ea6b7ea.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Step 2: JavaScript setup'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the *boring* part out of the way, let’s start writing some JavaScript
+    code! Create a file called `index.js` and link to it in `index.html` by adding
+    the following to the end of the `<body>`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `type="module"` attribute is important, as it turns our file into a [JavaScript
+    module](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules),
+    meaning that we’ll be able to use imports and exports.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Moving into `index.js`, let’s import Transformers.js by adding the following
+    line to the top of the file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Since we will be downloading the model from the Hugging Face Hub, we can skip
+    the local model check by setting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, let’s create references to the various DOM elements we will access later:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Step 3: Create an object detection pipeline'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We’re finally ready to create our object detection pipeline! As a reminder,
+    a [pipeline](./pipelines). is a high-level interface provided by the library to
+    perform a specific task. In our case, we will instantiate an object detection
+    pipeline with the `pipeline()` helper function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since this can take some time (especially the first time when we have to download
+    the ~40MB model), we first update the `status` paragraph so that the user knows
+    that we’re about to load the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: To keep this tutorial simple, we’ll be loading and running the model in the
+    main (UI) thread. This is not recommended for production applications, since the
+    UI will freeze when we’re performing these actions. This is because JavaScript
+    is a single-threaded language. To overcome this, you can use a [web worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
+    to download and run the model in the background. However, we’re not going to do
+    cover that in this tutorial…
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can now call the `pipeline()` function that we imported at the top of our
+    file, to create our object detection pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’re passing two arguments into the `pipeline()` function: (1) task and (2)
+    model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first tells Transformers.js what kind of task we want to perform. In our
+    case, that is `object-detection`, but there are many other tasks that the library
+    supports, including `text-generation`, `sentiment-analysis`, `summarization`,
+    or `automatic-speech-recognition`. See [here](https://huggingface.co/docs/transformers.js/pipelines#tasks)
+    for the full list.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The second argument specifies which model we would like to use to solve the
+    given task. We will use [`Xenova/detr-resnet-50`](https://huggingface.co/Xenova/detr-resnet-50),
+    as it is a relatively small (~40MB) but powerful model for detecting objects in
+    an image.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Once the function returns, we’ll tell the user that the app is ready to be used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Step 4: Create the image uploader'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The next step is to support uploading/selection of images. To achieve this,
+    we will listen for “change” events from the `fileUpload` element. In the callback
+    function, we use a `FileReader()` to read the contents of the image if one is
+    selected (and nothing otherwise).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once the image has been loaded into the browser, the `reader.onload` callback
+    function will be invoked. In it, we append the new `<img>` element to the `imageContainer`
+    to be displayed to the user.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Don’t worry about the `detect(image)` function call (which is commented out)
+    - we will explain it later! For now, try to run the app and upload an image to
+    the browser. You should see your image displayed under the button like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Demo](../Images/cb7cca9d3c88a5511c333c6583724936.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Step 5: Run the model'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We’re finally ready to start interacting with Transformers.js! Let’s uncomment
+    the `detect(image)` function call from the snippet above. Then we’ll define the
+    function itself:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'NOTE: The `detect` function needs to be asynchronous, since we’ll `await` the
+    result of the the model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once we’ve updated the `status` to “Analysing”, we’re ready to perform *inference*,
+    which simply means to run the model with some data. This is done via the `detector()`
+    function that was returned from `pipeline()`. The first argument we’re passing
+    is the image data (`img.src`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The second argument is an options object:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We set the `threshold` property to `0.5`. This means that we want the model
+    to be at least 50% confident before claiming it has detected an object in the
+    image. The lower the threshold, the more objects it’ll detect (but may misidentify
+    objects); the higher the threshold, the fewer objects it’ll detect (but may miss
+    objects in the scene).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We also specify `percentage: true`, which means that we want the bounding box
+    for the objects to be returned as percentages (instead of pixels).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If you now try to run the app and upload an image, you should see the following
+    output logged to the console:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Demo](../Images/3b9d7bad794acec4f02358c5e5494057.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: In the example above, we uploaded an image of two elephants, so the `output`
+    variable holds an array with two objects, each containing a `label` (the string
+    “elephant”), a `score` (indicating the model’s confidence in its prediction) and
+    a `box` object (representing the bounding box of the detected entity).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 6: Render the boxes'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The final step is to display the `box` coordinates as rectangles around each
+    of the elephants.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At the end of our `detect()` function, we’ll run the `renderBox` function on
+    each object in the `output` array, using `.forEach()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s the code for the `renderBox()` function with comments to help you understand
+    what’s going on:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The bounding box and label span also need some styling, so add the following
+    to the `style.css` file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**And that’s it!**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You’ve now built your own fully-functional AI application that detects objects
+    in images, which runns completely in your browser: no external server, APIs, or
+    build tools. Pretty cool! 🥳'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Demo](../Images/483cc54122437ce4a480746160152d3d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'The app is live at the following URL: [https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector)'
+  prefs: []
+  type: TYPE_NORMAL

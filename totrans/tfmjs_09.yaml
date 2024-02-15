@@ -1,0 +1,312 @@
+- en: Building a Next.js application
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers.js/tutorials/next](https://huggingface.co/docs/transformers.js/tutorials/next)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers.js/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/entry/start.d68a6d16.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/scheduler.b108d059.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/singletons.e4b794f0.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/paths.0114e475.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/entry/app.c6513cb2.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/index.008de539.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/nodes/0.7513fd35.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/nodes/26.56f8eca8.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/CodeBlock.3968c746.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/Heading.88bfeb84.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this tutorial, we’ll build a simple Next.js application that performs sentiment
+    analysis using Transformers.js! Since Transformers.js can run in the browser or
+    in Node.js, you can choose whether you want to perform inference [client-side](#client-side-inference)
+    or [server-side](#server-side-inference) (we’ll show you how to do both). In either
+    case, we will be developing with the new [App Router](https://nextjs.org/docs/app)
+    paradigm. The final product will look something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Demo](../Images/263f9827f1a37479fa322dad0df05303.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Useful links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Demo site: [client-side](https://huggingface.co/spaces/Xenova/next-example-app)
+    or [server-side](https://huggingface.co/spaces/Xenova/next-server-example-app)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Source code: [client-side](https://github.com/xenova/transformers.js/tree/main/examples/next-client)
+    or [server-side](https://github.com/xenova/transformers.js/tree/main/examples/next-server)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prerequisites
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Node.js](https://nodejs.org/en/) version 18+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[npm](https://www.npmjs.com/) version 9+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Client-side inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Step 1: Initialise the project'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Start by creating a new Next.js application using `create-next-app`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On installation, you’ll see various prompts. For this demo, we’ll be selecting
+    those shown below in bold:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Step 2: Install and configure Transformers.js'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can install Transformers.js from [NPM](https://www.npmjs.com/package/@xenova/transformers)
+    with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also need to update the `next.config.js` file to ignore node-specific modules
+    when bundling for the browser:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, we’ll create a new [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
+    script where we’ll place all ML-related code. This is to ensure that the main
+    thread is not blocked while the model is loading and performing inference. For
+    this application, we’ll be using [`Xenova/distilbert-base-uncased-finetuned-sst-2-english`](https://huggingface.co/Xenova/distilbert-base-uncased-finetuned-sst-2-english),
+    a ~67M parameter model finetuned on the [Stanford Sentiment Treebank](https://huggingface.co/datasets/sst)
+    dataset. Add the following code to `./src/app/worker.js`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Step 3: Design the user interface'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We’ll now modify the default `./src/app/page.js` file so that it connects to
+    our worker thread. Since we’ll only be performing in-browser inference, we can
+    opt-in to Client components using the [`'use client'` directive](https://nextjs.org/docs/getting-started/react-essentials#the-use-client-directive).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Initialise the following state variables at the beginning of the `Home` component:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'and fill in the `onMessageReceived` function to update these variables when
+    the worker thread sends a message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, we can add a simple UI to the `Home` component, consisting of an input
+    textbox and a preformatted text element to display the classification result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can now run your application using the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Visit the URL shown in the terminal (e.g., [http://localhost:3000/](http://localhost:3000/))
+    to see your application in action!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '(Optional) Step 4: Build and deploy'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To build your application, simply run:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will bundle your application and output the static files to the `out` folder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this demo, we will deploy our application as a static [Hugging Face Space](https://huggingface.co/docs/hub/spaces),
+    but you can deploy it anywhere you like! If you haven’t already, you can create
+    a free Hugging Face account [here](https://huggingface.co/join).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visit [https://huggingface.co/new-space](https://huggingface.co/new-space) and
+    fill in the form. Remember to select “Static” as the space type.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Click the “Create space” button at the bottom of the page.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Go to “Files” → “Add file” → “Upload files”. Drag the files from the `out` folder
+    into the upload box and click “Upload”. After they have uploaded, scroll down
+    to the button and click “Commit changes to main”.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**That’s it!** Your application should now be live at `https://huggingface.co/spaces/<your-username>/<your-space-name>`!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Server-side inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: While there are many different ways to perform server-side inference, the simplest
+    (which we will discuss in this tutorial) is using the new [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)
+    feature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 1: Initialise the project'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Start by creating a new Next.js application using `create-next-app`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On installation, you’ll see various prompts. For this demo, we’ll be selecting
+    those shown below in bold:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Step 2: Install and configure Transformers.js'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can install Transformers.js from [NPM](https://www.npmjs.com/package/@xenova/transformers)
+    with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also need to update the `next.config.js` file to prevent Webpack from bundling
+    certain packages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, let’s set up our Route Handler. We can do this by creating two files
+    in a new `./src/app/classify/` directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`pipeline.js` - to handle the construction of our pipeline.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: '`route.js` - to process requests made to the `/classify` route.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Step 3: Design the user interface'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We’ll now modify the default `./src/app/page.js` file to make requests to our
+    newly-created Route Handler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can now run your application using the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Visit the URL shown in the terminal (e.g., [http://localhost:3000/](http://localhost:3000/))
+    to see your application in action!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '(Optional) Step 4: Build and deploy'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For this demo, we will build and deploy our application to [Hugging Face Spaces](https://huggingface.co/docs/hub/spaces).
+    If you haven’t already, you can create a free Hugging Face account [here](https://huggingface.co/join).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a new `Dockerfile` in your project’s root folder. You can use our [example
+    Dockerfile](https://github.com/xenova/transformers.js/blob/main/examples/next-server/Dockerfile)
+    as a template.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Visit [https://huggingface.co/new-space](https://huggingface.co/new-space) and
+    fill in the form. Remember to select “Docker” as the space type (you can choose
+    the “Blank” Docker template).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Click the “Create space” button at the bottom of the page.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Go to “Files” → “Add file” → “Upload files”. Drag the files from your project
+    folder (excluding `node_modules` and `.next`, if present) into the upload box
+    and click “Upload”. After they have uploaded, scroll down to the button and click
+    “Commit changes to main”.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Add the following lines to the top of your `README.md`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: '**That’s it!** Your application should now be live at `https://huggingface.co/spaces/<your-username>/<your-space-name>`!'
+  prefs: []
+  type: TYPE_NORMAL

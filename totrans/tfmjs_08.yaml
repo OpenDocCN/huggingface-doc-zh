@@ -1,0 +1,291 @@
+- en: Building a React application
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers.js/tutorials/react](https://huggingface.co/docs/transformers.js/tutorials/react)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers.js/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/entry/start.d68a6d16.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/scheduler.b108d059.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/singletons.e4b794f0.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/paths.0114e475.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/entry/app.c6513cb2.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/index.008de539.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/nodes/0.7513fd35.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/nodes/28.984e8ce0.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/Tip.aeb15ab7.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/CodeBlock.3968c746.js">
+    <link rel="modulepreload" href="/docs/transformers.js/main/en/_app/immutable/chunks/Heading.88bfeb84.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this tutorial, we’ll be building a simple React application that performs
+    multilingual translation using Transformers.js! The final product will look something
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Demo](../Images/04732e5c65a2c2502d231cc7491291d4.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Useful links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Demo site](https://huggingface.co/spaces/Xenova/react-translator)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Source code](https://github.com/xenova/transformers.js/tree/main/examples/react-translator)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prerequisites
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Node.js](https://nodejs.org/en/) version 18+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[npm](https://www.npmjs.com/) version 9+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Step 1: Initialise the project'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For this tutorial, we will use [Vite](https://vitejs.dev/) to initialise our
+    project. Vite is a build tool that allows us to quickly set up a React application
+    with minimal configuration. Run the following command in your terminal:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: If prompted to install `create-vite`, type `y` and press `Enter`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, enter the project directory and install the necessary development dependencies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To test that our application is working, we can run the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Visiting the URL shown in the terminal (e.g., [http://localhost:5173/](http://localhost:5173/))
+    should show the default “React + Vite” landing page. You can stop the development
+    server by pressing `Ctrl` + `C` in the terminal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 2: Install and configure Transformers.js'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Now we get to the fun part: adding machine learning to our application! First,
+    install Transformers.js from [NPM](https://www.npmjs.com/package/@xenova/transformers)
+    with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For this application, we will use the [Xenova/nllb-200-distilled-600M](https://huggingface.co/Xenova/nllb-200-distilled-600M)
+    model, which can perform multilingual translation among 200 languages. Before
+    we start, there are 2 things we need to take note of:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ML inference can be quite computationally intensive, so it’s better to load
+    and run the models in a separate thread from the main (UI) thread.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Since the model is quite large (>1 GB), we don’t want to download it until the
+    user clicks the “Translate” button.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We can achieve both of these goals by using a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
+    and some [React hooks](https://react.dev/reference/react).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Create a file called `worker.js` in the `src` directory. This script will do
+    all the heavy-lifing for us, including loading and running of the translation
+    pipeline. To ensure the model is only loaded once, we will create the `MyTranslationPipeline`
+    class which use the [singleton pattern](https://en.wikipedia.org/wiki/Singleton_pattern)
+    to lazily create a single instance of the pipeline when `getInstance` is first
+    called, and use this pipeline for all subsequent calls:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Modify `App.jsx` in the `src` directory. This file is automatically created
+    when initializing our React project, and will contain some boilerplate code. Inside
+    the `App` function, let’s create the web worker and store a reference to it using
+    the `useRef` hook:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Step 3: Design the user interface'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We recommend starting the development server again with `npm run dev` (if not
+    already running) so that you can see your changes in real-time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, let’s define our components. Create a folder called `components` in
+    the `src` directory, and create the following files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`LanguageSelector.jsx`: This component will allow the user to select the input
+    and output languages. Check out the full list of languages [here](https://github.com/xenova/transformers.js/blob/main/examples/react-translator/src/components/LanguageSelector.jsx).'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: '`Progress.jsx`: This component will display the progress for downloading each
+    model file.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'We can now use these components in `App.jsx` by adding these imports to the
+    top of the file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s also add some state variables to keep track of a few things in our application,
+    like model loading, languages, input text, and output text. Add the following
+    code to the beginning of the `App` function in `src/App.jsx`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, we can add our custom components to the main `App` component. We will
+    also add two `textarea` elements for input and output text, and a `button` to
+    trigger the translation. Modify the `return` statement to look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Don’t worry about the `translate` function for now. We will define it in the
+    next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, we can add some CSS to make our app look a little nicer. Modify the
+    following files in the `src` directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`index.css`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: <details><summary data-svelte-h="svelte-1hbuv8y">View code</summary>
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE11]</details>'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '`App.css`'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: <details><summary data-svelte-h="svelte-1hbuv8y">View code</summary>
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE12]</details>'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Step 4: Connecting everything together'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we have a basic user interface set up, we can finally connect everything
+    together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, let’s define the `translate` function, which will be called when the
+    user clicks the `Translate` button. This sends a message (containing the input
+    text, source language, and target language) to the worker thread for processing.
+    We will also disable the button so the user doesn’t click it multiple times. Add
+    the following code just before the `return` statement in the `App` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, let’s add an event listener in `src/worker.js` to listen for messages from
+    the main thread. We will send back messages (e.g., for model loading progress
+    and text streaming) to the main thread with `self.postMessage`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, let’s fill in our `onMessageReceived` function, which will update
+    the application state in response to messages from the worker thread. Add the
+    following code inside the `useEffect` hook we defined earlier:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can now run the application with `npm run dev` and perform multilingual
+    translation directly in your browser!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '(Optional) Step 5: Build and deploy'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To build your application, simply run `npm run build`. This will bundle your
+    application and output the static files to the `dist` folder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this demo, we will deploy our application as a static [Hugging Face Space](https://huggingface.co/docs/hub/spaces),
+    but you can deploy it anywhere you like! If you haven’t already, you can create
+    a free Hugging Face account [here](https://huggingface.co/join).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visit [https://huggingface.co/new-space](https://huggingface.co/new-space) and
+    fill in the form. Remember to select “Static” as the space type.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Go to “Files” → “Add file” → “Upload files”. Drag the `index.html` file and
+    `public/` folder from the `dist` folder into the upload box and click “Upload”.
+    After they have uploaded, scroll down to the button and click “Commit changes
+    to main”.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**That’s it!** Your application should now be live at `https://huggingface.co/spaces/<your-username>/<your-space-name>`!'
+  prefs: []
+  type: TYPE_NORMAL
