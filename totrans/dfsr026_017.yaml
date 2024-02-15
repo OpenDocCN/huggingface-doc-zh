@@ -1,303 +1,440 @@
 - en: Schedulers
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 调度器
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/schedulers](https://huggingface.co/docs/diffusers/using-diffusers/schedulers)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/schedulers](https://huggingface.co/docs/diffusers/using-diffusers/schedulers)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Diffusion pipelines are inherently a collection of diffusion models and schedulers
     that are partly independent from each other. This means that one is able to switch
     out parts of the pipeline to better customize a pipeline to one’s use case. The
     best example of this is the [Schedulers](../api/schedulers/overview).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 扩散管道本质上是扩散模型和调度器的集合，它们在某种程度上是相互独立的。这意味着可以更换管道的部分以更好地定制管道以适应自己的用例。这种最好的例子是[调度器](../api/schedulers/overview)。
 - en: 'Whereas diffusion models usually simply define the forward pass from noise
     to a less noisy sample, schedulers define the whole denoising process, *i.e.*:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 而扩散模型通常只是定义从噪声到较少噪声样本的前向传递，调度器定义了整个去噪过程，即：
 - en: How many denoising steps?
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 有多少去噪步骤？
 - en: Stochastic or deterministic?
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 随机还是确定性？
 - en: What algorithm to use to find the denoised sample?
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用什么算法来找到去噪样本？
 - en: They can be quite complex and often define a trade-off between **denoising speed**
     and **denoising quality**. It is extremely difficult to measure quantitatively
     which scheduler works best for a given diffusion pipeline, so it is often recommended
     to simply try out which works best.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 它们可能非常复杂，通常定义了**去噪速度**和**去噪质量**之间的权衡。量化地衡量哪种调度器对于给定的扩散管道效果最好是非常困难的，因此通常建议简单尝试哪种效果最好。
 - en: The following paragraphs show how to do so with the 🧨 Diffusers library.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下段落展示了如何使用🧨 Diffusers库来实现。
 - en: Load pipeline
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载管道
 - en: 'Let’s start by loading the [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)
     model in the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline):'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从在[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)中加载[`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)模型开始：
 - en: '[PRE0]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Next, we move it to GPU:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们将其移至GPU：
 - en: '[PRE1]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Access the scheduler
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 访问调度器
 - en: The scheduler is always one of the components of the pipeline and is usually
     called `"scheduler"`. So it can be accessed via the `"scheduler"` property.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 调度器始终是管道的组件之一，通常称为`"scheduler"`。因此，可以通过`"scheduler"`属性访问它。
 - en: '[PRE2]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '**Output**:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE3]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'We can see that the scheduler is of type [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler).
     Cool, now let’s compare the scheduler in its performance to other schedulers.
     First we define a prompt on which we will test all the different schedulers:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以看到调度器的类型是[PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler)。很酷，现在让我们将调度器的性能与其他调度器进行比较。首先我们定义一个提示，我们将测试所有不同的调度器：
 - en: '[PRE4]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Next, we create a generator from a random seed that will ensure that we can
     generate similar images as well as run the pipeline:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们创建一个从随机种子生成器，以确保我们可以生成类似的图像并运行管道：
 - en: '[PRE5]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '![](../Images/85fa20e9e45dfa325b08a579c2503c04.png)'
+  id: totrans-24
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/85fa20e9e45dfa325b08a579c2503c04.png)'
 - en: Changing the scheduler
+  id: totrans-25
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 更改调度器
 - en: Now we show how easy it is to change the scheduler of a pipeline. Every scheduler
     has a property `compatibles` which defines all compatible schedulers. You can
     take a look at all available, compatible schedulers for the Stable Diffusion pipeline
     as follows.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们展示了如何轻松更改管道的调度器。每个调度器都有一个`compatibles`属性，定义了所有兼容的调度器。您可以查看所有可用的、兼容的稳定扩散管道调度器如下。
 - en: '[PRE6]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '**Output**:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE7]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Cool, lots of schedulers to look at. Feel free to have a look at their respective
     class definitions:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 很酷，有很多调度器可以看。随时查看它们各自的类定义：
 - en: '[EulerDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler#diffusers.EulerDiscreteScheduler),'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[EulerDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler#diffusers.EulerDiscreteScheduler),'
 - en: '[LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler),'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler),'
 - en: '[DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),'
 - en: '[DDPMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler),'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DDPMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler),'
 - en: '[HeunDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/heun#diffusers.HeunDiscreteScheduler),'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[HeunDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/heun#diffusers.HeunDiscreteScheduler),'
 - en: '[DPMSolverMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/multistep_dpm_solver#diffusers.DPMSolverMultistepScheduler),'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DPMSolverMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/multistep_dpm_solver#diffusers.DPMSolverMultistepScheduler),'
 - en: '[DEISMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/deis#diffusers.DEISMultistepScheduler),'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DEISMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/deis#diffusers.DEISMultistepScheduler),'
 - en: '[PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler),'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler),'
 - en: '[EulerAncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler_ancestral#diffusers.EulerAncestralDiscreteScheduler),'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[EulerAncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler_ancestral#diffusers.EulerAncestralDiscreteScheduler),'
 - en: '[UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler),'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler),'
 - en: '[KDPM2DiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/dpm_discrete#diffusers.KDPM2DiscreteScheduler),'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[KDPM2DiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/dpm_discrete#diffusers.KDPM2DiscreteScheduler),'
 - en: '[DPMSolverSinglestepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/singlestep_dpm_solver#diffusers.DPMSolverSinglestepScheduler),'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DPMSolverSinglestepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/singlestep_dpm_solver#diffusers.DPMSolverSinglestepScheduler),'
 - en: '[KDPM2AncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/dpm_discrete_ancestral#diffusers.KDPM2AncestralDiscreteScheduler).'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[KDPM2AncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/dpm_discrete_ancestral#diffusers.KDPM2AncestralDiscreteScheduler)。'
 - en: We will now compare the input prompt with all other schedulers. To change the
     scheduler of the pipeline you can make use of the convenient `config` property
     in combination with the [from_config()](/docs/diffusers/v0.26.3/en/api/configuration#diffusers.ConfigMixin.from_config)
     function.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们现在将输入提示与所有其他调度程序进行比较。要更改管道的调度程序，您可以利用方便的`config`属性与[from_config()](/docs/diffusers/v0.26.3/en/api/configuration#diffusers.ConfigMixin.from_config)函数相结合。
 - en: '[PRE8]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'returns a dictionary of the configuration of the scheduler:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回调度程序的配置字典：
 - en: '**Output**:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE9]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: This configuration can then be used to instantiate a scheduler of a different
     class that is compatible with the pipeline. Here, we change the scheduler to the
     [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler).
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后可以使用此配置来实例化与管道兼容的不同类的调度程序。在这里，我们将调度程序更改为[DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler)。
 - en: '[PRE10]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Cool, now we can run the pipeline again to compare the generation quality.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 很棒，现在我们可以再次运行管道以比较生成质量。
 - en: '[PRE11]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '![](../Images/aeaae55430badb2de910e1a713b0bbe8.png)'
+  id: totrans-53
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/aeaae55430badb2de910e1a713b0bbe8.png)'
 - en: If you are a JAX/Flax user, please check [this section](#changing-the-scheduler-in-flax)
     instead.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您是JAX/Flax用户，请查看[此部分](#changing-the-scheduler-in-flax)。
 - en: Compare schedulers
+  id: totrans-55
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 比较调度程序
 - en: 'So far we have tried running the stable diffusion pipeline with two schedulers:
     [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler)
     and [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler).
     A number of better schedulers have been released that can be run with much fewer
     steps; let’s compare them here:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我们已尝试使用两个调度程序运行稳定扩散管道：[PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler)和[DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler)。已发布了许多更好的调度程序，可以在更少的步骤下运行；让我们在这里进行比较：
 - en: '[LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler)
     usually leads to better results:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '[LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler)通常会产生更好的结果：'
 - en: '[PRE12]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '![](../Images/4c9dc4ee0fe60f14a122ed8f9267e44b.png)'
+  id: totrans-59
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/4c9dc4ee0fe60f14a122ed8f9267e44b.png)'
 - en: '[EulerDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler#diffusers.EulerDiscreteScheduler)
     and [EulerAncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler_ancestral#diffusers.EulerAncestralDiscreteScheduler)
     can generate high quality results with as little as 30 steps.'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '[EulerDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler#diffusers.EulerDiscreteScheduler)和[EulerAncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler_ancestral#diffusers.EulerAncestralDiscreteScheduler)可以在至少30个步骤下生成高质量的结果。'
 - en: '[PRE13]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '![](../Images/30a99b3625066922ca35535bb1da7557.png)'
+  id: totrans-62
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/30a99b3625066922ca35535bb1da7557.png)'
 - en: 'and:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: '和:'
 - en: '[PRE14]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '![](../Images/dac9b5338f1d73249d4d46fa8e35505e.png)'
+  id: totrans-65
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/dac9b5338f1d73249d4d46fa8e35505e.png)'
 - en: '[DPMSolverMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/multistep_dpm_solver#diffusers.DPMSolverMultistepScheduler)
     gives a reasonable speed/quality trade-off and can be run with as little as 20
     steps.'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DPMSolverMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/multistep_dpm_solver#diffusers.DPMSolverMultistepScheduler)提供了一个合理的速度/质量权衡，并且可以在至少20个步骤下运行。'
 - en: '[PRE15]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: '![](../Images/b97d4c7db809a65413b4dc12bcfc20fe.png)'
+  id: totrans-68
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/b97d4c7db809a65413b4dc12bcfc20fe.png)'
 - en: As you can see, most images look very similar and are arguably of very similar
     quality. It often really depends on the specific use case which scheduler to choose.
     A good approach is always to run multiple different schedulers to compare results.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，大多数图像看起来非常相似，质量也很相似。选择哪个调度程序通常取决于具体的用例。一个好的方法是始终运行多个不同的调度程序以比较结果。
 - en: Changing the Scheduler in Flax
+  id: totrans-70
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在Flax中更改调度程序
 - en: 'If you are a JAX/Flax user, you can also change the default pipeline scheduler.
     This is a complete example of how to run inference using the Flax Stable Diffusion
     pipeline and the super-fast [DPM-Solver++ scheduler](../api/schedulers/multistep_dpm_solver):'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您是JAX/Flax用户，还可以更改默认的管道调度程序。这是使用Flax Stable Diffusion管道和超快速[DPM-Solver++调度程序](../api/schedulers/multistep_dpm_solver)运行推理的完整示例：
 - en: '[PRE16]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'The following Flax schedulers are *not yet compatible* with the Flax Stable
     Diffusion Pipeline:'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下Flax调度程序与Flax Stable Diffusion Pipeline *尚不兼容*：
 - en: '`FlaxLMSDiscreteScheduler`'
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`FlaxLMSDiscreteScheduler`'
 - en: '`FlaxDDPMScheduler`'
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`FlaxDDPMScheduler`'
