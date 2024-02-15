@@ -1,28 +1,17 @@
 - en: Load adapters
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 加载适配器
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/loading_adapters](https://huggingface.co/docs/diffusers/using-diffusers/loading_adapters)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/using-diffusers/loading_adapters](https://huggingface.co/docs/diffusers/using-diffusers/loading_adapters)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: There are several [training](../training/overview) techniques for personalizing
@@ -31,512 +20,772 @@
     of the adapters generate an entirely new model, while other adapters only modify
     a smaller set of embeddings or weights. This means the loading process for each
     adapter is also different.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 有几种[训练](../training/overview)技术可用于个性化扩散模型，以生成特定主题的图像或特定风格的图像。每种训练方法都会产生不同类型的适配器。一些适配器会生成全新的模型，而其他适配器只会修改一小部分嵌入或权重。这意味着每个适配器的加载过程也是不同的。
 - en: This guide will show you how to load DreamBooth, textual inversion, and LoRA
     weights.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何加载DreamBooth、文本反转和LoRA权重。
 - en: Feel free to browse the [Stable Diffusion Conceptualizer](https://huggingface.co/spaces/sd-concepts-library/stable-diffusion-conceptualizer),
     [LoRA the Explorer](https://huggingface.co/spaces/multimodalart/LoraTheExplorer),
     and the [Diffusers Models Gallery](https://huggingface.co/spaces/huggingface-projects/diffusers-gallery)
     for checkpoints and embeddings to use.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 随意浏览[稳定扩散概念化器](https://huggingface.co/spaces/sd-concepts-library/stable-diffusion-conceptualizer)、[LoRA探险家](https://huggingface.co/spaces/multimodalart/LoraTheExplorer)和[Diffusers模型库](https://huggingface.co/spaces/huggingface-projects/diffusers-gallery)以获取检查点和嵌入以供使用。
 - en: DreamBooth
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DreamBooth
 - en: '[DreamBooth](https://dreambooth.github.io/) finetunes an *entire diffusion
     model* on just several images of a subject to generate images of that subject
     in new styles and settings. This method works by using a special word in the prompt
     that the model learns to associate with the subject image. Of all the training
     methods, DreamBooth produces the largest file size (usually a few GBs) because
     it is a full checkpoint model.'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DreamBooth](https://dreambooth.github.io/)在仅使用几幅主题图像对整个扩散模型进行微调，以生成该主题的新风格和设置的图像。这种方法通过在提示中使用一个特殊词，模型学会将其与主题图像关联起来。在所有训练方法中，DreamBooth产生的文件大小最大（通常为几GB），因为它是一个完整的检查点模型。'
 - en: 'Let’s load the [herge_style](https://huggingface.co/sd-dreambooth-library/herge-style)
     checkpoint, which is trained on just 10 images drawn by Hergé, to generate images
     in that style. For it to work, you need to include the special word `herge_style`
     in your prompt to trigger the checkpoint:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们加载[herge_style](https://huggingface.co/sd-dreambooth-library/herge-style)检查点，该检查点仅训练了由Hergé绘制的10幅图像，以在该风格中生成图像。为了使其工作，您需要在提示中包含特殊词`herge_style`来触发检查点：
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '![](../Images/97b7dec0aa8cde8c3b74690416b5a5ca.png)'
+  id: totrans-10
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/97b7dec0aa8cde8c3b74690416b5a5ca.png)'
 - en: Textual inversion
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文本反转
 - en: '[Textual inversion](https://textual-inversion.github.io/) is very similar to
     DreamBooth and it can also personalize a diffusion model to generate certain concepts
     (styles, objects) from just a few images. This method works by training and finding
     new embeddings that represent the images you provide with a special word in the
     prompt. As a result, the diffusion model weights stay the same and the training
     process produces a relatively tiny (a few KBs) file.'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '[文本反转](https://textual-inversion.github.io/)与DreamBooth非常相似，它也可以个性化扩散模型，从几幅图像中生成特定概念（风格、对象）。这种方法通过训练并找到代表您在提示中提供的图像的新嵌入来工作。因此，扩散模型的权重保持不变，训练过程产生一个相对较小（几KB）的文件。'
 - en: Because textual inversion creates embeddings, it cannot be used on its own like
     DreamBooth and requires another model.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为文本反转会创建嵌入，所以不能像DreamBooth那样单独使用，需要另一个模型。
 - en: '[PRE1]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Now you can load the textual inversion embeddings with the [load_textual_inversion()](/docs/diffusers/v0.26.3/en/api/loaders/textual_inversion#diffusers.loaders.TextualInversionLoaderMixin.load_textual_inversion)
     method and generate some images. Let’s load the [sd-concepts-library/gta5-artwork](https://huggingface.co/sd-concepts-library/gta5-artwork)
     embeddings and you’ll need to include the special word `<gta5-artwork>` in your
     prompt to trigger it:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以使用[load_textual_inversion()](/docs/diffusers/v0.26.3/en/api/loaders/textual_inversion#diffusers.loaders.TextualInversionLoaderMixin.load_textual_inversion)方法加载文本反转嵌入，并生成一些图像。让我们加载[sd-concepts-library/gta5-artwork](https://huggingface.co/sd-concepts-library/gta5-artwork)嵌入，您需要在提示中包含特殊词`<gta5-artwork>`来触发它：
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '![](../Images/c039eaa48a71bfa7f36cbc3d5bc64464.png)'
+  id: totrans-17
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/c039eaa48a71bfa7f36cbc3d5bc64464.png)'
 - en: 'Textual inversion can also be trained on undesirable things to create *negative
     embeddings* to discourage a model from generating images with those undesirable
     things like blurry images or extra fingers on a hand. This can be an easy way
     to quickly improve your prompt. You’ll also load the embeddings with [load_textual_inversion()](/docs/diffusers/v0.26.3/en/api/loaders/textual_inversion#diffusers.loaders.TextualInversionLoaderMixin.load_textual_inversion),
     but this time, you’ll need two more parameters:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 文本反转也可以训练不良事物，创建*负嵌入*，以阻止模型生成带有这些不良事物的图像，如模糊图像或手上额外的手指。这可以是快速改进提示的简单方法。您还将使用[load_textual_inversion()](/docs/diffusers/v0.26.3/en/api/loaders/textual_inversion#diffusers.loaders.TextualInversionLoaderMixin.load_textual_inversion)加载嵌入，但这次，您需要两个额外的参数：
 - en: '`weight_name`: specifies the weight file to load if the file was saved in the
     🤗 Diffusers format with a specific name or if the file is stored in the A1111
     format'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`weight_name`：指定要加载的权重文件，如果文件以特定名称保存在🤗 Diffusers格式中，或者文件存储在A1111格式中'
 - en: '`token`: specifies the special word to use in the prompt to trigger the embeddings'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token`：指定在提示中触发嵌入的特殊词'
 - en: 'Let’s load the [sayakpaul/EasyNegative-test](https://huggingface.co/sayakpaul/EasyNegative-test)
     embeddings:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们加载[sayakpaul/EasyNegative-test](https://huggingface.co/sayakpaul/EasyNegative-test)嵌入：
 - en: '[PRE3]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Now you can use the `token` to generate an image with the negative embeddings:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以使用`token`生成带有负嵌入的图像：
 - en: '[PRE4]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '![](../Images/e8cd1cf0f650f65d2b00c9db51b0e506.png)'
+  id: totrans-25
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/e8cd1cf0f650f65d2b00c9db51b0e506.png)'
 - en: LoRA
+  id: totrans-26
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: LoRA
 - en: '[Low-Rank Adaptation (LoRA)](https://huggingface.co/papers/2106.09685) is a
     popular training technique because it is fast and generates smaller file sizes
     (a couple hundred MBs). Like the other methods in this guide, LoRA can train a
     model to learn new styles from just a few images. It works by inserting new weights
     into the diffusion model and then only the new weights are trained instead of
     the entire model. This makes LoRAs faster to train and easier to store.'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '[低秩适应（LoRA）](https://huggingface.co/papers/2106.09685)是一种流行的训练技术，因为它快速且生成较小的文件大小（几百MB）。与本指南中的其他方法一样，LoRA可以训练模型仅从少量图像中学习新样式。它通过将新权重插入扩散模型，然后仅训练新权重而不是整个模型。这使得LoRA训练更快，存储更容易。'
 - en: LoRA is a very general training technique that can be used with other training
     methods. For example, it is common to train a model with DreamBooth and LoRA.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRA是一种非常通用的训练技术，可以与其他训练方法一起使用。例如，通常会使用DreamBooth和LoRA来训练模型。
 - en: 'LoRAs also need to be used with another model:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: LoRA还需要与另一个模型一起使用：
 - en: '[PRE5]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Then use the [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
     method to load the [ostris/super-cereal-sdxl-lora](https://huggingface.co/ostris/super-cereal-sdxl-lora)
     weights and specify the weights filename from the repository:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后使用[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)方法加载[ostris/super-cereal-sdxl-lora](https://huggingface.co/ostris/super-cereal-sdxl-lora)权重，并从存储库中指定权重文件名：
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '![](../Images/e378109cda4606520af62966b167614f.png)'
+  id: totrans-33
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/e378109cda4606520af62966b167614f.png)'
 - en: 'The [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
     method loads LoRA weights into both the UNet and text encoder. It is the preferred
     way for loading LoRAs because it can handle cases where:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)方法将LoRA权重加载到UNet和文本编码器中。这是加载LoRA的首选方式，因为它可以处理以下情况：'
 - en: the LoRA weights don’t have separate identifiers for the UNet and text encoder
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: LoRA权重没有UNet和文本编码器的单独标识符
 - en: the LoRA weights have separate identifiers for the UNet and text encoder
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: LoRA权重对UNet和文本编码器有单独的标识符
 - en: 'But if you only need to load LoRA weights into the UNet, then you can use the
     [load_attn_procs()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.load_attn_procs)
     method. Let’s load the [jbilcke-hf/sdxl-cinematic-1](https://huggingface.co/jbilcke-hf/sdxl-cinematic-1)
     LoRA:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，如果只需要将LoRA权重加载到UNet中，则可以使用[load_attn_procs()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.load_attn_procs)方法。让我们加载[jbilcke-hf/sdxl-cinematic-1](https://huggingface.co/jbilcke-hf/sdxl-cinematic-1)
+    LoRA：
 - en: '[PRE7]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '![](../Images/b7bd2f5305aeb45b260a0d963df68046.png)'
+  id: totrans-39
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/b7bd2f5305aeb45b260a0d963df68046.png)'
 - en: 'For both [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
     and [load_attn_procs()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.load_attn_procs),
     you can pass the `cross_attention_kwargs={"scale": 0.5}` parameter to adjust how
     much of the LoRA weights to use. A value of `0` is the same as only using the
     base model weights, and a value of `1` is equivalent to using the fully finetuned
     LoRA.'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '对于[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)和[load_attn_procs()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.load_attn_procs)，您可以传递`cross_attention_kwargs={"scale":
+    0.5}`参数来调整使用LoRA权重的比例。值为`0`相当于仅使用基本模型权重，值为`1`相当于使用完全微调的LoRA。'
 - en: 'To unload the LoRA weights, use the [unload_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.unload_lora_weights)
     method to discard the LoRA weights and restore the model to its original weights:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 要卸载LoRA权重，请使用[unload_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.unload_lora_weights)方法丢弃LoRA权重并将模型恢复为其原始权重：
 - en: '[PRE8]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Load multiple LoRAs
+  id: totrans-43
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 加载多个LoRA
 - en: It can be fun to use multiple LoRAs together to create something entirely new
     and unique. The [fuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.fuse_lora)
     method allows you to fuse the LoRA weights with the original weights of the underlying
     model.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 将多个LoRA一起使用可以创建全新且独特的东西，这很有趣。[fuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.fuse_lora)方法允许您将LoRA权重与基础模型的原始权重融合。
 - en: Fusing the weights can lead to a speedup in inference latency because you don’t
     need to separately load the base model and LoRA! You can save your fused pipeline
     with [save_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.save_pretrained)
     to avoid loading and fusing the weights every time you want to use the model.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 融合权重可以加快推理延迟，因为您无需单独加载基本模型和LoRA！您可以使用[save_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.save_pretrained)保存融合的管道，以避免每次使用模型时加载和融合权重。
 - en: 'Load an initial model:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载初始模型：
 - en: '[PRE9]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Next, load the LoRA checkpoint and fuse it with the original weights. The `lora_scale`
     parameter controls how much to scale the output by with the LoRA weights. It is
     important to make the `lora_scale` adjustments in the [fuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.fuse_lora)
     method because it won’t work if you try to pass `scale` to the `cross_attention_kwargs`
     in the pipeline.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，加载LoRA检查点并将其与原始权重融合。`lora_scale`参数控制使用LoRA权重时输出的缩放比例。在[fuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.fuse_lora)方法中进行`lora_scale`调整很重要，因为如果尝试在管道中将`scale`传递给`cross_attention_kwargs`，则不起作用。
 - en: If you need to reset the original model weights for any reason (use a different
     `lora_scale`), you should use the [unfuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.unfuse_lora)
     method.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果出于任何原因需要重置原始模型权重（使用不同的`lora_scale`），应使用[unfuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.unfuse_lora)方法。
 - en: '[PRE10]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Then fuse this pipeline with the next set of LoRA weights:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后将此管道与下一组LoRA权重融合：
 - en: '[PRE11]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: You can’t unfuse multiple LoRA checkpoints, so if you need to reset the model
     to its original weights, you’ll need to reload it.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 您无法解除多个LoRA检查点的融合，因此如果需要将模型重置为其原始权重，您需要重新加载它。
 - en: 'Now you can generate an image that uses the weights from both LoRAs:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以生成一张使用两个LoRA权重的图片：
 - en: '[PRE12]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 🤗 PEFT
+  id: totrans-56
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 🤗 PEFT
 - en: Read the [Inference with 🤗 PEFT](../tutorials/using_peft_for_inference) tutorial
     to learn more about its integration with 🤗 Diffusers and how you can easily work
     with and juggle multiple adapters. You’ll need to install 🤗 Diffusers and PEFT
     from source to run the example in this section.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 阅读[使用🤗 PEFT进行推断](../tutorials/using_peft_for_inference)教程，了解更多关于它与🤗 Diffusers集成以及如何轻松使用和切换多个适配器的信息。您需要从源代码安装🤗
+    Diffusers和PEFT才能运行本节中的示例。
 - en: 'Another way you can load and use multiple LoRAs is to specify the `adapter_name`
     parameter in [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights).
     This method takes advantage of the 🤗 PEFT integration. For example, load and name
     both LoRA weights:'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种加载和使用多个LoRA的方法是在[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)中指定`adapter_name`参数。这种方法利用了🤗
+    PEFT集成。例如，加载并命名两个LoRA权重：
 - en: '[PRE13]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Now use the [set_adapters()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.set_adapters)
     to activate both LoRAs, and you can configure how much weight each LoRA should
     have on the output:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在使用[set_adapters()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.set_adapters)来激活两个LoRA，并可以配置每个LoRA在输出上的权重：
 - en: '[PRE14]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Then, generate an image:'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，生成一张图片：
 - en: '[PRE15]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Kohya and TheLastBen
+  id: totrans-64
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Kohya和TheLastBen
 - en: Other popular LoRA trainers from the community include those by [Kohya](https://github.com/kohya-ss/sd-scripts/)
     and [TheLastBen](https://github.com/TheLastBen/fast-stable-diffusion). These trainers
     create different LoRA checkpoints than those trained by 🤗 Diffusers, but they
     can still be loaded in the same way.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 社区中其他流行的LoRA训练器包括[Kohya](https://github.com/kohya-ss/sd-scripts/)和[TheLastBen](https://github.com/TheLastBen/fast-stable-diffusion)的训练器。这些训练器创建的LoRA检查点与🤗
+    Diffusers训练的不同，但仍然可以以相同的方式加载。
 - en: 'Let’s download the [Blueprintify SD XL 1.0](https://civitai.com/models/150986/blueprintify-sd-xl-10)
     checkpoint from [Civitai](https://civitai.com/):'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从[Civitai](https://civitai.com/)下载[Blueprintify SD XL 1.0](https://civitai.com/models/150986/blueprintify-sd-xl-10)的检查点：
 - en: '[PRE16]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'Load the LoRA checkpoint with the [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
     method, and specify the filename in the `weight_name` parameter:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)方法加载LoRA检查点，并在`weight_name`参数中指定文件名：
 - en: '[PRE17]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'Generate an image:'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成一张图片：
 - en: '[PRE18]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'Some limitations of using Kohya LoRAs with 🤗 Diffusers include:'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用Kohya LoRA与🤗 Diffusers的一些限制包括：
 - en: Images may not look like those generated by UIs - like ComfyUI - for multiple
     reasons, which are explained [here](https://github.com/huggingface/diffusers/pull/4287/#issuecomment-1655110736).
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于多种原因，生成的图片可能不像UIs（如ComfyUI）生成的图片，这些原因在[这里](https://github.com/huggingface/diffusers/pull/4287/#issuecomment-1655110736)有解释。
 - en: '[LyCORIS checkpoints](https://github.com/KohakuBlueleaf/LyCORIS) aren’t fully
     supported. The [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
     method loads LyCORIS checkpoints with LoRA and LoCon modules, but Hada and LoKR
     are not supported.'
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[LyCORIS检查点](https://github.com/KohakuBlueleaf/LyCORIS)不受完全支持。[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)方法使用LoRA和LoCon模块加载LyCORIS检查点，但不支持Hada和LoKR。'
 - en: 'Loading a checkpoint from TheLastBen is very similar. For example, to load
     the [TheLastBen/William_Eggleston_Style_SDXL](https://huggingface.co/TheLastBen/William_Eggleston_Style_SDXL)
     checkpoint:'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载TheLastBen的检查点非常类似。例如，要加载[TheLastBen/William_Eggleston_Style_SDXL](https://huggingface.co/TheLastBen/William_Eggleston_Style_SDXL)的检查点：
 - en: '[PRE19]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: IP-Adapter
+  id: totrans-77
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IP-Adapter
 - en: '[IP-Adapter](https://ip-adapter.github.io/) is an effective and lightweight
     adapter that adds image prompting capabilities to a diffusion model. This adapter
     works by decoupling the cross-attention layers of the image and text features.
     All the other model components are frozen and only the embedded image features
     in the UNet are trained. As a result, IP-Adapter files are typically only ~100MBs.'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: '[IP-Adapter](https://ip-adapter.github.io/)是一种有效且轻量级的适配器，可为扩散模型添加图像提示功能。该适配器通过解耦图像和文本特征的交叉注意力层来工作。所有其他模型组件都被冻结，只有UNet中的嵌入图像特征被训练。因此，IP-Adapter文件通常只有约100MB。'
 - en: IP-Adapter works with most of our pipelines, including Stable Diffusion, Stable
     Diffusion XL (SDXL), ControlNet, T2I-Adapter, AnimateDiff. And you can use any
     custom models finetuned from the same base models. It also works with LCM-Lora
     out of box.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: IP-Adapter适用于我们的大多数管道，包括稳定扩散、稳定扩散XL（SDXL）、ControlNet、T2I-Adapter、AnimateDiff。您还可以使用从相同基础模型微调的任何自定义模型。它还可以与LCM-Lora直接配合使用。
 - en: You can find official IP-Adapter checkpoints in [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter).
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在[h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter)中找到官方IP-Adapter检查点。
 - en: IP-Adapter was contributed by [okotaku](https://github.com/okotaku).
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: IP-Adapter由[okotaku](https://github.com/okotaku)贡献。
 - en: Let’s first create a Stable Diffusion Pipeline.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们首先创建一个稳定扩散管道。
 - en: '[PRE20]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Now load the [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter) weights
     with the [load_ip_adapter()](/docs/diffusers/v0.26.3/en/api/loaders/ip_adapter#diffusers.loaders.IPAdapterMixin.load_ip_adapter)
     method.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在使用[load_ip_adapter()](/docs/diffusers/v0.26.3/en/api/loaders/ip_adapter#diffusers.loaders.IPAdapterMixin.load_ip_adapter)方法加载[h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter)的权重。
 - en: '[PRE21]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: IP-Adapter relies on an image encoder to generate the image features, if your
     IP-Adapter weights folder contains a "image_encoder" subfolder, the image encoder
     will be automatically loaded and registered to the pipeline. Otherwise you can
     so load a [CLIPVisionModelWithProjection](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPVisionModelWithProjection)
     model and pass it to a Stable Diffusion pipeline when you create it.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: IP-适配器依赖于图像编码器来生成图像特征，如果您的IP-适配器权重文件夹包含一个名为“image_encoder”的子文件夹，则图像编码器将自动加载并注册到管道中。否则，您可以加载一个[CLIPVisionModelWithProjection](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPVisionModelWithProjection)模型，并在创建时将其传递给稳定扩散管道。
 - en: '[PRE22]'
+  id: totrans-87
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: IP-Adapter allows you to use both image and text to condition the image generation
     process. For example, let’s use the bear image from the [Textual Inversion](#textual-inversion)
     section as the image prompt (`ip_adapter_image`) along with a text prompt to add
     “sunglasses”. 😎
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: IP-适配器允许您同时使用图像和文本来调节图像生成过程。例如，让我们使用来自[文本反转](#textual-inversion)部分的熊图像作为图像提示（`ip_adapter_image`），并附上一个文本提示添加“太阳镜”。
+    😎
 - en: '[PRE23]'
+  id: totrans-89
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: '![](../Images/344a4a031aa6d71b9b57dc0b5139e9be.png)'
+  id: totrans-90
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/344a4a031aa6d71b9b57dc0b5139e9be.png)'
 - en: You can use the `set_ip_adapter_scale()` method to adjust the text prompt and
     image prompt condition ratio.  If you’re only using the image prompt, you should
     set the scale to `1.0`. You can lower the scale to get more generation diversity,
     but it’ll be less aligned with the prompt. `scale=0.5` can achieve good results
     in most cases when you use both text and image prompts.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用`set_ip_adapter_scale()`方法来调整文本提示和图像提示的条件比例。如果您只使用图像提示，应将比例设置为`1.0`。您可以降低比例以获得更多的生成多样性，但它将与提示不太一致。在大多数情况下，当您同时使用文本和图像提示时，`scale=0.5`可以获得良好的结果。
 - en: IP-Adapter also works great with Image-to-Image and Inpainting pipelines. See
     below examples of how you can use it with Image-to-Image and Inpaint.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: IP-适配器也与图像到图像和修补管道非常配合。请看下面如何将其与图像到图像和修补一起使用的示例。
 - en: image-to-imageinpaint
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像到图像修补
 - en: '[PRE24]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: IP-Adapters can also be used with [SDXL](../api/pipelines/stable_diffusion/stable_diffusion_xl.md)
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: IP-适配器也可以与[SDXL](../api/pipelines/stable_diffusion/stable_diffusion_xl.md)一起使用
 - en: '[PRE25]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: '![](../Images/7714d8061d7ab0a16f36c9923a9a1d91.png)'
+  id: totrans-97
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/7714d8061d7ab0a16f36c9923a9a1d91.png)'
 - en: input image
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 输入图像
 - en: '![](../Images/6d3dc0e54f1d38caddd7daf1bd93c3fb.png)'
+  id: totrans-99
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/6d3dc0e54f1d38caddd7daf1bd93c3fb.png)'
 - en: adapted image
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 调整后的图像
 - en: You can use the IP-Adapter face model to apply specific faces to your images.
     It is an effective way to maintain consistent characters in your image generations.
     Weights are loaded with the same method used for the other IP-Adapters.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用IP-适配器面部模型将特定面部应用于您的图像。这是在图像生成中保持一致角色的有效方法。权重的加载方式与其他IP-适配器相同。
 - en: '[PRE26]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: It is recommended to use `DDIMScheduler` and `EulerDiscreteScheduler` for face
     model.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 建议使用`DDIMScheduler`和`EulerDiscreteScheduler`来进行面部模型。
 - en: '[PRE27]'
+  id: totrans-104
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: '![](../Images/d45f8afb266397140047ea513967ec17.png)'
+  id: totrans-105
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/d45f8afb266397140047ea513967ec17.png)'
 - en: input image
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 输入图像
 - en: '![](../Images/1f753c6cacd994b80a20d9f822857c7e.png)'
+  id: totrans-107
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/1f753c6cacd994b80a20d9f822857c7e.png)'
 - en: output image
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 输出图像
 - en: You can load multiple IP-Adapter models and use multiple reference images at
     the same time. In this example we use IP-Adapter-Plus face model to create a consistent
     character and also use IP-Adapter-Plus model along with 10 images to create a
     coherent style in the image we generate.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以同时加载多个IP-适配器模型并使用多个参考图像。在此示例中，我们使用IP-适配器-Plus面部模型创建一致的角色，并同时使用IP-适配器-Plus模型以及10个图像创建我们生成的图像中的连贯样式。
 - en: '[PRE28]'
+  id: totrans-110
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: '![](../Images/708cd0f9abdbb4eb3ad70ec47c4651d9.png)'
+  id: totrans-111
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/708cd0f9abdbb4eb3ad70ec47c4651d9.png)'
 - en: style input image
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 样式输入图像
 - en: '![](../Images/b4c08b99e9974c3a3e5bb5f7f2d1054f.png)'
+  id: totrans-113
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/b4c08b99e9974c3a3e5bb5f7f2d1054f.png)'
 - en: face input image
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 面部输入图像
 - en: '![](../Images/0f5d4fe5f2525dd88bd660385a4b080e.png)'
+  id: totrans-115
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/0f5d4fe5f2525dd88bd660385a4b080e.png)'
 - en: output image
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 输出图像
 - en: LCM-Lora
+  id: totrans-117
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: LCM-Lora
 - en: You can use IP-Adapter with LCM-Lora to achieve “instant fine-tune” with custom
     images. Note that you need to load IP-Adapter weights before loading the LCM-Lora
     weights.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用IP-适配器与LCM-Lora一起实现使用自定义图像的“即时微调”。请注意，在加载LCM-Lora权重之前，您需要加载IP-适配器权重。
 - en: '[PRE29]'
+  id: totrans-119
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: Other pipelines
+  id: totrans-120
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 其他管道
 - en: IP-Adapter is compatible with any pipeline that (1) uses a text prompt and (2)
     uses Stable Diffusion or Stable Diffusion XL checkpoint. To use IP-Adapter with
     a different pipeline, all you need to do is to run `load_ip_adapter()` method
     after you create the pipeline, and then pass your image to the pipeline as `ip_adapter_image`
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: IP-适配器与任何使用文本提示和使用稳定扩散或稳定扩散XL检查点的管道兼容。要在不同管道中使用IP-适配器，您只需要在创建管道后运行`load_ip_adapter()`方法，然后将您的图像作为`ip_adapter_image`传递给管道
 - en: 🤗 Diffusers currently only supports using IP-Adapter with some of the most popular
     pipelines, feel free to open a [feature request](https://github.com/huggingface/diffusers/issues/new/choose)
     if you have a cool use-case and require integrating IP-adapters with a pipeline
     that does not support it yet!
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗扩散器目前仅支持与一些最受欢迎的管道一起使用IP-适配器，如果您有一个很酷的用例并需要将IP适配器集成到尚不支持的管道中，请随时提出[功能请求](https://github.com/huggingface/diffusers/issues/new/choose)！
 - en: You can find below examples on how to use IP-Adapter with ControlNet and AnimateDiff.
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在下面找到如何使用IP-适配器与ControlNet和AnimateDiff的示例。
 - en: ControlNetAnimateDiff
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: ControlNetAnimateDiff
 - en: '[PRE30]'
+  id: totrans-125
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: '![](../Images/16fb69a794e63d70afc3ca739b1eee43.png)'
+  id: totrans-126
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/16fb69a794e63d70afc3ca739b1eee43.png)'
 - en: input image
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 输入图像
 - en: '![](../Images/e6383b3af214075c7c04400114af5b74.png)'
+  id: totrans-128
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/e6383b3af214075c7c04400114af5b74.png)'
 - en: adapted image
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 调整后的图像
