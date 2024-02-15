@@ -1,246 +1,340 @@
 - en: JAX/Flax
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: JAX/Flax
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/stable_diffusion_jax_how_to](https://huggingface.co/docs/diffusers/using-diffusers/stable_diffusion_jax_how_to)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/using-diffusers/stable_diffusion_jax_how_to](https://huggingface.co/docs/diffusers/using-diffusers/stable_diffusion_jax_how_to)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 🤗 Diffusers supports Flax for super fast inference on Google TPUs, such as those
     available in Colab, Kaggle or Google Cloud Platform. This guide shows you how
     to run inference with Stable Diffusion using JAX/Flax.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Diffusers支持Flax在Google TPU上进行超快推理，例如在Colab、Kaggle或Google Cloud Platform上可用的TPU。本指南向您展示如何使用JAX/Flax运行稳定扩散的推理。
 - en: 'Before you begin, make sure you have the necessary libraries installed:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装必要的库：
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: You should also make sure you’re using a TPU backend. While JAX does not run
     exclusively on TPUs, you’ll get the best performance on a TPU because each server
     has 8 TPU accelerators working in parallel.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还应确保您正在使用TPU后端。虽然JAX并不专门在TPU上运行，但在TPU上会获得最佳性能，因为每台服务器都有8个TPU加速器并行工作。
 - en: 'If you are running this guide in Colab, select *Runtime* in the menu above,
     select the option *Change runtime type*, and then select *TPU* under the *Hardware
     accelerator* setting. Import JAX and quickly check whether you’re using a TPU:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在Colab中运行此指南，请在上面的菜单中选择*运行时*，选择*更改运行时类型*选项，然后在*硬件加速器*设置下选择*TPU*。导入JAX并快速检查是否正在使用TPU：
 - en: '[PRE1]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Great, now you can import the rest of the dependencies you’ll need:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您可以导入所需的其余依赖项：
 - en: '[PRE2]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Load a model
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载模型
 - en: Flax is a functional framework, so models are stateless and parameters are stored
     outside of them. Loading a pretrained Flax pipeline returns *both* the pipeline
     and the model weights (or parameters). In this guide, you’ll use `bfloat16`, a
     more efficient half-float type that is supported by TPUs (you can also use `float32`
     for full precision if you want).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: Flax是一个功能性框架，因此模型是无状态的，参数存储在模型之外。加载预训练的Flax管道会返回*管道和模型权重（或参数）*。在本指南中，您将使用`bfloat16`，这是一种更高效的半浮点类型，受到TPU支持（如果需要，也可以使用`float32`进行完整精度）。
 - en: '[PRE3]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Inference
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推理
 - en: TPUs usually have 8 devices working in parallel, so let’s use the same prompt
     for each device. This means you can perform inference on 8 devices at once, with
     each device generating one image. As a result, you’ll get 8 images in the same
     amount of time it takes for one chip to generate a single image!
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常TPU有8个设备并行工作，因此让我们为每个设备使用相同的提示。这意味着您可以同时在8个设备上执行推理，每个设备生成一个图像。因此，您将在相同的时间内获得8张图像，就像一块芯片生成一张单个图像所需的时间一样！
 - en: Learn more details in the [How does parallelization work?](#how-does-parallelization-work)
     section.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[并行化工作原理是什么？](#how-does-parallelization-work)部分了解更多细节。
 - en: After replicating the prompt, get the tokenized text ids by calling the `prepare_inputs`
     function on the pipeline. The length of the tokenized text is set to 77 tokens
     as required by the configuration of the underlying CLIP text model.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在复制提示后，通过在管道上调用`prepare_inputs`函数来获取标记化文本id。标记化文本的长度设置为77个标记，这是基础CLIP文本模型配置所要求的。
 - en: '[PRE4]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Model parameters and inputs have to be replicated across the 8 parallel devices.
     The parameters dictionary is replicated with [`flax.jax_utils.replicate`](https://flax.readthedocs.io/en/latest/api_reference/flax.jax_utils.html#flax.jax_utils.replicate)
     which traverses the dictionary and changes the shape of the weights so they are
     repeated 8 times. Arrays are replicated using `shard`.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 模型参数和输入必须在8个并行设备上复制。参数字典使用[`flax.jax_utils.replicate`](https://flax.readthedocs.io/en/latest/api_reference/flax.jax_utils.html#flax.jax_utils.replicate)进行复制，该函数遍历字典并更改权重的形状，使其重复8次。数组使用`shard`进行复制。
 - en: '[PRE5]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: This shape means each one of the 8 devices receives as an input a `jnp` array
     with shape `(1, 77)`, where `1` is the batch size per device. On TPUs with sufficient
     memory, you could have a batch size larger than `1` if you want to generate multiple
     images (per chip) at once.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个形状意味着每个8个设备都接收一个形状为`(1, 77)`的`jnp`数组作为输入，其中`1`是每个设备的批量大小。在具有足够内存的TPU上，如果要一次生成多个图像（每个芯片），可以使用大于`1`的批量大小。
 - en: Next, create a random number generator to pass to the generation function. This
     is standard procedure in Flax, which is very serious and opinionated about random
     numbers. All functions that deal with random numbers are expected to receive a
     generator to ensure reproducibility, even when you’re training across multiple
     distributed devices.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，创建一个随机数生成器传递给生成函数。这是Flax中的标准程序，Flax对随机数非常严肃和有见地。所有处理随机数的函数都应该接收一个生成器，以确保可重现性，即使在跨多个分布式设备进行训练时也是如此。
 - en: The helper function below uses a seed to initialize a random number generator.
     As long as you use the same seed, you’ll get the exact same results. Feel free
     to use different seeds when exploring results later in the guide.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的辅助函数使用种子来初始化随机数生成器。只要使用相同的种子，您将获得完全相同的结果。在后续指南中探索结果时，可以随意使用不同的种子。
 - en: '[PRE6]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: The helper function, or `rng`, is split 8 times so each device receives a different
     generator and generates a different image.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 辅助函数，或`rng`，被分成8次，因此每个设备接收不同的生成器并生成不同的图像。
 - en: '[PRE7]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: To take advantage of JAX’s optimized speed on a TPU, pass `jit=True` to the
     pipeline to compile the JAX code into an efficient representation and to ensure
     the model runs in parallel across the 8 devices.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了利用JAX在TPU上的优化速度，将`jit=True`传递给管道，将JAX代码编译成高效的表示，并确保模型在8个设备上并行运行。
 - en: You need to ensure all your inputs have the same shape in subsequent calls,
     otherwise JAX will need to recompile the code which is slower.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 您需要确保所有输入在后续调用中具有相同的形状，否则JAX将需要重新编译代码，这会更慢。
 - en: The first inference run takes more time because it needs to compile the code,
     but subsequent calls (even with different inputs) are much faster. For example,
     it took more than a minute to compile on a TPU v2-8, but then it takes about **7s**
     on a future inference run!
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一次推理运行需要更多时间，因为需要编译代码，但后续调用（即使使用不同的输入）会快得多。例如，在TPU v2-8上编译需要超过一分钟，但在未来的推理运行中大约需要**7秒**！
 - en: '[PRE8]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The returned array has shape `(8, 1, 512, 512, 3)` which should be reshaped
     to remove the second dimension and get 8 images of `512 × 512 × 3`. Then you can
     use the [numpy_to_pil()](/docs/diffusers/v0.26.3/en/api/utilities#diffusers.utils.numpy_to_pil)
     function to convert the arrays into images.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回的数组形状为`(8, 1, 512, 512, 3)`，应该重新整形以去除第二维，并获得`512 × 512 × 3`的8个图像。然后，您可以使用[numpy_to_pil()](/docs/diffusers/v0.26.3/en/api/utilities#diffusers.utils.numpy_to_pil)函数将数组转换为图像。
 - en: '[PRE9]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '![img](../Images/ae26c49256edf5470277710762edc407.png)'
+  id: totrans-33
   prefs: []
   type: TYPE_IMG
+  zh: '![img](../Images/ae26c49256edf5470277710762edc407.png)'
 - en: Using different prompts
+  id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用不同的提示符
 - en: 'You don’t necessarily have to use the same prompt on all devices. For example,
     to generate 8 different prompts:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 您不一定需要在所有设备上使用相同的提示。例如，要生成8个不同的提示：
 - en: '[PRE10]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '![img](../Images/aca4bd3a07a58b9a81031e0734d47ed3.png)'
+  id: totrans-37
   prefs: []
   type: TYPE_IMG
+  zh: '![img](../Images/aca4bd3a07a58b9a81031e0734d47ed3.png)'
 - en: How does parallelization work?
+  id: totrans-38
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 并行化是如何工作的？
 - en: The Flax pipeline in 🤗 Diffusers automatically compiles the model and runs it
     in parallel on all available devices. Let’s take a closer look at how that process
     works.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Diffusers中的Flax管道会自动编译模型并在所有可用设备上并行运行。让我们更仔细地看看这个过程是如何工作的。
 - en: JAX parallelization can be done in multiple ways. The easiest one revolves around
     using the [`jax.pmap`](https://jax.readthedocs.io/en/latest/_autosummary/jax.pmap.html)
     function to achieve single-program multiple-data (SPMD) parallelization. It means
     running several copies of the same code, each on different data inputs. More sophisticated
     approaches are possible, and you can go over to the JAX [documentation](https://jax.readthedocs.io/en/latest/index.html)
     to explore this topic in more detail if you are interested!
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: JAX并行化可以通过多种方式实现。最简单的方法是使用[`jax.pmap`](https://jax.readthedocs.io/en/latest/_autosummary/jax.pmap.html)函数来实现单程序多数据（SPMD）并行化。这意味着在不同数据输入上运行相同代码的多个副本。还有更复杂的方法，如果您感兴趣，可以查看JAX的[文档](https://jax.readthedocs.io/en/latest/index.html)以更详细地探讨这个主题！
 - en: '`jax.pmap` does two things:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: '`jax.pmap`做了两件事：'
 - en: Compiles (or ”`jit`s”) the code which is similar to `jax.jit()`. This does not
     happen when you call `pmap`, and only the first time the `pmap`ped function is
     called.
+  id: totrans-42
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 编译（或“`jit`s”）类似于`jax.jit()`的代码。当您调用`pmap`时，不会发生这种情况，只有第一次调用`pmap`函数时才会发生。
 - en: Ensures the compiled code runs in parallel on all available devices.
+  id: totrans-43
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 确保编译的代码在所有可用设备上并行运行。
 - en: 'To demonstrate, call `pmap` on the pipeline’s `_generate` method (this is a
     private method that generates images and may be renamed or removed in future releases
     of 🤗 Diffusers):'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了演示，在管道的`_generate`方法上调用`pmap`（这是一个生成图像的私有方法，在未来的🤗 Diffusers版本中可能会被重命名或删除）：
 - en: '[PRE11]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'After calling `pmap`, the prepared function `p_generate` will:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用`pmap`后，准备好的函数`p_generate`将：
 - en: Make a copy of the underlying function, `pipeline._generate`, on each device.
+  id: totrans-47
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在每个设备上复制基础函数`pipeline._generate`。
 - en: Send each device a different portion of the input arguments (this is why it’s
     necessary to call the *shard* function). In this case, `prompt_ids` has shape
     `(8, 1, 77, 768)` so the array is split into 8 and each copy of `_generate` receives
     an input with shape `(1, 77, 768)`.
+  id: totrans-48
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 向每个设备发送不同部分的输入参数（这就是为什么需要调用*shard*函数）。在这种情况下，`prompt_ids`的形状为`(8, 1, 77, 768)`，因此数组被分成8部分，每个`_generate`的副本接收形状为`(1,
+    77, 768)`的输入。
 - en: The most important thing to pay attention to here is the batch size (1 in this
     example), and the input dimensions that make sense for your code. You don’t have
     to change anything else to make the code work in parallel.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里要注意的最重要的事情是批量大小（在本例中为1）和适合您代码的输入维度。您不必更改其他任何内容即可使代码并行工作。
 - en: The first time you call the pipeline takes more time, but the calls afterward
     are much faster. The `block_until_ready` function is used to correctly measure
     inference time because JAX uses asynchronous dispatch and returns control to the
     Python loop as soon as it can. You don’t need to use that in your code; blocking
     occurs automatically when you want to use the result of a computation that has
     not yet been materialized.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一次调用管道需要更多时间，但之后的调用速度要快得多。使用`block_until_ready`函数来正确测量推理时间，因为JAX使用异步调度，并尽快将控制返回给Python循环。您不需要在代码中使用它；当您想要使用尚未实现的计算结果时，阻塞会自动发生。
 - en: '[PRE12]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Check your image dimensions to see if they’re correct:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 检查您的图像维度是否正确：
 - en: '[PRE13]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
