@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 加速文本到图像扩散模型的推理
 - en: 'Original text: [https://huggingface.co/docs/diffusers/tutorials/fast_diffusion](https://huggingface.co/docs/diffusers/tutorials/fast_diffusion)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/tutorials/fast_diffusion](https://huggingface.co/docs/diffusers/tutorials/fast_diffusion)
 - en: null
   id: totrans-2
   prefs: []
@@ -20,6 +22,7 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于迭代和顺序反向扩散过程，扩散模型比它们的GAN对应模型慢。有几种技术可以解决这个限制，例如渐进式时间步蒸馏（[LCM LoRA](../using-diffusers/inference_with_lcm_lora)）、模型压缩（[SSD-1B](https://huggingface.co/segmind/SSD-1B)）和重用去噪器的相邻特征（[DeepCache](../optimization/deepcache)）。
 - en: However, you don’t necessarily need to use these techniques to speed up inference.
     With PyTorch 2 alone, you can accelerate the inference latency of text-to-image
     diffusion pipelines by up to 3x. This tutorial will show you how to progressively
@@ -30,10 +33,13 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，并不一定需要使用这些技术来加速推理。仅使用PyTorch 2，您可以将文本到图像扩散管道的推理延迟加速至3倍。本教程将向您展示如何逐步应用PyTorch
+    2中发现的优化来减少推理延迟。在本教程中，您将使用[Stable Diffusion XL (SDXL)](../using-diffusers/sdxl)管道，但这些技术也适用于其他文本到图像扩散管道。
 - en: 'Make sure you’re using the latest version of Diffusers:'
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保您正在使用最新版本的Diffusers：
 - en: '[PRE0]'
   id: totrans-6
   prefs: []
@@ -43,6 +49,7 @@
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后升级其他所需的库：
 - en: '[PRE1]'
   id: totrans-8
   prefs: []
@@ -53,6 +60,7 @@
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装[PyTorch nightly](https://pytorch.org/)以从最新和最快的内核中受益：
 - en: '[PRE2]'
   id: totrans-10
   prefs: []
@@ -63,21 +71,25 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面报告的结果来自一个80GB 400W A100，其时钟频率设置为最大。
 - en: If you’re interested in the full benchmarking code, take a look at [huggingface/diffusion-fast](https://github.com/huggingface/diffusion-fast).
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您对完整的基准代码感兴趣，请查看[huggingface/diffusion-fast](https://github.com/huggingface/diffusion-fast)。
 - en: Baseline
   id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 基线
 - en: 'Let’s start with a baseline. Disable reduced precision and the [`scaled_dot_product_attention`
     (SDPA)](../optimization/torch2.0#scaled-dot-product-attention) function which
     is automatically used by Diffusers:'
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从一个基线开始。禁用降低精度和[`scaled_dot_product_attention` (SDPA)](../optimization/torch2.0#scaled-dot-product-attention)函数，这个函数会被Diffusers自动使用：
 - en: '[PRE3]'
   id: totrans-15
   prefs: []
@@ -87,32 +99,38 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个默认设置需要7.36秒。
 - en: '![](../Images/584efcadbeb310692fb90a60e06360d2.png)'
   id: totrans-17
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/584efcadbeb310692fb90a60e06360d2.png)'
 - en: bfloat16
   id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: bfloat16
 - en: 'Enable the first optimization, reduced precision or more specifically bfloat16\.
     There are several benefits of using reduced precision:'
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 启用第一个优化，即降低精度，更具体地是bfloat16。使用降低精度有几个好处：
 - en: Using a reduced numerical precision (such as float16 or bfloat16) for inference
     doesn’t affect the generation quality but significantly improves latency.
   id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在推理中使用降低的数值精度（如float16或bfloat16）不会影响生成质量，但会显著提高延迟。
 - en: The benefits of using bfloat16 compared to float16 are hardware dependent, but
     modern GPUs tend to favor bfloat16.
   id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 与float16相比，使用bfloat16的好处取决于硬件，但现代GPU倾向于支持bfloat16。
 - en: bfloat16 is much more resilient when used with quantization compared to float16,
     but more recent versions of the quantization library ([torchao](https://github.com/pytorch-labs/ao))
     we used don’t have numerical issues with float16.
@@ -120,6 +138,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 与float16相比，bfloat16在与量化一起使用时更具弹性，但我们使用的量化库的更近版本（[torchao](https://github.com/pytorch-labs/ao)）对float16没有数值问题。
 - en: '[PRE4]'
   id: totrans-23
   prefs: []
@@ -129,31 +148,37 @@
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: bfloat16将延迟从7.36秒降至4.63秒。
 - en: '![](../Images/831463c6351d9fc036c263c31b10cd4b.png)'
   id: totrans-25
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/831463c6351d9fc036c263c31b10cd4b.png)'
 - en: In our later experiments with float16, recent versions of torchao do not incur
     numerical problems from float16.
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们后续的使用float16的实验中，最近版本的torchao不会出现float16的数值问题。
 - en: Take a look at the [Speed up inference](../optimization/fp16) guide to learn
     more about running inference with reduced precision.
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看[加速推理](../optimization/fp16)指南，了解更多关于使用降低精度进行推理的信息。
 - en: SDPA
   id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: SDPA
 - en: Attention blocks are intensive to run. But with PyTorch’s [`scaled_dot_product_attention`](../optimization/torch2.0#scaled-dot-product-attention)
     function, it is a lot more efficient. This function is used by default in Diffusers
     so you don’t need to make any changes to the code.
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意力块的运行是密集的。但是使用PyTorch的[`scaled_dot_product_attention`](../optimization/torch2.0#scaled-dot-product-attention)函数，效率更高。这个函数在Diffusers中默认使用，因此您不需要对代码进行任何更改。
 - en: '[PRE5]'
   id: totrans-30
   prefs: []
@@ -164,15 +189,18 @@
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 缩放点积注意力将延迟从4.63秒降至3.31秒。
 - en: '![](../Images/01dcfc49da5fef775ed409609c41b519.png)'
   id: totrans-32
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/01dcfc49da5fef775ed409609c41b519.png)'
 - en: torch.compile
   id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: torch.compile
 - en: 'PyTorch 2 includes `torch.compile` which uses fast and optimized kernels. In
     Diffusers, the UNet and VAE are usually compiled because these are the most compute-intensive
     modules. First, configure a few compiler flags (refer to the [full list](https://github.com/pytorch/pytorch/blob/main/torch/_inductor/config.py)
@@ -180,6 +208,7 @@
   id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch 2包括`torch.compile`，使用快速和优化的内核。在Diffusers中，UNet和VAE通常会被编译，因为这些是最计算密集的模块。首先，配置一些编译器标志（更多选项请参考[完整列表](https://github.com/pytorch/pytorch/blob/main/torch/_inductor/config.py)）：
 - en: '[PRE6]'
   id: totrans-35
   prefs: []
@@ -190,6 +219,7 @@
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 将UNet和VAE的内存布局更改为“channels_last”在编译它们时非常重要，以确保最大速度。
 - en: '[PRE7]'
   id: totrans-37
   prefs: []
@@ -199,6 +229,7 @@
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在编译并执行推理：
 - en: '[PRE8]'
   id: totrans-39
   prefs: []
@@ -212,26 +243,31 @@
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.compile`提供不同的后端和模式。为了获得最大的推理速度，对于感应器后端使用“max-autotune”。“max-autotune”使用CUDA图形，并专门为延迟优化编译图。CUDA图形通过一种机制来通过单个CPU操作启动多个GPU操作，大大减少了启动GPU操作的开销。'
 - en: Using SDPA attention and compiling both the UNet and VAE cuts the latency from
     3.31 seconds to 2.54 seconds.
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用SDPA注意力并编译UNet和VAE可以将延迟从3.31秒减少到2.54秒。
 - en: '![](../Images/4c34eff89c0a052eb3a44e922e8075c9.png)'
   id: totrans-42
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/4c34eff89c0a052eb3a44e922e8075c9.png)'
 - en: Prevent graph breaks
   id: totrans-43
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 防止图中断
 - en: Specifying `fullgraph=True` ensures there are no graph breaks in the underlying
     model to take full advantage of `torch.compile` without any performance degradation.
     For the UNet and VAE, this means changing how you access the return variables.
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 指定`fullgraph=True`可以确保底层模型中没有图中断，以充分利用`torch.compile`而不会降低性能。对于UNet和VAE，这意味着改变访问返回变量的方式。
 - en: '[PRE9]'
   id: totrans-45
   prefs: []
@@ -242,6 +278,7 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 编译后去除GPU同步
 - en: During the iterative reverse diffusion process, the `step()` function is [called](https://github.com/huggingface/diffusers/blob/1d686bac8146037e97f3fd8c56e4063230f71751/src/diffusers/pipelines/stable_diffusion_xl/pipeline_stable_diffusion_xl.py#L1228)
     on the scheduler each time after the denoiser predicts the less noisy latent embeddings.
     Inside `step()`, the `sigmas` variable is [indexed](https://github.com/huggingface/diffusers/blob/1d686bac8146037e97f3fd8c56e4063230f71751/src/diffusers/schedulers/scheduling_euler_discrete.py#L476)
@@ -251,6 +288,7 @@
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 在迭代反向扩散过程中，每次在去噪器预测出更少噪音的潜在嵌入后，调度器上的`step()`函数会被[调用](https://github.com/huggingface/diffusers/blob/1d686bac8146037e97f3fd8c56e4063230f71751/src/diffusers/pipelines/stable_diffusion_xl/pipeline_stable_diffusion_xl.py#L1228)。在`step()`内，`sigmas`变量会被[索引](https://github.com/huggingface/diffusers/blob/1d686bac8146037e97f3fd8c56e4063230f71751/src/diffusers/schedulers/scheduling_euler_discrete.py#L476)，当放置在GPU上时，会导致CPU和GPU之间的通信同步。这会引入延迟，当去噪器已经被编译时，这种情况会更加明显。
 - en: But if the `sigmas` array always [stays on the CPU](https://github.com/huggingface/diffusers/blob/35a969d297cba69110d175ee79c59312b9f49e1e/src/diffusers/schedulers/scheduling_euler_discrete.py#L240),
     the CPU and GPU sync doesn’t occur and you don’t get any latency. In general,
     any CPU and GPU communication sync should be none or be kept to a bare minimum
@@ -258,16 +296,19 @@
   id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 但如果`sigmas`数组始终[保留在CPU上](https://github.com/huggingface/diffusers/blob/35a969d297cba69110d175ee79c59312b9f49e1e/src/diffusers/schedulers/scheduling_euler_discrete.py#L240)，CPU和GPU同步就不会发生，也不会有任何延迟。一般来说，任何CPU和GPU之间的通信同步应该是没有或保持最小的，因为它可能会影响推理延迟。
 - en: Combine the attention block’s projection matrices
   id: totrans-49
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 合并注意力块的投影矩阵
 - en: The UNet and VAE in SDXL use Transformer-like blocks which consists of attention
     blocks and feed-forward blocks.
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: SDXL中的UNet和VAE使用类似Transformer的块，包括注意力块和前馈块。
 - en: In an attention block, the input is projected into three sub-spaces using three
     different projection matrices – Q, K, and V. These projections are performed separately
     on the input. But we can horizontally combine the projection matrices into a single
@@ -276,10 +317,12 @@
   id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 在注意力块中，输入会使用三个不同的投影矩阵（Q、K和V）投影到三个子空间中。这些投影会分别在输入上执行。但是我们可以将投影矩阵水平合并成一个单独的矩阵，并在一步中执行投影。这会增加输入投影的矩阵乘法的大小，并改善量化的影响。
 - en: 'You can combine the projection matrices with just a single line of code:'
   id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以用一行代码合并投影矩阵：
 - en: '[PRE10]'
   id: totrans-53
   prefs: []
@@ -289,10 +332,12 @@
   id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将将延迟从2.54秒略微提高到2.52秒。
 - en: '![](../Images/fe24b44eafbe3b39c1b11f09cd41d343.png)'
   id: totrans-55
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/fe24b44eafbe3b39c1b11f09cd41d343.png)'
 - en: Support for [fuse_qkv_projections()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline.fuse_qkv_projections)
     is limited and experimental. It’s not available for many non-Stable Diffusion
     pipelines such as [Kandinsky](../using-diffusers/kandinsky). You can refer to
@@ -301,11 +346,13 @@
   id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 对[fuse_qkv_projections()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline.fuse_qkv_projections)的支持是有限的且实验性的。对于许多非稳定扩散管道（如[Kandinsky](../using-diffusers/kandinsky)），它不可用。您可以参考这个[PR](https://github.com/huggingface/diffusers/pull/6179)来了解如何为其他管道启用此功能。
 - en: Dynamic quantization
   id: totrans-57
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 动态量化
 - en: You can also use the ultra-lightweight PyTorch quantization library, [torchao](https://github.com/pytorch-labs/ao)
     (commit SHA `54bcd5a10d0abbe7b0c045052029257099f83fd9`), to apply [dynamic int8
     quantization](https://pytorch.org/tutorials/recipes/recipes/dynamic_quantization.html)
@@ -315,10 +362,12 @@
   id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用超轻量级的PyTorch量化库[torchao](https://github.com/pytorch-labs/ao)（提交SHA `54bcd5a10d0abbe7b0c045052029257099f83fd9`）来对UNet和VAE应用[动态int8量化](https://pytorch.org/tutorials/recipes/recipes/dynamic_quantization.html)。量化会为模型增加额外的转换开销，希望通过更快的矩阵乘法（动态量化）来弥补。如果矩阵乘法太小，这些技术可能会降低性能。
 - en: 'First, configure all the compiler tags:'
   id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，配置所有编译器标签：
 - en: '[PRE11]'
   id: totrans-60
   prefs: []
