@@ -1,0 +1,539 @@
+- en: Text Environments
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/text_environments](https://huggingface.co/docs/trl/text_environments)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/22.536378c6.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Docstring.a2ba2b54.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text environments provide a learning ground for language agents. It allows a
+    language model to use tools to accomplish a task such as using a Python interpreter
+    to answer math questions or using a search index for trivia questions. Having
+    access to tools allows language models to solve tasks that would be very hard
+    for the models itself but can be trivial for the appropriate tools. A good example
+    is arithmetics of large numbers that become a simple copy-paste task once you
+    have access to a calculator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/900fbb92ad702f0ec4bb5534868998fb.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Let’s dive into how text environments work and start with tools!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tools
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'One of the core building blocks of text environments are tools that the model
+    can use to solve tasks. In general tools can be any Python function that takes
+    a string as input and returns string. The `TextEnvironment` offers two options
+    for tools: either go with predefined tools from `transformers.Tool` or define
+    your own function or class with `__call__` method. Let’s have a look at both!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: transformers.Tool
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Text environments fully support tools of the class `transformers.Tool`. The
+    advantage of building tools in that framework is that they can easily be shared
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'These tools are either loaded from the hub or from a local folder. Using the
+    tool is as simple as calling them with a text query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that both input and return values are strings to enable easy usage with
+    a language model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Custom Tools
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The following is an example of a tool that adds two integers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: We looked at basic examples such as a calculator but the principle holds for
+    more complex tools as well such as a web search tool where you input the query
+    and get the search results in return. Now let’s look at how the model can use
+    the tools with the call syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Call syntax
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In order to have a unified way for the model to call a tool we created a simple
+    syntax that looks as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There are a few special tokens involved so let’s decompose it: First the model
+    can signal that it wants to use a tool by emitting the `<request>` token. After
+    that we want to know the name of the tool to call which is done by enclosing the
+    tool name with `<>` brackets. Once we know which tool to call the tool query follows
+    which is in free text form. The `<call>` tokens signifies the end of the query
+    and stops the model generation. At this point the model output is parsed and the
+    query sent to the tool. The environment appends the tool response to the string
+    followed by the `<response>` token to show the end the tool output.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s look at the concrete example of the calculator and assume its name is
+    `Calculator` (more on how the name of a tool is inferred later):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, the episode is ended and generation stops when the model generates
+    `<submit>` which marks the interaction as completed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now let’s have a look how we can create a new text environment!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a TextEnvironment
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s decompose the settings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Argument | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-- | :-- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `model` | Language model to interact with the environment and generate requests.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `tokenizer` | Tokenizer of language model handling tokenization of strings.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `tools` | `list` of `dict` of tools. If former the name of the tool is inferred
+    from class name and otherwise it’s the keys of the dictionary. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `reward_fn` | A function that takes a string as input and returns. Can have
+    extra arguments that are passed to `.run()` such as ground truth. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `prompt` | Prompt to prepend to every task. Usually a few examples to demonstrate
+    to the model how to use the tools in a few-shot fashion. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `max_turns` | Maximum number of interactions between model and tools before
+    episode ends. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `max_tool_response` | The tool response is truncated to this number to avoid
+    running out of model context. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `max_length` | The maximum number of tokens to allow in an episode. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `generation_kwargs` | Generation settings used by the language model. |'
+  prefs: []
+  type: TYPE_TB
+- en: You can customize the environment to your needs and add custom tools and settings.
+    Let’s see how you can use the environment to have the model interact with the
+    available tools!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Run an Episode
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To run a set of queries through the text environment one can simply use the
+    `run` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will execute the model/tool feedback loop for each query until either no
+    tool is called anymore, the maximum number of turns is reached or to maximum number
+    of tokens in an episode is exceeded. The extra `kwargs` (e.g. `answers=answers`
+    above) passed to `run` will be passed on to the reward function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are five objects that are returned by `run`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`queries`: a list of the tokenized queries'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`responses`: all tokens that have been generated withing the environment including
+    model and tool tokens'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`masks`: mask that indicates which tokens have been generated by the model
+    and which tokens are generated by the tool'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rewards`: a list of reward for each query/response'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`histories`: list of `TextHistory` objects, which are useful objects containing
+    all the above and also the text equivalents'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The masks are crucial for training as we don’t want to optimize tokens that
+    the model has not generated which are tokens produced by the tools.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, we’ll train a PPO step with the generated responses!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Training on episodes from the `TextEnvironment` is straight forward and simply
+    requires forwarding all the returned variables except the `TextHistory` objects
+    to the `step` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: TextHistory
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `TextHistory` object stores the interactions between the model and the text
+    environment. It stores tokens and text generated in each turn and their source
+    in each turn (model or system) as well as rewards. Let’s go through the class
+    attributes and methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Attributes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The following table summarises the available attributes of the `TextEnvironment`
+    class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Attribute | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-- | :-- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `text` | The full string of the text generated in the text environment with
+    both model and system generated text. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `text_spans` | A list of tuples with the spans for each model or system generated
+    text segment. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `system_spans` | A list of boolean values indicating if the segment is model
+    or system generated. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `tokens` | All tokens generated in text environment with both model and system
+    generated tokens. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `token_spans` | Similar to `text_spans` the `token_spans` indicate the boundaries
+    of model andsystem generated tokens. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `token_masks` | The token masks can be used to ignore system generated tokens
+    by masking them. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `completed` | Indicates if the interaction with the environment has completed.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `truncated` | Indicates if the interaction with the environment has completed
+    because max length was reached. |'
+  prefs: []
+  type: TYPE_TB
+- en: With these attributes you can reconstruct every interaction of the model with
+    the `TextEnvironment`. The `TextHistory` also lets you visualize the text history.
+    Let’s have a look!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visualization
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When the model interacts inside the `TextEnvironment` it can be useful to visualize
+    and separate which parts of the text outputs were generated by the model and which
+    parts come from the system and tools. For that purpose there are the two methods
+    [TextHistory.show_text()](/docs/trl/v0.7.10/en/text_environments#trl.TextHistory.show_text)
+    and [TextHistory.show_tokens()](/docs/trl/v0.7.10/en/text_environments#trl.TextHistory.show_tokens).
+    They print the text and tokens respectively and highlight the various segments
+    using the [`rich` libray](https://github.com/Textualize/rich) (make sure to install
+    it before using these methods).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can see that the prompt is highlighted in gray, whereas system segments
+    such as query and tool responses are highlighted in green. All segments generated
+    by the model are highlighted in blue and in addition to the pure text output the
+    reward is displayed as additional text in plum. Here an example of `show_text`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/d257e9fec94b02a669a8b79a806b8ffa.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Sometimes there can be tricky tokenization related issues that are hidden when
+    showing the decoded text. Thus `TextHistory` also offers an option to display
+    the same highlighting on the tokens directly with `show_tokens`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/25fe8b1122f9aa79b20f7cf86d71b243.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Note that you can turn on the colour legend by passing `show_legend=True`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: API Documentation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class trl.TextEnvironment`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L208)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The TextEnvironment enables interaction of a LLM with an environment using tools.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `compute_reward`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L358)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Compute the reward for a list of histories.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `generate`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L367)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generate responses for a list of histories.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `parse_tool_call`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L333)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Parse request string. Expected format: <request><tool_name>query<call>'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `run`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L263)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`queries` (list[str]) — A list of queries to run the model in the environment
+    on.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Run the environment on a list of queries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `step`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L296)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`history` (`TextHistory`) — The history to step forward.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Step the environment forward one turn.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `task_end_check`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L393)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Check if the current generation sequence has finished.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `tasks_end_check`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L382)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Check if the current generation sequences have finished.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### `class trl.TextHistory`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L59)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: The TextHistory class keeps track of the history of an interaction between the
+    language model and the environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `append_segment`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L88)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Append a new segment to the history.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'args: text (`str`): The text of the new segment. tokens (`torch.LongTensor`):
+    The tokens of the new segment. system (`bool`, *optional*): Whether the new segment
+    is a system or user segment.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `complete`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L116)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Mark the history as completed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `show_colour_legend`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L189)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Print the colour legend.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `show_text`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L142)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Print the text history.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `show_tokens`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L164)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Print the history tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `split_query_response_tokens`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/environment/base_environment.py#L131)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Split the tokens into query and response tokens.
+  prefs: []
+  type: TYPE_NORMAL

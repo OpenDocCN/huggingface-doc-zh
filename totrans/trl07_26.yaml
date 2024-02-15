@@ -1,0 +1,290 @@
+- en: Learning Tools (Experimental 🧪)
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/learning_tools](https://huggingface.co/docs/trl/learning_tools)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/12.830de09a.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Large Language Models (LLMs) with tools has been a popular topic recently
+    with awesome works such as [ToolFormer](https://arxiv.org/abs/2302.04761) and
+    [ToolBench](https://arxiv.org/pdf/2305.16504.pdf). In TRL, we provide a simple
+    example of how to teach LLM to use tools with reinforcement learning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s an overview of the scripts in the [trl repository](https://github.com/lvwerra/trl/tree/main/examples/research_projects/tools):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| File | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [`calculator.py`](https://github.com/lvwerra/trl/blob/main/examples/research_projects/tools/calculator.py)
+    | Script to train LLM to use a calculator with reinforcement learning. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [`triviaqa.py`](https://github.com/lvwerra/trl/blob/main/examples/research_projects/tools/triviaqa.py)
+    | Script to train LLM to use a wiki tool to answer questions. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [`python_interpreter.py`](https://github.com/lvwerra/trl/blob/main/examples/research_projects/tools/python_interpreter.py)
+    | Script to train LLM to use python interpreter to solve math puzzles. |'
+  prefs: []
+  type: TYPE_TB
+- en: Note that the scripts above rely heavily on the `TextEnvironment` API which
+    is still under active development. The API may change in the future. Please see
+    [`TextEnvironment`](text_environment) for the related docs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Learning to Use a Calculator
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The rough idea is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load a tool such as [ybelkada/simple-calculator](https://huggingface.co/spaces/ybelkada/simple-calculator)
+    that parse a text calculation like `"14 + 34"` and return the calulated number:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Define a reward function that returns a positive reward if the tool returns
+    the correct answer. In the script we create a dummy reward function like `reward_fn
+    = lambda x: 1`, but we override the rewards directly later.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Create a prompt on how to use the tools
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: Create a `trl.TextEnvironment` with the model
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: Then generate some data such as `tasks = ["\n\nWhat is 13.1-3?", "\n\nWhat is
+    4*3?"]` and run the environment with `queries, responses, masks, rewards, histories
+    = env.run(tasks)`. The environment will look for the `<call>` token in the prompt
+    and append the tool output to the response; it will also return the mask associated
+    with the response. You can further use the `histories` to visualize the interaction
+    between the model and the tool; `histories[0].show_text()` will show the text
+    with color-coded tool output and `histories[0].show_tokens(tokenizer)` will show
+    visualize the tokens. ![](../Images/e9b6e7b4e250b332fcbd9626573e3f25.png)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Finally, we can train the model with `train_stats = ppo_trainer.step(queries,
+    responses, rewards, masks)`. The trainer will use the mask to ignore the tool
+    output when computing the loss, make sure to pass that argument to `step`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Experiment results
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We trained a model with the above script for 10 random seeds. You can reproduce
+    the run with the following command. Feel free to remove the `--slurm-*` arguments
+    if you don’t have access to a slurm cluster.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can then use [`openrlbenchmark`](https://github.com/openrlbenchmark/openrlbenchmark)
+    which generates the following plot.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/6cbe96fa603fe61845da0a4c0fbf4641.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: As we can see, while 1-2 experiments crashed for some reason, most of the runs
+    obtained near perfect proficiency in the calculator task.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '(Early Experiments 🧪): learning to use a wiki tool for question answering'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In the [ToolFormer](https://arxiv.org/abs/2302.04761) paper, it shows an interesting
+    use case that utilizes a Wikipedia Search tool to help answer questions. In this
+    section, we attempt to perform similar experiments but uses RL instead to teach
+    the model to use a wiki tool on the [TriviaQA](https://nlp.cs.washington.edu/triviaqa/)
+    dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Note that many settings are different so the results are not directly comparable.**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building a search index
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Since [ToolFormer](https://arxiv.org/abs/2302.04761) did not open source, we
+    needed to first replicate the search index. It is mentioned in their paper that
+    the authors built the search index using a BM25 retriever that indexes the Wikipedia
+    dump from [KILT](https://github.com/facebookresearch/KILT)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fortunately, [`pyserini`](https://github.com/castorini/pyserini) already implements
+    the BM25 retriever and provides a prebuilt index for the KILT Wikipedia dump.
+    We can use the following code to search the index.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: We then basically deployed this snippet as a Hugging Face space [here](https://huggingface.co/spaces/vwxyzjn/pyserini-wikipedia-kilt-doc),
+    so that we can use the space as a `transformers.Tool` later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/99bd431ca68ab971be553352b4f02e67.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Experiment settings
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'We use the following settings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: use the `bigcode/starcoderbase` model as the base model
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: use the `pyserini-wikipedia-kilt-doc` space as the wiki tool and only uses the
+    first paragrahs of the search result, allowing the `TextEnvironment` to obtain
+    at most `max_tool_reponse=400` response tokens from the tool.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: test if the response contain the answer string, if so, give a reward of 1, otherwise,
+    give a reward of 0.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: notice this is a simplified evaluation criteria. In [ToolFormer](https://arxiv.org/abs/2302.04761),
+    the authors checks if the first 20 words of the response contain the correct answer.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: used the following prompt that demonstrates the usage of the wiki tool.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Result and Discussion
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Our experiments show that the agent can learn to use the wiki tool to answer
+    questions. The learning curves would go up mostly, but one of the experiment did
+    crash.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/a85eaae9f29d7074402801be154c2d57.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Wandb report is [here](https://wandb.ai/costa-huang/cleanRL/reports/TriviaQA-Final-Experiments--Vmlldzo1MjY0ODk5)
+    for further inspection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that the correct rate of the trained model is on the low end, which could
+    be due to the following reasons:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**incorrect searches:** When given the question `"What is Bruce Willis'' real
+    first name?"` if the model searches for `Bruce Willis`, our wiki tool returns
+    “Patrick Poivey (born 18 February 1948) is a French actor. He is especially known
+    for his voice: he is the French dub voice of Bruce Willis since 1988.`But a correct
+    search should be`Walter Bruce Willis (born March 19, 1955) is an American former
+    actor. He achieved fame with a leading role on the comedy-drama series Moonlighting
+    (1985–1989) and appeared in over a hundred films, gaining recognition as an action
+    hero after his portrayal of John McClane in the Die Hard franchise (1988–2013)
+    and other roles.[1][2]”'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![](../Images/36b96862e37367132a174f261df0cb60.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '**unnecessarily long response**: The wiki tool by default sometimes output
+    very long sequences. E.g., when the wiki tool searches for “Brown Act”'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Our wiki tool returns “The Ralph M. Brown Act, located at California Government
+    Code 54950 “et seq.”, is an act of the California State Legislature, authored
+    by Assemblymember Ralph M. Brown and passed in 1953, that guarantees the public’s
+    right to attend and participate in meetings of local legislative bodies.”
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[ToolFormer](https://arxiv.org/abs/2302.04761)’s wiki tool returns “The Ralph
+    M. Brown Act is an act of the California State Legislature that guarantees the
+    public’s right to attend and participate in meetings of local legislative bodies.”
+    which is more succinct.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![](../Images/03829057729a612fe5243cc49785765b.png)'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_IMG
+- en: '(Early Experiments 🧪): solving math puzzles with python interpreter'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In this section, we attempt to teach the model to use a python interpreter
+    to solve math puzzles. The rough idea is to give the agent a prompt like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Training experiment can be found at [https://wandb.ai/lvwerra/trl-gsm8k/runs/a5odv01y](https://wandb.ai/lvwerra/trl-gsm8k/runs/a5odv01y)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/07e24d84156093ad57f614545aaa5ab2.png)'
+  prefs: []
+  type: TYPE_IMG

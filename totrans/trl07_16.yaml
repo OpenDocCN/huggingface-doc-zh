@@ -1,0 +1,669 @@
+- en: DPO Trainer
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/dpo_trainer](https://huggingface.co/docs/trl/dpo_trainer)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/6.5bcfd367.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Docstring.a2ba2b54.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TRL supports the DPO Trainer for training language models from preference data,
+    as described in the paper [Direct Preference Optimization: Your Language Model
+    is Secretly a Reward Model](https://arxiv.org/abs/2305.18290) by Rafailov et al.,
+    2023\. For a full example have a look at [`examples/scripts/dpo.py`](https://github.com/huggingface/trl/blob/main/examples/scripts/dpo.py).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first step as always is to train your SFT model, to ensure the data we train
+    on is in-distribution for the DPO algorithm.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Expected dataset format
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The DPO trainer expects a very specific format for the dataset. Since the model
+    will be trained to directly optimize the preference of which sentence is the most
+    relevant, given two sentences. We provide an example from the [`Anthropic/hh-rlhf`](https://huggingface.co/datasets/Anthropic/hh-rlhf)
+    dataset below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/108b7079a2ffc651b11289080d0cdc7d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Therefore the final dataset object should contain these 3 entries if you use
+    the default `DPODataCollatorWithPadding` data collator. The entries should be
+    named:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`prompt`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`chosen`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rejected`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'for example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: where the `prompt` contains the context inputs, `chosen` contains the corresponding
+    chosen responses and `rejected` contains the corresponding negative (rejected)
+    responses. As can be seen a prompt can have multiple responses and this is reflected
+    in the entries being repeated in the dictionary’s value arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Expected model format
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The DPO trainer expects a model of `AutoModelForCausalLM`, compared to PPO that
+    expects `AutoModelForCausalLMWithValueHead` for the value function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the DPOTrainer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For a detailed example have a look at the `examples/scripts/dpo.py` script.
+    At a high level we need to initialize the `DPOTrainer` with a `model` we wish
+    to train, a reference `ref_model` which we will use to calculate the implicit
+    rewards of the preferred and rejected response, the `beta` refers to the hyperparameter
+    of the implicit reward, and the dataset contains the 3 entries listed above. Note
+    that the `model` and `ref_model` need to have the same architecture (ie decoder
+    only or encoder-decoder).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After this one can then call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the `beta` is the temperature parameter for the DPO loss, typically
+    something in the range of `0.1` to `0.5`. We ignore the reference model as `beta`
+    -> 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Loss functions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Given the preference data, we can fit a binary classifier according to the Bradley-Terry
+    model and in fact the DPO authors propose the sigmoid loss on the normalized likelihood
+    via the `logsigmoid` to fit a logistic regression.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [RSO](https://arxiv.org/abs/2309.06657) authors propose to use a hinge loss
+    on the normalized likelihood from the [SLiC](https://arxiv.org/abs/2305.10425)
+    paper. The `DPOTrainer` can be switched to this loss via the `loss_type="hinge"`
+    argument and the `beta` in this case is the reciprocal of the margin.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [IPO](https://arxiv.org/abs/2310.12036) authors provide a deeper theoretical
+    understanding of the DPO algorithms and identify an issue with overfitting and
+    propose an alternative loss which can be used via the `loss_type="ipo"` argument
+    to the trainer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [cDPO](https://ericmitchell.ai/cdpo.pdf) is a tweak on the DPO loss where
+    we assume that the preference labels are noisy with some probability that can
+    be passed to the `DPOTrainer` via `label_smoothing` argument (between 0 and 0.5)
+    and then a conservative DPO loss is used. Use the `loss_type="cdpo"` argument
+    to the trainer to use it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [KTO](https://github.com/ContextualAI/HALOs/blob/main/assets/report.pdf)
+    loss is derived to directly maximize the utility of LLM generations instead of
+    the log-likelihood of preferences. Thus the dataset are not necessarily preferences
+    but rather desirable vs undesirable completions. For paired preference data as
+    required by the `DPOTrainer`, use the `loss_type="kto_pair"` argument to the trainer
+    to utilize this loss, while for the more general case of desired and undesirable
+    data, use the as of yet unimplemented `KTOTrainer`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logging
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'While training and evaluating we record the following reward metrics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`rewards/chosen`: the mean difference between the log probabilities of the
+    policy model and the reference model for the chosen responses scaled by beta'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rewards/rejected`: the mean difference between the log probabilities of the
+    policy model and the reference model for the rejected responses scaled by beta'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rewards/accuracies`: mean of how often the chosen rewards are > than the corresponding
+    rejected rewards'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rewards/margins`: the mean difference between the chosen and corresponding
+    rejected rewards'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Accelerate DPO fine-tuning using unsloth
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can further accelerate QLoRA / LoRA (2x faster, 60% less memory) using
+    the [`unsloth`](https://github.com/unslothai/unsloth) library that is fully compatible
+    with `SFTTrainer`. Currently `unsloth` supports only Llama (Yi, TinyLlama, Qwen,
+    Deepseek etc) and Mistral architectures. Some benchmarks for DPO listed below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| GPU | Model | Dataset | 🤗 | 🤗 + Flash Attention 2 | 🦥 Unsloth | 🦥 VRAM saved
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| A100 40G | Zephyr 7b | Ultra Chat | 1x | 1.24x | **1.88x** | -11.6% |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Tesla T4 | Zephyr 7b | Ultra Chat | 1x | 1.09x | **1.55x** | -18.6% |'
+  prefs: []
+  type: TYPE_TB
+- en: 'First install `unsloth` according to the [official documentation](https://github.com/unslothai/unsloth).
+    Once installed, you can incorporate unsloth into your workflow in a very simple
+    manner; instead of loading `AutoModelForCausalLM`, you just need to load a `FastLanguageModel`
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The saved model is fully compatible with Hugging Face’s transformers library.
+    Learn more about unsloth in their [official repository](https://github.com/unslothai/unsloth).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reference model considerations with PEFT
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You have three main options (plus several variants) for how the reference model
+    works when using PEFT, assuming the model that you would like to further enhance
+    with DPO was tuned using (Q)LoRA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Simply create two instances of the model, each loading your adapter - works
+    fine but is very inefficient.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Merge the adapter into the base model, create another adapter on top, then leave
+    the `model_ref` param null, in which case DPOTrainer will unload the adapter for
+    reference inference - efficient, but has potential downsides discussed below.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Load the adapter twice with different names, then use `set_adapter` during training
+    to swap between the adapter being DPO’d and the reference adapter - slightly less
+    efficient compared to 2 (~adapter size VRAM overhead), but avoids the pitfalls.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Downsides to merging QLoRA before DPO (approach 2)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As suggested by [Tim Dettmers](https://twitter.com/Tim_Dettmers/status/1694654191325573456),
+    the best option for merging QLoRA adapters is to first quantize the base model,
+    merge the adapter, then convert back to bf16\. Something similar to [this script](https://github.com/jondurbin/qlora/blob/main/qmerge.py)
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also just merge the adapters the standard way without quantizing the
+    base model, but then you have 1-2% reduced performance (and evidently, more issues
+    with empty responses).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you use the recommended approach, which quantizes the model, you’re now in
+    a situation where to use QLoRA for DPO, you will need to re-quantize the merged
+    model again or use an unquantized merge with lower overall performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using option 3 - load the adapter twice
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To avoid the downsides with option 2, at the expense of slightly increased VRAM,
+    you can load your fine-tuned adapter into the model twice, with different names,
+    and set the model/ref adapter names in DPOTrainer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: DPOTrainer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class trl.DPOTrainer`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L64)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`transformers.PreTrainedModel`) — The model to train, preferably an
+    `AutoModelForSequenceClassification`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ref_model` (`PreTrainedModelWrapper`) — Hugging Face transformer model with
+    a casual language modelling head. Used for implicit reward computation and loss.
+    If no reference model is provided, the trainer will create a reference model with
+    the same architecture as the model to be optimized.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`beta` (`float`, defaults to 0.1) — The beta factor in DPO loss. Higher beta
+    means less divergence from the initial policy. For the IPO loss, beta is the regularization
+    parameter denoted by tau in the paper.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_smoothing` (`float`, defaults to 0) — The robust DPO label smoothing
+    parameter from the [cDPO](https://ericmitchell.ai/cdpo.pdf) report that should
+    be between 0 and 0.5.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`loss_type` (`str`, defaults to `"sigmoid"`) — The type of DPO loss to use.
+    Either `"sigmoid"` the default DPO loss,`"hinge"` loss from [SLiC](https://arxiv.org/abs/2305.10425)
+    paper, `"ipo"` from [IPO](https://arxiv.org/abs/2310.12036) paper, or `"kto"`
+    from the HALOs [report](https://github.com/ContextualAI/HALOs/blob/main/assets/report.pdf).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`args` (`transformers.TrainingArguments`) — The arguments to use for training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`data_collator` (`transformers.DataCollator`) — The data collator to use for
+    training. If None is specified, the default data collator (`DPODataCollatorWithPadding`)
+    will be used which will pad the sequences to the maximum length of the sequences
+    in the batch, given a dataset of paired sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_pad_token_id` (`int`, defaults to `-100`) — The label pad token id.
+    This argument is required if you want to use the default data collator.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`padding_value` (`int`, defaults to `0`) — The padding value if it is different
+    to the tokenizer’s pad_token_id.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`truncation_mode` (`str`, defaults to `keep_end`) — The truncation mode to
+    use, either `keep_end` or `keep_start`. This argument is required if you want
+    to use the default data collator.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`train_dataset` (`datasets.Dataset`) — The dataset to use for training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`eval_dataset` (`datasets.Dataset`) — The dataset to use for evaluation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tokenizer` (`transformers.PreTrainedTokenizerBase`) — The tokenizer to use
+    for training. This argument is required if you want to use the default data collator.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`model_init` (`Callable[[], transformers.PreTrainedModel]`) — The model initializer
+    to use for training. If None is specified, the default model initializer will
+    be used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`callbacks` (`List[transformers.TrainerCallback]`) — The callbacks to use for
+    training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`optimizers` (`Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler.LambdaLR]`)
+    — The optimizer and scheduler to use for training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preprocess_logits_for_metrics` (`Callable[[torch.Tensor, torch.Tensor], torch.Tensor]`)
+    — The function to use to preprocess the logits before computing the metrics.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`max_length` (`int`, defaults to `None`) — The maximum length of the sequences
+    in the batch. This argument is required if you want to use the default data collator.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`max_prompt_length` (`int`, defaults to `None`) — The maximum length of the
+    prompt. This argument is required if you want to use the default data collator.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`max_target_length` (`int`, defaults to `None`) — The maximum length of the
+    target. This argument is required if you want to use the default data collator
+    and your model is an encoder-decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`peft_config` (`Dict`, defaults to `None`) — The PEFT configuration to use
+    for training. If you pass a PEFT configuration, the model will be wrapped in a
+    PEFT model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`is_encoder_decoder` (`Optional[bool]`, `optional`, defaults to `None`) — If
+    no model is provided, we need to know if the model_init returns an encoder-decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`disable_dropout` (`bool`, defaults to `True`) — Whether or not to disable
+    dropouts in `model` and `ref_model`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`generate_during_eval` (`bool`, defaults to `False`) — Whether to sample and
+    log generations during evaluation step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`compute_metrics` (`Callable[[EvalPrediction], Dict]`, *optional*) — The function
+    to use to compute the metrics. Must take a `EvalPrediction` and return a dictionary
+    string to metric values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`precompute_ref_log_probs` (`bool`, defaults to `False`) — Flag to precompute
+    reference model log probabilities and evaluation datasets. This is useful if you
+    want to train without the reference model and reduce the total GPU memory needed.
+    model_init_kwargs — (`Optional[Dict]`, *optional*): Dict of Optional kwargs to
+    pass when instantiating the model from a string ref_model_init_kwargs — (`Optional[Dict]`,
+    *optional*): Dict of Optional kwargs to pass when instantiating the ref model
+    from a string'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`model_adapter_name` (`str`, defaults to `None`) — Name of the train target
+    PEFT adapter, when using LoRA with multiple adapters.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ref_adapter_name` (`str`, defaults to `None`) — Name of the reference PEFT
+    adapter, when using LoRA with multiple adapters.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Initialize DPOTrainer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `build_tokenized_answer`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L523)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Llama tokenizer does satisfy `enc(a + b) = enc(a) + enc(b)`. It does ensure
+    `enc(a + b) = enc(a) + enc(a + b)[len(enc(a)):]`. Reference: [https://github.com/EleutherAI/lm-evaluation-harness/pull/531#issuecomment-1595586257](https://github.com/EleutherAI/lm-evaluation-harness/pull/531#issuecomment-1595586257)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `compute_reference_log_probs`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L731)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Computes log probabilities of the reference model for a single padded batch
+    of a DPO specific dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `concatenated_forward`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L936)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Run the given model on the given batch of inputs, concatenating the chosen and
+    rejected inputs together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We do this to avoid doing two forward passes, because it’s faster for FSDP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `concatenated_inputs`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L755)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Concatenate the chosen and rejected inputs into a single tensor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `dpo_loss`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L817)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: A tuple of three tensors
+  prefs: []
+  type: TYPE_NORMAL
+- en: (losses, chosen_rewards, rejected_rewards). The losses tensor contains the DPO
+    loss for each example in the batch. The chosen_rewards and rejected_rewards tensors
+    contain the rewards for the chosen and rejected responses, respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compute the DPO loss for a batch of policy and reference model log probabilities.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `evaluation_loop`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L1154)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Overriding built-in evaluation loop to store metrics for each batch. Prediction/evaluation
+    loop, shared by `Trainer.evaluate()` and `Trainer.predict()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Works both with or without labels.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `get_batch_logps`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L898)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Compute the log probabilities of the given labels under the given logits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `get_batch_loss_metrics`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L982)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Compute the DPO loss and other metrics for the given batch of inputs for train
+    or test.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `get_batch_samples`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L1064)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generate samples from the model and reference model for the given batch of inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `get_eval_dataloader`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L471)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`eval_dataset` (`torch.utils.data.Dataset`, *optional*) — If provided, will
+    override `self.eval_dataset`. If it is a [Dataset](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset),
+    columns not accepted by the `model.forward()` method are automatically removed.
+    It must implement `__len__`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns the evaluation `~torch.utils.data.DataLoader`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Subclass of transformers.src.transformers.trainer.get_eval_dataloader to precompute
+    `ref_log_probs`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `get_train_dataloader`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L428)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Returns the training `~torch.utils.data.DataLoader`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Subclass of transformers.src.transformers.trainer.get_train_dataloader to precompute
+    `ref_log_probs`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `log`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L1204)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`logs` (`Dict[str, float]`) — The values to log.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Log `logs` on the various objects watching training, including stored metrics.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `null_ref_context`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L719)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Context manager for handling null reference model (that is, peft adapter manipulation).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `tokenize_row`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/dpo_trainer.py#L573)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Tokenize a single row from a DPO specific dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At this stage, we don’t convert to PyTorch tensors yet; we just handle the truncation
+    in case the prompt + chosen or prompt + rejected responses is/are too long. First
+    we truncate the prompt; if we’re still too long, we truncate the chosen/rejected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also create the labels for the chosen/rejected responses, which are of length
+    equal to the sum of the length of the prompt and the chosen/rejected response,
+    with label_pad_token_id for the prompt tokens.
+  prefs: []
+  type: TYPE_NORMAL

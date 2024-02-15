@@ -1,0 +1,214 @@
+- en: Denoising Diffusion Policy Optimization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/ddpo_trainer](https://huggingface.co/docs/trl/ddpo_trainer)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/4.39021e7f.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The why
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '| Before | After DDPO finetuning |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ![](../Images/525575530cb9dca21650d9a9d0230bb5.png) | ![](../Images/5aaa7a517c219593f5db799d22e1f5c5.png)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ![](../Images/3a67f4b5f0d4d18ec14b68d5170d49c1.png) | ![](../Images/fdea8c20cd6ed6160a69e7f1d333f603.png)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ![](../Images/6358a27aa434a34fc1023c8c109cf857.png) | ![](../Images/b70dd11c1c6d0db89f6a9a786d7044d4.png)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: Getting started with Stable Diffusion finetuning with reinforcement learning
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The machinery for finetuning of Stable Diffusion models with reinforcement learning
+    makes heavy use of HuggingFace’s `diffusers` library. A reason for stating this
+    is that getting started requires a bit of familiarity with the `diffusers` library
+    concepts, mainly two of them - pipelines and schedulers. Right out of the box
+    (`diffusers` library), there isn’t a `Pipeline` nor a `Scheduler` instance that
+    is suitable for finetuning with reinforcement learning. Some adjustments need
+    to made.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There is a pipeline interface that is provided by this library that is required
+    to be implemented to be used with the `DDPOTrainer`, which is the main machinery
+    for fine-tuning Stable Diffusion with reinforcement learning. **Note: Only the
+    StableDiffusion architecture is supported at this point.** There is a default
+    implementation of this interface that you can use out of the box. Assuming the
+    default implementation is sufficient and/or to get things moving, refer to the
+    training example alongside this guide.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The point of the interface is to fuse the pipeline and the scheduler into one
+    object which allows for minimalness in terms of having the constraints all in
+    one place. The interface was designed in hopes of catering to pipelines and schedulers
+    beyond the examples in this repository and elsewhere at this time of writing.
+    Also the scheduler step is a method of this pipeline interface and this may seem
+    redundant given that the raw scheduler is accessible via the interface but this
+    is the only way to constrain the scheduler step output to an output type befitting
+    of the algorithm at hand (DDPO).
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a more detailed look into the interface and the associated default implementation,
+    go [here](https://github.com/lvwerra/trl/tree/main/trl/models/modeling_sd_base.py)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that the default implementation has a LoRA implementation path and a non-LoRA
+    based implementation path. The LoRA flag enabled by default and this can be turned
+    off by passing in the flag to do so. LORA based training is faster and the LORA
+    associated model hyperparameters responsible for model convergence aren’t as finicky
+    as non-LORA based training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also in addition, there is the expectation of providing a reward function and
+    a prompt function. The reward function is used to evaluate the generated images
+    and the prompt function is used to generate the prompts that are used to generate
+    the images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting started with examples/scripts/ddpo.py
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `ddpo.py` script is a working example of using the `DDPO` trainer to finetune
+    a Stable Diffusion model. This example explicitly configures a small subset of
+    the overall parameters associated with the config object (`DDPOConfig`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Note:** one A100 GPU is recommended to get this running. Anything below a
+    A100 will not be able to run this example script and even if it does via relatively
+    smaller sized parameters, the results will most likely be poor.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Almost every configuration parameter has a default. There is only one commandline
+    flag argument that is required of the user to get things up and running. The user
+    is expected to have a [huggingface user access token](https://huggingface.co/docs/hub/security-tokens)
+    that will be used to upload the model post finetuning to HuggingFace hub. The
+    following bash command is to be entered to get things running
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: To obtain the documentation of `stable_diffusion_tuning.py`, please run `python
+    stable_diffusion_tuning.py --help`
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following are things to keep in mind (The code checks this for you as well)
+    in general while configuring the trainer (beyond the use case of using the example
+    script)
+  prefs: []
+  type: TYPE_NORMAL
+- en: The configurable sample batch size (`--ddpo_config.sample_batch_size=6`) should
+    be greater than or equal to the configurable training batch size (`--ddpo_config.train_batch_size=3`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The configurable sample batch size (`--ddpo_config.sample_batch_size=6`) must
+    be divisible by the configurable train batch size (`--ddpo_config.train_batch_size=3`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The configurable sample batch size (`--ddpo_config.sample_batch_size=6`) must
+    be divisible by both the configurable gradient accumulation steps (`--ddpo_config.train_gradient_accumulation_steps=1`)
+    and the configurable accelerator processes count
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Setting up the image logging hook function
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Expect the function to be given a list of lists of the form
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: and `image`, `prompt`, `prompt_metadata`, `rewards`, `reward_metadata` are batched.
+    The last list in the lists of lists represents the last sample batch. You are
+    likely to want to log this one While you are free to log however you want the
+    use of `wandb` or `tensorboard` is recommended.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Key terms
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`rewards` : The rewards/score is a numerical associated with the generated
+    image and is key to steering the RL process'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`reward_metadata` : The reward metadata is the metadata associated with the
+    reward. Think of this as extra information payload delivered alongside the reward'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`prompt` : The prompt is the text that is used to generate the image'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`prompt_metadata` : The prompt metadata is the metadata associated with the
+    prompt. A situation where this will not be empty is when the reward model comprises
+    of a [`FLAVA`](https://huggingface.co/docs/transformers/model_doc/flava) setup
+    where questions and ground answers (linked to the generated image) are expected
+    with the generated image (See here: [https://github.com/kvablack/ddpo-pytorch/blob/main/ddpo_pytorch/rewards.py#L45](https://github.com/kvablack/ddpo-pytorch/blob/main/ddpo_pytorch/rewards.py#L45))'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`image` : The image generated by the Stable Diffusion model'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example code for logging sampled images with `wandb` is given below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using the finetuned model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Assuming you’ve done with all the epochs and have pushed up your model to the
+    hub, you can use the finetuned model as follows
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Credits
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This work is heavily influenced by the repo [here](https://github.com/kvablack/ddpo-pytorch)
+    and the associated paper [Training Diffusion Models with Reinforcement Learning
+    by Kevin Black, Michael Janner, Yilan Du, Ilya Kostrikov, Sergey Levine](https://arxiv.org/abs/2305.13301).
+  prefs: []
+  type: TYPE_NORMAL

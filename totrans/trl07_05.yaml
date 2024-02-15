@@ -1,0 +1,181 @@
+- en: Training FAQ
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/how_to_train](https://huggingface.co/docs/trl/how_to_train)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/8.4bcdc59a.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: What Metrics Should I Look at?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When performing classical supervised fine-tuning of language models, the loss
+    (especially the validation loss) serves as a good indicator of the training progress.
+    However, in Reinforcement Learning (RL), the loss becomes less informative about
+    the model’s performance, and its value may fluctuate while the actual performance
+    improves.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To address this, we recommend focusing on two key metrics first:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Mean Reward**: The primary goal is to maximize the reward achieved by the
+    model during RL training. **Objective KL Divergence**: KL divergence (Kullback-Leibler
+    divergence) measures the dissimilarity between two probability distributions.
+    In the context of RL training, we use it to quantify the difference between the
+    current model and a reference model. Ideally, we want to keep the KL divergence
+    between 0 and 10 to ensure the model’s generated text remains close to what the
+    reference model produces.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, there are more metrics that can be useful for debugging, checkout the
+    [logging section](logging).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why Do We Use a Reference Model, and What’s the Purpose of KL Divergence?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When training RL models, optimizing solely for reward may lead to unexpected
+    behaviors, where the model exploits the environment in ways that don’t align with
+    good language generation. In the case of RLHF, we use a reward model trained to
+    predict whether a generated text is highly ranked by humans.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, the RL model being optimized against the reward model may learn patterns
+    that yield high reward but do not represent good language. This can result in
+    extreme cases where the model generates texts with excessive exclamation marks
+    or emojis to maximize the reward. In some worst-case scenarios, the model may
+    generate patterns completely unrelated to natural language yet receive high rewards,
+    similar to adversarial attacks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/1f9d0c78b6bd70ca9e768b8d3302bb7f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '**Figure:** Samples without a KL penalty from [https://arxiv.org/pdf/1909.08593.pdf](https://arxiv.org/pdf/1909.08593.pdf).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To address this issue, we add a penalty to the reward function based on the
+    KL divergence between the current model and the reference model. By doing this,
+    we encourage the model to stay close to what the reference model generates.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What Is the Concern with Negative KL Divergence?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you generate text by purely sampling from the model distribution things
+    work fine in general. But when you use the `generate` method there are a few caveats
+    because it does not always purely sample depending on the settings which can cause
+    KL-divergence to go negative. Essentially when the active model achieves `log_p_token_active
+    < log_p_token_ref` we get negative KL-div. This can happen in a several cases:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**top-k sampling**: the model can smooth out the probability distribution causing
+    the top-k tokens having a smaller probability than those of the reference model
+    but they still are selected'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**min_length**: this ignores the EOS token until `min_length` is reached. thus
+    the model can assign a very low log prob to the EOS token and very high probs
+    to all others until min_length is reached'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These are just a few examples. Why is negative KL an issue? The total reward
+    `R` is computed `R = r - beta * KL` so if the model can learn how to drive KL-divergence
+    negative it effectively gets a positive reward. In many cases it can be much easier
+    to exploit such a bug in the generation than actually learning the reward function.
+    In addition the KL can become arbitrarily small thus the actual reward can be
+    very small compared to it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So how should you generate text for PPO training? Let’s have a look!
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to generate text for training?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In order to avoid the KL issues described above we recommend to use the following
+    settings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: With these settings we usually don’t encounter any issues. You can also experiments
+    with other settings but if you encounter issues with negative KL-divergence try
+    to go back to these and see if they persist.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How can debug your own use-case?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Debugging the RL pipeline can be challenging due to its complexity. Here are
+    some tips and suggestions to make the process easier:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Start from a working example**: Begin with a working example from the trl
+    repository and gradually modify it to fit your specific use-case. Changing everything
+    at once can make it difficult to identify the source of potential issues. For
+    example, you can start by replacing the model in the example and once you figure
+    out the best hyperparameters try to switch to your dataset and reward model. If
+    you change everything at once you won’t know where a potential problem comes from.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Start small, scale later**: Training large models can be very slow and take
+    several hours or days until you see any improvement. For debugging this is not
+    a convenient timescale so try to use small model variants during the development
+    phase and scale up once that works. That being said you sometimes have to be careful
+    as small models might not have the capacity to solve a complicated task either.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Start simple**: Try to start with a minimal example and build complexity
+    from there. Your use-case might require for example a complicated reward function
+    consisting of many different rewards - try to use one signal first and see if
+    you can optimize that and then add more complexity after that.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Inspect the generations**: It’s always a good idea to inspect what the model
+    is generating. Maybe there is a big in your post-processing or your prompt. Due
+    to bad settings you might cut-off generations too soon. These things are very
+    hard to see on the metrics but very obvious if you look at the generations.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Inspect the reward model**: If you reward is not improving over time maybe
+    there’s an issue with the reward model. You can look at extreme cases to see if
+    it does what it should: e.g. in the sentiment case you can check if simple positive
+    and negative examples really get different rewards. And you can look at the distribution
+    of your dataset. Finally, maybe the reward is dominated by the query which the
+    model can’t affect so you might need to normalize this (e.g. reward of query+response
+    minus reward of the query).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These are just a few tips that we find helpful - if you have more useful tricks
+    feel free to open a PR to add them as well!
+  prefs: []
+  type: TYPE_NORMAL

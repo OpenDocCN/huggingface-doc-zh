@@ -1,0 +1,776 @@
+- en: Supervised Fine-tuning Trainer
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/sft_trainer](https://huggingface.co/docs/trl/sft_trainer)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/21.499373e8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Docstring.a2ba2b54.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Supervised fine-tuning (or SFT for short) is a crucial step in RLHF. In TRL
+    we provide an easy-to-use API to create your SFT models and train them with few
+    lines of code on your dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out a complete flexible example at [`examples/scripts/sft.py`](https://github.com/huggingface/trl/tree/main/examples/scripts/sft.py).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quickstart
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you have a dataset hosted on the 🤗 Hub, you can easily fine-tune your SFT
+    model using [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer) from TRL.
+    Let us assume your dataset is `imdb`, the text you want to predict is inside the
+    `text` field of the dataset, and you want to fine-tune the `facebook/opt-350m`
+    model. The following code-snippet takes care of all the data pre-processing and
+    training for you:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Make sure to pass a correct value for `max_seq_length` as the default value
+    will be set to `min(tokenizer.model_max_length, 1024)`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also construct a model outside of the trainer and pass it as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The above snippets will use the default training arguments from the [`transformers.TrainingArguments`](https://huggingface.co/docs/transformers/main_classes/trainer#transformers.TrainingArguments)
+    class. If you want to modify that, make sure to create your own `TrainingArguments`
+    object and pass it to the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
+    constructor as it is done on the [`supervised_finetuning.py` script](https://github.com/huggingface/trl/blob/main/examples/stack_llama/scripts/supervised_finetuning.py)
+    on the stack-llama example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Advanced usage
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Train on completions only
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can use the `DataCollatorForCompletionOnlyLM` to train your model on the
+    generated prompts only. Note that this works only in the case when `packing=False`.
+    To instantiate that collator for instruction data, pass a response template and
+    the tokenizer. Here is an example of how it would work to fine-tune `opt-350m`
+    on completions only on the CodeAlpaca dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To instantiate that collator for assistant style conversation data, pass a
+    response template, an instruction template and the tokenizer. Here is an example
+    of how it would work to fine-tune `opt-350m` on assistant completions only on
+    the Open Assistant Guanaco dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Make sure to have a `pad_token_id` which is different from `eos_token_id` which
+    can result in the model not properly predicting EOS (End of Sentence) tokens during
+    generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using token_ids directly for response_template
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Some tokenizers like Llama 2 (`meta-llama/Llama-2-XXb-hf`) tokenize sequences
+    differently depending whether they have context or not. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this case, and due to lack of context in `response_template`, the same string
+    (”### Assistant:”) is tokenized differently:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Text (with context): `[2277, 29937, 4007, 22137, 29901]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`response_template` (without context): `[835, 4007, 22137, 29901]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'This will lead to an error when the `DataCollatorForCompletionOnlyLM` does
+    not find the `response_template` in the dataset example text:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To solve this, you can tokenize the `response_template` with the same context
+    than in the dataset, truncate it as needed and pass the `token_ids` directly to
+    the `response_template` argument of the `DataCollatorForCompletionOnlyLM` class.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Add Special Tokens for Chat Format
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Adding special tokens to a language model is crucial for training chat models.
+    These tokens are added between the different roles in a conversation, such as
+    the user, assistant, and system and help the model recognize the structure and
+    flow of a conversation. This setup is essential for enabling the model to generate
+    coherent and contextually appropriate responses in a chat environment. The `setup_chat_format()`
+    function in `trl` easily sets up a model and tokenizer for conversational AI tasks.
+    This function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds special tokens to the tokenizer, e.g. `<|im_start|>` and `<|im_end|>`,
+    to indicate the start and end of a conversation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Resizes the model’s embedding layer to accommodate the new tokens.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Sets the `chat_template` of the tokenizer, which is used to format the input
+    data into a chat-like format. The default is `chatml` from OpenAI.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*optionally* you can pass `resize_to_multiple_of` to resize the embedding layer
+    to a multiple of the `resize_to_multiple_of` argument, e.g. 64\. If you want to
+    see more formats being supported in the future, please open a GitHub issue on
+    [trl](https://github.com/huggingface/trl)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: With our model and tokenizer set up, we can now fine-tune our model on a conversational
+    dataset. Below is an example of how a dataset can be formatted for fine-tuning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dataset format support
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer) supports popular
+    dataset formats. This allows you to pass the dataset to the trainer without any
+    pre-processing directly. The following formats are supported:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: conversational format
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: instruction format
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: If your dataset uses one of the above formats, you can directly pass it to the
+    trainer without pre-processing. The [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
+    will then format the dataset for you using the defined format from the model’s
+    tokenizer with the [apply_chat_template](https://huggingface.co/docs/transformers/main/en/chat_templating#templates-for-chat-models)
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the dataset is not in one those format you can either preprocess the dataset
+    to match the formatting or pass a formatting function to the SFTTrainer to do
+    it for you. Let’s have a look.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Format your input prompts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For instruction fine-tuning, it is quite common to have two columns inside
+    the dataset: one for the prompt & the other for the response. This allows people
+    to format examples like [Stanford-Alpaca](https://github.com/tatsu-lab/stanford_alpaca)
+    did as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let us assume your dataset has two fields, `question` and `answer`. Therefore
+    you can just run:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: To preperly format your input make sure to process all the examples by looping
+    over them and returning a list of processed text. Check out a full example on
+    how to use SFTTrainer on alpaca dataset [here](https://github.com/huggingface/trl/pull/444#issue-1760952763)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Packing dataset ( ConstantLengthDataset )
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer) supports *example
+    packing*, where multiple short examples are packed in the same input sequence
+    to increase training efficiency. This is done with the `ConstantLengthDataset`
+    utility class that returns constant length chunks of tokens from a stream of examples.
+    To enable the usage of this dataset class, simply pass `packing=True` to the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
+    constructor.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that if you use a packed dataset and if you pass `max_steps` in the training
+    arguments you will probably train your models for more than few epochs, depending
+    on the way you have configured the packed dataset and the training protocol. Double
+    check that you know and understand what you are doing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Customize your prompts using packed dataset
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'If your dataset has several fields that you want to combine, for example if
+    the dataset has `question` and `answer` fields and you want to combine them, you
+    can pass a formatting function to the trainer that will take care of that. For
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also customize the `ConstantLengthDataset` much more by directly passing
+    the arguments to the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
+    constructor. Please refer to that class’ signature for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Control over the pretrained model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can directly pass the kwargs of the `from_pretrained()` method to the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer).
+    For example, if you want to load a model in a different precision, analogous to
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that all keyword arguments of `from_pretrained()` are supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Training adapters
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We also support a tight integration with 🤗 PEFT library so that any user can
+    conveniently train adapters and share them on the Hub instead of training the
+    entire model
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also continue training your `PeftModel`. For that, first load a `PeftModel`
+    outside `SFTTrainer` and pass it directly to the trainer without the `peft_config`
+    argument being passed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Training adapters with base 8 bit models
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For that you need to first load your 8bit model outside the Trainer and pass
+    a `PeftConfig` to the trainer. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using Flash Attention and Flash Attention 2
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can benefit from Flash Attention 1 & 2 using SFTTrainer out of the box with
+    minimal changes of code. First, to make sure you have all the latest features
+    from transformers, install transformers from source
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that Flash Attention only works on GPU now and under half-precision regime
+    (when using adapters, base model loaded in half-precision) Note also both features
+    are perfectly compatible with other tools such as quantization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Flash-Attention 1
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For Flash Attention 1 you can use the `BetterTransformer` API and force-dispatch
+    the API to use Flash Attention kernel. First, install the latest optimum package:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once you have loaded your model, wrap the `trainer.train()` call under the
+    `with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=False, enable_mem_efficient=False):`
+    context manager:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that you cannot train your model using Flash Attention 1 on an arbitrary
+    dataset as `torch.scaled_dot_product_attention` does not support training with
+    padding tokens if you use Flash Attention kernels. Therefore you can only use
+    that feature with `packing=True`. If your dataset contains padding tokens, consider
+    switching to Flash Attention 2 integration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Below are some numbers you can get in terms of speedup and memory efficiency,
+    using Flash Attention 1, on a single NVIDIA-T4 16GB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| use_flash_attn_1 | model_name | max_seq_len | batch_size | time per training
+    step |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| x | facebook/opt-350m | 2048 | 8 | ~59.1s |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | facebook/opt-350m | 2048 | 8 | **OOM** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| x | facebook/opt-350m | 2048 | 4 | ~30.3s |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | facebook/opt-350m | 2048 | 4 | ~148.9s |'
+  prefs: []
+  type: TYPE_TB
+- en: Using Flash Attention-2
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To use Flash Attention 2, first install the latest `flash-attn` package:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And add `use_flash_attention_2=True` when calling `from_pretrained`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you don’t use quantization, make sure your model is loaded in half-precision
+    and dispatch your model on a supported GPU device. After loading your model, you
+    can either train it as it is, or attach adapters and train adapters on it in case
+    your model is quantized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In contrary to Flash Attention 1, the integration makes it possible to train
+    your model on an arbitrary dataset that also includes padding tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enhance model’s performances using NEFTune
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'NEFTune is a technique to boost the performance of chat models and was introduced
+    by the paper [“NEFTune: Noisy Embeddings Improve Instruction Finetuning”](https://arxiv.org/abs/2310.05914)
+    from Jain et al. it consists of adding noise to the embedding vectors during training.
+    According to the abstract of the paper:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Standard finetuning of LLaMA-2-7B using Alpaca achieves 29.79% on AlpacaEval,
+    which rises to 64.69% using noisy embeddings. NEFTune also improves over strong
+    baselines on modern instruction datasets. Models trained with Evol-Instruct see
+    a 10% improvement, with ShareGPT an 8% improvement, and with OpenPlatypus an 8%
+    improvement. Even powerful models further refined with RLHF such as LLaMA-2-Chat
+    benefit from additional training with NEFTune.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: '![](../Images/52cfc6d8e877350238b9e92fa688af9a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: To use it in `SFTTrainer` simply pass `neftune_noise_alpha` when creating your
+    `SFTTrainer` instance. Note that to avoid any surprising behaviour, NEFTune is
+    disabled after training to retrieve back the original behaviour of the embedding
+    layer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: We have tested NEFTune by training `mistralai/Mistral-7B-v0.1` on the [OpenAssistant
+    dataset](https://huggingface.co/datasets/timdettmers/openassistant-guanaco) and
+    validated that using NEFTune led to a performance boost of ~25% on MT Bench.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/2041067e08b1835ad3fb89fb4c7255c5.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Note however, that the amount of performance gain is *dataset dependent* and
+    in particular, applying NEFTune on synthetic datasets like [UltraChat](https://huggingface.co/datasets/stingning/ultrachat)
+    typically produces smaller gains.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accelerate fine-tuning 2x using unsloth
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can further accelerate QLoRA / LoRA (2x faster, 60% less memory) using
+    the [`unsloth`](https://github.com/unslothai/unsloth) library that is fully compatible
+    with `SFTTrainer`. Currently `unsloth` supports only Llama (Yi, TinyLlama, Qwen,
+    Deepseek etc) and Mistral architectures. Some benchmarks on 1x A100 listed below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| 1 A100 40GB | Dataset | 🤗 | 🤗 + Flash Attention 2 | 🦥 Unsloth | 🦥 VRAM saved
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Code Llama 34b | Slim Orca | 1x | 1.01x | **1.94x** | -22.7% |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Llama-2 7b | Slim Orca | 1x | 0.96x | **1.87x** | -39.3% |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Mistral 7b | Slim Orca | 1x | 1.17x | **1.88x** | -65.9% |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Tiny Llama 1.1b | Alpaca | 1x | 1.55x | **2.74x** | -57.8% |'
+  prefs: []
+  type: TYPE_TB
+- en: 'First install `unsloth` according to the [official documentation](https://github.com/unslothai/unsloth).
+    Once installed, you can incorporate unsloth into your workflow in a very simple
+    manner; instead of loading `AutoModelForCausalLM`, you just need to load a `FastLanguageModel`
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: The saved model is fully compatible with Hugging Face’s transformers library.
+    Learn more about unsloth in their [official repository](https://github.com/unslothai/unsloth).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Best practices
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Pay attention to the following best practices when training a model with that
+    trainer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer) always pads by default
+    the sequences to the `max_seq_length` argument of the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer).
+    If none is passed, the trainer will retrieve that value from the tokenizer. Some
+    tokenizers do not provide default value, so there is a check to retrieve the minimum
+    between 2048 and that value. Make sure to check it before training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For training adapters in 8bit, you might need to tweak the arguments of the
+    `prepare_model_for_kbit_training` method from PEFT, hence we advise users to use
+    `prepare_in_int8_kwargs` field, or create the `PeftModel` outside the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
+    and pass it.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For a more memory-efficient training using adapters, you can load the base model
+    in 8bit, for that simply add `load_in_8bit` argument when creating the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer),
+    or create a base model in 8bit outside the trainer and pass it.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you create a model outside the trainer, make sure to not pass to the trainer
+    any additional keyword arguments that are relative to `from_pretrained()` method.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: GPTQ Conversion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You may experience some issues with GPTQ Quantization after completing training.
+    Lowering `gradient_accumulation_steps` to `4` will resolve most issues during
+    the quantization process to GPTQ format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SFTTrainer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class trl.SFTTrainer`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/sft_trainer.py#L54)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (Union[`transformers.PreTrainedModel`, `nn.Module`, `str`]) — The model
+    to train, can be a `PreTrainedModel`, a `torch.nn.Module` or a string with the
+    model name to load from cache or download. The model can be also converted to
+    a `PeftModel` if a `PeftConfig` object is passed to the `peft_config` argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`args` (Optional[transformers.TrainingArguments](https://huggingface.co/docs/transformers/v4.36.2/en/main_classes/trainer#transformers.TrainingArguments))
+    — The arguments to tweak for training. Please refer to the official documentation
+    of `transformers.TrainingArguments` for more information.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`data_collator` (Optional`transformers.DataCollator`) — The data collator to
+    use for training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`train_dataset` (Optional[datasets.Dataset](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset))
+    — The dataset to use for training. We recommend users to use `trl.trainer.ConstantLengthDataset`
+    to create their dataset.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`eval_dataset` (Optional[Union[`datasets.Dataset`, Dict[`str`, `datasets.Dataset`]]])
+    — The dataset to use for evaluation. We recommend users to use `trl.trainer.ConstantLengthDataset`
+    to create their dataset.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tokenizer` (Optional[transformers.PreTrainedTokenizer](https://huggingface.co/docs/transformers/v4.36.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizer))
+    — The tokenizer to use for training. If not specified, the tokenizer associated
+    to the model will be used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`model_init` (`Callable[[], transformers.PreTrainedModel]`) — The model initializer
+    to use for training. If None is specified, the default model initializer will
+    be used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`compute_metrics` (`Callable[[transformers.EvalPrediction], Dict]`, *optional*
+    defaults to None) — The function used to compute metrics during evaluation. It
+    should return a dictionary mapping metric names to metric values. If not specified,
+    only the loss will be computed during evaluation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`callbacks` (`List[transformers.TrainerCallback]`) — The callbacks to use for
+    training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`optimizers` (`Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler.LambdaLR]`)
+    — The optimizer and scheduler to use for training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`preprocess_logits_for_metrics` (`Callable[[torch.Tensor, torch.Tensor], torch.Tensor]`)
+    — The function to use to preprocess the logits before computing the metrics.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`peft_config` (`Optional[PeftConfig]`) — The PeftConfig object to use to initialize
+    the PeftModel.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dataset_text_field` (`Optional[str]`) — The name of the text field of the
+    dataset, in case this is passed by a user, the trainer will automatically create
+    a `ConstantLengthDataset` based on the `dataset_text_field` argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`formatting_func` (`Optional[Callable]`) — The formatting function to be used
+    for creating the `ConstantLengthDataset`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`max_seq_length` (`Optional[int]`) — The maximum sequence length to use for
+    the `ConstantLengthDataset` and for automatically creating the Dataset. Defaults
+    to `512`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`infinite` (`Optional[bool]`) — Whether to use an infinite dataset or not.
+    Defaults to `False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_of_sequences` (`Optional[int]`) — The number of sequences to use for the
+    `ConstantLengthDataset`. Defaults to `1024`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`chars_per_token` (`Optional[float]`) — The number of characters per token
+    to use for the `ConstantLengthDataset`. Defaults to `3.6`. You can check how this
+    is computed in the stack-llama example: [https://github.com/huggingface/trl/blob/08f550674c553c36c51d1027613c29f14f3676a5/examples/stack_llama/scripts/supervised_finetuning.py#L53](https://github.com/huggingface/trl/blob/08f550674c553c36c51d1027613c29f14f3676a5/examples/stack_llama/scripts/supervised_finetuning.py#L53).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`packing` (`Optional[bool]`) — Used only in case `dataset_text_field` is passed.
+    This argument is used by the `ConstantLengthDataset` to pack the sequences of
+    the dataset.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dataset_num_proc` (`Optional[int]`) — The number of workers to use to tokenize
+    the data. Only used when `packing=False`. Defaults to None.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dataset_batch_size` (`int`) — The number of examples to tokenize per batch.
+    If batch_size <= 0 or batch_size == None, tokenize the full dataset as a single
+    batch. Defaults to 1000.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`neftune_noise_alpha` (`Optional[float]`) — If not `None`, this will activate
+    NEFTune noise embeddings. This has been proven to drastically improve model performances
+    for instruction fine-tuning. Check out the original paper here: [https://arxiv.org/abs/2310.05914](https://arxiv.org/abs/2310.05914)
+    and the original code here: [https://github.com/neelsjain/NEFTune](https://github.com/neelsjain/NEFTune)
+    model_init_kwargs — (`Optional[Dict]`, *optional*): Dict of Optional kwargs to
+    pass when instantiating the model from a string dataset_kwargs — (`Optional[Dict]`,
+    *optional*): Dict of Optional kwargs to pass when creating packed or non-packed
+    datasets'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Class definition of the Supervised Finetuning Trainer (SFT Trainer). This class
+    is a wrapper around the `transformers.Trainer` class and inherits all of its attributes
+    and methods. The trainer takes care of properly initializing the PeftModel in
+    case a user passes a `PeftConfig` object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ConstantLengthDataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class trl.trainer.ConstantLengthDataset`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/utils.py#L355)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tokenizer` (`transformers.PreTrainedTokenizer`) — The processor used for processing
+    the data.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dataset` (`dataset.Dataset`) — Dataset with text files.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`dataset_text_field` (`str`, **optional**) — Name of the field in the dataset
+    that contains the text. Used only if `formatting_func` is `None`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`formatting_func` (`Callable`, **optional**) — Function that formats the text
+    before tokenization. Usually it is recommended to have follows a certain pattern
+    such as `"### Question: {question} ### Answer: {answer}"`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`infinite` (`bool`, *optional*, defaults to `False`) — If True the iterator
+    is reset after dataset reaches end else stops.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`seq_length` (`int`, *optional*, defaults to `1024`) — Length of token sequences
+    to return.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_of_sequences` (`int`, *optional*, defaults to `1024`) — Number of token
+    sequences to keep in buffer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`chars_per_token` (`int`, *optional*, defaults to `3.6`) — Number of characters
+    per token used to estimate number of tokens in text buffer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`eos_token_id` (`int`, *optional*, defaults to `0`) — Id of the end of sequence
+    token if the passed tokenizer does not have an EOS token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`shuffle` (‘bool’, *optional*, defaults to True) — Shuffle the examples before
+    they are returned'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`append_concat_token` (‘bool’, *optional*, defaults to True) — If true, appends
+    `eos_token_id` at the end of each sample being packed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`add_special_tokens` (‘bool’, *optional*, defaults to True) — If true, tokenizers
+    adds special tokens to each sample being packed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Iterable dataset that returns constant length chunks of tokens from stream of
+    text files. The dataset also formats the text before tokenization with a specific
+    format that is provided by the user.
+  prefs: []
+  type: TYPE_NORMAL

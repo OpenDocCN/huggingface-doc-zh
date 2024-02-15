@@ -1,0 +1,220 @@
+- en: Using LLaMA models with TRL
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/using_llama_models](https://huggingface.co/docs/trl/using_llama_models)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/25.12a382c5.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ve begun rolling out examples to use Meta’s LLaMA models in `trl` (see [Meta’s
+    LLaMA release](https://ai.facebook.com/blog/large-language-model-llama-meta-ai/)
+    for the original LLaMA model).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Efficient training strategies
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Even training the smallest LLaMA model requires an enormous amount of memory.
+    Some quick math: in bf16, every parameter uses 2 bytes (in fp32 4 bytes) in addition
+    to 8 bytes used, e.g., in the Adam optimizer (see the [performance docs](https://huggingface.co/docs/transformers/perf_train_gpu_one#optimizer)
+    in Transformers for more info). So a 7B parameter model would use `(2+8)*7B=70GB`
+    just to fit in memory and would likely need more when you compute intermediate
+    values such as attention scores. So you couldn’t train the model even on a single
+    80GB A100 like that. You can use some tricks, like more efficient optimizers of
+    half-precision training, to squeeze a bit more into memory, but you’ll run out
+    sooner or later.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another option is to use Parameter-Efficient Fine-Tuning (PEFT) techniques,
+    such as the [`peft`](https://github.com/huggingface/peft) library, which can perform
+    low-rank adaptation (LoRA) on a model loaded in 8-bit. For more on `peft` + `trl`,
+    see the [docs](https://huggingface.co/docs/trl/sentiment_tuning_peft).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Loading the model in 8bit reduces the memory footprint drastically since you
+    only need one byte per parameter for the weights (e.g. 7B LlaMa is 7GB in memory).
+    Instead of training the original weights directly, LoRA adds small adapter layers
+    on top of some specific layers (usually the attention layers); thus, the number
+    of trainable parameters is drastically reduced.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this scenario, a rule of thumb is to allocate ~1.2-1.4GB per billion parameters
+    (depending on the batch size and sequence length) to fit the entire fine-tuning
+    setup. This enables fine-tuning larger models (up to 50-60B scale models on a
+    NVIDIA A100 80GB) at low cost.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now we can fit very large models into a single GPU, but the training might
+    still be very slow. The simplest strategy in this scenario is data parallelism:
+    we replicate the same training setup into separate GPUs and pass different batches
+    to each GPU. With this, you can parallelize the forward/backward passes of the
+    model and scale with the number of GPUs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![chapter10_ddp.png](../Images/f281f3d2b69eb8ef7952621def3f8b06.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: We use either the `transformers.Trainer` or `accelerate`, which both support
+    data parallelism without any code changes, by simply passing arguments when calling
+    the scripts with `torchrun` or `accelerate launch`. The following runs a training
+    script with 8 GPUs on a single machine with `accelerate` and `torchrun`, respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Supervised fine-tuning
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Before we start training reward models and tuning our model with RL, it helps
+    if the model is already good in the domain we are interested in. In our case,
+    we want it to answer questions, while for other use cases, we might want it to
+    follow instructions, in which case instruction tuning is a great idea. The easiest
+    way to achieve this is by continuing to train the language model with the language
+    modeling objective on texts from the domain or task. The [StackExchange dataset](https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences)
+    is enormous (over 10 million instructions), so we can easily train the language
+    model on a subset of it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There is nothing special about fine-tuning the model before doing RLHF - it’s
+    just the causal language modeling objective from pretraining that we apply here.
+    To use the data efficiently, we use a technique called packing: instead of having
+    one text per sample in the batch and then padding to either the longest text or
+    the maximal context of the model, we concatenate a lot of texts with a EOS token
+    in between and cut chunks of the context size to fill the batch without any padding.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![chapter10_preprocessing-clm.png](../Images/b6a16749788aead5596b057282494855.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: With this approach the training is much more efficient as each token that is
+    passed through the model is also trained in contrast to padding tokens which are
+    usually masked from the loss. If you don’t have much data and are more concerned
+    about occasionally cutting off some tokens that are overflowing the context you
+    can also use a classical data loader.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The packing is handled by the `ConstantLengthDataset` and we can then use the
+    `Trainer` after loading the model with `peft`. First, we load the model in int8,
+    prepare it for training, and then add the LoRA adapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: We train the model for a few thousand steps with the causal language modeling
+    objective and save the model. Since we will tune the model again with different
+    objectives, we merge the adapter weights with the original model weights.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Disclaimer:** due to LLaMA’s license, we release only the adapter weights
+    for this and the model checkpoints in the following sections. You can apply for
+    access to the base model’s weights by filling out Meta AI’s [form](https://docs.google.com/forms/d/e/1FAIpQLSfqNECQnMkycAp2jP4Z9TFX0cGR4uf7b_fBxjY_OjhJILlKGA/viewform)
+    and then converting them to the 🤗 Transformers format by running this [script](https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/convert_llama_weights_to_hf.py).
+    Note that you’ll also need to install 🤗 Transformers from source until the `v4.28`
+    is released.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we have fine-tuned the model for the task, we are ready to train a
+    reward model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reward modeling and human preferences
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In principle, we could fine-tune the model using RLHF directly with the human
+    annotations. However, this would require us to send some samples to humans for
+    rating after each optimization iteration. This is expensive and slow due to the
+    number of training samples needed for convergence and the inherent latency of
+    human reading and annotator speed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A trick that works well instead of direct feedback is training a reward model
+    on human annotations collected before the RL loop. The goal of the reward model
+    is to imitate how a human would rate a text. There are several possible strategies
+    to build a reward model: the most straightforward way would be to predict the
+    annotation (e.g. a rating score or a binary value for “good”/”bad”). In practice,
+    what works better is to predict the ranking of two examples, where the reward
+    model is presented with two candidates `(y_k, y_j)` for a given prompt `x` and
+    has to predict which one would be rated higher by a human annotator.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the StackExchange dataset, we can infer which of the two answers was preferred
+    by the users based on the score. With that information and the loss defined above,
+    we can then modify the `transformers.Trainer` by adding a custom loss function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We utilize a subset of a 100,000 pair of candidates and evaluate on a held-out
+    set of 50,000\. With a modest training batch size of 4, we train the Llama model
+    using the LoRA `peft` adapter for a single epoch using the Adam optimizer with
+    BF16 precision. Our LoRA configuration is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: As detailed in the next section, the resulting adapter can be merged into the
+    frozen model and saved for further downstream use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reinforcement Learning from Human Feedback
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the fine-tuned language model and the reward model at hand, we are now
+    ready to run the RL loop. It follows roughly three steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generate responses from prompts,
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Rate the responses with the reward model,
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Run a reinforcement learning policy-optimization step with the ratings.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The Query and Response prompts are templated as follows before being tokenized
+    and passed to the model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The same template was used for SFT, RM and RLHF stages. Once more, we utilize
+    `peft` for memory-efficient training, which offers an extra advantage in the RLHF
+    context. Here, the reference model and policy share the same base, the SFT model,
+    which we load in 8-bit and freeze during training. We exclusively optimize the
+    policy’s LoRA weights using PPO while sharing the base model’s weights.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: For the rest of the details and evaluation, please refer to our [blog post on
+    StackLLaMA](https://huggingface.co/blog/stackllama).
+  prefs: []
+  type: TYPE_NORMAL

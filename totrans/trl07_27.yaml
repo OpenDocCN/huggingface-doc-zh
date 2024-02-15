@@ -1,0 +1,110 @@
+- en: Multi Adapter RL (MARL) - a single base model for everything
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/multi_adapter_rl](https://huggingface.co/docs/trl/multi_adapter_rl)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/16.cf351b7a.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Here we present an approach that uses a single base model for the entire PPO
+    algorithm - which includes retrieving the reference logits, computing the active
+    logits and the rewards. This feature is experimental as we did not tested the
+    convergence of the approach. We encourage the community to let us know if they
+    potentially face into any issue.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Requirements
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You just need to install `peft` and optionally install `bitsandbytes` as well
+    if you want to go for 8bit base models, for more memory efficient finetuning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You need to address this approach in three stages that we summarize as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1- Train a base model on the target domain (e.g. `imdb` dataset) - this is the
+    Supervised Fine Tuning stage - it can leverage the `SFTTrainer` from TRL. 2- Train
+    a reward model using `peft`. This is required in order to re-use the adapter during
+    the RL optimisation process (step 3 below). We show an example of leveraging the
+    `RewardTrainer` from TRL in [this example](https://github.com/huggingface/trl/tree/main/examples/scripts/reward_modeling.py)
+    3- Fine tune new adapters on the base model using PPO and the reward adapter.
+    (“0 abstraction RL”)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make sure to use the same model (i.e. same architecture and same weights) for
+    the stages 2 & 3.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quickstart
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let us assume you have trained your reward adapter on `llama-7b` model using
+    `RewardTrainer` and pushed the weights on the hub under `trl-lib/llama-7b-hh-rm-adapter`.
+    When doing PPO, before passing the model to `PPOTrainer` create your model as
+    follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then inside your PPO training loop, call the `compute_reward_score` method by
+    accessing to the `model` attribute from `PPOTrainer`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Advanced usage
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Control on the adapter name
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you are familiar with the `peft` library, you know that you can use multiple
+    adapters inside the same model. What you can do is to train multiple adapters
+    on the same base model to fine-tune on different policies. In this case, you want
+    to have a control on the adapter name you want to activate back, after retrieving
+    the reward. For that, simply pass the appropriate `adapter_name` to `ppo_adapter_name`
+    argument when calling `compute_reward_score`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using 4-bit and 8-bit base models
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For more memory efficient fine-tuning, you can load your base model in 8-bit
+    or 4-bit while keeping the adapters in the default precision (float32). Just pass
+    the appropriate arguments (i.e. `load_in_8bit=True` or `load_in_4bit=True`) to
+    `AutoModelForCausalLMWithValueHead.from_pretrained` as follows (assuming you have
+    installed `bitsandbytes`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE

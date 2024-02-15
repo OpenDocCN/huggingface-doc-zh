@@ -1,0 +1,189 @@
+- en: Training customization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/customization](https://huggingface.co/docs/trl/customization)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/3.948fda40.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: TRL is designed with modularity in mind so that users to be able to efficiently
+    customize the training loop for their needs. Below are some examples on how you
+    can apply and test different techniques.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train on multiple GPUs / nodes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The trainers in TRL use 🤗 Accelerate to enable distributed training across multiple
+    GPUs or nodes. To do so, first create an 🤗 Accelerate config file by running
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'and answering the questions according to your multi-gpu / multi-node setup.
+    You can then launch distributed training by running:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also provide config files in the [examples folder](https://github.com/huggingface/trl/tree/main/examples/accelerate_configs)
+    that can be used as templates. To use these templates, simply pass the path to
+    the config file when launching a job, e.g.:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Refer to the [examples page](https://github.com/huggingface/trl/tree/main/examples)
+    for more details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distributed training with DeepSpeed
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'All of the trainers in TRL can be run on multiple GPUs together with DeepSpeed
+    ZeRO-{1,2,3} for efficient sharding of the optimizer states, gradients, and model
+    weights. To do so, run:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note that for ZeRO-3, a small tweak is needed to initialize your reward model
+    on the correct device via the `zero3_init_context_manager()` context manager.
+    In particular, this is needed to avoid DeepSpeed hanging after a fixed number
+    of training steps. Here is a snippet of what is involved from the [`sentiment_tuning`](https://github.com/huggingface/trl/blob/main/examples/scripts/ppo.py)
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Consult the 🤗 Accelerate [documentation](https://huggingface.co/docs/accelerate/usage_guides/deepspeed)
+    for more information about the DeepSpeed plugin.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use different optimizers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'By default, the `PPOTrainer` creates a `torch.optim.Adam` optimizer. You can
+    create and define a different optimizer and pass it to `PPOTrainer`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For memory efficient fine-tuning, you can also pass `Adam8bit` optimizer from
+    `bitsandbytes`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use LION optimizer
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can use the new [LION optimizer from Google](https://arxiv.org/abs/2302.06675)
+    as well, first take the source code of the optimizer definition [here](https://github.com/lucidrains/lion-pytorch/blob/main/lion_pytorch/lion_pytorch.py),
+    and copy it so that you can import the optimizer. Make sure to initialize the
+    optimizer by considering the trainable parameters only for a more memory efficient
+    training:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We advise you to use the learning rate that you would use for `Adam` divided
+    by 3 as pointed out [here](https://github.com/lucidrains/lion-pytorch#lion---pytorch).
+    We observed an improvement when using this optimizer compared to classic Adam
+    (check the full logs [here](https://wandb.ai/distill-bloom/trl/runs/lj4bheke?workspace=user-younesbelkada)):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/df158f76e736e28cb11b4474cc879ebe.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Add a learning rate scheduler
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can also play with your training by adding learning rate schedulers!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Memory efficient fine-tuning by sharing layers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Another tool you can use for more memory efficient fine-tuning is to share layers
+    between the reference model and the model you want to train.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pass 8-bit reference models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Since `trl` supports all key word arguments when loading a model from `transformers`
+    using `from_pretrained`, you can also leverage `load_in_8bit` from `transformers`
+    for more memory efficient fine-tuning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Read more about 8-bit model loading in `transformers` [here](https://huggingface.co/docs/transformers/perf_infer_gpu_one#bitsandbytes-integration-for-int8-mixedprecision-matrix-decomposition).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use the CUDA cache optimizer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When training large models, you should better handle the CUDA cache by iteratively
+    clearing it. Do do so, simply pass `optimize_cuda_cache=True` to `PPOConfig`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use score scaling/normalization/clipping
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As suggested by [Secrets of RLHF in Large Language Models Part I: PPO](https://arxiv.org/abs/2307.04964),
+    we support score (aka reward) scaling/normalization/clipping to improve training
+    stability via `PPOConfig`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To run `ppo.py`, you can use the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE

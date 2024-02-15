@@ -1,0 +1,282 @@
+- en: Logging
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/trl/logging](https://huggingface.co/docs/trl/logging)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/trl/v0.7.10/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/start.d9a24ea1.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/singletons.9eef12cc.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/paths.1355483e.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/entry/app.5bef33b8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/index.ded8f90d.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/0.abccdcd8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/nodes/13.ff284cc9.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/CodeBlock.8580f3e8.js">
+    <link rel="modulepreload" href="/docs/trl/v0.7.10/en/_app/immutable/chunks/Heading.f027f30d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: As reinforcement learning algorithms are historically challenging to debug,
+    it’s important to pay careful attention to logging. By default, the TRL [PPOTrainer](/docs/trl/v0.7.10/en/trainer#trl.PPOTrainer)
+    saves a lot of relevant information to `wandb` or `tensorboard`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Upon initialization, pass one of these two options to the [PPOConfig](/docs/trl/v0.7.10/en/trainer#trl.PPOConfig):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to log with tensorboard, add the kwarg `project_kwargs={"logging_dir":
+    PATH_TO_LOGS}` to the PPOConfig.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PPO Logging
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Here’s a brief explanation for the logged metrics provided in the data:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Key metrics to monitor. We want to maximize the reward, maintain a low KL divergence,
+    and maximize entropy:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`env/reward_mean`: The average reward obtained from the environment. Alias
+    `ppo/mean_scores`, which is sed to specifically monitor the reward model.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`env/reward_std`: The standard deviation of the reward obtained from the environment.
+    Alias ``ppo/std_scores`, which is sed to specifically monitor the reward model.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`env/reward_dist`: The histogram distribution of the reward obtained from the
+    environment.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`objective/kl`: The mean Kullback-Leibler (KL) divergence between the old and
+    new policies. It measures how much the new policy deviates from the old policy.
+    The KL divergence is used to compute the KL penalty in the objective function.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`objective/kl_dist`: The histogram distribution of the `objective/kl`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`objective/kl_coef`: The coefficient for Kullback-Leibler (KL) divergence in
+    the objective function.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/mean_non_score_reward`: The **KL penalty** calculated by `objective/kl
+    * objective/kl_coef` as the total reward for optimization to prevent the new policy
+    from deviating too far from the old policy.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`objective/entropy`: The entropy of the model’s policy, calculated by `-logprobs.sum(-1).mean()`.
+    High entropy means the model’s actions are more random, which can be beneficial
+    for exploration.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Training stats:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ppo/learning_rate`: The learning rate for the PPO algorithm.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/entropy`: The entropy of the model’s policy, calculated by `pd
+    = torch.nn.functional.softmax(logits, dim=-1); entropy = torch.logsumexp(logits,
+    dim=-1) - torch.sum(pd * logits, dim=-1)`. It measures the randomness of the policy.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/clipfrac`: The fraction of probability ratios (old policy / new
+    policy) that fell outside the clipping range in the PPO objective. This can be
+    used to monitor the optimization process.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/approxkl`: The approximate KL divergence between the old and new
+    policies, measured by `0.5 * masked_mean((logprobs - old_logprobs) ** 2, mask)`,
+    corresponding to the `k2` estimator in [http://joschu.net/blog/kl-approx.html](http://joschu.net/blog/kl-approx.html)'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/policykl`: Similar to `ppo/policy/approxkl`, but measured by `masked_mean(old_logprobs
+    - logprobs, mask)`, corresponding to the `k1` estimator in [http://joschu.net/blog/kl-approx.html](http://joschu.net/blog/kl-approx.html)'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/ratio`: The histogram distribution of the ratio between the new
+    and old policies, used to compute the PPO objective.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/advantages_mean`: The average of the GAE (Generalized Advantage
+    Estimation) advantage estimates. The advantage function measures how much better
+    an action is compared to the average action at a state.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/advantages`: The histogram distribution of `ppo/policy/advantages_mean`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/returns/mean`: The mean of the TD(λ) returns, calculated by `returns =
+    advantage + values`, another indicator of model performance. See [https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/)
+    for more details.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/returns/var`: The variance of the TD(λ) returns, calculated by `returns
+    = advantage + values`, another indicator of model performance.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/val/mean`: The mean of the values, used to monitor the value function’s
+    performance.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/val/var` : The variance of the values, used to monitor the value function’s
+    performance.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/val/var_explained`: The explained variance for the value function, used
+    to monitor the value function’s performance.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/val/clipfrac`: The fraction of the value function’s predicted values that
+    are clipped.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/val/vpred`: The predicted values from the value function.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/val/error`: The mean squared error between the `ppo/val/vpred` and returns,
+    used to monitor the value function’s performance.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/loss/policy`: The policy loss for the Proximal Policy Optimization (PPO)
+    algorithm.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/loss/value`: The loss for the value function in the PPO algorithm. This
+    value quantifies how well the function estimates the expected future rewards.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/loss/total`: The total loss for the PPO algorithm. It is the sum of the
+    policy loss and the value function loss.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Stats on queries, responses, and logprobs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tokens/queries_len_mean`: The average length of the queries tokens.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`tokens/queries_len_std`: The standard deviation of the length of the queries
+    tokens.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`tokens/queries_dist`: The histogram distribution of the length of the queries
+    tokens.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`tokens/responses_len_mean`: The average length of the responses tokens.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`tokens/responses_len_std`: The standard deviation of the length of the responses
+    tokens.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`tokens/responses_dist`: The histogram distribution of the length of the responses
+    tokens. (Costa: inconsistent naming, should be `tokens/responses_len_dist`)'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`objective/logprobs`: The histogram distribution of the log probabilities of
+    the actions taken by the model.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`objective/ref_logprobs`: The histogram distribution of the log probabilities
+    of the actions taken by the reference model.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Crucial values
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'During training, many values are logged, here are the most important ones:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`env/reward_mean`,`env/reward_std`, `env/reward_dist`: the properties of the
+    reward distribution from the “environment” / reward model'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/mean_non_score_reward`: The mean negated KL penalty during training (shows
+    the delta between the reference model and the new policy over the batch in the
+    step)'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Here are some parameters that are useful to monitor for stability (when these
+    diverge or collapse to 0, try tuning variables):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ppo/loss/value`: it will spike / NaN when not going well.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/ratio`: `ratio` being 1 is a baseline value, meaning that the probability
+    of sampling a token is the same under the new and old policy. If the ratio is
+    too high like 200, it means the probability of sampling a token is 200 times higher
+    under the new policy than the old policy. This is a sign that the new policy is
+    too different from the old policy, which will likely cause overoptimization and
+    collapse training later on.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ppo/policy/clipfrac` and `ppo/policy/approxkl`: if `ratio` is too high, the
+    `ratio` is going to get clipped, resulting in high `clipfrac` and high `approxkl`
+    as well.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`objective/kl`: it should stay positive so that the policy is not too far away
+    from the reference policy.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`objective/kl_coef`: The target coefficient with `AdaptiveKLController`. Often
+    increases before numerical instabilities.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
