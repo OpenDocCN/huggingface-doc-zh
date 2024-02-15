@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Webhooks服务器
 - en: 'Original text: [https://huggingface.co/docs/huggingface_hub/guides/webhooks_server](https://huggingface.co/docs/huggingface_hub/guides/webhooks_server)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/huggingface_hub/guides/webhooks_server](https://huggingface.co/docs/huggingface_hub/guides/webhooks_server)
 - en: null
   id: totrans-2
   prefs: []
@@ -22,6 +24,8 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Webhooks是MLOps相关功能的基础。它们允许您监听特定存储库或您感兴趣的特定用户/组织的所有存储库的新更改。本指南将解释如何利用`huggingface_hub`创建一个监听webhooks并将其部署到Space的服务器。它假定您熟悉Huggingface
+    Hub上的webhooks概念。要了解有关webhooks本身的更多信息，您可以先阅读此指南。
 - en: The base class that we will use in this guide is [WebhooksServer()](/docs/huggingface_hub/v0.20.3/en/package_reference/webhooks_server#huggingface_hub.WebhooksServer).
     It is a class for easily configuring a server that can receive webhooks from the
     Huggingface Hub. The server is based on a [Gradio](https://gradio.app/) app. It
@@ -30,12 +34,15 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在本指南中将使用的基类是[WebhooksServer()](/docs/huggingface_hub/v0.20.3/en/package_reference/webhooks_server#huggingface_hub.WebhooksServer)。这是一个用于轻松配置可以接收来自Huggingface
+    Hub的webhooks的服务器的类。该服务器基于[Gradio](https://gradio.app/)应用程序。它具有用于显示指导信息的UI，供您或您的用户使用，并具有用于监听webhooks的API。
 - en: To see a running example of a webhook server, check out the [Spaces CI Bot](https://huggingface.co/spaces/spaces-ci-bot/webhook)
     one. It is a Space that launches ephemeral environments when a PR is opened on
     a Space.
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看一个正在运行的webhook服务器的示例，请查看[Spaces CI Bot](https://huggingface.co/spaces/spaces-ci-bot/webhook)。这是一个Space，当在Space上打开PR时，它会启动临时环境。
 - en: This is an [experimental feature](../package_reference/environment_variables#hfhubdisableexperimentalwarning).
     This means that we are still working on improving the API. Breaking changes might
     be introduced in the future without prior notice. Make sure to pin the version
@@ -43,16 +50,19 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个实验性功能。这意味着我们仍在努力改进API。未来可能会引入破坏性更改，而不事先通知。请确保在您的要求中固定`huggingface_hub`的版本。
 - en: Create an endpoint
   id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建一个端点
 - en: 'Implementing a webhook endpoint is as simple as decorating a function. Let’s
     see a first example to explain the main concepts:'
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 实现webhook端点就像装饰一个函数一样简单。让我们看一个第一个示例来解释主要概念：
 - en: '[PRE0]'
   id: totrans-9
   prefs: []
@@ -63,6 +73,7 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 将此片段保存在名为`'app.py'`的文件中，并使用`'python app.py'`运行它。您应该会看到类似以下的消息：
 - en: '[PRE1]'
   id: totrans-11
   prefs: []
@@ -73,6 +84,7 @@
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 干得好！您刚刚启动了一个webhook服务器！让我们详细解释一下发生了什么：
 - en: By decorating a function with [webhook_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/webhooks_server#huggingface_hub.webhook_endpoint),
     a [WebhooksServer()](/docs/huggingface_hub/v0.20.3/en/package_reference/webhooks_server#huggingface_hub.WebhooksServer)
     object has been created in the background. As you can see, this server is a Gradio
@@ -83,6 +95,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通过使用[webhook_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/webhooks_server#huggingface_hub.webhook_endpoint)装饰函数，后台已创建了一个[WebhooksServer()](/docs/huggingface_hub/v0.20.3/en/package_reference/webhooks_server#huggingface_hub.WebhooksServer)对象。正如您所看到的，此服务器是在[http://127.0.0.1:7860](http://127.0.0.1:7860)上运行的Gradio应用程序。如果在浏览器中打开此URL，您将看到一个包含有关已注册webhooks的说明的登陆页面。
 - en: A Gradio app is a FastAPI server under the hood. A new POST route `/webhooks/trigger_training`
     has been added to it. This is the route that will listen to webhooks and run the
     `trigger_training` function when triggered. FastAPI will automatically parse the
@@ -93,6 +106,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: Gradio应用程序是FastAPI服务器的底层。它添加了一个新的POST路由`/webhooks/trigger_training`。这是将监听webhooks并在触发时运行`trigger_training`函数的路由。FastAPI将自动解析有效负载并将其作为[WebhookPayload](/docs/huggingface_hub/v0.20.3/en/package_reference/webhooks_server#huggingface_hub.WebhookPayload)对象传递给函数。这是一个包含有关触发webhook的事件的所有信息的`pydantic`对象。
 - en: 'The Gradio app also opened a tunnel to receive requests from the internet.
     This is the interesting part: you can configure a Webhook on [https://huggingface.co/settings/webhooks](https://huggingface.co/settings/webhooks)
     pointing to your local machine. This is useful for debugging your webhook server
@@ -101,6 +115,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: Gradio应用程序还打开了一个隧道以接收来自互联网的请求。这是有趣的部分：您可以在[https://huggingface.co/settings/webhooks](https://huggingface.co/settings/webhooks)上配置一个指向本地机器的Webhook。这对于调试您的webhook服务器并在部署到Space之前快速迭代非常有用。
 - en: Finally, the logs also tell you that your server is currently not secured by
     a secret. This is not problematic for local debugging but is to keep in mind for
     later.
@@ -108,6 +123,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 最后，日志还告诉您，您的服务器当前未受到秘密的保护。这对于本地调试并不成问题，但以后要记住。
 - en: By default, the server is started at the end of your script. If you are running
     it in a notebook, you can start the server manually by calling `decorated_function.run()`.
     Since a unique server is used, you only have to start the server once even if
@@ -115,11 +131,13 @@
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，服务器在脚本结束时启动。如果您在笔记本中运行它，可以通过调用`decorated_function.run()`手动启动服务器。由于使用唯一服务器，即使有多个端点，您也只需启动服务器一次。
 - en: Configure a Webhook
   id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 配置Webhook
 - en: Now that you have a webhook server running, you want to configure a Webhook
     to start receiving messages. Go to [https://huggingface.co/settings/webhooks](https://huggingface.co/settings/webhooks),
     click on “Add a new webhook” and configure your Webhook. Set the target repositories
