@@ -1,273 +1,400 @@
 - en: Create your own chatbot with llama-2-13B on AWS Inferentia
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在AWS Inferentia上使用llama-2-13B创建您自己的聊天机器人
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/tutorials/llama2-13b-chatbot](https://huggingface.co/docs/optimum-neuron/tutorials/llama2-13b-chatbot)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/optimum-neuron/tutorials/llama2-13b-chatbot](https://huggingface.co/docs/optimum-neuron/tutorials/llama2-13b-chatbot)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '*There is a notebook version of that tutorial [here](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-generation/llama2-13b-chatbot.ipynb)*.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '*这里有一个笔记本版本的教程[链接](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-generation/llama2-13b-chatbot.ipynb)*。'
 - en: This guide will detail how to export, deploy and run a **LLama-2 13B** chat
     model on AWS inferentia.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将详细介绍如何在AWS inferentia上导出、部署和运行**LLama-2 13B**聊天模型。
 - en: 'You will learn how to:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将学习如何：
 - en: export the Llama-2 model to the Neuron format,
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将Llama-2模型导出为Neuron格式，
 - en: push the exported model to the Hugging Face Hub,
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将导出的模型推送到Hugging Face Hub，
 - en: deploy the model and use it in a chat application.
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 部署模型并在聊天应用程序中使用它。
 - en: 'Note: This tutorial was created on a inf2.48xlarge AWS EC2 Instance.'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意：本教程是在一个inf2.48xlarge的AWS EC2实例上创建的。
 - en: 1\. Export the Llama 2 model to Neuron
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 1\. 将Llama 2模型导出到Neuron
 - en: For this guide, we will use the non-gated [NousResearch/Llama-2-13b-chat-hf](https://huggingface.co/NousResearch/Llama-2-13b-chat-hf)
     model, which is functionally equivalent to the original [meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf).
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，我们将使用非门控[NousResearch/Llama-2-13b-chat-hf](https://huggingface.co/NousResearch/Llama-2-13b-chat-hf)模型，它在功能上等同于原始的[meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf)模型。
 - en: This model is part of the **Llama 2** family of models, and has been tuned to
     recognize chat interactions between a *user* and an *assistant* (more on that
     later).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型是**Llama 2**系列模型的一部分，已经调整为识别*用户*和*助手*之间的聊天互动（稍后会详细介绍）。
 - en: As explained in the [optimum-neuron documentation](https://huggingface.co/docs/optimum-neuron/guides/export_model#why-compile-to-neuron-model)
     , models need to be compiled and exported to a serialized format before running
     them on Neuron devices.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 如[最佳神经元文档](https://huggingface.co/docs/optimum-neuron/guides/export_model#why-compile-to-neuron-model)中所解释的，模型需要在Neuron设备上运行之前被编译和导出为序列化格式。
 - en: Fortunately, 🤗 **optimum-neuron** offers a [very simple API](https://huggingface.co/docs/optimum-neuron/guides/models#configuring-the-export-of-a-generative-model)
     to export standard 🤗 [transformers models](https://huggingface.co/docs/transformers/index)
     to the Neuron format.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，🤗 **optimum-neuron** 提供了一个非常简单的 [API](https://huggingface.co/docs/optimum-neuron/guides/models#configuring-the-export-of-a-generative-model)
+    来将标准 🤗 [transformers 模型](https://huggingface.co/docs/transformers/index) 导出为Neuron格式。
 - en: 'When exporting the model, we will specify two sets of parameters:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 在导出模型时，我们将指定两组参数：
 - en: using *compiler_args*, we specify on how many cores we want the model to be
     deployed (each neuron device has two cores), and with which precision (here *float16*),
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用*compiler_args*，我们指定要部署模型的核心数（每个神经元设备有两个核心），以及精度（这里是*float16*），
 - en: using *input_shapes*, we set the static input and output dimensions of the model.
     All model compilers require static shapes, and neuron makes no exception. Note
     that the *sequence_length* not only constrains the length of the input context,
     but also the length of the Key/Value cache, and thus, the output length.
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用*input_shapes*，我们设置模型的静态输入和输出维度。所有模型编译器都需要静态形状，神经元也不例外。请注意，*sequence_length*不仅限制了输入上下文的长度，还限制了Key/Value缓存的长度，因此也限制了输出长度。
 - en: Depending on your choice of parameters and inferentia host, this may take from
     a few minutes to more than an hour.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据您选择的参数和inferentia主机，这可能需要几分钟到一个多小时的时间。
 - en: For your convenience, we host a pre-compiled version of that model on the Hugging
     Face hub, so you can skip the export and start using the model immediately in
     section 2.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了方便起见，我们在Hugging Face hub上托管了该模型的预编译版本，因此您可以跳过导出并立即在第2节中开始使用该模型。
 - en: '[PRE0]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: This will probably take a while.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 这可能需要一段时间。
 - en: Fortunately, you will need to do this only once because you can save your model
     and reload it later.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，您只需要做一次这个操作，因为您可以保存您的模型并稍后重新加载它。
 - en: '[PRE1]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Even better, you can push it to the [Hugging Face hub](https://huggingface.co/models).
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 更好的是，您可以将其推送到[Hugging Face hub](https://huggingface.co/models)。
 - en: For that, you need to be logged in to a [HuggingFace account](https://huggingface.co/join).
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 为此，您需要登录到[HuggingFace帐户](https://huggingface.co/join)。
 - en: 'In the terminal, just type the following command and paste your Hugging Face
     token when requested:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 在终端中，只需输入以下命令，并在请求时粘贴您的Hugging Face令牌：
 - en: '[PRE2]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: By default, the model will be uploaded to your account (organization equal to
     your user name).
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，模型将上传到您的帐户（组织等于您的用户名）。
 - en: Feel free to edit the code below if you want to upload the model to a specific
     [Hugging Face organization](https://huggingface.co/docs/hub/organizations).
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想将模型上传到特定的[Hugging Face组织](https://huggingface.co/docs/hub/organizations)，请随意编辑下面的代码。
 - en: '[PRE3]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: A few more words about export parameters.
+  id: totrans-31
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 关于导出参数的更多说明。
 - en: 'The minimum memory required to load a model can be computed with:'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载模型所需的最小内存可以通过以下方式计算：
 - en: '[PRE4]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: The **Llama 2 13B** model uses *float16* weights (stored on 2 bytes) and has
     13 billion parameters, which means it requires at least 2 * 13B or ~26GB of memory
     to store its weights.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '**Llama 2 13B**模型使用*float16*权重（存储在2字节中），有130亿参数，这意味着至少需要2 * 13B或~26GB的内存来存储其权重。'
 - en: Each NeuronCore has 16GB of memory which means that a 26GB model cannot fit
     on a single NeuronCore.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个NeuronCore有16GB的内存，这意味着26GB的模型无法放入单个NeuronCore中。
 - en: In reality, the total space required is much greater than just the number of
     parameters due to caching attention layer projections (KV caching). This caching
     mechanism grows memory allocations linearly with sequence length and batch size.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 实际上，由于缓存注意力层投影（KV缓存），所需的总空间远远大于参数数量。这种缓存机制会随着序列长度和批量大小线性增长内存分配。
 - en: Here we set the *batch_size* to 1, meaning that we can only process one input
     prompt in parallel. We set the *sequence_length* to 2048, which corresponds to
     half the model maximum capacity (4096).
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们将*batch_size*设置为1，这意味着我们只能并行处理一个输入提示。我们将*sequence_length*设置为2048，这对应于模型最大容量的一半（4096）。
 - en: The formula to evaluate the size of the KV cache is more involved as it also
     depends on parameters related to the model architecture, such as the width of
     the embeddings and the number of decoder blocks.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 评估KV缓存大小的公式更复杂，因为它还取决于与模型架构相关的参数，比如嵌入的宽度和解码器块的数量。
 - en: Bottom-line is, to get very large language models to fit, tensor parallelism
     is used to split weights, data, and compute across multiple NeuronCores, keeping
     in mind that the memory on each core cannot exceed 16GB.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 总的来说，为了使非常大的语言模型适应，张量并行性被用来在多个NeuronCores之间分割权重、数据和计算，需要注意的是每个核心上的内存不能超过16GB。
 - en: Note that increasing the number of cores beyond the minimum requirement almost
     always results in a faster model. Increasing the tensor parallelism degree improves
     memory bandwidth which improves model performance.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，将核心数量增加到最低要求之上几乎总是会导致模型运行更快。增加张量并行度会提高内存带宽，从而提高模型性能。
 - en: To optimize performance it’s recommended to use all cores available on the instance.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了优化性能，建议使用实例上所有可用的核心。
 - en: In this guide we use all the 24 cores of the *inf2.48xlarge*, but this should
     be changed to 12 if you are using a *inf2.24xlarge* instance.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，我们使用*inf2.48xlarge*的所有24个核心，但如果您使用*inf2.24xlarge*实例，则应将其更改为12个核心。
 - en: 2\. Generate text using Llama 2 on AWS Inferentia2
+  id: totrans-43
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 2. 在AWS Inferentia2上使用Llama 2生成文本
 - en: Once your model has been exported, you can generate text using the transformers
     library, as it has been described in [detail in this post](https://huggingface.co/blog/how-to-generate).
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您的模型被导出，您可以使用transformers库生成文本，如在[这篇文章](https://huggingface.co/blog/how-to-generate)中详细描述的。
 - en: 'If as suggested you skipped the first section, don’t worry: we will use a precompiled
     model already present on the hub instead.'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您按照建议跳过了第一部分，不用担心：我们将使用hub上已经存在的预编译模型。
 - en: '[PRE5]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: We will need a *Llama 2* tokenizer to convert the prompt strings to text tokens.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将需要一个*Llama 2*分词器将提示字符串转换为文本标记。
 - en: '[PRE6]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'The following generation strategies are supported:'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 支持以下生成策略：
 - en: greedy search,
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 贪婪搜索，
 - en: multinomial sampling with top-k and top-p (with temperature).
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用top-k和top-p（带有温度）的多项式采样。
 - en: Most logits pre-processing/filters (such as repetition penalty) are supported.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数对数预处理/过滤（如重复惩罚）都受支持。
 - en: '[PRE7]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 3\. Create a chat application using llama on AWS Inferentia2
+  id: totrans-54
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 3. 在AWS Inferentia2上使用llama创建聊天应用
 - en: We specifically selected a **Llama 2** chat variant to illustrate the excellent
     behaviour of the exported model when the length of the encoding context grows.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们特意选择了**Llama 2**聊天变体，以展示导出模型在编码上下文长度增加时的出色行为。
 - en: The model expects the prompts to be formatted following a specific template
     corresponding to the interactions between a *user* role and an *assistant* role.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 模型期望提示按照特定模板格式化，该模板对应于*用户*角色和*助手*角色之间的互动。
 - en: Each chat model has its own convention for encoding such contents, and we will
     not go into too much details in this guide, because we will directly use the [Hugging
     Face chat templates](https://huggingface.co/blog/chat-templates) corresponding
     to our model.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个聊天模型都有自己的约定来编码这些内容，我们在本指南中不会详细介绍，因为我们将直接使用与我们的模型对应的[Hugging Face聊天模板](https://huggingface.co/blog/chat-templates)。
 - en: The utility function below converts a list of exchanges between the user and
     the model into a well-formatted chat prompt.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的实用函数将把用户和模型之间的交流列表转换为格式良好的聊天提示。
 - en: '[PRE8]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: We are now equipped to build a simplistic chat application.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们已经准备好构建一个简单的聊天应用程序。
 - en: We simply store the interactions between the user and the assistant in a list
     that we use to generate the input prompt.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们简单地将用户和助手之间的互动存储在一个列表中，我们用这个列表来生成输入提示。
 - en: '[PRE9]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'To test the chat application you can use for instance the following sequence
     of prompts:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 要测试聊天应用程序，您可以使用以下提示序列：
 - en: '[PRE10]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: <Warning>
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: <警告>
 - en: While very powerful, Large language models can sometimes *hallucinate*. We call
     *hallucinations* generated content that is irrelevant or made-up but presented
     by the model as if it was accurate. This is a flaw of LLMs and is not a side effect
     of using them on Trainium / Inferentia.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管非常强大，大型语言模型有时可能会“幻觉”。我们称生成的内容为“幻觉”，如果内容与主题无关或是虚构的，但模型呈现出来的好像是准确的。这是LLM的一个缺陷，不是在Trainium
+    / Inferentia上使用它们的副作用。
 - en: </Warning>
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: </警告>

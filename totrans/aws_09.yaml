@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在 AWS Inferentia 上使用稳定扩散模型生成图像
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion](https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion](https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion)
 - en: null
   id: totrans-2
   prefs: []
@@ -17,21 +19,26 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 稳定扩散
 - en: '*There is a notebook version of that tutorial [here](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/stable-diffusion/stable-diffusion-txt2img.ipynb)*.'
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '*该教程有笔记本版本 [在这里](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/stable-diffusion/stable-diffusion-txt2img.ipynb)*。'
 - en: 🤗 `Optimum` extends `Diffusers` to support inference on the second generation
     of Neuron devices(powering Trainium and Inferentia 2). It aims at inheriting the
     ease of Diffusers on Neuron.
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 `Optimum` 扩展了 `Diffusers` 以支持第二代 Neuron 设备（驱动 Trainium 和 Inferentia 2）上的推理。它旨在继承
+    Neuron 上 Diffusers 的易用性。
 - en: 'To get started, make sure you have [configured your inf2 / trn1 instance](../installation),
     and installed optimum:'
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 要开始，请确保您已经[配置了您的 inf2 / trn1 实例](../installation)，并安装了 optimum：
 - en: '[PRE0]'
   id: totrans-7
   prefs: []
@@ -42,46 +49,56 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 编译稳定扩散
 - en: 'To deploy models, you will need to compile them to TorchScript optimized for
     AWS Neuron. In the case of Stable Diffusion, there are four components which need
     to be exported to the `.neuron` format to boost the performance:'
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 要部署模型，您需要将它们编译为针对 AWS Neuron 优化的 TorchScript。在稳定扩散的情况下，有四个组件需要导出到 `.neuron`
+    格式以提高性能：
 - en: Text encoder
   id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 文本编码器
 - en: U-Net
   id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: U-Net
 - en: VAE encoder
   id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: VAE 编码器
 - en: VAE decoder
   id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: VAE 解码器
 - en: You can either compile and export a Stable Diffusion Checkpoint via CLI or `NeuronStableDiffusionPipeline`
     class.
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过 CLI 或 `NeuronStableDiffusionPipeline` 类编译和导出稳定扩散检查点。
 - en: '***Export via CLI***'
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '***通过 CLI 导出***'
 - en: 'Here is an example of exporting stable diffusion components with `Optimum`
     CLI:'
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是使用 `Optimum` CLI 导出稳定扩散组件的示例：
 - en: '[PRE1]'
   id: totrans-17
   prefs: []
@@ -95,19 +112,24 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们建议使用 `inf2.8xlarge` 或更大的实例来进行模型编译。您也可以在仅CPU实例上使用 Optimum CLI 编译模型（需要约35 GB内存），然后在
+    `inf2.xlarge` 上运行预编译的模型以减少费用。在这种情况下，不要忘记通过添加 `--disable-validation` 参数来禁用推理的验证。
 - en: '***Export via Python API***'
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '***通过 Python API 导出***'
 - en: 'Here is an example of exporting stable diffusion components with `NeuronStableDiffusionPipeline`:'
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是使用 `NeuronStableDiffusionPipeline` 导出稳定扩散组件的示例：
 - en: To apply optimized compute of Unet’s attention score, please configure your
     environment variable with `export NEURON_FUSE_SOFTMAX=1`.
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 要应用 Unet 的注意力分数的优化计算，请使用 `export NEURON_FUSE_SOFTMAX=1` 配置您的环境变量。
 - en: Besides, don’t hesitate to tweak the compilation configuration to find the best
     tradeoff between performance v.s accuracy in your use case. By default, we suggest
     casting FP32 matrix multiplication operations to BF16 which offers good performance
@@ -117,6 +139,9 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，不要犹豫调整编译配置，以在您的用例中找到性能与准确性之间的最佳权衡。默认情况下，我们建议将 FP32 矩阵乘法运算转换为 BF16，这在适度牺牲准确性的情况下提供良好的性能。查看来自
+    [AWS Neuron 文档](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/appnotes/neuronx-cc/neuronx-cc-training-mixed-precision.html#neuronx-cc-training-mixed-precision)
+    的指南，以更好地了解编译选项。
 - en: '[PRE2]'
   id: totrans-23
   prefs: []
@@ -127,16 +152,19 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 文本到图像
 - en: '`NeuronStableDiffusionPipeline` class allows you to generate images from a
     text prompt on neuron devices similar to the experience with `Diffusers`.'
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: '`NeuronStableDiffusionPipeline` 类允许您在类似于 `Diffusers` 的 Neuron 设备上根据文本提示生成图像。'
 - en: 'With pre-compiled Stable Diffusion models, now generate an image with a prompt
     on Neuron:'
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在使用预编译的稳定扩散模型，在 Neuron 上生成带提示的图像：
 - en: '[PRE3]'
   id: totrans-27
   prefs: []
@@ -146,16 +174,19 @@
   id: totrans-28
   prefs: []
   type: TYPE_IMG
+  zh: '![稳定扩散生成的图像](../Images/e9bdfbe61952c061089cfa95a2059afb.png)'
 - en: Image-to-Image
   id: totrans-29
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 图像到图像
 - en: With the `NeuronStableDiffusionImg2ImgPipeline` class, you can generate a new
     image conditioned on a text prompt and an initial image.
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `NeuronStableDiffusionImg2ImgPipeline` 类，您可以根据文本提示和初始图像生成新图像。
 - en: '[PRE4]'
   id: totrans-31
   prefs: []
@@ -165,10 +196,12 @@
   id: totrans-32
   prefs: []
   type: TYPE_TB
+  zh: '| `image` | `prompt` | 输出 |  |'
 - en: '| :-: | :-: | :-: | --: |'
   id: totrans-33
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | --: |'
 - en: '| ![landscape photo](../Images/a03c8be4cac347c435e8607dd6ced9a4.png) | ***ghibli
     style, a fantasy landscape with snowcapped mountains, trees, lake with detailed
     reflection. warm colors, 8K*** | ![drawing](../Images/9f3025ed17a13258842023d761eaee3c.png)
@@ -176,16 +209,20 @@
   id: totrans-34
   prefs: []
   type: TYPE_TB
+  zh: '| ![landscape photo](../Images/a03c8be4cac347c435e8607dd6ced9a4.png) | ***吉卜力风格，一个幻想的风景，有雪山、树木、湖泊和详细的倒影。暖色调，8K***
+    | ![drawing](../Images/9f3025ed17a13258842023d761eaee3c.png) |  |'
 - en: Inpaint
   id: totrans-35
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 修补
 - en: With the `NeuronStableDiffusionInpaintPipeline` class, you can edit specific
     parts of an image by providing a mask and a text prompt.
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `NeuronStableDiffusionInpaintPipeline` 类，您可以通过提供蒙版和文本提示来编辑图像的特定部分。
 - en: '[PRE5]'
   id: totrans-37
   prefs: []
@@ -195,25 +232,32 @@
   id: totrans-38
   prefs: []
   type: TYPE_TB
+  zh: '| `image` | `mask_image` | `prompt` | 输出 |'
 - en: '| :-: | :-: | :-: | --: |'
   id: totrans-39
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | --: |'
 - en: '| ![drawing](../Images/ccaa29fadd7036eecdf16d6ed327b788.png) | ![drawing](../Images/845ec3d502fa4754b97332a095702af9.png)
     | ***Face of a yellow cat, high resolution, sitting on a park bench*** | ![drawing](../Images/229c5966ac3cee6ead365a6a1b86e209.png)
     |'
   id: totrans-40
   prefs: []
   type: TYPE_TB
+  zh: '| ![drawing](../Images/ccaa29fadd7036eecdf16d6ed327b788.png) | ![drawing](../Images/845ec3d502fa4754b97332a095702af9.png)
+    | ***一只黄色猫的脸，高分辨率，坐在公园长椅上*** | ![drawing](../Images/229c5966ac3cee6ead365a6a1b86e209.png)
+    |'
 - en: Stable Diffusion XL
   id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 稳定扩散 XL
 - en: '*There is a notebook version of that tutorial [here](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/stable-diffusion/stable-diffusion-xl-txt2img.ipynb)*.'
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: '*该教程有笔记本版本 [在这里](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/stable-diffusion/stable-diffusion-xl-txt2img.ipynb)*。'
 - en: Stable Diffusion XL (SDXL) is a latent diffusion model for text-to-image. Compared
     to the previous versions of Stable Diffusion models, it improves the quality of
     generated images with a times larger UNet.
