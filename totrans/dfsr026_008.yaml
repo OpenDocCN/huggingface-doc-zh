@@ -1,26 +1,15 @@
 - en: Understanding pipelines, models and schedulers
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/write_own_pipeline](https://huggingface.co/docs/diffusers/using-diffusers/write_own_pipeline)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 🧨 Diffusers is designed to be a user-friendly and flexible toolbox for building
@@ -28,29 +17,37 @@
     and schedulers. While the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
     bundles these components together for convenience, you can also unbundle the pipeline
     and use the models and schedulers separately to create new diffusion systems.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: In this tutorial, you’ll learn how to use models and schedulers to assemble
     a diffusion system for inference, starting with a basic pipeline and then progressing
     to the Stable Diffusion pipeline.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: Deconstruct a basic pipeline
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'A pipeline is a quick and easy way to run a model for inference, requiring
     no more than four lines of code to generate an image:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '![Image of cat created from DDPMPipeline](../Images/14589ab570d5bde87da475dacae4b73e.png)'
+  id: totrans-8
   prefs: []
   type: TYPE_IMG
 - en: That was super easy, but how did the pipeline do that? Let’s breakdown the pipeline
     and take a look at what’s happening under the hood.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: In the example above, the pipeline contains a [UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel)
@@ -60,66 +57,87 @@
     predicts the *noise residual* and the scheduler uses it to predict a less noisy
     image. The pipeline repeats this process until it reaches the end of the specified
     number of inference steps.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: To recreate the pipeline with the model and scheduler separately, let’s write
     our own denoising process.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: 'Load the model and scheduler:'
+  id: totrans-12
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Set the number of timesteps to run the denoising process for:'
+  id: totrans-14
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Setting the scheduler timesteps creates a tensor with evenly spaced elements
     in it, 50 in this example. Each element corresponds to a timestep at which the
     model denoises an image. When you create the denoising loop later, you’ll iterate
     over this tensor to denoise an image:'
+  id: totrans-16
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Create some random noise with the same shape as the desired output:'
+  id: totrans-18
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Now write a loop to iterate over the timesteps. At each timestep, the model
     does a [UNet2DModel.forward()](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel.forward)
     pass and returns the noisy residual. The scheduler’s [step()](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler.step)
     method takes the noisy residual, timestep, and input and it predicts the image
     at the previous timestep. This output becomes the next input to the model in the
     denoising loop, and it’ll repeat until it reaches the end of the `timesteps` array.
+  id: totrans-20
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: This is the entire denoising process, and you can use this same pattern to write
     any diffusion system.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: 'The last step is to convert the denoised output into an image:'
+  id: totrans-23
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: In the next section, you’ll put your skills to the test and breakdown the more
     complex Stable Diffusion pipeline. The steps are more or less the same. You’ll
     initialize the necessary components, and set the number of timesteps to create
@@ -128,12 +146,15 @@
     loop iterates over the `timestep`’s, and at each timestep, it outputs a noisy
     residual and the scheduler uses it to predict a less noisy image at the previous
     timestep. This process is repeated until you reach the end of the `timestep` array.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: Let’s try it out!
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: Deconstruct the Stable Diffusion pipeline
+  id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -144,82 +165,110 @@
     to convert the compressed representation back into an image. For text-to-image
     models, you’ll need a tokenizer and an encoder to generate text embeddings. From
     the previous example, you already know you need a UNet model and a scheduler.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: As you can see, this is already more complex than the DDPM pipeline which only
     contains a UNet model. The Stable Diffusion model has three separate pretrained
     models.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: 💡 Read the [How does Stable Diffusion work?](https://huggingface.co/blog/stable_diffusion#how-does-stable-diffusion-work)
     blog for more details about how the VAE, UNet, and text encoder models work.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
 - en: 'Now that you know what you need for the Stable Diffusion pipeline, load all
     these components with the [from_pretrained()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.from_pretrained)
     method. You can find them in the pretrained [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)
     checkpoint, and each component is stored in a separate subfolder:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Instead of the default [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler),
     exchange it for the [UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler)
     to see how easy it is to plug a different scheduler in:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'To speed up inference, move the models to a GPU since, unlike the scheduler,
     they have trainable weights:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Create text embeddings
+  id: totrans-37
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: The next step is to tokenize the text to generate embeddings. The text is used
     to condition the UNet model and steer the diffusion process towards something
     that resembles the input prompt.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
 - en: 💡 The `guidance_scale` parameter determines how much weight should be given
     to the prompt when generating an image.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: Feel free to choose any prompt you like if you want to generate something else!
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Tokenize the text and generate the embeddings from the prompt:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'You’ll also need to generate the *unconditional text embeddings* which are
     the embeddings for the padding token. These need to have the same shape (`batch_size`
     and `seq_length`) as the conditional `text_embeddings`:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Let’s concatenate the conditional and unconditional embeddings into a batch
     to avoid doing two forward passes:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE13]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Create random noise
+  id: totrans-48
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -228,71 +277,96 @@
     denoised. At this point, the `latent` image is smaller than the final image size
     but that’s okay though because the model will transform it into the final 512x512
     image dimensions later.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
 - en: '💡 The height and width are divided by 8 because the `vae` model has 3 down-sampling
     layers. You can check by running the following:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE14]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '[PRE15]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Denoise the image
+  id: totrans-53
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'Start by scaling the input with the initial noise distribution, *sigma*, the
     noise scale value, which is required for improved schedulers like [UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler):'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE16]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'The last step is to create the denoising loop that’ll progressively transform
     the pure noise in `latents` to an image described by your prompt. Remember, the
     denoising loop needs to do three things:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
 - en: Set the scheduler’s timesteps to use during denoising.
+  id: totrans-57
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Iterate over the timesteps.
+  id: totrans-58
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: At each timestep, call the UNet model to predict the noise residual and pass
     it to the scheduler to compute the previous noisy sample.
+  id: totrans-59
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE17]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Decode the image
+  id: totrans-61
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'The final step is to use the `vae` to decode the latent representation into
     an image and get the decoded output with `sample`:'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE18]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Lastly, convert the image to a `PIL.Image` to see your generated image!
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE19]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: '![](../Images/4e7ad063cb2c61e9b5a381072c11e2f2.png)'
+  id: totrans-66
   prefs: []
   type: TYPE_IMG
 - en: Next steps
+  id: totrans-67
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -301,23 +375,33 @@
     timesteps, iterate over them, and alternate between calling the UNet model to
     predict the noise residual and passing it to the scheduler to compute the previous
     noisy sample.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 从基本到复杂的管道，您已经看到，编写自己的扩散系统所需的只是一个去噪环。该循环应设置调度器的时间步长，对其进行迭代，并在调用 UNet 模型以预测噪声残差并将其传递给调度器以计算先前的嘈杂样本之间进行交替。
 - en: 'This is really what 🧨 Diffusers is designed for: to make it intuitive and easy
     to write your own diffusion system using models and schedulers.'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 这确实是 🧨 Diffusers 的设计目的：使使用模型和调度器编写自己的扩散系统变得直观和简单。
 - en: 'For your next steps, feel free to:'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您可以自由地：
 - en: Learn how to [build and contribute a pipeline](../using-diffusers/contribute_pipeline)
     to 🧨 Diffusers. We can’t wait and see what you’ll come up with!
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 学习如何[构建和贡献管道](../using-diffusers/contribute_pipeline)给 🧨 Diffusers。我们迫不及待地想看看您会想出什么！
 - en: Explore [existing pipelines](../api/pipelines/overview) in the library, and
     see if you can deconstruct and build a pipeline from scratch using the models
     and schedulers separately.
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在库中探索[现有的管道](../api/pipelines/overview)，看看您是否可以解构并从头开始构建一个管道，分别使用模型和调度器。
