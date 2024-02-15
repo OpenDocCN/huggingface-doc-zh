@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 深度Q学习算法
 - en: 'Original text: [https://huggingface.co/learn/deep-rl-course/unit3/deep-q-algorithm](https://huggingface.co/learn/deep-rl-course/unit3/deep-q-algorithm)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文：[https://huggingface.co/learn/deep-rl-course/unit3/deep-q-algorithm](https://huggingface.co/learn/deep-rl-course/unit3/deep-q-algorithm)
 - en: null
   id: totrans-2
   prefs: []
@@ -17,45 +19,54 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们了解到深度Q学习**使用深度神经网络来逼近每个可能动作的不同Q值**（值函数估计）。
 - en: 'The difference is that, during the training phase, instead of updating the
     Q-value of a state-action pair directly as we have done with Q-Learning:'
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 不同之处在于，在训练阶段，我们不直接更新状态-动作对的Q值，而是像我们在Q学习中所做的那样：
 - en: '![Q Loss](../Images/039d07cc30eaeda29cabcae129111e00.png)'
   id: totrans-5
   prefs: []
   type: TYPE_IMG
+  zh: '![Q损失](../Images/039d07cc30eaeda29cabcae129111e00.png)'
 - en: in Deep Q-Learning, we create a **loss function that compares our Q-value prediction
     and the Q-target and uses gradient descent to update the weights of our Deep Q-Network
     to approximate our Q-values better**.
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在深度Q学习中，我们创建一个**损失函数，比较我们的Q值预测和Q目标，并使用梯度下降来更新我们的深度Q网络的权重，以更好地逼近我们的Q值**。
 - en: '![Q-target](../Images/ab542bd5b3eba9def6a1225c5ee2e599.png)'
   id: totrans-7
   prefs: []
   type: TYPE_IMG
+  zh: '![Q目标](../Images/ab542bd5b3eba9def6a1225c5ee2e599.png)'
 - en: 'The Deep Q-Learning training algorithm has *two phases*:'
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 深度Q学习训练算法有*两个阶段*：
 - en: '**Sampling**: we perform actions and **store the observed experience tuples
     in a replay memory**.'
   id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**采样**：我们执行动作并**将观察到的经验元组存储在重播记忆中**。'
 - en: '**Training**: Select a **small batch of tuples randomly and learn from this
     batch using a gradient descent update step**.'
   id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**训练**：随机选择一个**小批量元组，并通过梯度下降更新步骤从这批元组中学习**。'
 - en: '![Sampling Training](../Images/bc0888331c25250764e5f1a5409db265.png)'
   id: totrans-11
   prefs: []
   type: TYPE_IMG
+  zh: '![采样训练](../Images/bc0888331c25250764e5f1a5409db265.png)'
 - en: This is not the only difference compared with Q-Learning. Deep Q-Learning training
     **might suffer from instability**, mainly because of combining a non-linear Q-value
     function (Neural Network) and bootstrapping (when we update targets with existing
@@ -63,43 +74,52 @@
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 这不是与Q学习相比的唯一区别。深度Q学习训练**可能会遭受不稳定性**，主要是因为结合了非线性Q值函数（神经网络）和自举（当我们使用现有估计更新目标而不是实际完整回报时）。
 - en: 'To help us stabilize the training, we implement three different solutions:'
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了帮助我们稳定训练，我们实施了三种不同的解决方案：
 - en: '*Experience Replay* to make more **efficient use of experiences**.'
   id: totrans-14
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '*经验重播*以更**有效地利用经验**。'
 - en: '*Fixed Q-Target* **to stabilize the training**.'
   id: totrans-15
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '*固定Q目标* **以稳定训练**。'
 - en: '*Double Deep Q-Learning*, to **handle the problem of the overestimation of
     Q-values**.'
   id: totrans-16
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '*双重深度Q学习*，以**处理Q值过高估的问题**。'
 - en: Let’s go through them!
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们来看看它们！
 - en: Experience Replay to make more efficient use of experiences
   id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 经验重播以更有效地利用经验
 - en: Why do we create a replay memory?
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 为什么我们创建一个重播记忆？
 - en: 'Experience Replay in Deep Q-Learning has two functions:'
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 深度Q学习中的经验重播有两个功能：
 - en: '**Make more efficient use of the experiences during the training**. Usually,
     in online reinforcement learning, the agent interacts with the environment, gets
     experiences (state, action, reward, and next state), learns from them (updates
@@ -108,26 +128,31 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '**更有效地利用训练经验**。通常，在在线强化学习中，代理与环境交互，获取经验（状态、动作、奖励和下一个状态），从中学习（更新神经网络），然后丢弃它们。这是低效的。'
 - en: Experience replay helps by **using the experiences of the training more efficiently**.
     We use a replay buffer that saves experience samples **that we can reuse during
     the training.**
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 经验重播通过**更有效地利用训练经验**来帮助。我们使用一个重播缓冲区，保存经验样本**在训练期间可以重复使用**。
 - en: '![Experience Replay](../Images/80b75242ab1f1cf0504128697813311f.png)'
   id: totrans-23
   prefs: []
   type: TYPE_IMG
+  zh: '![经验重播](../Images/80b75242ab1f1cf0504128697813311f.png)'
 - en: ⇒ This allows the agent to **learn from the same experiences multiple times**.
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: ⇒ 这使代理可以**多次从相同经验中学习**。
 - en: '**Avoid forgetting previous experiences (aka catastrophic interference, or
     catastrophic forgetting) and reduce the correlation between experiences**.'
   id: totrans-25
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '**避免忘记先前的经验（也称为灾难性干扰或灾难性遗忘），减少经验之间的相关性**。'
 - en: '**[catastrophic forgetting](https://en.wikipedia.org/wiki/Catastrophic_interference)**:
     The problem we get if we give sequential samples of experiences to our neural
     network is that it tends to forget **the previous experiences as it gets new experiences.** For
@@ -137,18 +162,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**灾难性遗忘**：如果我们将经验的顺序样本提供给我们的神经网络，我们会遇到的问题是，随着获取新经验，它往往会忘记**之前的经验**。例如，如果代理在第一级别，然后在第二级别，这是不同的，它可能会忘记如何在第一级别中行为和玩耍。'
 - en: The solution is to create a Replay Buffer that stores experience tuples while
     interacting with the environment and then sample a small batch of tuples. This
     prevents **the network from only learning about what it has done immediately before.**
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案是创建一个重播缓冲区，存储经验元组，同时与环境交互，然后随机抽取一小批元组。这可以防止**网络仅学习最近所做的事情**。
 - en: Experience replay also has other benefits. By randomly sampling the experiences,
     we remove correlation in the observation sequences and avoid **action values from
     oscillating or diverging catastrophically.**
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 经验重播还有其他好处。通过随机抽样经验，我们消除了观察序列中的相关性，并避免**动作值震荡或灾难性发散**。
 - en: In the Deep Q-Learning pseudocode, we **initialize a replay memory buffer D
     with capacity N** (N is a hyperparameter that you can define). We then store experiences
     in the memory and sample a batch of experiences to feed the Deep Q-Network during
@@ -156,15 +184,18 @@
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 在深度Q学习伪代码中，我们**用容量N初始化一个重播记忆缓冲区D**（N是您可以定义的超参数）。然后我们将经验存储在内存中，并抽取一批经验来在训练阶段馈送深度Q网络。
 - en: '![Experience Replay Pseudocode](../Images/d3b200053d66243af692a4207fbc7f6f.png)'
   id: totrans-30
   prefs: []
   type: TYPE_IMG
+  zh: '![经验重播伪代码](../Images/d3b200053d66243af692a4207fbc7f6f.png)'
 - en: Fixed Q-Target to stabilize the training
   id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 固定Q目标以稳定训练
 - en: When we want to calculate the TD error (aka the loss), we calculate the **difference
     between the TD target (Q-Target) and the current Q-value (estimation of Q)**.
   id: totrans-32
