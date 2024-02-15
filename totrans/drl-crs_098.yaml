@@ -1,90 +1,123 @@
 - en: Introducing the Clipped Surrogate Objective Function
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 引入剪辑替代目标函数
 - en: 'Original text: [https://huggingface.co/learn/deep-rl-course/unit8/clipped-surrogate-objective](https://huggingface.co/learn/deep-rl-course/unit8/clipped-surrogate-objective)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/learn/deep-rl-course/unit8/clipped-surrogate-objective](https://huggingface.co/learn/deep-rl-course/unit8/clipped-surrogate-objective)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'Recap: The Policy Objective Function'
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 回顾：策略目标函数
 - en: 'Let’s remember what the objective is to optimize in Reinforce:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们记住Reinforce中要优化的目标：
 - en: '![Reinforce](../Images/3ea9a018889b4f5f31f0194f43f0595c.png)'
+  id: totrans-5
   prefs: []
   type: TYPE_IMG
+  zh: '![Reinforce](../Images/3ea9a018889b4f5f31f0194f43f0595c.png)'
 - en: The idea was that by taking a gradient ascent step on this function (equivalent
     to taking gradient descent of the negative of this function), we would **push
     our agent to take actions that lead to higher rewards and avoid harmful actions.**
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 想法是通过在这个函数上进行梯度上升步骤（等同于对这个函数的负梯度进行梯度下降），我们将**推动我们的代理人采取导致更高奖励并避免有害动作的行动。**
 - en: 'However, the problem comes from the step size:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，问题出在步长：
 - en: Too small, **the training process was too slow**
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 太小，训练过程太慢
 - en: Too high, **there was too much variability in the training**
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 太高，训练中的变化太大
 - en: With PPO, the idea is to constrain our policy update with a new objective function
     called the *Clipped surrogate objective function* that **will constrain the policy
     change in a small range using a clip.**
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用PPO，想法是通过一个名为*Clipped surrogate objective function*的新目标函数来约束我们的策略更新，**使用剪辑将策略变化限制在一个小范围内。**
 - en: 'This new function **is designed to avoid destructively large weights updates**
     :'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个新功能旨在避免权重更新过大破坏性地：
 - en: '![PPO surrogate function](../Images/bd42a48549cf230c618200f1b3512d6e.png)'
+  id: totrans-12
   prefs: []
   type: TYPE_IMG
+  zh: '![PPO替代函数](../Images/bd42a48549cf230c618200f1b3512d6e.png)'
 - en: Let’s study each part to understand how it works.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们研究每个部分，以了解它是如何工作的。
 - en: The Ratio Function
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 比率函数
 - en: '![Ratio](../Images/10170b8c578faa2b06caa171526c06aa.png)'
+  id: totrans-15
   prefs: []
   type: TYPE_IMG
+  zh: '![比率](../Images/10170b8c578faa2b06caa171526c06aa.png)'
 - en: 'This ratio is calculated as follows:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个比率计算如下：
 - en: '![Ratio](../Images/ec4562b6e26c0b68f44d7fa0c50254c8.png)'
+  id: totrans-17
   prefs: []
   type: TYPE_IMG
+  zh: '![比率](../Images/ec4562b6e26c0b68f44d7fa0c50254c8.png)'
 - en: It’s the probability of taking action<math><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow>
     <annotation encoding="application/x-tex">a_t</annotation></semantics></math> at​
     at state<math><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow> <annotation
     encoding="application/x-tex">s_t</annotation></semantics></math> st​ in the current
     policy, divided by the same for the previous policy.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是在当前策略中采取动作<math><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">a_t</annotation></semantics></math> 在状态<math><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">s_t</annotation></semantics></math> 中的概率，除以先前策略相同的概率。
 - en: 'As we can see,<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
     stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">r_t(\theta)</annotation></semantics></math>
     rt​(θ) denotes the probability ratio between the current and old policy:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们所看到的，<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">r_t(\theta)</annotation></semantics></math>
+    表示当前和旧策略之间的概率比率：
 - en: If<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
     stretchy="false">)</mo><mo>></mo><mn>1</mn></mrow> <annotation encoding="application/x-tex">r_t(\theta)
     > 1</annotation></semantics></math> rt​(θ)>1, the **action<math><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow>
@@ -92,76 +125,116 @@
     at state<math><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow> <annotation
     encoding="application/x-tex">s_t</annotation></semantics></math> st​ is more likely
     in the current policy than the old policy.**
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo><mo>></mo><mn>1</mn></mrow> <annotation encoding="application/x-tex">r_t(\theta)
+    > 1</annotation></semantics></math>，**在当前策略中，动作<math><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">a_t</annotation></semantics></math> 在状态<math><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">s_t</annotation></semantics></math>中比旧策略更有可能。**
 - en: If<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
     stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">r_t(\theta)</annotation></semantics></math>
     rt​(θ) is between 0 and 1, the **action is less likely for the current policy
     than for the old one**.
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">r_t(\theta)</annotation></semantics></math>
+    在0和1之间，**动作在当前策略中的可能性比旧策略中的可能性小。**
 - en: So this probability ratio is an **easy way to estimate the divergence between
     old and current policy.**
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，这个概率比率是**估计旧策略和当前策略之间的差异的一种简单方法。**
 - en: The unclipped part of the Clipped Surrogate Objective function
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 剪辑替代目标函数的未剪辑部分
 - en: '![PPO](../Images/00c0cdc7880db7501dbb213c1490b249.png)'
+  id: totrans-24
   prefs: []
   type: TYPE_IMG
+  zh: '![PPO](../Images/00c0cdc7880db7501dbb213c1490b249.png)'
 - en: 'This ratio **can replace the log probability we use in the policy objective
     function**. This gives us the left part of the new objective function: multiplying
     the ratio by the advantage.'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个比率**可以替代我们在策略目标函数中使用的对数概率**。这给我们新目标函数的左部分：将比率乘以优势。
 - en: '![PPO](../Images/f43eb6cfc9c7ae8d1931c818bfc24184.png)'
+  id: totrans-26
   prefs: []
   type: TYPE_IMG
+  zh: '![PPO](../Images/f43eb6cfc9c7ae8d1931c818bfc24184.png)'
 - en: '[Proximal Policy Optimization Algorithms](https://arxiv.org/pdf/1707.06347.pdf)'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '[近端策略优化算法](https://arxiv.org/pdf/1707.06347.pdf)'
 - en: However, without a constraint, if the action taken is much more probable in
     our current policy than in our former, **this would lead to a significant policy
     gradient step** and, therefore, an **excessive policy update.**
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，如果没有约束，如果当前策略中采取的动作比以前策略中更有可能，**这将导致显著的策略梯度步骤**，因此，**过度的策略更新。**
 - en: The clipped Part of the Clipped Surrogate Objective function
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 剪辑替代目标函数的剪辑部分
 - en: '![PPO](../Images/581016b29c8a3fc730cba20795499167.png)'
+  id: totrans-30
   prefs: []
   type: TYPE_IMG
+  zh: '![PPO](../Images/581016b29c8a3fc730cba20795499167.png)'
 - en: Consequently, we need to constrain this objective function by penalizing changes
     that lead to a ratio far away from 1 (in the paper, the ratio can only vary from
     0.8 to 1.2).
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，我们需要通过惩罚导致远离1的比率的变化来约束这个目标函数（在论文中，比率只能在0.8到1.2之间变化）。
 - en: '**By clipping the ratio, we ensure that we do not have a too large policy update
     because the current policy can’t be too different from the older one.**'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: '**通过修剪比率，我们确保不会有太大的策略更新，因为当前策略不能与旧策略有太大的不同。**'
 - en: 'To do that, we have two solutions:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 为此，我们有两种解决方案：
 - en: '*TRPO (Trust Region Policy Optimization)* uses KL divergence constraints outside
     the objective function to constrain the policy update. But this method **is complicated
     to implement and takes more computation time.**'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*TRPO（Trust Region Policy Optimization）*在目标函数之外使用KL散度约束来约束策略更新。但这种方法**实现起来复杂，需要更多的计算时间。**'
 - en: '*PPO* clip probability ratio directly in the objective function with its **Clipped
     surrogate objective function.**'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*PPO*在其**修剪的替代目标函数**中直接修剪概率比率。'
 - en: '![PPO](../Images/581016b29c8a3fc730cba20795499167.png)'
+  id: totrans-36
   prefs: []
   type: TYPE_IMG
+  zh: '![PPO](../Images/581016b29c8a3fc730cba20795499167.png)'
 - en: This clipped part is a version where<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo
     stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow> <annotation
     encoding="application/x-tex">r_t(\theta)</annotation></semantics></math> rt​(θ)
@@ -169,8 +242,15 @@
     separator="true">,</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mo stretchy="false">]</mo></mrow>
     <annotation encoding="application/x-tex">[1 - \epsilon, 1 + \epsilon]</annotation></semantics></math>
     [1−ϵ,1+ϵ].
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个修剪部分是一个版本，其中<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">r_t(\theta)</annotation></semantics></math>
+    rt​(θ)在<math><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>−</mo><mi>ϵ</mi><mo
+    separator="true">,</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mo stretchy="false">]</mo></mrow>
+    <annotation encoding="application/x-tex">[1 - \epsilon, 1 + \epsilon]</annotation></semantics></math>
+    [1−ϵ,1+ϵ]之间修剪。
 - en: With the Clipped Surrogate Objective function, we have two probability ratios,
     one non-clipped and one clipped in a range between <math><semantics><mrow><mo
     stretchy="false">[</mo><mn>1</mn><mo>−</mo><mi>ϵ</mi><mo separator="true">,</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mo
@@ -179,14 +259,25 @@
     that helps us to define this clip range (in the paper <math><semantics><mrow><mi>ϵ</mi><mo>=</mo><mn>0.2</mn></mrow>
     <annotation encoding="application/x-tex">\epsilon = 0.2</annotation></semantics></math>
     ϵ=0.2.).
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用修剪的替代目标函数，我们有两个概率比率，一个是非修剪的，一个是在<math><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>−</mo><mi>ϵ</mi><mo
+    separator="true">,</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mo stretchy="false">]</mo></mrow>
+    <annotation encoding="application/x-tex">[1 - \epsilon, 1 + \epsilon]</annotation></semantics></math>
+    [1−ϵ,1+ϵ]范围内修剪的，epsilon是一个超参数，帮助我们定义这个修剪范围（在论文中<math><semantics><mrow><mi>ϵ</mi><mo>=</mo><mn>0.2</mn></mrow>
+    <annotation encoding="application/x-tex">\epsilon = 0.2</annotation></semantics></math>
+    ϵ=0.2）。
 - en: Then, we take the minimum of the clipped and non-clipped objective, **so the
     final objective is a lower bound (pessimistic bound) of the unclipped objective.**
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，我们取修剪和非修剪目标的最小值，**因此最终目标是未修剪目标的下界（悲观下界）。**
 - en: Taking the minimum of the clipped and non-clipped objective means **we’ll select
     either the clipped or the non-clipped objective based on the ratio and advantage
     situation**.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 取修剪和非修剪目标的最小值意味着**我们将根据比率和优势情况选择修剪或非修剪目标**。
