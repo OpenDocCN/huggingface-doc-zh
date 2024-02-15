@@ -1,114 +1,130 @@
 - en: The Deep Q-Learning Algorithm
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/learn/deep-rl-course/unit3/deep-q-algorithm](https://huggingface.co/learn/deep-rl-course/unit3/deep-q-algorithm)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: We learned that Deep Q-Learning **uses a deep neural network to approximate
     the different Q-values for each possible action at a state** (value-function estimation).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: 'The difference is that, during the training phase, instead of updating the
     Q-value of a state-action pair directly as we have done with Q-Learning:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: '![Q Loss](../Images/039d07cc30eaeda29cabcae129111e00.png)'
+  id: totrans-5
   prefs: []
   type: TYPE_IMG
 - en: in Deep Q-Learning, we create a **loss function that compares our Q-value prediction
     and the Q-target and uses gradient descent to update the weights of our Deep Q-Network
     to approximate our Q-values better**.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '![Q-target](../Images/ab542bd5b3eba9def6a1225c5ee2e599.png)'
+  id: totrans-7
   prefs: []
   type: TYPE_IMG
 - en: 'The Deep Q-Learning training algorithm has *two phases*:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: '**Sampling**: we perform actions and **store the observed experience tuples
     in a replay memory**.'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Training**: Select a **small batch of tuples randomly and learn from this
     batch using a gradient descent update step**.'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '![Sampling Training](../Images/bc0888331c25250764e5f1a5409db265.png)'
+  id: totrans-11
   prefs: []
   type: TYPE_IMG
 - en: This is not the only difference compared with Q-Learning. Deep Q-Learning training
     **might suffer from instability**, mainly because of combining a non-linear Q-value
     function (Neural Network) and bootstrapping (when we update targets with existing
     estimates and not an actual complete return).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: 'To help us stabilize the training, we implement three different solutions:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
 - en: '*Experience Replay* to make more **efficient use of experiences**.'
+  id: totrans-14
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '*Fixed Q-Target* **to stabilize the training**.'
+  id: totrans-15
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '*Double Deep Q-Learning*, to **handle the problem of the overestimation of
     Q-values**.'
+  id: totrans-16
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Let’s go through them!
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: Experience Replay to make more efficient use of experiences
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Why do we create a replay memory?
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: 'Experience Replay in Deep Q-Learning has two functions:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: '**Make more efficient use of the experiences during the training**. Usually,
     in online reinforcement learning, the agent interacts with the environment, gets
     experiences (state, action, reward, and next state), learns from them (updates
     the neural network), and discards them. This is not efficient.'
+  id: totrans-21
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Experience replay helps by **using the experiences of the training more efficiently**.
     We use a replay buffer that saves experience samples **that we can reuse during
     the training.**
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: '![Experience Replay](../Images/80b75242ab1f1cf0504128697813311f.png)'
+  id: totrans-23
   prefs: []
   type: TYPE_IMG
 - en: ⇒ This allows the agent to **learn from the same experiences multiple times**.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '**Avoid forgetting previous experiences (aka catastrophic interference, or
     catastrophic forgetting) and reduce the correlation between experiences**.'
+  id: totrans-25
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -117,136 +133,193 @@
     network is that it tends to forget **the previous experiences as it gets new experiences.** For
     instance, if the agent is in the first level and then in the second, which is
     different, it can forget how to behave and play in the first level.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The solution is to create a Replay Buffer that stores experience tuples while
     interacting with the environment and then sample a small batch of tuples. This
     prevents **the network from only learning about what it has done immediately before.**
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
 - en: Experience replay also has other benefits. By randomly sampling the experiences,
     we remove correlation in the observation sequences and avoid **action values from
     oscillating or diverging catastrophically.**
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: In the Deep Q-Learning pseudocode, we **initialize a replay memory buffer D
     with capacity N** (N is a hyperparameter that you can define). We then store experiences
     in the memory and sample a batch of experiences to feed the Deep Q-Network during
     the training phase.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: '![Experience Replay Pseudocode](../Images/d3b200053d66243af692a4207fbc7f6f.png)'
+  id: totrans-30
   prefs: []
   type: TYPE_IMG
 - en: Fixed Q-Target to stabilize the training
+  id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: When we want to calculate the TD error (aka the loss), we calculate the **difference
     between the TD target (Q-Target) and the current Q-value (estimation of Q)**.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 当我们想要计算TD误差（又名损失）时，我们计算**TD目标（Q目标）与当前Q值（Q的估计）之间的差异**。
 - en: But we **don’t have any idea of the real TD target**. We need to estimate it.
     Using the Bellman equation, we saw that the TD target is just the reward of taking
     that action at that state plus the discounted highest Q value for the next state.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是**我们没有关于真实TD目标的任何想法**。我们需要估计它。使用贝尔曼方程，我们看到TD目标只是在该状态采取该动作的奖励加上下一个状态的折扣最高Q值。
 - en: '![Q-target](../Images/ab542bd5b3eba9def6a1225c5ee2e599.png)'
+  id: totrans-34
   prefs: []
   type: TYPE_IMG
+  zh: '![Q目标](../Images/ab542bd5b3eba9def6a1225c5ee2e599.png)'
 - en: However, the problem is that we are using the same parameters (weights) for
     estimating the TD target **and** the Q-value. Consequently, there is a significant
     correlation between the TD target and the parameters we are changing.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，问题在于我们正在使用相同的参数（权重）来估计TD目标**和**Q值。因此，TD目标和我们正在更改的参数之间存在显著的相关性。
 - en: Therefore, at every step of training, **both our Q-values and the target values
     shift.** We’re getting closer to our target, but the target is also moving. It’s
     like chasing a moving target! This can lead to significant oscillation in training.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，在训练的每一步中，**我们的Q值和目标值都会发生变化。**我们正在接近我们的目标，但目标也在移动。这就像追逐一个移动的目标！这可能导致训练中的显著振荡。
 - en: It’s like if you were a cowboy (the Q estimation) and you wanted to catch a
     cow (the Q-target). Your goal is to get closer (reduce the error).
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像你是一个牛仔（Q估计），你想抓住一头牛（Q目标）。你的目标是靠近（减少误差）。
 - en: '![Q-target](../Images/a6fd654fac7f317acecc36b47289fa71.png)'
+  id: totrans-38
   prefs: []
   type: TYPE_IMG
+  zh: '![Q目标](../Images/a6fd654fac7f317acecc36b47289fa71.png)'
 - en: At each time step, you’re trying to approach the cow, which also moves at each
     time step (because you use the same parameters).
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 在每个时间步中，您试图接近牛，而牛也在每个时间步中移动（因为您使用相同的参数）。
 - en: '![Q-target](../Images/287c4358eb4ad3198e6e56f30a31ad5b.png) ![Q-target](../Images/8519d6249b8bdbc45e53376324b636c9.png)
     This leads to a bizarre path of chasing (a significant oscillation in training).
     ![Q-target](../Images/73475c3ebfe23d4414212297248eefd2.png)'
+  id: totrans-40
   prefs: []
   type: TYPE_IMG
+  zh: '![Q目标](../Images/287c4358eb4ad3198e6e56f30a31ad5b.png) ![Q目标](../Images/8519d6249b8bdbc45e53376324b636c9.png)
+    这导致了一个奇怪的追逐路径（训练中的显著振荡）。![Q目标](../Images/73475c3ebfe23d4414212297248eefd2.png)'
 - en: 'Instead, what we see in the pseudo-code is that we:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 相反，我们在伪代码中看到的是：
 - en: Use a **separate network with fixed parameters** for estimating the TD Target
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用具有固定参数的**单独网络**来估计TD目标
 - en: '**Copy the parameters from our Deep Q-Network every C steps** to update the
     target network.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**每隔C步从我们的深度Q网络复制参数**以更新目标网络。'
 - en: '![Fixed Q-target Pseudocode](../Images/327d75c11d54073c6773eda69f09d8c2.png)'
+  id: totrans-44
   prefs: []
   type: TYPE_IMG
+  zh: '![固定Q目标伪代码](../Images/327d75c11d54073c6773eda69f09d8c2.png)'
 - en: Double DQN
+  id: totrans-45
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 双重DQN
 - en: Double DQNs, or Double Deep Q-Learning neural networks, were introduced [by
     Hado van Hasselt](https://papers.nips.cc/paper/3964-double-q-learning). This method **handles
     the problem of the overestimation of Q-values.**
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 双重DQN，或双重深度Q学习神经网络，由[Hado van Hasselt](https://papers.nips.cc/paper/3964-double-q-learning)引入。这种方法**解决了Q值的过度估计问题。**
 - en: 'To understand this problem, remember how we calculate the TD Target:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 要理解这个问题，请记住我们如何计算TD目标：
 - en: '![TD target](../Images/56f8c1151f274ebdbc9bcfe88f3a6f80.png)'
+  id: totrans-48
   prefs: []
   type: TYPE_IMG
+  zh: '![TD目标](../Images/56f8c1151f274ebdbc9bcfe88f3a6f80.png)'
 - en: 'We face a simple problem by calculating the TD target: how are we sure that **the
     best action for the next state is the action with the highest Q-value?**'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过计算TD目标，我们面临一个简单的问题：我们如何确定**下一个状态的最佳动作是具有最高Q值的动作？**
 - en: We know that the accuracy of Q-values depends on what action we tried **and** what
     neighboring states we explored.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们知道Q值的准确性取决于我们尝试的动作**和**我们探索的相邻状态。
 - en: Consequently, we don’t have enough information about the best action to take
     at the beginning of the training. Therefore, taking the maximum Q-value (which
     is noisy) as the best action to take can lead to false positives. If non-optimal
     actions are regularly **given a higher Q value than the optimal best action, the
     learning will be complicated.**
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，在训练开始时，我们对于要采取的最佳动作没有足够的信息。因此，将最大Q值（嘈杂的）作为最佳动作可能导致错误的正例。如果非最优动作经常**比最佳最佳动作获得更高的Q值，学习将变得复杂。**
 - en: 'The solution is: when we compute the Q target, we use two networks to decouple
     the action selection from the target Q-value generation. We:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案是：当我们计算Q目标时，我们使用两个网络来将动作选择与目标Q值生成分离。我们：
 - en: Use our **DQN network** to select the best action to take for the next state
     (the action with the highest Q-value).
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用我们的**DQN网络**来选择下一个状态要采取的最佳动作（具有最高Q值的动作）。
 - en: Use our **Target network** to calculate the target Q-value of taking that action
     at the next state.
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用我们的**目标网络**来计算在下一个状态采取该动作的目标Q值。
 - en: Therefore, Double DQN helps us reduce the overestimation of Q-values and, as
     a consequence, helps us train faster and with more stable learning.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，双重DQN帮助我们减少Q值的过度估计，从而帮助我们更快地进行训练并实现更稳定的学习。
 - en: Since these three improvements in Deep Q-Learning, many more have been added,
     such as Prioritized Experience Replay and Dueling Deep Q-Learning. They’re out
     of the scope of this course but if you’re interested, check the links we put in
     the reading list.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 自从这三个改进在深度Q学习中出现后，还有许多其他改进，例如优先经验重放和对抗深度Q学习。它们超出了本课程的范围，但如果您感兴趣，请查看我们在阅读列表中放置的链接。
