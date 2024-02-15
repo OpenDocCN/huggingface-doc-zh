@@ -1,77 +1,82 @@
 - en: Quick tour
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/accelerate/quicktour](https://huggingface.co/docs/accelerate/quicktour)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This guide aims to help you get started with 🤗 Accelerate quickly. It covers
     the essential steps you need to take to enable distributed training, as well as
     the adjustments that you need to make in some common scenarios.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: 'To help you navigate, the guide is split into two sections:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: '[Getting Started with 🤗 Accelerate](#getting-started-with--accelerate): start
     here to learn how to modify your script to enable distributed training with 🤗
     Accelerate'
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[Common adaptations to the base case](#common-adaptations-to-the-base-case):
     check out this section for common deviations from the baseline scenario and what
     adjustments may need to be made to support them.'
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Getting started with 🤗 Accelerate
+  id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Enable distributed training in your script
+  id: totrans-8
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'To use 🤗 Accelerate in your own training script, you have to modify four things:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: Import the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     main class and instantiate one in an `accelerator` object.
+  id: totrans-10
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Add this at the beginning of your training script as it will initialize everything
     necessary for distributed training. You don’t need to indicate the kind of environment
     you are in (a single machine with a GPU, a machine with several GPUs, or several
     machines with multiple GPUs or a TPU), the library will detect this automatically.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: Remove the `.to(device)` or `.cuda()` calls for your model and input data.
+  id: totrans-13
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: 'The `accelerator` object will handle placing these objects on the right device
     for you. If you choose to leave those `.to(device)` calls, make sure to use the
     device provided by the `accelerator` object: `accelerator.device`.'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: You can fully deactivate the automatic device placement by passing along `device_placement=False`
@@ -79,25 +84,31 @@
     However, if you place your objects manually on the proper device, be careful to
     create your optimizer after putting your model on `accelerator.device` or your
     training will fail on TPU.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: 'Pass all PyTorch objects relevant to training (optimizer, model, dataloader(s),
     learning rate scheduler) to the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
     method as soon as these objects are created, before starting your actual training
     loop:'
+  id: totrans-16
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '**Important notes**:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: You should always pass the the learning rate scheduler to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare),
     however if the scheduler should *not* be stepped at each optimization step, pass
     `step_with_optimizer=False` to the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     init.
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -105,6 +116,7 @@
     on its own (and there are cases for doing so, such as distributed inference),
     it’s best to send it to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
     together with the model and optimizer.
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -112,11 +124,13 @@
     [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
     as well. There are some nuances to distributed validation, check the [Distributed
     evaluation](#add-distributed-evaluation) section of the guide.
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Any instruction using your training dataloader length (for instance if you want
     to log the number of total training steps) should go after the call to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -128,6 +142,7 @@
     will be synchronized at the beginning of each iteration through your dataloader,
     to make sure the data is shuffled the same way (if you decided to use `shuffle=True`
     or any kind of random sampler).
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: 'The actual batch size for your training will be the number of devices used
@@ -139,18 +154,22 @@
     Your training dataloader may change length when going through this method: if
     you run on X GPUs, it will have its length divided by X (since your actual batch
     size will be multiplied by X), unless you set `split_batches=True`.'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: Replace the `loss.backward()` line with `accelerator.backward(loss)`.
+  id: totrans-25
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: And you’re all set! With all these changes, your script will run on your local
     machine as well as on multiple GPUs or a TPU! You can either use your favorite
     tool to launch the distributed training, or you can use the 🤗 Accelerate launcher.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: Add distributed evaluation
+  id: totrans-27
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -158,29 +177,37 @@
     validation dataloader out of the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
     method. In this case, you will need to put the input data on the `accelerator.device`
     manually.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: 'To perform distributed evaluation, send along your validation dataloader to
     the [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
     method:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Same as with your training dataloader, each device will only see part of the
     evaluation data should you run your script on multiple devices. This means you
     will need to group your predictions together which you can do with the [gather_for_metrics()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather_for_metrics)
     method.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Similar to the training dataloader, passing your validation dataloader through
     [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
     may change it: if you run on X GPUs, it will have its length divided by X (since
     your actual batch size will be multiplied by X), unless you set `split_batches=True`.'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: Some data at the end of the dataset may be duplicated so the batch can be divided
@@ -188,11 +215,13 @@
     [gather_for_metrics()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather_for_metrics)
     method to automatically remove the duplicated data while gathering and provide
     a more accurate metric.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
 - en: If for some reason you don’t wish to have this automatically done, [gather()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather)
     can be used instead to gather the data across all processes and this can manually
     be done instead.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: The [gather()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather)
@@ -201,85 +230,111 @@
     tensors of different sizes on each process (for instance when dynamically padding
     to the maximum length in a batch), you should use the [pad_across_processes()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.pad_across_processes)
     method to pad you tensor to the biggest size across processes.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
 - en: Launch your distributed script
+  id: totrans-37
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: You can use the regular commands to launch your distributed training (like `torch.distributed.run`
     for PyTorch) - they are fully compatible with 🤗 Accelerate.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
 - en: 'Alternatively, 🤗 Accelerate provides a CLI tool that unifies all launchers,
     so you only have to remember one command. \ To use it, run a quick configuration
     setup first on your machine and answer the questions:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'At the end of the setup, a *default_config.yaml* file will be saved in your
     cache folder for 🤗 Accelerate. That cache folder is (with decreasing order of
     priority):'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: The content of your environment variable `HF_HOME` suffixed with *accelerate*.
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: If it does not exist, the content of your environment variable `XDG_CACHE_HOME`
     suffixed with *huggingface/accelerate*.
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: If this does not exist either, the folder *~/.cache/huggingface/accelerate*.
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'By specifying the `--config_file` flag you can specify an alternative location
     of the configuration file. Once the configuration setup is complete, you can test
     your setup by running:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: This will launch a short script that will test the distributed environment.
     If it runs without issues, you are ready for the next step!
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
 - en: 'Note that if you specified a location for the config file in the previous step,
     you need to pass it here as well:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Now that this is done, you can run your script with the following command:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'If you stored the config file in a non-default location, you can indicate it
     to the launcher like this:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: You can override any of the arguments determined by your config file. To see
     the complete list of parameters that you can pass in, run `accelerate launch -h`.
     (And further niche argument help by passing in partial commands, such as `accelerate
     launch --multi_gpu -h` for all `multi_gpu` args)
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
 - en: Check out the [Launch tutorial](basic_tutorials/launch) for more information
     about launching your scripts.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
 - en: Common modifications of the base case
+  id: totrans-56
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -287,9 +342,11 @@
     into a distributed setup with 🤗 Accelerate. Here we describe common modifications/deviations
     from the base case scenario and the adjustments you need to make to accommodate
     for them.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
 - en: Launch distributed training from a notebook
+  id: totrans-58
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -297,25 +354,32 @@
     to help you launch your training function from a notebook. This launcher supports
     launching a training with TPUs on Colab or Kaggle, as well as training on several
     GPUs and machines (if the machine on which you are running your notebook has them).
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
 - en: 'Define a function responsible for your whole training and/or evaluation in
     a cell of the notebook, then execute a cell with the following code:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Your [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     object should only be defined inside the training function. This is because the
     initialization should be done inside the launcher only.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
 - en: Check out the [Notebook Launcher tutorial](basic_tutorials/notebook) for more
     information about training on TPUs.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
 - en: Specifics of training on TPU
+  id: totrans-64
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -324,19 +388,23 @@
     happening in your training step (forward pass, backward pass and optimizer step).
     This is why your first step of training will always be very long as building and
     compiling this graph for optimizations takes some time.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
 - en: 'The good news is that this compilation will be cached so the second step and
     all the following will be much faster. The bad news is that it only applies if
     all of your steps do exactly the same operations, which implies:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
 - en: having all tensors of the same length in all your batches
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: having static code (i.e., not a for loop of length that could change from step
     to step)
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -346,17 +414,22 @@
     dynamic padding for instance if you are in an NLP problem) and should not use
     layers with for loops that have different lengths depending on the inputs (such
     as an LSTM) or the training will be excruciatingly slow.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
 - en: 'To introduce special behavior in your script for TPUs you can check the `distributed_type`
     of your `accelerator`:'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: The [NLP example](https://github.com/huggingface/accelerate/blob/main/examples/nlp_example.py)
     shows an example in a situation with dynamic padding.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
 - en: 'One last thing to pay close attention to: if your model has tied weights (such
@@ -366,46 +439,60 @@
     will break the tying. You will need to retie the weights after. You can find an
     example of this in the [run_clm_no_trainer](https://github.com/huggingface/transformers/blob/master/examples/pytorch/language-modeling/run_clm.py)
     script in the Transformers repository.'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
 - en: Check out the [TPU tutorial](concept_guides/training_tpu) for more information
     about training on TPUs.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
 - en: Execute a statement only on one processes
+  id: totrans-75
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'Some of your instructions only need to run for one process on a given server:
     for instance a data download or a log statement. To do this, wrap the statement
     in a test like this:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Another example is progress bars: to avoid having multiple progress bars in
     your output, you should only display one on the local main process:'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'The *local* means per machine: if you are running your training on two servers
     with several GPUs, the instruction will be executed once on each of those servers.
     If you need to execute something only once for all processes (and not per machine)
     for instance, uploading the final model to the 🤗 model hub, wrap it in a test
     like this:'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE13]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: For printing statements you only want executed once per machine, you can just
     replace the `print` function by `accelerator.print`.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
 - en: Defer execution on multiple GPUs
+  id: totrans-83
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -413,23 +500,29 @@
     Accelerate to deploy your script on several GPUs at the same time introduces a
     complication: while each process executes all instructions in order, some may
     be faster than others.'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
 - en: 'You might need to wait for all processes to have reached a certain point before
     executing a given instruction. For instance, you shouldn’t save a model before
     making sure every process is done with training. To do this, add the following
     line in your code:'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE14]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: This instruction will block all the processes that arrive first until all the
     other processes have reached that point (if you run your script on just one GPU
     or CPU, this won’t do anything).
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
 - en: Save/load a model in a distributed setup
+  id: totrans-88
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -443,43 +536,58 @@
     and you will end up with weights you can’t load back in your base model. The [save_model()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_model)
     method will help you to achieve that. It will unwrap your model and save the model
     state dictionary.'
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
 - en: 'Here is an example:'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE15]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'The [save_model()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_model)
     method can also save a model into sharded checkpoints or with safetensors format:'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE16]'
+  id: totrans-93
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'If your script contains logic to load a checkpoint, we also recommend you load
     your weights in the unwrapped model (this is only useful if you use the load function
     after making your model go through [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)).
     Here is an example:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE17]'
+  id: totrans-95
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Note that since all the model parameters are references to tensors, this will
     load your weights inside `model`.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
 - en: 'If you want to load a sharded checkpoint or a checkpoint with safetensors format
     into the model with a specific `device`, we recommend you to load it with [load_checkpoint_in_model()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.load_checkpoint_in_model)
     function. Here’s an example:'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE18]'
+  id: totrans-98
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Save/load entire states
+  id: totrans-99
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -488,23 +596,28 @@
     in the *same script*. You can use [save_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_state)
     and [load_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.load_state)
     respectively to do so.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
 - en: To further customize where and how states saved through [save_state()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_state)
     the [ProjectConfiguration](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.ProjectConfiguration)
     class can be used. For example if `automatic_checkpoint_naming` is enabled each
     saved checkpoint will be located then at `Accelerator.project_dir/checkpoints/checkpoint_{checkpoint_number}`.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
 - en: If you have registered any other stateful items to be stored through [register_for_checkpointing()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.register_for_checkpointing)
     they will also be saved and/or loaded.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
 - en: Every object passed to [register_for_checkpointing()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.register_for_checkpointing)
     must have a `load_state_dict` and `state_dict` function to be stored
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
 - en: Use gradient clipping
+  id: totrans-104
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -513,9 +626,11 @@
     [clip*grad_norm*()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.clip_grad_norm_)
     and [clip*grad_value*()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.clip_grad_value_)
     respectively.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
 - en: Train with mixed precision
+  id: totrans-106
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -526,38 +641,54 @@
     especially if it involves a softmax). However, you might want to put your loss
     computation inside the [autocast()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.autocast)
     context manager:'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在🤗 Accelerate中以混合精度运行训练，则最好的结果是在模型内计算损失（例如在Transformer模型中）。模型外的每个计算将以完整精度执行（这通常是损失计算所需的，特别是如果涉及softmax）。但是，您可能希望将损失计算放在[autocast()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.autocast)上下文管理器中：
 - en: '[PRE19]'
+  id: totrans-108
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'Another caveat with Mixed Precision training is that the gradient will skip
     a few updates at the beginning and sometimes during training: because of the dynamic
     loss scaling strategy, there are points during training where the gradients have
     overflown, and the loss scaling factor is reduced to avoid this happening again
     at the next step.'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 混合精度训练的另一个注意事项是，梯度在开始时会跳过几次更新，有时在训练过程中也会跳过：由于动态损失缩放策略，训练过程中存在梯度溢出的点，损失缩放因子会减小，以避免在下一步再次发生这种情况。
 - en: 'This means that you may update your learning rate scheduler when there was
     no update, which is fine in general, but may have an impact when you have very
     little training data, or if the first learning rate values of your scheduler are
     very important. In this case, you can skip the learning rate scheduler updates
     when the optimizer step was not done like this:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着当没有更新时，您可以更新学习率调度器，这在一般情况下是可以的，但在训练数据很少或者调度器的第一个学习率值非常重要时可能会产生影响。在这种情况下，您可以跳过学习率调度器的更新，就像这样：
 - en: '[PRE20]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Use gradient accumulation
+  id: totrans-112
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用梯度累积
 - en: 'To perform gradient accumulation use [accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)
     and specify a `gradient_accumulation_steps`. This will also automatically ensure
     the gradients are synced or unsynced when on multi-device training, check if the
     step should actually be performed, and auto-scale the loss:'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 要执行梯度累积，请使用[accumulate()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.accumulate)并指定`gradient_accumulation_steps`。这也会自动确保在多设备训练时梯度是同步的或异步的，检查步骤是否实际执行，并自动缩放损失：
 - en: '[PRE21]'
+  id: totrans-114
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
