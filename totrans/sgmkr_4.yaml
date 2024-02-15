@@ -1,0 +1,392 @@
+- en: Deploy models to Amazon SageMaker
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/sagemaker/inference](https://huggingface.co/docs/sagemaker/inference)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/sagemaker/main/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/entry/start.599a0c37.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/chunks/scheduler.389d799c.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/chunks/singletons.68d051b6.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/chunks/paths.050ac67a.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/entry/app.66c68f8e.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/chunks/index.8f81d18f.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/nodes/0.a9101d2f.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/nodes/4.36f0a309.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/chunks/CodeBlock.3845caa1.js">
+    <link rel="modulepreload" href="/docs/sagemaker/main/en/_app/immutable/chunks/Heading.41733039.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Deploying a 🤗 Transformers models in SageMaker for inference is as easy as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This guide will show you how to deploy models with zero-code using the [Inference
+    Toolkit](https://github.com/aws/sagemaker-huggingface-inference-toolkit). The
+    Inference Toolkit builds on top of the [`pipeline` feature](https://huggingface.co/docs/transformers/main_classes/pipelines)
+    from 🤗 Transformers. Learn how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Install and setup the Inference Toolkit](#installation-and-setup).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Deploy a 🤗 Transformers model trained in SageMaker](#deploy-a-transformer-model-trained-in-sagemaker).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Deploy a 🤗 Transformers model from the Hugging Face [model Hub](https://huggingface.co/models)](#deploy-a-model-from-the-hub).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Run a Batch Transform Job using 🤗 Transformers and Amazon SageMaker](#run-batch-transform-with-transformers-and-sagemaker).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Create a custom inference module](#user-defined-code-and-modules).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Installation and setup
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Before deploying a 🤗 Transformers model to SageMaker, you need to sign up for
+    an AWS account. If you don’t have an AWS account yet, learn more [here](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-set-up.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once you have an AWS account, get started using one of the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-studio-onboard.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[SageMaker notebook instance](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-console.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Local environment
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To start training locally, you need to setup an appropriate [IAM role](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Upgrade to the latest `sagemaker` version.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**SageMaker environment**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Setup your SageMaker environment as shown below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '*Note: The execution role is only available when running a notebook within
+    SageMaker. If you run `get_execution_role` in a notebook not on SageMaker, expect
+    a `region` error.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Local environment**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Setup your local environment as shown below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Deploy a 🤗 Transformers model trained in SageMaker
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[https://www.youtube.com/embed/pfBGgSGnYLs](https://www.youtube.com/embed/pfBGgSGnYLs)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two ways to deploy your Hugging Face model trained in SageMaker:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deploy it after your training has finished.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Deploy your saved model at a later time from S3 with the `model_data`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 📓 Open the [notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/10_deploy_model_from_s3/deploy_transformer_model_from_s3.ipynb)
+    for an example of how to deploy a model from S3 to SageMaker for inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deploy after training
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To deploy your model directly after training, ensure all required files are
+    saved in your training script, including the tokenizer and the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you use the Hugging Face `Trainer`, you can pass your tokenizer as an argument
+    to the `Trainer`. It will be automatically saved when you call `trainer.save_model()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After you run your request you can delete the endpoint as shown:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Deploy with model_data
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you’ve already trained your model and want to deploy it at a later time,
+    use the `model_data` argument to specify the location of your tokenizer and model
+    weights.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After you run our request, you can delete the endpoint again with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Create a model artifact for deployment
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For later deployment, you can create a `model.tar.gz` file that contains all
+    the required files, such as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`pytorch_model.bin`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tf_model.h5`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tokenizer.json`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tokenizer_config.json`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'For example, your file should look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Create your own `model.tar.gz` from a model from the 🤗 Hub:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Download a model:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Create a `tar` file:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Upload `model.tar.gz` to S3:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now you can provide the S3 URI to the `model_data` argument to deploy your model
+    later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deploy a model from the 🤗 Hub
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[https://www.youtube.com/embed/l9QZuazbzWM](https://www.youtube.com/embed/l9QZuazbzWM)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To deploy a model directly from the 🤗 Hub to SageMaker, define two environment
+    variables when you create a `HuggingFaceModel`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`HF_MODEL_ID` defines the model ID which is automatically loaded from [huggingface.co/models](http://huggingface.co/models)
+    when you create a SageMaker endpoint. Access 10,000+ models on he 🤗 Hub through
+    this environment variable.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`HF_TASK` defines the task for the 🤗 Transformers `pipeline`. A complete list
+    of tasks can be found [here](https://huggingface.co/docs/transformers/main_classes/pipelines).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After you run our request, you can delete the endpoint again with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 📓 Open the [notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/11_deploy_model_from_hf_hub/deploy_transformer_model_from_hf_hub.ipynb)
+    for an example of how to deploy a model from the 🤗 Hub to SageMaker for inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Run batch transform with 🤗 Transformers and SageMaker
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[https://www.youtube.com/embed/lnTixz0tUBg](https://www.youtube.com/embed/lnTixz0tUBg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After training a model, you can use [SageMaker batch transform](https://docs.aws.amazon.com/sagemaker/latest/dg/how-it-works-batch.html)
+    to perform inference with the model. Batch transform accepts your inference data
+    as an S3 URI and then SageMaker will take care of downloading the data, running
+    the prediction, and uploading the results to S3\. For more details about batch
+    transform, take a look [here](https://docs.aws.amazon.com/sagemaker/latest/dg/batch-transform.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ⚠️ The Hugging Face Inference DLC currently only supports `.jsonl` for batch
+    transform due to the complex structure of textual data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Note: Make sure your `inputs` fit the `max_length` of the model during preprocessing.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you trained a model using the Hugging Face Estimator, call the `transformer()`
+    method to create a transform job for a model based on the training job (see [here](https://sagemaker.readthedocs.io/en/stable/overview.html#sagemaker-batch-transform)
+    for more details):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to run your batch transform job later or with a model from the
+    🤗 Hub, create a `HuggingFaceModel` instance and then call the `transformer()`
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `input.jsonl` looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 📓 Open the [notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/12_batch_transform_inference/sagemaker-notebook.ipynb)
+    for an example of how to run a batch transform job for inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: User defined code and modules
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Hugging Face Inference Toolkit allows the user to override the default
+    methods of the `HuggingFaceHandlerService`. You will need to create a folder named
+    `code/` with an `inference.py` file in it. See [here](#create-a-model-artifact-for-deployment)
+    for more details on how to archive your model artifacts. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `inference.py` file contains your custom inference module, and the `requirements.txt`
+    file contains additional dependencies that should be added. The custom module
+    can override the following methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model_fn(model_dir)` overrides the default method for loading a model. The
+    return value `model` will be used in `predict` for predictions. `predict` receives
+    argument the `model_dir`, the path to your unzipped `model.tar.gz`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`transform_fn(model, data, content_type, accept_type)` overrides the default
+    transform function with your custom implementation. You will need to implement
+    your own `preprocess`, `predict` and `postprocess` steps in the `transform_fn`.
+    This method can’t be combined with `input_fn`, `predict_fn` or `output_fn` mentioned
+    below.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`input_fn(input_data, content_type)` overrides the default method for preprocessing.
+    The return value `data` will be used in `predict` for predictions. The inputs
+    are:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`input_data` is the raw body of your request.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`content_type` is the content type from the request header.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`predict_fn(processed_data, model)` overrides the default method for predictions.
+    The return value `predictions` will be used in `postprocess`. The input is `processed_data`,
+    the result from `preprocess`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`output_fn(prediction, accept)` overrides the default method for postprocessing.
+    The return value `result` will be the response of your request (e.g.`JSON`). The
+    inputs are:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`predictions` is the result from `predict`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`accept` is the return accept type from the HTTP Request, e.g. `application/json`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Here is an example of a custom inference module with `model_fn`, `input_fn`,
+    `predict_fn`, and `output_fn`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Customize your inference module with only `model_fn` and `transform_fn`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
