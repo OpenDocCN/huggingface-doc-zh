@@ -1,125 +1,169 @@
 - en: Deferring Executions
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 推迟执行
 - en: 'Original text: [https://huggingface.co/docs/accelerate/concept_guides/deferring_execution](https://huggingface.co/docs/accelerate/concept_guides/deferring_execution)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/concept_guides/deferring_execution](https://huggingface.co/docs/accelerate/concept_guides/deferring_execution)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'When you run your usual script, instructions are executed in order. Using 🤗
     Accelerate to deploy your script on several GPUs at the same time introduces a
     complication: while each process executes all instructions in order, some may
     be faster than others.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 当运行您的常规脚本时，指令按顺序执行。使用🤗 Accelerate在多个GPU上同时部署脚本会引入一个复杂性：虽然每个进程按顺序执行所有指令，但有些可能比其他进程快。
 - en: 'You might need to wait for all processes to have reached a certain point before
     executing a given instruction. For instance, you shouldn’t save a model before
     being sure every process is done with training, and you wouldn’t want to continue
     training before all the model weights have been loaded in. To do this, just write
     the following line in your code:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能需要等待所有进程达到某一点后才执行给定指令。例如，在确保每个进程都完成训练之前，不应该保存模型，并且在加载所有模型权重之前不应该继续训练。要做到这一点，只需在您的代码中编写以下行：
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: This instruction will block all the processes that arrive first until all the
     other processes have reached that point (if you run your script on just one GPU
     or CPU, this won’t do anything).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 此指令将阻止所有最先到达的进程，直到所有其他进程都达到该点（如果您只在一个GPU或CPU上运行脚本，则不会执行任何操作）。
 - en: 'A few example cases of when to use this utility are listed below:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下列出了使用此实用程序的几个示例情况：
 - en: Some of these are utilized with the [main_process_first()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.main_process_first)
     context manager, which utilizes [wait_for_everyone()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.wait_for_everyone)
     to run a particular set of code on the main process beforehand before triggering
     and launching the other processes
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 其中一些与[main_process_first()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.main_process_first)上下文管理器一起使用，该管理器利用[wait_for_everyone()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.wait_for_everyone)在触发和启动其他进程之前在主进程上运行一组特定代码
 - en: Downloading a Dataset
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下载数据集
 - en: When downloading a dataset, you should download it first on the main process
     and then load the cached dataset afterward
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下载数据集时，应首先在主进程上下载数据集，然后加载缓存的数据集
 - en: '`load_dataset` will perform a lock under the hood to stop multiple downloads
     from happening at once, but if you are downloading something not using this library
     you should use this method.'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '`load_dataset`将在内部执行锁定，以阻止同时发生多次下载，但如果您下载的内容不使用此库，则应使用此方法。'
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Under the hood this is the same as calling:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 在幕后，这与调用相同：
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Saving the state_dict
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 保存state_dict
 - en: 'When saving the `state_dict` of the model, since you would normally save one
     file on just the main process you should specify that:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 保存模型的`state_dict`时，由于通常只在主进程上保存一个文件，因此应指定：
 - en: '[PRE3]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Loading in the state_dict
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载state_dict
 - en: When loading in the `state_dict` to a model, optimizer, or scheduler, you should
     wait for all workers to have the weights loaded in before moving on to training
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 在将`state_dict`加载到模型、优化器或调度器中时，应等待所有工作进程加载权重后再继续训练
 - en: '[PRE4]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Applying a multi-worker CPU operation
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 应用多工作进程CPU操作
 - en: Applying a `map()` operation on multiple workers, such as tokenizing should
     be done on the main process first, and then propagated to each one.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 在多个工作进程上应用`map()`操作，例如对令牌进行标记化应该首先在主进程上执行，然后传播到每个进程。
 - en: '[PRE5]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Applying checks such as Early Stopping
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 应用检查，如提前停止
 - en: To have a check that works with a flag set by a particular process, the `set_trigger`
     and `check_trigger` API should be used. Useful examples for doing so can include
     situations such as using early stopping and monitoring the loss (as each loss
     slightly differs on each process).
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用由特定进程设置的标志进行检查，应使用`set_trigger`和`check_trigger`API。这样做的有用示例可以包括使用提前停止并监视损失（因为每个进程上的损失略有不同）等情况。
 - en: 'Call [Accelerator.set_trigger()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.set_trigger)
     when your condition has been met, and [Accelerator.check_trigger()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.check_trigger)
     when checking if that condition has been met in any process:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您的条件满足时，请调用[Accelerator.set_trigger()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.set_trigger)，并在任何进程中检查该条件是否满足时使用[Accelerator.check_trigger()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.check_trigger)：
 - en: '[PRE6]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
