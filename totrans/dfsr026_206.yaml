@@ -1,24 +1,17 @@
 - en: ScoreSdeVeScheduler
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: ScoreSdeVeScheduler
 - en: 'Original text: [https://huggingface.co/docs/diffusers/api/schedulers/score_sde_ve](https://huggingface.co/docs/diffusers/api/schedulers/score_sde_ve)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/diffusers/api/schedulers/score_sde_ve](https://huggingface.co/docs/diffusers/api/schedulers/score_sde_ve)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '`ScoreSdeVeScheduler` is a variance exploding stochastic differential equation
@@ -26,11 +19,16 @@
     Stochastic Differential Equations](https://huggingface.co/papers/2011.13456) paper
     by Yang Song, Jascha Sohl-Dickstein, Diederik P. Kingma, Abhishek Kumar, Stefano
     Ermon, Ben Poole.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ScoreSdeVeScheduler` 是一个方差爆炸的随机微分方程（SDE）调度器。它在Yang Song、Jascha Sohl-Dickstein、Diederik
+    P. Kingma、Abhishek Kumar、Stefano Ermon、Ben Poole的论文[通过随机微分方程进行基于得分的生成建模](https://huggingface.co/papers/2011.13456)中介绍。'
 - en: 'The abstract from the paper is:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 论文摘要为：
 - en: '*Creating noise from data is easy; creating data from noise is generative modeling.
     We present a stochastic differential equation (SDE) that smoothly transforms a
     complex data distribution to a known prior distribution by slowly injecting noise,
@@ -53,294 +51,449 @@
     of 9.89 and FID of 2.20, a competitive likelihood of 2.99 bits/dim, and demonstrate
     high fidelity generation of 1024 x 1024 images for the first time from a score-based
     generative model.*'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '*从数据中创建噪声很容易；从噪声中创建数据是生成建模。我们提出了一种随机微分方程（SDE），通过缓慢注入噪声，将复杂数据分布平滑地转换为已知的先验分布，并且通过缓慢去除噪声的相应逆向时间SDE，将先验分布转换回数据分布。关键是，逆向时间SDE仅取决于扰动数据分布的时间相关梯度场（即得分）。通过利用得分为基础的生成建模的进展，我们可以使用神经网络准确估计这些得分，并使用数值SDE求解器生成样本。我们展示了这个框架封装了得分为基础的生成建模和扩散概率建模中的先前方法，允许新的采样过程和新的建模能力。特别是，我们引入了一个预测校正框架，用于纠正离散化逆向时间SDE演变中的错误。我们还推导出一个等效的神经ODE，从与SDE相同的分布中采样，但另外还能实现精确的似然计算和改进的采样效率。此外，我们提供了一种使用基于得分的模型解决逆问题的新方法，通过在类条件生成、图像修补和着色方面的实验进行演示。结合多个架构改进，我们在CIFAR-10上实现了无条件图像生成的创纪录性性能，Inception得分为9.89，FID为2.20，竞争性似然度为2.99
+    bits/dim，并首次展示了对1024 x 1024图像的高保真生成，这是从基于得分的生成模型中实现的。*'
 - en: ScoreSdeVeScheduler
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ScoreSdeVeScheduler
 - en: '### `class diffusers.ScoreSdeVeScheduler`'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class diffusers.ScoreSdeVeScheduler`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L46)'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L46)'
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Parameters
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`num_train_timesteps` (`int`, defaults to 1000) — The number of diffusion steps
     to train the model.'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_train_timesteps` (`int`，默认为1000）— 训练模型的扩散步数。'
 - en: '`snr` (`float`, defaults to 0.15) — A coefficient weighting the step from the
     `model_output` sample (from the network) to the random noise.'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`snr` (`float`，默认为0.15）— 一个系数，用于加权从`model_output`样本（来自网络）到随机噪声的步骤。'
 - en: '`sigma_min` (`float`, defaults to 0.01) — The initial noise scale for the sigma
     sequence in the sampling procedure. The minimum sigma should mirror the distribution
     of the data.'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sigma_min` (`float`，默认为0.01）— 采样过程中sigma序列的初始噪声尺度。最小的sigma应该反映数据的分布。'
 - en: '`sigma_max` (`float`, defaults to 1348.0) — The maximum value used for the
     range of continuous timesteps passed into the model.'
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sigma_max` (`float`，默认为1348.0）— 用于传递给模型的连续时间步范围的最大值。'
 - en: '`sampling_eps` (`float`, defaults to 1e-5) — The end value of sampling where
     timesteps decrease progressively from 1 to epsilon.'
+  id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sampling_eps` (`float`，默认为1e-5）— 采样的结束值，其中时间步从1逐渐减少到epsilon。'
 - en: '`correct_steps` (`int`, defaults to 1) — The number of correction steps performed
     on a produced sample.'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`correct_steps` (`int`，默认为1）— 在生成的样本上执行的校正步数。'
 - en: '`ScoreSdeVeScheduler` is a variance exploding stochastic differential equation
     (SDE) scheduler.'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ScoreSdeVeScheduler` 是一个方差爆炸的随机微分方程（SDE）调度器。'
 - en: This model inherits from [SchedulerMixin](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin)
     and [ConfigMixin](/docs/diffusers/v0.26.3/en/api/configuration#diffusers.ConfigMixin).
     Check the superclass documentation for the generic methods the library implements
     for all schedulers such as loading and saving.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型继承自[SchedulerMixin](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin)和[ConfigMixin](/docs/diffusers/v0.26.3/en/api/configuration#diffusers.ConfigMixin)。查看超类文档以了解库为所有调度器实现的通用方法，如加载和保存。
 - en: '#### `scale_model_input`'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `scale_model_input`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L89)'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L89)'
 - en: '[PRE1]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Parameters
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`sample` (`torch.FloatTensor`) — The input sample.'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sample` (`torch.FloatTensor`) — 输入样本。'
 - en: '`timestep` (`int`, *optional*) — The current timestep in the diffusion chain.'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`timestep` (`int`，*可选*) — 扩散链中的当前时间步。'
 - en: Returns
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`torch.FloatTensor`'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.FloatTensor`'
 - en: A scaled input sample.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个缩放的输入样本。
 - en: Ensures interchangeability with schedulers that need to scale the denoising
     model input depending on the current timestep.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保与需要根据当前时间步长缩放去噪模型输入的调度程序可以互换。
 - en: '#### `set_sigmas`'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `set_sigmas`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L125)'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L125)'
 - en: '[PRE2]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Parameters
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`num_inference_steps` (`int`) — The number of diffusion steps used when generating
     samples with a pre-trained model.'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_inference_steps` (`int`) — 使用预训练模型生成样本时使用的扩散步骤数。'
 - en: '`sigma_min` (`float`, optional) — The initial noise scale value (overrides
     value given during scheduler instantiation).'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sigma_min` (`float`, optional) — 初始噪声尺度值（覆盖调度程序实例化时给定的值）。'
 - en: '`sigma_max` (`float`, optional) — The final noise scale value (overrides value
     given during scheduler instantiation).'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sigma_max` (`float`, optional) — 最终噪声尺度值（覆盖调度程序实例化时给定的值）。'
 - en: '`sampling_eps` (`float`, optional) — The final timestep value (overrides value
     given during scheduler instantiation).'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sampling_eps` (`float`, optional) — 最终时间步长值（覆盖调度程序实例化时给定的值）。'
 - en: Sets the noise scales used for the diffusion chain (to be run before inference).
     The sigmas control the weight of the `drift` and `diffusion` components of the
     sample update.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置用于扩散链的噪声尺度（在推理之前运行）。sigma 控制样本更新的 `drift` 和 `diffusion` 组件的权重。
 - en: '#### `set_timesteps`'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `set_timesteps`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L106)'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L106)'
 - en: '[PRE3]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Parameters
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`num_inference_steps` (`int`) — The number of diffusion steps used when generating
     samples with a pre-trained model.'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_inference_steps` (`int`) — 使用预训练模型生成样本时使用的扩散步骤数。'
 - en: '`sampling_eps` (`float`, *optional*) — The final timestep value (overrides
     value given during scheduler instantiation).'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sampling_eps` (`float`, *optional*) — 最终时间步长值（覆盖调度程序实例化时给定的值）。'
 - en: '`device` (`str` or `torch.device`, *optional*) — The device to which the timesteps
     should be moved to. If `None`, the timesteps are not moved.'
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`device` (`str` 或 `torch.device`, *optional*) — 应将时间步移动到的设备。如果为 `None`，则不移动时间步。'
 - en: Sets the continuous timesteps used for the diffusion chain (to be run before
     inference).
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置用于扩散链的连续时间步长（在推理之前运行）。
 - en: '#### `step_correct`'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `step_correct`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L228)'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L228)'
 - en: '[PRE4]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Parameters
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model_output` (`torch.FloatTensor`) — The direct output from learned diffusion
     model.'
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model_output` (`torch.FloatTensor`) — 从学习扩散模型直接输出的结果。'
 - en: '`sample` (`torch.FloatTensor`) — A current instance of a sample created by
     the diffusion process.'
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sample` (`torch.FloatTensor`) — 由扩散过程创建的当前样本实例。'
 - en: '`generator` (`torch.Generator`, *optional*) — A random number generator.'
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`generator` (`torch.Generator`, *optional*) — 一个随机数生成器。'
 - en: '`return_dict` (`bool`, *optional*, defaults to `True`) — Whether or not to
     return a [SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
     or `tuple`.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *optional*, 默认为 `True`) — 是否返回 [SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
+    或 `tuple`。'
 - en: Returns
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
     or `tuple`'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: '[SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
+    或 `tuple`'
 - en: If return_dict is `True`, [SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
     is returned, otherwise a tuple is returned where the first element is the sample
     tensor.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 return_dict 为 `True`，则返回 [SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)，否则返回一个元组，其中第一个元素是样本张量。
 - en: Correct the predicted sample based on the `model_output` of the network. This
     is often run repeatedly after making the prediction for the previous timestep.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据网络的 `model_output` 对预测的样本进行校正。通常在为上一个时间步骤做出预测后重复运行。
 - en: '#### `step_pred`'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `step_pred`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L160)'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L160)'
 - en: '[PRE5]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Parameters
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model_output` (`torch.FloatTensor`) — The direct output from learned diffusion
     model.'
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model_output` (`torch.FloatTensor`) — 从学习扩散模型直接输出的结果。'
 - en: '`timestep` (`int`) — The current discrete timestep in the diffusion chain.'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`timestep` (`int`) — 扩散链中当前的离散时间步。'
 - en: '`sample` (`torch.FloatTensor`) — A current instance of a sample created by
     the diffusion process.'
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sample` (`torch.FloatTensor`) — 由扩散过程创建的当前样本实例。'
 - en: '`generator` (`torch.Generator`, *optional*) — A random number generator.'
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`generator` (`torch.Generator`, *optional*) — 一个随机数生成器。'
 - en: '`return_dict` (`bool`, *optional*, defaults to `True`) — Whether or not to
     return a [SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
     or `tuple`.'
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *optional*, 默认为 `True`) — 是否返回 [SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
+    或 `tuple`。'
 - en: Returns
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
     or `tuple`'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: '[SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
+    或 `tuple`'
 - en: If return_dict is `True`, [SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)
     is returned, otherwise a tuple is returned where the first element is the sample
     tensor.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 return_dict 为 `True`，则返回 [SdeVeOutput](/docs/diffusers/v0.26.3/en/api/schedulers/score_sde_ve#diffusers.schedulers.scheduling_sde_ve.SdeVeOutput)，否则返回一个元组，其中第一个元素是样本张量。
 - en: Predict the sample from the previous timestep by reversing the SDE. This function
     propagates the diffusion process from the learned model outputs (most often the
     predicted noise).
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过反转 SDE 来预测上一个时间步骤的样本。此函数从学习模型输出（通常是预测的噪声）中传播扩散过程。
 - en: SdeVeOutput
+  id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: SdeVeOutput
 - en: '### `class diffusers.schedulers.scheduling_sde_ve.SdeVeOutput`'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class diffusers.schedulers.scheduling_sde_ve.SdeVeOutput`'
 - en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L29)'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/schedulers/scheduling_sde_ve.py#L29)'
 - en: '[PRE6]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Parameters
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`prev_sample` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
     width)` for images) — Computed sample `(x_{t-1})` of previous timestep. `prev_sample`
     should be used as next model input in the denoising loop.'
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prev_sample` (`torch.FloatTensor`，形状为 `(batch_size, num_channels, height,
+    width)`，用于图像) — 先前时间步的计算样本 `(x_{t-1})`。`prev_sample` 应该在去噪循环中作为下一个模型输入使用。'
 - en: '`prev_sample_mean` (`torch.FloatTensor` of shape `(batch_size, num_channels,
     height, width)` for images) — Mean averaged `prev_sample` over previous timesteps.'
+  id: totrans-77
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prev_sample_mean` (`torch.FloatTensor`，形状为 `(batch_size, num_channels, height,
+    width)`，用于图像) — 在先前时间步上对 `prev_sample` 进行平均的均值。'
 - en: Output class for the scheduler’s `step` function output.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 调度程序 `step` 函数输出的输出类。
