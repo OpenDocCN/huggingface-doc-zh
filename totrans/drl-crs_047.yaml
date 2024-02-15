@@ -1,0 +1,253 @@
+- en: The Deep Q-Learning Algorithm
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit3/deep-q-algorithm](https://huggingface.co/learn/deep-rl-course/unit3/deep-q-algorithm)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/38.d49de052.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: We learned that Deep Q-Learning **uses a deep neural network to approximate
+    the different Q-values for each possible action at a state** (value-function estimation).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The difference is that, during the training phase, instead of updating the
+    Q-value of a state-action pair directly as we have done with Q-Learning:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q Loss](../Images/039d07cc30eaeda29cabcae129111e00.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: in Deep Q-Learning, we create a **loss function that compares our Q-value prediction
+    and the Q-target and uses gradient descent to update the weights of our Deep Q-Network
+    to approximate our Q-values better**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q-target](../Images/ab542bd5b3eba9def6a1225c5ee2e599.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'The Deep Q-Learning training algorithm has *two phases*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Sampling**: we perform actions and **store the observed experience tuples
+    in a replay memory**.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Training**: Select a **small batch of tuples randomly and learn from this
+    batch using a gradient descent update step**.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Sampling Training](../Images/bc0888331c25250764e5f1a5409db265.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: This is not the only difference compared with Q-Learning. Deep Q-Learning training
+    **might suffer from instability**, mainly because of combining a non-linear Q-value
+    function (Neural Network) and bootstrapping (when we update targets with existing
+    estimates and not an actual complete return).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To help us stabilize the training, we implement three different solutions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Experience Replay* to make more **efficient use of experiences**.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '*Fixed Q-Target* **to stabilize the training**.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '*Double Deep Q-Learning*, to **handle the problem of the overestimation of
+    Q-values**.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Let’s go through them!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Experience Replay to make more efficient use of experiences
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Why do we create a replay memory?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Experience Replay in Deep Q-Learning has two functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Make more efficient use of the experiences during the training**. Usually,
+    in online reinforcement learning, the agent interacts with the environment, gets
+    experiences (state, action, reward, and next state), learns from them (updates
+    the neural network), and discards them. This is not efficient.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Experience replay helps by **using the experiences of the training more efficiently**.
+    We use a replay buffer that saves experience samples **that we can reuse during
+    the training.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Experience Replay](../Images/80b75242ab1f1cf0504128697813311f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: ⇒ This allows the agent to **learn from the same experiences multiple times**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Avoid forgetting previous experiences (aka catastrophic interference, or
+    catastrophic forgetting) and reduce the correlation between experiences**.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**[catastrophic forgetting](https://en.wikipedia.org/wiki/Catastrophic_interference)**:
+    The problem we get if we give sequential samples of experiences to our neural
+    network is that it tends to forget **the previous experiences as it gets new experiences.** For
+    instance, if the agent is in the first level and then in the second, which is
+    different, it can forget how to behave and play in the first level.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The solution is to create a Replay Buffer that stores experience tuples while
+    interacting with the environment and then sample a small batch of tuples. This
+    prevents **the network from only learning about what it has done immediately before.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: Experience replay also has other benefits. By randomly sampling the experiences,
+    we remove correlation in the observation sequences and avoid **action values from
+    oscillating or diverging catastrophically.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the Deep Q-Learning pseudocode, we **initialize a replay memory buffer D
+    with capacity N** (N is a hyperparameter that you can define). We then store experiences
+    in the memory and sample a batch of experiences to feed the Deep Q-Network during
+    the training phase.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Experience Replay Pseudocode](../Images/d3b200053d66243af692a4207fbc7f6f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Fixed Q-Target to stabilize the training
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When we want to calculate the TD error (aka the loss), we calculate the **difference
+    between the TD target (Q-Target) and the current Q-value (estimation of Q)**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But we **don’t have any idea of the real TD target**. We need to estimate it.
+    Using the Bellman equation, we saw that the TD target is just the reward of taking
+    that action at that state plus the discounted highest Q value for the next state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q-target](../Images/ab542bd5b3eba9def6a1225c5ee2e599.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: However, the problem is that we are using the same parameters (weights) for
+    estimating the TD target **and** the Q-value. Consequently, there is a significant
+    correlation between the TD target and the parameters we are changing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Therefore, at every step of training, **both our Q-values and the target values
+    shift.** We’re getting closer to our target, but the target is also moving. It’s
+    like chasing a moving target! This can lead to significant oscillation in training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s like if you were a cowboy (the Q estimation) and you wanted to catch a
+    cow (the Q-target). Your goal is to get closer (reduce the error).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q-target](../Images/a6fd654fac7f317acecc36b47289fa71.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: At each time step, you’re trying to approach the cow, which also moves at each
+    time step (because you use the same parameters).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q-target](../Images/287c4358eb4ad3198e6e56f30a31ad5b.png) ![Q-target](../Images/8519d6249b8bdbc45e53376324b636c9.png)
+    This leads to a bizarre path of chasing (a significant oscillation in training).
+    ![Q-target](../Images/73475c3ebfe23d4414212297248eefd2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Instead, what we see in the pseudo-code is that we:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use a **separate network with fixed parameters** for estimating the TD Target
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Copy the parameters from our Deep Q-Network every C steps** to update the
+    target network.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Fixed Q-target Pseudocode](../Images/327d75c11d54073c6773eda69f09d8c2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Double DQN
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Double DQNs, or Double Deep Q-Learning neural networks, were introduced [by
+    Hado van Hasselt](https://papers.nips.cc/paper/3964-double-q-learning). This method **handles
+    the problem of the overestimation of Q-values.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To understand this problem, remember how we calculate the TD Target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![TD target](../Images/56f8c1151f274ebdbc9bcfe88f3a6f80.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'We face a simple problem by calculating the TD target: how are we sure that **the
+    best action for the next state is the action with the highest Q-value?**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We know that the accuracy of Q-values depends on what action we tried **and** what
+    neighboring states we explored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Consequently, we don’t have enough information about the best action to take
+    at the beginning of the training. Therefore, taking the maximum Q-value (which
+    is noisy) as the best action to take can lead to false positives. If non-optimal
+    actions are regularly **given a higher Q value than the optimal best action, the
+    learning will be complicated.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The solution is: when we compute the Q target, we use two networks to decouple
+    the action selection from the target Q-value generation. We:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use our **DQN network** to select the best action to take for the next state
+    (the action with the highest Q-value).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use our **Target network** to calculate the target Q-value of taking that action
+    at the next state.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Therefore, Double DQN helps us reduce the overestimation of Q-values and, as
+    a consequence, helps us train faster and with more stable learning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since these three improvements in Deep Q-Learning, many more have been added,
+    such as Prioritized Experience Replay and Dueling Deep Q-Learning. They’re out
+    of the scope of this course but if you’re interested, check the links we put in
+    the reading list.
+  prefs: []
+  type: TYPE_NORMAL

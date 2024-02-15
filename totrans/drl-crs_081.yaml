@@ -1,0 +1,203 @@
+- en: Advantage Actor-Critic (A2C)
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit6/advantage-actor-critic](https://huggingface.co/learn/deep-rl-course/unit6/advantage-actor-critic)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/65.e753fc63.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reducing variance with Actor-Critic methods
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The solution to reducing the variance of the Reinforce algorithm and training
+    our agent faster and better is to use a combination of Policy-Based and Value-Based
+    methods: *the Actor-Critic method*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To understand the Actor-Critic, imagine you’re playing a video game. You can
+    play with a friend that will provide you with some feedback. You’re the Actor
+    and your friend is the Critic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Actor Critic](../Images/042bd39f9e4b369ec6cfbc9ae67d3829.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: You don’t know how to play at the beginning, **so you try some actions randomly**.
+    The Critic observes your action and **provides feedback**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Learning from this feedback, **you’ll update your policy and be better at playing
+    that game.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the other hand, your friend (Critic) will also update their way to provide
+    feedback so it can be better next time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is the idea behind Actor-Critic. We learn two function approximations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*A policy* that **controls how our agent acts**:<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow> <annotation
+    encoding="application/x-tex">\pi_{\theta}(s)</annotation></semantics></math> πθ​(s)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*A value function* to assist the policy update by measuring how good the action
+    taken is:<math><semantics><mrow><msub><mover accent="true"><mi>q</mi><mo>^</mo></mover><mi>w</mi></msub><mo
+    stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow>
+    <annotation encoding="application/x-tex">\hat{q}_{w}(s,a)</annotation></semantics></math>
+    q^​w​(s,a)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Actor-Critic Process
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we have seen the Actor Critic’s big picture, let’s dive deeper to understand
+    how the Actor and Critic improve together during the training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As we saw, with Actor-Critic methods, there are two function approximations
+    (two neural networks):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Actor*, a **policy function** parameterized by theta:<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow> <annotation
+    encoding="application/x-tex">\pi_{\theta}(s)</annotation></semantics></math> πθ​(s)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Critic*, a **value function** parameterized by w:<math><semantics><mrow><msub><mover
+    accent="true"><mi>q</mi><mo>^</mo></mover><mi>w</mi></msub><mo stretchy="false">(</mo><mi>s</mi><mo
+    separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow> <annotation
+    encoding="application/x-tex">\hat{q}_{w}(s,a)</annotation></semantics></math>
+    q^​w​(s,a)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Let’s see the training process to understand how the Actor and Critic are optimized:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: At each timestep, t, we get the current state<math><semantics><mrow><msub><mi>S</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">S_t</annotation></semantics></math>St​
+    from the environment and **pass it as input through our Actor and Critic**.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Our Policy takes the state and **outputs an action** <math><semantics><mrow><msub><mi>A</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">A_t</annotation></semantics></math> At​.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Step 1 Actor Critic](../Images/5633968bb872e917c968f590412b0f7b.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'The Critic takes that action also as input and, using<math><semantics><mrow><msub><mi>S</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">S_t</annotation></semantics></math>St​
+    and<math><semantics><mrow><msub><mi>A</mi><mi>t</mi></msub></mrow> <annotation
+    encoding="application/x-tex">A_t</annotation></semantics></math> At​, **computes
+    the value of taking that action at that state: the Q-value**.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Step 2 Actor Critic](../Images/2240186d96dc80dba4057389b4c239ab.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: The action<math><semantics><mrow><msub><mi>A</mi><mi>t</mi></msub></mrow> <annotation
+    encoding="application/x-tex">A_t</annotation></semantics></math>At​ performed
+    in the environment outputs a new state<math><semantics><mrow><msub><mi>S</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow>
+    <annotation encoding="application/x-tex">S_{t+1}</annotation></semantics></math>St+1​
+    and a reward<math><semantics><mrow><msub><mi>R</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow>
+    <annotation encoding="application/x-tex">R_{t+1}</annotation></semantics></math>
+    Rt+1​ .
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Step 3 Actor Critic](../Images/aca327aae99a5abb4493fc07abd2dd69.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: The Actor updates its policy parameters using the Q value.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Step 4 Actor Critic](../Images/cf429723f7f14d366206f1e0c83f52ed.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Thanks to its updated parameters, the Actor produces the next action to take
+    at<math><semantics><mrow><msub><mi>A</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow>
+    <annotation encoding="application/x-tex">A_{t+1}</annotation></semantics></math>
+    At+1​ given the new state<math><semantics><mrow><msub><mi>S</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow>
+    <annotation encoding="application/x-tex">S_{t+1}</annotation></semantics></math>
+    St+1​.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Critic then updates its value parameters.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Step 5 Actor Critic](../Images/ec927ac9ae5bbb27566b494db46568aa.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Adding Advantage in Actor-Critic (A2C)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We can stabilize learning further by **using the Advantage function as Critic
+    instead of the Action value function**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The idea is that the Advantage function calculates the relative advantage of
+    an action compared to the others possible at a state: **how taking that action
+    at a state is better compared to the average value of the state**. It’s subtracting
+    the mean value of the state from the state action pair:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Advantage Function](../Images/d178c6579c3c840bd90abfd5839b83af.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: In other words, this function calculates **the extra reward we get if we take
+    this action at that state compared to the mean reward we get at that state**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The extra reward is what’s beyond the expected value of that state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If A(s,a) > 0: our gradient is **pushed in that direction**.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If A(s,a) < 0 (our action does worse than the average value of that state),
+    **our gradient is pushed in the opposite direction**.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The problem with implementing this advantage function is that it requires two
+    value functions — <math><semantics><mrow><mi>Q</mi><mo stretchy="false">(</mo><mi>s</mi><mo
+    separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow> <annotation
+    encoding="application/x-tex">Q(s,a)</annotation></semantics></math>Q(s,a) and
+    <math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow>
+    <annotation encoding="application/x-tex">V(s)</annotation></semantics></math>V(s).
+    Fortunately, **we can use the TD error as a good estimator of the advantage function.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Advantage Function](../Images/f524503c61319621c198656df4b56427.png)'
+  prefs: []
+  type: TYPE_IMG

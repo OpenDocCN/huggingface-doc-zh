@@ -1,0 +1,546 @@
+- en: 'Hands-on: advanced Deep Reinforcement Learning. Using Sample Factory to play
+    Doom from pixels'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit8/hands-on-sf](https://huggingface.co/learn/deep-rl-course/unit8/hands-on-sf)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/84.d09fa444.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/CodeBlock.a6d3f852.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/CourseFloatingBanner.36c274d0.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">[![Ask
+    a Question](../Images/255e59f8542cbd6d3f1c72646b2fff13.png)](http://hf.co/join/discord)
+    [![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit8/unit8_part2.ipynb)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The colab notebook: [![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit8/unit8_part2.ipynb)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unit 8 Part 2: Advanced Deep Reinforcement Learning. Using Sample Factory to
+    play Doom from pixels'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '![Thumbnail](../Images/1636e0752d93a1e41c70f4a1147a2563.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: In this notebook, we will learn how to train a Deep Neural Network to collect
+    objects in a 3D environment based on the game of Doom, a video of the resulting
+    policy is shown below. We train this policy using [Sample Factory](https://www.samplefactory.dev/),
+    an asynchronous implementation of the PPO algorithm.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Please note the following points:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Sample Factory](https://www.samplefactory.dev/) is an advanced RL framework
+    and **only functions on Linux and Mac** (not Windows).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The framework performs best on a **GPU machine with many CPU cores**, where
+    it can achieve speeds of 100k interactions per second. The resources available
+    on a standard Colab notebook **limit the performance of this library**. So the
+    speed in this setting **does not reflect the real-world performance**.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Benchmarks for Sample Factory are available in a number of settings, check out
+    the [examples](https://github.com/alex-petrenko/sample-factory/tree/master/sf_examples)
+    if you want to find out more.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To validate this hands-on for the [certification process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process),
+    you need to push one model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`doom_health_gathering_supreme` get a result of >= 5.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To find your result, go to the [leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
+    and find your model, **the result = mean_reward - std of reward**
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you don’t find your model, **go to the bottom of the page and click on the
+    refresh button**
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more information about the certification process, check this section 👉 [https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Set the GPU 💪
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To **accelerate the agent’s training, we’ll use a GPU**. To do that, go to `Runtime
+    > Change Runtime type`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![GPU Step 1](../Images/5378127c314cdd92729aa31b7e11ca44.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '`Hardware Accelerator > GPU`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![GPU Step 2](../Images/e0fec252447f98378386ccca8e57a80a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Before starting to train our agent, let’s **study the library and environments
+    we’re going to use**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sample Factory
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Sample Factory](https://www.samplefactory.dev/) is one of the **fastest RL
+    libraries focused on very efficient synchronous and asynchronous implementations
+    of policy gradients (PPO)**.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sample Factory is thoroughly **tested, used by many researchers and practitioners**,
+    and is actively maintained. Our implementation is known to **reach SOTA performance
+    in a variety of domains while minimizing RL experiment training time and hardware
+    requirements**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Sample factory](../Images/cec8dbebc3e783f8e71a5698f72f4450.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Key features
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Highly optimized algorithm [architecture](https://www.samplefactory.dev/06-architecture/overview/) for
+    maximum learning throughput
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Synchronous and asynchronous](https://www.samplefactory.dev/07-advanced-topics/sync-async/) training
+    regimes'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Serial (single-process) mode](https://www.samplefactory.dev/07-advanced-topics/serial-mode/) for
+    easy debugging'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Optimal performance in both CPU-based and [GPU-accelerated environments](https://www.samplefactory.dev/09-environment-integrations/isaacgym/)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Single- & multi-agent training, self-play, supports [training multiple policies](https://www.samplefactory.dev/07-advanced-topics/multi-policy-training/) at
+    once on one or many GPUs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Population-Based Training ([PBT](https://www.samplefactory.dev/07-advanced-topics/pbt/))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Discrete, continuous, hybrid action spaces
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Vector-based, image-based, dictionary observation spaces
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Automatically creates a model architecture by parsing action/observation space
+    specification. Supports [custom model architectures](https://www.samplefactory.dev/03-customization/custom-models/)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Designed to be imported into other projects, [custom environments](https://www.samplefactory.dev/03-customization/custom-environments/) are
+    first-class citizens
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Detailed [WandB and Tensorboard summaries](https://www.samplefactory.dev/05-monitoring/metrics-reference/), [custom
+    metrics](https://www.samplefactory.dev/05-monitoring/custom-metrics/)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[HuggingFace 🤗 integration](https://www.samplefactory.dev/10-huggingface/huggingface/) (upload
+    trained models and metrics to the Hub)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Multiple](https://www.samplefactory.dev/09-environment-integrations/mujoco/) [example](https://www.samplefactory.dev/09-environment-integrations/atari/) [environment](https://www.samplefactory.dev/09-environment-integrations/vizdoom/) [integrations](https://www.samplefactory.dev/09-environment-integrations/dmlab/) with
+    tuned parameters and trained models'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All of the above policies are available on the 🤗 hub. Search for the tag [sample-factory](https://huggingface.co/models?library=sample-factory&sort=downloads)
+  prefs: []
+  type: TYPE_NORMAL
+- en: How sample-factory works
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Sample-factory is one of the **most highly optimized RL implementations available
+    to the community**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It works by **spawning multiple processes that run rollout workers, inference
+    workers and a learner worker**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *workers* **communicate through shared memory, which lowers the communication
+    cost between processes**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *rollout workers* interact with the environment and send observations to
+    the *inference workers*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *inferences workers* query a fixed version of the policy and **send actions
+    back to the rollout worker**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After *k* steps the rollout works send a trajectory of experience to the learner
+    worker, **which it uses to update the agent’s policy network**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Sample factory](../Images/dbf151279f91bb01f87ae6359c6f520f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Actor Critic models in Sample-factory
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Actor Critic models in Sample Factory are composed of three components:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Encoder** - Process input observations (images, vectors) and map them to
+    a vector. This is the part of the model you will most likely want to customize.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Core** - Intergrate vectors from one or more encoders, can optionally include
+    a single- or multi-layer LSTM/GRU in a memory-based agent.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Decoder** - Apply additional layers to the output of the model core before
+    computing the policy and value outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The library has been designed to automatically support any observation and action
+    spaces. Users can easily add their custom models. You can find out more in the
+    [documentation](https://www.samplefactory.dev/03-customization/custom-models/#actor-critic-models-in-sample-factory).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ViZDoom
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[ViZDoom](https://vizdoom.cs.put.edu.pl/) is an **open-source python interface
+    for the Doom Engine**.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The library was created in 2016 by Marek Wydmuch, Michal Kempka at the Institute
+    of Computing Science, Poznan University of Technology, Poland.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The library enables the **training of agents directly from the screen pixels
+    in a number of scenarios**, including team deathmatch, shown in the video below.
+    Because the ViZDoom environment is based on a game the was created in the 90s,
+    it can be run on modern hardware at accelerated speeds, **allowing us to learn
+    complex AI behaviors fairly quickly**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The library includes feature such as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multi-platform (Linux, macOS, Windows),
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: API for Python and C++,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[OpenAI Gym](https://www.gymlibrary.dev/) environment wrappers'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Easy-to-create custom scenarios (visual editors, scripting language, and examples
+    available),
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Async and sync single-player and multiplayer modes,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Lightweight (few MBs) and fast (up to 7000 fps in sync mode, single-threaded),
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Customizable resolution and rendering parameters,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Access to the depth buffer (3D vision),
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Automatic labeling of game objects visible in the frame,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Access to the audio buffer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Access to the list of actors/objects and map geometry,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Off-screen rendering and episode recording,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Time scaling in async mode.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We first need to install some dependencies that are required for the ViZDoom
+    environment
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that our Colab runtime is set up, we can start by installing the dependencies
+    required to run ViZDoom on linux.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you are following on your machine on Mac, you will want to follow the installation
+    instructions on the [github page](https://github.com/Farama-Foundation/ViZDoom/blob/master/doc/Quickstart.md#-quickstart-for-macos-and-anaconda3-python-36).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then we can install Sample Factory and ViZDoom
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This can take 7min
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Setting up the Doom Environment in sample-factory
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now that the setup if complete, we can train the agent. We have chosen here
+    to learn a ViZDoom task called `Health Gathering Supreme`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The scenario: Health Gathering Supreme'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '![Health-Gathering-Supreme](../Images/08a1a85695f5485b036e974dd75dc6b6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: The objective of this scenario is to **teach the agent how to survive without
+    knowing what makes it survive**. The Agent know only that **life is precious**
+    and death is bad so **it must learn what prolongs its existence and that its health
+    is connected with survival**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The map is a rectangle containing walls and with a green, acidic floor which
+    **hurts the player periodically**. Initially there are some medkits spread uniformly
+    over the map. A new medkit falls from the skies every now and then. **Medkits
+    heal some portions of player’s health** - to survive, the agent needs to pick
+    them up. The episode finishes after the player’s death or on timeout.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Further configuration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Living_reward = 1
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '3 available buttons: turn left, turn right, move forward'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1 available game variable: HEALTH'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: death penalty = 100
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can find out more about the scenarios available in ViZDoom [here](https://github.com/Farama-Foundation/ViZDoom/tree/master/scenarios).
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are also a number of more complex scenarios that have been create for
+    ViZDoom, such as the ones detailed on [this github page](https://github.com/edbeeching/3d_control_deep_rl).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Training the agent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We’re going to train the agent for 4000000 steps. It will take approximately
+    20min
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s take a look at the performance of the trained policy and output a video
+    of the agent.
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now lets visualize the performance of the agent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The agent has learned something, but its performance could be better. We would
+    clearly need to train for longer. But let’s upload this model to the Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now lets upload your checkpoint and video to the Hugging Face Hub
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To be able to share your model with the community there are three more steps
+    to follow:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1️⃣ (If it’s not already done) create an account to HF ➡ [https://huggingface.co/join](https://huggingface.co/join)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 2️⃣ Sign in and get your authentication token from the Hugging Face website.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a new token ([https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens))
+    **with write role**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Create HF Token](../Images/d21a97c736edaab9119d2d1c1da9deac.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Copy the token
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Run the cell below and paste the token
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If you don’t want to use Google Colab or a Jupyter Notebook, you need to use
+    this command instead: `huggingface-cli login`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s load another model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This agent’s performance was good, but we can do better! Let’s download and
+    visualize an agent trained for 10B timesteps from the hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Some additional challenges 🏆: Doom Deathmatch'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Training an agent to play a Doom deathmatch **takes many hours on a more beefy
+    machine than is available in Colab**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fortunately, we have have **already trained an agent in this scenario and it
+    is available in the 🤗 Hub!** Let’s download the model and visualize the agent’s
+    performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Given the agent plays for a long time the video generation can take **10 minutes**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: You **can try to train your agent in this environment** using the code above,
+    but not on colab. **Good luck 🤞**
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you prefer an easier scenario, **why not try training in another ViZDoom
+    scenario such as `doom_deadly_corridor` or `doom_defend_the_center`.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '* * *'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This concludes the last unit. But we are not finished yet! 🤗 The following **bonus
+    section include some of the most interesting, advanced, and cutting edge work
+    in Deep Reinforcement Learning**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keep learning, stay awesome 🤗
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL

@@ -1,0 +1,1061 @@
+- en: Hands-on
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit2/hands-on](https://huggingface.co/learn/deep-rl-course/unit2/hands-on)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/25.5399e9f8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/CodeBlock.a6d3f852.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/CourseFloatingBanner.36c274d0.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">[![Ask
+    a Question](../Images/255e59f8542cbd6d3f1c72646b2fff13.png)](http://hf.co/join/discord)
+    [![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit2/unit2.ipynb)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now that we studied the Q-Learning algorithm, let’s implement it from scratch
+    and train our Q-Learning agent in two environments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Frozen-Lake-v1 (non-slippery and slippery version)](https://gymnasium.farama.org/environments/toy_text/frozen_lake/)
+    ☃️ : where our agent will need to **go from the starting state (S) to the goal
+    state (G)** by walking only on frozen tiles (F) and avoiding holes (H).'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[An autonomous taxi](https://gymnasium.farama.org/environments/toy_text/taxi/)
+    🚖 will need **to learn to navigate** a city to **transport its passengers from
+    point A to point B.**'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Environments](../Images/10f0816329e6557bfe5cfedcbbc9c8e0.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Thanks to a [leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard),
+    you’ll be able to compare your results with other classmates and exchange the
+    best practices to improve your agent’s scores. Who will win the challenge for
+    Unit 2?
+  prefs: []
+  type: TYPE_NORMAL
+- en: To validate this hands-on for the [certification process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process),
+    you need to push your trained Taxi model to the Hub and **get a result of >= 4.5**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To find your result, go to the [leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
+    and find your model, **the result = mean_reward - std of reward**
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more information about the certification process, check this section 👉 [https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+  prefs: []
+  type: TYPE_NORMAL
+- en: And you can check your progress here 👉 [https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course](https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**To start the hands-on click on the Open In Colab button** 👇 :'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit2/unit2.ipynb)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We strongly **recommend students use Google Colab for the hands-on exercises**
+    instead of running them on their personal computers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By using Google Colab, **you can focus on learning and experimenting without
+    worrying about the technical aspects** of setting up your environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unit 2: Q-Learning with FrozenLake-v1 ⛄ and Taxi-v3 🚕'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '![Unit 2 Thumbnail](../Images/0b9bbdbce6b297349ae6de9075b71340.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: In this notebook, **you’ll code your first Reinforcement Learning agent from
+    scratch** to play FrozenLake ❄️ using Q-Learning, share it with the community,
+    and experiment with different configurations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ⬇️ Here is an example of what **you will achieve in just a couple of minutes.**
+    ⬇️
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Environments](../Images/10f0816329e6557bfe5cfedcbbc9c8e0.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '🎮 Environments:'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[FrozenLake-v1](https://gymnasium.farama.org/environments/toy_text/frozen_lake/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Taxi-v3](https://gymnasium.farama.org/environments/toy_text/taxi/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '📚 RL-Library:'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Python and NumPy
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Gymnasium](https://gymnasium.farama.org/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We’re constantly trying to improve our tutorials, so **if you find some issues
+    in this notebook**, please [open an issue on the GitHub Repo](https://github.com/huggingface/deep-rl-class/issues).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Objectives of this notebook 🏆
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'At the end of the notebook, you will:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Be able to use **Gymnasium**, the environment library.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Be able to code a Q-Learning agent from scratch.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Be able to **push your trained agent and the code to the Hub** with a nice video
+    replay and an evaluation score 🔥.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This notebook is from the Deep Reinforcement Learning Course
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '![Deep RL Course illustration](../Images/1ffbb6aa2076af9a6f9eb9b4e21ecf34.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'In this free course, you will:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 📖 Study Deep Reinforcement Learning in **theory and practice**.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 🧑‍💻 Learn to **use famous Deep RL libraries** such as Stable Baselines3, RL
+    Baselines3 Zoo, CleanRL and Sample Factory 2.0.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 🤖 Train **agents in unique environments**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: And more check 📚 the syllabus 👉 [https://simoninithomas.github.io/deep-rl-course](https://simoninithomas.github.io/deep-rl-course)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Don’t forget to **[sign up to the course](http://eepurl.com/ic5ZUD)** (we are
+    collecting your email to be able to **send you the links when each Unit is published
+    and give you information about the challenges and updates).**
+  prefs: []
+  type: TYPE_NORMAL
+- en: The best way to keep in touch is to join our discord server to exchange with
+    the community and with us 👉🏻 [https://discord.gg/ydHrjt3WP5](https://discord.gg/ydHrjt3WP5)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prerequisites 🏗️
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Before diving into the notebook, you need to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🔲 📚 **Study [Q-Learning by reading Unit 2](https://huggingface.co/deep-rl-course/unit2/introduction)**
+    🤗
+  prefs: []
+  type: TYPE_NORMAL
+- en: A small recap of Q-Learning
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Q-Learning* **is the RL algorithm that**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Trains *Q-Function*, an **action-value function** that is encoded, in internal
+    memory, by a *Q-table* **that contains all the state-action pair values.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Given a state and action, our Q-Function **will search the Q-table for the corresponding
+    value.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Q function](../Images/c6f51357ba01781edc9f3041b33e5be4.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: When the training is done, **we have an optimal Q-Function, so an optimal Q-Table.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: And if we **have an optimal Q-function**, we have an optimal policy, since we
+    **know for each state, the best action to take.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Link value policy](../Images/06e7785cc764e6109bfc6c89005a4d92.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: But, in the beginning, our **Q-Table is useless since it gives arbitrary value
+    for each state-action pair (most of the time we initialize the Q-Table to 0 values)**.
+    But, as we’ll explore the environment and update our Q-Table it will give us better
+    and better approximations
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![q-learning.jpeg](../Images/ef3754e1d95bf97371e1a41ca61d6d72.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'This is the Q-Learning pseudocode:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q-Learning](../Images/e98aadd735672374a66857c170d3b2ce.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Let’s code our first Reinforcement Learning algorithm 🚀
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: To validate this hands-on for the [certification process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process),
+    you need to push your trained Taxi model to the Hub and **get a result of >= 4.5**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To find your result, go to the [leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
+    and find your model, **the result = mean_reward - std of reward**
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more information about the certification process, check this section 👉 [https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Install dependencies and create a virtual display 🔽
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In the notebook, we’ll need to generate a replay video. To do so, with Colab,
+    **we need to have a virtual screen to render the environment** (and thus record
+    the frames).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hence the following cell will install the libraries and create and run a virtual
+    screen 🖥
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We’ll install multiple ones:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`gymnasium`: Contains the FrozenLake-v1 ⛄ and Taxi-v3 🚕 environments.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`pygame`: Used for the FrozenLake-v1 and Taxi-v3 UI.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`numpy`: Used for handling our Q-table.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Hugging Face Hub 🤗 works as a central place where anyone can share and explore
+    models and datasets. It has versioning, metrics, visualizations and other features
+    that will allow you to easily collaborate with others.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can see here all the Deep RL models available (if they use Q Learning) here
+    👉 [https://huggingface.co/models?other=q-learning](https://huggingface.co/models?other=q-learning)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: To make sure the new installed libraries are used, **sometimes it’s required
+    to restart the notebook runtime**. The next cell will force the **runtime to crash,
+    so you’ll need to connect again and run the code starting from here**. Thanks
+    to this trick, **we will be able to run our virtual screen.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Import the packages 📦
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In addition to the installed libraries, we also use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`random`: To generate random numbers (that will be useful for epsilon-greedy
+    policy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`imageio`: To generate a replay video.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’re now ready to code our Q-Learning algorithm 🔥
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Part 1: Frozen Lake ⛄ (non slippery version)'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Create and understand FrozenLake environment ⛄ (( https://gymnasium.farama.org/environments/toy_text/frozen_lake/
+    )
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '* * *'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 💡 A good habit when you start to use an environment is to check its documentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: 👉 [https://gymnasium.farama.org/environments/toy_text/frozen_lake/](https://gymnasium.farama.org/environments/toy_text/frozen_lake/)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '* * *'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’re going to train our Q-Learning agent **to navigate from the starting state
+    (S) to the goal state (G) by walking only on frozen tiles (F) and avoid holes
+    (H)**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can have two sizes of environment:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`map_name="4x4"`: a 4x4 grid version'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`map_name="8x8"`: a 8x8 grid version'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The environment has two modes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`is_slippery=False`: The agent always moves **in the intended direction** due
+    to the non-slippery nature of the frozen lake (deterministic).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`is_slippery=True`: The agent **may not always move in the intended direction**
+    due to the slippery nature of the frozen lake (stochastic).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For now let’s keep it simple with the 4x4 map and non-slippery. We add a parameter
+    called `render_mode` that specifies how the environment should be visualised.
+    In our case because we **want to record a video of the environment at the end,
+    we need to set render_mode to rgb_array**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As [explained in the documentation](https://gymnasium.farama.org/api/env/#gymnasium.Env.render)
+    “rgb_array”: Return a single frame representing the current state of the environment.
+    A frame is a np.ndarray with shape (x, y, 3) representing RGB values for an x-by-y
+    pixel image.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Solution
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can create your own custom grid like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: but we’ll use the default environment for now.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s see what the Environment looks like:'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: We see with `Observation Space Shape Discrete(16)` that the observation is an
+    integer representing the **agent’s current position as current_row * ncols + current_col
+    (where both the row and col start at 0)**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, the goal position in the 4x4 map can be calculated as follows:
+    3 * 4 + 3 = 15\. The number of possible observations is dependent on the size
+    of the map. **For example, the 4x4 map has 16 possible observations.**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For instance, this is what state = 0 looks like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![FrozenLake](../Images/5d72cc95a82a64293bb4212444acec50.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The action space (the set of possible actions the agent can take) is discrete
+    with 4 actions available 🎮:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '0: GO LEFT'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1: GO DOWN'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '2: GO RIGHT'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '3: GO UP'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Reward function 💰:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Reach goal: +1'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Reach hole: 0'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Reach frozen: 0'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Create and Initialize the Q-table 🗄️
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: (👀 Step 1 of the pseudocode)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q-Learning](../Images/e98aadd735672374a66857c170d3b2ce.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'It’s time to initialize our Q-table! To know how many rows (states) and columns
+    (actions) to use, we need to know the action and observation space. We already
+    know their values from before, but we’ll want to obtain them programmatically
+    so that our algorithm generalizes for different environments. Gym provides us
+    a way to do that: `env.action_space.n` and `env.observation_space.n`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Solution
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Define the greedy policy 🤖
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Remember we have two policies since Q-Learning is an **off-policy** algorithm.
+    This means we’re using a **different policy for acting and updating the value
+    function**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Epsilon-greedy policy (acting policy)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Greedy-policy (updating policy)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The greedy policy will also be the final policy we’ll have when the Q-learning
+    agent completes training. The greedy policy is used to select an action using
+    the Q-table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q-Learning](../Images/ce691ce98ae89b58669eb975be3f446c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Solution
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Define the epsilon-greedy policy 🤖
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Epsilon-greedy is the training policy that handles the exploration/exploitation
+    trade-off.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The idea with epsilon-greedy:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With *probability 1 - ɛ* : **we do exploitation** (i.e. our agent selects the
+    action with the highest state-action pair value).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'With *probability ɛ*: we do **exploration** (trying a random action).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As the training continues, we progressively **reduce the epsilon value since
+    we will need less and less exploration and more exploitation.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Q-Learning](../Images/30b0aba4490af7f85f0594dc198e9c03.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Solution
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Define the hyperparameters ⚙️
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The exploration related hyperparamters are some of the most important ones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We need to make sure that our agent **explores enough of the state space** to
+    learn a good value approximation. To do that, we need to have progressive decay
+    of the epsilon.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you decrease epsilon too fast (too high decay_rate), **you take the risk
+    that your agent will be stuck**, since your agent didn’t explore enough of the
+    state space and hence can’t solve the problem.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Create the training loop method
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '![Q-Learning](../Images/e98aadd735672374a66857c170d3b2ce.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'The training loop goes like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Solution
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Train the Q-Learning agent 🏃
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s see what our Q-Learning table looks like now 👀
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: The evaluation method 📝
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We defined the evaluation method that we’re going to use to test our Q-Learning
+    agent.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Evaluate our Q-Learning agent 📈
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Usually, you should have a mean reward of 1.0
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The **environment is relatively easy** since the state space is really small
+    (16). What you can try to do is [to replace it with the slippery version](https://www.gymlibrary.dev/environments/toy_text/frozen_lake/),
+    which introduces stochasticity, making the environment more complex.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Publish our trained model to the Hub 🔥
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we saw good results after the training, **we can publish our trained
+    model to the Hub 🤗 with one line of code**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s an example of a Model Card:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Model card](../Images/9832a45306ed2f863e30acb21be3060d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Under the hood, the Hub uses git-based repositories (don’t worry if you don’t
+    know what git is), which means you can update the model with new versions as you
+    experiment and improve your agent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Do not modify this code
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: .
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: By using `push_to_hub` **you evaluate, record a replay, generate a model card
+    of your agent and push it to the Hub**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can **showcase our work** 🔥
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can **visualize your agent playing** 👀
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can **share an agent with the community that others can use** 💾
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can **access a leaderboard 🏆 to see how well your agent is performing compared
+    to your classmates** 👉 [https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'To be able to share your model with the community there are three more steps
+    to follow:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1️⃣ (If it’s not already done) create an account to HF ➡ [https://huggingface.co/join](https://huggingface.co/join)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 2️⃣ Sign in and then, you need to store your authentication token from the Hugging
+    Face website.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a new token ([https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens))
+    **with write role**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Create HF Token](../Images/d21a97c736edaab9119d2d1c1da9deac.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you don’t want to use a Google Colab or a Jupyter Notebook, you need to
+    use this command instead: `huggingface-cli login` (or `login`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3️⃣ We’re now ready to push our trained agent to the 🤗 Hub 🔥 using `push_to_hub()`
+    function
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s create **the model dictionary that contains the hyperparameters and the
+    Q_table**.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s fill the `push_to_hub` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`repo_id`: the name of the Hugging Face Hub Repository that will be created/updated
+    `(repo_id = {username}/{repo_name})` 💡 A good `repo_id` is `{username}/q-{env_id}`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`model`: our model dictionary containing the hyperparameters and the Qtable.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`env`: the environment.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`commit_message`: message of the commit'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Congrats 🥳 you’ve just implemented from scratch, trained, and uploaded your
+    first Reinforcement Learning agent. FrozenLake-v1 no_slippery is very simple environment,
+    let’s try a harder one 🔥.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Part 2: Taxi-v3 🚖'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Create and understand Taxi-v3 🚕
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '* * *'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 💡 A good habit when you start to use an environment is to check its documentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: 👉 [https://gymnasium.farama.org/environments/toy_text/taxi/](https://gymnasium.farama.org/environments/toy_text/taxi/)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '* * *'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In `Taxi-v3` 🚕, there are four designated locations in the grid world indicated
+    by R(ed), G(reen), Y(ellow), and B(lue).
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the episode starts, **the taxi starts off at a random square** and the
+    passenger is at a random location. The taxi drives to the passenger’s location,
+    **picks up the passenger**, drives to the passenger’s destination (another one
+    of the four specified locations), and then **drops off the passenger**. Once the
+    passenger is dropped off, the episode ends.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Taxi](../Images/dcffe584c3d93a6b2668209fe5b78373.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: There are **500 discrete states since there are 25 taxi positions, 5 possible
+    locations of the passenger** (including the case when the passenger is in the
+    taxi), and **4 destination locations.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The action space (the set of possible actions the agent can take) is discrete
+    with **6 actions available 🎮**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '0: move south'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '1: move north'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '2: move east'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '3: move west'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '4: pickup passenger'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '5: drop off passenger'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Reward function 💰:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: -1 per step unless other reward is triggered.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: +20 delivering passenger.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: -10 executing “pickup” and “drop-off” actions illegally.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: Define the hyperparameters ⚙️
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '⚠ DO NOT MODIFY EVAL_SEED: the eval_seed array **allows us to evaluate your
+    agent with the same taxi starting positions for every classmate**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Train our Q-Learning agent 🏃
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Create a model dictionary 💾 and publish our trained model to the Hub 🔥
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We create a model dictionary that will contain all the training hyperparameters
+    for reproducibility and the Q-Table.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now that it’s on the Hub, you can compare the results of your Taxi-v3 with your
+    classmates using the leaderboard 🏆 👉 [https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Taxi Leaderboard](../Images/0d0ce61b026fca34f96441a33217667d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Part 3: Load from Hub 🔽'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: What’s amazing with Hugging Face Hub 🤗 is that you can easily load powerful
+    models from the community.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Loading a saved model from the Hub is really easy:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You go [https://huggingface.co/models?other=q-learning](https://huggingface.co/models?other=q-learning)
+    to see the list of all the q-learning saved models.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: You select one and copy its repo_id
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Copy id](../Images/38b2f545a7fd317518e1c20d339f44d7.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Then we just need to use `load_from_hub` with:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The repo_id
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The filename: the saved model inside the repo.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Do not modify this code
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: .
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: Some additional challenges 🏆
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The best way to learn **is to try things on your own**! As you saw, the current
+    agent is not doing great. As a first suggestion, you can train for more steps.
+    With 1,000,000 steps, we saw some great results!
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the [Leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
+    you will find your agents. Can you get to the top?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are some ideas to climb up the leaderboard:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train more steps
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Try different hyperparameters by looking at what your classmates have done.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Push your new trained model** on the Hub 🔥'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Are walking on ice and driving taxis too boring to you? Try to **change the
+    environment**, why not use FrozenLake-v1 slippery version? Check how they work
+    [using the gymnasium documentation](https://gymnasium.farama.org/) and have fun
+    🎉.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '* * *'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Congrats 🥳, you’ve just implemented, trained, and uploaded your first Reinforcement
+    Learning agent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding Q-Learning is an **important step to understanding value-based
+    methods.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next Unit with Deep Q-Learning, we’ll see that while creating and updating
+    a Q-table was a good strategy — **however, it is not scalable.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: For instance, imagine you create an agent that learns to play Doom.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Doom](../Images/5692612f8572824879d3b76eb2ec21b4.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Doom is a large environment with a huge state space (millions of different states).
+    Creating and updating a Q-table for that environment would not be efficient.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That’s why we’ll study Deep Q-Learning in the next unit, an algorithm **where
+    we use a neural network that approximates, given a state, the different Q-values
+    for each action.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Environments](../Images/bf441b005cda192d0dc86eb42475aeb3.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: See you in Unit 3! 🔥
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keep learning, stay awesome 🤗
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL

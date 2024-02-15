@@ -1,0 +1,915 @@
+- en: Hands on
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit4/hands-on](https://huggingface.co/learn/deep-rl-course/unit4/hands-on)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/49.2b78f5ed.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/CodeBlock.a6d3f852.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/CourseFloatingBanner.36c274d0.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">[![Ask
+    a Question](../Images/255e59f8542cbd6d3f1c72646b2fff13.png)](http://hf.co/join/discord)
+    [![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit4/unit4.ipynb)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we’ve studied the theory behind Reinforce, **you’re ready to code your
+    Reinforce agent with PyTorch**. And you’ll test its robustness using CartPole-v1
+    and PixelCopter,.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You’ll then be able to iterate and improve this implementation for more advanced
+    environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Environments](../Images/3b1f63eab47a364ef05dcdca4df7bf08.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'To validate this hands-on for the certification process, you need to push your
+    trained models to the Hub and:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Get a result of >= 350 for `Cartpole-v1`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Get a result of >= 5 for `PixelCopter`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To find your result, go to the leaderboard and find your model, **the result
+    = mean_reward - std of reward**. **If you don’t see your model on the leaderboard,
+    go at the bottom of the leaderboard page and click on the refresh button**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**If you don’t find your model, go to the bottom of the page and click on the
+    refresh button.**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more information about the certification process, check this section 👉 [https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+  prefs: []
+  type: TYPE_NORMAL
+- en: And you can check your progress here 👉 [https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course](https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**To start the hands-on click on Open In Colab button** 👇 :'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit4/unit4.ipynb)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We strongly **recommend students use Google Colab for the hands-on exercises**
+    instead of running them on their personal computers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By using Google Colab, **you can focus on learning and experimenting without
+    worrying about the technical aspects** of setting up your environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unit 4: Code your first Deep Reinforcement Learning Algorithm with PyTorch:
+    Reinforce. And test its robustness 💪'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '![thumbnail](../Images/207886028f30a9a8c43010256f915e88.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'In this notebook, you’ll code your first Deep Reinforcement Learning algorithm
+    from scratch: Reinforce (also called Monte Carlo Policy Gradient).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Reinforce is a *Policy-based method*: a Deep Reinforcement Learning algorithm
+    that tries **to optimize the policy directly without using an action-value function**.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: More precisely, Reinforce is a *Policy-gradient method*, a subclass of *Policy-based
+    methods* that aims **to optimize the policy directly by estimating the weights
+    of the optimal policy using gradient ascent**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To test its robustness, we’re going to train it in 2 different simple environments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cartpole-v1
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PixelcopterEnv
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ⬇️ Here is an example of what **you will achieve at the end of this notebook.**
+    ⬇️
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Environments](../Images/3b1f63eab47a364ef05dcdca4df7bf08.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '🎮 Environments:'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[CartPole-v1](https://www.gymlibrary.dev/environments/classic_control/cart_pole/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PixelCopter](https://pygame-learning-environment.readthedocs.io/en/latest/user/games/pixelcopter.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '📚 RL-Library:'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Python
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PyTorch
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We’re constantly trying to improve our tutorials, so **if you find some issues
+    in this notebook**, please [open an issue on the GitHub Repo](https://github.com/huggingface/deep-rl-class/issues).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Objectives of this notebook 🏆
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'At the end of the notebook, you will:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Be able to **code a Reinforce algorithm from scratch using PyTorch.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Be able to **test the robustness of your agent using simple environments.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Be able to **push your trained agent to the Hub** with a nice video replay and
+    an evaluation score 🔥.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Prerequisites 🏗️
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Before diving into the notebook, you need to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🔲 📚 [Study Policy Gradients by reading Unit 4](https://huggingface.co/deep-rl-course/unit4/introduction)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s code Reinforce algorithm from scratch 🔥
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Some advice 💡
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: It’s better to run this colab in a copy on your Google Drive, so that **if it
+    times out** you still have the saved notebook on your Google Drive and do not
+    need to fill everything in from scratch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To do that you can either do `Ctrl + S` or `File > Save a copy in Google Drive.`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Set the GPU 💪
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To **accelerate the agent’s training, we’ll use a GPU**. To do that, go to `Runtime
+    > Change Runtime type`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![GPU Step 1](../Images/5378127c314cdd92729aa31b7e11ca44.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '`Hardware Accelerator > GPU`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![GPU Step 2](../Images/e0fec252447f98378386ccca8e57a80a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Create a virtual display 🖥
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: During the notebook, we’ll need to generate a replay video. To do so, with colab,
+    **we need to have a virtual screen to be able to render the environment** (and
+    thus record the frames).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following cell will install the librairies and create and run a virtual
+    screen 🖥
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Install the dependencies 🔽
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The first step is to install the dependencies. We’ll install multiple ones:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`gym`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`gym-games`: Extra gym environments made with PyGame.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`huggingface_hub`: The Hub works as a central place where anyone can share
+    and explore models and datasets. It has versioning, metrics, visualizations, and
+    other features that will allow you to easily collaborate with others.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You may be wondering why we install gym and not gymnasium, a more recent version
+    of gym? **Because the gym-games we are using are not updated yet with gymnasium**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The differences you’ll encounter here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In `gym` we don’t have `terminated` and `truncated` but only `done`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In `gym` using `env.step()` returns `state, reward, done, info`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can learn more about the differences between Gym and Gymnasium here 👉 [https://gymnasium.farama.org/content/migration-guide/](https://gymnasium.farama.org/content/migration-guide/)
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can see here all the Reinforce models available 👉 [https://huggingface.co/models?other=reinforce](https://huggingface.co/models?other=reinforce)
+  prefs: []
+  type: TYPE_NORMAL
+- en: And you can find all the Deep Reinforcement Learning models here 👉 [https://huggingface.co/models?pipeline_tag=reinforcement-learning](https://huggingface.co/models?pipeline_tag=reinforcement-learning)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Import the packages 📦
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In addition to importing the installed libraries, we also import:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`imageio`: A library that will help us to generate a replay video'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Check if we have a GPU
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s check if we have a GPU
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If it’s the case you should see `device:cuda0`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’re now ready to implement our Reinforce algorithm 🔥
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First agent: Playing CartPole-v1 🤖'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Create the CartPole environment and understand how it works
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The environment 🎮
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Why do we use a simple environment like CartPole-v1?
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As explained in [Reinforcement Learning Tips and Tricks](https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html),
+    when you implement your agent from scratch, you need **to be sure that it works
+    correctly and find bugs with easy environments before going deeper** as finding
+    bugs will be much easier in simple environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Try to have some “sign of life” on toy problems
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: Validate the implementation by making it run on harder and harder envs (you
+    can compare results against the RL zoo). You usually need to run hyperparameter
+    optimization for that step.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: The CartPole-v1 environment
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A pole is attached by an un-actuated joint to a cart, which moves along a frictionless
+    track. The pendulum is placed upright on the cart and the goal is to balance the
+    pole by applying forces in the left and right direction on the cart.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: So, we start with CartPole-v1\. The goal is to push the cart left or right **so
+    that the pole stays in the equilibrium.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The episode ends if:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The pole Angle is greater than ±12°
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Cart Position is greater than ±2.4
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The episode length is greater than 500
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We get a reward 💰 of +1 every timestep that the Pole stays in the equilibrium.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s build the Reinforce Architecture
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'This implementation is based on three implementations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PyTorch official Reinforcement Learning example](https://github.com/pytorch/examples/blob/main/reinforcement_learning/reinforce.py)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Udacity Reinforce](https://github.com/udacity/deep-reinforcement-learning/blob/master/reinforce/REINFORCE.ipynb)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Improvement of the integration by Chris1nexus](https://github.com/huggingface/deep-rl-class/pull/95)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Reinforce](../Images/36cf0376b1e1c1f32df0bf4cc6199001.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'So we want:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Two fully connected layers (fc1 and fc2).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To use ReLU as activation function of fc1
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To use Softmax to output a probability distribution over actions
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Solution
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: I made a mistake, can you guess where?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To find out let’s make a forward pass:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here we see that the error says `ValueError: The value argument to log_prob
+    must be a Tensor`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It means that `action` in `m.log_prob(action)` must be a Tensor **but it’s not.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Do you know why? Check the act function and try to see why it does not work.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Advice 💡: Something is wrong in this implementation. Remember that for the
+    act function **we want to sample an action from the probability distribution over
+    actions**.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: (Real) Solution
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: By using CartPole, it was easier to debug since **we know that the bug comes
+    from our integration and not from our simple environment**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since **we want to sample an action from the probability distribution over actions**,
+    we can’t use `action = np.argmax(m)` since it will always output the action that
+    has the highest probability.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We need to replace this with `action = m.sample()` which will sample an action
+    from the probability distribution P(.|s)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s build the Reinforce Training Algorithm
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'This is the Reinforce algorithm pseudocode:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Policy gradient pseudocode](../Images/98fc23971db3e1a9e35baeee827641dc.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: When we calculate the return Gt (line 6), we see that we calculate the sum of
+    discounted rewards **starting at timestep t**.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Why? Because our policy should only **reinforce actions on the basis of the
+    consequences**: so rewards obtained before taking an action are useless (since
+    they were not because of the action), **only the ones that come after the action
+    matters**.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Before coding this you should read this section [don’t let the past distract
+    you](https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html#don-t-let-the-past-distract-you)
+    that explains why we use reward-to-go policy gradient.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We use an interesting technique coded by [Chris1nexus](https://github.com/Chris1nexus)
+    to **compute the return at each timestep efficiently**. The comments explained
+    the procedure. Don’t hesitate also [to check the PR explanation](https://github.com/huggingface/deep-rl-class/pull/95)
+    But overall the idea is to **compute the return at each timestep efficiently**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The second question you may ask is **why do we minimize the loss**? Didn’t we
+    talk about Gradient Ascent, not Gradient Descent earlier?
+  prefs: []
+  type: TYPE_NORMAL
+- en: We want to maximize our utility function $J(\theta)$, but in PyTorch and TensorFlow,
+    it’s better to **minimize an objective function.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: So let’s say we want to reinforce action 3 at a certain timestep. Before training
+    this action P is 0.25.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: So we want to modify<math><semantics><mrow><mi>t</mi><mi>h</mi><mi>e</mi><mi>t</mi><mi>a</mi></mrow><annotation
+    encoding="application/x-tex">theta</annotation></semantics></math> theta such
+    that<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi
+    mathvariant="normal">∣</mi><mi>s</mi><mo separator="true">;</mo><mi>θ</mi><mo
+    stretchy="false">)</mo><mo>></mo><mn>0.25</mn></mrow><annotation encoding="application/x-tex">\pi_\theta(a_3|s;
+    \theta) > 0.25</annotation></semantics></math> πθ​(a3​∣s;θ)>0.25
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Because all P must sum to 1, max<math><semantics><mrow><mi>p</mi><msub><mi>i</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo
+    separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">pi_\theta(a_3|s; \theta)</annotation></semantics></math>piθ​(a3​∣s;θ)
+    will **minimize other action probability.**
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: So we should tell PyTorch **to min<math><semantics><mrow><mn>1</mn><mo>−</mo><msub><mi>π</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo
+    separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">1 - \pi_\theta(a_3|s; \theta)</annotation></semantics></math>1−πθ​(a3​∣s;θ).**
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This loss function approaches 0 as<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo
+    separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">\pi_\theta(a_3|s; \theta)</annotation></semantics></math>πθ​(a3​∣s;θ)
+    nears 1.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: So we are encouraging the gradient to max<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo
+    separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">\pi_\theta(a_3|s; \theta)</annotation></semantics></math>πθ​(a3​∣s;θ)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Solution
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Train it
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We’re now ready to train our agent.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: But first, we define a variable containing all the training hyperparameters.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can change the training parameters (and should 😉)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Define evaluation method 📝
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Here we define the evaluation method that we’re going to use to test our Reinforce
+    agent.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Evaluate our agent 📈
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Publish our trained model on the Hub 🔥
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Now that we saw we got good results after the training, we can publish our trained
+    model on the hub 🤗 with one line of code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s an example of a Model Card:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/afdb3be9b09aa528c9ee40968ca15774.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Push to the Hub
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Do not modify this code
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: By using `push_to_hub`, **you evaluate, record a replay, generate a model card
+    of your agent, and push it to the Hub**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can **showcase our work** 🔥
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can **visualize your agent playing** 👀
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can **share an agent with the community that others can use** 💾
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can **access a leaderboard 🏆 to see how well your agent is performing compared
+    to your classmates** 👉 [https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'To be able to share your model with the community there are three more steps
+    to follow:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1️⃣ (If it’s not already done) create an account to HF ➡ [https://huggingface.co/join](https://huggingface.co/join)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 2️⃣ Sign in and then, you need to store your authentication token from the Hugging
+    Face website.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a new token ([https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens))
+    **with write role**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Create HF Token](../Images/d21a97c736edaab9119d2d1c1da9deac.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you don’t want to use Google Colab or a Jupyter Notebook, you need to use
+    this command instead: `huggingface-cli login` (or `login`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3️⃣ We’re now ready to push our trained agent to the 🤗 Hub 🔥 using `package_to_hub()`
+    function
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now that we tested the robustness of our implementation, let’s try a more complex
+    environment: PixelCopter 🚁'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Second agent: PixelCopter 🚁'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Study the PixelCopter environment 👀
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[The Environment documentation](https://pygame-learning-environment.readthedocs.io/en/latest/user/games/pixelcopter.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The observation space (7) 👀:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: player y position
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: player velocity
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: player distance to floor
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: player distance to ceiling
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: next block x distance to player
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: next blocks top y location
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: next blocks bottom y location
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The action space(2) 🎮:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Up (press accelerator)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Do nothing (don’t press accelerator)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reward function 💰:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For each vertical block it passes, it gains a positive reward of +1\. Each time
+    a terminal state is reached it receives a negative reward of -1.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Define the new Policy 🧠
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We need to have a deeper neural network since the environment is more complex
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Solution
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Define the hyperparameters ⚙️
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Because this environment is more complex.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Especially for the hidden size, we need more neurons.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Train it
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We’re now ready to train our agent 🔥.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: Publish our trained model on the Hub 🔥
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Some additional challenges 🏆
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The best way to learn **is to try things on your own**! As you saw, the current
+    agent is not doing great. As a first suggestion, you can train for more steps.
+    But also try to find better parameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the [Leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
+    you will find your agents. Can you get to the top?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are some ideas to climb up the leaderboard:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train more steps
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Try different hyperparameters by looking at what your classmates have done 👉
+    [https://huggingface.co/models?other=reinforce](https://huggingface.co/models?other=reinforce)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Push your new trained model** on the Hub 🔥'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Improving the implementation for more complex environments** (for instance,
+    what about changing the network to a Convolutional Neural Network to handle frames
+    as observation)?'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '* * *'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Congrats on finishing this unit**! There was a lot of information. And congrats
+    on finishing the tutorial. You’ve just coded your first Deep Reinforcement Learning
+    agent from scratch using PyTorch and shared it on the Hub 🥳.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Don’t hesitate to iterate on this unit **by improving the implementation for
+    more complex environments** (for instance, what about changing the network to
+    a Convolutional Neural Network to handle frames as observation)?
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next unit, **we’re going to learn more about Unity MLAgents**, by training
+    agents in Unity environments. This way, you will be ready to participate in the
+    **AI vs AI challenges where you’ll train your agents to compete against other
+    agents in a snowball fight and a soccer game.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sound fun? See you next time!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, we would love **to hear what you think of the course and how we can
+    improve it**. If you have some feedback then please 👉 [fill this form](https://forms.gle/BzKXWzLAGZESGNaE9)
+  prefs: []
+  type: TYPE_NORMAL
+- en: See you in Unit 5! 🔥
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keep Learning, stay awesome 🤗
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL

@@ -1,0 +1,318 @@
+- en: Monte Carlo vs Temporal Difference Learning
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit2/mc-vs-td](https://huggingface.co/learn/deep-rl-course/unit2/mc-vs-td)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/27.36f26216.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The last thing we need to discuss before diving into Q-Learning is the two learning
+    strategies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Remember that an RL agent **learns by interacting with its environment.** The
+    idea is that **given the experience and the received reward, the agent will update
+    its value function or policy.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: Monte Carlo and Temporal Difference Learning are two different **strategies
+    on how to train our value function or our policy function.** Both of them **use
+    experience to solve the RL problem.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: On one hand, Monte Carlo uses **an entire episode of experience before learning.** On
+    the other hand, Temporal Difference uses **only a step (<math><semantics><mrow><msub><mi>S</mi><mi>t</mi></msub><mo
+    separator="true">,</mo><msub><mi>A</mi><mi>t</mi></msub><mo separator="true">,</mo><msub><mi>R</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo
+    separator="true">,</mo><msub><mi>S</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation
+    encoding="application/x-tex">S_t, A_t, R_{t+1}, S_{t+1}</annotation></semantics></math>St​,At​,Rt+1​,St+1​
+    ) to learn.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll explain both of them **using a value-based method example.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Monte Carlo: learning at the end of the episode'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Monte Carlo waits until the end of the episode, calculates <math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">G_t</annotation></semantics></math>Gt​ (return) and
+    uses it as **a target for updating <math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mi>t</mi></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(S_t)</annotation></semantics></math>V(St​).**
+  prefs: []
+  type: TYPE_NORMAL
+- en: So it requires a **complete episode of interaction before updating our value
+    function.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Monte Carlo](../Images/6be3469c44f4969a313e63ae3d083f7f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'If we take an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Monte Carlo](../Images/208dbe55d499c365b9ed37acb6950d52.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: We always start the episode **at the same starting point.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**The agent takes actions using the policy**. For instance, using an Epsilon
+    Greedy Strategy, a policy that alternates between exploration (random actions)
+    and exploitation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We get **the reward and the next state.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We terminate the episode if the cat eats the mouse or if the mouse moves > 10
+    steps.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: At the end of the episode, **we have a list of State, Actions, Rewards, and
+    Next States tuples** For instance [[State tile 3 bottom, Go Left, +1, State tile
+    2 bottom], [State tile 2 bottom, Go Left, +0, State tile 1 bottom]…]
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**The agent will sum the total rewards<math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">G_t</annotation></semantics></math>Gt​** (to see
+    how well it did).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It will then **update<math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>s</mi><mi>t</mi></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(s_t)</annotation></semantics></math>V(st​)
+    based on the formula**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Monte Carlo](../Images/c9946b98c2ce4cd1229121de2153817a.png)'
+  prefs:
+  - PREF_IND
+  type: TYPE_IMG
+- en: Then **start a new game with this new knowledge**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: By running more and more episodes, **the agent will learn to play better and
+    better.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Monte Carlo](../Images/ab81d39bcb1c43b9258e84c954f9d623.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'For instance, if we train a state-value function using Monte Carlo:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We initialize our value function **so that it returns 0 value for each state**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Our learning rate (lr) is 0.1 and our discount rate is 1 (= no discount)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Our mouse **explores the environment and takes random actions**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Monte Carlo](../Images/de3ade61595152a7510c90a06231c043.png)'
+  prefs:
+  - PREF_IND
+  type: TYPE_IMG
+- en: The mouse made more than 10 steps, so the episode ends .
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Monte Carlo](../Images/80025a29726af24822d02b1a50c2ae81.png)'
+  prefs:
+  - PREF_IND
+  type: TYPE_IMG
+- en: We have a list of state, action, rewards, next_state, **we need to calculate
+    the return<math><semantics><mrow><mi>G</mi><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow></mrow><annotation
+    encoding="application/x-tex">G{t=0}</annotation></semantics></math>Gt=0** <math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub><mo>=</mo><msub><mi>R</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>R</mi><mrow><mi>t</mi><mo>+</mo><mn>2</mn></mrow></msub><mo>+</mo><msub><mi>R</mi><mrow><mi>t</mi><mo>+</mo><mn>3</mn></mrow></msub><mi
+    mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi></mrow><annotation
+    encoding="application/x-tex">G_t = R_{t+1} + R_{t+2} + R_{t+3} ...</annotation></semantics></math>Gt​=Rt+1​+Rt+2​+Rt+3​...
+    (for simplicity, we don’t discount the rewards) <math><semantics><mrow><msub><mi>G</mi><mn>0</mn></msub><mo>=</mo><msub><mi>R</mi><mn>1</mn></msub><mo>+</mo><msub><mi>R</mi><mn>2</mn></msub><mo>+</mo><msub><mi>R</mi><mn>3</mn></msub><mo>…</mo></mrow><annotation
+    encoding="application/x-tex">G_0 = R_{1} + R_{2} + R_{3}…</annotation></semantics></math>G0​=R1​+R2​+R3​…
+    <math><semantics><mrow><msub><mi>G</mi><mn>0</mn></msub><mo>=</mo><mn>1</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn></mrow><annotation
+    encoding="application/x-tex">G_0 = 1 + 0 + 0 + 0 + 0 + 0 + 1 + 1 + 0 + 0</annotation></semantics></math>G0​=1+0+0+0+0+0+1+1+0+0
+    <math><semantics><mrow><msub><mi>G</mi><mn>0</mn></msub><mo>=</mo><mn>3</mn></mrow><annotation
+    encoding="application/x-tex">G_0 = 3</annotation></semantics></math>G0​=3
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We can now compute the **new**<math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(S_0)</annotation></semantics></math>V(S0​):'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Monte Carlo](../Images/4a209eb21ceb820fc6968e98524a9e05.png) <math><semantics><mrow><mi>V</mi><mo
+    stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo stretchy="false">)</mo><mo>=</mo><mi>V</mi><mo
+    stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo stretchy="false">)</mo><mo>+</mo><mi>l</mi><mi>r</mi><mo>∗</mo><mo
+    stretchy="false">[</mo><msub><mi>G</mi><mn>0</mn></msub><mtext>—</mtext><mi>V</mi><mo
+    stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo stretchy="false">)</mo><mo
+    stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">V(S_0)
+    = V(S_0) + lr * [G_0 — V(S_0)]</annotation></semantics></math>V(S0​)=V(S0​)+lr∗[G0​—V(S0​)]
+    <math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo
+    stretchy="false">)</mo><mo>=</mo><mn>0</mn><mo>+</mo><mn>0.1</mn><mo>∗</mo><mo
+    stretchy="false">[</mo><mn>3</mn><mtext>–</mtext><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation
+    encoding="application/x-tex">V(S_0) = 0 + 0.1 * [3 – 0]</annotation></semantics></math>V(S0​)=0+0.1∗[3–0]
+    <math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo
+    stretchy="false">)</mo><mo>=</mo><mn>0.3</mn></mrow><annotation encoding="application/x-tex">V(S_0)
+    = 0.3</annotation></semantics></math>V(S0​)=0.3'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '![Monte Carlo](../Images/63cd724aa6e4576eee8bd60359878abc.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Temporal Difference Learning: learning at each step'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '**Temporal Difference, on the other hand, waits for only one interaction (one
+    step)<math><semantics><mrow><msub><mi>S</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation
+    encoding="application/x-tex">S_{t+1}</annotation></semantics></math>St+1​** to
+    form a TD target and update<math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mi>t</mi></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(S_t)</annotation></semantics></math>V(St​)
+    using<math><semantics><mrow><msub><mi>R</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation
+    encoding="application/x-tex">R_{t+1}</annotation></semantics></math>Rt+1​ and<math><semantics><mrow><mi>γ</mi><mo>∗</mo><mi>V</mi><mo
+    stretchy="false">(</mo><msub><mi>S</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">\gamma
+    * V(S_{t+1})</annotation></semantics></math>γ∗V(St+1​).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The idea with **TD is to update the<math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mi>t</mi></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(S_t)</annotation></semantics></math>V(St​)
+    at each step.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: But because we didn’t experience an entire episode, we don’t have<math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">G_t</annotation></semantics></math>Gt​ (expected
+    return). Instead, **we estimate<math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">G_t</annotation></semantics></math>Gt​ by adding<math><semantics><mrow><msub><mi>R</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><annotation
+    encoding="application/x-tex">R_{t+1}</annotation></semantics></math>Rt+1​ and
+    the discounted value of the next state.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is called bootstrapping. It’s called this **because TD bases its update
+    in part on an existing estimate<math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(S_{t+1})</annotation></semantics></math>V(St+1​)
+    and not a complete sample<math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">G_t</annotation></semantics></math>Gt​.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Temporal Difference](../Images/56f8c1151f274ebdbc9bcfe88f3a6f80.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: This method is called TD(0) or **one-step TD (update the value function after
+    any individual step).**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Temporal Difference](../Images/286efaf5c1b5de2ad9e109131ca201df.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: If we take the same example,
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Temporal Difference](../Images/175fb7d45ed3bc3efb402d3f79053314.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: We initialize our value function so that it returns 0 value for each state.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Our learning rate (lr) is 0.1, and our discount rate is 1 (no discount).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Our mouse begins to explore the environment and takes a random action: **going
+    to the left**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It gets a reward <math><semantics><mrow><msub><mi>R</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation
+    encoding="application/x-tex">R_{t+1} = 1</annotation></semantics></math>Rt+1​=1
+    since **it eats a piece of cheese**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Temporal Difference](../Images/4e5303ed2cdddedb79026b8bcf87db50.png)'
+  prefs:
+  - PREF_IND
+  type: TYPE_IMG
+- en: '![Temporal Difference](../Images/4d6ac97d6902760f7c73b3041a426db2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'We can now update <math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(S_0)</annotation></semantics></math>V(S0​):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: New <math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo
+    stretchy="false">)</mo><mo>=</mo><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo
+    stretchy="false">)</mo><mo>+</mo><mi>l</mi><mi>r</mi><mo>∗</mo><mo stretchy="false">[</mo><msub><mi>R</mi><mn>1</mn></msub><mo>+</mo><mi>γ</mi><mo>∗</mo><mi>V</mi><mo
+    stretchy="false">(</mo><msub><mi>S</mi><mn>1</mn></msub><mo stretchy="false">)</mo><mo>−</mo><mi>V</mi><mo
+    stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo stretchy="false">)</mo><mo
+    stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">V(S_0)
+    = V(S_0) + lr * [R_1 + \gamma * V(S_1) - V(S_0)]</annotation></semantics></math>V(S0​)=V(S0​)+lr∗[R1​+γ∗V(S1​)−V(S0​)]
+  prefs: []
+  type: TYPE_NORMAL
+- en: New<math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo
+    stretchy="false">)</mo><mo>=</mo><mn>0</mn><mo>+</mo><mn>0.1</mn><mo>∗</mo><mo
+    stretchy="false">[</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo>∗</mo><mn>0</mn><mtext>–</mtext><mn>0</mn><mo
+    stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">V(S_0)
+    = 0 + 0.1 * [1 + 1 * 0–0]</annotation></semantics></math>V(S0​)=0+0.1∗[1+1∗0–0]
+  prefs: []
+  type: TYPE_NORMAL
+- en: New<math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>S</mi><mn>0</mn></msub><mo
+    stretchy="false">)</mo><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">V(S_0)
+    = 0.1</annotation></semantics></math>V(S0​)=0.1
+  prefs: []
+  type: TYPE_NORMAL
+- en: So we just updated our value function for State 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now we **continue to interact with this environment with our updated value function.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Temporal Difference](../Images/8395ce7b9aecec14c7501e705f7399d7.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'To summarize:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With *Monte Carlo*, we update the value function from a complete episode, and
+    so we **use the actual accurate discounted return of this episode.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: With *TD Learning*, we update the value function from a step, and we replace<math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">G_t</annotation></semantics></math>Gt​, which we
+    don’t know, with **an estimated return called the TD target.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Summary](../Images/35ab544da41ee9cb8401401181dde763.png)'
+  prefs:
+  - PREF_IND
+  type: TYPE_IMG

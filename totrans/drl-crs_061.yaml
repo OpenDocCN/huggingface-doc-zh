@@ -1,0 +1,304 @@
+- en: Diving deeper into policy-gradient methods
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit4/policy-gradient](https://huggingface.co/learn/deep-rl-course/unit4/policy-gradient)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/52.ff5ed781.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting the big picture
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We just learned that policy-gradient methods aim to find parameters<math><semantics><mrow><mi>θ</mi></mrow>
+    <annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+    θ that **maximize the expected return**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The idea is that we have a *parameterized stochastic policy*. In our case, a
+    neural network outputs a probability distribution over actions. The probability
+    of taking each action is also called the *action preference*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If we take the example of CartPole-v1:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As input, we have a state.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As output, we have a probability distribution over actions at that state.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Policy based](../Images/7b4b24746a62f4244cc0e64f74bdaef3.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Our goal with policy-gradient is to **control the probability distribution of
+    actions** by tuning the policy such that **good actions (that maximize the return) are
+    sampled more frequently in the future.** Each time the agent interacts with the
+    environment, we tweak the parameters such that good actions will be sampled more
+    likely in the future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But **how are we going to optimize the weights using the expected return**?
+  prefs: []
+  type: TYPE_NORMAL
+- en: The idea is that we’re going to **let the agent interact during an episode**.
+    And if we win the episode, we consider that each action taken was good and must
+    be more sampled in the future since they lead to win.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So for each state-action pair, we want to increase the<math><semantics><mrow><mi>P</mi><mo
+    stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(a|s)</annotation></semantics></math>P(a∣s):
+    the probability of taking that action at that state. Or decrease if we lost.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Policy-gradient algorithm (simplified) looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Policy Gradient Big Picture](../Images/78f8ee2b54067a5bb57aa1023ac8af61.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Now that we got the big picture, let’s dive deeper into policy-gradient methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Diving deeper into policy-gradient methods
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We have our stochastic policy<math><semantics><mrow><mi>π</mi></mrow><annotation
+    encoding="application/x-tex">\pi</annotation></semantics></math>π which has a
+    parameter<math><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math>θ.
+    This<math><semantics><mrow><mi>π</mi></mrow><annotation encoding="application/x-tex">\pi</annotation></semantics></math>π,
+    given a state, **outputs a probability distribution of actions**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Policy](../Images/9123df7ebedfa0c5bc669c2d2531968f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Where<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mi>t</mi></msub><mi
+    mathvariant="normal">∣</mi><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">\pi_\theta(a_t|s_t)</annotation></semantics></math>πθ​(at​∣st​)
+    is the probability of the agent selecting action<math><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">a_t</annotation></semantics></math>at​ from state<math><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">s_t</annotation></semantics></math>st​ given our
+    policy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**But how do we know if our policy is good?** We need to have a way to measure
+    it. To know that, we define a score/objective function called<math><semantics><mrow><mi>J</mi><mo
+    stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">J(\theta)</annotation></semantics></math>J(θ).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The objective function
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The *objective function* gives us the **performance of the agent** given a trajectory
+    (state action sequence without considering reward (contrary to an episode)), and
+    it outputs the *expected cumulative reward*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Return](../Images/d6c60dbb37bf65407a91cf7b220d932f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Let’s give some more details on this formula:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *expected return* (also called expected cumulative reward), is the weighted
+    average (where the weights are given by<math><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>τ</mi><mo
+    separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">P(\tau;\theta)</annotation></semantics></math>P(τ;θ)
+    of all possible values that the return<math><semantics><mrow><mi>R</mi><mo stretchy="false">(</mo><mi>τ</mi><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">R(\tau)</annotation></semantics></math>R(τ)
+    can take).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Return](../Images/91e5d228c6d4b4dfdbd4a60c7ae8fa63.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '-<math><semantics><mrow><mi>R</mi><mo stretchy="false">(</mo><mi>τ</mi><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">R(\tau)</annotation></semantics></math>R(τ)
+    : Return from an arbitrary trajectory. To take this quantity and use it to calculate
+    the expected return, we need to multiply it by the probability of each possible
+    trajectory. -<math><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>τ</mi><mo
+    separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">P(\tau;\theta)</annotation></semantics></math>P(τ;θ)
+    : Probability of each possible trajectory<math><semantics><mrow><mi>τ</mi></mrow><annotation
+    encoding="application/x-tex">\tau</annotation></semantics></math>τ (that probability
+    depends on<math><semantics><mrow><mi>θ</mi></mrow> <annotation encoding="application/x-tex">\theta</annotation></semantics></math>θ
+    since it defines the policy that it uses to select the actions of the trajectory
+    which has an impact of the states visited).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Probability](../Images/4b4baebaf1b080cb2852e25cd8686dec.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '-<math><semantics><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">J(\theta)</annotation></semantics></math>J(θ)
+    : Expected return, we calculate it by summing for all trajectories, the probability
+    of taking that trajectory given<math><semantics><mrow><mi>θ</mi></mrow><annotation
+    encoding="application/x-tex">\theta</annotation></semantics></math> θ multiplied
+    by the return of this trajectory.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our objective then is to maximize the expected cumulative reward by finding
+    the<math><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+    θ that will output the best action probability distributions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Max objective](../Images/31ba87d76bb37e63c67651a76498624b.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Gradient Ascent and the Policy-gradient Theorem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Policy-gradient is an optimization problem: we want to find the values of<math><semantics><mrow><mi>θ</mi></mrow><annotation
+    encoding="application/x-tex">\theta</annotation></semantics></math>θ that maximize
+    our objective function<math><semantics><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">J(\theta)</annotation></semantics></math>J(θ),
+    so we need to use **gradient-ascent**. It’s the inverse of *gradient-descent*
+    since it gives the direction of the steepest increase of<math><semantics><mrow><mi>J</mi><mo
+    stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">J(\theta)</annotation></semantics></math>J(θ).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: (If you need a refresher on the difference between gradient descent and gradient
+    ascent [check this](https://www.baeldung.com/cs/gradient-descent-vs-ascent) and
+    [this](https://stats.stackexchange.com/questions/258721/gradient-ascent-vs-gradient-descent-in-logistic-regression)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our update step for gradient-ascent is: <math><semantics><mrow><mi>θ</mi><mo>←</mo><mi>θ</mi><mo>+</mo><mi>α</mi><mo>∗</mo><msub><mi
+    mathvariant="normal">∇</mi><mi>θ</mi></msub><mi>J</mi><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">\theta
+    \leftarrow \theta + \alpha * \nabla_\theta J(\theta)</annotation></semantics></math>
+    θ←θ+α∗∇θ​J(θ)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can repeatedly apply this update in the hopes that<math><semantics><mrow><mi>θ</mi></mrow><annotation
+    encoding="application/x-tex">\theta</annotation></semantics></math> θ converges
+    to the value that maximizes<math><semantics><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">J(\theta)</annotation></semantics></math>J(θ).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'However, there are two problems with computing the derivative of<math><semantics><mrow><mi>J</mi><mo
+    stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">J(\theta)</annotation></semantics></math>J(θ):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can’t calculate the true gradient of the objective function since it requires
+    calculating the probability of each possible trajectory, which is computationally
+    super expensive. So we want to **calculate a gradient estimation with a sample-based
+    estimate (collect some trajectories)**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We have another problem that I explain in the next optional section. To differentiate
+    this objective function, we need to differentiate the state distribution, called
+    the Markov Decision Process dynamics. This is attached to the environment. It
+    gives us the probability of the environment going into the next state, given the
+    current state and the action taken by the agent. The problem is that we can’t
+    differentiate it because we might not know about it.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Probability](../Images/4b4baebaf1b080cb2852e25cd8686dec.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Fortunately we’re going to use a solution called the Policy Gradient Theorem
+    that will help us to reformulate the objective function into a differentiable
+    function that does not involve the differentiation of the state distribution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Policy Gradient](../Images/5a9b6c1a3ee9cf5b0e888fb819446af5.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: If you want to understand how we derive this formula for approximating the gradient,
+    check out the next (optional) section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Reinforce algorithm (Monte Carlo Reinforce)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Reinforce algorithm, also called Monte-Carlo policy-gradient, is a policy-gradient
+    algorithm that **uses an estimated return from an entire episode to update the
+    policy parameter** <math><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math>θ:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In a loop:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the policy<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub></mrow><annotation
+    encoding="application/x-tex">\pi_\theta</annotation></semantics></math>πθ​ to
+    collect an episode<math><semantics><mrow><mi>τ</mi></mrow><annotation encoding="application/x-tex">\tau</annotation></semantics></math>τ
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use the episode to estimate the gradient<math><semantics><mrow><mover accent="true"><mi>g</mi><mo>^</mo></mover><mo>=</mo><msub><mi
+    mathvariant="normal">∇</mi><mi>θ</mi></msub><mi>J</mi><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\hat{g}
+    = \nabla_\theta J(\theta)</annotation></semantics></math>g^​=∇θ​J(θ)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Policy Gradient](../Images/e23396a1ff30adf8f68d0df9a6cbd339.png)'
+  prefs:
+  - PREF_IND
+  type: TYPE_IMG
+- en: Update the weights of the policy:<math><semantics><mrow><mi>θ</mi><mo>←</mo><mi>θ</mi><mo>+</mo><mi>α</mi><mover
+    accent="true"><mi>g</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\theta
+    \leftarrow \theta + \alpha \hat{g}</annotation></semantics></math>θ←θ+αg^​
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We can interpret this update as follows: -<math><semantics><mrow><msub><mi
+    mathvariant="normal">∇</mi><mi>θ</mi></msub><mi>l</mi><mi>o</mi><mi>g</mi><msub><mi>π</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>a</mi><mi>t</mi></msub><mi mathvariant="normal">∣</mi><msub><mi>s</mi><mi>t</mi></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\nabla_\theta
+    log \pi_\theta(a_t|s_t)</annotation></semantics></math>∇θ​logπθ​(at​∣st​) is the
+    direction of **steepest increase of the (log) probability** of selecting action
+    at from state st. This tells us **how we should change the weights of policy**
+    if we want to increase/decrease the log probability of selecting action<math><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">a_t</annotation></semantics></math>at​ at state<math><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">s_t</annotation></semantics></math>st​. -<math><semantics><mrow><mi>R</mi><mo
+    stretchy="false">(</mo><mi>τ</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">R(\tau)</annotation></semantics></math>R(τ): is the
+    scoring function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the return is high, it will **push up the probabilities** of the (state,
+    action) combinations.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Otherwise, if the return is low, it will **push down the probabilities** of
+    the (state, action) combinations.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We can also **collect multiple episodes (trajectories)** to estimate the gradient:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Policy Gradient](../Images/327a4c57d46079088dd2af66d56e830d.png)'
+  prefs: []
+  type: TYPE_IMG

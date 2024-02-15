@@ -1,0 +1,574 @@
+- en: Hands-on
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit7/hands-on](https://huggingface.co/learn/deep-rl-course/unit7/hands-on)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/73.479e6272.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/CodeBlock.a6d3f852.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now that you learned the basics of multi-agents, you’re ready to train your
+    first agents in a multi-agent system: **a 2vs2 soccer team that needs to beat
+    the opponent team**.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: And you’re going to participate in AI vs. AI challenges where your trained agent
+    will compete against other classmates’ **agents every day and be ranked on a new
+    leaderboard.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: To validate this hands-on for the certification process, you just need to push
+    a trained model. There **are no minimal results to attain to validate it.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more information about the certification process, check this section 👉 [https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This hands-on will be different since to get correct results **you need to
+    train your agents from 4 hours to 8 hours**. And given the risk of timeout in
+    Colab, we advise you to train on your computer. You don’t need a supercomputer:
+    a simple laptop is good enough for this exercise.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s get started! 🔥
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is AI vs. AI?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: AI vs. AI is an open-source tool we developed at Hugging Face to compete agents
+    on the Hub against one another in a multi-agent setting. These models are then
+    ranked in a leaderboard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The idea of this tool is to have a robust evaluation tool: **by evaluating
+    your agent with a lot of others, you’ll get a good idea of the quality of your
+    policy.**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'More precisely, AI vs. AI is three tools:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A *matchmaking process* defining the matches (which model against which) and
+    running the model fights using a background task in the Space.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'A *leaderboard* getting the match history results and displaying the models’
+    ELO ratings: [https://huggingface.co/spaces/huggingface-projects/AIvsAI-SoccerTwos](https://huggingface.co/spaces/huggingface-projects/AIvsAI-SoccerTwos)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'A *Space demo* to visualize your agents playing against others: [https://huggingface.co/spaces/unity/ML-Agents-SoccerTwos](https://huggingface.co/spaces/unity/ML-Agents-SoccerTwos)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'In addition to these three tools, your classmate cyllum created a 🤗 SoccerTwos
+    Challenge Analytics where you can check the detailed match results of a model:
+    [https://huggingface.co/spaces/cyllum/soccertwos-analytics](https://huggingface.co/spaces/cyllum/soccertwos-analytics)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We’re [wrote a blog post to explain this AI vs. AI tool in detail](https://huggingface.co/blog/aivsai),
+    but to give you the big picture it works this way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every four hours, our algorithm **fetches all the available models for a given
+    environment (in our case ML-Agents-SoccerTwos).**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It creates a **queue of matches with the matchmaking algorithm.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We simulate the match in a Unity headless process and **gather the match result**
+    (1 if the first model won, 0.5 if it’s a draw, 0 if the second model won) in a
+    Dataset.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Then, when all matches from the matches queue are done, **we update the ELO
+    score for each model and update the leaderboard.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Competition Rules
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'This first AI vs. AI competition **is an experiment**: the goal is to improve
+    the tool in the future with your feedback. So some **breakups can happen during
+    the challenge**. But don’t worry **all the results are saved in a dataset so we
+    can always restart the calculation correctly without losing information**.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In order for your model to get correctly evaluated against others you need
+    to follow these rules:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**You can’t change the observation space or action space of the agent.** By
+    doing that your model will not work during evaluation.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: You **can’t use a custom trainer for now,** you need to use the Unity MLAgents
+    ones.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We provide executables to train your agents. You can also use the Unity Editor
+    if you prefer **, but to avoid bugs, we advise that you use our executables**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What will make the difference during this challenge are **the hyperparameters
+    you choose**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’re constantly trying to improve our tutorials, so **if you find some issues
+    in this notebook**, please [open an issue on the GitHub Repo](https://github.com/huggingface/deep-rl-class/issues).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Chat with your classmates, share advice and ask questions on Discord
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We created a new channel called `ai-vs-ai-challenge` to exchange advice and
+    ask questions.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you didn’t join the discord server yet, you can [join here](https://discord.gg/ydHrjt3WP5)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Step 0: Install MLAgents and download the correct executable'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We advise you to use [conda](https://docs.conda.io/en/latest/) as a package
+    manager and create a new environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With conda, we create a new environment called rl with **Python 3.10.12**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: To be able to train our agents correctly and push to the Hub, we need to install
+    ML-Agents
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: When the cloning is done (it takes 2.63 GB), we go inside the repository and
+    install the package
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, you need to install git-lfs: [https://git-lfs.com/](https://git-lfs.com/)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that it’s installed, we need to add the environment training executable.
+    Based on your operating system you need to download one of them, unzip it and
+    place it in a new folder inside `ml-agents` that you call `training-envs-executables`
+  prefs: []
+  type: TYPE_NORMAL
+- en: At the end your executable should be in `ml-agents/training-envs-executables/SoccerTwos`
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Windows: Download [this executable](https://drive.google.com/file/d/1sqFxbEdTMubjVktnV4C6ICjp89wLhUcP/view?usp=sharing)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Linux (Ubuntu): Download [this executable](https://drive.google.com/file/d/1KuqBKYiXiIcU4kNMqEzhgypuFP5_45CL/view?usp=sharing)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Mac: Download [this executable](https://drive.google.com/drive/folders/1h7YB0qwjoxxghApQdEUQmk95ZwIDxrPG?usp=share_link)
+    ⚠ For Mac you need also to call this `xattr -cr training-envs-executables/SoccerTwos/SoccerTwos.app`
+    to be able to run SoccerTwos'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 1: Understand the environment'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The environment is called `SoccerTwos`. The Unity MLAgents Team made it. You
+    can find its documentation [here](https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Learning-Environment-Examples.md#soccer-twos)
+  prefs: []
+  type: TYPE_NORMAL
+- en: The goal in this environment **is to get the ball into the opponent’s goal while
+    preventing the ball from entering your own goal.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![SoccerTwos](../Images/b8d7d800c316a50a5f64472742088b73.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: This environment was made by the [Unity MLAgents Team](https://github.com/Unity-Technologies/ml-agents)
+  prefs: []
+  type: TYPE_NORMAL
+- en: The reward function
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The reward function is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![SoccerTwos Reward](../Images/236ec2816e80441049618048e60a2b89.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: The observation space
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The observation space is composed of vectors of size 336:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 11 ray-casts forward distributed over 120 degrees (264 state dimensions)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 3 ray-casts backward distributed over 90 degrees (72 state dimensions)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Both of these ray-casts can detect 6 objects:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Ball
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Blue Goal
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Purple Goal
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Wall
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Blue Agent
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Purple Agent
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The action space
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The action space is three discrete branches:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![SoccerTwos Action](../Images/8afca8f83c98b99eae38b8072b97e32c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Step 2: Understand MA-POCA'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We know how to train agents to play against others: **we can use self-play.**
+    This is a perfect technique for a 1vs1.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: But in our case we’re 2vs2, and each team has 2 agents. How then can we **train
+    cooperative behavior for groups of agents?**
+  prefs: []
+  type: TYPE_NORMAL
+- en: As explained in the [Unity Blog](https://blog.unity.com/technology/ml-agents-v20-release-now-supports-training-complex-cooperative-behaviors),
+    agents typically receive a reward as a group (+1 - penalty) when the team scores
+    a goal. This implies that **every agent on the team is rewarded even if each agent
+    didn’t contribute the same to the win**, which makes it difficult to learn what
+    to do independently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Unity MLAgents team developed the solution in a new multi-agent trainer
+    called *MA-POCA (Multi-Agent POsthumous Credit Assignment)*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The idea is simple but powerful: a centralized critic **processes the states
+    of all agents in the team to estimate how well each agent is doing**. Think of
+    this critic as a coach.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This allows each agent to **make decisions based only on what it perceives locally**,
+    and **simultaneously evaluate how good its behavior is in the context of the whole
+    group**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![MA POCA](../Images/7ad7814daeea1597757fe72e8d0ff01a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'This illustrates MA-POCA’s centralized learning and decentralized execution.
+    Source: [MLAgents Plays Dodgeball](https://blog.unity.com/technology/ml-agents-plays-dodgeball)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The solution then is to use Self-Play with an MA-POCA trainer (called poca).
+    The poca trainer will help us to train cooperative behavior and self-play to win
+    against an opponent team.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to dive deeper into this MA-POCA algorithm, you need to read the
+    paper they published [here](https://arxiv.org/pdf/2111.05992.pdf) and the sources
+    we put on the additional readings section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 3: Define the config file'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We already learned in [Unit 5](https://huggingface.co/deep-rl-course/unit5/introduction)
+    that in ML-Agents, you define **the training hyperparameters in `config.yaml`
+    files.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are multiple hyperparameters. To understand them better, you should read
+    the explanations for each of them in **[the documentation](https://github.com/Unity-Technologies/ml-agents/blob/release_20_docs/docs/Training-Configuration-File.md)**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The config file we’re going to use here is in `./config/poca/SoccerTwos.yaml`.
+    It looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Compared to Pyramids or SnowballTarget, we have new hyperparameters with a self-play
+    part. How you modify them can be critical in getting good results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The advice I can give you here is to check the explanation and recommended value
+    for each parameters (especially self-play ones) against **[the documentation](https://github.com/Unity-Technologies/ml-agents/blob/release_20_docs/docs/Training-Configuration-File.md).**
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that you’ve modified our config file, you’re ready to train your agents.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 4: Start the training'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To train the agents, we need to **launch mlagents-learn and select the executable
+    containing the environment.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We define four parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`mlagents-learn <config>`: the path where the hyperparameter config file is.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`-env`: where the environment executable is.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`-run_id`: the name you want to give to your training run id.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`-no-graphics`: to not launch the visualization during the training.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Depending on your hardware, 5M timesteps (the recommended value, but you can
+    also try 10M) will take 5 to 8 hours of training. You can continue using your
+    computer in the meantime, but I advise deactivating the computer standby mode
+    to prevent the training from being stopped.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Depending on the executable you use (windows, ubuntu, mac) the training command
+    will look like this (your executable path can be different so don’t hesitate to
+    check before running).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The executable contains 8 copies of SoccerTwos.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ⚠️ It’s normal if you don’t see a big increase of ELO score (and even a decrease
+    below 1200) before 2M timesteps, since your agents will spend most of their time
+    moving randomly on the field before being able to goal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ⚠️ You can stop the training with Ctrl + C but beware of typing this command
+    only once to stop the training since MLAgents needs to generate a final .onnx
+    file before closing the run.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 5: Push the agent to the Hugging Face Hub'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we trained our agents, we’re **ready to push them to the Hub to be
+    able to participate in the AI vs. AI challenge and visualize them playing on your
+    browser🔥.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To be able to share your model with the community, there are three more steps
+    to follow:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1️⃣ (If it’s not already done) create an account to HF ➡ [https://huggingface.co/join](https://huggingface.co/join)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 2️⃣ Sign in and store your authentication token from the Hugging Face website.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a new token ([https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) **with
+    write role**
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Create HF Token](../Images/d21a97c736edaab9119d2d1c1da9deac.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Copy the token, run this, and paste the token
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then, we need to run `mlagents-push-to-hf`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'And we define four parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-run-id`: the name of the training run id.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`-local-dir`: where the agent was saved, it’s results/<run_id name>, so in
+    my case results/First Training.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`-repo-id`: the name of the Hugging Face repo you want to create or update.
+    It’s always <your huggingface username>/<the repo name> If the repo does not exist
+    **it will be created automatically**'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`--commit-message`: since HF repos are git repositories you need to give a
+    commit message.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In my case
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If everything worked you should see this at the end of the process (but with
+    a different url 😆) :'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Your model is pushed to the Hub. You can view your model here: [https://huggingface.co/ThomasSimonini/poca-SoccerTwos](https://huggingface.co/ThomasSimonini/poca-SoccerTwos)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s the link to your model. It contains a model card that explains how to use
+    it, your Tensorboard, and your config file. **What’s awesome is that it’s a git
+    repository, which means you can have different commits, update your repository
+    with a new push, etc.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 6: Verify that your model is ready for AI vs AI Challenge'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that your model is pushed to the Hub, **it’s going to be added automatically
+    to the AI vs AI Challenge model pool.** It can take a little bit of time before
+    your model is added to the leaderboard given we do a run of matches every 4h.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But to ensure that everything works perfectly you need to check:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'That you have this tag in your model: ML-Agents-SoccerTwos. This is the tag
+    we use to select models to be added to the challenge pool. To do that go to your
+    model and check the tags'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Verify](../Images/f293f2ed5fa03cd6a2cd77086f6200a5.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: If it’s not the case you just need to modify the readme and add it
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Verify](../Images/9cec0da6fa3195c208f23e9300898d7e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: That you have a `SoccerTwos.onnx` file
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Verify](../Images/99478ac1cd0c73aef674a98bc5457f48.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: We strongly suggest that you create a new model when you push to the Hub if
+    you want to train it again or train a new version.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Step 7: Visualize some match in our demo'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Now that your model is part of AI vs AI Challenge, **you can visualize how
+    good it is compared to others**: [https://huggingface.co/spaces/unity/ML-Agents-SoccerTwos](https://huggingface.co/spaces/unity/ML-Agents-SoccerTwos)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In order to do that, you just need to go to this demo:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Select your model as team blue (or team purple if you prefer) and another model
+    to compete against. The best opponents to compare your model to are either whoever
+    is on top of the leaderboard or the [baseline model](https://huggingface.co/unity/MLAgents-SoccerTwos)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The matches you see live are not used in the calculation of your result **but
+    they are a good way to visualize how good your agent is**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'And don’t hesitate to share the best score your agent gets on discord in the
+    #rl-i-made-this channel 🔥'
+  prefs: []
+  type: TYPE_NORMAL

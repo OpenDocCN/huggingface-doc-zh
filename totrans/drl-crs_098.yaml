@@ -1,0 +1,193 @@
+- en: Introducing the Clipped Surrogate Objective Function
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/learn/deep-rl-course/unit8/clipped-surrogate-objective](https://huggingface.co/learn/deep-rl-course/unit8/clipped-surrogate-objective)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/deep-rl-course/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/start.c0547f01.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/scheduler.37c15a92.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/singletons.b4cd11ef.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.18351ede.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/paths.3cd722f3.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/entry/app.41e0adab.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/index.7cb9c9b8.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/0.b906e680.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/nodes/80.fe898113.js">
+    <link rel="modulepreload" href="/docs/deep-rl-course/main/en/_app/immutable/chunks/Heading.d3928e2a.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Recap: The Policy Objective Function'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s remember what the objective is to optimize in Reinforce:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Reinforce](../Images/3ea9a018889b4f5f31f0194f43f0595c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: The idea was that by taking a gradient ascent step on this function (equivalent
+    to taking gradient descent of the negative of this function), we would **push
+    our agent to take actions that lead to higher rewards and avoid harmful actions.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'However, the problem comes from the step size:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Too small, **the training process was too slow**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Too high, **there was too much variability in the training**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: With PPO, the idea is to constrain our policy update with a new objective function
+    called the *Clipped surrogate objective function* that **will constrain the policy
+    change in a small range using a clip.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This new function **is designed to avoid destructively large weights updates**
+    :'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![PPO surrogate function](../Images/bd42a48549cf230c618200f1b3512d6e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Let’s study each part to understand how it works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Ratio Function
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '![Ratio](../Images/10170b8c578faa2b06caa171526c06aa.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'This ratio is calculated as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Ratio](../Images/ec4562b6e26c0b68f44d7fa0c50254c8.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: It’s the probability of taking action<math><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">a_t</annotation></semantics></math> at​
+    at state<math><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow> <annotation
+    encoding="application/x-tex">s_t</annotation></semantics></math> st​ in the current
+    policy, divided by the same for the previous policy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As we can see,<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">r_t(\theta)</annotation></semantics></math>
+    rt​(θ) denotes the probability ratio between the current and old policy:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo><mo>></mo><mn>1</mn></mrow> <annotation encoding="application/x-tex">r_t(\theta)
+    > 1</annotation></semantics></math> rt​(θ)>1, the **action<math><semantics><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow>
+    <annotation encoding="application/x-tex">a_t</annotation></semantics></math> at​
+    at state<math><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow> <annotation
+    encoding="application/x-tex">s_t</annotation></semantics></math> st​ is more likely
+    in the current policy than the old policy.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">r_t(\theta)</annotation></semantics></math>
+    rt​(θ) is between 0 and 1, the **action is less likely for the current policy
+    than for the old one**.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: So this probability ratio is an **easy way to estimate the divergence between
+    old and current policy.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: The unclipped part of the Clipped Surrogate Objective function
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '![PPO](../Images/00c0cdc7880db7501dbb213c1490b249.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'This ratio **can replace the log probability we use in the policy objective
+    function**. This gives us the left part of the new objective function: multiplying
+    the ratio by the advantage.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![PPO](../Images/f43eb6cfc9c7ae8d1931c818bfc24184.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[Proximal Policy Optimization Algorithms](https://arxiv.org/pdf/1707.06347.pdf)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, without a constraint, if the action taken is much more probable in
+    our current policy than in our former, **this would lead to a significant policy
+    gradient step** and, therefore, an **excessive policy update.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: The clipped Part of the Clipped Surrogate Objective function
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '![PPO](../Images/581016b29c8a3fc730cba20795499167.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Consequently, we need to constrain this objective function by penalizing changes
+    that lead to a ratio far away from 1 (in the paper, the ratio can only vary from
+    0.8 to 1.2).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**By clipping the ratio, we ensure that we do not have a too large policy update
+    because the current policy can’t be too different from the older one.**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To do that, we have two solutions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*TRPO (Trust Region Policy Optimization)* uses KL divergence constraints outside
+    the objective function to constrain the policy update. But this method **is complicated
+    to implement and takes more computation time.**'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*PPO* clip probability ratio directly in the objective function with its **Clipped
+    surrogate objective function.**'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![PPO](../Images/581016b29c8a3fc730cba20795499167.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: This clipped part is a version where<math><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo
+    stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow> <annotation
+    encoding="application/x-tex">r_t(\theta)</annotation></semantics></math> rt​(θ)
+    is clipped between <math><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>−</mo><mi>ϵ</mi><mo
+    separator="true">,</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mo stretchy="false">]</mo></mrow>
+    <annotation encoding="application/x-tex">[1 - \epsilon, 1 + \epsilon]</annotation></semantics></math>
+    [1−ϵ,1+ϵ].
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the Clipped Surrogate Objective function, we have two probability ratios,
+    one non-clipped and one clipped in a range between <math><semantics><mrow><mo
+    stretchy="false">[</mo><mn>1</mn><mo>−</mo><mi>ϵ</mi><mo separator="true">,</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mo
+    stretchy="false">]</mo></mrow> <annotation encoding="application/x-tex">[1 - \epsilon,
+    1 + \epsilon]</annotation></semantics></math> [1−ϵ,1+ϵ], epsilon is a hyperparameter
+    that helps us to define this clip range (in the paper <math><semantics><mrow><mi>ϵ</mi><mo>=</mo><mn>0.2</mn></mrow>
+    <annotation encoding="application/x-tex">\epsilon = 0.2</annotation></semantics></math>
+    ϵ=0.2.).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Then, we take the minimum of the clipped and non-clipped objective, **so the
+    final objective is a lower bound (pessimistic bound) of the unclipped objective.**
+  prefs: []
+  type: TYPE_NORMAL
+- en: Taking the minimum of the clipped and non-clipped objective means **we’ll select
+    either the clipped or the non-clipped objective based on the ratio and advantage
+    situation**.
+  prefs: []
+  type: TYPE_NORMAL
