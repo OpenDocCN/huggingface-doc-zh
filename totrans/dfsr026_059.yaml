@@ -1,36 +1,27 @@
 - en: Stable Diffusion XL
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/sdxl](https://huggingface.co/docs/diffusers/training/sdxl)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This script is experimental, and it’s easy to overfit and run into issues like
     catastrophic forgetting. Try exploring different hyperparameters to get the best
     results on your dataset.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: '[Stable Diffusion XL (SDXL)](https://hf.co/papers/2307.01952) is a larger and
     more powerful iteration of the Stable Diffusion model, capable of producing higher
     resolution images.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: SDXL’s UNet is 3x larger and the model adds a second text encoder to the architecture.
@@ -40,57 +31,77 @@
     `mixed_precision`, and `gradient_accumulation_steps`. You can reduce your memory-usage
     even more by enabling memory-efficient attention with [xFormers](../optimization/xformers)
     and using [bitsandbytes’](https://github.com/TimDettmers/bitsandbytes) 8-bit optimizer.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: This guide will explore the [train_text_to_image_sdxl.py](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_sdxl.py)
     training script to help you become more familiar with it, and how you can adapt
     it for your own use-case.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: 'Before running the script, make sure you install the library from source:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then navigate to the example folder containing the training script and install
     the required dependencies for the script you’re using:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 🤗 Accelerate is a library for helping you train on multiple GPUs/TPUs or with
     mixed-precision. It’ll automatically configure your training setup based on your
     hardware and environment. Take a look at the 🤗 Accelerate [Quick tour](https://huggingface.co/docs/accelerate/quicktour)
     to learn more.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: 'Initialize an 🤗 Accelerate environment:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To setup a default 🤗 Accelerate environment without choosing any configurations:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Or if your environment doesn’t support an interactive shell, like a notebook,
     you can use:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Lastly, if you want to train a model on your own dataset, take a look at the
     [Create a dataset for training](create_dataset) guide to learn how to create a
     dataset that works with the training script.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: Script parameters
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -99,6 +110,7 @@
     in detail. If you’re interested in learning more, feel free to read through the
     [script](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_sdxl.py)
     and let us know if you have any questions or concerns.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: The training script provides many parameters to help you customize your training
@@ -106,53 +118,66 @@
     function. This function provides default values for each parameter, such as the
     training batch size and learning rate, but you can also set your own values in
     the training command if you’d like.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: 'For example, to speedup training with mixed precision using the bf16 format,
     add the `--mixed_precision` parameter to the training command:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Most of the parameters are identical to the parameters in the [Text-to-image](text2image#script-parameters)
     training guide, so you’ll focus on the parameters that are relevant to training
     SDXL in this guide.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '`--pretrained_vae_model_name_or_path`: path to a pretrained VAE; the SDXL VAE
     is known to suffer from numerical instability, so this parameter allows you to
     specify a better [VAE](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix)'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--proportion_empty_prompts`: the proportion of image prompts to replace with
     empty strings'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--timestep_bias_strategy`: where (earlier vs. later) in the timestep to apply
     a bias, which can encourage the model to either learn low or high frequency details'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--timestep_bias_multiplier`: the weight of the bias to apply to the timestep'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--timestep_bias_begin`: the timestep to begin applying the bias'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--timestep_bias_end`: the timestep to end applying the bias'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--timestep_bias_portion`: the proportion of timesteps to apply the bias to'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Min-SNR weighting
+  id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -161,21 +186,27 @@
     training script supports predicting either `epsilon` (noise) or `v_prediction`,
     but Min-SNR is compatible with both prediction types. This weighting strategy
     is only supported by PyTorch and is unavailable in the Flax training script.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: 'Add the `--snr_gamma` parameter and set it to the recommended value of 5.0:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Training script
+  id: totrans-36
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: The training script is also similar to the [Text-to-image](text2image#training-script)
     training guide, but it’s been modified to support SDXL training. This guide will
     focus on the code that is unique to the SDXL training script.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
 - en: It starts by creating functions to [tokenize the prompts](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L478)
@@ -183,53 +214,69 @@
     [VAE](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L519).
     Next, you’ll a function to [generate the timesteps weights](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L531)
     depending on the number of timesteps and the timestep bias strategy to apply.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
 - en: 'Within the [`main()`](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L572)
     function, in addition to loading a tokenizer, the script loads a second tokenizer
     and text encoder because the SDXL architecture uses two of each:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: The [prompt and image embeddings](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L857)
     are computed first and kept in memory, which isn’t typically an issue for a smaller
     dataset, but for larger datasets it can lead to memory problems. If this is the
     case, you should save the pre-computed embeddings to disk separately and load
     them into memory during the training process (see this [PR](https://github.com/huggingface/diffusers/pull/4505)
     for more discussion about this topic).
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'After calculating the embeddings, the text encoder, VAE, and tokenizer are
     deleted to free up some memory:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Finally, the [training loop](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L943)
     takes care of the rest. If you chose to apply a timestep bias strategy, you’ll
     see the timestep weights are calculated and added as noise:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: If you want to learn more about how the training loop works, check out the [Understanding
     pipelines, models and schedulers](../using-diffusers/write_own_pipeline) tutorial
     which breaks down the basic pattern of the denoising process.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
 - en: Launch the script
+  id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Once you’ve made all your changes or you’re okay with the default configuration,
     you’re ready to launch the training script! 🚀
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
 - en: Let’s train on the [Pokémon BLIP captions](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)
@@ -237,44 +284,63 @@
     and `DATASET_NAME` to the model and the dataset (either from the Hub or a local
     path). You should also specify a VAE other than the SDXL VAE (either from the
     Hub or a local path) with `VAE_NAME` to avoid numerical instabilities.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: To monitor training progress with Weights & Biases, add the `--report_to=wandb`
     parameter to the training command. You’ll also need to add the `--validation_prompt`
     and `--validation_epochs` to the training command to keep track of results. This
     can be really useful for debugging the model and viewing intermediate results.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用Weights＆Biases监控训练进度，将`--report_to=wandb`参数添加到训练命令中。您还需要将`--validation_prompt`和`--validation_epochs`添加到训练命令中以跟踪结果。这对于调试模型和查看中间结果非常有用。
 - en: '[PRE11]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: After you’ve finished training, you can use your newly trained SDXL model for
     inference!
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用新训练的SDXL模型进行推断！
 - en: PyTorchPyTorch XLA
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorchPyTorch XLA
 - en: '[PRE12]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Next steps
+  id: totrans-56
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'Congratulations on training a SDXL model! To learn more about how to use your
     new model, the following guides may be helpful:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 祝贺您训练了一个SDXL模型！要了解如何使用您的新模型，以下指南可能会有所帮助：
 - en: Read the [Stable Diffusion XL](../using-diffusers/sdxl) guide to learn how to
     use it for a variety of different tasks (text-to-image, image-to-image, inpainting),
     how to use it’s refiner model, and the different types of micro-conditionings.
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 阅读[Stable Diffusion XL](../using-diffusers/sdxl)指南，了解如何将其用于各种不同任务（文本到图像，图像到图像，修复），如何使用其细化器模型以及不同类型的微调。
 - en: Check out the [DreamBooth](dreambooth) and [LoRA](lora) training guides to learn
     how to train a personalized SDXL model with just a few example images. These two
     training techniques can even be combined!
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 查看[DreamBooth](dreambooth)和[LoRA](lora)培训指南，了解如何仅使用几个示例图像训练个性化的SDXL模型。这两种训练技术甚至可以结合使用！
