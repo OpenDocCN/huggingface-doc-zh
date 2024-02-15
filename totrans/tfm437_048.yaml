@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: LLM提示指南
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/prompting](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/prompting)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/prompting](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/prompting)
 - en: null
   id: totrans-2
   prefs: []
@@ -21,6 +23,7 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 像Falcon、LLaMA等大型语言模型是预训练的变压器模型，最初训练用于预测给定一些输入文本的下一个标记。它们通常具有数十亿个参数，并且已经在长时间内训练了数万亿个标记。因此，这些模型变得非常强大和多功能，您可以通过用自然语言提示指导模型来解决多个NLP任务。
 - en: Designing such prompts to ensure the optimal output is often called “prompt
     engineering”. Prompt engineering is an iterative process that requires a fair
     amount of experimentation. Natural languages are much more flexible and expressive
@@ -30,37 +33,44 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 设计这样的提示以确保最佳输出通常被称为“提示工程”。提示工程是一个需要大量实验的迭代过程。自然语言比编程语言更加灵活和表达丰富，但也可能引入一些歧义。同时，自然语言中的提示对变化非常敏感。即使提示中进行轻微修改也可能导致截然不同的输出。
 - en: While there is no exact recipe for creating prompts to match all cases, researchers
     have worked out a number of best practices that help to achieve optimal results
     more consistently.
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然没有确切的配方可以创建适用于所有情况的提示，但研究人员已经制定出一些最佳实践，有助于更一致地实现最佳结果。
 - en: 'This guide covers the prompt engineering best practices to help you craft better
     LLM prompts and solve various NLP tasks. You’ll learn:'
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南涵盖了提示工程的最佳实践，以帮助您制作更好的LLM提示并解决各种NLP任务。您将学到：
 - en: '[Basics of prompting](#basic-prompts)'
   id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[提示的基础知识](#basic-prompts)'
 - en: '[Best practices of LLM prompting](#best-practices-of-llm-prompting)'
   id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[LLM提示的最佳实践](#best-practices-of-llm-prompting)'
 - en: '[Advanced prompting techniques: few-shot prompting and chain-of-thought](#advanced-prompting-techniques)'
   id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[高级提示技术：少样本提示和思维链](#advanced-prompting-techniques)'
 - en: '[When to fine-tune instead of prompting](#prompting-vs-fine-tuning)'
   id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[何时进行微调而不是提示](#prompting-vs-fine-tuning)'
 - en: 'Prompt engineering is only a part of the LLM output optimization process. Another
     essential component is choosing the optimal text generation strategy. You can
     customize how your LLM selects each of the subsequent tokens when generating the
@@ -71,26 +81,31 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示工程仅是LLM输出优化过程的一部分。另一个重要组成部分是选择最佳的文本生成策略。您可以自定义LLM在生成文本时如何选择每个后续标记，而无需修改任何可训练参数。通过调整文本生成参数，您可以减少生成文本中的重复，并使其更连贯和更具人类声音。文本生成策略和参数超出了本指南的范围，但您可以在以下指南中了解更多相关主题：
 - en: '[Generation with LLMs](../llm_tutorial)'
   id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[使用LLM进行生成](../llm_tutorial)'
 - en: '[Text generation strategies](../generation_strategies)'
   id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[文本生成策略](../generation_strategies)'
 - en: Basics of prompting
   id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 提示的基础知识
 - en: Types of models
   id: totrans-15
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 模型类型
 - en: 'The majority of modern LLMs are decoder-only transformers. Some examples include:
     [LLaMA](../model_doc/llama), [Llama2](../model_doc/llama2), [Falcon](../model_doc/falcon),
     [GPT2](../model_doc/gpt2). However, you may encounter encoder-decoder transformer
@@ -98,21 +113,26 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 现代LLM大多数是仅解码器的变压器。一些例子包括：[LLaMA](../model_doc/llama), [Llama2](../model_doc/llama2),
+    [Falcon](../model_doc/falcon), [GPT2](../model_doc/gpt2)。但是，您也可能遇到编码器-解码器变压器LLM，例如[Flan-T5](../model_doc/flan-t5)和[BART](../model_doc/bart)。
 - en: Encoder-decoder-style models are typically used in generative tasks where the
     output **heavily** relies on the input, for example, in translation and summarization.
     The decoder-only models are used for all other types of generative tasks.
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 编码器-解码器风格的模型通常用于生成任务，其中输出**严重**依赖于输入，例如翻译和总结。解码器模型用于所有其他类型的生成任务。
 - en: When using a pipeline to generate text with an LLM, it’s important to know what
     type of LLM you are using, because they use different pipelines.
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用管道生成LLM文本时，了解您正在使用的LLM类型很重要，因为它们使用不同的管道。
 - en: 'Run inference with decoder-only models with the `text-generation` pipeline:'
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`text-generation`管道运行仅解码器模型的推理：
 - en: '[PRE0]'
   id: totrans-20
   prefs: []
@@ -122,6 +142,7 @@
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用编码器-解码器进行推理，请使用`text2text-generation`管道：
 - en: '[PRE1]'
   id: totrans-22
   prefs: []
@@ -132,12 +153,15 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 基础版 vs 指导/聊天版模型
 - en: 'Most of the recent LLM checkpoints available on 🤗 Hub come in two versions:
     base and instruct (or chat). For example, [`tiiuae/falcon-7b`](https://huggingface.co/tiiuae/falcon-7b)
     and [`tiiuae/falcon-7b-instruct`](https://huggingface.co/tiiuae/falcon-7b-instruct).'
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Hub上提供的大多数最新LLM检查点都有两个版本：基础版和指导版（或聊天版）。例如，[`tiiuae/falcon-7b`](https://huggingface.co/tiiuae/falcon-7b)
+    和 [`tiiuae/falcon-7b-instruct`](https://huggingface.co/tiiuae/falcon-7b-instruct)。
 - en: Base models are excellent at completing the text when given an initial prompt,
     however, they are not ideal for NLP tasks where they need to follow instructions,
     or for conversational use. This is where the instruct (chat) versions come in.
@@ -147,20 +171,24 @@
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 基础模型在给定初始提示时完成文本的能力非常出色，但是它们并不适合需要遵循指令或用于对话的NLP任务。这就是指导（聊天）版本的用武之地。这些检查点是在预训练基础版本上进一步微调指令和对话数据的结果。这种额外的微调使它们成为许多NLP任务的更好选择。
 - en: Let’s illustrate some simple prompts that you can use with [`tiiuae/falcon-7b-instruct`](https://huggingface.co/tiiuae/falcon-7b-instruct)
     to solve some common NLP tasks.
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们举例说明一些简单的提示，您可以使用[`tiiuae/falcon-7b-instruct`](https://huggingface.co/tiiuae/falcon-7b-instruct)来解决一些常见的NLP任务。
 - en: NLP tasks
   id: totrans-27
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 自然语言处理任务
 - en: 'First, let’s set up the environment:'
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，让我们设置环境：
 - en: '[PRE2]'
   id: totrans-29
   prefs: []
@@ -170,6 +198,7 @@
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们使用适当的管道（`"text-generation"`）加载模型：
 - en: '[PRE3]'
   id: totrans-31
   prefs: []
@@ -181,16 +210,19 @@
   id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，Falcon模型是使用`bfloat16`数据类型训练的，因此我们建议您也使用相同的数据类型。这需要一个最新版本的CUDA，并且在现代显卡上效果最佳。
 - en: Now that we have the model loaded via the pipeline, let’s explore how you can
     use prompts to solve NLP tasks.
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们已经通过管道加载了模型，让我们探讨如何使用提示来解决NLP任务。
 - en: Text classification
   id: totrans-34
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 文本分类
 - en: 'One of the most common forms of text classification is sentiment analysis,
     which assigns a label like “positive”, “negative”, or “neutral” to a sequence
     of text. Let’s write a prompt that instructs the model to classify a given text
@@ -200,6 +232,8 @@
   id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 文本分类中最常见的形式之一是情感分析，它为一段文本分配一个标签，比如“积极”、“消极”或“中性”。让我们编写一个提示，指示模型对给定的文本（电影评论）进行分类。我们将从给出指令开始，然后指定要分类的文本。请注意，我们不仅仅止步于此，还添加了响应的开头
+    - `"情感："`：
 - en: '[PRE4]'
   id: totrans-36
   prefs: []
@@ -210,6 +244,7 @@
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，输出包含了我们在指令中提供的列表中的一个分类标签，而且是正确的！
 - en: You may notice that in addition to the prompt, we pass a `max_new_tokens` parameter.
     It controls the number of tokens the model shall generate, and it is one of the
     many text generation parameters that you can learn about in [Text generation strategies](../generation_strategies)
@@ -217,11 +252,13 @@
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能注意到，除了提示之外，我们还传递了一个`max_new_tokens`参数。它控制模型应该生成的标记数量，这是您可以在[文本生成策略](../generation_strategies)指南中了解的许多文本生成参数之一。
 - en: Named Entity Recognition
   id: totrans-39
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 命名实体识别
 - en: 'Named Entity Recognition (NER) is a task of finding named entities in a piece
     of text, such as a person, location, or organization. Let’s modify the instructions
     in the prompt to make the LLM perform this task. Here, let’s also set `return_full_text
@@ -229,6 +266,8 @@
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 命名实体识别（NER）是在文本中找到命名实体的任务，比如人物、地点或组织。让我们修改提示中的指令，让LLM执行这个任务。在这里，我们还设置`return_full_text
+    = False`，这样输出就不包含提示了：
 - en: '[PRE5]'
   id: totrans-41
   prefs: []
@@ -239,11 +278,13 @@
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，模型正确识别了给定文本中的两个命名实体。
 - en: Translation
   id: totrans-43
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 翻译
 - en: 'Another task LLMs can perform is translation. You can choose to use encoder-decoder
     models for this task, however, here, for the simplicity of the examples, we’ll
     keep using Falcon-7b-instruct, which does a decent job. Once again, here’s how
@@ -252,6 +293,7 @@
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: LLM可以执行的另一个任务是翻译。您可以选择使用编码器-解码器模型来执行此任务，但是在这里，为了简化示例，我们将继续使用Falcon-7b-instruct，它做得相当不错。再次，这是您如何编写一个基本提示，指示模型将一段文本从英语翻译成意大利语：
 - en: '[PRE6]'
   id: totrans-45
   prefs: []
@@ -262,11 +304,13 @@
   id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们添加了`do_sample=True`和`top_k=10`，以允许模型在生成输出时更加灵活。
 - en: Text summarization
   id: totrans-47
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 文本摘要
 - en: Similar to the translation, text summarization is another generative task where
     the output **heavily** relies on the input, and encoder-decoder models can be
     a better choice. However, decoder-style models can be used for this task as well.
@@ -276,6 +320,7 @@
   id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 与翻译类似，文本摘要是另一个生成任务，输出**严重**依赖于输入，编码器-解码器模型可能是更好的选择。然而，解码器风格的模型也可以用于这个任务。以前，我们将指令放在提示的开头。然而，提示的最后也可以是一个合适的位置来放置指令。通常，最好将指令放在两端之一。
 - en: '[PRE7]'
   id: totrans-49
   prefs: []
@@ -286,12 +331,14 @@
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 问答
 - en: 'For question answering task we can structure the prompt into the following
     logical components: instructions, context, question, and the leading word or phrase
     (`"Answer:"`) to nudge the model to start generating the answer:'
   id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于问答任务，我们可以将提示结构化为以下逻辑组件：指令、上下文、问题和引导词或短语（`"Answer:"`），以促使模型开始生成答案：
 - en: '[PRE8]'
   id: totrans-52
   prefs: []
@@ -302,16 +349,19 @@
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 推理
 - en: Reasoning is one of the most difficult tasks for LLMs, and achieving good results
     often requires applying advanced prompting techniques, like [Chain-of-though](#chain-of-thought).
   id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 推理是LLM中最困难的任务之一，要取得良好的结果通常需要应用高级提示技术，比如[思维链](#chain-of-thought)。
 - en: 'Let’s try if we can make a model reason about a simple arithmetics task with
     a basic prompt:'
   id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们尝试看看我们是否可以让模型通过一个基本提示来推理一个简单的算术任务：
 - en: '[PRE9]'
   id: totrans-56
   prefs: []
@@ -322,6 +372,7 @@
   id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 正确！让我们稍微增加一点复杂性，看看我们是否仍然可以通过一个基本提示来完成：
 - en: '[PRE10]'
   id: totrans-58
   prefs: []
