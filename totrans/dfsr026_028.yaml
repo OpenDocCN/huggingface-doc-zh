@@ -1,0 +1,657 @@
+- en: Inpainting
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/inpaint](https://huggingface.co/docs/diffusers/using-diffusers/inpaint)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/172.394d328f.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/HfOption.fc88c804.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/stores.aa51e67d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inpainting replaces or edits specific areas of an image. This makes it a useful
+    tool for image restoration like removing defects and artifacts, or even replacing
+    an image area with something entirely new. Inpainting relies on a mask to determine
+    which regions of an image to fill in; the area to inpaint is represented by white
+    pixels and the area to keep is represented by black pixels. The white pixels are
+    filled in by the prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With 🤗 Diffusers, here is how you can do inpainting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load an inpainting checkpoint with the [AutoPipelineForInpainting](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForInpainting)
+    class. This’ll automatically detect the appropriate pipeline class to load based
+    on the checkpoint:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll notice throughout the guide, we use [enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
+    and [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline.enable_xformers_memory_efficient_attention),
+    to save memory and increase inference speed. If you’re using PyTorch 2.0, it’s
+    not necessary to call [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline.enable_xformers_memory_efficient_attention)
+    on your pipeline because it’ll already be using PyTorch 2.0’s native [scaled-dot
+    product attention](../optimization/torch2.0#scaled-dot-product-attention).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load the base and mask images:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Create a prompt to inpaint the image with and pass it to the pipeline with
+    the base and mask images:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/e54493b4e03ab58931aa2b35535a314d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: base image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/50397365c167c77e28b112edb22eb879.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: mask image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/53b76ec0efb1b6851d4c8b23347a3f52.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generated image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a mask image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Throughout this guide, the mask image is provided in all of the code examples
+    for convenience. You can inpaint on your own images, but you’ll need to create
+    a mask image for it. Use the Space below to easily create a mask image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Upload a base image to inpaint on and use the sketch tool to draw a mask. Once
+    you’re done, click **Run** to generate and download the mask image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://stevhliu-inpaint-mask-maker.hf.space](https://stevhliu-inpaint-mask-maker.hf.space)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mask blur
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `~VaeImageProcessor.blur` method provides an option for how to blend the
+    original image and inpaint area. The amount of blur is determined by the `blur_factor`
+    parameter. Increasing the `blur_factor` increases the amount of blur applied to
+    the mask edges, softening the transition between the original image and inpaint
+    area. A low or zero `blur_factor` preserves the sharper edges of the mask.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To use this, create a blurred mask with the image processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/bd4255378e4be6f2da63ef7b2951ac46.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: mask with no blur
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/8a2ec7820a1b085328cbab8c7625a7d0.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: mask with blur applied
+  prefs: []
+  type: TYPE_NORMAL
+- en: Popular models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Stable Diffusion Inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting),
+    [Stable Diffusion XL (SDXL) Inpainting](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1),
+    and [Kandinsky 2.2 Inpainting](https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder-inpaint)
+    are among the most popular models for inpainting. SDXL typically produces higher
+    resolution images than Stable Diffusion v1.5, and Kandinsky 2.2 is also capable
+    of generating high-quality images.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stable Diffusion Inpainting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Stable Diffusion Inpainting is a latent diffusion model finetuned on 512x512
+    images on inpainting. It is a good starting point because it is relatively fast
+    and generates good quality images. To use this model for inpainting, you’ll need
+    to pass a prompt, base and mask image to the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Stable Diffusion XL (SDXL) Inpainting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: SDXL is a larger and more powerful version of Stable Diffusion v1.5\. This model
+    can follow a two-stage model process (though each model can also be used alone);
+    the base model generates an image, and a refiner model takes that image and further
+    enhances its details and quality. Take a look at the [SDXL](sdxl) guide for a
+    more comprehensive guide on how to use SDXL and configure it’s parameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Kandinsky 2.2 Inpainting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Kandinsky model family is similar to SDXL because it uses two models as
+    well; the image prior model creates image embeddings, and the diffusion model
+    generates images from them. You can load the image prior and diffusion model separately,
+    but the easiest way to use Kandinsky 2.2 is to load it into the [AutoPipelineForInpainting](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForInpainting)
+    class which uses the [KandinskyV22InpaintCombinedPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22InpaintCombinedPipeline)
+    under the hood.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/e54493b4e03ab58931aa2b35535a314d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: base image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/09fbce513beddef5b655c0a444a3c86c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Stable Diffusion Inpainting
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/2489c89cec0d33d1acc14b3011bf03c9.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Stable Diffusion XL Inpainting
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/44c50c30f2c0b8b5adb606ae538dbb54.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Kandinsky 2.2 Inpainting
+  prefs: []
+  type: TYPE_NORMAL
+- en: Non-inpaint specific checkpoints
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: So far, this guide has used inpaint specific checkpoints such as [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting).
+    But you can also use regular checkpoints like [runwayml/stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5).
+    Let’s compare the results of the two checkpoints.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The image on the left is generated from a regular checkpoint, and the image
+    on the right is from an inpaint checkpoint. You’ll immediately notice the image
+    on the left is not as clean, and you can still see the outline of the area the
+    model is supposed to inpaint. The image on the right is much cleaner and the inpainted
+    area appears more natural.
+  prefs: []
+  type: TYPE_NORMAL
+- en: runwayml/stable-diffusion-v1-5runwayml/stable-diffusion-inpainting
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/5a890789342f9e1a86868211a7896271.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: runwayml/stable-diffusion-v1-5
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/aecbb44542e32cda8ce2bb2da3d692e3.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: runwayml/stable-diffusion-inpainting
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, for more basic tasks like erasing an object from an image (like the
+    rocks in the road for example), a regular checkpoint yields pretty good results.
+    There isn’t as noticeable of difference between the regular and inpaint checkpoint.
+  prefs: []
+  type: TYPE_NORMAL
+- en: runwayml/stable-diffusion-v1-5runwayml/stable-diffusion-inpaint
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/f49798dfa50ce8a7c46fe18a6da38589.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: runwayml/stable-diffusion-v1-5
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/c59fac74bc905b0800d717d2ce675c20.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: runwayml/stable-diffusion-inpainting
+  prefs: []
+  type: TYPE_NORMAL
+- en: The trade-off of using a non-inpaint specific checkpoint is the overall image
+    quality may be lower, but it generally tends to preserve the mask area (that is
+    why you can see the mask outline). The inpaint specific checkpoints are intentionally
+    trained to generate higher quality inpainted images, and that includes creating
+    a more natural transition between the masked and unmasked areas. As a result,
+    these checkpoints are more likely to change your unmasked area.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If preserving the unmasked area is important for your task, you can use the
+    `VaeImageProcessor.apply_overlay` method to force the unmasked area of an image
+    to remain the same at the expense of some more unnatural transitions between the
+    masked and unmasked areas.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Configure pipeline parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Image features - like quality and “creativity” - are dependent on pipeline parameters.
+    Knowing what these parameters do is important for getting the results you want.
+    Let’s take a look at the most important parameters and see how changing them affects
+    the output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Strength
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`strength` is a measure of how much noise is added to the base image, which
+    influences how similar the output is to the base image.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 📈 a high `strength` value means more noise is added to an image and the denoising
+    process takes longer, but you’ll get higher quality images that are more different
+    from the base image
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 📉 a low `strength` value means less noise is added to an image and the denoising
+    process is faster, but the image quality may not be as great and the generated
+    image resembles the base image more
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/39f952b5e61ce473b5fc8dab92c18466.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: strength = 0.6
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/ba1cef420a7d6632e8dad96029906868.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: strength = 0.8
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/b42b3e014dc563c0005c55a35f02fba9.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: strength = 1.0
+  prefs: []
+  type: TYPE_NORMAL
+- en: Guidance scale
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`guidance_scale` affects how aligned the text prompt and generated image are.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 📈 a high `guidance_scale` value means the prompt and generated image are closely
+    aligned, so the output is a stricter interpretation of the prompt
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 📉 a low `guidance_scale` value means the prompt and generated image are more
+    loosely aligned, so the output may be more varied from the prompt
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can use `strength` and `guidance_scale` together for more control over how
+    expressive the model is. For example, a combination high `strength` and `guidance_scale`
+    values gives the model the most creative freedom.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/363406b3094071baef896b0e11a247cb.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: guidance_scale = 2.5
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/0d10a98f98590aa92471ef3aabf758c6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: guidance_scale = 7.5
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/e32bf623e4fd55de7bce1266f480fffb.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: guidance_scale = 12.5
+  prefs: []
+  type: TYPE_NORMAL
+- en: Negative prompt
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A negative prompt assumes the opposite role of a prompt; it guides the model
+    away from generating certain things in an image. This is useful for quickly improving
+    image quality and preventing the model from generating things you don’t want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/a9e6a070339236ad42e15252d8be37a7.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: negative_prompt = "bad architecture, unstable, poor details, blurry"
+  prefs: []
+  type: TYPE_NORMAL
+- en: Padding mask crop
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A method for increasing the inpainting image quality is to use the [`padding_mask_crop`](https://huggingface.co/docs/diffusers/v0.25.0/en/api/pipelines/stable_diffusion/inpaint#diffusers.StableDiffusionInpaintPipeline.__call__.padding_mask_crop)
+    parameter. When enabled, this option crops the masked area with some user-specified
+    padding and it’ll also crop the same area from the original image. Both the image
+    and mask are upscaled to a higher resolution for inpainting, and then overlaid
+    on the original image. This is a quick and easy way to improve image quality without
+    using a separate pipeline like [StableDiffusionUpscalePipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Add the `padding_mask_crop` parameter to the pipeline call and set it to the
+    desired padding value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/1770d17f089e4087ecdf844bc2f75ad6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: default inpaint image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/f4ef40443043de12e889be5caf4c9289.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: inpaint image with `padding_mask_crop` enabled
+  prefs: []
+  type: TYPE_NORMAL
+- en: Chained inpainting pipelines
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[AutoPipelineForInpainting](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForInpainting)
+    can be chained with other 🤗 Diffusers pipelines to edit their outputs. This is
+    often useful for improving the output quality from your other diffusion pipelines,
+    and if you’re using multiple pipelines, it can be more memory-efficient to chain
+    them together to keep the outputs in latent space and reuse the same pipeline
+    components.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text-to-image-to-inpaint
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Chaining a text-to-image and inpainting pipeline allows you to inpaint the generated
+    image, and you don’t have to provide a base image to begin with. This makes it
+    convenient to edit your favorite text-to-image outputs without having to generate
+    an entirely new image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start with the text-to-image pipeline to create a castle:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load the mask image of the output from above:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And let’s inpaint the masked area with a waterfall:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/2cc5fc0f54d60ce54294305f4a65f5b2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: text-to-image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/b685c42746dfa11241d879c1e331fac2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: inpaint
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inpaint-to-image-to-image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can also chain an inpainting pipeline before another pipeline like image-to-image
+    or an upscaler to improve the quality.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Begin by inpainting an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now let’s pass the image to another inpainting pipeline with SDXL’s refiner
+    model to enhance the image details and quality:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is important to specify `output_type="latent"` in the pipeline to keep all
+    the outputs in latent space to avoid an unnecessary decode-encode step. This only
+    works if the chained pipelines are using the same VAE. For example, in the [Text-to-image-to-inpaint](#text-to-image-to-inpaint)
+    section, Kandinsky 2.2 uses a different VAE class than the Stable Diffusion model
+    so it won’t work. But if you use Stable Diffusion v1.5 for both pipelines, then
+    you can keep everything in latent space because they both use [AutoencoderKL](/docs/diffusers/v0.26.3/en/api/models/autoencoderkl#diffusers.AutoencoderKL).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, you can pass this image to an image-to-image pipeline to put the finishing
+    touches on it. It is more efficient to use the [from_pipe()](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForImage2Image.from_pipe)
+    method to reuse the existing pipeline components, and avoid unnecessarily loading
+    all the pipeline components into memory again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/e54493b4e03ab58931aa2b35535a314d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: initial image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/5fec6ffc8bfc87edf18dd2bfa1e68bb5.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: inpaint
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/ba2bb2403b87d4b1fb495bae370dc1c4.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: image-to-image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image-to-image and inpainting are actually very similar tasks. Image-to-image
+    generates a new image that resembles the existing provided image. Inpainting does
+    the same thing, but it only transforms the image area defined by the mask and
+    the rest of the image is unchanged. You can think of inpainting as a more precise
+    tool for making specific changes and image-to-image has a broader scope for making
+    more sweeping changes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Control image generation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Getting an image to look exactly the way you want is challenging because the
+    denoising process is random. While you can control certain aspects of generation
+    by configuring parameters like `negative_prompt`, there are better and more efficient
+    methods for controlling image generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prompt weighting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Prompt weighting provides a quantifiable way to scale the representation of
+    concepts in a prompt. You can use it to increase or decrease the magnitude of
+    the text embedding vector for each concept in the prompt, which subsequently determines
+    how much of each concept is generated. The [Compel](https://github.com/damian0815/compel)
+    library offers an intuitive syntax for scaling the prompt weights and generating
+    the embeddings. Learn how to create the embeddings in the [Prompt weighting](../using-diffusers/weighted_prompts)
+    guide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once you’ve generated the embeddings, pass them to the `prompt_embeds` (and
+    `negative_prompt_embeds` if you’re using a negative prompt) parameter in the [AutoPipelineForInpainting](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForInpainting).
+    The embeddings replace the `prompt` parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: ControlNet
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: ControlNet models are used with other diffusion models like Stable Diffusion,
+    and they provide an even more flexible and accurate way to control how an image
+    is generated. A ControlNet accepts an additional conditioning image input that
+    guides the diffusion model to preserve the features in it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, let’s condition an image with a ControlNet pretrained on inpaint
+    images:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now generate an image from the base, mask and control images. You’ll notice
+    features of the base image are strongly preserved in the generated image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can take this a step further and chain it with an image-to-image pipeline
+    to apply a new [style](https://huggingface.co/nitrosocke/elden-ring-diffusion):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/e54493b4e03ab58931aa2b35535a314d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: initial image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/916b854bd12a25f80f4e9acf9e6601b6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: ControlNet inpaint
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/a9594334cac8c0320fd63c03f321d2de.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: image-to-image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Optimize
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: It can be difficult and slow to run diffusion models if you’re resource constrained,
+    but it doesn’t have to be with a few optimization tricks. One of the biggest (and
+    easiest) optimizations you can enable is switching to memory-efficient attention.
+    If you’re using PyTorch 2.0, [scaled-dot product attention](../optimization/torch2.0#scaled-dot-product-attention)
+    is automatically enabled and you don’t need to do anything else. For non-PyTorch
+    2.0 users, you can install and use [xFormers](../optimization/xformers)’s implementation
+    of memory-efficient attention. Both options reduce memory usage and accelerate
+    inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also offload the model to the CPU to save even more memory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To speed-up your inference code even more, use [`torch_compile`](../optimization/torch2.0#torchcompile).
+    You should wrap `torch.compile` around the most intensive component in the pipeline
+    which is typically the UNet:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Learn more in the [Reduce memory usage](../optimization/memory) and [Torch 2.0](../optimization/torch2.0)
+    guides.
+  prefs: []
+  type: TYPE_NORMAL

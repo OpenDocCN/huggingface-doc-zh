@@ -1,0 +1,544 @@
+- en: Evaluating Diffusion Models
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/conceptual/evaluation](https://huggingface.co/docs/diffusers/conceptual/evaluation)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/116.94d6cae8.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/evaluation.ipynb)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Evaluation of generative models like [Stable Diffusion](https://huggingface.co/docs/diffusers/stable_diffusion)
+    is subjective in nature. But as practitioners and researchers, we often have to
+    make careful choices amongst many different possibilities. So, when working with
+    different generative models (like GANs, Diffusion, etc.), how do we choose one
+    over the other?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Qualitative evaluation of such models can be error-prone and might incorrectly
+    influence a decision. However, quantitative metrics don’t necessarily correspond
+    to image quality. So, usually, a combination of both qualitative and quantitative
+    evaluations provides a stronger signal when choosing one model over the other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this document, we provide a non-exhaustive overview of qualitative and quantitative
+    methods to evaluate Diffusion models. For quantitative methods, we specifically
+    focus on how to implement them alongside `diffusers`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The methods shown in this document can also be used to evaluate different [noise
+    schedulers](https://huggingface.co/docs/diffusers/main/en/api/schedulers/overview)
+    keeping the underlying generation model fixed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scenarios
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We cover Diffusion models with the following pipelines:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text-guided image generation (such as the [`StableDiffusionPipeline`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/text2img)).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Text-guided image generation, additionally conditioned on an input image (such
+    as the [`StableDiffusionImg2ImgPipeline`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/img2img)
+    and [`StableDiffusionInstructPix2PixPipeline`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/pix2pix)).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Class-conditioned image generation models (such as the [`DiTPipeline`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/dit)).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Qualitative Evaluation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Qualitative evaluation typically involves human assessment of generated images.
+    Quality is measured across aspects such as compositionality, image-text alignment,
+    and spatial relations. Common prompts provide a degree of uniformity for subjective
+    metrics. DrawBench and PartiPrompts are prompt datasets used for qualitative benchmarking.
+    DrawBench and PartiPrompts were introduced by [Imagen](https://imagen.research.google/)
+    and [Parti](https://parti.research.google/) respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'From the [official Parti website](https://parti.research.google/):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PartiPrompts (P2) is a rich set of over 1600 prompts in English that we release
+    as part of this work. P2 can be used to measure model capabilities across various
+    categories and challenge aspects.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: '![parti-prompts](../Images/a33baa9f457f5cb38b2e24aaacf3265c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'PartiPrompts has the following columns:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prompt
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Category of the prompt (such as “Abstract”, “World Knowledge”, etc.)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Challenge reflecting the difficulty (such as “Basic”, “Complex”, “Writing &
+    Symbols”, etc.)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These benchmarks allow for side-by-side human evaluation of different image
+    generation models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For this, the 🧨 Diffusers team has built **Open Parti Prompts**, which is a
+    community-driven qualitative benchmark based on Parti Prompts to compare state-of-the-art
+    open-source diffusion models:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Open Parti Prompts Game](https://huggingface.co/spaces/OpenGenAI/open-parti-prompts):
+    For 10 parti prompts, 4 generated images are shown and the user selects the image
+    that suits the prompt best.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Open Parti Prompts Leaderboard](https://huggingface.co/spaces/OpenGenAI/parti-prompts-leaderboard):
+    The leaderboard comparing the currently best open-sourced diffusion models to
+    each other.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To manually compare images, let’s see how we can use `diffusers` on a couple
+    of PartiPrompts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Below we show some prompts sampled across different challenges: Basic, Complex,
+    Linguistic Structures, Imagination, and Writing & Symbols. Here we are using PartiPrompts
+    as a [dataset](https://huggingface.co/datasets/nateraw/parti-prompts).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we can use these prompts to generate some images using Stable Diffusion
+    ([v1-4 checkpoint](https://huggingface.co/CompVis/stable-diffusion-v1-4)):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![parti-prompts-14](../Images/bee6f1ffad12dea358f2f7f0b461f9a4.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'We can also set `num_images_per_prompt` accordingly to compare different images
+    for the same prompt. Running the same pipeline but with a different checkpoint
+    ([v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5)), yields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![parti-prompts-15](../Images/8809682b839cee78ffe96b7e472b1f04.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Once several images are generated from all the prompts using multiple models
+    (under evaluation), these results are presented to human evaluators for scoring.
+    For more details on the DrawBench and PartiPrompts benchmarks, refer to their
+    respective papers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is useful to look at some inference samples while a model is training to
+    measure the training progress. In our [training scripts](https://github.com/huggingface/diffusers/tree/main/examples/),
+    we support this utility with additional support for logging to TensorBoard and
+    Weights & Biases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quantitative Evaluation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In this section, we will walk you through how to evaluate three different diffusion
+    pipelines using:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CLIP score
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CLIP directional similarity
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: FID
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Text-guided image generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[CLIP score](https://arxiv.org/abs/2104.08718) measures the compatibility of
+    image-caption pairs. Higher CLIP scores imply higher compatibility 🔼. The CLIP
+    score is a quantitative measurement of the qualitative concept “compatibility”.
+    Image-caption pair compatibility can also be thought of as the semantic similarity
+    between the image and the caption. CLIP score was found to have high correlation
+    with human judgement.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s first load a [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Generate some images with multiple prompts:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: And then, we calculate the CLIP score.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the above example, we generated one image per prompt. If we generated multiple
+    images per prompt, we would have to take the average score from the generated
+    images per prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now, if we wanted to compare two checkpoints compatible with the [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)
+    we should pass a generator while calling the pipeline. First, we generate images
+    with a fixed seed with the [v1-4 Stable Diffusion checkpoint](https://huggingface.co/CompVis/stable-diffusion-v1-4):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then we load the [v1-5 checkpoint](https://huggingface.co/runwayml/stable-diffusion-v1-5)
+    to generate images:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And finally, we compare their CLIP scores:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: It seems like the [v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5)
+    checkpoint performs better than its predecessor. Note, however, that the number
+    of prompts we used to compute the CLIP scores is quite low. For a more practical
+    evaluation, this number should be way higher, and the prompts should be diverse.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By construction, there are some limitations in this score. The captions in the
+    training dataset were crawled from the web and extracted from `alt` and similar
+    tags associated an image on the internet. They are not necessarily representative
+    of what a human being would use to describe an image. Hence we had to “engineer”
+    some prompts here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image-conditioned text-to-image generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In this case, we condition the generation pipeline with an input image as well
+    as a text prompt. Let’s take the [StableDiffusionInstructPix2PixPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/pix2pix#diffusers.StableDiffusionInstructPix2PixPipeline),
+    as an example. It takes an edit instruction as an input prompt and an input image
+    to be edited.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is one example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![edit-instruction](../Images/dd654c9963d1e235d32cfd4a6a4ce36b.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: One strategy to evaluate such a model is to measure the consistency of the change
+    between the two images (in [CLIP](https://huggingface.co/docs/transformers/model_doc/clip)
+    space) with the change between the two image captions (as shown in [CLIP-Guided
+    Domain Adaptation of Image Generators](https://arxiv.org/abs/2108.00946)). This
+    is referred to as the ”**CLIP directional similarity**“.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Caption 1 corresponds to the input image (image 1) that is to be edited.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Caption 2 corresponds to the edited image (image 2). It should reflect the edit
+    instruction.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Following is a pictorial overview:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![edit-consistency](../Images/4246d7a1ea8f4bbc62b049bedecedc25.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: We have prepared a mini dataset to implement this metric. Let’s first load the
+    dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here we have:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input` is a caption corresponding to the `image`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`edit` denotes the edit instruction.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`output` denotes the modified caption reflecting the `edit` instruction.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s take a look at a sample.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And here is the image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![edit-dataset](../Images/d57605cd3c5d841cf20ff0af193b5321.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: We will first edit the images of our dataset with the edit instruction and compute
+    the directional similarity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s first load the [StableDiffusionInstructPix2PixPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/pix2pix#diffusers.StableDiffusionInstructPix2PixPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, we perform the edits:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To measure the directional similarity, we first load CLIP’s image and text
+    encoders:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Notice that we are using a particular CLIP checkpoint, i.e., `openai/clip-vit-large-patch14`.
+    This is because the Stable Diffusion pre-training was performed with this CLIP
+    variant. For more details, refer to the [documentation](https://huggingface.co/docs/transformers/model_doc/clip).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, we prepare a PyTorch `nn.Module` to compute directional similarity:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s put `DirectionalSimilarity` to use now.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Like the CLIP Score, the higher the CLIP directional similarity, the better
+    it is.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It should be noted that the `StableDiffusionInstructPix2PixPipeline` exposes
+    two arguments, namely, `image_guidance_scale` and `guidance_scale` that let you
+    control the quality of the final edited image. We encourage you to experiment
+    with these two arguments and see the impact of that on the directional similarity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can extend the idea of this metric to measure how similar the original image
+    and edited version are. To do that, we can just do `F.cosine_similarity(img_feat_two,
+    img_feat_one)`. For these kinds of edits, we would still want the primary semantics
+    of the images to be preserved as much as possible, i.e., a high similarity score.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can use these metrics for similar pipelines such as the [`StableDiffusionPix2PixZeroPipeline`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/pix2pix_zero#diffusers.StableDiffusionPix2PixZeroPipeline).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both CLIP score and CLIP direction similarity rely on the CLIP model, which
+    can make the evaluations biased.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '***Extending metrics like IS, FID (discussed later), or KID can be difficult***
+    when the model under evaluation was pre-trained on a large image-captioning dataset
+    (such as the [LAION-5B dataset](https://laion.ai/blog/laion-5b/)). This is because
+    underlying these metrics is an InceptionNet (pre-trained on the ImageNet-1k dataset)
+    used for extracting intermediate image features. The pre-training dataset of Stable
+    Diffusion may have limited overlap with the pre-training dataset of InceptionNet,
+    so it is not a good candidate here for feature extraction.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '***Using the above metrics helps evaluate models that are class-conditioned.
+    For example, [DiT](https://huggingface.co/docs/diffusers/main/en/api/pipelines/dit).
+    It was pre-trained being conditioned on the ImageNet-1k classes.***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Class-conditioned image generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Class-conditioned generative models are usually pre-trained on a class-labeled
+    dataset such as [ImageNet-1k](https://huggingface.co/datasets/imagenet-1k). Popular
+    metrics for evaluating these models include Fréchet Inception Distance (FID),
+    Kernel Inception Distance (KID), and Inception Score (IS). In this document, we
+    focus on FID ([Heusel et al.](https://arxiv.org/abs/1706.08500)). We show how
+    to compute it with the [`DiTPipeline`](https://huggingface.co/docs/diffusers/api/pipelines/dit),
+    which uses the [DiT model](https://arxiv.org/abs/2212.09748) under the hood.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'FID aims to measure how similar are two datasets of images. As per [this resource](https://mmgeneration.readthedocs.io/en/latest/quick_run.html#fid):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fréchet Inception Distance is a measure of similarity between two datasets of
+    images. It was shown to correlate well with the human judgment of visual quality
+    and is most often used to evaluate the quality of samples of Generative Adversarial
+    Networks. FID is calculated by computing the Fréchet distance between two Gaussians
+    fitted to feature representations of the Inception network.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: These two datasets are essentially the dataset of real images and the dataset
+    of fake images (generated images in our case). FID is usually calculated with
+    two large datasets. However, for this document, we will work with two mini datasets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s first download a few images from the ImageNet-1k training set:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'These are 10 images from the following ImageNet-1k classes: “cassette_player”,
+    “chain_saw” (x2), “church”, “gas_pump” (x3), “parachute” (x2), and “tench”.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![real-images](../Images/f9f0dfbeb754ed8d4f547460644fd7bd.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '*Real images.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that the images are loaded, let’s apply some lightweight pre-processing
+    on them to use them for FID calculation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: We now load the [`DiTPipeline`](https://huggingface.co/docs/diffusers/api/pipelines/dit)
+    to generate images conditioned on the above-mentioned classes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, we can compute the FID using [`torchmetrics`](https://torchmetrics.readthedocs.io/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The lower the FID, the better it is. Several things can influence FID here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Number of images (both real and fake)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Randomness induced in the diffusion process
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Number of inference steps in the diffusion process
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The scheduler being used in the diffusion process
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For the last two points, it is, therefore, a good practice to run the evaluation
+    across different seeds and inference steps, and then report an average result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'FID results tend to be fragile as they depend on a lot of factors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The specific Inception model used during computation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The implementation accuracy of the computation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The image format (not the same if we start from PNGs vs JPGs).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Keeping that in mind, FID is often most useful when comparing similar runs,
+    but it is hard to reproduce paper results unless the authors carefully disclose
+    the FID measurement code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These points apply to other related metrics too, such as KID and IS.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a final step, let’s visually inspect the `fake_images`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![fake-images](../Images/d9d2a296bc3c224017b8ff324b7d9c84.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '*Fake images.*'
+  prefs: []
+  type: TYPE_NORMAL

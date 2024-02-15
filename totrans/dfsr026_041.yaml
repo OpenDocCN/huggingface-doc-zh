@@ -1,0 +1,415 @@
+- en: ControlNet
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/controlnet](https://huggingface.co/docs/diffusers/using-diffusers/controlnet)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/162.81f7bd64.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: ControlNet is a type of model for controlling image diffusion models by conditioning
+    the model with an additional input image. There are many types of conditioning
+    inputs (canny edge, user sketching, human pose, depth, and more) you can use to
+    control a diffusion model. This is hugely useful because it affords you greater
+    control over image generation, making it easier to generate specific images without
+    experimenting with different text prompts or denoising values as much.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out Section 3.5 of the [ControlNet](https://huggingface.co/papers/2302.05543)
+    paper v1 for a list of ControlNet implementations on various conditioning inputs.
+    You can find the official Stable Diffusion ControlNet conditioned models on [lllyasviel](https://huggingface.co/lllyasviel)’s
+    Hub profile, and more [community-trained](https://huggingface.co/models?other=stable-diffusion&other=controlnet)
+    ones on the Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For Stable Diffusion XL (SDXL) ControlNet models, you can find them on the 🤗
+    [Diffusers](https://huggingface.co/diffusers) Hub organization, or you can browse
+    [community-trained](https://huggingface.co/models?other=stable-diffusion-xl&other=controlnet)
+    ones on the Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A ControlNet model has two sets of weights (or blocks) connected by a zero-convolution
+    layer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: a *locked copy* keeps everything a large pretrained diffusion model has learned
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a *trainable copy* is trained on the additional conditioning input
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Since the locked copy preserves the pretrained model, training and implementing
+    a ControlNet on a new conditioning input is as fast as finetuning any other model
+    because you aren’t training the model from scratch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will show you how to use ControlNet for text-to-image, image-to-image,
+    inpainting, and more! There are many types of ControlNet conditioning inputs to
+    choose from, but in this guide we’ll only focus on several of them. Feel free
+    to experiment with other conditioning inputs!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have the following libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-to-image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For text-to-image, you normally pass a text prompt to the model. But with ControlNet,
+    you can specify an additional conditioning input. Let’s condition the model with
+    a canny image, a white outline of an image on a black background. This way, the
+    ControlNet can use the canny image as a control to guide the model to generate
+    an image with the same outline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load an image and use the [opencv-python](https://github.com/opencv/opencv-python)
+    library to extract the canny image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/f3d8c311d87a9fa7e106fb97353058b0.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: original image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/58be7817d7057b4931067ef80d28b944.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: canny image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, load a ControlNet model conditioned on canny edge detection and pass it
+    to the [StableDiffusionControlNetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet#diffusers.StableDiffusionControlNetPipeline).
+    Use the faster [UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler)
+    and enable model offloading to speed up inference and reduce memory usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now pass your prompt and canny image to the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/0ae01d64d6dd0f507a15d4c469ccb3ea.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Image-to-image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For image-to-image, you’d typically pass an initial image and a prompt to the
+    pipeline to generate a new image. With ControlNet, you can pass an additional
+    conditioning input to guide the model. Let’s condition the model with a depth
+    map, an image which contains spatial information. This way, the ControlNet can
+    use the depth map as a control to guide the model to generate an image that preserves
+    spatial information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You’ll use the [StableDiffusionControlNetImg2ImgPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet#diffusers.StableDiffusionControlNetImg2ImgPipeline)
+    for this task, which is different from the [StableDiffusionControlNetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet#diffusers.StableDiffusionControlNetPipeline)
+    because it allows you to pass an initial image as the starting point for the image
+    generation process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load an image and use the `depth-estimation` [Pipeline](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)
+    from 🤗 Transformers to extract the depth map of an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, load a ControlNet model conditioned on depth maps and pass it to the [StableDiffusionControlNetImg2ImgPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet#diffusers.StableDiffusionControlNetImg2ImgPipeline).
+    Use the faster [UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler)
+    and enable model offloading to speed up inference and reduce memory usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now pass your prompt, initial image, and depth map to the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/1677a0fe907026354ef7fe3200082c57.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: original image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/5cb27d107bcf2a908b7a2c6086129663.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generated image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inpainting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For inpainting, you need an initial image, a mask image, and a prompt describing
+    what to replace the mask with. ControlNet models allow you to add another control
+    image to condition a model with. Let’s condition the model with an inpainting
+    mask. This way, the ControlNet can use the inpainting mask as a control to guide
+    the model to generate an image within the mask area.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load an initial image and a mask image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Create a function to prepare the control image from the initial and mask images.
+    This’ll create a tensor to mark the pixels in `init_image` as masked if the corresponding
+    pixel in `mask_image` is over a certain threshold.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/0fb83d127798531122cbaf23bb76b7c8.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: original image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/f1431ffd86896d9e2aed5e38fead866b.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: mask image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load a ControlNet model conditioned on inpainting and pass it to the [StableDiffusionControlNetInpaintPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet#diffusers.StableDiffusionControlNetInpaintPipeline).
+    Use the faster [UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler)
+    and enable model offloading to speed up inference and reduce memory usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now pass your prompt, initial image, mask image, and control image to the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/da98e94db90a9c1f480cba2d1ce9fd5a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Guess mode
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Guess mode](https://github.com/lllyasviel/ControlNet/discussions/188) does
+    not require supplying a prompt to a ControlNet at all! This forces the ControlNet
+    encoder to do it’s best to “guess” the contents of the input control map (depth
+    map, pose estimation, canny edge, etc.).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Guess mode adjusts the scale of the output residuals from a ControlNet by a
+    fixed ratio depending on the block depth. The shallowest `DownBlock` corresponds
+    to 0.1, and as the blocks get deeper, the scale increases exponentially such that
+    the scale of the `MidBlock` output becomes 1.0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Guess mode does not have any impact on prompt conditioning and you can still
+    provide a prompt if you want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Set `guess_mode=True` in the pipeline, and it is [recommended](https://github.com/lllyasviel/ControlNet#guess-mode--non-prompt-mode)
+    to set the `guidance_scale` value between 3.0 and 5.0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/a552b1e5d87c2575305045e9d6e5c665.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: regular mode with prompt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/0e47994b983e6afdf574ca4730cc4d14.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: guess mode without prompt
+  prefs: []
+  type: TYPE_NORMAL
+- en: ControlNet with Stable Diffusion XL
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There aren’t too many ControlNet models compatible with Stable Diffusion XL
+    (SDXL) at the moment, but we’ve trained two full-sized ControlNet models for SDXL
+    conditioned on canny edge detection and depth maps. We’re also experimenting with
+    creating smaller versions of these SDXL-compatible ControlNet models so it is
+    easier to run on resource-constrained hardware. You can find these checkpoints
+    on the [🤗 Diffusers Hub organization](https://huggingface.co/diffusers)!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s use a SDXL ControlNet conditioned on canny images to generate an image.
+    Start by loading an image and prepare the canny image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/dfd7f04394323063a78501b85525d2b3.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: original image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/a7144be809b8fc762e76238607a485d2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: canny image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load a SDXL ControlNet model conditioned on canny edge detection and pass it
+    to the [StableDiffusionXLControlNetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet_sdxl#diffusers.StableDiffusionXLControlNetPipeline).
+    You can also enable model offloading to reduce memory usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now pass your prompt (and optionally a negative prompt if you’re using one)
+    and canny image to the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [`controlnet_conditioning_scale`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/controlnet#diffusers.StableDiffusionControlNetPipeline.__call__.controlnet_conditioning_scale)
+    parameter determines how much weight to assign to the conditioning inputs. A value
+    of 0.5 is recommended for good generalization, but feel free to experiment with
+    this number!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/033f4d98632798d409eabe8ebfffc8db.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'You can use [StableDiffusionXLControlNetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet_sdxl#diffusers.StableDiffusionXLControlNetPipeline)
+    in guess mode as well by setting the parameter to `True`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: MultiControlNet
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Replace the SDXL model with a model like [runwayml/stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5)
+    to use multiple conditioning inputs with Stable Diffusion models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can compose multiple ControlNet conditionings from different image inputs
+    to create a *MultiControlNet*. To get better results, it is often helpful to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: mask conditionings such that they don’t overlap (for example, mask the area
+    of a canny image where the pose conditioning is located)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: experiment with the [`controlnet_conditioning_scale`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/controlnet#diffusers.StableDiffusionControlNetPipeline.__call__.controlnet_conditioning_scale)
+    parameter to determine how much weight to assign to each conditioning input
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In this example, you’ll combine a canny image and a human pose estimation image
+    to generate a new image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Prepare the canny image conditioning:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/35bd0f11e1c7ca277ac60a85a75be06a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: original image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/5a37576bad87523fdb8a31aa840b4fdc.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: canny image
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For human pose estimation, install [controlnet_aux](https://github.com/patrickvonplaten/controlnet_aux):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Prepare the human pose estimation conditioning:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/77e2344bf3a8143f50f20ca5d095bf81.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: original image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/5a8432160ffe7c6268d59c8c8d536c20.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: human pose image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load a list of ControlNet models that correspond to each conditioning, and pass
+    them to the [StableDiffusionXLControlNetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet_sdxl#diffusers.StableDiffusionXLControlNetPipeline).
+    Use the faster [UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler)
+    and enable model offloading to reduce memory usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you can pass your prompt (an optional negative prompt if you’re using one),
+    canny image, and pose image to the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/780255e1bc5d49726b432882894f0b81.png)'
+  prefs: []
+  type: TYPE_IMG

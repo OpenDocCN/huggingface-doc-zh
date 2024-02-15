@@ -1,0 +1,403 @@
+- en: Stable Diffusion XL
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/sdxl](https://huggingface.co/docs/diffusers/using-diffusers/sdxl)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/184.21c0cbde.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Stable Diffusion XL](https://huggingface.co/papers/2307.01952) (SDXL) is a
+    powerful text-to-image generation model that iterates on the previous Stable Diffusion
+    models in three key ways:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: the UNet is 3x larger and SDXL combines a second text encoder (OpenCLIP ViT-bigG/14)
+    with the original text encoder to significantly increase the number of parameters
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: introduces size and crop-conditioning to preserve training data from being discarded
+    and gain more control over how a generated image should be cropped
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: introduces a two-stage model process; the *base* model (can also be run as a
+    standalone model) generates an image as an input to the *refiner* model which
+    adds additional high-quality details
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This guide will show you how to use SDXL for text-to-image, image-to-image,
+    and inpainting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have the following libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We recommend installing the [invisible-watermark](https://pypi.org/project/invisible-watermark/)
+    library to help identify images that are generated. If the invisible-watermark
+    library is installed, it is used by default. To disable the watermarker:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load model checkpoints
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Model weights may be stored in separate subfolders on the Hub or locally, in
+    which case, you should use the [from_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.from_pretrained)
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also use the [from_single_file()](/docs/diffusers/v0.26.3/en/api/loaders/single_file#diffusers.loaders.FromSingleFileMixin.from_single_file)
+    method to load a model checkpoint stored in a single file format (`.ckpt` or `.safetensors`)
+    from the Hub or locally:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-to-image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For text-to-image, pass a text prompt. By default, SDXL generates a 1024x1024
+    image for the best results. You can try setting the `height` and `width` parameters
+    to 768x768 or 512x512, but anything below 512x512 is not likely to work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![generated image of an astronaut in a jungle](../Images/47eb848e4e09fd8ca2c920b1f98d089d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Image-to-image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For image-to-image, SDXL works especially well with image sizes between 768x768
+    and 1024x1024\. Pass an initial image, and a text prompt to condition the image
+    with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![generated image of a dog catching a frisbee in a jungle](../Images/55a0d39eaf8bd9f5f77b3d034b991391.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Inpainting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For inpainting, you’ll need the original image and a mask of what you want to
+    replace in the original image. Create a prompt to describe what you want to replace
+    the masked area with.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![generated image of a deep sea diver in a jungle](../Images/1f8afc98a8a746ad39b81d94dcd646d0.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Refine image quality
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'SDXL includes a [refiner model](https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0)
+    specialized in denoising low-noise stage images to generate higher-quality images
+    from the base model. There are two ways to use the refiner:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: use the base and refiner models together to produce a refined image
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: use the base model to produce an image, and subsequently use the refiner model
+    to add more details to the image (this is how SDXL was originally trained)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Base + refiner model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When you use the base and refiner model together to generate an image, this
+    is known as an [*ensemble of expert denoisers*](https://research.nvidia.com/labs/dir/eDiff-I/).
+    The ensemble of expert denoisers approach requires fewer overall denoising steps
+    versus passing the base model’s output to the refiner model, so it should be significantly
+    faster to run. However, you won’t be able to inspect the base model’s output because
+    it still contains a large amount of noise.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As an ensemble of expert denoisers, the base model serves as the expert during
+    the high-noise diffusion stage and the refiner model serves as the expert during
+    the low-noise diffusion stage. Load the base and refiner model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: To use this approach, you need to define the number of timesteps for each model
+    to run through their respective stages. For the base model, this is controlled
+    by the [`denoising_end`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline.__call__.denoising_end)
+    parameter and for the refiner model, it is controlled by the [`denoising_start`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLImg2ImgPipeline.__call__.denoising_start)
+    parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `denoising_end` and `denoising_start` parameters should be a float between
+    0 and 1\. These parameters are represented as a proportion of discrete timesteps
+    as defined by the scheduler. If you’re also using the `strength` parameter, it’ll
+    be ignored because the number of denoising steps is determined by the discrete
+    timesteps the model is trained on and the declared fractional cutoff.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s set `denoising_end=0.8` so the base model performs the first 80% of denoising
+    the **high-noise** timesteps and set `denoising_start=0.8` so the refiner model
+    performs the last 20% of denoising the **low-noise** timesteps. The base model
+    output should be in **latent** space instead of a PIL image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![generated image of a lion on a rock at night](../Images/ef6f87a67e4302925ad70cad452060f0.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: default base model
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![generated image of a lion on a rock at night in higher quality](../Images/33eab9fdb93d52d1ea5ac9c0abb385b9.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: ensemble of expert denoisers
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The refiner model can also be used for inpainting in the [StableDiffusionXLInpaintPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLInpaintPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: This ensemble of expert denoisers method works well for all available schedulers!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Base to refiner model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: SDXL gets a boost in image quality by using the refiner model to add additional
+    high-quality details to the fully-denoised image from the base model, in an image-to-image
+    setting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load the base and refiner models:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Generate an image from the base model, and set the model output to **latent**
+    space:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass the generated image to the refiner model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![generated image of an astronaut riding a green horse on Mars](../Images/80df2aefcda4915968249be118157434.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: base model
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![higher quality generated image of an astronaut riding a green horse on Mars](../Images/e69b90229b2f9360e7773d6580ae6cf1.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: base model + refiner model
+  prefs: []
+  type: TYPE_NORMAL
+- en: For inpainting, load the base and the refiner model in the [StableDiffusionXLInpaintPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLInpaintPipeline),
+    remove the `denoising_end` and `denoising_start` parameters, and choose a smaller
+    number of inference steps for the refiner.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Micro-conditioning
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: SDXL training involves several additional conditioning techniques, which are
+    referred to as *micro-conditioning*. These include original image size, target
+    image size, and cropping parameters. The micro-conditionings can be used at inference
+    time to create high-quality, centered images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can use both micro-conditioning and negative micro-conditioning parameters
+    thanks to classifier-free guidance. They are available in the [StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline),
+    [StableDiffusionXLImg2ImgPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLImg2ImgPipeline),
+    [StableDiffusionXLInpaintPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLInpaintPipeline),
+    and [StableDiffusionXLControlNetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet_sdxl#diffusers.StableDiffusionXLControlNetPipeline).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Size conditioning
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There are two types of size conditioning:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[`original_size`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline.__call__.original_size)
+    conditioning comes from upscaled images in the training batch (because it would
+    be wasteful to discard the smaller images which make up almost 40% of the total
+    training data). This way, SDXL learns that upscaling artifacts are not supposed
+    to be present in high-resolution images. During inference, you can use `original_size`
+    to indicate the original image resolution. Using the default value of `(1024,
+    1024)` produces higher-quality images that resemble the 1024x1024 images in the
+    dataset. If you choose to use a lower resolution, such as `(256, 256)`, the model
+    still generates 1024x1024 images, but they’ll look like the low resolution images
+    (simpler patterns, blurring) in the dataset.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[`target_size`](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline.__call__.target_size)
+    conditioning comes from finetuning SDXL to support different image aspect ratios.
+    During inference, if you use the default value of `(1024, 1024)`, you’ll get an
+    image that resembles the composition of square images in the dataset. We recommend
+    using the same value for `target_size` and `original_size`, but feel free to experiment
+    with other options!'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '🤗 Diffusers also lets you specify negative conditions about an image’s size
+    to steer generation away from certain image resolutions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/eb8daaf025f019bf5475af302cf825d4.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Images negatively conditioned on image resolutions of (128, 128), (256, 256),
+    and (512, 512).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Crop conditioning
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Images generated by previous Stable Diffusion models may sometimes appear to
+    be cropped. This is because images are actually cropped during training so that
+    all the images in a batch have the same size. By conditioning on crop coordinates,
+    SDXL *learns* that no cropping - coordinates `(0, 0)` - usually correlates with
+    centered subjects and complete faces (this is the default value in 🤗 Diffusers).
+    You can experiment with different coordinates if you want to generate off-centered
+    compositions!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![generated image of an astronaut in a jungle, slightly cropped](../Images/f09d2bde8c0bb94924d692c1760dfca3.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'You can also specify negative cropping coordinates to steer generation away
+    from certain cropping parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use a different prompt for each text-encoder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'SDXL uses two text-encoders, so it is possible to pass a different prompt to
+    each text-encoder, which can [improve quality](https://github.com/huggingface/diffusers/issues/4004#issuecomment-1627764201).
+    Pass your original prompt to `prompt` and the second prompt to `prompt_2` (use
+    `negative_prompt` and `negative_prompt_2` if you’re using negative prompts):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![generated image of an astronaut in a jungle in the style of a van gogh painting](../Images/3bd090b79f879a79477c88a713c15375.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: The dual text-encoders also support textual inversion embeddings that need to
+    be loaded separately as explained in the [SDXL textual inversion](textual_inversion_inference#stable-diffusion-xl)
+    section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Optimizations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: SDXL is a large model, and you may need to optimize memory to get it to run
+    on your hardware. Here are some tips to save memory and speed up inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Offload the model to the CPU with [enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
+    for out-of-memory errors:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use `torch.compile` for ~20% speed-up (you need `torch>=2.0`):'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Enable [xFormers](../optimization/xformers) to run SDXL if `torch<2.0`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Other resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’re interested in experimenting with a minimal version of the [UNet2DConditionModel](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.UNet2DConditionModel)
+    used in SDXL, take a look at the [minSDXL](https://github.com/cloneofsimo/minSDXL)
+    implementation which is written in PyTorch and directly compatible with 🤗 Diffusers.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,201 @@
+- en: Wuerstchen
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/training/wuerstchen](https://huggingface.co/docs/diffusers/training/wuerstchen)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/151.c8cc24a6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Wuerstchen](https://hf.co/papers/2306.00637) model drastically reduces
+    computational costs by compressing the latent space by 42x, without compromising
+    image quality and accelerating inference. During training, Wuerstchen uses two
+    models (VQGAN + autoencoder) to compress the latents, and then a third model (text-conditioned
+    latent diffusion model) is conditioned on this highly compressed space to generate
+    an image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To fit the prior model into GPU memory and to speedup training, try enabling
+    `gradient_accumulation_steps`, `gradient_checkpointing`, and `mixed_precision`
+    respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide explores the [train_text_to_image_prior.py](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_prior.py)
+    script to help you become more familiar with it, and how you can adapt it for
+    your own use-case.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before running the script, make sure you install the library from source:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then navigate to the example folder containing the training script and install
+    the required dependencies for the script you’re using:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 🤗 Accelerate is a library for helping you train on multiple GPUs/TPUs or with
+    mixed-precision. It’ll automatically configure your training setup based on your
+    hardware and environment. Take a look at the 🤗 Accelerate [Quick tour](https://huggingface.co/docs/accelerate/quicktour)
+    to learn more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Initialize an 🤗 Accelerate environment:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To setup a default 🤗 Accelerate environment without choosing any configurations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or if your environment doesn’t support an interactive shell, like a notebook,
+    you can use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Lastly, if you want to train a model on your own dataset, take a look at the
+    [Create a dataset for training](create_dataset) guide to learn how to create a
+    dataset that works with the training script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following sections highlight parts of the training scripts that are important
+    for understanding how to modify it, but it doesn’t cover every aspect of the [script](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_prior.py)
+    in detail. If you’re interested in learning more, feel free to read through the
+    scripts and let us know if you have any questions or concerns.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Script parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The training scripts provides many parameters to help you customize your training
+    run. All of the parameters and their descriptions are found in the [`parse_args()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L192)
+    function. It provides default values for each parameter, such as the training
+    batch size and learning rate, but you can also set your own values in the training
+    command if you’d like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, to speedup training with mixed precision using the fp16 format,
+    add the `--mixed_precision` parameter to the training command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Most of the parameters are identical to the parameters in the [Text-to-image](text2image#script-parameters)
+    training guide, so let’s dive right into the Wuerstchen training script!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Training script
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The training script is also similar to the [Text-to-image](text2image#training-script)
+    training guide, but it’s been modified to support Wuerstchen. This guide focuses
+    on the code that is unique to the Wuerstchen training script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [`main()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L441)
+    function starts by initializing the image encoder - an [EfficientNet](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/modeling_efficient_net_encoder.py)
+    - in addition to the usual scheduler and tokenizer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll also load the `WuerstchenPrior` model for optimization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, you’ll apply some [transforms](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L656)
+    to the images and [tokenize](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L637)
+    the captions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, the [training loop](https://github.com/huggingface/diffusers/blob/65ef7a0c5c594b4f84092e328fbdd73183613b30/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L656)
+    handles compressing the images to latent space with the `EfficientNetEncoder`,
+    adding noise to the latents, and predicting the noise residual with the `WuerstchenPrior`
+    model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you want to learn more about how the training loop works, check out the [Understanding
+    pipelines, models and schedulers](../using-diffusers/write_own_pipeline) tutorial
+    which breaks down the basic pattern of the denoising process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Launch the script
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once you’ve made all your changes or you’re okay with the default configuration,
+    you’re ready to launch the training script! 🚀
+  prefs: []
+  type: TYPE_NORMAL
+- en: Set the `DATASET_NAME` environment variable to the dataset name from the Hub.
+    This guide uses the [Pokémon BLIP captions](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)
+    dataset, but you can create and train on your own datasets as well (see the [Create
+    a dataset for training](create_dataset) guide).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To monitor training progress with Weights & Biases, add the `--report_to=wandb`
+    parameter to the training command. You’ll also need to add the `--validation_prompt`
+    to the training command to keep track of results. This can be really useful for
+    debugging the model and viewing intermediate results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once training is complete, you can use your newly trained model for inference!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next steps
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Congratulations on training a Wuerstchen model! To learn more about how to
+    use your new model, the following may be helpful:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at the [Wuerstchen](../api/pipelines/wuerstchen#text-to-image-generation)
+    API documentation to learn more about how to use the pipeline for text-to-image
+    generation and its limitations.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

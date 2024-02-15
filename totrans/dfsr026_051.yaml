@@ -1,0 +1,142 @@
+- en: Stable Video Diffusion
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/svd](https://huggingface.co/docs/diffusers/using-diffusers/svd)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/188.a5a8c928.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Stable Video Diffusion (SVD)](https://huggingface.co/papers/2311.15127) is
+    a powerful image-to-video generation model that can generate 2-4 second high resolution
+    (576x1024) videos conditioned on an input image.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will show you how to use SVD to generate short videos from images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have the following libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The are two variants of this model, [SVD](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid)
+    and [SVD-XT](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt).
+    The SVD checkpoint is trained to generate 14 frames and the SVD-XT checkpoint
+    is further finetuned to generate 25 frames.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You’ll use the SVD-XT checkpoint for this guide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/a94676a4f9986b4f5a952953468c1829.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '"source image of a rocket"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/d65879bddc72e398a4fbd137d886bc66.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '"generated video from source image"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: torch.compile
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can gain a 20-25% speedup at the expense of slightly increased memory by
+    [compiling](../optimization/torch2.0#torchcompile) the UNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Reduce memory usage
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Video generation is very memory intensive because you’re essentially generating
+    `num_frames` all at once, similar to text-to-image generation with a high batch
+    size. To reduce the memory requirement, there are multiple options that trade-off
+    inference speed for lower memory requirement:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'enable model offloading: each component of the pipeline is offloaded to the
+    CPU once it’s not needed anymore.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'enable feed-forward chunking: the feed-forward layer runs in a loop instead
+    of running a single feed-forward with a huge batch size.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'reduce `decode_chunk_size`: the VAE decodes frames in chunks instead of decoding
+    them all together. Setting `decode_chunk_size=1` decodes one frame at a time and
+    uses the least amount of memory (we recommend adjusting this value based on your
+    GPU memory) but the video might have some flickering.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using all these tricks togethere should lower the memory requirement to less
+    than 8GB VRAM.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Micro-conditioning
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Stable Diffusion Video also accepts micro-conditioning, in addition to the
+    conditioning image, which allows more control over the generated video:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`fps`: the frames per second of the generated video.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`motion_bucket_id`: the motion bucket id to use for the generated video. This
+    can be used to control the motion of the generated video. Increasing the motion
+    bucket id increases the motion of the generated video.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`noise_aug_strength`: the amount of noise added to the conditioning image.
+    The higher the values the less the video resembles the conditioning image. Increasing
+    this value also increases the motion of the generated video.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'For example, to generate a video with more motion, use the `motion_bucket_id`
+    and `noise_aug_strength` micro-conditioning parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/a13661013e72a7151cea4ff2f8c2c9b3.png)'
+  prefs: []
+  type: TYPE_IMG

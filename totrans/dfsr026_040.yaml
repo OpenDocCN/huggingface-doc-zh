@@ -1,0 +1,442 @@
+- en: Kandinsky
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/kandinsky](https://huggingface.co/docs/diffusers/using-diffusers/kandinsky)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/173.dfc347fb.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/HfOption.fc88c804.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/stores.aa51e67d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Kandinsky models are a series of multilingual text-to-image generation models.
+    The Kandinsky 2.0 model uses two multilingual text encoders and concatenates those
+    results for the UNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Kandinsky 2.1](../api/pipelines/kandinsky) changes the architecture to include
+    an image prior model ([`CLIP`](https://huggingface.co/docs/transformers/model_doc/clip))
+    to generate a mapping between text and image embeddings. The mapping provides
+    better text-image alignment and it is used with the text embeddings during training,
+    leading to higher quality results. Finally, Kandinsky 2.1 uses a [Modulating Quantized
+    Vectors (MoVQ)](https://huggingface.co/papers/2209.09002) decoder - which adds
+    a spatial conditional normalization layer to increase photorealism - to decode
+    the latents into images.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Kandinsky 2.2](../api/pipelines/kandinsky_v22) improves on the previous model
+    by replacing the image encoder of the image prior model with a larger CLIP-ViT-G
+    model to improve quality. The image prior model was also retrained on images with
+    different resolutions and aspect ratios to generate higher-resolution images and
+    different image sizes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Kandinsky 3](../api/pipelines/kandinsky3) simplifies the architecture and
+    shifts away from the two-stage generation process involving the prior model and
+    diffusion model. Instead, Kandinsky 3 uses [Flan-UL2](https://huggingface.co/google/flan-ul2)
+    to encode text, a UNet with [BigGan-deep](https://hf.co/papers/1809.11096) blocks,
+    and [Sber-MoVQGAN](https://github.com/ai-forever/MoVQGAN) to decode the latents
+    into images. Text understanding and generated image quality are primarily achieved
+    by using a larger text encoder and UNet.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will show you how to use the Kandinsky models for text-to-image,
+    image-to-image, inpainting, interpolation, and more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have the following libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Kandinsky 2.1 and 2.2 usage is very similar! The only difference is Kandinsky
+    2.2 doesn’t accept `prompt` as an input when decoding the latents. Instead, Kandinsky
+    2.2 only accepts `image_embeds` during decoding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 3 has a more concise architecture and it doesn’t require a prior model.
+    This means it’s usage is identical to other diffusion models like [Stable Diffusion
+    XL](sdxl).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text-to-image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To use the Kandinsky models for any task, you always start by setting up the
+    prior pipeline to encode the prompt and generate the image embeddings. The prior
+    pipeline also generates `negative_image_embeds` that correspond to the negative
+    prompt `""`. For better results, you can pass an actual `negative_prompt` to the
+    prior pipeline, but this’ll increase the effective batch size of the prior pipeline
+    by 2x.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2Kandinsky 3
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now pass all the prompts and embeddings to the [KandinskyPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky#diffusers.KandinskyPipeline)
+    to generate an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/7a49f6e1db66e1eebcfa846868181899.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 🤗 Diffusers also provides an end-to-end API with the [KandinskyCombinedPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky#diffusers.KandinskyCombinedPipeline)
+    and [KandinskyV22CombinedPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22CombinedPipeline),
+    meaning you don’t have to separately load the prior and text-to-image pipeline.
+    The combined pipeline automatically loads both the prior model and the decoder.
+    You can still set different values for the prior pipeline with the `prior_guidance_scale`
+    and `prior_num_inference_steps` parameters if you want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the [AutoPipelineForText2Image](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForText2Image)
+    to automatically call the combined pipelines under the hood:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Image-to-image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For image-to-image, pass the initial image and text prompt to condition the
+    image to the pipeline. Start by loading the prior pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2Kandinsky 3
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Download an image to condition on:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/f2a11ed9e52e5fabb2124e5fe7bba075.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Generate the `image_embeds` and `negative_image_embeds` with the prior pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now pass the original image, and all the prompts and embeddings to the pipeline
+    to generate an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2Kandinsky 3
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/8554b2d04f4b98afeb9692a00447ba5d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 🤗 Diffusers also provides an end-to-end API with the [KandinskyImg2ImgCombinedPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky#diffusers.KandinskyImg2ImgCombinedPipeline)
+    and [KandinskyV22Img2ImgCombinedPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22Img2ImgCombinedPipeline),
+    meaning you don’t have to separately load the prior and image-to-image pipeline.
+    The combined pipeline automatically loads both the prior model and the decoder.
+    You can still set different values for the prior pipeline with the `prior_guidance_scale`
+    and `prior_num_inference_steps` parameters if you want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the [AutoPipelineForImage2Image](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForImage2Image)
+    to automatically call the combined pipelines under the hood:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inpainting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '⚠️ The Kandinsky models use ⬜️ **white pixels** to represent the masked area
+    now instead of black pixels. If you are using [KandinskyInpaintPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky#diffusers.KandinskyInpaintPipeline)
+    in production, you need to change the mask to use white pixels:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For inpainting, you’ll need the original image, a mask of the area to replace
+    in the original image, and a text prompt of what to inpaint. Load the prior pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load an initial image and create a mask:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Generate the embeddings with the prior pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now pass the initial image, mask, and prompt and embeddings to the pipeline
+    to generate an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/06d9ede591c4c816c0afb1ac1756de88.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'You can also use the end-to-end [KandinskyInpaintCombinedPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky#diffusers.KandinskyInpaintCombinedPipeline)
+    and [KandinskyV22InpaintCombinedPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22InpaintCombinedPipeline)
+    to call the prior and decoder pipelines together under the hood. Use the [AutoPipelineForInpainting](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForInpainting)
+    for this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Interpolation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Interpolation allows you to explore the latent space between the image and
+    text embeddings which is a cool way to see some of the prior model’s intermediate
+    outputs. Load the prior pipeline and two images you’d like to interpolate:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/c39ee2cbaacad2963f3842a301c122a7.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: a cat
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/d28a21117fde9e1974b55867c4e29dea.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Van Gogh's Starry Night painting
+  prefs: []
+  type: TYPE_NORMAL
+- en: Specify the text or images to interpolate, and set the weights for each text
+    or image. Experiment with the weights to see how they affect the interpolation!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Call the `interpolate` function to generate the embeddings, and then pass them
+    to the pipeline to generate the image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.1Kandinsky 2.2
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/59fe929dc7d1553d026875441e579c7b.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: ControlNet
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: ⚠️ ControlNet is only supported for Kandinsky 2.2!
+  prefs: []
+  type: TYPE_NORMAL
+- en: ControlNet enables conditioning large pretrained diffusion models with additional
+    inputs such as a depth map or edge detection. For example, you can condition Kandinsky
+    2.2 with a depth map so the model understands and preserves the structure of the
+    depth image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s load an image and extract it’s depth map:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/098067659c7d591c7d25aac963832424.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Then you can use the `depth-estimation` [Pipeline](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)
+    from 🤗 Transformers to process the image and retrieve the depth map:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-to-image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Load the prior pipeline and the [KandinskyV22ControlnetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22ControlnetPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Generate the image embeddings from a prompt and negative prompt:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, pass the image embeddings and the depth image to the [KandinskyV22ControlnetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22ControlnetPipeline)
+    to generate an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/b044b806899a4ae7cdc6df24f2b71924.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Image-to-image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'For image-to-image with ControlNet, you’ll need to use the:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[KandinskyV22PriorEmb2EmbPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22PriorEmb2EmbPipeline)
+    to generate the image embeddings from a text prompt and an image'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[KandinskyV22ControlnetImg2ImgPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22ControlnetImg2ImgPipeline)
+    to generate an image from the initial image and the image embeddings'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Process and extract a depth map of an initial image of a cat with the `depth-estimation`
+    [Pipeline](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)
+    from 🤗 Transformers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load the prior pipeline and the [KandinskyV22ControlnetImg2ImgPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22ControlnetImg2ImgPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass a text prompt and the initial image to the prior pipeline to generate
+    the image embeddings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you can run the [KandinskyV22ControlnetImg2ImgPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/kandinsky_v22#diffusers.KandinskyV22ControlnetImg2ImgPipeline)
+    to generate an image from the initial image and the image embeddings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/3b9c48325073009cf6dc5d406bfe39d2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Optimizations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Kandinsky is unique because it requires a prior pipeline to generate the mappings,
+    and a second pipeline to decode the latents into an image. Optimization efforts
+    should be focused on the second pipeline because that is where the bulk of the
+    computation is done. Here are some tips to improve Kandinsky during inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Enable [xFormers](../optimization/xformers) if you’re using PyTorch < 2.0:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Enable `torch.compile` if you’re using PyTorch >= 2.0 to automatically use
+    scaled dot-product attention (SDPA):'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is the same as explicitly setting the attention processor to use [AttnAddedKVProcessor2_0](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnAddedKVProcessor2_0):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Offload the model to the CPU with [enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
+    to avoid out-of-memory errors:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'By default, the text-to-image pipeline uses the [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler)
+    but you can replace it with another scheduler like [DDPMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler)
+    to see how that affects the tradeoff between inference speed and image quality:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE

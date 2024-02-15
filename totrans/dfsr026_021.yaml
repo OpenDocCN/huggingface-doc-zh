@@ -1,0 +1,543 @@
+- en: Load adapters
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/loading_adapters](https://huggingface.co/docs/diffusers/using-diffusers/loading_adapters)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/175.b584f717.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/HfOption.fc88c804.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/stores.aa51e67d.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several [training](../training/overview) techniques for personalizing
+    diffusion models to generate images of a specific subject or images in certain
+    styles. Each of these training methods produces a different type of adapter. Some
+    of the adapters generate an entirely new model, while other adapters only modify
+    a smaller set of embeddings or weights. This means the loading process for each
+    adapter is also different.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will show you how to load DreamBooth, textual inversion, and LoRA
+    weights.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Feel free to browse the [Stable Diffusion Conceptualizer](https://huggingface.co/spaces/sd-concepts-library/stable-diffusion-conceptualizer),
+    [LoRA the Explorer](https://huggingface.co/spaces/multimodalart/LoraTheExplorer),
+    and the [Diffusers Models Gallery](https://huggingface.co/spaces/huggingface-projects/diffusers-gallery)
+    for checkpoints and embeddings to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DreamBooth
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[DreamBooth](https://dreambooth.github.io/) finetunes an *entire diffusion
+    model* on just several images of a subject to generate images of that subject
+    in new styles and settings. This method works by using a special word in the prompt
+    that the model learns to associate with the subject image. Of all the training
+    methods, DreamBooth produces the largest file size (usually a few GBs) because
+    it is a full checkpoint model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s load the [herge_style](https://huggingface.co/sd-dreambooth-library/herge-style)
+    checkpoint, which is trained on just 10 images drawn by Hergé, to generate images
+    in that style. For it to work, you need to include the special word `herge_style`
+    in your prompt to trigger the checkpoint:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/97b7dec0aa8cde8c3b74690416b5a5ca.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Textual inversion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Textual inversion](https://textual-inversion.github.io/) is very similar to
+    DreamBooth and it can also personalize a diffusion model to generate certain concepts
+    (styles, objects) from just a few images. This method works by training and finding
+    new embeddings that represent the images you provide with a special word in the
+    prompt. As a result, the diffusion model weights stay the same and the training
+    process produces a relatively tiny (a few KBs) file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because textual inversion creates embeddings, it cannot be used on its own like
+    DreamBooth and requires another model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you can load the textual inversion embeddings with the [load_textual_inversion()](/docs/diffusers/v0.26.3/en/api/loaders/textual_inversion#diffusers.loaders.TextualInversionLoaderMixin.load_textual_inversion)
+    method and generate some images. Let’s load the [sd-concepts-library/gta5-artwork](https://huggingface.co/sd-concepts-library/gta5-artwork)
+    embeddings and you’ll need to include the special word `<gta5-artwork>` in your
+    prompt to trigger it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/c039eaa48a71bfa7f36cbc3d5bc64464.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Textual inversion can also be trained on undesirable things to create *negative
+    embeddings* to discourage a model from generating images with those undesirable
+    things like blurry images or extra fingers on a hand. This can be an easy way
+    to quickly improve your prompt. You’ll also load the embeddings with [load_textual_inversion()](/docs/diffusers/v0.26.3/en/api/loaders/textual_inversion#diffusers.loaders.TextualInversionLoaderMixin.load_textual_inversion),
+    but this time, you’ll need two more parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`weight_name`: specifies the weight file to load if the file was saved in the
+    🤗 Diffusers format with a specific name or if the file is stored in the A1111
+    format'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`token`: specifies the special word to use in the prompt to trigger the embeddings'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Let’s load the [sayakpaul/EasyNegative-test](https://huggingface.co/sayakpaul/EasyNegative-test)
+    embeddings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you can use the `token` to generate an image with the negative embeddings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/e8cd1cf0f650f65d2b00c9db51b0e506.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: LoRA
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Low-Rank Adaptation (LoRA)](https://huggingface.co/papers/2106.09685) is a
+    popular training technique because it is fast and generates smaller file sizes
+    (a couple hundred MBs). Like the other methods in this guide, LoRA can train a
+    model to learn new styles from just a few images. It works by inserting new weights
+    into the diffusion model and then only the new weights are trained instead of
+    the entire model. This makes LoRAs faster to train and easier to store.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: LoRA is a very general training technique that can be used with other training
+    methods. For example, it is common to train a model with DreamBooth and LoRA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'LoRAs also need to be used with another model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then use the [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
+    method to load the [ostris/super-cereal-sdxl-lora](https://huggingface.co/ostris/super-cereal-sdxl-lora)
+    weights and specify the weights filename from the repository:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/e378109cda4606520af62966b167614f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'The [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
+    method loads LoRA weights into both the UNet and text encoder. It is the preferred
+    way for loading LoRAs because it can handle cases where:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: the LoRA weights don’t have separate identifiers for the UNet and text encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: the LoRA weights have separate identifiers for the UNet and text encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'But if you only need to load LoRA weights into the UNet, then you can use the
+    [load_attn_procs()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.load_attn_procs)
+    method. Let’s load the [jbilcke-hf/sdxl-cinematic-1](https://huggingface.co/jbilcke-hf/sdxl-cinematic-1)
+    LoRA:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/b7bd2f5305aeb45b260a0d963df68046.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'For both [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
+    and [load_attn_procs()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.load_attn_procs),
+    you can pass the `cross_attention_kwargs={"scale": 0.5}` parameter to adjust how
+    much of the LoRA weights to use. A value of `0` is the same as only using the
+    base model weights, and a value of `1` is equivalent to using the fully finetuned
+    LoRA.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To unload the LoRA weights, use the [unload_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.unload_lora_weights)
+    method to discard the LoRA weights and restore the model to its original weights:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load multiple LoRAs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: It can be fun to use multiple LoRAs together to create something entirely new
+    and unique. The [fuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.fuse_lora)
+    method allows you to fuse the LoRA weights with the original weights of the underlying
+    model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fusing the weights can lead to a speedup in inference latency because you don’t
+    need to separately load the base model and LoRA! You can save your fused pipeline
+    with [save_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.save_pretrained)
+    to avoid loading and fusing the weights every time you want to use the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load an initial model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, load the LoRA checkpoint and fuse it with the original weights. The `lora_scale`
+    parameter controls how much to scale the output by with the LoRA weights. It is
+    important to make the `lora_scale` adjustments in the [fuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.fuse_lora)
+    method because it won’t work if you try to pass `scale` to the `cross_attention_kwargs`
+    in the pipeline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you need to reset the original model weights for any reason (use a different
+    `lora_scale`), you should use the [unfuse_lora()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.unfuse_lora)
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then fuse this pipeline with the next set of LoRA weights:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can’t unfuse multiple LoRA checkpoints, so if you need to reset the model
+    to its original weights, you’ll need to reload it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now you can generate an image that uses the weights from both LoRAs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 🤗 PEFT
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Read the [Inference with 🤗 PEFT](../tutorials/using_peft_for_inference) tutorial
+    to learn more about its integration with 🤗 Diffusers and how you can easily work
+    with and juggle multiple adapters. You’ll need to install 🤗 Diffusers and PEFT
+    from source to run the example in this section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another way you can load and use multiple LoRAs is to specify the `adapter_name`
+    parameter in [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights).
+    This method takes advantage of the 🤗 PEFT integration. For example, load and name
+    both LoRA weights:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now use the [set_adapters()](/docs/diffusers/v0.26.3/en/api/loaders/unet#diffusers.loaders.UNet2DConditionLoadersMixin.set_adapters)
+    to activate both LoRAs, and you can configure how much weight each LoRA should
+    have on the output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, generate an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Kohya and TheLastBen
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Other popular LoRA trainers from the community include those by [Kohya](https://github.com/kohya-ss/sd-scripts/)
+    and [TheLastBen](https://github.com/TheLastBen/fast-stable-diffusion). These trainers
+    create different LoRA checkpoints than those trained by 🤗 Diffusers, but they
+    can still be loaded in the same way.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s download the [Blueprintify SD XL 1.0](https://civitai.com/models/150986/blueprintify-sd-xl-10)
+    checkpoint from [Civitai](https://civitai.com/):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load the LoRA checkpoint with the [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
+    method, and specify the filename in the `weight_name` parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Generate an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Some limitations of using Kohya LoRAs with 🤗 Diffusers include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Images may not look like those generated by UIs - like ComfyUI - for multiple
+    reasons, which are explained [here](https://github.com/huggingface/diffusers/pull/4287/#issuecomment-1655110736).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[LyCORIS checkpoints](https://github.com/KohakuBlueleaf/LyCORIS) aren’t fully
+    supported. The [load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
+    method loads LyCORIS checkpoints with LoRA and LoCon modules, but Hada and LoKR
+    are not supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Loading a checkpoint from TheLastBen is very similar. For example, to load
+    the [TheLastBen/William_Eggleston_Style_SDXL](https://huggingface.co/TheLastBen/William_Eggleston_Style_SDXL)
+    checkpoint:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: IP-Adapter
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[IP-Adapter](https://ip-adapter.github.io/) is an effective and lightweight
+    adapter that adds image prompting capabilities to a diffusion model. This adapter
+    works by decoupling the cross-attention layers of the image and text features.
+    All the other model components are frozen and only the embedded image features
+    in the UNet are trained. As a result, IP-Adapter files are typically only ~100MBs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IP-Adapter works with most of our pipelines, including Stable Diffusion, Stable
+    Diffusion XL (SDXL), ControlNet, T2I-Adapter, AnimateDiff. And you can use any
+    custom models finetuned from the same base models. It also works with LCM-Lora
+    out of box.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can find official IP-Adapter checkpoints in [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: IP-Adapter was contributed by [okotaku](https://github.com/okotaku).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s first create a Stable Diffusion Pipeline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now load the [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter) weights
+    with the [load_ip_adapter()](/docs/diffusers/v0.26.3/en/api/loaders/ip_adapter#diffusers.loaders.IPAdapterMixin.load_ip_adapter)
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: IP-Adapter relies on an image encoder to generate the image features, if your
+    IP-Adapter weights folder contains a "image_encoder" subfolder, the image encoder
+    will be automatically loaded and registered to the pipeline. Otherwise you can
+    so load a [CLIPVisionModelWithProjection](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPVisionModelWithProjection)
+    model and pass it to a Stable Diffusion pipeline when you create it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: IP-Adapter allows you to use both image and text to condition the image generation
+    process. For example, let’s use the bear image from the [Textual Inversion](#textual-inversion)
+    section as the image prompt (`ip_adapter_image`) along with a text prompt to add
+    “sunglasses”. 😎
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/344a4a031aa6d71b9b57dc0b5139e9be.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: You can use the `set_ip_adapter_scale()` method to adjust the text prompt and
+    image prompt condition ratio.  If you’re only using the image prompt, you should
+    set the scale to `1.0`. You can lower the scale to get more generation diversity,
+    but it’ll be less aligned with the prompt. `scale=0.5` can achieve good results
+    in most cases when you use both text and image prompts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IP-Adapter also works great with Image-to-Image and Inpainting pipelines. See
+    below examples of how you can use it with Image-to-Image and Inpaint.
+  prefs: []
+  type: TYPE_NORMAL
+- en: image-to-imageinpaint
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: IP-Adapters can also be used with [SDXL](../api/pipelines/stable_diffusion/stable_diffusion_xl.md)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/7714d8061d7ab0a16f36c9923a9a1d91.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: input image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/6d3dc0e54f1d38caddd7daf1bd93c3fb.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: adapted image
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can use the IP-Adapter face model to apply specific faces to your images.
+    It is an effective way to maintain consistent characters in your image generations.
+    Weights are loaded with the same method used for the other IP-Adapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is recommended to use `DDIMScheduler` and `EulerDiscreteScheduler` for face
+    model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/d45f8afb266397140047ea513967ec17.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: input image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/1f753c6cacd994b80a20d9f822857c7e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: output image
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can load multiple IP-Adapter models and use multiple reference images at
+    the same time. In this example we use IP-Adapter-Plus face model to create a consistent
+    character and also use IP-Adapter-Plus model along with 10 images to create a
+    coherent style in the image we generate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/708cd0f9abdbb4eb3ad70ec47c4651d9.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: style input image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/b4c08b99e9974c3a3e5bb5f7f2d1054f.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: face input image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/0f5d4fe5f2525dd88bd660385a4b080e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: output image
+  prefs: []
+  type: TYPE_NORMAL
+- en: LCM-Lora
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can use IP-Adapter with LCM-Lora to achieve “instant fine-tune” with custom
+    images. Note that you need to load IP-Adapter weights before loading the LCM-Lora
+    weights.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Other pipelines
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: IP-Adapter is compatible with any pipeline that (1) uses a text prompt and (2)
+    uses Stable Diffusion or Stable Diffusion XL checkpoint. To use IP-Adapter with
+    a different pipeline, all you need to do is to run `load_ip_adapter()` method
+    after you create the pipeline, and then pass your image to the pipeline as `ip_adapter_image`
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🤗 Diffusers currently only supports using IP-Adapter with some of the most popular
+    pipelines, feel free to open a [feature request](https://github.com/huggingface/diffusers/issues/new/choose)
+    if you have a cool use-case and require integrating IP-adapters with a pipeline
+    that does not support it yet!
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can find below examples on how to use IP-Adapter with ControlNet and AnimateDiff.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ControlNetAnimateDiff
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/16fb69a794e63d70afc3ca739b1eee43.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: input image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/e6383b3af214075c7c04400114af5b74.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: adapted image
+  prefs: []
+  type: TYPE_NORMAL

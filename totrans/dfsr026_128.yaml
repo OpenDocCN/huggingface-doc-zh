@@ -1,0 +1,747 @@
+- en: aMUSEd
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/api/pipelines/amused](https://huggingface.co/docs/diffusers/api/pipelines/amused)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/32.344ee32f.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Docstring.93f6f462.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/ExampleCodeBlock.658f5cd6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'aMUSEd was introduced in [aMUSEd: An Open MUSE Reproduction](https://huggingface.co/papers/2401.01808)
+    by Suraj Patil, William Berman, Robin Rombach, and Patrick von Platen.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Amused is a lightweight text to image model based off of the [MUSE](https://arxiv.org/abs/2301.00704)
+    architecture. Amused is particularly useful in applications that require a lightweight
+    and fast model such as generating many images quickly at once.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Amused is a vqvae token based transformer that can generate an image in fewer
+    forward passes than many diffusion models. In contrast with muse, it uses the
+    smaller text encoder CLIP-L/14 instead of t5-xxl. Due to its small parameter count
+    and few forward pass generation process, amused can generate many images quickly.
+    This benefit is seen particularly at larger batch sizes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We present aMUSEd, an open-source, lightweight masked image model (MIM) for
+    text-to-image generation based on MUSE. With 10 percent of MUSE’s parameters,
+    aMUSEd is focused on fast image generation. We believe MIM is under-explored compared
+    to latent diffusion, the prevailing approach for text-to-image generation. Compared
+    to latent diffusion, MIM requires fewer inference steps and is more interpretable.
+    Additionally, MIM can be fine-tuned to learn additional styles with only a single
+    image. We hope to encourage further exploration of MIM by demonstrating its effectiveness
+    on large-scale text-to-image generation and releasing reproducible training code.
+    We also release checkpoints for two models which directly produce images at 256x256
+    and 512x512 resolutions.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Model | Params |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [amused-256](https://huggingface.co/amused/amused-256) | 603M |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [amused-512](https://huggingface.co/amused/amused-512) | 608M |'
+  prefs: []
+  type: TYPE_TB
+- en: AmusedPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.AmusedPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/amused/pipeline_amused.py#L44)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vqvae: VQModel tokenizer: CLIPTokenizer text_encoder: CLIPTextModelWithProjection
+    transformer: UVit2DModel scheduler: AmusedScheduler )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/amused/pipeline_amused.py#L74)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None height: Optional = None width: Optional = None num_inference_steps:
+    int = 12 guidance_scale: float = 10.0 negative_prompt: Union = None num_images_per_prompt:
+    Optional = 1 generator: Optional = None latents: Optional = None prompt_embeds:
+    Optional = None encoder_hidden_states: Optional = None negative_prompt_embeds:
+    Optional = None negative_encoder_hidden_states: Optional = None output_type =
+    ''pil'' return_dict: bool = True callback: Optional = None callback_steps: int
+    = 1 cross_attention_kwargs: Optional = None micro_conditioning_aesthetic_score:
+    int = 6 micro_conditioning_crop_coord: Tuple = (0, 0) temperature: Union = (2,
+    0) ) → [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    image generation. If not defined, you need to pass `prompt_embeds`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`, *optional*, defaults to `self.transformer.config.sample_size
+    * self.vae_scale_factor`) — The height in pixels of the generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`, *optional*, defaults to `self.unet.config.sample_size * self.vae_scale_factor`)
+    — The width in pixels of the generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 16) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 10.0) — A higher guidance
+    scale value encourages the model to generate images closely linked to the text
+    `prompt` at the expense of lower image quality. Guidance scale is enabled when
+    `guidance_scale > 1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    to guide what to not include in image generation. If not defined, you need to
+    pass `negative_prompt_embeds` instead. Ignored when not using guidance (`guidance_scale
+    < 1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator`, *optional*) — A [`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latents** (`torch.IntTensor`, *optional*) — Pre-generated tokens representing
+    latent vectors in `self.vqvae`, to be used as inputs for image gneration. If not
+    provided, the starting latents will be completely masked.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs (prompt weighting). If not provided, text
+    embeddings are generated from the `prompt` input argument. A single vector from
+    the pooled and projected final hidden states.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states** (`torch.FloatTensor`, *optional*) — Pre-generated
+    penultimate hidden states from the text encoder providing additional text conditioning.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs (prompt weighting).
+    If not provided, `negative_prompt_embeds` are generated from the `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_encoder_hidden_states** (`torch.FloatTensor`, *optional*) — Analogous
+    to `encoder_hidden_states` for the positive prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generated image. Choose between `PIL.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [StableDiffusionPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.pipelines.stable_diffusion.StableDiffusionPipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that calls every `callback_steps`
+    steps during inference. The function is called with the following arguments: `callback(step:
+    int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function is called. If not specified, the callback is called at
+    every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined in [`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**micro_conditioning_aesthetic_score** (`int`, *optional*, defaults to 6) —
+    The targeted aesthetic score according to the laion aesthetic classifier. See
+    [https://laion.ai/blog/laion-aesthetics/](https://laion.ai/blog/laion-aesthetics/)
+    and the micro-conditioning section of [https://arxiv.org/abs/2307.01952](https://arxiv.org/abs/2307.01952).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**micro_conditioning_crop_coord** (`Tuple[int]`, *optional*, defaults to (0,
+    0)) — The targeted height, width crop coordinates. See the micro-conditioning
+    section of [https://arxiv.org/abs/2307.01952](https://arxiv.org/abs/2307.01952).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**temperature** (`Union[int, Tuple[int, int], List[int]]`, *optional*, defaults
+    to (2, 0)) — Configures the temperature scheduler on `self.scheduler` see `AmusedScheduler#set_timesteps`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `return_dict` is `True`, [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    is returned, otherwise a `tuple` is returned where the first element is a list
+    with the generated images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The call function to the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### enable_xformers_memory_efficient_attention'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pipeline_utils.py#L2002)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( attention_op: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**attention_op** (`Callable`, *optional*) — Override the default `None` operator
+    for use as `op` argument to the [`memory_efficient_attention()`](https://facebookresearch.github.io/xformers/components/ops.html#xformers.ops.memory_efficient_attention)
+    function of xFormers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Enable memory efficient attention from [xFormers](https://facebookresearch.github.io/xformers/).
+    When this option is enabled, you should observe lower GPU memory usage and a potential
+    speed up during inference. Speed up during training is not guaranteed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ⚠️ When memory efficient attention and sliced attention are both enabled, memory
+    efficient attention takes precedent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### disable_xformers_memory_efficient_attention'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pipeline_utils.py#L2037)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disable memory efficient attention from [xFormers](https://facebookresearch.github.io/xformers/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### class diffusers.AmusedImg2ImgPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/amused/pipeline_amused_img2img.py#L52)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vqvae: VQModel tokenizer: CLIPTokenizer text_encoder: CLIPTextModelWithProjection
+    transformer: UVit2DModel scheduler: AmusedScheduler )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/amused/pipeline_amused_img2img.py#L87)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None image: Union = None strength: float = 0.5 num_inference_steps:
+    int = 12 guidance_scale: float = 10.0 negative_prompt: Union = None num_images_per_prompt:
+    Optional = 1 generator: Optional = None prompt_embeds: Optional = None encoder_hidden_states:
+    Optional = None negative_prompt_embeds: Optional = None negative_encoder_hidden_states:
+    Optional = None output_type = ''pil'' return_dict: bool = True callback: Optional
+    = None callback_steps: int = 1 cross_attention_kwargs: Optional = None micro_conditioning_aesthetic_score:
+    int = 6 micro_conditioning_crop_coord: Tuple = (0, 0) temperature: Union = (2,
+    0) ) → [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    image generation. If not defined, you need to pass `prompt_embeds`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image** (`torch.FloatTensor`, `PIL.Image.Image`, `np.ndarray`, `List[torch.FloatTensor]`,
+    `List[PIL.Image.Image]`, or `List[np.ndarray]`) — `Image`, numpy array or tensor
+    representing an image batch to be used as the starting point. For both numpy array
+    and pytorch tensor, the expected value range is between `[0, 1]` If it’s a tensor
+    or a list or tensors, the expected shape should be `(B, C, H, W)` or `(C, H, W)`.
+    If it is a numpy array or a list of arrays, the expected shape should be `(B,
+    H, W, C)` or `(H, W, C)` It can also accept image latents as `image`, but if passing
+    latents directly it is not encoded again.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strength** (`float`, *optional*, defaults to 0.5) — Indicates extent to transform
+    the reference `image`. Must be between 0 and 1\. `image` is used as a starting
+    point and more noise is added the higher the `strength`. The number of denoising
+    steps depends on the amount of noise initially added. When `strength` is 1, added
+    noise is maximum and the denoising process runs for the full number of iterations
+    specified in `num_inference_steps`. A value of 1 essentially ignores `image`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 16) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 10.0) — A higher guidance
+    scale value encourages the model to generate images closely linked to the text
+    `prompt` at the expense of lower image quality. Guidance scale is enabled when
+    `guidance_scale > 1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    to guide what to not include in image generation. If not defined, you need to
+    pass `negative_prompt_embeds` instead. Ignored when not using guidance (`guidance_scale
+    < 1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator`, *optional*) — A [`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs (prompt weighting). If not provided, text
+    embeddings are generated from the `prompt` input argument. A single vector from
+    the pooled and projected final hidden states.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states** (`torch.FloatTensor`, *optional*) — Pre-generated
+    penultimate hidden states from the text encoder providing additional text conditioning.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs (prompt weighting).
+    If not provided, `negative_prompt_embeds` are generated from the `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_encoder_hidden_states** (`torch.FloatTensor`, *optional*) — Analogous
+    to `encoder_hidden_states` for the positive prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generated image. Choose between `PIL.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [StableDiffusionPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.pipelines.stable_diffusion.StableDiffusionPipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that calls every `callback_steps`
+    steps during inference. The function is called with the following arguments: `callback(step:
+    int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function is called. If not specified, the callback is called at
+    every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined in [`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**micro_conditioning_aesthetic_score** (`int`, *optional*, defaults to 6) —
+    The targeted aesthetic score according to the laion aesthetic classifier. See
+    [https://laion.ai/blog/laion-aesthetics/](https://laion.ai/blog/laion-aesthetics/)
+    and the micro-conditioning section of [https://arxiv.org/abs/2307.01952](https://arxiv.org/abs/2307.01952).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**micro_conditioning_crop_coord** (`Tuple[int]`, *optional*, defaults to (0,
+    0)) — The targeted height, width crop coordinates. See the micro-conditioning
+    section of [https://arxiv.org/abs/2307.01952](https://arxiv.org/abs/2307.01952).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**temperature** (`Union[int, Tuple[int, int], List[int]]`, *optional*, defaults
+    to (2, 0)) — Configures the temperature scheduler on `self.scheduler` see `AmusedScheduler#set_timesteps`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `return_dict` is `True`, [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    is returned, otherwise a `tuple` is returned where the first element is a list
+    with the generated images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The call function to the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### enable_xformers_memory_efficient_attention'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pipeline_utils.py#L2002)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( attention_op: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**attention_op** (`Callable`, *optional*) — Override the default `None` operator
+    for use as `op` argument to the [`memory_efficient_attention()`](https://facebookresearch.github.io/xformers/components/ops.html#xformers.ops.memory_efficient_attention)
+    function of xFormers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Enable memory efficient attention from [xFormers](https://facebookresearch.github.io/xformers/).
+    When this option is enabled, you should observe lower GPU memory usage and a potential
+    speed up during inference. Speed up during training is not guaranteed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ⚠️ When memory efficient attention and sliced attention are both enabled, memory
+    efficient attention takes precedent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### disable_xformers_memory_efficient_attention'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pipeline_utils.py#L2037)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disable memory efficient attention from [xFormers](https://facebookresearch.github.io/xformers/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### class diffusers.AmusedInpaintPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/amused/pipeline_amused_inpaint.py#L60)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vqvae: VQModel tokenizer: CLIPTokenizer text_encoder: CLIPTextModelWithProjection
+    transformer: UVit2DModel scheduler: AmusedScheduler )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/amused/pipeline_amused_inpaint.py#L103)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None image: Union = None mask_image: Union = None strength:
+    float = 1.0 num_inference_steps: int = 12 guidance_scale: float = 10.0 negative_prompt:
+    Union = None num_images_per_prompt: Optional = 1 generator: Optional = None prompt_embeds:
+    Optional = None encoder_hidden_states: Optional = None negative_prompt_embeds:
+    Optional = None negative_encoder_hidden_states: Optional = None output_type =
+    ''pil'' return_dict: bool = True callback: Optional = None callback_steps: int
+    = 1 cross_attention_kwargs: Optional = None micro_conditioning_aesthetic_score:
+    int = 6 micro_conditioning_crop_coord: Tuple = (0, 0) temperature: Union = (2,
+    0) ) → [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    image generation. If not defined, you need to pass `prompt_embeds`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image** (`torch.FloatTensor`, `PIL.Image.Image`, `np.ndarray`, `List[torch.FloatTensor]`,
+    `List[PIL.Image.Image]`, or `List[np.ndarray]`) — `Image`, numpy array or tensor
+    representing an image batch to be used as the starting point. For both numpy array
+    and pytorch tensor, the expected value range is between `[0, 1]` If it’s a tensor
+    or a list or tensors, the expected shape should be `(B, C, H, W)` or `(C, H, W)`.
+    If it is a numpy array or a list of arrays, the expected shape should be `(B,
+    H, W, C)` or `(H, W, C)` It can also accept image latents as `image`, but if passing
+    latents directly it is not encoded again.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_image** (`torch.FloatTensor`, `PIL.Image.Image`, `np.ndarray`, `List[torch.FloatTensor]`,
+    `List[PIL.Image.Image]`, or `List[np.ndarray]`) — `Image`, numpy array or tensor
+    representing an image batch to mask `image`. White pixels in the mask are repainted
+    while black pixels are preserved. If `mask_image` is a PIL image, it is converted
+    to a single channel (luminance) before use. If it’s a numpy array or pytorch tensor,
+    it should contain one color channel (L) instead of 3, so the expected shape for
+    pytorch tensor would be `(B, 1, H, W)`, `(B, H, W)`, `(1, H, W)`, `(H, W)`. And
+    for numpy array would be for `(B, H, W, 1)`, `(B, H, W)`, `(H, W, 1)`, or `(H,
+    W)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strength** (`float`, *optional*, defaults to 1.0) — Indicates extent to transform
+    the reference `image`. Must be between 0 and 1\. `image` is used as a starting
+    point and more noise is added the higher the `strength`. The number of denoising
+    steps depends on the amount of noise initially added. When `strength` is 1, added
+    noise is maximum and the denoising process runs for the full number of iterations
+    specified in `num_inference_steps`. A value of 1 essentially ignores `image`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 16) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 10.0) — A higher guidance
+    scale value encourages the model to generate images closely linked to the text
+    `prompt` at the expense of lower image quality. Guidance scale is enabled when
+    `guidance_scale > 1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    to guide what to not include in image generation. If not defined, you need to
+    pass `negative_prompt_embeds` instead. Ignored when not using guidance (`guidance_scale
+    < 1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator`, *optional*) — A [`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs (prompt weighting). If not provided, text
+    embeddings are generated from the `prompt` input argument. A single vector from
+    the pooled and projected final hidden states.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states** (`torch.FloatTensor`, *optional*) — Pre-generated
+    penultimate hidden states from the text encoder providing additional text conditioning.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs (prompt weighting).
+    If not provided, `negative_prompt_embeds` are generated from the `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_encoder_hidden_states** (`torch.FloatTensor`, *optional*) — Analogous
+    to `encoder_hidden_states` for the positive prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generated image. Choose between `PIL.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [StableDiffusionPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.pipelines.stable_diffusion.StableDiffusionPipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that calls every `callback_steps`
+    steps during inference. The function is called with the following arguments: `callback(step:
+    int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function is called. If not specified, the callback is called at
+    every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined in [`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**micro_conditioning_aesthetic_score** (`int`, *optional*, defaults to 6) —
+    The targeted aesthetic score according to the laion aesthetic classifier. See
+    [https://laion.ai/blog/laion-aesthetics/](https://laion.ai/blog/laion-aesthetics/)
+    and the micro-conditioning section of [https://arxiv.org/abs/2307.01952](https://arxiv.org/abs/2307.01952).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**micro_conditioning_crop_coord** (`Tuple[int]`, *optional*, defaults to (0,
+    0)) — The targeted height, width crop coordinates. See the micro-conditioning
+    section of [https://arxiv.org/abs/2307.01952](https://arxiv.org/abs/2307.01952).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**temperature** (`Union[int, Tuple[int, int], List[int]]`, *optional*, defaults
+    to (2, 0)) — Configures the temperature scheduler on `self.scheduler` see `AmusedScheduler#set_timesteps`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `return_dict` is `True`, [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    is returned, otherwise a `tuple` is returned where the first element is a list
+    with the generated images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The call function to the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### enable_xformers_memory_efficient_attention'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pipeline_utils.py#L2002)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( attention_op: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**attention_op** (`Callable`, *optional*) — Override the default `None` operator
+    for use as `op` argument to the [`memory_efficient_attention()`](https://facebookresearch.github.io/xformers/components/ops.html#xformers.ops.memory_efficient_attention)
+    function of xFormers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Enable memory efficient attention from [xFormers](https://facebookresearch.github.io/xformers/).
+    When this option is enabled, you should observe lower GPU memory usage and a potential
+    speed up during inference. Speed up during training is not guaranteed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ⚠️ When memory efficient attention and sliced attention are both enabled, memory
+    efficient attention takes precedent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### disable_xformers_memory_efficient_attention'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pipeline_utils.py#L2037)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disable memory efficient attention from [xFormers](https://facebookresearch.github.io/xformers/).
+  prefs: []
+  type: TYPE_NORMAL

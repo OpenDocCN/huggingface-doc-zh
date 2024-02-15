@@ -1,0 +1,207 @@
+- en: DiffEdit
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/diffedit](https://huggingface.co/docs/diffusers/using-diffusers/diffedit)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/166.9e267c39.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Image editing typically requires providing a mask of the area to be edited.
+    DiffEdit automatically generates the mask for you based on a text query, making
+    it easier overall to create a mask without image editing software. The DiffEdit
+    algorithm works in three steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: the diffusion model denoises an image conditioned on some query text and reference
+    text which produces different noise estimates for different areas of the image;
+    the difference is used to infer a mask to identify which area of the image needs
+    to be changed to match the query text
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: the input image is encoded into latent space with DDIM
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: the latents are decoded with the diffusion model conditioned on the text query,
+    using the mask as a guide such that pixels outside the mask remain the same as
+    in the input image
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This guide will show you how to use DiffEdit to edit images without manually
+    creating a mask.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have the following libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The [StableDiffusionDiffEditPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline)
+    requires an image mask and a set of partially inverted latents. The image mask
+    is generated from the [generate_mask()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.generate_mask)
+    function, and includes two parameters, `source_prompt` and `target_prompt`. These
+    parameters determine what to edit in the image. For example, if you want to change
+    a bowl of *fruits* to a bowl of *pears*, then:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The partially inverted latents are generated from the [invert()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.invert)
+    function, and it is generally a good idea to include a `prompt` or *caption* describing
+    the image to help guide the inverse latent sampling process. The caption can often
+    be your `source_prompt`, but feel free to experiment with other text descriptions!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s load the pipeline, scheduler, inverse scheduler, and enable some optimizations
+    to reduce memory usage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load the image to edit:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use the [generate_mask()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.generate_mask)
+    function to generate the image mask. You’ll need to pass it the `source_prompt`
+    and `target_prompt` to specify what to edit in the image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, create the inverted latents and pass it a caption describing the image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, pass the image mask and inverted latents to the pipeline. The `target_prompt`
+    becomes the `prompt` now, and the `source_prompt` is used as the `negative_prompt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/66e8c6b1baf21e3ade0ec71d71f6eff6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: original image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/9cc02168a4ef69d9e1454293018a3a04.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: edited image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generate source and target embeddings
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The source and target embeddings can be automatically generated with the [Flan-T5](https://huggingface.co/docs/transformers/model_doc/flan-t5)
+    model instead of creating them manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load the Flan-T5 model and tokenizer from the 🤗 Transformers library:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Provide some initial text to prompt the model to generate the source and target
+    prompts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, create a utility function to generate the prompts:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Check out the [generation strategy](https://huggingface.co/docs/transformers/main/en/generation_strategies)
+    guide if you’re interested in learning more about strategies for generating different
+    quality text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load the text encoder model used by the [StableDiffusionDiffEditPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline)
+    to encode the text. You’ll use the text encoder to compute the text embeddings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, pass the embeddings to the [generate_mask()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.generate_mask)
+    and [invert()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.invert)
+    functions, and pipeline to generate the image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generate a caption for inversion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: While you can use the `source_prompt` as a caption to help generate the partially
+    inverted latents, you can also use the [BLIP](https://huggingface.co/docs/transformers/model_doc/blip)
+    model to automatically generate a caption.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load the BLIP model and processor from the 🤗 Transformers library:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Create a utility function to generate a caption from the input image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load an input image and generate a caption for it using the `generate_caption`
+    function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/66e8c6b1baf21e3ade0ec71d71f6eff6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'generated caption: "a photograph of a bowl of fruit on a table"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now you can drop the caption into the [invert()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.invert)
+    function to generate the partially inverted latents!
+  prefs: []
+  type: TYPE_NORMAL

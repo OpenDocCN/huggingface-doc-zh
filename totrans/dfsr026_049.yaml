@@ -1,0 +1,283 @@
+- en: Performing inference with LCM-LoRA
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm_lora](https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm_lora)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/171.da021de0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Latent Consistency Models (LCM) enable quality image generation in typically
+    2-4 steps making it possible to use diffusion models in almost real-time settings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'From the [official website](https://latent-consistency-models.github.io/):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: LCMs can be distilled from any pre-trained Stable Diffusion (SD) in only 4,000
+    training steps (~32 A100 GPU Hours) for generating high quality 768 x 768 resolution
+    images in 2~4 steps or even one step, significantly accelerating text-to-image
+    generation. We employ LCM to distill the Dreamshaper-V7 version of SD in just
+    4,000 training iterations.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: For a more technical overview of LCMs, refer to [the paper](https://huggingface.co/papers/2310.04378).
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, each model needs to be distilled separately for latent consistency
+    distillation. The core idea with LCM-LoRA is to train just a few adapter layers,
+    the adapter being LoRA in this case. This way, we don’t have to train the full
+    model and keep the number of trainable parameters manageable. The resulting LoRAs
+    can then be applied to any fine-tuned version of the model without distilling
+    them separately. Additionally, the LoRAs can be applied to image-to-image, ControlNet/T2I-Adapter,
+    inpainting, AnimateDiff etc. The LCM-LoRA can also be combined with other LoRAs
+    to generate styled images in very few steps (4-8).
+  prefs: []
+  type: TYPE_NORMAL
+- en: LCM-LoRAs are available for [stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5),
+    [stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0),
+    and the [SSD-1B](https://huggingface.co/segmind/SSD-1B) model. All the checkpoints
+    can be found in this [collection](https://huggingface.co/collections/latent-consistency/latent-consistency-models-loras-654cdd24e111e16f0865fba6).
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more details about LCM-LoRA, refer to [the technical report](https://huggingface.co/papers/2311.05556).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide shows how to perform inference with LCM-LoRAs for
+  prefs: []
+  type: TYPE_NORMAL
+- en: text-to-image
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: image-to-image
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: combined with styled LoRAs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ControlNet/T2I-Adapter
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: inpainting
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: AnimateDiff
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Before going through this guide, we’ll take a look at the general workflow for
+    performing inference with LCM-LoRAs. LCM-LoRAs are similar to other Stable Diffusion
+    LoRAs so they can be used with any [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
+    that supports LoRAs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load the task specific pipeline and model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Set the scheduler to [LCMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lcm#diffusers.LCMScheduler).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Load the LCM-LoRA weights for the model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Reduce the `guidance_scale` between `[1.0, 2.0]` and set the `num_inference_steps`
+    between [4, 8].
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Perform inference with the pipeline with the usual parameters.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s look at how we can perform inference with LCM-LoRAs for different tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, make sure you have [peft](https://github.com/huggingface/peft) installed,
+    for better LoRA support.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-to-image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You’ll use the [StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline)
+    with the scheduler: [LCMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lcm#diffusers.LCMScheduler)
+    and then load the LCM-LoRA. Together with the LCM-LoRA and the scheduler, the
+    pipeline enables a fast inference workflow overcoming the slow iterative nature
+    of diffusion models.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/2ca06b97873717e791e8cb391d65c97e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Notice that we use only 4 steps for generation which is way less than what’s
+    typically used for standard SDXL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You may have noticed that we set `guidance_scale=1.0`, which disables classifer-free-guidance.
+    This is because the LCM-LoRA is trained with guidance, so the batch size does
+    not have to be doubled in this case. This leads to a faster inference time, with
+    the drawback that negative prompts don’t have any effect on the denoising process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also use guidance with LCM-LoRA, but due to the nature of training the
+    model is very sensitve to the `guidance_scale` values, high values can lead to
+    artifacts in the generated images. In our experiments, we found that the best
+    values are in the range of [1.0, 2.0].
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inference with a fine-tuned model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As mentioned above, the LCM-LoRA can be applied to any fine-tuned version of
+    the model without having to distill them separately. Let’s look at how we can
+    perform inference with a fine-tuned model. In this example, we’ll use the [animagine-xl](https://huggingface.co/Linaqruf/animagine-xl)
+    model, which is a fine-tuned version of the SDXL model for generating anime.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/7ca0f83858b96602e6d6532ddecb9a22.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Image-to-image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: LCM-LoRA can be applied to image-to-image tasks too. Let’s look at how we can
+    perform image-to-image generation with LCMs. For this example we’ll use the [dreamshaper-7](https://huggingface.co/Lykon/dreamshaper-7)
+    model and the LCM-LoRA for `stable-diffusion-v1-5` .
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/57491291a2825c214ac6c8fda2b34cfe.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: You can get different results based on your prompt and the image you provide.
+    To get the best results, we recommend trying different values for `num_inference_steps`,
+    `strength`, and `guidance_scale` parameters and choose the best one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Combine with styled LoRAs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: LCM-LoRA can be combined with other LoRAs to generate styled-images in very
+    few steps (4-8). In the following example, we’ll use the LCM-LoRA with the [papercut
+    LoRA](TheLastBen/Papercut_SDXL). To learn more about how to combine LoRAs, refer
+    to [this guide](https://huggingface.co/docs/diffusers/tutorials/using_peft_for_inference#combine-multiple-adapters).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/13ecbe2ca5401bbe4f7c504d04cc6b95.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: ControlNet/T2I-Adapter
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s look at how we can perform inference with ControlNet/T2I-Adapter and LCM-LoRA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ControlNet
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For this example, we’ll use the SD-v1-5 model and the LCM-LoRA for SD-v1-5 with
+    canny ControlNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/e92fb093ce9ab261a6081a45cf6ba97c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: The inference parameters in this example might not work for all examples, so
+    we recommend you to try different values for `num_inference_steps`, `guidance_scale`,
+    `controlnet_conditioning_scale` and `cross_attention_kwargs` parameters and choose
+    the best one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: T2I-Adapter
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This example shows how to use the LCM-LoRA with the [Canny T2I-Adapter](TencentARC/t2i-adapter-canny-sdxl-1.0)
+    and SDXL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/2ee6c4de3add72aae6b96e5673406b21.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Inpainting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: LCM-LoRA can be used for inpainting as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/b5493832202c5c129c84462826847ba1.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: AnimateDiff
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '`AnimateDiff` allows you to animate images using Stable Diffusion models. To
+    get good results, we need to generate multiple frames (16-24), and doing this
+    with standard SD models can be very slow. LCM-LoRA can be used to speed up the
+    process significantly, as you just need to do 4-8 steps for each frame. Let’s
+    look at how we can perform animation with LCM-LoRA and AnimateDiff.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/43e783334497532daab457d32f83c51a.png)'
+  prefs: []
+  type: TYPE_IMG

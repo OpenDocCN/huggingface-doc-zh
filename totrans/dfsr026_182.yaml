@@ -1,0 +1,863 @@
+- en: Würstchen
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/api/pipelines/wuerstchen](https://huggingface.co/docs/diffusers/api/pipelines/wuerstchen)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/86.d32613af.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Docstring.93f6f462.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/ExampleCodeBlock.658f5cd6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/e29b341d4d756c0a6cf4d1a787243bfc.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[Wuerstchen: An Efficient Architecture for Large-Scale Text-to-Image Diffusion
+    Models](https://huggingface.co/papers/2306.00637) is by Pablo Pernias, Dominic
+    Rampas, Mats L. Richter and Christopher Pal and Marc Aubreville.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We introduce Würstchen, a novel architecture for text-to-image synthesis that
+    combines competitive performance with unprecedented cost-effectiveness for large-scale
+    text-to-image diffusion models. A key contribution of our work is to develop a
+    latent diffusion technique in which we learn a detailed but extremely compact
+    semantic image representation used to guide the diffusion process. This highly
+    compressed representation of an image provides much more detailed guidance compared
+    to latent representations of language and this significantly reduces the computational
+    requirements to achieve state-of-the-art results. Our approach also improves the
+    quality of text-conditioned image generation based on our user preference study.
+    The training requirements of our approach consists of 24,602 A100-GPU hours -
+    compared to Stable Diffusion 2.1’s 200,000 GPU hours. Our approach also requires
+    less training data to achieve these results. Furthermore, our compact latent representations
+    allows us to perform inference over twice as fast, slashing the usual costs and
+    carbon footprint of a state-of-the-art (SOTA) diffusion model significantly, without
+    compromising the end performance. In a broader comparison against SOTA models
+    our approach is substantially more efficient and compares favorably in terms of
+    image quality. We believe that this work motivates more emphasis on the prioritization
+    of both performance and computational accessibility.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Würstchen Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Würstchen is a diffusion model, whose text-conditional model works in a highly
+    compressed latent space of images. Why is this important? Compressing data can
+    reduce computational costs for both training and inference by magnitudes. Training
+    on 1024x1024 images is way more expensive than training on 32x32\. Usually, other
+    works make use of a relatively small compression, in the range of 4x - 8x spatial
+    compression. Würstchen takes this to an extreme. Through its novel design, we
+    achieve a 42x spatial compression. This was unseen before because common methods
+    fail to faithfully reconstruct detailed images after 16x spatial compression.
+    Würstchen employs a two-stage compression, what we call Stage A and Stage B. Stage
+    A is a VQGAN, and Stage B is a Diffusion Autoencoder (more details can be found
+    in the [paper](https://huggingface.co/papers/2306.00637)). A third model, Stage
+    C, is learned in that highly compressed latent space. This training requires fractions
+    of the compute used for current top-performing models, while also allowing cheaper
+    and faster inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Würstchen v2 comes to Diffusers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: After the initial paper release, we have improved numerous things in the architecture,
+    training and sampling, making Würstchen competitive to current state-of-the-art
+    models in many ways. We are excited to release this new version together with
+    Diffusers. Here is a list of the improvements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Higher resolution (1024x1024 up to 2048x2048)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Faster inference
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multi Aspect Resolution Sampling
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Better quality
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We are releasing 3 checkpoints for the text-conditional image generation model
+    (Stage C). Those are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: v2-base
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: v2-aesthetic
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**(default)** v2-interpolated (50% interpolation between v2-base and v2-aesthetic)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We recommend using v2-interpolated, as it has a nice touch of both photorealism
+    and aesthetics. Use v2-base for finetunings as it does not have a style bias and
+    use v2-aesthetic for very artistic generations. A comparison can be seen here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/b06dcd2bc467532747508fc8c277921a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Text-to-Image Generation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For the sake of usability, Würstchen can be used with a single pipeline. This
+    pipeline can be used as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For explanation purposes, we can also initialize the two main pipelines of
+    Würstchen individually. Würstchen consists of 3 stages: Stage C, Stage B, Stage
+    A. They all have different jobs and work only together. When generating text-conditional
+    images, Stage C will first generate the latents in a very compressed latent space.
+    This is what happens in the `prior_pipeline`. Afterwards, the generated latents
+    will be passed to Stage B, which decompresses the latents into a bigger latent
+    space of a VQGAN. These latents can then be decoded by Stage A, which is a VQGAN,
+    into the pixel-space. Stage B & Stage A are both encapsulated in the `decoder_pipeline`.
+    For more details, take a look at the [paper](https://huggingface.co/papers/2306.00637).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Speed-Up Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can make use of `torch.compile` function and gain a speed-up of about 2-3x:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Limitations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Due to the high compression employed by Würstchen, generations can lack a good
+    amount of detail. To our human eye, this is especially noticeable in faces, hands
+    etc.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Images can only be generated in 128-pixel steps**, e.g. the next higher resolution
+    after 1024x1024 is 1152x1152'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The model lacks the ability to render correct text in images
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The model often does not achieve photorealism
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Difficult compositional prompts are hard for the model
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The original codebase, as well as experimental ideas, can be found at [dome272/Wuerstchen](https://github.com/dome272/Wuerstchen).
+  prefs: []
+  type: TYPE_NORMAL
+- en: WuerstchenCombinedPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.WuerstchenCombinedPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen_combined.py#L43)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: CLIPTokenizer text_encoder: CLIPTextModel decoder: WuerstchenDiffNeXt
+    scheduler: DDPMWuerstchenScheduler vqgan: PaellaVQModel prior_tokenizer: CLIPTokenizer
+    prior_text_encoder: CLIPTextModel prior_prior: WuerstchenPrior prior_scheduler:
+    DDPMWuerstchenScheduler )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**tokenizer** (`CLIPTokenizer`) — The decoder tokenizer to be used for text
+    inputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder** (`CLIPTextModel`) — The decoder text encoder to be used for
+    text inputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder** (`WuerstchenDiffNeXt`) — The decoder model to be used for decoder
+    image generation pipeline.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scheduler** (`DDPMWuerstchenScheduler`) — The scheduler to be used for decoder
+    image generation pipeline.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vqgan** (`PaellaVQModel`) — The VQGAN model to be used for decoder image
+    generation pipeline.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_tokenizer** (`CLIPTokenizer`) — The prior tokenizer to be used for
+    text inputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_text_encoder** (`CLIPTextModel`) — The prior text encoder to be used
+    for text inputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_prior** (`WuerstchenPrior`) — The prior model to be used for prior
+    pipeline.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_scheduler** (`DDPMWuerstchenScheduler`) — The scheduler to be used
+    for prior pipeline.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Combined Pipeline for text-to-image generation using Wuerstchen
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline).
+    Check the superclass documentation for the generic methods the library implements
+    for all the pipelines (such as downloading or saving, running on a particular
+    device, etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen_combined.py#L143)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None height: int = 512 width: int = 512 prior_num_inference_steps:
+    int = 60 prior_timesteps: Optional = None prior_guidance_scale: float = 4.0 num_inference_steps:
+    int = 12 decoder_timesteps: Optional = None decoder_guidance_scale: float = 0.0
+    negative_prompt: Union = None prompt_embeds: Optional = None negative_prompt_embeds:
+    Optional = None num_images_per_prompt: int = 1 generator: Union = None latents:
+    Optional = None output_type: Optional = ''pil'' return_dict: bool = True prior_callback_on_step_end:
+    Optional = None prior_callback_on_step_end_tensor_inputs: List = [''latents'']
+    callback_on_step_end: Optional = None callback_on_step_end_tensor_inputs: List
+    = [''latents''] **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`) — The prompt or prompts to guide the image
+    generation for the prior and decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. Ignored when not using guidance (i.e., ignored
+    if `guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings
+    for the prior. Can be used to easily tweak text inputs, *e.g.* prompt weighting.
+    If not provided, text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings for the prior. Can be used to easily tweak text inputs,
+    *e.g.* prompt weighting. If not provided, negative_prompt_embeds will be generated
+    from `negative_prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`, *optional*, defaults to 512) — The height in pixels of the
+    generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`, *optional*, defaults to 512) — The width in pixels of the
+    generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_guidance_scale** (`float`, *optional*, defaults to 4.0) — Guidance
+    scale as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `prior_guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `prior_guidance_scale > 1`. Higher guidance
+    scale encourages to generate images that are closely linked to the text `prompt`,
+    usually at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_num_inference_steps** (`Union[int, Dict[float, int]]`, *optional*,
+    defaults to 60) — The number of prior denoising steps. More denoising steps usually
+    lead to a higher quality image at the expense of slower inference. For more specific
+    timestep spacing, you can pass customized `prior_timesteps`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 12) — The number of
+    decoder denoising steps. More denoising steps usually lead to a higher quality
+    image at the expense of slower inference. For more specific timestep spacing,
+    you can pass customized `timesteps`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_timesteps** (`List[float]`, *optional*) — Custom timesteps to use for
+    the denoising process for the prior. If not defined, equal spaced `prior_num_inference_steps`
+    timesteps are used. Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder_timesteps** (`List[float]`, *optional*) — Custom timesteps to use
+    for the denoising process for the decoder. If not defined, equal spaced `num_inference_steps`
+    timesteps are used. Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder_guidance_scale** (`float`, *optional*, defaults to 0.0) — Guidance
+    scale as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `guidance_scale > 1`. Higher guidance scale
+    encourages to generate images that are closely linked to the text `prompt`, usually
+    at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latents** (`torch.FloatTensor`, *optional*) — Pre-generated noisy latents,
+    sampled from a Gaussian distribution, to be used as inputs for image generation.
+    Can be used to tweak the same generation with different prompts. If not provided,
+    a latents tensor will ge generated by sampling using the supplied random `generator`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between: `"pil"` (`PIL.Image.Image`), `"np"` (`np.array`)
+    or `"pt"` (`torch.Tensor`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_callback_on_step_end** (`Callable`, *optional*) — A function that calls
+    at the end of each denoising steps during the inference. The function is called
+    with the following arguments: `prior_callback_on_step_end(self: DiffusionPipeline,
+    step: int, timestep: int, callback_kwargs: Dict)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prior_callback_on_step_end_tensor_inputs** (`List`, *optional*) — The list
+    of tensor inputs for the `prior_callback_on_step_end` function. The tensors specified
+    in the list will be passed as `callback_kwargs` argument. You will only be able
+    to include variables listed in the `._callback_tensor_inputs` attribute of your
+    pipeline class.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_on_step_end** (`Callable`, *optional*) — A function that calls at
+    the end of each denoising steps during the inference. The function is called with
+    the following arguments: `callback_on_step_end(self: DiffusionPipeline, step:
+    int, timestep: int, callback_kwargs: Dict)`. `callback_kwargs` will include a
+    list of all tensors as specified by `callback_on_step_end_tensor_inputs`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_on_step_end_tensor_inputs** (`List`, *optional*) — The list of tensor
+    inputs for the `callback_on_step_end` function. The tensors specified in the list
+    will be passed as `callback_kwargs` argument. You will only be able to include
+    variables listed in the `._callback_tensor_inputs` attribute of your pipeline
+    class.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### enable_model_cpu_offload'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen_combined.py#L115)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( gpu_id = 0 )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Offloads all models to CPU using accelerate, reducing memory usage with a low
+    impact on performance. Compared to `enable_sequential_cpu_offload`, this method
+    moves one whole model at a time to the GPU when its `forward` method is called,
+    and the model remains in GPU until the next model runs. Memory savings are lower
+    than with `enable_sequential_cpu_offload`, but performance is much better due
+    to the iterative execution of the `unet`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_sequential_cpu_offload'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen_combined.py#L125)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( gpu_id = 0 )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Offloads all models (`unet`, `text_encoder`, `vae`, and `safety checker` state
+    dicts) to CPU using 🤗 Accelerate, significantly reducing memory usage. Models
+    are moved to a `torch.device('meta')` and loaded on a GPU only when their specific
+    submodule’s `forward` method is called. Offloading happens on a submodule basis.
+    Memory savings are higher than using `enable_model_cpu_offload`, but performance
+    is lower.
+  prefs: []
+  type: TYPE_NORMAL
+- en: WuerstchenPriorPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.WuerstchenPriorPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen_prior.py#L65)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: CLIPTokenizer text_encoder: CLIPTextModel prior: WuerstchenPrior
+    scheduler: DDPMWuerstchenScheduler latent_mean: float = 42.0 latent_std: float
+    = 1.0 resolution_multiple: float = 42.67 )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prior** (`Prior`) — The canonical unCLIP prior to approximate the image embedding
+    from the text embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder** (`CLIPTextModelWithProjection`) — Frozen text-encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer** (`CLIPTokenizer`) — Tokenizer of class [CLIPTokenizer](https://huggingface.co/docs/transformers/v4.21.0/en/model_doc/clip#transformers.CLIPTokenizer).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scheduler** (`DDPMWuerstchenScheduler`) — A scheduler to be used in combination
+    with `prior` to generate image embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latent_mean** (‘float’, *optional*, defaults to 42.0) — Mean value for latent
+    diffusers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latent_std** (‘float’, *optional*, defaults to 1.0) — Standard value for
+    latent diffusers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resolution_multiple** (‘float’, *optional*, defaults to 42.67) — Default
+    resolution for multiple images generated.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Pipeline for generating image prior for Wuerstchen.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline).
+    Check the superclass documentation for the generic methods the library implements
+    for all the pipelines (such as downloading or saving, running on a particular
+    device, etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The pipeline also inherits the following loading methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
+    for loading LoRA weights'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[save_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.save_lora_weights)
+    for saving LoRA weights'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen_prior.py#L280)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None height: int = 1024 width: int = 1024 num_inference_steps:
+    int = 60 timesteps: List = None guidance_scale: float = 8.0 negative_prompt: Union
+    = None prompt_embeds: Optional = None negative_prompt_embeds: Optional = None
+    num_images_per_prompt: Optional = 1 generator: Union = None latents: Optional
+    = None output_type: Optional = ''pt'' return_dict: bool = True callback_on_step_end:
+    Optional = None callback_on_step_end_tensor_inputs: List = [''latents''] **kwargs
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`) — The prompt or prompts to guide the image
+    generation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`, *optional*, defaults to 1024) — The height in pixels of
+    the generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`, *optional*, defaults to 1024) — The width in pixels of the
+    generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 60) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timesteps** (`List[int]`, *optional*) — Custom timesteps to use for the denoising
+    process. If not defined, equal spaced `num_inference_steps` timesteps are used.
+    Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 8.0) — Guidance scale
+    as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `decoder_guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `decoder_guidance_scale > 1`. Higher guidance
+    scale encourages to generate images that are closely linked to the text `prompt`,
+    usually at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. Ignored when not using guidance (i.e., ignored
+    if `decoder_guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latents** (`torch.FloatTensor`, *optional*) — Pre-generated noisy latents,
+    sampled from a Gaussian distribution, to be used as inputs for image generation.
+    Can be used to tweak the same generation with different prompts. If not provided,
+    a latents tensor will ge generated by sampling using the supplied random `generator`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between: `"pil"` (`PIL.Image.Image`), `"np"` (`np.array`)
+    or `"pt"` (`torch.Tensor`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_on_step_end** (`Callable`, *optional*) — A function that calls at
+    the end of each denoising steps during the inference. The function is called with
+    the following arguments: `callback_on_step_end(self: DiffusionPipeline, step:
+    int, timestep: int, callback_kwargs: Dict)`. `callback_kwargs` will include a
+    list of all tensors as specified by `callback_on_step_end_tensor_inputs`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_on_step_end_tensor_inputs** (`List`, *optional*) — The list of tensor
+    inputs for the `callback_on_step_end` function. The tensors specified in the list
+    will be passed as `callback_kwargs` argument. You will only be able to include
+    variables listed in the `._callback_tensor_inputs` attribute of your pipeline
+    class.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: WuerstchenPriorPipelineOutput
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.pipelines.wuerstchen.pipeline_wuerstchen_prior.WuerstchenPriorPipelineOutput'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen_prior.py#L51)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image_embeddings: Union )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image_embeddings** (`torch.FloatTensor` or `np.ndarray`) — Prior image embeddings
+    for text prompt'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Output class for WuerstchenPriorPipeline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: WuerstchenDecoderPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.WuerstchenDecoderPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen.py#L51)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: CLIPTokenizer text_encoder: CLIPTextModel decoder: WuerstchenDiffNeXt
+    scheduler: DDPMWuerstchenScheduler vqgan: PaellaVQModel latent_dim_scale: float
+    = 10.67 )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**tokenizer** (`CLIPTokenizer`) — The CLIP tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder** (`CLIPTextModel`) — The CLIP text encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder** (`WuerstchenDiffNeXt`) — The WuerstchenDiffNeXt unet decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vqgan** (`PaellaVQModel`) — The VQGAN model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scheduler** (`DDPMWuerstchenScheduler`) — A scheduler to be used in combination
+    with `prior` to generate image embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latent_dim_scale** (float, `optional`, defaults to 10.67) — Multiplier to
+    determine the VQ latent space size from the image embeddings. If the image embeddings
+    are height=24 and width=24, the VQ latent shape needs to be height=int(24*10.67)=256
+    and width=int(24*10.67)=256 in order to match the training conditions.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Pipeline for generating images from the Wuerstchen model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline).
+    Check the superclass documentation for the generic methods the library implements
+    for all the pipelines (such as downloading or saving, running on a particular
+    device, etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/wuerstchen/pipeline_wuerstchen.py#L208)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image_embeddings: Union prompt: Union = None num_inference_steps: int = 12
+    timesteps: Optional = None guidance_scale: float = 0.0 negative_prompt: Union
+    = None num_images_per_prompt: int = 1 generator: Union = None latents: Optional
+    = None output_type: Optional = ''pil'' return_dict: bool = True callback_on_step_end:
+    Optional = None callback_on_step_end_tensor_inputs: List = [''latents''] **kwargs
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image_embedding** (`torch.FloatTensor` or `List[torch.FloatTensor]`) — Image
+    Embeddings either extracted from an image or generated by a Prior Model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`) — The prompt or prompts to guide the image
+    generation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 12) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timesteps** (`List[int]`, *optional*) — Custom timesteps to use for the denoising
+    process. If not defined, equal spaced `num_inference_steps` timesteps are used.
+    Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 0.0) — Guidance scale
+    as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `decoder_guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `decoder_guidance_scale > 1`. Higher guidance
+    scale encourages to generate images that are closely linked to the text `prompt`,
+    usually at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. Ignored when not using guidance (i.e., ignored
+    if `decoder_guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latents** (`torch.FloatTensor`, *optional*) — Pre-generated noisy latents,
+    sampled from a Gaussian distribution, to be used as inputs for image generation.
+    Can be used to tweak the same generation with different prompts. If not provided,
+    a latents tensor will ge generated by sampling using the supplied random `generator`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between: `"pil"` (`PIL.Image.Image`), `"np"` (`np.array`)
+    or `"pt"` (`torch.Tensor`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [ImagePipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_unclip#diffusers.ImagePipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_on_step_end** (`Callable`, *optional*) — A function that calls at
+    the end of each denoising steps during the inference. The function is called with
+    the following arguments: `callback_on_step_end(self: DiffusionPipeline, step:
+    int, timestep: int, callback_kwargs: Dict)`. `callback_kwargs` will include a
+    list of all tensors as specified by `callback_on_step_end_tensor_inputs`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_on_step_end_tensor_inputs** (`List`, *optional*) — The list of tensor
+    inputs for the `callback_on_step_end` function. The tensors specified in the list
+    will be passed as `callback_kwargs` argument. You will only be able to include
+    variables listed in the `._callback_tensor_inputs` attribute of your pipeline
+    class.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Citation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE

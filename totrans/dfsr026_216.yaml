@@ -1,0 +1,573 @@
+- en: VAE Image Processor
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/api/image_processor](https://huggingface.co/docs/diffusers/api/image_processor)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/5.6e89d26a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Docstring.93f6f462.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `VaeImageProcessor` provides a unified API for [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)s
+    to prepare image inputs for VAE encoding and post-processing outputs once they’re
+    decoded. This includes transformations such as resizing, normalization, and conversion
+    between PIL Image, PyTorch, and NumPy arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All pipelines with `VaeImageProcessor` accept PIL Image, PyTorch tensor, or
+    NumPy arrays as image inputs and return outputs based on the `output_type` argument
+    by the user. You can pass encoded image latents directly to the pipeline and return
+    latents from the pipeline as a specific output with the `output_type` argument
+    (for example `output_type="latent"`). This allows you to take the generated latents
+    from one pipeline and pass it to another pipeline as input without leaving the
+    latent space. It also makes it much easier to use multiple pipelines together
+    by passing PyTorch tensors directly between different pipelines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: VaeImageProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.image_processor.VaeImageProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L39)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_resize: bool = True vae_scale_factor: int = 8 resample: str = ''lanczos''
+    do_normalize: bool = True do_binarize: bool = False do_convert_rgb: bool = False
+    do_convert_grayscale: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Whether to downscale
+    the image’s (height, width) dimensions to multiples of `vae_scale_factor`. Can
+    accept `height` and `width` arguments from [image_processor.VaeImageProcessor.preprocess()](/docs/diffusers/v0.26.3/en/api/image_processor#diffusers.image_processor.VaeImageProcessor.preprocess)
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vae_scale_factor** (`int`, *optional*, defaults to `8`) — VAE scale factor.
+    If `do_resize` is `True`, the image is automatically resized to multiples of this
+    factor.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`str`, *optional*, defaults to `lanczos`) — Resampling filter
+    to use when resizing the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `True`) — Whether to normalize
+    the image to [-1,1].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_binarize** (`bool`, *optional*, defaults to `False`) — Whether to binarize
+    the image to 0/1.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_convert_rgb** (`bool`, *optional*, defaults to be `False`) — Whether to
+    convert the images to RGB format.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_convert_grayscale** (`bool`, *optional*, defaults to be `False`) — Whether
+    to convert the images to grayscale format.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Image processor for VAE.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### apply_overlay'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L610)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( mask: Image init_image: Image image: Image crop_coords: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: overlay the inpaint output to the original image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### binarize'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L384)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Image ) → `PIL.Image.Image`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image** (`PIL.Image.Image`) — The image input, should be a PIL image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PIL.Image.Image`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The binarized image. Values less than 0.5 are set to 0, values greater than
+    0.5 are set to 1.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a mask.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### blur'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L162)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Image blur_factor: int = 4 )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Applies Gaussian blur to an image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### convert_to_grayscale'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L153)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Image )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converts a PIL image to grayscale format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### convert_to_rgb'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L144)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Image )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converts a PIL image to RGB format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### denormalize'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L137)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Denormalize an image array to [0,1].
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### get_crop_region'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L171)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( mask_image: Image width: int height: int pad = 0 ) → tuple'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**mask_image** (PIL.Image.Image) — Mask image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (int) — Width of the image to be processed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (int) — Height of the image to be processed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad** (int, optional) — Padding to be added to the crop region. Defaults
+    to 0.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: tuple
+  prefs: []
+  type: TYPE_NORMAL
+- en: (x1, y1, x2, y2) represent a rectangular region that contains all masked ares
+    in an image and matches the original aspect ratio.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finds a rectangular region that contains all masked ares in an image, and expands
+    region to match the aspect ratio of the original image; for example, if user drew
+    mask in a 128x32 region, and the dimensions for processing are 512x512, the region
+    will be expanded to 128x128.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### get_default_height_width'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L401)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Union height: Optional = None width: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image(`PIL.Image.Image`,** `np.ndarray` or `torch.Tensor`) — The image input,
+    can be a PIL image, numpy array or pytorch tensor. if it is a numpy array, should
+    have shape `[batch, height, width]` or `[batch, height, width, channel]` if it
+    is a pytorch tensor, should have shape `[batch, channel, height, width]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`, *optional*, defaults to `None`) — The height in preprocessed
+    image. If `None`, will use the height of `image` input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`, *optional*`, defaults to` None`) -- The width in preprocessed.
+    If` None`, will use the width of the` image` input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This function return the height and width that are downscaled to the next integer
+    multiple of `vae_scale_factor`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### normalize'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L130)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Normalize an image array to [-1,1].
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### numpy_to_pil'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L83)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: ndarray )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Convert a numpy image or a batch of images to a PIL image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### numpy_to_pt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L111)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: ndarray )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Convert a NumPy image to a PyTorch tensor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### pil_to_numpy'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L99)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Convert a PIL image or a list of PIL images to NumPy arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### postprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L555)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: FloatTensor output_type: str = ''pil'' do_denormalize: Optional =
+    None ) → `PIL.Image.Image`, `np.ndarray` or `torch.FloatTensor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image** (`torch.FloatTensor`) — The image input, should be a pytorch tensor
+    with shape `B x C x H x W`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `pil`) — The output type of
+    the image, can be one of `pil`, `np`, `pt`, `latent`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_denormalize** (`List[bool]`, *optional*, defaults to `None`) — Whether
+    to denormalize the image to [0,1]. If `None`, will use the value of `do_normalize`
+    in the `VaeImageProcessor` config.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PIL.Image.Image`, `np.ndarray` or `torch.FloatTensor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The postprocessed image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Postprocess the image output from tensor to `output_type`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L444)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Union height: Optional = None width: Optional = None resize_mode:
+    str = ''default'' crops_coords: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image** (`pipeline_image_input`) — The image input, accepted formats are
+    PIL images, NumPy arrays, PyTorch tensors; Also accept list of supported formats.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`, *optional*, defaults to `None`) — The height in preprocessed
+    image. If `None`, will use the `get_default_height_width()` to get default height.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`, *optional*`, defaults to` None`) -- The width in preprocessed.
+    If` None`, will use get_default_height_width()` to get the default width.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resize_mode** (`str`, *optional*, defaults to `default`) — The resize mode,
+    can be one of `default` or `fill`. If `default`, will resize the image to fit
+    within the specified width and height, and it may not maintaining the original
+    aspect ratio. If `fill`, will resize the image to fit within the specified width
+    and height, maintaining the aspect ratio, and then center the image within the
+    dimensions, filling empty with data from image. If `crop`, will resize the image
+    to fit within the specified width and height, maintaining the aspect ratio, and
+    then center the image within the dimensions, cropping the excess. Note that resize_mode
+    `fill` and `crop` are only supported for PIL image input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crops_coords** (`List[Tuple[int, int, int, int]]`, *optional*, defaults to
+    `None`) — The crop coordinates for each image in the batch. If `None`, will not
+    crop the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocess the image input.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### pt_to_numpy'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L122)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: FloatTensor )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Convert a PyTorch tensor to a NumPy image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### resize'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L328)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Union height: int width: int resize_mode: str = ''default'' ) → `PIL.Image.Image`,
+    `np.ndarray` or `torch.Tensor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image** (`PIL.Image.Image`, `np.ndarray` or `torch.Tensor`) — The image input,
+    can be a PIL image, numpy array or pytorch tensor.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`) — The height to resize to.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`) — The width to resize to.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resize_mode** (`str`, *optional*, defaults to `default`) — The resize mode
+    to use, can be one of `default` or `fill`. If `default`, will resize the image
+    to fit within the specified width and height, and it may not maintaining the original
+    aspect ratio. If `fill`, will resize the image to fit within the specified width
+    and height, maintaining the aspect ratio, and then center the image within the
+    dimensions, filling empty with data from image. If `crop`, will resize the image
+    to fit within the specified width and height, maintaining the aspect ratio, and
+    then center the image within the dimensions, cropping the excess. Note that resize_mode
+    `fill` and `crop` are only supported for PIL image input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PIL.Image.Image`, `np.ndarray` or `torch.Tensor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The resized image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Resize image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: VaeImageProcessorLDM3D
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `VaeImageProcessorLDM3D` accepts RGB and depth inputs and returns RGB and
+    depth outputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### class diffusers.image_processor.VaeImageProcessorLDM3D'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L646)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_resize: bool = True vae_scale_factor: int = 8 resample: str = ''lanczos''
+    do_normalize: bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Whether to downscale
+    the image’s (height, width) dimensions to multiples of `vae_scale_factor`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vae_scale_factor** (`int`, *optional*, defaults to `8`) — VAE scale factor.
+    If `do_resize` is `True`, the image is automatically resized to multiples of this
+    factor.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`str`, *optional*, defaults to `lanczos`) — Resampling filter
+    to use when resizing the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `True`) — Whether to normalize
+    the image to [-1,1].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Image processor for VAE LDM3D.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### depth_pil_to_numpy'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L689)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Convert a PIL image or a list of PIL images to NumPy arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### numpy_to_depth'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L712)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: ndarray )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Convert a NumPy depth image or a batch of images to a PIL image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### numpy_to_pil'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L673)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: ndarray )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Convert a NumPy image or a batch of images to a PIL image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L787)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( rgb: Union depth: Union height: Optional = None width: Optional = None target_res:
+    Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preprocess the image input. Accepted formats are PIL images, NumPy arrays or
+    PyTorch tensors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### rgblike_to_depthmap'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/image_processor.py#L701)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Union )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Returns: depth map'
+  prefs: []
+  type: TYPE_NORMAL

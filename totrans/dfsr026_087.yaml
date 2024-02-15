@@ -1,0 +1,300 @@
+- en: How to run Stable Diffusion with Core ML
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/optimization/coreml](https://huggingface.co/docs/diffusers/optimization/coreml)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/120.948c854e.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Core ML](https://developer.apple.com/documentation/coreml) is the model format
+    and machine learning library supported by Apple frameworks. If you are interested
+    in running Stable Diffusion models inside your macOS or iOS/iPadOS apps, this
+    guide will show you how to convert existing PyTorch checkpoints into the Core
+    ML format and use them for inference with Python or Swift.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Core ML models can leverage all the compute engines available in Apple devices:
+    the CPU, the GPU, and the Apple Neural Engine (or ANE, a tensor-optimized accelerator
+    available in Apple Silicon Macs and modern iPhones/iPads). Depending on the model
+    and the device it’s running on, Core ML can mix and match compute engines too,
+    so some portions of the model may run on the CPU while others run on GPU, for
+    example.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also run the `diffusers` Python codebase on Apple Silicon Macs using
+    the `mps` accelerator built into PyTorch. This approach is explained in depth
+    in [the mps guide](mps), but it is not compatible with native apps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stable Diffusion Core ML Checkpoints
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Stable Diffusion weights (or checkpoints) are stored in the PyTorch format,
+    so you need to convert them to the Core ML format before we can use them inside
+    native apps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thankfully, Apple engineers developed [a conversion tool](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml)
+    based on `diffusers` to convert the PyTorch checkpoints to Core ML.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you convert a model, though, take a moment to explore the Hugging Face
+    Hub – chances are the model you’re interested in is already available in Core
+    ML format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: the [Apple](https://huggingface.co/apple) organization includes Stable Diffusion
+    versions 1.4, 1.5, 2.0 base, and 2.1 base
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[coreml community](https://huggingface.co/coreml-community) includes custom
+    finetuned models'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: use this [filter](https://huggingface.co/models?pipeline_tag=text-to-image&library=coreml&p=2&sort=likes)
+    to return all available Core ML checkpoints
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you can’t find the model you’re interested in, we recommend you follow the
+    instructions for [Converting Models to Core ML](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml)
+    by Apple.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Selecting the Core ML Variant to Use
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Stable Diffusion models can be converted to different Core ML variants intended
+    for different purposes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The type of attention blocks used. The attention operation is used to “pay
+    attention” to the relationship between different areas in the image representations
+    and to understand how the image and text representations are related. Attention
+    is compute- and memory-intensive, so different implementations exist that consider
+    the hardware characteristics of different devices. For Core ML Stable Diffusion
+    models, there are two attention variants:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`split_einsum` ([introduced by Apple](https://machinelearning.apple.com/research/neural-engine-transformers))
+    is optimized for ANE devices, which is available in modern iPhones, iPads and
+    M-series computers.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The “original” attention (the base implementation used in `diffusers`) is only
+    compatible with CPU/GPU and not ANE. It can be *faster* to run your model on CPU
+    + GPU using `original` attention than ANE. See [this performance benchmark](https://huggingface.co/blog/fast-mac-diffusers#performance-benchmarks)
+    as well as some [additional measures provided by the community](https://github.com/huggingface/swift-coreml-diffusers/issues/31)
+    for additional details.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The supported inference framework.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`packages` are suitable for Python inference. This can be used to test converted
+    Core ML models before attempting to integrate them inside native apps, or if you
+    want to explore Core ML performance but don’t need to support native apps. For
+    example, an application with a web UI could perfectly use a Python Core ML backend.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`compiled` models are required for Swift code. The `compiled` models in the
+    Hub split the large UNet model weights into several files for compatibility with
+    iOS and iPadOS devices. This corresponds to the [`--chunk-unet` conversion option](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml).
+    If you want to support native apps, then you need to select the `compiled` variant.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The official Core ML Stable Diffusion [models](https://huggingface.co/apple/coreml-stable-diffusion-v1-4/tree/main)
+    include these variants, but the community ones may vary:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can download and use the variant you need as shown below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Core ML Inference in Python
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Install the following libraries to run Core ML inference in Python:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Download the Model Checkpoints
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To run inference in Python, use one of the versions stored in the `packages`
+    folders because the `compiled` ones are only compatible with Swift. You may choose
+    whether you want to use `original` or `split_einsum` attention.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is how you’d download the `original` attention variant from the Hub to
+    a directory called `models`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inference
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Once you have downloaded a snapshot of the model, you can test it using Apple’s
+    Python script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass the path of the downloaded checkpoint with `-i` flag to the script. `--compute-unit`
+    indicates the hardware you want to allow for inference. It must be one of the
+    following options: `ALL`, `CPU_AND_GPU`, `CPU_ONLY`, `CPU_AND_NE`. You may also
+    provide an optional output path, and a seed for reproducibility.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The inference script assumes you’re using the original version of the Stable
+    Diffusion model, `CompVis/stable-diffusion-v1-4`. If you use another model, you
+    *have* to specify its Hub id in the inference command line, using the `--model-version`
+    option. This works for models already supported and custom models you trained
+    or fine-tuned yourself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, if you want to use [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Core ML inference in Swift
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Running inference in Swift is slightly faster than in Python because the models
+    are already compiled in the `mlmodelc` format. This is noticeable on app startup
+    when the model is loaded but shouldn’t be noticeable if you run several generations
+    afterward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Download
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To run inference in Swift on your Mac, you need one of the `compiled` checkpoint
+    versions. We recommend you download them locally using Python code similar to
+    the previous example, but with one of the `compiled` variants:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inference
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To run inference, please clone Apple’s repo:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And then use Apple’s command line tool, [Swift Package Manager](https://www.swift.org/package-manager/#):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You have to specify in `--resource-path` one of the checkpoints downloaded
+    in the previous step, so please make sure it contains compiled Core ML bundles
+    with the extension `.mlmodelc`. The `--compute-units` has to be one of these values:
+    `all`, `cpuOnly`, `cpuAndGPU`, `cpuAndNeuralEngine`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more details, please refer to the [instructions in Apple’s repo](https://github.com/apple/ml-stable-diffusion).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Supported Diffusers Features
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Core ML models and inference code don’t support many of the features, options,
+    and flexibility of 🧨 Diffusers. These are some of the limitations to keep in mind:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Core ML models are only suitable for inference. They can’t be used for training
+    or fine-tuning.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Only two schedulers have been ported to Swift, the default one used by Stable
+    Diffusion and `DPMSolverMultistepScheduler`, which we ported to Swift from our
+    `diffusers` implementation. We recommend you use `DPMSolverMultistepScheduler`,
+    since it produces the same quality in about half the steps.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Negative prompts, classifier-free guidance scale, and image-to-image tasks are
+    available in the inference code. Advanced features such as depth guidance, ControlNet,
+    and latent upscalers are not available yet.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Apple’s [conversion and inference repo](https://github.com/apple/ml-stable-diffusion)
+    and our own [swift-coreml-diffusers](https://github.com/huggingface/swift-coreml-diffusers)
+    repos are intended as technology demonstrators to enable other developers to build
+    upon.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you feel strongly about any missing features, please feel free to open a
+    feature request or, better yet, a contribution PR 🙂.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Native Diffusers Swift app
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One easy way to run Stable Diffusion on your own Apple hardware is to use [our
+    open-source Swift repo](https://github.com/huggingface/swift-coreml-diffusers),
+    based on `diffusers` and Apple’s conversion and inference repo. You can study
+    the code, compile it with [Xcode](https://developer.apple.com/xcode/) and adapt
+    it for your own needs. For your convenience, there’s also a [standalone Mac app
+    in the App Store](https://apps.apple.com/app/diffusers/id1666309574), so you can
+    play with it without having to deal with the code or IDE. If you are a developer
+    and have determined that Core ML is the best solution to build your Stable Diffusion
+    app, then you can use the rest of this guide to get started with your project.
+    We can’t wait to see what you’ll build 🙂.
+  prefs: []
+  type: TYPE_NORMAL

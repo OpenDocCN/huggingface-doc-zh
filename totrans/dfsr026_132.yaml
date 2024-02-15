@@ -1,0 +1,1002 @@
+- en: AudioLDM 2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/api/pipelines/audioldm2](https://huggingface.co/docs/diffusers/api/pipelines/audioldm2)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/36.af5619bd.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Docstring.93f6f462.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/ExampleCodeBlock.658f5cd6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'AudioLDM 2 was proposed in [AudioLDM 2: Learning Holistic Audio Generation
+    with Self-supervised Pretraining](https://arxiv.org/abs/2308.05734) by Haohe Liu
+    et al. AudioLDM 2 takes a text prompt as input and predicts the corresponding
+    audio. It can generate text-conditional sound effects, human speech and music.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Inspired by [Stable Diffusion](https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/overview),
+    AudioLDM 2 is a text-to-audio *latent diffusion model (LDM)* that learns continuous
+    audio representations from text embeddings. Two text encoder models are used to
+    compute the text embeddings from a prompt input: the text-branch of [CLAP](https://huggingface.co/docs/transformers/main/en/model_doc/clap)
+    and the encoder of [Flan-T5](https://huggingface.co/docs/transformers/main/en/model_doc/flan-t5).
+    These text embeddings are then projected to a shared embedding space by an [AudioLDM2ProjectionModel](https://huggingface.co/docs/diffusers/main/api/pipelines/audioldm2#diffusers.AudioLDM2ProjectionModel).
+    A [GPT2](https://huggingface.co/docs/transformers/main/en/model_doc/gpt2) *language
+    model (LM)* is used to auto-regressively predict eight new embedding vectors,
+    conditional on the projected CLAP and Flan-T5 embeddings. The generated embedding
+    vectors and Flan-T5 text embeddings are used as cross-attention conditioning in
+    the LDM. The [UNet](https://huggingface.co/docs/diffusers/main/en/api/pipelines/audioldm2#diffusers.AudioLDM2UNet2DConditionModel)
+    of AudioLDM 2 is unique in the sense that it takes **two** cross-attention embeddings,
+    as opposed to one cross-attention conditioning, as in most other LDMs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract of the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Although audio generation shares commonalities across different types of audio,
+    such as speech, music, and sound effects, designing models for each type requires
+    careful consideration of specific objectives and biases that can significantly
+    differ from those of other types. To bring us closer to a unified perspective
+    of audio generation, this paper proposes a framework that utilizes the same learning
+    method for speech, music, and sound effect generation. Our framework introduces
+    a general representation of audio, called “language of audio” (LOA). Any audio
+    can be translated into LOA based on AudioMAE, a self-supervised pre-trained representation
+    learning model. In the generation process, we translate any modalities into LOA
+    by using a GPT-2 model, and we perform self-supervised audio generation learning
+    with a latent diffusion model conditioned on LOA. The proposed framework naturally
+    brings advantages such as in-context learning abilities and reusable self-supervised
+    pretrained AudioMAE and latent diffusion models. Experiments on the major benchmarks
+    of text-to-audio, text-to-music, and text-to-speech demonstrate state-of-the-art
+    or competitive performance against previous approaches. Our code, pretrained model,
+    and demo are available at [this https URL](https://audioldm.github.io/audioldm2).*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This pipeline was contributed by [sanchit-gandhi](https://huggingface.co/sanchit-gandhi).
+    The original codebase can be found at [haoheliu/audioldm2](https://github.com/haoheliu/audioldm2).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Choosing a checkpoint
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: AudioLDM2 comes in three variants. Two of these checkpoints are applicable to
+    the general task of text-to-audio generation. The third checkpoint is trained
+    exclusively on text-to-music generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'All checkpoints share the same model size for the text encoders and VAE. They
+    differ in the size and depth of the UNet. See table below for details on the three
+    checkpoints:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Checkpoint | Task | UNet Model Size | Total Model Size | Training Data /
+    h |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [audioldm2](https://huggingface.co/cvssp/audioldm2) | Text-to-audio | 350M
+    | 1.1B | 1150k |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [audioldm2-large](https://huggingface.co/cvssp/audioldm2-large) | Text-to-audio
+    | 750M | 1.5B | 1150k |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [audioldm2-music](https://huggingface.co/cvssp/audioldm2-music) | Text-to-music
+    | 350M | 1.1B | 665k |'
+  prefs: []
+  type: TYPE_TB
+- en: Constructing a prompt
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Descriptive prompt inputs work best: use adjectives to describe the sound (e.g.
+    “high quality” or “clear”) and make the prompt context specific (e.g. “water stream
+    in a forest” instead of “stream”).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It’s best to use general terms like “cat” or “dog” instead of specific names
+    or abstract objects the model may not be familiar with.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using a **negative prompt** can significantly improve the quality of the generated
+    waveform, by guiding the generation away from terms that correspond to poor quality
+    audio. Try using a negative prompt of “Low quality.”
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Controlling inference
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The *quality* of the predicted audio sample can be controlled by the `num_inference_steps`
+    argument; higher steps give higher quality audio at the expense of slower inference.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The *length* of the predicted audio sample can be controlled by varying the
+    `audio_length_in_s` argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Evaluating generated waveforms:'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The quality of the generated waveforms can vary significantly based on the seed.
+    Try generating with different seeds until you find a satisfactory generation.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Multiple waveforms can be generated in one go: set `num_waveforms_per_prompt`
+    to a value greater than 1\. Automatic scoring will be performed between the generated
+    waveforms and prompt text, and the audios ranked from best to worst accordingly.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following example demonstrates how to construct good music generation using
+    the aforementioned tips: [example](https://huggingface.co/docs/diffusers/main/en/api/pipelines/audioldm2#diffusers.AudioLDM2Pipeline.__call__.example).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make sure to check out the Schedulers [guide](../../using-diffusers/schedulers)
+    to learn how to explore the tradeoff between scheduler speed and quality, and
+    see the [reuse components across pipelines](../../using-diffusers/loading#reuse-components-across-pipelines)
+    section to learn how to efficiently load the same components into multiple pipelines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: AudioLDM2Pipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.AudioLDM2Pipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/pipeline_audioldm2.py#L103)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vae: AutoencoderKL text_encoder: ClapModel text_encoder_2: T5EncoderModel
+    projection_model: AudioLDM2ProjectionModel language_model: GPT2Model tokenizer:
+    Union tokenizer_2: Union feature_extractor: ClapFeatureExtractor unet: AudioLDM2UNet2DConditionModel
+    scheduler: KarrasDiffusionSchedulers vocoder: SpeechT5HifiGan )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vae** ([AutoencoderKL](/docs/diffusers/v0.26.3/en/api/models/autoencoderkl#diffusers.AutoencoderKL))
+    — Variational Auto-Encoder (VAE) model to encode and decode images to and from
+    latent representations.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder** ([ClapModel](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clap#transformers.ClapModel))
+    — First frozen text-encoder. AudioLDM2 uses the joint audio-text embedding model
+    [CLAP](https://huggingface.co/docs/transformers/model_doc/clap#transformers.CLAPTextModelWithProjection),
+    specifically the [laion/clap-htsat-unfused](https://huggingface.co/laion/clap-htsat-unfused)
+    variant. The text branch is used to encode the text prompt to a prompt embedding.
+    The full audio-text model is used to rank generated waveforms against the text
+    prompt by computing similarity scores.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder_2** ([T5EncoderModel](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/t5#transformers.T5EncoderModel))
+    — Second frozen text-encoder. AudioLDM2 uses the encoder of [T5](https://huggingface.co/docs/transformers/model_doc/t5#transformers.T5EncoderModel),
+    specifically the [google/flan-t5-large](https://huggingface.co/google/flan-t5-large)
+    variant.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**projection_model** ([AudioLDM2ProjectionModel](/docs/diffusers/v0.26.3/en/api/pipelines/audioldm2#diffusers.AudioLDM2ProjectionModel))
+    — A trained model used to linearly project the hidden-states from the first and
+    second text encoder models and insert learned SOS and EOS token embeddings. The
+    projected hidden-states from the two text encoders are concatenated to give the
+    input to the language model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**language_model** ([GPT2Model](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/gpt2#transformers.GPT2Model))
+    — An auto-regressive language model used to generate a sequence of hidden-states
+    conditioned on the projected outputs from the two text encoders.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer** ([RobertaTokenizer](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/roberta#transformers.RobertaTokenizer))
+    — Tokenizer to tokenize text for the first frozen text-encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer_2** ([T5Tokenizer](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/mt5#transformers.T5Tokenizer))
+    — Tokenizer to tokenize text for the second frozen text-encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**feature_extractor** ([ClapFeatureExtractor](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clap#transformers.ClapFeatureExtractor))
+    — Feature extractor to pre-process generated audio waveforms to log-mel spectrograms
+    for automatic scoring.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unet** ([UNet2DConditionModel](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.UNet2DConditionModel))
+    — A `UNet2DConditionModel` to denoise the encoded audio latents.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scheduler** ([SchedulerMixin](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin))
+    — A scheduler to be used in combination with `unet` to denoise the encoded audio
+    latents. Can be one of [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    [LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler),
+    or [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vocoder** ([SpeechT5HifiGan](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/speecht5#transformers.SpeechT5HifiGan))
+    — Vocoder of class `SpeechT5HifiGan` to convert the mel-spectrogram latents to
+    the final audio waveform.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Pipeline for text-to-audio generation using AudioLDM2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline).
+    Check the superclass documentation for the generic methods implemented for all
+    pipelines (downloading, saving, running on a particular device, etc.).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/pipeline_audioldm2.py#L732)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None audio_length_in_s: Optional = None num_inference_steps:
+    int = 200 guidance_scale: float = 3.5 negative_prompt: Union = None num_waveforms_per_prompt:
+    Optional = 1 eta: float = 0.0 generator: Union = None latents: Optional = None
+    prompt_embeds: Optional = None negative_prompt_embeds: Optional = None generated_prompt_embeds:
+    Optional = None negative_generated_prompt_embeds: Optional = None attention_mask:
+    Optional = None negative_attention_mask: Optional = None max_new_tokens: Optional
+    = None return_dict: bool = True callback: Optional = None callback_steps: Optional
+    = 1 cross_attention_kwargs: Optional = None output_type: Optional = ''np'' ) →
+    [StableDiffusionPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.pipelines.stable_diffusion.StableDiffusionPipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    audio generation. If not defined, you need to pass `prompt_embeds`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**audio_length_in_s** (`int`, *optional*, defaults to 10.24) — The length of
+    the generated audio sample in seconds.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 200) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality audio at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 3.5) — A higher guidance
+    scale value encourages the model to generate audio that is closely linked to the
+    text `prompt` at the expense of lower sound quality. Guidance scale is enabled
+    when `guidance_scale > 1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    to guide what to not include in audio generation. If not defined, you need to
+    pass `negative_prompt_embeds` instead. Ignored when not using guidance (`guidance_scale
+    < 1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_waveforms_per_prompt** (`int`, *optional*, defaults to 1) — The number
+    of waveforms to generate per prompt. If `num_waveforms_per_prompt > 1`, then automatic
+    scoring is performed between the generated outputs and the text prompt. This scoring
+    ranks the generated waveforms based on their cosine similarity with the text input
+    in the joint text-audio embedding space.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) from the [DDIM](https://arxiv.org/abs/2010.02502) paper. Only applies to the
+    [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    and is ignored in other schedulers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    A [`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latents** (`torch.FloatTensor`, *optional*) — Pre-generated noisy latents
+    sampled from a Gaussian distribution, to be used as inputs for spectrogram generation.
+    Can be used to tweak the same generation with different prompts. If not provided,
+    a latents tensor is generated by sampling using the supplied random `generator`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs (prompt weighting). If not provided, text
+    embeddings are generated from the `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs (prompt weighting).
+    If not provided, `negative_prompt_embeds` are generated from the `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generated_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    text embeddings from the GPT2 langauge model. Can be used to easily tweak text
+    inputs, *e.g.* prompt weighting. If not provided, text embeddings will be generated
+    from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_generated_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings from the GPT2 language model. Can be used to easily tweak
+    text inputs, *e.g.* prompt weighting. If not provided, negative_prompt_embeds
+    will be computed from `negative_prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.LongTensor`, *optional*) — Pre-computed attention
+    mask to be applied to the `prompt_embeds`. If not provided, attention mask will
+    be computed from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_attention_mask** (`torch.LongTensor`, *optional*) — Pre-computed
+    attention mask to be applied to the `negative_prompt_embeds`. If not provided,
+    attention mask will be computed from `negative_prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_new_tokens** (`int`, *optional*, defaults to None) — Number of new tokens
+    to generate with the GPT2 language model. If not provided, number of tokens will
+    be taken from the config of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [StableDiffusionPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.pipelines.stable_diffusion.StableDiffusionPipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that calls every `callback_steps`
+    steps during inference. The function is called with the following arguments: `callback(step:
+    int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function is called. If not specified, the callback is called at
+    every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined in [`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"np"`) — The output format
+    of the generated audio. Choose between `"np"` to return a NumPy `np.ndarray` or
+    `"pt"` to return a PyTorch `torch.Tensor` object. Set to `"latent"` to return
+    the latent diffusion model (LDM) output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[StableDiffusionPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.pipelines.stable_diffusion.StableDiffusionPipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `return_dict` is `True`, [StableDiffusionPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.pipelines.stable_diffusion.StableDiffusionPipelineOutput)
+    is returned, otherwise a `tuple` is returned where the first element is a list
+    with the generated audio.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The call function to the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### disable_vae_slicing'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/pipeline_audioldm2.py#L185)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disable sliced VAE decoding. If `enable_vae_slicing` was previously enabled,
+    this method will go back to computing decoding in one step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_model_cpu_offload'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/pipeline_audioldm2.py#L192)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( gpu_id = 0 )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Offloads all models to CPU using accelerate, reducing memory usage with a low
+    impact on performance. Compared to `enable_sequential_cpu_offload`, this method
+    moves one whole model at a time to the GPU when its `forward` method is called,
+    and the model remains in GPU until the next model runs. Memory savings are lower
+    than with `enable_sequential_cpu_offload`, but performance is much better due
+    to the iterative execution of the `unet`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_vae_slicing'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/pipeline_audioldm2.py#L177)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enable sliced VAE decoding. When this option is enabled, the VAE will split
+    the input tensor in slices to compute decoding in several steps. This is useful
+    to save some memory and allow larger batch sizes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/pipeline_audioldm2.py#L270)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt device num_waveforms_per_prompt do_classifier_free_guidance negative_prompt
+    = None prompt_embeds: Optional = None negative_prompt_embeds: Optional = None
+    generated_prompt_embeds: Optional = None negative_generated_prompt_embeds: Optional
+    = None attention_mask: Optional = None negative_attention_mask: Optional = None
+    max_new_tokens: Optional = None ) → prompt_embeds (`torch.FloatTensor`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**device** (`torch.device`) — torch device'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_waveforms_per_prompt** (`int`) — number of waveforms that should be generated
+    per prompt'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`) — whether to use classifier free guidance
+    or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the audio generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-computed text embeddings
+    from the Flan T5 model. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, text embeddings will be computed from `prompt` input
+    argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-computed
+    negative text embeddings from the Flan T5 model. Can be used to easily tweak text
+    inputs, *e.g.* prompt weighting. If not provided, negative_prompt_embeds will
+    be computed from `negative_prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generated_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    text embeddings from the GPT2 langauge model. Can be used to easily tweak text
+    inputs, *e.g.* prompt weighting. If not provided, text embeddings will be generated
+    from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_generated_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings from the GPT2 language model. Can be used to easily tweak
+    text inputs, *e.g.* prompt weighting. If not provided, negative_prompt_embeds
+    will be computed from `negative_prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.LongTensor`, *optional*) — Pre-computed attention
+    mask to be applied to the `prompt_embeds`. If not provided, attention mask will
+    be computed from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_attention_mask** (`torch.LongTensor`, *optional*) — Pre-computed
+    attention mask to be applied to the `negative_prompt_embeds`. If not provided,
+    attention mask will be computed from `negative_prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_new_tokens** (`int`, *optional*, defaults to None) — The number of new
+    tokens to generate with the GPT2 language model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: prompt_embeds (`torch.FloatTensor`)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Text embeddings from the Flan T5 model. attention_mask (`torch.LongTensor`):
+    Attention mask to be applied to the `prompt_embeds`. generated_prompt_embeds (`torch.FloatTensor`):
+    Text embeddings generated from the GPT2 langauge model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### generate_language_model'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/pipeline_audioldm2.py#L229)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs_embeds: Tensor = None max_new_tokens: int = 8 **model_kwargs ) → `inputs_embeds
+    (`torch.FloatTensor`of shape`(batch_size, sequence_length, hidden_size)`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — The sequence used as a prompt for the generation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_new_tokens** (`int`) — Number of new tokens to generate.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**model_kwargs** (`Dict[str, Any]`, *optional*) — Ad hoc parametrization of
+    additional model-specific kwargs that will be forwarded to the `forward` function
+    of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`inputs_embeds (`torch.FloatTensor`of shape`(batch_size, sequence_length, hidden_size)`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The sequence of generated hidden-states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generates a sequence of hidden-states from the language model, conditioned on
+    the embedding inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: AudioLDM2ProjectionModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.AudioLDM2ProjectionModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/modeling_audioldm2.py#L82)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( text_encoder_dim text_encoder_1_dim langauge_model_dim )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**text_encoder_dim** (`int`) — Dimensionality of the text embeddings from the
+    first text encoder (CLAP).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder_1_dim** (`int`) — Dimensionality of the text embeddings from
+    the second text encoder (T5 or VITS).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**langauge_model_dim** (`int`) — Dimensionality of the text embeddings from
+    the language model (GPT2).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A simple linear projection model to map two text embeddings to a shared latent
+    space. It also inserts learned embedding vectors at the start and end of each
+    text embedding sequence respectively. Each variable appended with `_1` refers
+    to that corresponding to the second text encoder. Otherwise, it is from the first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/modeling_audioldm2.py#L111)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( hidden_states: Optional = None hidden_states_1: Optional = None attention_mask:
+    Optional = None attention_mask_1: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: AudioLDM2UNet2DConditionModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.AudioLDM2UNet2DConditionModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/modeling_audioldm2.py#L148)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( sample_size: Optional = None in_channels: int = 4 out_channels: int = 4 flip_sin_to_cos:
+    bool = True freq_shift: int = 0 down_block_types: Tuple = (''CrossAttnDownBlock2D'',
+    ''CrossAttnDownBlock2D'', ''CrossAttnDownBlock2D'', ''DownBlock2D'') mid_block_type:
+    Optional = ''UNetMidBlock2DCrossAttn'' up_block_types: Tuple = (''UpBlock2D'',
+    ''CrossAttnUpBlock2D'', ''CrossAttnUpBlock2D'', ''CrossAttnUpBlock2D'') only_cross_attention:
+    Union = False block_out_channels: Tuple = (320, 640, 1280, 1280) layers_per_block:
+    Union = 2 downsample_padding: int = 1 mid_block_scale_factor: float = 1 act_fn:
+    str = ''silu'' norm_num_groups: Optional = 32 norm_eps: float = 1e-05 cross_attention_dim:
+    Union = 1280 transformer_layers_per_block: Union = 1 attention_head_dim: Union
+    = 8 num_attention_heads: Union = None use_linear_projection: bool = False class_embed_type:
+    Optional = None num_class_embeds: Optional = None upcast_attention: bool = False
+    resnet_time_scale_shift: str = ''default'' time_embedding_type: str = ''positional''
+    time_embedding_dim: Optional = None time_embedding_act_fn: Optional = None timestep_post_act:
+    Optional = None time_cond_proj_dim: Optional = None conv_in_kernel: int = 3 conv_out_kernel:
+    int = 3 projection_class_embeddings_input_dim: Optional = None class_embeddings_concat:
+    bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**sample_size** (`int` or `Tuple[int, int]`, *optional*, defaults to `None`)
+    — Height and width of input/output sample.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**in_channels** (`int`, *optional*, defaults to 4) — Number of channels in
+    the input sample.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**out_channels** (`int`, *optional*, defaults to 4) — Number of channels in
+    the output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**flip_sin_to_cos** (`bool`, *optional*, defaults to `False`) — Whether to
+    flip the sin to cos in the time embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**freq_shift** (`int`, *optional*, defaults to 0) — The frequency shift to
+    apply to the time embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**down_block_types** (`Tuple[str]`, *optional*, defaults to `("CrossAttnDownBlock2D",
+    "CrossAttnDownBlock2D", "CrossAttnDownBlock2D", "DownBlock2D")`) — The tuple of
+    downsample blocks to use.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mid_block_type** (`str`, *optional*, defaults to `"UNetMidBlock2DCrossAttn"`)
+    — Block type for middle of UNet, it can only be `UNetMidBlock2DCrossAttn` for
+    AudioLDM2.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**up_block_types** (`Tuple[str]`, *optional*, defaults to `("UpBlock2D", "CrossAttnUpBlock2D",
+    "CrossAttnUpBlock2D", "CrossAttnUpBlock2D")`) — The tuple of upsample blocks to
+    use.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**only_cross_attention** (`bool` or `Tuple[bool]`, *optional*, default to `False`)
+    — Whether to include self-attention in the basic transformer blocks, see `BasicTransformerBlock`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**block_out_channels** (`Tuple[int]`, *optional*, defaults to `(320, 640, 1280,
+    1280)`) — The tuple of output channels for each block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layers_per_block** (`int`, *optional*, defaults to 2) — The number of layers
+    per block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**downsample_padding** (`int`, *optional*, defaults to 1) — The padding to
+    use for the downsampling convolution.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mid_block_scale_factor** (`float`, *optional*, defaults to 1.0) — The scale
+    factor to use for the mid block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**act_fn** (`str`, *optional*, defaults to `"silu"`) — The activation function
+    to use.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**norm_num_groups** (`int`, *optional*, defaults to 32) — The number of groups
+    to use for the normalization. If `None`, normalization and activation layers is
+    skipped in post-processing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**norm_eps** (`float`, *optional*, defaults to 1e-5) — The epsilon to use for
+    the normalization.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_dim** (`int` or `Tuple[int]`, *optional*, defaults to 1280)
+    — The dimension of the cross attention features.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**transformer_layers_per_block** (`int` or `Tuple[int]`, *optional*, defaults
+    to 1) — The number of transformer blocks of type `BasicTransformerBlock`. Only
+    relevant for `~models.unet_2d_blocks.CrossAttnDownBlock2D`, `~models.unet_2d_blocks.CrossAttnUpBlock2D`,
+    `~models.unet_2d_blocks.UNetMidBlock2DCrossAttn`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_head_dim** (`int`, *optional*, defaults to 8) — The dimension of
+    the attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`int`, *optional*) — The number of attention heads.
+    If not defined, defaults to `attention_head_dim`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resnet_time_scale_shift** (`str`, *optional*, defaults to `"default"`) —
+    Time scale shift config for ResNet blocks (see `ResnetBlock2D`). Choose from `default`
+    or `scale_shift`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**class_embed_type** (`str`, *optional*, defaults to `None`) — The type of
+    class embedding to use which is ultimately summed with the time embeddings. Choose
+    from `None`, `"timestep"`, `"identity"`, `"projection"`, or `"simple_projection"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_class_embeds** (`int`, *optional*, defaults to `None`) — Input dimension
+    of the learnable embedding matrix to be projected to `time_embed_dim`, when performing
+    class conditioning with `class_embed_type` equal to `None`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**time_embedding_type** (`str`, *optional*, defaults to `positional`) — The
+    type of position embedding to use for timesteps. Choose from `positional` or `fourier`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**time_embedding_dim** (`int`, *optional*, defaults to `None`) — An optional
+    override for the dimension of the projected time embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**time_embedding_act_fn** (`str`, *optional*, defaults to `None`) — Optional
+    activation function to use only once on the time embeddings before they are passed
+    to the rest of the UNet. Choose from `silu`, `mish`, `gelu`, and `swish`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timestep_post_act** (`str`, *optional*, defaults to `None`) — The second
+    activation function to use in timestep embedding. Choose from `silu`, `mish` and
+    `gelu`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**time_cond_proj_dim** (`int`, *optional*, defaults to `None`) — The dimension
+    of `cond_proj` layer in the timestep embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**conv_in_kernel** (`int`, *optional*, default to `3`) — The kernel size of
+    `conv_in` layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**conv_out_kernel** (`int`, *optional*, default to `3`) — The kernel size of
+    `conv_out` layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**projection_class_embeddings_input_dim** (`int`, *optional*) — The dimension
+    of the `class_labels` input when `class_embed_type="projection"`. Required when
+    `class_embed_type="projection"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**class_embeddings_concat** (`bool`, *optional*, defaults to `False`) — Whether
+    to concatenate the time embeddings with the class embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A conditional 2D UNet model that takes a noisy sample, conditional state, and
+    a timestep and returns a sample shaped output. Compared to the vanilla [UNet2DConditionModel](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.UNet2DConditionModel),
+    this variant optionally includes an additional self-attention layer in each Transformer
+    block, as well as multiple cross-attention layers. It also allows for up to two
+    cross-attention embeddings, `encoder_hidden_states` and `encoder_hidden_states_1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [ModelMixin](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin).
+    Check the superclass documentation for it’s generic methods implemented for all
+    models (such as downloading or saving).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/audioldm2/modeling_audioldm2.py#L662)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( sample: FloatTensor timestep: Union encoder_hidden_states: Tensor class_labels:
+    Optional = None timestep_cond: Optional = None attention_mask: Optional = None
+    cross_attention_kwargs: Optional = None encoder_attention_mask: Optional = None
+    return_dict: bool = True encoder_hidden_states_1: Optional = None encoder_attention_mask_1:
+    Optional = None ) → [UNet2DConditionOutput](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.models.unets.unet_2d_condition.UNet2DConditionOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**sample** (`torch.FloatTensor`) — The noisy input tensor with the following
+    shape `(batch, channel, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timestep** (`torch.FloatTensor` or `float` or `int`) — The number of timesteps
+    to denoise an input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states** (`torch.FloatTensor`) — The encoder hidden states
+    with shape `(batch, sequence_length, feature_dim)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_attention_mask** (`torch.Tensor`) — A cross-attention mask of shape
+    `(batch, sequence_length)` is applied to `encoder_hidden_states`. If `True` the
+    mask is kept, otherwise if `False` it is discarded. Mask will be converted into
+    a bias, which adds large negative values to the attention scores corresponding
+    to “discard” tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [UNet2DConditionOutput](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.models.unets.unet_2d_condition.UNet2DConditionOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttnProcessor`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states_1** (`torch.FloatTensor`, *optional*) — A second set
+    of encoder hidden states with shape `(batch, sequence_length_2, feature_dim_2)`.
+    Can be used to condition the model on a different set of embeddings to `encoder_hidden_states`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_attention_mask_1** (`torch.Tensor`, *optional*) — A cross-attention
+    mask of shape `(batch, sequence_length_2)` is applied to `encoder_hidden_states_1`.
+    If `True` the mask is kept, otherwise if `False` it is discarded. Mask will be
+    converted into a bias, which adds large negative values to the attention scores
+    corresponding to “discard” tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[UNet2DConditionOutput](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.models.unets.unet_2d_condition.UNet2DConditionOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `return_dict` is True, an [UNet2DConditionOutput](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.models.unets.unet_2d_condition.UNet2DConditionOutput)
+    is returned, otherwise a `tuple` is returned where the first element is the sample
+    tensor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [AudioLDM2UNet2DConditionModel](/docs/diffusers/v0.26.3/en/api/pipelines/audioldm2#diffusers.AudioLDM2UNet2DConditionModel)
+    forward method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: AudioPipelineOutput
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.AudioPipelineOutput'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/pipeline_utils.py#L130)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( audios: ndarray )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**audios** (`np.ndarray`) — List of denoised audio samples of a NumPy array
+    of shape `(batch_size, num_channels, sample_rate)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Output class for audio pipelines.
+  prefs: []
+  type: TYPE_NORMAL

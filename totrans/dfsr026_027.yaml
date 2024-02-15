@@ -1,0 +1,508 @@
+- en: Image-to-image
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/img2img](https://huggingface.co/docs/diffusers/using-diffusers/img2img)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/169.6b566169.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image-to-image is similar to [text-to-image](conditional_image_generation),
+    but in addition to a prompt, you can also pass an initial image as a starting
+    point for the diffusion process. The initial image is encoded to latent space
+    and noise is added to it. Then the latent diffusion model takes a prompt and the
+    noisy latent image, predicts the added noise, and removes the predicted noise
+    from the initial latent image to get the new latent image. Lastly, a decoder decodes
+    the new latent image back into an image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With 🤗 Diffusers, this is as easy as 1-2-3:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load a checkpoint into the [AutoPipelineForImage2Image](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForImage2Image)
+    class; this pipeline automatically handles loading the correct pipeline class
+    based on the checkpoint:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll notice throughout the guide, we use [enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
+    and [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline.enable_xformers_memory_efficient_attention),
+    to save memory and increase inference speed. If you’re using PyTorch 2.0, then
+    you don’t need to call [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline.enable_xformers_memory_efficient_attention)
+    on your pipeline because it’ll already be using PyTorch 2.0’s native [scaled-dot
+    product attention](../optimization/torch2.0#scaled-dot-product-attention).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load an image to pass to the pipeline:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass a prompt and image to the pipeline to generate an image:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/b7dea39428bc1d2cd88a6400783552cb.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: initial image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/54142d2106911436dd03998048a92fad.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generated image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Popular models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The most popular image-to-image models are [Stable Diffusion v1.5](https://huggingface.co/runwayml/stable-diffusion-v1-5),
+    [Stable Diffusion XL (SDXL)](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0),
+    and [Kandinsky 2.2](https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder).
+    The results from the Stable Diffusion and Kandinsky models vary due to their architecture
+    differences and training process; you can generally expect SDXL to produce higher
+    quality images than Stable Diffusion v1.5\. Let’s take a quick look at how to
+    use each of these models and compare their results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stable Diffusion v1.5
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Stable Diffusion v1.5 is a latent diffusion model initialized from an earlier
+    checkpoint, and further finetuned for 595K steps on 512x512 images. To use this
+    pipeline for image-to-image, you’ll need to prepare an initial image to pass to
+    the pipeline. Then you can pass a prompt and the image to the pipeline to generate
+    a new image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/36dc16e92be7b4f357b7201ad98da118.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: initial image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/0145794767dd4ef55a2071169ec77aa2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generated image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stable Diffusion XL (SDXL)
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: SDXL is a more powerful version of the Stable Diffusion model. It uses a larger
+    base model, and an additional refiner model to increase the quality of the base
+    model’s output. Read the [SDXL](sdxl) guide for a more detailed walkthrough of
+    how to use this model, and other techniques it uses to produce high quality images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/2fe2edb85787ba08991e059ff912c98c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: initial image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/7ec0479f09a14b51ed59ccd01d6f93c9.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generated image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Kandinsky 2.2
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The Kandinsky model is different from the Stable Diffusion models because it
+    uses an image prior model to create image embeddings. The embeddings help create
+    a better alignment between text and images, allowing the latent diffusion model
+    to generate better images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The simplest way to use Kandinsky 2.2 is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/36dc16e92be7b4f357b7201ad98da118.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: initial image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/97dcd8328035f392ab7d774997117ed0.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generated image
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configure pipeline parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are several important parameters you can configure in the pipeline that’ll
+    affect the image generation process and image quality. Let’s take a closer look
+    at what these parameters do and how changing them affects the output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Strength
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`strength` is one of the most important parameters to consider and it’ll have
+    a huge impact on your generated image. It determines how much the generated image
+    resembles the initial image. In other words:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 📈 a higher `strength` value gives the model more “creativity” to generate an
+    image that’s different from the initial image; a `strength` value of 1.0 means
+    the initial image is more or less ignored
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 📉 a lower `strength` value means the generated image is more similar to the
+    initial image
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `strength` and `num_inference_steps` parameters are related because `strength`
+    determines the number of noise steps to add. For example, if the `num_inference_steps`
+    is 50 and `strength` is 0.8, then this means adding 40 (50 * 0.8) steps of noise
+    to the initial image and then denoising for 40 steps to get the newly generated
+    image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/b18d4d9ef1fda116b32a37eb344dd61d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: strength = 0.4
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/caabae187343ac728e132d95979f20d9.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: strength = 0.6
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/6dd3ccf15afa5473f942682270943955.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: strength = 1.0
+  prefs: []
+  type: TYPE_NORMAL
+- en: Guidance scale
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `guidance_scale` parameter is used to control how closely aligned the generated
+    image and text prompt are. A higher `guidance_scale` value means your generated
+    image is more aligned with the prompt, while a lower `guidance_scale` value means
+    your generated image has more space to deviate from the prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can combine `guidance_scale` with `strength` for even more precise control
+    over how expressive the model is. For example, combine a high `strength + guidance_scale`
+    for maximum creativity or use a combination of low `strength` and low `guidance_scale`
+    to generate an image that resembles the initial image but is not as strictly bound
+    to the prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/8f312f9d19115eba39cce061ca99ee11.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: guidance_scale = 0.1
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/ee6aee8a1bb3c419a6a94dd5b4a870b8.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: guidance_scale = 5.0
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/94e53acaee818fe2a3dddf5671819e4e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: guidance_scale = 10.0
+  prefs: []
+  type: TYPE_NORMAL
+- en: Negative prompt
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A negative prompt conditions the model to *not* include things in an image,
+    and it can be used to improve image quality or modify an image. For example, you
+    can improve image quality by including negative prompts like “poor details” or
+    “blurry” to encourage the model to generate a higher quality image. Or you can
+    modify an image by specifying things to exclude from an image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/b0371dfac3fc42c122a50da2e48f809a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: negative_prompt = "ugly, deformed, disfigured, poor details, bad anatomy"
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/420cf48fd86187c0fb09679e8d6a92bd.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: negative_prompt = "jungle"
+  prefs: []
+  type: TYPE_NORMAL
+- en: Chained image-to-image pipelines
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are some other interesting ways you can use an image-to-image pipeline
+    aside from just generating an image (although that is pretty cool too). You can
+    take it a step further and chain it with other pipelines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text-to-image-to-image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Chaining a text-to-image and image-to-image pipeline allows you to generate
+    an image from text and use the generated image as the initial image for the image-to-image
+    pipeline. This is useful if you want to generate an image entirely from scratch.
+    For example, let’s chain a Stable Diffusion and a Kandinsky model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start by generating an image with the text-to-image pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you can pass this generated image to the image-to-image pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Image-to-image-to-image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can also chain multiple image-to-image pipelines together to create more
+    interesting images. This can be useful for iteratively performing style transfer
+    on an image, generating short GIFs, restoring color to an image, or restoring
+    missing areas of an image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start by generating an image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is important to specify `output_type="latent"` in the pipeline to keep all
+    the outputs in latent space to avoid an unnecessary decode-encode step. This only
+    works if the chained pipelines are using the same VAE.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Pass the latent output from this pipeline to the next pipeline to generate
+    an image in a [comic book art style](https://huggingface.co/ogkalu/Comic-Diffusion):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Repeat one more time to generate the final image in a [pixel art style](https://huggingface.co/kohbanye/pixel-art-style):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Image-to-upscaler-to-super-resolution
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Another way you can chain your image-to-image pipeline is with an upscaler and
+    super-resolution pipeline to really increase the level of details in an image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start with an image-to-image pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is important to specify `output_type="latent"` in the pipeline to keep all
+    the outputs in *latent* space to avoid an unnecessary decode-encode step. This
+    only works if the chained pipelines are using the same VAE.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Chain it to an upscaler pipeline to increase the image resolution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, chain it to a super-resolution pipeline to further enhance the resolution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Control image generation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Trying to generate an image that looks exactly the way you want can be difficult,
+    which is why controlled generation techniques and models are so useful. While
+    you can use the `negative_prompt` to partially control image generation, there
+    are more robust methods like prompt weighting and ControlNets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prompt weighting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Prompt weighting allows you to scale the representation of each concept in a
+    prompt. For example, in a prompt like “Astronaut in a jungle, cold color palette,
+    muted colors, detailed, 8k”, you can choose to increase or decrease the embeddings
+    of “astronaut” and “jungle”. The [Compel](https://github.com/damian0815/compel)
+    library provides a simple syntax for adjusting prompt weights and generating the
+    embeddings. You can learn how to create the embeddings in the [Prompt weighting](weighted_prompts)
+    guide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[AutoPipelineForImage2Image](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForImage2Image)
+    has a `prompt_embeds` (and `negative_prompt_embeds` if you’re using a negative
+    prompt) parameter where you can pass the embeddings which replaces the `prompt`
+    parameter.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: ControlNet
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: ControlNets provide a more flexible and accurate way to control image generation
+    because you can use an additional conditioning image. The conditioning image can
+    be a canny image, depth map, image segmentation, and even scribbles! Whatever
+    type of conditioning image you choose, the ControlNet generates an image that
+    preserves the information in it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, let’s condition an image with a depth map to keep the spatial information
+    in the image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load a ControlNet model conditioned on depth maps and the [AutoPipelineForImage2Image](/docs/diffusers/v0.26.3/en/api/pipelines/auto_pipeline#diffusers.AutoPipelineForImage2Image):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now generate a new image conditioned on the depth map, initial image, and prompt:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/36dc16e92be7b4f357b7201ad98da118.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: initial image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/795c4016502683bcda2f00fa33a84c2d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: depth image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/e425aa0e6403b0304599567d11b91a4d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: ControlNet image
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s apply a new [style](https://huggingface.co/nitrosocke/elden-ring-diffusion)
+    to the image generated from the ControlNet by chaining it with an image-to-image
+    pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/3d19fb4449a5e38b2448796e3bf6cf11.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Optimize
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Running diffusion models is computationally expensive and intensive, but with
+    a few optimization tricks, it is entirely possible to run them on consumer and
+    free-tier GPUs. For example, you can use a more memory-efficient form of attention
+    such as PyTorch 2.0’s [scaled-dot product attention](../optimization/torch2.0#scaled-dot-product-attention)
+    or [xFormers](../optimization/xformers) (you can use one or the other, but there’s
+    no need to use both). You can also offload the model to the GPU while the other
+    pipeline components wait on the CPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With [`torch.compile`](../optimization/torch2.0#torchcompile), you can boost
+    your inference speed even more by wrapping your UNet with it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: To learn more, take a look at the [Reduce memory usage](../optimization/memory)
+    and [Torch 2.0](../optimization/torch2.0) guides.
+  prefs: []
+  type: TYPE_NORMAL

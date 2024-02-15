@@ -1,0 +1,1747 @@
+- en: DeepFloyd IF
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/api/pipelines/deepfloyd_if](https://huggingface.co/docs/diffusers/api/pipelines/deepfloyd_if)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/45.05923c39.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Docstring.93f6f462.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/ExampleCodeBlock.658f5cd6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'DeepFloyd IF is a novel state-of-the-art open-source text-to-image model with
+    a high degree of photorealism and language understanding. The model is a modular
+    composed of a frozen text encoder and three cascaded pixel diffusion modules:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Stage 1: a base model that generates 64x64 px image based on text prompt,'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Stage 2: a 64x64 px => 256x256 px super-resolution model, and'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Stage 3: a 256x256 px => 1024x1024 px super-resolution model Stage 1 and Stage
+    2 utilize a frozen text encoder based on the T5 transformer to extract text embeddings,
+    which are then fed into a UNet architecture enhanced with cross-attention and
+    attention pooling. Stage 3 is [Stability AI’s x4 Upscaling model](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler).
+    The result is a highly efficient model that outperforms current state-of-the-art
+    models, achieving a zero-shot FID score of 6.66 on the COCO dataset. Our work
+    underscores the potential of larger UNet architectures in the first stage of cascaded
+    diffusion models and depicts a promising future for text-to-image synthesis.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Usage
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Before you can use IF, you need to accept its usage conditions. To do so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make sure to have a [Hugging Face account](https://huggingface.co/join) and
+    be logged in.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Accept the license on the model card of [DeepFloyd/IF-I-XL-v1.0](https://huggingface.co/DeepFloyd/IF-I-XL-v1.0).
+    Accepting the license on the stage I model card will auto accept for the other
+    IF models.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Make sure to login locally. Install `huggingface_hub`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'run the login function in a Python shell:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: and enter your [Hugging Face Hub access token](https://huggingface.co/docs/hub/security-tokens#what-are-user-access-tokens).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next we install `diffusers` and dependencies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The following sections give more in-detail examples of how to use IF. Specifically:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Text-to-Image Generation](#text-to-image-generation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Image-to-Image Generation](#text-guided-image-to-image-generation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Inpainting](#text-guided-inpainting-generation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Reusing model weights](#converting-between-different-pipelines)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Speed optimization](#optimizing-for-speed)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Memory optimization](#optimizing-for-memory)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Available checkpoints**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Stage-1*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DeepFloyd/IF-I-XL-v1.0](https://huggingface.co/DeepFloyd/IF-I-XL-v1.0)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DeepFloyd/IF-I-L-v1.0](https://huggingface.co/DeepFloyd/IF-I-L-v1.0)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DeepFloyd/IF-I-M-v1.0](https://huggingface.co/DeepFloyd/IF-I-M-v1.0)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Stage-2*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DeepFloyd/IF-II-L-v1.0](https://huggingface.co/DeepFloyd/IF-II-L-v1.0)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DeepFloyd/IF-II-M-v1.0](https://huggingface.co/DeepFloyd/IF-II-M-v1.0)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Stage-3*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[stabilityai/stable-diffusion-x4-upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Google Colab** [![Open In Colab](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/deepfloyd_if_free_tier_google_colab.ipynb)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text-to-Image Generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: By default diffusers makes use of [model cpu offloading](../../optimization/memory#model-offloading)
+    to run the whole IF pipeline with as little as 14 GB of VRAM.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text Guided Image-to-Image Generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The same IF model weights can be used for text-guided image-to-image translation
+    or image variation. In this case just make sure to load the weights using the
+    [IFImg2ImgPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/deepfloyd_if#diffusers.IFImg2ImgPipeline)
+    and [IFImg2ImgSuperResolutionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/deepfloyd_if#diffusers.IFImg2ImgSuperResolutionPipeline)
+    pipelines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Note**: You can also directly move the weights of the text-to-image pipelines
+    to the image-to-image pipelines without loading them twice by making use of the
+    [components](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.components)
+    argument as explained [here](#converting-between-different-pipelines).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text Guided Inpainting Generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The same IF model weights can be used for text-guided image-to-image translation
+    or image variation. In this case just make sure to load the weights using the
+    [IFInpaintingPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/deepfloyd_if#diffusers.IFInpaintingPipeline)
+    and [IFInpaintingSuperResolutionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/deepfloyd_if#diffusers.IFInpaintingSuperResolutionPipeline)
+    pipelines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Note**: You can also directly move the weights of the text-to-image pipelines
+    to the image-to-image pipelines without loading them twice by making use of the
+    `~DiffusionPipeline.components()` function as explained [here](#converting-between-different-pipelines).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Converting between different pipelines
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In addition to being loaded with `from_pretrained`, Pipelines can also be loaded
+    directly from each other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Optimizing for speed
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The simplest optimization to run IF faster is to move all model components to
+    the GPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also run the diffusion process for a shorter number of timesteps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This can either be done with the `num_inference_steps` argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or with the `timesteps` argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: When doing image variation or inpainting, you can also decrease the number of
+    timesteps with the strength argument. The strength argument is the amount of noise
+    to add to the input image which also determines how many steps to run in the denoising
+    process. A smaller number will vary the image less but run faster.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also use [`torch.compile`](../../optimization/torch2.0). Note that we
+    have not exhaustively tested `torch.compile` with IF and it might not give expected
+    results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Optimizing for memory
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When optimizing for GPU memory, we can use the standard diffusers CPU offloading
+    APIs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Either the model based CPU offloading,
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: or the more aggressive layer based CPU offloading.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Additionally, T5 can be loaded in 8bit precision
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: For CPU RAM constrained machines like Google Colab free tier where we can’t
+    load all model components to the CPU at once, we can manually only load the pipeline
+    with the text encoder or UNet when the respective model components are needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Available Pipelines:'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '| Pipeline | Tasks | Colab |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [pipeline_if.py](https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/deepfloyd_if/pipeline_if.py)
+    | *Text-to-Image Generation* | - |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [pipeline_if_superresolution.py](https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/deepfloyd_if/pipeline_if_superresolution.py)
+    | *Text-to-Image Generation* | - |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [pipeline_if_img2img.py](https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/deepfloyd_if/pipeline_if_img2img.py)
+    | *Image-to-Image Generation* | - |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [pipeline_if_img2img_superresolution.py](https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/deepfloyd_if/pipeline_if_img2img_superresolution.py)
+    | *Image-to-Image Generation* | - |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [pipeline_if_inpainting.py](https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/deepfloyd_if/pipeline_if_inpainting.py)
+    | *Image-to-Image Generation* | - |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [pipeline_if_inpainting_superresolution.py](https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/deepfloyd_if/pipeline_if_inpainting_superresolution.py)
+    | *Image-to-Image Generation* | - |'
+  prefs: []
+  type: TYPE_TB
+- en: IFPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.IFPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if.py#L88)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: T5Tokenizer text_encoder: T5EncoderModel unet: UNet2DConditionModel
+    scheduler: DDPMScheduler safety_checker: Optional feature_extractor: Optional
+    watermarker: Optional requires_safety_checker: bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if.py#L555)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None num_inference_steps: int = 100 timesteps: List = None
+    guidance_scale: float = 7.0 negative_prompt: Union = None num_images_per_prompt:
+    Optional = 1 height: Optional = None width: Optional = None eta: float = 0.0 generator:
+    Union = None prompt_embeds: Optional = None negative_prompt_embeds: Optional =
+    None output_type: Optional = ''pil'' return_dict: bool = True callback: Optional
+    = None callback_steps: int = 1 clean_caption: bool = True cross_attention_kwargs:
+    Optional = None ) → `~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    the image generation. If not defined, one has to pass `prompt_embeds`. instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 100) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timesteps** (`List[int]`, *optional*) — Custom timesteps to use for the denoising
+    process. If not defined, equal spaced `num_inference_steps` timesteps are used.
+    Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 7.0) — Guidance scale
+    as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `guidance_scale > 1`. Higher guidance scale
+    encourages to generate images that are closely linked to the text `prompt`, usually
+    at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`, *optional*, defaults to self.unet.config.sample_size) —
+    The height in pixels of the generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`, *optional*, defaults to self.unet.config.sample_size) — The
+    width in pixels of the generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) in the DDIM paper: [https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502).
+    Only applies to [schedulers.DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    will be ignored for others.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between [PIL](https://pillow.readthedocs.io/en/stable/):
+    `PIL.Image.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a `~pipelines.stable_diffusion.IFPipelineOutput` instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that will be called every
+    `callback_steps` steps during inference. The function will be called with the
+    following arguments: `callback(step: int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function will be called. If not specified, the callback will be
+    called at every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (`bool`, *optional*, defaults to `True`) — Whether or not
+    to clean the caption before creating embeddings. Requires `beautifulsoup4` and
+    `ftfy` to be installed. If the dependencies are not installed, the embeddings
+    will be created from the raw prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined under `self.processor`
+    in [diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` if `return_dict` is True, otherwise
+    a `tuple. When returning a tuple, the first element is a list with the generated
+    images, and the second element is a list of` bool`s denoting whether the corresponding
+    generated image likely represents "not-safe-for-work" (nsfw) or watermarked content,
+    according to the` safety_checker`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if.py#L173)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union do_classifier_free_guidance: bool = True num_images_per_prompt:
+    int = 1 device: Optional = None negative_prompt: Union = None prompt_embeds: Optional
+    = None negative_prompt_embeds: Optional = None clean_caption: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`, *optional*, defaults to `True`) —
+    whether to use classifier free guidance or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — number of images
+    that should be generated per prompt device — (`torch.device`, *optional*): torch
+    device to place the resulting embeddings on'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`.
+    instead. If not defined, one has to pass `negative_prompt_embeds`. instead. Ignored
+    when not using guidance (i.e., ignored if `guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (bool, defaults to `False`) — If `True`, the function will
+    preprocess and clean the provided caption before encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IFSuperResolutionPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.IFSuperResolutionPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_superresolution.py#L73)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: T5Tokenizer text_encoder: T5EncoderModel unet: UNet2DConditionModel
+    scheduler: DDPMScheduler image_noising_scheduler: DDPMScheduler safety_checker:
+    Optional feature_extractor: Optional watermarker: Optional requires_safety_checker:
+    bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_superresolution.py#L622)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None height: int = None width: int = None image: Union =
+    None num_inference_steps: int = 50 timesteps: List = None guidance_scale: float
+    = 4.0 negative_prompt: Union = None num_images_per_prompt: Optional = 1 eta: float
+    = 0.0 generator: Union = None prompt_embeds: Optional = None negative_prompt_embeds:
+    Optional = None output_type: Optional = ''pil'' return_dict: bool = True callback:
+    Optional = None callback_steps: int = 1 cross_attention_kwargs: Optional = None
+    noise_level: int = 250 clean_caption: bool = True ) → `~pipelines.stable_diffusion.IFPipelineOutput`
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    the image generation. If not defined, one has to pass `prompt_embeds`. instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`, *optional*, defaults to None) — The height in pixels of
+    the generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`, *optional*, defaults to None) — The width in pixels of the
+    generated image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image** (`PIL.Image.Image`, `np.ndarray`, `torch.FloatTensor`) — The image
+    to be upscaled.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 50) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timesteps** (`List[int]`, *optional*, defaults to None) — Custom timesteps
+    to use for the denoising process. If not defined, equal spaced `num_inference_steps`
+    timesteps are used. Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 4.0) — Guidance scale
+    as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `guidance_scale > 1`. Higher guidance scale
+    encourages to generate images that are closely linked to the text `prompt`, usually
+    at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) in the DDIM paper: [https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502).
+    Only applies to [schedulers.DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    will be ignored for others.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between [PIL](https://pillow.readthedocs.io/en/stable/):
+    `PIL.Image.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a `~pipelines.stable_diffusion.IFPipelineOutput` instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that will be called every
+    `callback_steps` steps during inference. The function will be called with the
+    following arguments: `callback(step: int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function will be called. If not specified, the callback will be
+    called at every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined under `self.processor`
+    in [diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**noise_level** (`int`, *optional*, defaults to 250) — The amount of noise
+    to add to the upscaled image. Must be in the range `[0, 1000)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (`bool`, *optional*, defaults to `True`) — Whether or not
+    to clean the caption before creating embeddings. Requires `beautifulsoup4` and
+    `ftfy` to be installed. If the dependencies are not installed, the embeddings
+    will be created from the raw prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` if `return_dict` is True, otherwise
+    a `tuple. When returning a tuple, the first element is a list with the generated
+    images, and the second element is a list of` bool`s denoting whether the corresponding
+    generated image likely represents "not-safe-for-work" (nsfw) or watermarked content,
+    according to the` safety_checker`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_superresolution.py#L307)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union do_classifier_free_guidance: bool = True num_images_per_prompt:
+    int = 1 device: Optional = None negative_prompt: Union = None prompt_embeds: Optional
+    = None negative_prompt_embeds: Optional = None clean_caption: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`, *optional*, defaults to `True`) —
+    whether to use classifier free guidance or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — number of images
+    that should be generated per prompt device — (`torch.device`, *optional*): torch
+    device to place the resulting embeddings on'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`.
+    instead. If not defined, one has to pass `negative_prompt_embeds`. instead. Ignored
+    when not using guidance (i.e., ignored if `guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (bool, defaults to `False`) — If `True`, the function will
+    preprocess and clean the provided caption before encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IFImg2ImgPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.IFImg2ImgPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_img2img.py#L112)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: T5Tokenizer text_encoder: T5EncoderModel unet: UNet2DConditionModel
+    scheduler: DDPMScheduler safety_checker: Optional feature_extractor: Optional
+    watermarker: Optional requires_safety_checker: bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_img2img.py#L667)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None image: Union = None strength: float = 0.7 num_inference_steps:
+    int = 80 timesteps: List = None guidance_scale: float = 10.0 negative_prompt:
+    Union = None num_images_per_prompt: Optional = 1 eta: float = 0.0 generator: Union
+    = None prompt_embeds: Optional = None negative_prompt_embeds: Optional = None
+    output_type: Optional = ''pil'' return_dict: bool = True callback: Optional =
+    None callback_steps: int = 1 clean_caption: bool = True cross_attention_kwargs:
+    Optional = None ) → `~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    the image generation. If not defined, one has to pass `prompt_embeds`. instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image** (`torch.FloatTensor` or `PIL.Image.Image`) — `Image`, or tensor representing
+    an image batch, that will be used as the starting point for the process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strength** (`float`, *optional*, defaults to 0.7) — Conceptually, indicates
+    how much to transform the reference `image`. Must be between 0 and 1\. `image`
+    will be used as a starting point, adding more noise to it the larger the `strength`.
+    The number of denoising steps depends on the amount of noise initially added.
+    When `strength` is 1, added noise will be maximum and the denoising process will
+    run for the full number of iterations specified in `num_inference_steps`. A value
+    of 1, therefore, essentially ignores `image`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 80) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timesteps** (`List[int]`, *optional*) — Custom timesteps to use for the denoising
+    process. If not defined, equal spaced `num_inference_steps` timesteps are used.
+    Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 10.0) — Guidance scale
+    as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `guidance_scale > 1`. Higher guidance scale
+    encourages to generate images that are closely linked to the text `prompt`, usually
+    at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) in the DDIM paper: [https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502).
+    Only applies to [schedulers.DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    will be ignored for others.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between [PIL](https://pillow.readthedocs.io/en/stable/):
+    `PIL.Image.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a `~pipelines.stable_diffusion.IFPipelineOutput` instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that will be called every
+    `callback_steps` steps during inference. The function will be called with the
+    following arguments: `callback(step: int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function will be called. If not specified, the callback will be
+    called at every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (`bool`, *optional*, defaults to `True`) — Whether or not
+    to clean the caption before creating embeddings. Requires `beautifulsoup4` and
+    `ftfy` to be installed. If the dependencies are not installed, the embeddings
+    will be created from the raw prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined under `self.processor`
+    in [diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` if `return_dict` is True, otherwise
+    a `tuple. When returning a tuple, the first element is a list with the generated
+    images, and the second element is a list of` bool`s denoting whether the corresponding
+    generated image likely represents "not-safe-for-work" (nsfw) or watermarked content,
+    according to the` safety_checker`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_img2img.py#L198)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union do_classifier_free_guidance: bool = True num_images_per_prompt:
+    int = 1 device: Optional = None negative_prompt: Union = None prompt_embeds: Optional
+    = None negative_prompt_embeds: Optional = None clean_caption: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`, *optional*, defaults to `True`) —
+    whether to use classifier free guidance or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — number of images
+    that should be generated per prompt device — (`torch.device`, *optional*): torch
+    device to place the resulting embeddings on'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`.
+    instead. If not defined, one has to pass `negative_prompt_embeds`. instead. Ignored
+    when not using guidance (i.e., ignored if `guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (bool, defaults to `False`) — If `True`, the function will
+    preprocess and clean the provided caption before encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IFImg2ImgSuperResolutionPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.IFImg2ImgSuperResolutionPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_img2img_superresolution.py#L115)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: T5Tokenizer text_encoder: T5EncoderModel unet: UNet2DConditionModel
+    scheduler: DDPMScheduler image_noising_scheduler: DDPMScheduler safety_checker:
+    Optional feature_extractor: Optional watermarker: Optional requires_safety_checker:
+    bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_img2img_superresolution.py#L750)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Union original_image: Union = None strength: float = 0.8 prompt: Union
+    = None num_inference_steps: int = 50 timesteps: List = None guidance_scale: float
+    = 4.0 negative_prompt: Union = None num_images_per_prompt: Optional = 1 eta: float
+    = 0.0 generator: Union = None prompt_embeds: Optional = None negative_prompt_embeds:
+    Optional = None output_type: Optional = ''pil'' return_dict: bool = True callback:
+    Optional = None callback_steps: int = 1 cross_attention_kwargs: Optional = None
+    noise_level: int = 250 clean_caption: bool = True ) → `~pipelines.stable_diffusion.IFPipelineOutput`
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image** (`torch.FloatTensor` or `PIL.Image.Image`) — `Image`, or tensor representing
+    an image batch, that will be used as the starting point for the process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**original_image** (`torch.FloatTensor` or `PIL.Image.Image`) — The original
+    image that `image` was varied from.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strength** (`float`, *optional*, defaults to 0.8) — Conceptually, indicates
+    how much to transform the reference `image`. Must be between 0 and 1\. `image`
+    will be used as a starting point, adding more noise to it the larger the `strength`.
+    The number of denoising steps depends on the amount of noise initially added.
+    When `strength` is 1, added noise will be maximum and the denoising process will
+    run for the full number of iterations specified in `num_inference_steps`. A value
+    of 1, therefore, essentially ignores `image`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    the image generation. If not defined, one has to pass `prompt_embeds`. instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 50) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timesteps** (`List[int]`, *optional*) — Custom timesteps to use for the denoising
+    process. If not defined, equal spaced `num_inference_steps` timesteps are used.
+    Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 4.0) — Guidance scale
+    as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `guidance_scale > 1`. Higher guidance scale
+    encourages to generate images that are closely linked to the text `prompt`, usually
+    at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) in the DDIM paper: [https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502).
+    Only applies to [schedulers.DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    will be ignored for others.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between [PIL](https://pillow.readthedocs.io/en/stable/):
+    `PIL.Image.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a `~pipelines.stable_diffusion.IFPipelineOutput` instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that will be called every
+    `callback_steps` steps during inference. The function will be called with the
+    following arguments: `callback(step: int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function will be called. If not specified, the callback will be
+    called at every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined under `self.processor`
+    in [diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**noise_level** (`int`, *optional*, defaults to 250) — The amount of noise
+    to add to the upscaled image. Must be in the range `[0, 1000)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (`bool`, *optional*, defaults to `True`) — Whether or not
+    to clean the caption before creating embeddings. Requires `beautifulsoup4` and
+    `ftfy` to be installed. If the dependencies are not installed, the embeddings
+    will be created from the raw prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` if `return_dict` is True, otherwise
+    a `tuple. When returning a tuple, the first element is a list with the generated
+    images, and the second element is a list of` bool`s denoting whether the corresponding
+    generated image likely represents "not-safe-for-work" (nsfw) or watermarked content,
+    according to the` safety_checker`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_img2img_superresolution.py#L349)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union do_classifier_free_guidance: bool = True num_images_per_prompt:
+    int = 1 device: Optional = None negative_prompt: Union = None prompt_embeds: Optional
+    = None negative_prompt_embeds: Optional = None clean_caption: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`, *optional*, defaults to `True`) —
+    whether to use classifier free guidance or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — number of images
+    that should be generated per prompt device — (`torch.device`, *optional*): torch
+    device to place the resulting embeddings on'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`.
+    instead. If not defined, one has to pass `negative_prompt_embeds`. instead. Ignored
+    when not using guidance (i.e., ignored if `guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (bool, defaults to `False`) — If `True`, the function will
+    preprocess and clean the provided caption before encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IFInpaintingPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.IFInpaintingPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_inpainting.py#L115)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: T5Tokenizer text_encoder: T5EncoderModel unet: UNet2DConditionModel
+    scheduler: DDPMScheduler safety_checker: Optional feature_extractor: Optional
+    watermarker: Optional requires_safety_checker: bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_inpainting.py#L760)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None image: Union = None mask_image: Union = None strength:
+    float = 1.0 num_inference_steps: int = 50 timesteps: List = None guidance_scale:
+    float = 7.0 negative_prompt: Union = None num_images_per_prompt: Optional = 1
+    eta: float = 0.0 generator: Union = None prompt_embeds: Optional = None negative_prompt_embeds:
+    Optional = None output_type: Optional = ''pil'' return_dict: bool = True callback:
+    Optional = None callback_steps: int = 1 clean_caption: bool = True cross_attention_kwargs:
+    Optional = None ) → `~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    the image generation. If not defined, one has to pass `prompt_embeds`. instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image** (`torch.FloatTensor` or `PIL.Image.Image`) — `Image`, or tensor representing
+    an image batch, that will be used as the starting point for the process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_image** (`PIL.Image.Image`) — `Image`, or tensor representing an image
+    batch, to mask `image`. White pixels in the mask will be repainted, while black
+    pixels will be preserved. If `mask_image` is a PIL image, it will be converted
+    to a single channel (luminance) before use. If it’s a tensor, it should contain
+    one color channel (L) instead of 3, so the expected shape would be `(B, H, W,
+    1)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strength** (`float`, *optional*, defaults to 1.0) — Conceptually, indicates
+    how much to transform the reference `image`. Must be between 0 and 1\. `image`
+    will be used as a starting point, adding more noise to it the larger the `strength`.
+    The number of denoising steps depends on the amount of noise initially added.
+    When `strength` is 1, added noise will be maximum and the denoising process will
+    run for the full number of iterations specified in `num_inference_steps`. A value
+    of 1, therefore, essentially ignores `image`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 50) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timesteps** (`List[int]`, *optional*) — Custom timesteps to use for the denoising
+    process. If not defined, equal spaced `num_inference_steps` timesteps are used.
+    Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 7.0) — Guidance scale
+    as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `guidance_scale > 1`. Higher guidance scale
+    encourages to generate images that are closely linked to the text `prompt`, usually
+    at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) in the DDIM paper: [https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502).
+    Only applies to [schedulers.DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    will be ignored for others.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between [PIL](https://pillow.readthedocs.io/en/stable/):
+    `PIL.Image.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a `~pipelines.stable_diffusion.IFPipelineOutput` instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that will be called every
+    `callback_steps` steps during inference. The function will be called with the
+    following arguments: `callback(step: int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function will be called. If not specified, the callback will be
+    called at every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (`bool`, *optional*, defaults to `True`) — Whether or not
+    to clean the caption before creating embeddings. Requires `beautifulsoup4` and
+    `ftfy` to be installed. If the dependencies are not installed, the embeddings
+    will be created from the raw prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined under `self.processor`
+    in [diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` if `return_dict` is True, otherwise
+    a `tuple. When returning a tuple, the first element is a list with the generated
+    images, and the second element is a list of` bool`s denoting whether the corresponding
+    generated image likely represents "not-safe-for-work" (nsfw) or watermarked content,
+    according to the` safety_checker`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_inpainting.py#L201)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union do_classifier_free_guidance: bool = True num_images_per_prompt:
+    int = 1 device: Optional = None negative_prompt: Union = None prompt_embeds: Optional
+    = None negative_prompt_embeds: Optional = None clean_caption: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`, *optional*, defaults to `True`) —
+    whether to use classifier free guidance or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — number of images
+    that should be generated per prompt device — (`torch.device`, *optional*): torch
+    device to place the resulting embeddings on'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`.
+    instead. If not defined, one has to pass `negative_prompt_embeds`. instead. Ignored
+    when not using guidance (i.e., ignored if `guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (bool, defaults to `False`) — If `True`, the function will
+    preprocess and clean the provided caption before encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IFInpaintingSuperResolutionPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.IFInpaintingSuperResolutionPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_inpainting_superresolution.py#L117)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( tokenizer: T5Tokenizer text_encoder: T5EncoderModel unet: UNet2DConditionModel
+    scheduler: DDPMScheduler image_noising_scheduler: DDPMScheduler safety_checker:
+    Optional feature_extractor: Optional watermarker: Optional requires_safety_checker:
+    bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_inpainting_superresolution.py#L838)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( image: Union original_image: Union = None mask_image: Union = None strength:
+    float = 0.8 prompt: Union = None num_inference_steps: int = 100 timesteps: List
+    = None guidance_scale: float = 4.0 negative_prompt: Union = None num_images_per_prompt:
+    Optional = 1 eta: float = 0.0 generator: Union = None prompt_embeds: Optional
+    = None negative_prompt_embeds: Optional = None output_type: Optional = ''pil''
+    return_dict: bool = True callback: Optional = None callback_steps: int = 1 cross_attention_kwargs:
+    Optional = None noise_level: int = 0 clean_caption: bool = True ) → `~pipelines.stable_diffusion.IFPipelineOutput`
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image** (`torch.FloatTensor` or `PIL.Image.Image`) — `Image`, or tensor representing
+    an image batch, that will be used as the starting point for the process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**original_image** (`torch.FloatTensor` or `PIL.Image.Image`) — The original
+    image that `image` was varied from.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_image** (`PIL.Image.Image`) — `Image`, or tensor representing an image
+    batch, to mask `image`. White pixels in the mask will be repainted, while black
+    pixels will be preserved. If `mask_image` is a PIL image, it will be converted
+    to a single channel (luminance) before use. If it’s a tensor, it should contain
+    one color channel (L) instead of 3, so the expected shape would be `(B, H, W,
+    1)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strength** (`float`, *optional*, defaults to 0.8) — Conceptually, indicates
+    how much to transform the reference `image`. Must be between 0 and 1\. `image`
+    will be used as a starting point, adding more noise to it the larger the `strength`.
+    The number of denoising steps depends on the amount of noise initially added.
+    When `strength` is 1, added noise will be maximum and the denoising process will
+    run for the full number of iterations specified in `num_inference_steps`. A value
+    of 1, therefore, essentially ignores `image`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    the image generation. If not defined, one has to pass `prompt_embeds`. instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 100) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality image at
+    the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**timesteps** (`List[int]`, *optional*) — Custom timesteps to use for the denoising
+    process. If not defined, equal spaced `num_inference_steps` timesteps are used.
+    Must be in descending order.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 4.0) — Guidance scale
+    as defined in [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
+    `guidance_scale` is defined as `w` of equation 2\. of [Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf).
+    Guidance scale is enabled by setting `guidance_scale > 1`. Higher guidance scale
+    encourages to generate images that are closely linked to the text `prompt`, usually
+    at the expense of lower image quality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) in the DDIM paper: [https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502).
+    Only applies to [schedulers.DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    will be ignored for others.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    One or a list of [torch generator(s)](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"pil"`) — The output format
+    of the generate image. Choose between [PIL](https://pillow.readthedocs.io/en/stable/):
+    `PIL.Image.Image` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a `~pipelines.stable_diffusion.IFPipelineOutput` instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that will be called every
+    `callback_steps` steps during inference. The function will be called with the
+    following arguments: `callback(step: int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function will be called. If not specified, the callback will be
+    called at every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined under `self.processor`
+    in [diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**noise_level** (`int`, *optional*, defaults to 0) — The amount of noise to
+    add to the upscaled image. Must be in the range `[0, 1000)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (`bool`, *optional*, defaults to `True`) — Whether or not
+    to clean the caption before creating embeddings. Requires `beautifulsoup4` and
+    `ftfy` to be installed. If the dependencies are not installed, the embeddings
+    will be created from the raw prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`~pipelines.stable_diffusion.IFPipelineOutput` if `return_dict` is True, otherwise
+    a `tuple. When returning a tuple, the first element is a list with the generated
+    images, and the second element is a list of` bool`s denoting whether the corresponding
+    generated image likely represents "not-safe-for-work" (nsfw) or watermarked content,
+    according to the` safety_checker`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function invoked when calling the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/deepfloyd_if/pipeline_if_inpainting_superresolution.py#L351)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union do_classifier_free_guidance: bool = True num_images_per_prompt:
+    int = 1 device: Optional = None negative_prompt: Union = None prompt_embeds: Optional
+    = None negative_prompt_embeds: Optional = None clean_caption: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`, *optional*, defaults to `True`) —
+    whether to use classifier free guidance or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — number of images
+    that should be generated per prompt device — (`torch.device`, *optional*): torch
+    device to place the resulting embeddings on'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`.
+    instead. If not defined, one has to pass `negative_prompt_embeds`. instead. Ignored
+    when not using guidance (i.e., ignored if `guidance_scale` is less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_caption** (bool, defaults to `False`) — If `True`, the function will
+    preprocess and clean the provided caption before encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL

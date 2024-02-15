@@ -1,0 +1,266 @@
+- en: Reduce memory usage
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/optimization/memory](https://huggingface.co/docs/diffusers/optimization/memory)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/124.f5959de6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: A barrier to using diffusion models is the large amount of memory required.
+    To overcome this challenge, there are several memory-reducing techniques you can
+    use to run even some of the largest models on free-tier or consumer GPUs. Some
+    of these techniques can even be combined to further reduce memory usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In many cases, optimizing for memory or speed leads to improved performance
+    in the other, so you should try to optimize for both whenever you can. This guide
+    focuses on minimizing memory usage, but you can also learn more about how to [Speed
+    up inference](fp16).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The results below are obtained from generating a single 512x512 image from the
+    prompt a photo of an astronaut riding a horse on mars with 50 DDIM steps on a
+    Nvidia Titan RTX, demonstrating the speed-up you can expect as a result of reduced
+    memory consumption.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '|  | latency | speed-up |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| original | 9.50s | x1 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| fp16 | 3.61s | x2.63 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| channels last | 3.30s | x2.88 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| traced UNet | 3.21s | x2.96 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| memory-efficient attention | 2.63s | x3.61 |'
+  prefs: []
+  type: TYPE_TB
+- en: Sliced VAE
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sliced VAE enables decoding large batches of images with limited VRAM or batches
+    with 32 images or more by decoding the batches of latents one image at a time.
+    You’ll likely want to couple this with [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)
+    to reduce memory use further if you have xFormers installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use sliced VAE, call [enable_vae_slicing()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.enable_vae_slicing)
+    on your pipeline before inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You may see a small performance boost in VAE decoding on multi-image batches,
+    and there should be no performance impact on single-image batches.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tiled VAE
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Tiled VAE processing also enables working with large images on limited VRAM
+    (for example, generating 4k images on 8GB of VRAM) by splitting the image into
+    overlapping tiles, decoding the tiles, and then blending the outputs together
+    to compose the final image. You should also used tiled VAE with [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)
+    to reduce memory use further if you have xFormers installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use tiled VAE processing, call [enable_vae_tiling()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.enable_vae_tiling)
+    on your pipeline before inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The output image has some tile-to-tile tone variation because the tiles are
+    decoded separately, but you shouldn’t see any sharp and obvious seams between
+    the tiles. Tiling is turned off for images that are 512x512 or smaller.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CPU offloading
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Offloading the weights to the CPU and only loading them on the GPU when performing
+    the forward pass can also save memory. Often, this technique can reduce memory
+    consumption to less than 3GB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To perform CPU offloading, call [enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: CPU offloading works on submodules rather than whole models. This is the best
+    way to minimize memory consumption, but inference is much slower due to the iterative
+    nature of the diffusion process. The UNet component of the pipeline runs several
+    times (as many as `num_inference_steps`); each time, the different UNet submodules
+    are sequentially onloaded and offloaded as needed, resulting in a large number
+    of memory transfers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Consider using [model offloading](#model-offloading) if you want to optimize
+    for speed because it is much faster. The tradeoff is your memory savings won’t
+    be as large.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When using [enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload),
+    don’t move the pipeline to CUDA beforehand or else the gain in memory consumption
+    will only be minimal (see this [issue](https://github.com/huggingface/diffusers/issues/1934)
+    for more information).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload)
+    is a stateful operation that installs hooks on the models.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Model offloading
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Model offloading requires 🤗 Accelerate version 0.17.0 or higher.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Sequential CPU offloading](#cpu-offloading) preserves a lot of memory but
+    it makes inference slower because submodules are moved to GPU as needed, and they’re
+    immediately returned to the CPU when a new module runs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Full-model offloading is an alternative that moves whole models to the GPU,
+    instead of handling each model’s constituent *submodules*. There is a negligible
+    impact on inference time (compared with moving the pipeline to `cuda`), and it
+    still provides some memory savings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: During model offloading, only one of the main components of the pipeline (typically
+    the text encoder, UNet and VAE) is placed on the GPU while the others wait on
+    the CPU. Components like the UNet that run for multiple iterations stay on the
+    GPU until they’re no longer needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Enable model offloading by calling [enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
+    on the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: In order to properly offload models after they’re called, it is required to
+    run the entire pipeline and models are called in the pipeline’s expected order.
+    Exercise caution if models are reused outside the context of the pipeline after
+    hooks have been installed. See [Removing Hooks](https://huggingface.co/docs/accelerate/en/package_reference/big_modeling#accelerate.hooks.remove_hook_from_module)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
+    is a stateful operation that installs hooks on the models and state on the pipeline.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Channels-last memory format
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The channels-last memory format is an alternative way of ordering NCHW tensors
+    in memory to preserve dimension ordering. Channels-last tensors are ordered in
+    such a way that the channels become the densest dimension (storing images pixel-per-pixel).
+    Since not all operators currently support the channels-last format, it may result
+    in worst performance but you should still try and see if it works for your model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, to set the pipeline’s UNet to use the channels-last format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Tracing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Tracing runs an example input tensor through the model and captures the operations
+    that are performed on it as that input makes its way through the model’s layers.
+    The executable or `ScriptFunction` that is returned is optimized with just-in-time
+    compilation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To trace a UNet:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Replace the `unet` attribute of the pipeline with the traced model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Memory-efficient attention
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Recent work on optimizing bandwidth in the attention block has generated huge
+    speed-ups and reductions in GPU memory usage. The most recent type of memory-efficient
+    attention is [Flash Attention](https://arxiv.org/abs/2205.14135) (you can check
+    out the original code at [HazyResearch/flash-attention](https://github.com/HazyResearch/flash-attention)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you have PyTorch >= 2.0 installed, you should not expect a speed-up for inference
+    when enabling `xformers`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use Flash Attention, install the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PyTorch > 1.12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CUDA available
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[xFormers](xformers)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Then call [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)
+    on the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The iteration speed when using `xformers` should match the iteration speed of
+    PyTorch 2.0 as described [here](torch2.0).
+  prefs: []
+  type: TYPE_NORMAL

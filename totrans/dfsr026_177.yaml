@@ -1,0 +1,960 @@
+- en: Text-to-video
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/api/pipelines/text_to_video](https://huggingface.co/docs/diffusers/api/pipelines/text_to_video)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/81.62ec8394.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Docstring.93f6f462.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/ExampleCodeBlock.658f5cd6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🧪 This pipeline is for research purposes only.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[ModelScope Text-to-Video Technical Report](https://arxiv.org/abs/2308.06571)
+    is by Jiuniu Wang, Hangjie Yuan, Dayou Chen, Yingya Zhang, Xiang Wang, Shiwei
+    Zhang.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*This paper introduces ModelScopeT2V, a text-to-video synthesis model that
+    evolves from a text-to-image synthesis model (i.e., Stable Diffusion). ModelScopeT2V
+    incorporates spatio-temporal blocks to ensure consistent frame generation and
+    smooth movement transitions. The model could adapt to varying frame numbers during
+    training and inference, rendering it suitable for both image-text and video-text
+    datasets. ModelScopeT2V brings together three components (i.e., VQGAN, a text
+    encoder, and a denoising UNet), totally comprising 1.7 billion parameters, in
+    which 0.5 billion parameters are dedicated to temporal capabilities. The model
+    demonstrates superior performance over state-of-the-art methods across three evaluation
+    metrics. The code and an online demo are available at [https://modelscope.cn/models/damo/text-to-video-synthesis/summary](https://modelscope.cn/models/damo/text-to-video-synthesis/summary).*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can find additional information about Text-to-Video on the [project page](https://modelscope.cn/models/damo/text-to-video-synthesis/summary),
+    [original codebase](https://github.com/modelscope/modelscope/), and try it out
+    in a [demo](https://huggingface.co/spaces/damo-vilab/modelscope-text-to-video-synthesis).
+    Official checkpoints can be found at [damo-vilab](https://huggingface.co/damo-vilab)
+    and [cerspense](https://huggingface.co/cerspense).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage example
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: text-to-video-ms-1.7b
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Let’s start by generating a short video with the default length of 16 frames
+    (2s at 8 fps):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Diffusers supports different optimization techniques to improve the latency
+    and memory footprint of a pipeline. Since videos are often more memory-heavy than
+    images, we can enable CPU offloading and VAE slicing to keep the memory footprint
+    at bay.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s generate a video of 8 seconds (64 frames) on the same GPU using CPU offloading
+    and VAE slicing:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: It just takes **7 GBs of GPU memory** to generate the 64 video frames using
+    PyTorch 2.0, “fp16” precision and the techniques mentioned above.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can also use a different scheduler easily, using the same method we’d use
+    for Stable Diffusion:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here are some sample outputs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| An astronaut riding a horse. ![An astronaut riding a horse.](../Images/7624b329ee96da305cc8cda11bf80fae.png)
+    | Darth vader surfing in waves. ![Darth vader surfing in waves.](../Images/fa05339350fb9cb455c843e7f524e44d.png)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: cerspense/zeroscope_v2_576w & cerspense/zeroscope_v2_XL
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Zeroscope are watermark-free model and have been trained on specific sizes such
+    as `576x320` and `1024x576`. One should first generate a video using the lower
+    resolution checkpoint [`cerspense/zeroscope_v2_576w`](https://huggingface.co/cerspense/zeroscope_v2_576w)
+    with [TextToVideoSDPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.TextToVideoSDPipeline),
+    which can then be upscaled using [VideoToVideoSDPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.VideoToVideoSDPipeline)
+    and [`cerspense/zeroscope_v2_XL`](https://huggingface.co/cerspense/zeroscope_v2_XL).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now the video can be upscaled:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here are some sample outputs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Darth vader surfing in waves. ![Darth vader surfing in waves.](../Images/aab508b5ff9217f4f86b14a309983b1d.png)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: Make sure to check out the Schedulers [guide](../../using-diffusers/schedulers)
+    to learn how to explore the tradeoff between scheduler speed and quality, and
+    see the [reuse components across pipelines](../../using-diffusers/loading#reuse-components-across-pipelines)
+    section to learn how to efficiently load the same components into multiple pipelines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: TextToVideoSDPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.TextToVideoSDPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L84)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vae: AutoencoderKL text_encoder: CLIPTextModel tokenizer: CLIPTokenizer unet:
+    UNet3DConditionModel scheduler: KarrasDiffusionSchedulers )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vae** ([AutoencoderKL](/docs/diffusers/v0.26.3/en/api/models/autoencoderkl#diffusers.AutoencoderKL))
+    — Variational Auto-Encoder (VAE) Model to encode and decode images to and from
+    latent representations.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder** (`CLIPTextModel`) — Frozen text-encoder ([clip-vit-large-patch14](https://huggingface.co/openai/clip-vit-large-patch14)).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer** (`CLIPTokenizer`) — A [CLIPTokenizer](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)
+    to tokenize text.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unet** ([UNet3DConditionModel](/docs/diffusers/v0.26.3/en/api/models/unet3d-cond#diffusers.UNet3DConditionModel))
+    — A [UNet3DConditionModel](/docs/diffusers/v0.26.3/en/api/models/unet3d-cond#diffusers.UNet3DConditionModel)
+    to denoise the encoded video latents.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scheduler** ([SchedulerMixin](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin))
+    — A scheduler to be used in combination with `unet` to denoise the encoded image
+    latents. Can be one of [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    [LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler),
+    or [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Pipeline for text-to-video generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline).
+    Check the superclass documentation for the generic methods implemented for all
+    pipelines (downloading, saving, running on a particular device, etc.).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The pipeline also inherits the following loading methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[load_textual_inversion()](/docs/diffusers/v0.26.3/en/api/loaders/textual_inversion#diffusers.loaders.TextualInversionLoaderMixin.load_textual_inversion)
+    for loading textual inversion embeddings'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
+    for loading LoRA weights'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[save_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.save_lora_weights)
+    for saving LoRA weights'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L527)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None height: Optional = None width: Optional = None num_frames:
+    int = 16 num_inference_steps: int = 50 guidance_scale: float = 9.0 negative_prompt:
+    Union = None eta: float = 0.0 generator: Union = None latents: Optional = None
+    prompt_embeds: Optional = None negative_prompt_embeds: Optional = None output_type:
+    Optional = ''np'' return_dict: bool = True callback: Optional = None callback_steps:
+    int = 1 cross_attention_kwargs: Optional = None clip_skip: Optional = None ) →
+    [TextToVideoSDPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    image generation. If not defined, you need to pass `prompt_embeds`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**height** (`int`, *optional*, defaults to `self.unet.config.sample_size *
+    self.vae_scale_factor`) — The height in pixels of the generated video.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**width** (`int`, *optional*, defaults to `self.unet.config.sample_size * self.vae_scale_factor`)
+    — The width in pixels of the generated video.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_frames** (`int`, *optional*, defaults to 16) — The number of video frames
+    that are generated. Defaults to 16 frames which at 8 frames per seconds amounts
+    to 2 seconds of video.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 50) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality videos
+    at the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 7.5) — A higher guidance
+    scale value encourages the model to generate images closely linked to the text
+    `prompt` at the expense of lower image quality. Guidance scale is enabled when
+    `guidance_scale > 1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    to guide what to not include in image generation. If not defined, you need to
+    pass `negative_prompt_embeds` instead. Ignored when not using guidance (`guidance_scale
+    < 1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`, *optional*, defaults to 1) — The number of
+    images to generate per prompt.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) from the [DDIM](https://arxiv.org/abs/2010.02502) paper. Only applies to the
+    [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    and is ignored in other schedulers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    A [`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latents** (`torch.FloatTensor`, *optional*) — Pre-generated noisy latents
+    sampled from a Gaussian distribution, to be used as inputs for video generation.
+    Can be used to tweak the same generation with different prompts. If not provided,
+    a latents tensor is generated by sampling using the supplied random `generator`.
+    Latents should be of shape `(batch_size, num_channel, num_frames, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs (prompt weighting). If not provided, text
+    embeddings are generated from the `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs (prompt weighting).
+    If not provided, `negative_prompt_embeds` are generated from the `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"np"`) — The output format
+    of the generated video. Choose between `torch.FloatTensor` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [TextToVideoSDPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that calls every `callback_steps`
+    steps during inference. The function is called with the following arguments: `callback(step:
+    int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function is called. If not specified, the callback is called at
+    every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined in [`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clip_skip** (`int`, *optional*) — Number of layers to be skipped from CLIP
+    while computing the prompt embeddings. A value of 1 means that the output of the
+    pre-final layer will be used for computing the prompt embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[TextToVideoSDPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `return_dict` is `True`, [TextToVideoSDPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput)
+    is returned, otherwise a `tuple` is returned where the first element is a list
+    with the generated frames.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The call function to the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### disable_freeu'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L523)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disables the FreeU mechanism if enabled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### disable_vae_slicing'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L141)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disable sliced VAE decoding. If `enable_vae_slicing` was previously enabled,
+    this method will go back to computing decoding in one step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### disable_vae_tiling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L158)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disable tiled VAE decoding. If `enable_vae_tiling` was previously enabled, this
+    method will go back to computing decoding in one step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_freeu'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L500)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( s1: float s2: float b1: float b2: float )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**s1** (`float`) — Scaling factor for stage 1 to attenuate the contributions
+    of the skip features. This is done to mitigate “oversmoothing effect” in the enhanced
+    denoising process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**s2** (`float`) — Scaling factor for stage 2 to attenuate the contributions
+    of the skip features. This is done to mitigate “oversmoothing effect” in the enhanced
+    denoising process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**b1** (`float`) — Scaling factor for stage 1 to amplify the contributions
+    of backbone features.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**b2** (`float`) — Scaling factor for stage 2 to amplify the contributions
+    of backbone features.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Enables the FreeU mechanism as in [https://arxiv.org/abs/2309.11497](https://arxiv.org/abs/2309.11497).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The suffixes after the scaling factors represent the stages where they are being
+    applied.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Please refer to the [official repository](https://github.com/ChenyangSi/FreeU)
+    for combinations of the values that are known to work well for different pipelines
+    such as Stable Diffusion v1, v2, and Stable Diffusion XL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_vae_slicing'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L133)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enable sliced VAE decoding. When this option is enabled, the VAE will split
+    the input tensor in slices to compute decoding in several steps. This is useful
+    to save some memory and allow larger batch sizes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_vae_tiling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L149)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enable tiled VAE decoding. When this option is enabled, the VAE will split the
+    input tensor into tiles to compute decoding and encoding in several steps. This
+    is useful for saving a large amount of memory and to allow processing larger images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth.py#L199)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt device num_images_per_prompt do_classifier_free_guidance negative_prompt
+    = None prompt_embeds: Optional = None negative_prompt_embeds: Optional = None
+    lora_scale: Optional = None clip_skip: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded device
+    — (`torch.device`): torch device'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`) — number of images that should be generated
+    per prompt'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`) — whether to use classifier free guidance
+    or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**lora_scale** (`float`, *optional*) — A LoRA scale that will be applied to
+    all LoRA layers of the text encoder if LoRA layers are loaded.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clip_skip** (`int`, *optional*) — Number of layers to be skipped from CLIP
+    while computing the prompt embeddings. A value of 1 means that the output of the
+    pre-final layer will be used for computing the prompt embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: VideoToVideoSDPipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.VideoToVideoSDPipeline'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L160)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vae: AutoencoderKL text_encoder: CLIPTextModel tokenizer: CLIPTokenizer unet:
+    UNet3DConditionModel scheduler: KarrasDiffusionSchedulers )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vae** ([AutoencoderKL](/docs/diffusers/v0.26.3/en/api/models/autoencoderkl#diffusers.AutoencoderKL))
+    — Variational Auto-Encoder (VAE) Model to encode and decode videos to and from
+    latent representations.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder** (`CLIPTextModel`) — Frozen text-encoder ([clip-vit-large-patch14](https://huggingface.co/openai/clip-vit-large-patch14)).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer** (`CLIPTokenizer`) — A [CLIPTokenizer](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)
+    to tokenize text.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unet** ([UNet3DConditionModel](/docs/diffusers/v0.26.3/en/api/models/unet3d-cond#diffusers.UNet3DConditionModel))
+    — A [UNet3DConditionModel](/docs/diffusers/v0.26.3/en/api/models/unet3d-cond#diffusers.UNet3DConditionModel)
+    to denoise the encoded video latents.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scheduler** ([SchedulerMixin](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin))
+    — A scheduler to be used in combination with `unet` to denoise the encoded image
+    latents. Can be one of [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    [LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler),
+    or [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Pipeline for text-guided video-to-video generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline).
+    Check the superclass documentation for the generic methods implemented for all
+    pipelines (downloading, saving, running on a particular device, etc.).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The pipeline also inherits the following loading methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[load_textual_inversion()](/docs/diffusers/v0.26.3/en/api/loaders/textual_inversion#diffusers.loaders.TextualInversionLoaderMixin.load_textual_inversion)
+    for loading textual inversion embeddings'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[load_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.load_lora_weights)
+    for loading LoRA weights'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[save_lora_weights()](/docs/diffusers/v0.26.3/en/api/loaders/lora#diffusers.loaders.LoraLoaderMixin.save_lora_weights)
+    for saving LoRA weights'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L632)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt: Union = None video: Union = None strength: float = 0.6 num_inference_steps:
+    int = 50 guidance_scale: float = 15.0 negative_prompt: Union = None eta: float
+    = 0.0 generator: Union = None latents: Optional = None prompt_embeds: Optional
+    = None negative_prompt_embeds: Optional = None output_type: Optional = ''np''
+    return_dict: bool = True callback: Optional = None callback_steps: int = 1 cross_attention_kwargs:
+    Optional = None clip_skip: Optional = None ) → [TextToVideoSDPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts to guide
+    image generation. If not defined, you need to pass `prompt_embeds`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**video** (`List[np.ndarray]` or `torch.FloatTensor`) — `video` frames or tensor
+    representing a video batch to be used as the starting point for the process. Can
+    also accept video latents as `image`, if passing latents directly, it will not
+    be encoded again.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strength** (`float`, *optional*, defaults to 0.8) — Indicates extent to transform
+    the reference `video`. Must be between 0 and 1\. `video` is used as a starting
+    point, adding more noise to it the larger the `strength`. The number of denoising
+    steps depends on the amount of noise initially added. When `strength` is 1, added
+    noise is maximum and the denoising process runs for the full number of iterations
+    specified in `num_inference_steps`. A value of 1 essentially ignores `video`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_inference_steps** (`int`, *optional*, defaults to 50) — The number of
+    denoising steps. More denoising steps usually lead to a higher quality videos
+    at the expense of slower inference.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**guidance_scale** (`float`, *optional*, defaults to 7.5) — A higher guidance
+    scale value encourages the model to generate images closely linked to the text
+    `prompt` at the expense of lower image quality. Guidance scale is enabled when
+    `guidance_scale > 1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    to guide what to not include in video generation. If not defined, you need to
+    pass `negative_prompt_embeds` instead. Ignored when not using guidance (`guidance_scale
+    < 1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eta** (`float`, *optional*, defaults to 0.0) — Corresponds to parameter eta
+    (η) from the [DDIM](https://arxiv.org/abs/2010.02502) paper. Only applies to the
+    [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),
+    and is ignored in other schedulers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generator** (`torch.Generator` or `List[torch.Generator]`, *optional*) —
+    A [`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)
+    to make generation deterministic.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**latents** (`torch.FloatTensor`, *optional*) — Pre-generated noisy latents
+    sampled from a Gaussian distribution, to be used as inputs for video generation.
+    Can be used to tweak the same generation with different prompts. If not provided,
+    a latents tensor is generated by sampling using the supplied random `generator`.
+    Latents should be of shape `(batch_size, num_channel, num_frames, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs (prompt weighting). If not provided, text
+    embeddings are generated from the `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs (prompt weighting).
+    If not provided, `negative_prompt_embeds` are generated from the `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_type** (`str`, *optional*, defaults to `"np"`) — The output format
+    of the generated video. Choose between `torch.FloatTensor` or `np.array`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not to
+    return a [TextToVideoSDPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback** (`Callable`, *optional*) — A function that calls every `callback_steps`
+    steps during inference. The function is called with the following arguments: `callback(step:
+    int, timestep: int, latents: torch.FloatTensor)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**callback_steps** (`int`, *optional*, defaults to 1) — The frequency at which
+    the `callback` function is called. If not specified, the callback is called at
+    every step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_kwargs** (`dict`, *optional*) — A kwargs dictionary that
+    if specified is passed along to the `AttentionProcessor` as defined in [`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clip_skip** (`int`, *optional*) — Number of layers to be skipped from CLIP
+    while computing the prompt embeddings. A value of 1 means that the output of the
+    pre-final layer will be used for computing the prompt embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[TextToVideoSDPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput)
+    or `tuple`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `return_dict` is `True`, [TextToVideoSDPipelineOutput](/docs/diffusers/v0.26.3/en/api/pipelines/text_to_video#diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput)
+    is returned, otherwise a `tuple` is returned where the first element is a list
+    with the generated frames.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The call function to the pipeline for generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### disable_freeu'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L628)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disables the FreeU mechanism if enabled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### disable_vae_slicing'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L217)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disable sliced VAE decoding. If `enable_vae_slicing` was previously enabled,
+    this method will go back to computing decoding in one step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### disable_vae_tiling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L234)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disable tiled VAE decoding. If `enable_vae_tiling` was previously enabled, this
+    method will go back to computing decoding in one step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_freeu'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L605)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( s1: float s2: float b1: float b2: float )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**s1** (`float`) — Scaling factor for stage 1 to attenuate the contributions
+    of the skip features. This is done to mitigate “oversmoothing effect” in the enhanced
+    denoising process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**s2** (`float`) — Scaling factor for stage 2 to attenuate the contributions
+    of the skip features. This is done to mitigate “oversmoothing effect” in the enhanced
+    denoising process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**b1** (`float`) — Scaling factor for stage 1 to amplify the contributions
+    of backbone features.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**b2** (`float`) — Scaling factor for stage 2 to amplify the contributions
+    of backbone features.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Enables the FreeU mechanism as in [https://arxiv.org/abs/2309.11497](https://arxiv.org/abs/2309.11497).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The suffixes after the scaling factors represent the stages where they are being
+    applied.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Please refer to the [official repository](https://github.com/ChenyangSi/FreeU)
+    for combinations of the values that are known to work well for different pipelines
+    such as Stable Diffusion v1, v2, and Stable Diffusion XL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_vae_slicing'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L209)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enable sliced VAE decoding. When this option is enabled, the VAE will split
+    the input tensor in slices to compute decoding in several steps. This is useful
+    to save some memory and allow larger batch sizes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### enable_vae_tiling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L225)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enable tiled VAE decoding. When this option is enabled, the VAE will split the
+    input tensor into tiles to compute decoding and encoding in several steps. This
+    is useful for saving a large amount of memory and to allow processing larger images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### encode_prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_text_to_video_synth_img2img.py#L275)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( prompt device num_images_per_prompt do_classifier_free_guidance negative_prompt
+    = None prompt_embeds: Optional = None negative_prompt_embeds: Optional = None
+    lora_scale: Optional = None clip_skip: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**prompt** (`str` or `List[str]`, *optional*) — prompt to be encoded device
+    — (`torch.device`): torch device'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_images_per_prompt** (`int`) — number of images that should be generated
+    per prompt'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_classifier_free_guidance** (`bool`) — whether to use classifier free guidance
+    or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt** (`str` or `List[str]`, *optional*) — The prompt or prompts
+    not to guide the image generation. If not defined, one has to pass `negative_prompt_embeds`
+    instead. Ignored when not using guidance (i.e., ignored if `guidance_scale` is
+    less than `1`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated text embeddings.
+    Can be used to easily tweak text inputs, *e.g.* prompt weighting. If not provided,
+    text embeddings will be generated from `prompt` input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**negative_prompt_embeds** (`torch.FloatTensor`, *optional*) — Pre-generated
+    negative text embeddings. Can be used to easily tweak text inputs, *e.g.* prompt
+    weighting. If not provided, negative_prompt_embeds will be generated from `negative_prompt`
+    input argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**lora_scale** (`float`, *optional*) — A LoRA scale that will be applied to
+    all LoRA layers of the text encoder if LoRA layers are loaded.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clip_skip** (`int`, *optional*) — Number of layers to be skipped from CLIP
+    while computing the prompt embeddings. A value of 1 means that the output of the
+    pre-final layer will be used for computing the prompt embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Encodes the prompt into text encoder hidden states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: TextToVideoSDPipelineOutput
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class diffusers.pipelines.text_to_video_synthesis.TextToVideoSDPipelineOutput'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/diffusers/blob/v0.26.3/src/diffusers/pipelines/text_to_video_synthesis/pipeline_output.py#L12)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( frames: Union )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**frames** (`List[np.ndarray]` or `torch.FloatTensor`) — List of denoised frames
+    (essentially images) as NumPy arrays of shape `(height, width, num_channels)`
+    or as a `torch` tensor. The length of the list denotes the video length (the number
+    of frames).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Output class for text-to-video pipelines.
+  prefs: []
+  type: TYPE_NORMAL

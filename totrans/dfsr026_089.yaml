@@ -1,0 +1,93 @@
+- en: Metal Performance Shaders (MPS)
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/optimization/mps](https://huggingface.co/docs/diffusers/optimization/mps)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/125.eabc8ce9.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '🤗 Diffusers is compatible with Apple silicon (M1/M2 chips) using the PyTorch
+    [`mps`](https://pytorch.org/docs/stable/notes/mps.html) device, which uses the
+    Metal framework to leverage the GPU on MacOS devices. You’ll need to have:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: macOS computer with Apple silicon (M1/M2) hardware
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: macOS 12.6 or later (13.0 or later recommended)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: arm64 version of Python
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PyTorch 2.0](https://pytorch.org/get-started/locally/) (recommended) or 1.13
+    (minimum version supported for `mps`)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The `mps` backend uses PyTorch’s `.to()` interface to move the Stable Diffusion
+    pipeline on to your M1 or M2 device:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generating multiple prompts in a batch can [crash](https://github.com/huggingface/diffusers/issues/363)
+    or fail to work reliably. We believe this is related to the [`mps`](https://github.com/pytorch/pytorch/issues/84039)
+    backend in PyTorch. While this is being investigated, you should iterate instead
+    of batching.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re using **PyTorch 1.13**, you need to “prime” the pipeline with an additional
+    one-time pass through it. This is a temporary workaround for an issue where the
+    first inference pass produces slightly different results than subsequent ones.
+    You only need to do this pass once, and after just one inference step you can
+    discard the result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Troubleshoot
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: M1/M2 performance is very sensitive to memory pressure. When this occurs, the
+    system automatically swaps if it needs to which significantly degrades performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To prevent this from happening, we recommend *attention slicing* to reduce
+    memory pressure during inference and prevent swapping. This is especially relevant
+    if your computer has less than 64GB of system RAM, or if you generate images at
+    non-standard resolutions larger than 512×512 pixels. Call the [enable_attention_slicing()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline.enable_attention_slicing)
+    function on your pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Attention slicing performs the costly attention operation in multiple steps
+    instead of all at once. It usually improves performance by ~20% in computers without
+    universal memory, but we’ve observed *better performance* in most Apple silicon
+    computers unless you have 64GB of RAM or more.
+  prefs: []
+  type: TYPE_NORMAL

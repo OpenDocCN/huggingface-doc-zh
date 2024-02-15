@@ -1,0 +1,654 @@
+- en: PyTorch 2.0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/optimization/torch2.0](https://huggingface.co/docs/diffusers/optimization/torch2.0)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/130.7886bd43.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '🤗 Diffusers supports the latest optimizations from [PyTorch 2.0](https://pytorch.org/get-started/pytorch-2.0/)
+    which include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A memory-efficient attention implementation, scaled dot product attention, without
+    requiring any extra dependencies such as xFormers.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[`torch.compile`](https://pytorch.org/tutorials/intermediate/torch_compile_tutorial.html),
+    a just-in-time (JIT) compiler to provide an extra performance boost when individual
+    models are compiled.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Both of these optimizations require PyTorch 2.0 or later and 🤗 Diffusers > 0.13.0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Scaled dot product attention
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention)
+    (SDPA) is an optimized and memory-efficient attention (similar to xFormers) that
+    automatically enables several other optimizations depending on the model inputs
+    and GPU type. SDPA is enabled by default if you’re using PyTorch 2.0 and the latest
+    version of 🤗 Diffusers, so you don’t need to add anything to your code.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'However, if you want to explicitly enable it, you can set a [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
+    to use [AttnProcessor2_0](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor2_0):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: SDPA should be as fast and memory efficient as `xFormers`; check the [benchmark](#benchmark)
+    for more details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In some cases - such as making the pipeline more deterministic or converting
+    it to other formats - it may be helpful to use the vanilla attention processor,
+    [AttnProcessor](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor).
+    To revert to [AttnProcessor](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor),
+    call the [set_default_attn_processor()](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.UNet2DConditionModel.set_default_attn_processor)
+    function on the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: torch.compile
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `torch.compile` function can often provide an additional speed-up to your
+    PyTorch code. In 🤗 Diffusers, it is usually best to wrap the UNet with `torch.compile`
+    because it does most of the heavy lifting in the pipeline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Depending on GPU type, `torch.compile` can provide an *additional speed-up*
+    of **5-300x** on top of SDPA! If you’re using more recent GPU architectures such
+    as Ampere (A100, 3090), Ada (4090), and Hopper (H100), `torch.compile` is able
+    to squeeze even more performance out of these GPUs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compilation requires some time to complete, so it is best suited for situations
+    where you prepare your pipeline once and then perform the same type of inference
+    operations multiple times. For example, calling the compiled pipeline on a different
+    image size triggers compilation again which can be expensive.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more information and different options about `torch.compile`, refer to the
+    [`torch_compile`](https://pytorch.org/tutorials/intermediate/torch_compile_tutorial.html)
+    tutorial.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Benchmark
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We conducted a comprehensive benchmark with PyTorch 2.0’s efficient attention
+    implementation and `torch.compile` across different GPUs and batch sizes for five
+    of our most used pipelines. The code is benchmarked on 🤗 Diffusers v0.17.0.dev0
+    to optimize `torch.compile` usage (see [here](https://github.com/huggingface/diffusers/pull/3313)
+    for more details).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Expand the dropdown below to find the code used to benchmark each pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: <details>### Stable Diffusion text-to-image
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Stable Diffusion image-to-image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Stable Diffusion inpainting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: ControlNet
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: DeepFloyd IF text-to-image + upscaling
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE8]</details>'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The graph below highlights the relative speed-ups for the [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)
+    across five GPU families with PyTorch 2.0 and `torch.compile` enabled. The benchmarks
+    for the following graphs are measured in *number of iterations/second*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![t2i_speedup](../Images/b9e5a83589de9942d685c07d4cf11ecd.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'To give you an even better idea of how this speed-up holds for the other pipelines,
+    consider the following graph for an A100 with PyTorch 2.0 and `torch.compile`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![a100_numbers](../Images/f5f080ae9f99b4a72d2909f42bde4477.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: In the following tables, we report our findings in terms of the *number of iterations/second*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A100 (batch size: 1)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 21.66 | 23.13 | 44.03 | 49.74 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 21.81 | 22.40 | 43.92 | 46.32 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 22.24 | 23.23 | 43.76 | 49.25 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 15.02 | 15.82 | 32.13 | 36.08 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 20.21 / 13.84 /'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 24.00 | 20.12 / 13.70 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 24.03 | ❌ | 97.34 / 27.23 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 111.66 |
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| SDXL - txt2img | 8.64 | 9.9 | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: 'A100 (batch size: 4)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 11.6 | 13.12 | 14.62 | 17.27 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 11.47 | 13.06 | 14.66 | 17.25 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 11.67 | 13.31 | 14.88 | 17.48 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 8.28 | 9.38 | 10.51 | 12.41 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 25.02 | 18.04 | ❌ | 48.47 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SDXL - txt2img | 2.44 | 2.74 | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: 'A100 (batch size: 16)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 3.04 | 3.6 | 3.83 | 4.68 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 2.98 | 3.58 | 3.83 | 4.67 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 3.04 | 3.66 | 3.9 | 4.76 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 2.15 | 2.58 | 2.74 | 3.35 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 8.78 | 9.82 | ❌ | 16.77 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SDXL - txt2img | 0.64 | 0.72 | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: 'V100 (batch size: 1)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 18.99 | 19.14 | 20.95 | 22.17 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 18.56 | 19.18 | 20.95 | 22.11 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 19.14 | 19.06 | 21.08 | 22.20 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 13.48 | 13.93 | 15.18 | 15.88 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 20.01 / 9.08 /'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 23.34 | 19.79 / 8.98 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 24.10 | ❌ | 55.75 / 11.57 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 57.67 |
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'V100 (batch size: 4)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 5.96 | 5.89 | 6.83 | 6.86 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 5.90 | 5.91 | 6.81 | 6.82 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 5.99 | 6.03 | 6.93 | 6.95 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 4.26 | 4.29 | 4.92 | 4.93 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 15.41 | 14.76 | ❌ | 22.95 |'
+  prefs: []
+  type: TYPE_TB
+- en: 'V100 (batch size: 16)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 1.66 | 1.66 | 1.92 | 1.90 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 1.65 | 1.65 | 1.91 | 1.89 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 1.69 | 1.69 | 1.95 | 1.93 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 1.19 | 1.19 | OOM after warmup | 1.36 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 5.43 | 5.29 | ❌ | 7.06 |'
+  prefs: []
+  type: TYPE_TB
+- en: 'T4 (batch size: 1)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 6.9 | 6.95 | 7.3 | 7.56 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 6.84 | 6.99 | 7.04 | 7.55 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 6.91 | 6.7 | 7.01 | 7.37 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 4.89 | 4.86 | 5.35 | 5.48 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 17.42 / 2.47 /'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 18.52 | 16.96 / 2.45 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 18.69 | ❌ | 24.63 / 2.47 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 23.39 |
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| SDXL - txt2img | 1.15 | 1.16 | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: 'T4 (batch size: 4)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 1.79 | 1.79 | 2.03 | 1.99 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 1.77 | 1.77 | 2.05 | 2.04 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 1.81 | 1.82 | 2.09 | 2.09 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 1.34 | 1.27 | 1.47 | 1.46 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 5.79 | 5.61 | ❌ | 7.39 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SDXL - txt2img | 0.288 | 0.289 | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: 'T4 (batch size: 16)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 2.34s | 2.30s | OOM after 2nd iteration | 1.99s |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 2.35s | 2.31s | OOM after warmup | 2.00s |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 2.30s | 2.26s | OOM after 2nd iteration | 1.95s |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | OOM after 2nd iteration | OOM after 2nd iteration | OOM
+    after warmup | OOM after warmup |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF * | 1.44 | 1.44 | ❌ | 1.94 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SDXL - txt2img | OOM | OOM | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: 'RTX 3090 (batch size: 1)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 22.56 | 22.84 | 23.84 | 25.69 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 22.25 | 22.61 | 24.1 | 25.83 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 22.22 | 22.54 | 24.26 | 26.02 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 16.03 | 16.33 | 17.38 | 18.56 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 27.08 / 9.07 /'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 31.23 | 26.75 / 8.92 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 31.47 | ❌ | 68.08 / 11.16 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 65.29 |
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'RTX 3090 (batch size: 4)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 6.46 | 6.35 | 7.29 | 7.3 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 6.33 | 6.27 | 7.31 | 7.26 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 6.47 | 6.4 | 7.44 | 7.39 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 4.59 | 4.54 | 5.27 | 5.26 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 16.81 | 16.62 | ❌ | 21.57 |'
+  prefs: []
+  type: TYPE_TB
+- en: 'RTX 3090 (batch size: 16)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 1.7 | 1.69 | 1.93 | 1.91 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 1.68 | 1.67 | 1.93 | 1.9 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 1.72 | 1.71 | 1.97 | 1.94 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 1.23 | 1.22 | 1.4 | 1.38 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 5.01 | 5.00 | ❌ | 6.33 |'
+  prefs: []
+  type: TYPE_TB
+- en: 'RTX 4090 (batch size: 1)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 40.5 | 41.89 | 44.65 | 49.81 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 40.39 | 41.95 | 44.46 | 49.8 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 40.51 | 41.88 | 44.58 | 49.72 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 29.27 | 30.29 | 32.26 | 36.03 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 69.71 / 18.78 /'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 85.49 | 69.13 / 18.80 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 85.56 | ❌ | 124.60 / 26.37 /
+  prefs: []
+  type: TYPE_NORMAL
+- en: 138.79 |
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| SDXL - txt2img | 6.8 | 8.18 | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: 'RTX 4090 (batch size: 4)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 12.62 | 12.84 | 15.32 | 15.59 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 12.61 | 12,.79 | 15.35 | 15.66 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 12.65 | 12.81 | 15.3 | 15.58 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 9.1 | 9.25 | 11.03 | 11.22 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 31.88 | 31.14 | ❌ | 43.92 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SDXL - txt2img | 2.19 | 2.35 | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: 'RTX 4090 (batch size: 16)'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - txt2img | 3.17 | 3.2 | 3.84 | 3.85 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - img2img | 3.16 | 3.2 | 3.84 | 3.85 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - inpaint | 3.17 | 3.2 | 3.85 | 3.85 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SD - controlnet | 2.23 | 2.3 | 2.7 | 2.75 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| IF | 9.26 | 9.2 | ❌ | 13.31 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| SDXL - txt2img | 0.52 | 0.53 | - | - |'
+  prefs: []
+  type: TYPE_TB
+- en: Notes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Follow this [PR](https://github.com/huggingface/diffusers/pull/3313) for more
+    details on the environment used for conducting the benchmarks.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For the DeepFloyd IF pipeline where batch sizes > 1, we only used a batch size
+    of > 1 in the first IF pipeline for text-to-image generation and NOT for upscaling.
+    That means the two upscaling pipelines received a batch size of 1.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Thanks to [Horace He](https://github.com/Chillee) from the PyTorch team for
+    their support in improving our support of `torch.compile()` in Diffusers.*'
+  prefs: []
+  type: TYPE_NORMAL

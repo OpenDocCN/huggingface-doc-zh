@@ -1,0 +1,304 @@
+- en: Schedulers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/schedulers](https://huggingface.co/docs/diffusers/using-diffusers/schedulers)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/183.7f3d5c56.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Diffusion pipelines are inherently a collection of diffusion models and schedulers
+    that are partly independent from each other. This means that one is able to switch
+    out parts of the pipeline to better customize a pipeline to one’s use case. The
+    best example of this is the [Schedulers](../api/schedulers/overview).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Whereas diffusion models usually simply define the forward pass from noise
+    to a less noisy sample, schedulers define the whole denoising process, *i.e.*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How many denoising steps?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Stochastic or deterministic?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: What algorithm to use to find the denoised sample?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: They can be quite complex and often define a trade-off between **denoising speed**
+    and **denoising quality**. It is extremely difficult to measure quantitatively
+    which scheduler works best for a given diffusion pipeline, so it is often recommended
+    to simply try out which works best.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following paragraphs show how to do so with the 🧨 Diffusers library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load pipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s start by loading the [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)
+    model in the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, we move it to GPU:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Access the scheduler
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The scheduler is always one of the components of the pipeline and is usually
+    called `"scheduler"`. So it can be accessed via the `"scheduler"` property.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**Output**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can see that the scheduler is of type [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler).
+    Cool, now let’s compare the scheduler in its performance to other schedulers.
+    First we define a prompt on which we will test all the different schedulers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, we create a generator from a random seed that will ensure that we can
+    generate similar images as well as run the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/85fa20e9e45dfa325b08a579c2503c04.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Changing the scheduler
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now we show how easy it is to change the scheduler of a pipeline. Every scheduler
+    has a property `compatibles` which defines all compatible schedulers. You can
+    take a look at all available, compatible schedulers for the Stable Diffusion pipeline
+    as follows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**Output**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Cool, lots of schedulers to look at. Feel free to have a look at their respective
+    class definitions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[EulerDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler#diffusers.EulerDiscreteScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DDPMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[HeunDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/heun#diffusers.HeunDiscreteScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DPMSolverMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/multistep_dpm_solver#diffusers.DPMSolverMultistepScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DEISMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/deis#diffusers.DEISMultistepScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[EulerAncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler_ancestral#diffusers.EulerAncestralDiscreteScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[UniPCMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/unipc#diffusers.UniPCMultistepScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[KDPM2DiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/dpm_discrete#diffusers.KDPM2DiscreteScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DPMSolverSinglestepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/singlestep_dpm_solver#diffusers.DPMSolverSinglestepScheduler),'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[KDPM2AncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/dpm_discrete_ancestral#diffusers.KDPM2AncestralDiscreteScheduler).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We will now compare the input prompt with all other schedulers. To change the
+    scheduler of the pipeline you can make use of the convenient `config` property
+    in combination with the [from_config()](/docs/diffusers/v0.26.3/en/api/configuration#diffusers.ConfigMixin.from_config)
+    function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'returns a dictionary of the configuration of the scheduler:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Output**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: This configuration can then be used to instantiate a scheduler of a different
+    class that is compatible with the pipeline. Here, we change the scheduler to the
+    [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Cool, now we can run the pipeline again to compare the generation quality.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/aeaae55430badb2de910e1a713b0bbe8.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: If you are a JAX/Flax user, please check [this section](#changing-the-scheduler-in-flax)
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compare schedulers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'So far we have tried running the stable diffusion pipeline with two schedulers:
+    [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler)
+    and [DDIMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddim#diffusers.DDIMScheduler).
+    A number of better schedulers have been released that can be run with much fewer
+    steps; let’s compare them here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[LMSDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lms_discrete#diffusers.LMSDiscreteScheduler)
+    usually leads to better results:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/4c9dc4ee0fe60f14a122ed8f9267e44b.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[EulerDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler#diffusers.EulerDiscreteScheduler)
+    and [EulerAncestralDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler_ancestral#diffusers.EulerAncestralDiscreteScheduler)
+    can generate high quality results with as little as 30 steps.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/30a99b3625066922ca35535bb1da7557.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'and:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/dac9b5338f1d73249d4d46fa8e35505e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[DPMSolverMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/multistep_dpm_solver#diffusers.DPMSolverMultistepScheduler)
+    gives a reasonable speed/quality trade-off and can be run with as little as 20
+    steps.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/b97d4c7db809a65413b4dc12bcfc20fe.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: As you can see, most images look very similar and are arguably of very similar
+    quality. It often really depends on the specific use case which scheduler to choose.
+    A good approach is always to run multiple different schedulers to compare results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Changing the Scheduler in Flax
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you are a JAX/Flax user, you can also change the default pipeline scheduler.
+    This is a complete example of how to run inference using the Flax Stable Diffusion
+    pipeline and the super-fast [DPM-Solver++ scheduler](../api/schedulers/multistep_dpm_solver):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The following Flax schedulers are *not yet compatible* with the Flax Stable
+    Diffusion Pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`FlaxLMSDiscreteScheduler`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`FlaxDDPMScheduler`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

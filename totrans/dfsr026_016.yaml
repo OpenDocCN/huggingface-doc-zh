@@ -1,0 +1,450 @@
+- en: Load pipelines, models, and schedulers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/diffusers/using-diffusers/loading](https://huggingface.co/docs/diffusers/using-diffusers/loading)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/diffusers/v0.26.3/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/start.99629b4a.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/scheduler.182ea377.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/singletons.fade7992.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.1f6d62f6.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/paths.108a236d.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/entry/app.2b3eaeb0.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/index.abf12888.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/0.3862a335.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/nodes/174.c8222f27.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Tip.230e2334.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/CodeBlock.57fe6e13.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/DocNotebookDropdown.5fa27ace.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/diffusers/v0.26.3/en/_app/immutable/chunks/Heading.16916d63.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having an easy way to use a diffusion system for inference is essential to 🧨
+    Diffusers. Diffusion systems often consist of multiple components like parameterized
+    models, tokenizers, and schedulers that interact in complex ways. That is why
+    we designed the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
+    to wrap the complexity of the entire diffusion system into an easy-to-use API,
+    while remaining flexible enough to be adapted for other use cases, such as loading
+    each component individually as building blocks to assemble your own diffusion
+    system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Everything you need for inference or training is accessible with the `from_pretrained()`
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This guide will show you how to load:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: pipelines from the Hub and locally
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: different components into a pipeline
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: checkpoint variants such as different floating point types or non-exponential
+    mean averaged (EMA) weights
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: models and schedulers
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Diffusion Pipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 💡 Skip to the [DiffusionPipeline explained](#diffusionpipeline-explained) section
+    if you are interested in learning in more detail about how the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
+    class works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
+    class is the simplest and most generic way to load the latest trending diffusion
+    model from the [Hub](https://huggingface.co/models?library=diffusers&sort=trending).
+    The [DiffusionPipeline.from_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.from_pretrained)
+    method automatically detects the correct pipeline class from the checkpoint, downloads,
+    and caches all the required configuration and weight files, and returns a pipeline
+    instance ready for inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also load a checkpoint with its specific pipeline class. The example
+    above loaded a Stable Diffusion model; to get the same result, use the [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)
+    class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A checkpoint (such as [`CompVis/stable-diffusion-v1-4`](https://huggingface.co/CompVis/stable-diffusion-v1-4)
+    or [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5))
+    may also be used for more than one task, like text-to-image or image-to-image.
+    To differentiate what task you want to use the checkpoint for, you have to load
+    it directly with its corresponding task-specific pipeline class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Local pipeline
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To load a diffusion pipeline locally, use [`git-lfs`](https://git-lfs.github.com/)
+    to manually download the checkpoint (in this case, [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5))
+    to your local disk. This creates a local folder, `./stable-diffusion-v1-5`, on
+    your disk:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then pass the local path to [from_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.from_pretrained):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The [from_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.from_pretrained)
+    method won’t download any files from the Hub when it detects a local path, but
+    this also means it won’t download and cache the latest changes to a checkpoint.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Swap components in a pipeline
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can customize the default components of any pipeline with another compatible
+    component. Customization is important because:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Changing the scheduler is important for exploring the trade-off between generation
+    speed and quality.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Different components of a model are typically trained independently and you
+    can swap out a component with a better-performing one.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: During finetuning, usually only some components - like the UNet or text encoder
+    - are trained.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'To find out which schedulers are compatible for customization, you can use
+    the `compatibles` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s use the [SchedulerMixin.from_pretrained()](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin.from_pretrained)
+    method to replace the default [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler)
+    with a more performant scheduler, [EulerDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler#diffusers.EulerDiscreteScheduler).
+    The `subfolder="scheduler"` argument is required to load the scheduler configuration
+    from the correct [subfolder](https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/main/scheduler)
+    of the pipeline repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Then you can pass the new [EulerDiscreteScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/euler#diffusers.EulerDiscreteScheduler)
+    instance to the `scheduler` argument in [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Safety checker
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Diffusion models like Stable Diffusion can generate harmful content, which
+    is why 🧨 Diffusers has a [safety checker](https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/safety_checker.py)
+    to check generated outputs against known hardcoded NSFW content. If you’d like
+    to disable the safety checker for whatever reason, pass `None` to the `safety_checker`
+    argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Reuse components across pipelines
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can also reuse the same components in multiple pipelines to avoid loading
+    the weights into RAM twice. Use the [components](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.components)
+    method to save the components:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then you can pass the `components` to another pipeline without reloading the
+    weights into RAM:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also pass the components individually to the pipeline if you want more
+    flexibility over which components to reuse or disable. For example, to reuse the
+    same components in the text-to-image pipeline, except for the safety checker and
+    feature extractor, in the image-to-image pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Checkpoint variants
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'A checkpoint variant is usually a checkpoint whose weights are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stored in a different floating point type for lower precision and lower storage,
+    such as [`torch.float16`](https://pytorch.org/docs/stable/tensors.html#data-types),
+    because it only requires half the bandwidth and storage to download. You can’t
+    use this variant if you’re continuing training or using a CPU.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Non-exponential mean averaged (EMA) weights, which shouldn’t be used for inference.
+    You should use these to continue fine-tuning a model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 💡 When the checkpoints have identical model structures, but they were trained
+    on different datasets and with a different training setup, they should be stored
+    in separate repositories instead of variations (for example, `stable-diffusion-v1-4`
+    and `stable-diffusion-v1-5`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Otherwise, a variant is **identical** to the original checkpoint. They have
+    exactly the same serialization format (like [Safetensors](./using_safetensors)),
+    model structure, and weights that have identical tensor shapes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| **checkpoint type** | **weight name** | **argument for loading weights**
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| original | diffusion_pytorch_model.bin |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| floating point | diffusion_pytorch_model.fp16.bin | `variant`, `torch_dtype`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| non-EMA | diffusion_pytorch_model.non_ema.bin | `variant` |'
+  prefs: []
+  type: TYPE_TB
+- en: 'There are two important arguments to know for loading variants:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch_dtype` defines the floating point precision of the loaded checkpoints.
+    For example, if you want to save bandwidth by loading a `fp16` variant, you should
+    specify `torch_dtype=torch.float16` to *convert the weights* to `fp16`. Otherwise,
+    the `fp16` weights are converted to the default `fp32` precision. You can also
+    load the original checkpoint without defining the `variant` argument, and convert
+    it to `fp16` with `torch_dtype=torch.float16`. In this case, the default `fp32`
+    weights are downloaded first, and then they’re converted to `fp16` after loading.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`variant` defines which files should be loaded from the repository. For example,
+    if you want to load a `non_ema` variant from the [`diffusers/stable-diffusion-variants`](https://huggingface.co/diffusers/stable-diffusion-variants/tree/main/unet)
+    repository, you should specify `variant="non_ema"` to download the `non_ema` files.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To save a checkpoint stored in a different floating-point type or as a non-EMA
+    variant, use the [DiffusionPipeline.save_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.save_pretrained)
+    method and specify the `variant` argument. You should try and save a variant to
+    the same folder as the original checkpoint, so you can load both from the same
+    folder:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you don’t save the variant to an existing folder, you must specify the `variant`
+    argument otherwise it’ll throw an `Exception` because it can’t find the original
+    checkpoint:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Models are loaded from the [ModelMixin.from_pretrained()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.from_pretrained)
+    method, which downloads and caches the latest version of the model weights and
+    configurations. If the latest files are available in the local cache, [from_pretrained()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.from_pretrained)
+    reuses files in the cache instead of re-downloading them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Models can be loaded from a subfolder with the `subfolder` argument. For example,
+    the model weights for `runwayml/stable-diffusion-v1-5` are stored in the [`unet`](https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/main/unet)
+    subfolder:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or directly from a repository’s [directory](https://huggingface.co/google/ddpm-cifar10-32/tree/main):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also load and save model variants by specifying the `variant` argument
+    in [ModelMixin.from_pretrained()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.from_pretrained)
+    and [ModelMixin.save_pretrained()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.save_pretrained):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Schedulers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Schedulers are loaded from the [SchedulerMixin.from_pretrained()](/docs/diffusers/v0.26.3/en/api/schedulers/overview#diffusers.SchedulerMixin.from_pretrained)
+    method, and unlike models, schedulers are **not parameterized** or **trained**;
+    they are defined by a configuration file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Loading schedulers does not consume any significant amount of memory and the
+    same configuration file can be used for a variety of different schedulers. For
+    example, the following schedulers are compatible with [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline),
+    which means you can load the same scheduler configuration file in any of these
+    classes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: DiffusionPipeline explained
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As a class method, [DiffusionPipeline.from_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.from_pretrained)
+    is responsible for two things:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Download the latest version of the folder structure required for inference and
+    cache it. If the latest folder structure is available in the local cache, [DiffusionPipeline.from_pretrained()](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline.from_pretrained)
+    reuses the cache and won’t redownload the files.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Load the cached weights into the correct pipeline [class](../api/pipelines/overview#diffusers-summary)
+    - retrieved from the `model_index.json` file - and return an instance of it.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The pipelines’ underlying folder structure corresponds directly with their class
+    instances. For example, the [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)
+    corresponds to the folder structure in [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You’ll see pipeline is an instance of [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline),
+    which consists of seven components:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`"feature_extractor"`: a [CLIPImageProcessor](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPImageProcessor)
+    from 🤗 Transformers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"safety_checker"`: a [component](https://github.com/huggingface/diffusers/blob/e55687e1e15407f60f32242027b7bb8170e58266/src/diffusers/pipelines/stable_diffusion/safety_checker.py#L32)
+    for screening against harmful content.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"scheduler"`: an instance of [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"text_encoder"`: a [CLIPTextModel](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTextModel)
+    from 🤗 Transformers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"tokenizer"`: a [CLIPTokenizer](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)
+    from 🤗 Transformers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"unet"`: an instance of [UNet2DConditionModel](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.UNet2DConditionModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"vae"`: an instance of [AutoencoderKL](/docs/diffusers/v0.26.3/en/api/models/autoencoderkl#diffusers.AutoencoderKL).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Compare the components of the pipeline instance to the [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/main)
+    folder structure, and you’ll see there is a separate folder for each of the components
+    in the repository:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can access each of the components of the pipeline as an attribute to view
+    its configuration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Every pipeline expects a [`model_index.json`](https://huggingface.co/runwayml/stable-diffusion-v1-5/blob/main/model_index.json)
+    file that tells the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: which pipeline class to load from `_class_name`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: which version of 🧨 Diffusers was used to create the model in `_diffusers_version`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: what components from which library are stored in the subfolders (`name` corresponds
+    to the component and subfolder name, `library` corresponds to the name of the
+    library to load the class from, and `class` corresponds to the class name)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
