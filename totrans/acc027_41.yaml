@@ -1,308 +1,423 @@
 - en: Wrapper classes for torch Dataloaders, Optimizers, and Schedulers
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 用于torch数据加载器、优化器和调度器的包装类
 - en: 'Original text: [https://huggingface.co/docs/accelerate/package_reference/torch_wrappers](https://huggingface.co/docs/accelerate/package_reference/torch_wrappers)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/accelerate/package_reference/torch_wrappers](https://huggingface.co/docs/accelerate/package_reference/torch_wrappers)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The internal classes Accelerate uses to prepare objects for distributed training
     when calling [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Accelerate在调用[prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)时使用的内部类，用于为分布式训练准备对象。
 - en: Datasets and DataLoaders
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数据集和数据加载器
 - en: '#### `accelerate.data_loader.prepare_data_loader`'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.data_loader.prepare_data_loader`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L745)'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L745)'
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Parameters
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`dataloader` (`torch.utils.data.dataloader.DataLoader`) — The data loader to
     split across several devices.'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dataloader` (`torch.utils.data.dataloader.DataLoader`) — 要在多个设备上拆分的数据加载器。'
 - en: '`device` (`torch.device`) — The target device for the returned `DataLoader`.'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`device` (`torch.device`) — 返回的`DataLoader`的目标设备。'
 - en: '`num_processes` (`int`, *optional*) — The number of processes running concurrently.
     Will default to the value given by [AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState).'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_processes` (`int`, *可选*) — 并行运行的进程数。将默认为[AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState)给定的值。'
 - en: '`process_index` (`int`, *optional*) — The index of the current process. Will
     default to the value given by [AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState).'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`process_index` (`int`, *可选*) — 当前进程的索引。将默认为[AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState)给定的值。'
 - en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether the resulting
     `DataLoader` should split the batches of the original data loader across devices
     or yield full batches (in which case it will yield batches starting at the `process_index`-th
     and advancing of `num_processes` batches at each iteration).'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`split_batches` (`bool`, *可选*, 默认为`False`) — 结果`DataLoader`是否应该将原始数据加载器的批次拆分到设备上或产生完整的批次（在这种情况下，它将产生从`process_index`开始的批次，并在每次迭代时向前推进`num_processes`批次）。'
 - en: Another way to see this is that the observed batch size will be the same as
     the initial `dataloader` if this option is set to `True`, the batch size of the
     initial `dataloader` multiplied by `num_processes` otherwise.
+  id: totrans-14
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 另一种看待这个问题的方式是，如果将此选项设置为`True`，则观察到的批次大小将与初始`dataloader`的批次大小相同，否则将是初始`dataloader`的批次大小乘以`num_processes`。
 - en: Setting this option to `True` requires that the batch size of the `dataloader`
     is a round multiple of `batch_size`.
+  id: totrans-15
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 将此选项设置为`True`要求`dataloader`的批次大小是`batch_size`的整数倍。
 - en: '`put_on_device` (`bool`, *optional*, defaults to `False`) — Whether or not
     to put the batches on `device` (only works if the batches are nested list, tuples
     or dictionaries of tensors).'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`put_on_device` (`bool`, *可选*, 默认为`False`) — 是否将批次放在`device`上（仅在批次为嵌套列表、元组或张量字典时有效）。'
 - en: '`rng_types` (list of `str` or [RNGType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.RNGType))
     — The list of random number generators to synchronize at the beginning of each
     iteration. Should be one or several of:'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`rng_types`（`str`列表或[RNGType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.RNGType)）
+    — 每次迭代开始时要同步的随机数生成器列表。应该是以下之一或几个：'
 - en: '`"torch"`: the base torch random number generator'
+  id: totrans-18
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"torch"`: 基本的torch随机数生成器'
 - en: '`"cuda"`: the CUDA random number generator (GPU only)'
+  id: totrans-19
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"cuda"`: CUDA随机数生成器（仅适用于GPU）'
 - en: '`"xla"`: the XLA random number generator (TPU only)'
+  id: totrans-20
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"xla"`: XLA随机数生成器（仅适用于TPU）'
 - en: '`"generator"`: the `torch.Generator` of the sampler (or batch sampler if there
     is no sampler in your dataloader) or of the iterable dataset (if it exists) if
     the underlying dataset is of that type.'
+  id: totrans-21
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"generator"`: 采样器的`torch.Generator`（如果数据加载器中没有采样器）或可迭代数据集的`torch.Generator`（如果存在）。'
 - en: '`dispatch_batches` (`bool`, *optional*) — If set to `True`, the datalaoder
     prepared is only iterated through on the main process and then the batches are
     split and broadcast to each process. Will default to `True` when the underlying
     dataset is an `IterableDataset`, `False` otherwise.'
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dispatch_batches` (`bool`, *可选*) — 如果设置为`True`，则准备的数据加载器仅在主进程上迭代，然后将批次拆分并广播到每个进程。当底层数据集为`IterableDataset`时，默认为`True`，否则为`False`。'
 - en: '`even_batches` (`bool`, *optional*, defaults to `True`) — If set to `True`,
     in cases where the total batch size across all processes does not exactly divide
     the dataset, samples at the start of the dataset will be duplicated so the batch
     can be divided equally among all workers.'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`even_batches` (`bool`, *可选*, 默认为`True`) — 如果设置为`True`，在所有进程的总批次大小不能完全整除数据集的情况下，数据集开头的样本将被复制，以便批次可以在所有工作进程之间平均分配。'
 - en: '`slice_fn_for_dispatch` (`Callable`, *optional*`) -- If passed, this function
     will be used to slice tensors across` num_processes`. Will default to [slice_tensors()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.slice_tensors).
     This argument is used only when` dispatch_batches`is set to`True` and will be
     ignored otherwise.'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`slice_fn_for_dispatch` (`Callable`, *可选*`) -- 如果传递，将用于在`num_processes`上切片张量。将默认为[slice_tensors()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.slice_tensors)。此参数仅在`dispatch_batches`设置为`True`时使用，否则将被忽略。'
 - en: '`use_seedable_sampler` (`bool`, *optional*, defaults to `False`) — Whether
     to use the `SeedableRandomSampler` instead of a `RandomSampler` for better reproducability.
     Comes at a cost of potentially different performances due to different shuffling
     algorithms but ensures results will be the *exact* same. Should be paired with
     `set_seed()` at every `self.set_epoch`'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`use_seedable_sampler` (`bool`, *可选*, 默认为`False`) — 是否使用`SeedableRandomSampler`而不是`RandomSampler`以获得更好的可重现性。由于不同的洗牌算法可能导致不同的性能，但确保结果将是*完全*相同。应该与每个`self.set_epoch`配对使用`set_seed()`'
 - en: Returns
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回值
 - en: '`torch.utils.data.dataloader.DataLoader`'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.utils.data.dataloader.DataLoader`'
 - en: A new data loader that will yield the portion of the batches
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个新的数据加载器，将产生批次的部分
 - en: Wraps a PyTorch `DataLoader` to generate batches for one of the processes only.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 将PyTorch的`DataLoader`包装起来，仅为一个进程生成批次。
 - en: Depending on the value of the `drop_last` attribute of the `dataloader` passed,
     it will either stop the iteration at the first batch that would be too small /
     not present on all processes or loop with indices from the beginning.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据传递的`dataloader`的`drop_last`属性的值，它将在第一个批次太小/不在所有进程上存在时停止迭代，或者使用从头开始的索引循环。
 - en: '`BatchSampler`s with varying batch sizes are not enabled by default. To enable
     this behaviour, set `even_batches` equal to `False`'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下不启用具有不同批次大小的`BatchSampler`。要启用此行为，请将`even_batches`设置为`False`。
 - en: '#### `accelerate.skip_first_batches`'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.skip_first_batches`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L1019)'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L1019)'
 - en: '[PRE1]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Creates a `torch.utils.data.DataLoader` that will efficiently skip the first
     `num_batches`.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个`torch.utils.data.DataLoader`，将有效地跳过前`num_batches`。
 - en: '### `class accelerate.data_loader.BatchSamplerShard`'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.data_loader.BatchSamplerShard`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L100)'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L100)'
 - en: '[PRE2]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Parameters
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`batch_sampler` (`torch.utils.data.sampler.BatchSampler`) — The batch sampler
     to split in several shards.'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`batch_sampler` (`torch.utils.data.sampler.BatchSampler`) — 将批次采样器拆分为几个分片。'
 - en: '`num_processes` (`int`, *optional*, defaults to 1) — The number of processes
     running concurrently.'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_processes` (`int`, *可选*, 默认为1) — 并发运行的进程数。'
 - en: '`process_index` (`int`, *optional*, defaults to 0) — The index of the current
     process.'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`process_index` (`int`, *可选*, 默认为0) — 当前进程的索引。'
 - en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether the shards
     should be created by splitting a batch to give a piece of it on each process,
     or by yielding different full batches on each process.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`split_batches` (`bool`, *可选*, 默认为`False`) — 是否通过将一个批次拆分为每个进程上的一部分来创建分片，或者通过在每个进程上产生不同的完整批次来创建分片。'
 - en: 'On two processes with a sampler of `[[0, 1, 2, 3], [4, 5, 6, 7]]`, this will
     result in:'
+  id: totrans-44
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在一个采样器为`[[0, 1, 2, 3], [4, 5, 6, 7]]`的两个进程上，结果如下：
 - en: the sampler on process 0 to yield `[0, 1, 2, 3]` and the sampler on process
     1 to yield `[4, 5, 6, 7]` if this argument is set to `False`.
+  id: totrans-45
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在进程0上的采样器产生`[0, 1, 2, 3]`，在进程1上的采样器产生`[4, 5, 6, 7]`，如果此参数设置为`False`。
 - en: the sampler on process 0 to yield `[0, 1]` then `[4, 5]` and the sampler on
     process 1 to yield `[2, 3]` then `[6, 7]` if this argument is set to `True`.
+  id: totrans-46
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在进程0上的采样器产生`[0, 1]`然后`[4, 5]`，在进程1上的采样器产生`[2, 3]`然后`[6, 7]`，如果此参数设置为`True`。
 - en: '`even_batches` (`bool`, *optional*, defaults to `True`) — Whether or not to
     loop back at the beginning of the sampler when the number of samples is not a
     round multiple of (original batch size / number of processes).'
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`even_batches` (`bool`, *可选*, 默认为`True`) — 当样本数量不是（原始批次大小/进程数）的整数倍时，是否在采样器开头循环回来。'
 - en: Wraps a PyTorch `BatchSampler` to generate batches for one of the processes
     only. Instances of this class will always yield a number of batches that is a
     round multiple of `num_processes` and that all have the same size. Depending on
     the value of the `drop_last` attribute of the batch sampler passed, it will either
     stop the iteration at the first batch that would be too small / not present on
     all processes or loop with indices from the beginning.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 将PyTorch的`BatchSampler`包装起来，仅为一个进程生成批次。此类的实例始终产生`num_processes`的整数倍的批次数量，并且所有批次大小相同。根据传递的批次采样器的`drop_last`属性的值，它将在第一个批次太小/不在所有进程上存在时停止迭代，或者使用从头开始的索引循环。
 - en: '`BatchSampler`s with varying batch sizes are not enabled by default. To enable
     this behaviour, set `even_batches` equal to `False`'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下不启用具有不同批次大小的`BatchSampler`。要启用此行为，请将`even_batches`设置为`False`。
 - en: '### `class accelerate.data_loader.IterableDatasetShard`'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.data_loader.IterableDatasetShard`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L256)'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L256)'
 - en: '[PRE3]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Parameters
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`dataset` (`torch.utils.data.dataset.IterableDataset`) — The batch sampler
     to split in several shards.'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dataset` (`torch.utils.data.dataset.IterableDataset`) — 将批次拆分为几个分片的批次采样器。'
 - en: '`batch_size` (`int`, *optional*, defaults to 1) — The size of the batches per
     shard (if `split_batches=False`) or the size of the batches (if `split_batches=True`).'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`batch_size` (`int`, *可选*, 默认为1) — 每个分片的批次大小（如果`split_batches=False`）或批次大小（如果`split_batches=True`）。'
 - en: '`drop_last` (`bool`, *optional*, defaults to `False`) — Whether or not to drop
     the last incomplete batch or complete the last batches by using the samples from
     the beginning.'
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`drop_last` (`bool`, *可选*, 默认为`False`) — 是否丢弃最后一个不完整的批次或使用从头开始的样本完成最后的批次。'
 - en: '`num_processes` (`int`, *optional*, defaults to 1) — The number of processes
     running concurrently.'
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_processes` (`int`, *可选*, 默认为1) — 并发运行的进程数。'
 - en: '`process_index` (`int`, *optional*, defaults to 0) — The index of the current
     process.'
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`process_index` (`int`, *可选*, 默认为0) — 当前进程的索引。'
 - en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether the shards
     should be created by splitting a batch to give a piece of it on each process,
     or by yielding different full batches on each process.'
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`split_batches` (`bool`, *可选*, 默认为`False`) — 是否通过将一个批次拆分为每个进程上的一部分来创建分片，或者通过在每个进程上产生不同的完整批次来创建分片。'
 - en: 'On two processes with an iterable dataset yielding of `[0, 1, 2, 3, 4, 5, 6,
     7]`, this will result in:'
+  id: totrans-60
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在一个可迭代数据集上有两个进程产生`[0, 1, 2, 3, 4, 5, 6, 7]`，结果如下：
 - en: the shard on process 0 to yield `[0, 1, 2, 3]` and the shard on process 1 to
     yield `[4, 5, 6, 7]` if this argument is set to `False`.
+  id: totrans-61
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在进程0上的分片产生`[0, 1, 2, 3]`，在进程1上的分片产生`[4, 5, 6, 7]`，如果此参数设置为`False`。
 - en: the shard on process 0 to yield `[0, 1, 4, 5]` and the sampler on process 1
     to yield `[2, 3, 6, 7]` if this argument is set to `True`.
+  id: totrans-62
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在进程0上分片以产生`[0, 1, 4, 5]`，在进程1上采样以产生`[2, 3, 6, 7]`，如果设置了此参数为`True`。
 - en: Wraps a PyTorch `IterableDataset` to generate samples for one of the processes
     only. Instances of this class will always yield a number of samples that is a
     round multiple of the actual batch size (depending of the value of `split_batches`,
@@ -310,97 +425,143 @@
     value of the `drop_last` attribute of the batch sampler passed, it will either
     stop the iteration at the first batch that would be too small or loop with indices
     from the beginning.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 包装一个PyTorch `IterableDataset`，仅为其中一个进程生成样本。此类的实例将始终产生实际批次大小的样本数量（取决于`split_batches`的值，这是`batch_size`或`batch_size
+    x num_processes`）。根据传递的批次采样器的`drop_last`属性的值，它将在第一个批次太小的情况下停止迭代，或者从头开始循环索引。
 - en: '### `class accelerate.data_loader.DataLoaderShard`'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.data_loader.DataLoaderShard`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L391)'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L391)'
 - en: '[PRE4]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Parameters
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`dataset` (`torch.utils.data.dataset.Dataset`) — The dataset to use to build
     this datalaoder.'
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dataset` (`torch.utils.data.dataset.Dataset`) — 用于构建此数据加载器的数据集。'
 - en: '`device` (`torch.device`, *optional*) — If passed, the device to put all batches
     on.'
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`device` (`torch.device`, *可选*) — 如果传递，则将所有批次放在该设备上。'
 - en: '`rng_types` (list of `str` or [RNGType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.RNGType))
     — The list of random number generators to synchronize at the beginning of each
     iteration. Should be one or several of:'
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`rng_types`（`str`列表或[RNGType](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.RNGType)）
+    — 每次迭代开始时要同步的随机数生成器列表。应该是以下之一或几个：'
 - en: '`"torch"`: the base torch random number generator'
+  id: totrans-71
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"torch"`: 基本的torch随机数生成器'
 - en: '`"cuda"`: the CUDA random number generator (GPU only)'
+  id: totrans-72
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"cuda"`: CUDA随机数生成器（仅限GPU）'
 - en: '`"xla"`: the XLA random number generator (TPU only)'
+  id: totrans-73
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"xla"`: XLA随机数生成器（仅限TPU）'
 - en: '`"generator"`: an optional `torch.Generator`'
+  id: totrans-74
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"generator"`: 可选的`torch.Generator`'
 - en: '`synchronized_generator` (`torch.Generator`, *optional*) — A random number
     generator to keep synchronized across processes.'
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`synchronized_generator` (`torch.Generator`, *可选*) — 要在各个进程之间保持同步的随机数生成器。'
 - en: '`skip_batches` (`int`, *optional*, defaults to 0) — The number of batches to
     skip at the beginning. kwargs — All other keyword arguments to pass to the regular
     `DataLoader` initialization.'
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`skip_batches` (`int`, *可选*, 默认为0) — 在开始时要跳过的批次数。kwargs — 传递给常规`DataLoader`初始化的所有其他关键字参数。'
 - en: Subclass of a PyTorch `DataLoader` that will deal with device placement and
     current distributed setup.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch `DataLoader`的子类，将处理设备放置和当前分布式设置。
 - en: '**Available attributes:**'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: '**可用属性:**'
 - en: '`total_batch_size` (`int`) — Total batch size of the dataloader across all
     processes. Equal to the original batch size when `split_batches=True`; otherwise
     the original batch size * the total number of processes'
+  id: totrans-79
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`total_batch_size` (`int`) — 所有进程中数据加载器的总批次大小。当`split_batches=True`时等于原始批次大小；否则等于原始批次大小乘以总进程数'
 - en: '`total_dataset_length` (`int`) — Total length of the inner dataset across all
     processes.'
+  id: totrans-80
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`total_dataset_length` (`int`) — 所有进程中内部数据集的总长度。'
 - en: '### `class accelerate.data_loader.DataLoaderDispatcher`'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.data_loader.DataLoaderDispatcher`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L548)'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/data_loader.py#L548)'
 - en: '[PRE5]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Parameters
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether the resulting
     `DataLoader` should split the batches of the original data loader across devices
     or yield full batches (in which case it will yield batches starting at the `process_index`-th
@@ -409,112 +570,166 @@
     if this option is set to `True`, the batch size of the initial `dataloader` multiplied
     by `num_processes` otherwise. Setting this option to `True` requires that the
     batch size of the `dataloader` is a round multiple of `batch_size`.'
+  id: totrans-85
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`split_batches` (`bool`, *可选*, 默认为`False`) — 结果`DataLoader`是否应该将原始数据加载器的批次拆分到设备上或产生完整批次（在这种情况下，它将产生从`process_index`开始并在每次迭代时前进`num_processes`批次的批次）。另一种看待这个问题的方式是，如果将此选项设置为`True`，则观察到的批次大小将与初始`dataloader`的批次大小相同，否则将乘以`num_processes`。将此选项设置为`True`要求`dataloader`的批次大小是`batch_size`的圆整倍数。'
 - en: '`skip_batches` (`int`, *optional*, defaults to 0) — The number of batches to
     skip at the beginning of an iteration.'
+  id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`skip_batches` (`int`, *可选*, 默认为0) — 在迭代开始时要跳过的批次数。'
 - en: Subclass of a PyTorch `DataLoader` that will iterate and preprocess on process
     0 only, then dispatch on each process their part of the batch.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch `DataLoader`的子类，仅在进程0上迭代和预处理，然后在每个进程上分派其批次的部分。
 - en: '**Available attributes:**'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: '**可用属性:**'
 - en: '`total_batch_size` (`int`) — Total batch size of the dataloader across all
     processes. Equal to the original batch size when `split_batches=True`; otherwise
     the original batch size * the total number of processes'
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`total_batch_size` (`int`) — 所有进程中数据加载器的总批次大小。当`split_batches=True`时等于原始批次大小；否则等于原始批次大小乘以总进程数'
 - en: '`total_dataset_length` (`int`) — Total length of the inner dataset across all
     processes.'
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`total_dataset_length` (`int`) — 所有进程中内部数据集的总长度。'
 - en: Optimizers
+  id: totrans-91
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 优化器
 - en: '### `class accelerate.optimizer.AcceleratedOptimizer`'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.optimizer.AcceleratedOptimizer`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/optimizer.py#L38)'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/optimizer.py#L38)'
 - en: '[PRE6]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Parameters
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`optimizer` (`torch.optim.optimizer.Optimizer`) — The optimizer to wrap.'
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`optimizer` (`torch.optim.optimizer.Optimizer`) — 要包装的优化器。'
 - en: '`device_placement` (`bool`, *optional*, defaults to `True`) — Whether or not
     the optimizer should handle device placement. If so, it will place the state dictionary
     of `optimizer` on the right device.'
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`device_placement` (`bool`, *optional*, defaults to `True`) — 是否优化器应该处理设备放置。如果是，则会将`optimizer`的状态字典放置在正确的设备上。'
 - en: '`scaler` (`torch.cuda.amp.grad_scaler.GradScaler`, *optional*) — The scaler
     to use in the step function if training with mixed precision.'
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`scaler` (`torch.cuda.amp.grad_scaler.GradScaler`, *optional*) — 如果使用混合精度进行训练，则在步进函数中使用的缩放器。'
 - en: Internal wrapper around a torch optimizer.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 在torch优化器周围的内部包装器。
 - en: Conditionally will perform `step` and `zero_grad` if gradients should be synchronized
     when performing gradient accumulation.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 在执行梯度累积时，有条件地执行`step`和`zero_grad`，如果梯度应该在梯度累积时同步。
 - en: Schedulers
+  id: totrans-101
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 调度程序
 - en: '### `class accelerate.scheduler.AcceleratedScheduler`'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.scheduler.AcceleratedScheduler`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/scheduler.py#L25)'
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/scheduler.py#L25)'
 - en: '[PRE7]'
+  id: totrans-104
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Parameters
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`scheduler` (`torch.optim.lr_scheduler._LRScheduler`) — The scheduler to wrap.'
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`scheduler` (`torch.optim.lr_scheduler._LRScheduler`) — 要包装的调度程序。'
 - en: '`optimizers` (one or a list of `torch.optim.Optimizer`) — The optimizers used.'
+  id: totrans-107
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`optimizers`（一个或多个`torch.optim.Optimizer`的列表） — 使用的优化器。'
 - en: '`step_with_optimizer` (`bool`, *optional*, defaults to `True`) — Whether or
     not the scheduler should be stepped at each optimizer step.'
+  id: totrans-108
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`step_with_optimizer` (`bool`, *optional*, defaults to `True`) — 是否调度程序应该在每个优化器步骤时进行步进。'
 - en: '`split_batches` (`bool`, *optional*, defaults to `False`) — Whether or not
     the dataloaders split one batch across the different processes (so batch size
     is the same regardless of the number of processes) or create batches on each process
     (so batch size is the original batch size multiplied by the number of processes).'
+  id: totrans-109
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`split_batches` (`bool`, *optional*, defaults to `False`) — 是否数据加载器跨不同进程拆分一个批次（因此无论进程数量如何，批次大小都相同），或者在每个进程上创建批次（因此批次大小是原始批次大小乘以进程数量）。'
 - en: A wrapper around a learning rate scheduler that will only step when the optimizer(s)
     have a training step. Useful to avoid making a scheduler step too fast when gradients
     went overflow and there was no training step (in mixed precision training)
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个围绕学习率调度程序的包装器，只有当优化器有训练步骤时才会进行步进。在梯度溢出并且没有训练步骤时（在混合精度训练中），有用以避免使调度程序步进太快。
 - en: When performing gradient accumulation scheduler lengths should not be changed
     accordingly, Accelerate will always step the scheduler to account for it.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 在执行梯度累积时，调度程序长度不应相应更改，Accelerate将始终步进调度程序以考虑此情况。
