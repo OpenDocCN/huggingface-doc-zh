@@ -1,24 +1,17 @@
 - en: Semantic segmentation
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 语义分割
 - en: 'Original text: [https://huggingface.co/docs/datasets/semantic_segmentation](https://huggingface.co/docs/datasets/semantic_segmentation)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/datasets/semantic_segmentation](https://huggingface.co/docs/datasets/semantic_segmentation)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Semantic segmentation datasets are used to train a model to classify every pixel
@@ -26,122 +19,190 @@
     such as background removal from images, stylizing images, or scene understanding
     for autonomous driving. This guide will show you how to apply transformations
     to an image segmentation dataset.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 语义分割数据集用于训练模型以对图像中的每个像素进行分类。这些数据集使得可以实现许多应用，如从图像中去除背景、美化图像或用于自动驾驶的场景理解。本指南将向您展示如何对图像分割数据集应用转换。
 - en: 'Before you start, make sure you have up-to-date versions of `albumentations`
     and `cv2` installed:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装了最新版本的`albumentations`和`cv2`：
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '[Albumentations](https://albumentations.ai/) is a Python library for performing
     data augmentation for computer vision. It supports various computer vision tasks
     such as image classification, object detection, segmentation, and keypoint estimation.'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Albumentations](https://albumentations.ai/)是一个用于计算机视觉数据增强的Python库。它支持各种计算机视觉任务，如图像分类、目标检测、分割和关键点估计。'
 - en: This guide uses the [Scene Parsing](https://huggingface.co/datasets/scene_parse_150)
     dataset for segmenting and parsing an image into different image regions associated
     with semantic categories, such as sky, road, person, and bed.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南使用[Scene Parsing](https://huggingface.co/datasets/scene_parse_150)数据集来对图像进行分割和解析，将其分为与语义类别相关的不同图像区域，如天空、道路、人物和床。
 - en: 'Load the `train` split of the dataset and take a look at an example:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载数据集的`train`拆分并查看一个示例：
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'The dataset has three fields:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 数据集有三个字段：
 - en: '`image`: a PIL image object.'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image`：一个PIL图像对象。'
 - en: '`annotation`: segmentation mask of the image.'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`annotation`：图像的分割蒙版。'
 - en: '`scene_category`: the label or scene category of the image (like “kitchen”
     or “office”).'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`scene_category`：图像的标签或场景类别（如“厨房”或“办公室”）。'
 - en: 'Next, check out an image with:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，查看一个图像：
 - en: '[PRE2]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '![](../Images/801b925be58fde47ab832b7270ff9024.png)'
+  id: totrans-16
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/801b925be58fde47ab832b7270ff9024.png)'
 - en: 'Similarly, you can check out the respective segmentation mask:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，您可以查看相应的分割蒙版：
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '![](../Images/0d18bd94d7b74e5d9e463aca0bd8c2c2.png)'
+  id: totrans-19
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/0d18bd94d7b74e5d9e463aca0bd8c2c2.png)'
 - en: 'We can also add a [color palette](https://github.com/tensorflow/models/blob/3f1ca33afe3c1631b733ea7e40c294273b9e406d/research/deeplab/utils/get_dataset_colormap.py#L51)
     on the segmentation mask and overlay it on top of the original image to visualize
     the dataset:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还可以在分割蒙版上添加[调色板](https://github.com/tensorflow/models/blob/3f1ca33afe3c1631b733ea7e40c294273b9e406d/research/deeplab/utils/get_dataset_colormap.py#L51)，并将其叠加在原始图像上以可视化数据集：
 - en: After defining the color palette, you should be ready to visualize some overlays.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 在定义颜色调色板之后，您应该准备好可视化一些叠加效果。
 - en: '[PRE4]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '![](../Images/924483b9a1c47be43a2b8471ff229d38.png)'
+  id: totrans-23
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/924483b9a1c47be43a2b8471ff229d38.png)'
 - en: Now apply some augmentations with `albumentations`. You’ll first resize the
     image and adjust its brightness.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在使用`albumentations`进行一些增强。您将首先调整图像大小并调整其亮度。
 - en: '[PRE5]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Create a function to apply the transformation to the images:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个函数来将转换应用于图像：
 - en: '[PRE6]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Use the [set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
     function to apply the transformation on-the-fly to batches of the dataset to consume
     less disk space:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[set_transform()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)函数将转换应用于数据集的批次，以在消耗更少磁盘空间的同时进行实时转换：
 - en: '[PRE7]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'You can verify the transformation worked by indexing into the `pixel_values`
     and `label` of an example:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过索引到示例的`pixel_values`和`label`来验证转换是否起作用：
 - en: '[PRE8]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '![](../Images/0e48d6f015aab9011f476a321307a70a.png)'
+  id: totrans-32
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/0e48d6f015aab9011f476a321307a70a.png)'
 - en: In this guide, you have used `albumentations` for augmenting the dataset. It’s
     also possible to use `torchvision` to apply some similar transforms.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，您已经使用`albumentations`来增强数据集。也可以使用`torchvision`来应用一些类似的转换。
 - en: '[PRE9]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '![](../Images/cef6cac569929e789bf7b6c643174dd6.png)'
+  id: totrans-35
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/cef6cac569929e789bf7b6c643174dd6.png)'
 - en: Now that you know how to process a dataset for semantic segmentation, learn
     [how to train a semantic segmentation model](https://huggingface.co/docs/transformers/tasks/semantic_segmentation)
     and use it for inference.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您知道如何处理用于语义分割的数据集后，学习[如何训练语义分割模型](https://huggingface.co/docs/transformers/tasks/semantic_segmentation)并将其用于推断。
