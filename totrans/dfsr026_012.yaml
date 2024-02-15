@@ -1,24 +1,15 @@
 - en: Accelerate inference of text-to-image diffusion models
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/tutorials/fast_diffusion](https://huggingface.co/docs/diffusers/tutorials/fast_diffusion)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Diffusion models are slower than their GAN counterparts because of the iterative
@@ -26,6 +17,7 @@
     address this limitation such as progressive timestep distillation ([LCM LoRA](../using-diffusers/inference_with_lcm_lora)),
     model compression ([SSD-1B](https://huggingface.co/segmind/SSD-1B)), and reusing
     adjacent features of the denoiser ([DeepCache](../optimization/deepcache)).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: However, you don’t necessarily need to use these techniques to speed up inference.
@@ -35,113 +27,149 @@
     use the [Stable Diffusion XL (SDXL)](../using-diffusers/sdxl) pipeline in this
     tutorial, but these techniques are applicable to other text-to-image diffusion
     pipelines too.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: 'Make sure you’re using the latest version of Diffusers:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then upgrade the other required libraries too:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Install [PyTorch nightly](https://pytorch.org/) to benefit from the latest
     and fastest kernels:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: The results reported below are from a 80GB 400W A100 with its clock rate set
     to the maximum.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: If you’re interested in the full benchmarking code, take a look at [huggingface/diffusion-fast](https://github.com/huggingface/diffusion-fast).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: Baseline
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Let’s start with a baseline. Disable reduced precision and the [`scaled_dot_product_attention`
     (SDPA)](../optimization/torch2.0#scaled-dot-product-attention) function which
     is automatically used by Diffusers:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: This default setup takes 7.36 seconds.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: '![](../Images/584efcadbeb310692fb90a60e06360d2.png)'
+  id: totrans-17
   prefs: []
   type: TYPE_IMG
 - en: bfloat16
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Enable the first optimization, reduced precision or more specifically bfloat16\.
     There are several benefits of using reduced precision:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: Using a reduced numerical precision (such as float16 or bfloat16) for inference
     doesn’t affect the generation quality but significantly improves latency.
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The benefits of using bfloat16 compared to float16 are hardware dependent, but
     modern GPUs tend to favor bfloat16.
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: bfloat16 is much more resilient when used with quantization compared to float16,
     but more recent versions of the quantization library ([torchao](https://github.com/pytorch-labs/ao))
     we used don’t have numerical issues with float16.
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: bfloat16 reduces the latency from 7.36 seconds to 4.63 seconds.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '![](../Images/831463c6351d9fc036c263c31b10cd4b.png)'
+  id: totrans-25
   prefs: []
   type: TYPE_IMG
 - en: In our later experiments with float16, recent versions of torchao do not incur
     numerical problems from float16.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: Take a look at the [Speed up inference](../optimization/fp16) guide to learn
     more about running inference with reduced precision.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
 - en: SDPA
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Attention blocks are intensive to run. But with PyTorch’s [`scaled_dot_product_attention`](../optimization/torch2.0#scaled-dot-product-attention)
     function, it is a lot more efficient. This function is used by default in Diffusers
     so you don’t need to make any changes to the code.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Scaled dot product attention improves the latency from 4.63 seconds to 3.31
     seconds.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: '![](../Images/01dcfc49da5fef775ed409609c41b519.png)'
+  id: totrans-32
   prefs: []
   type: TYPE_IMG
 - en: torch.compile
+  id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -149,51 +177,68 @@
     Diffusers, the UNet and VAE are usually compiled because these are the most compute-intensive
     modules. First, configure a few compiler flags (refer to the [full list](https://github.com/pytorch/pytorch/blob/main/torch/_inductor/config.py)
     for more options):'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: It is also important to change the UNet and VAE’s memory layout to “channels_last”
     when compiling them to ensure maximum speed.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Now compile and perform inference:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '`torch.compile` offers different backends and modes. For maximum inference
     speed, use “max-autotune” for the inductor backend. “max-autotune” uses CUDA graphs
     and optimizes the compilation graph specifically for latency. CUDA graphs greatly
     reduces the overhead of launching GPU operations by using a mechanism to launch
     multiple GPU operations through a single CPU operation.'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
 - en: Using SDPA attention and compiling both the UNet and VAE cuts the latency from
     3.31 seconds to 2.54 seconds.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: '![](../Images/4c34eff89c0a052eb3a44e922e8075c9.png)'
+  id: totrans-42
   prefs: []
   type: TYPE_IMG
 - en: Prevent graph breaks
+  id: totrans-43
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: Specifying `fullgraph=True` ensures there are no graph breaks in the underlying
     model to take full advantage of `torch.compile` without any performance degradation.
     For the UNet and VAE, this means changing how you access the return variables.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Remove GPU sync after compilation
+  id: totrans-46
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -203,20 +248,24 @@
     which when placed on the GPU, causes a communication sync between the CPU and
     GPU. This introduces latency and it becomes more evident when the denoiser has
     already been compiled.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
 - en: But if the `sigmas` array always [stays on the CPU](https://github.com/huggingface/diffusers/blob/35a969d297cba69110d175ee79c59312b9f49e1e/src/diffusers/schedulers/scheduling_euler_discrete.py#L240),
     the CPU and GPU sync doesn’t occur and you don’t get any latency. In general,
     any CPU and GPU communication sync should be none or be kept to a bare minimum
     because it can impact inference latency.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
 - en: Combine the attention block’s projection matrices
+  id: totrans-49
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: The UNet and VAE in SDXL use Transformer-like blocks which consists of attention
     blocks and feed-forward blocks.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: In an attention block, the input is projected into three sub-spaces using three
@@ -224,18 +273,24 @@
     on the input. But we can horizontally combine the projection matrices into a single
     matrix and perform the projection in one step. This increases the size of the
     matrix multiplications of the input projections and improves the impact of quantization.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
 - en: 'You can combine the projection matrices with just a single line of code:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: This provides a minor improvement from 2.54 seconds to 2.52 seconds.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
 - en: '![](../Images/fe24b44eafbe3b39c1b11f09cd41d343.png)'
+  id: totrans-55
   prefs: []
   type: TYPE_IMG
 - en: Support for [fuse_qkv_projections()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline.fuse_qkv_projections)
@@ -243,9 +298,11 @@
     pipelines such as [Kandinsky](../using-diffusers/kandinsky). You can refer to
     this [PR](https://github.com/huggingface/diffusers/pull/6179) to get an idea about
     how to enable this for the other pipelines.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
 - en: Dynamic quantization
+  id: totrans-57
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -255,51 +312,79 @@
     to the UNet and VAE. Quantization adds additional conversion overhead to the model
     that is hopefully made up for by faster matmuls (dynamic quantization). If the
     matmuls are too small, these techniques may degrade performance.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
 - en: 'First, configure all the compiler tags:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Certain linear layers in the UNet and VAE don’t benefit from dynamic int8 quantization.
     You can filter out those layers with the [`dynamic_quant_filter_fn`](https://github.com/huggingface/diffusion-fast/blob/0f169640b1db106fe6a479f78c1ed3bfaeba3386/utils/pipeline_utils.py#L16)
     shown below.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: UNet和VAE中的某些线性层不受动态int8量化的益处。您可以使用下面显示的[`dynamic_quant_filter_fn`](https://github.com/huggingface/diffusion-fast/blob/0f169640b1db106fe6a479f78c1ed3bfaeba3386/utils/pipeline_utils.py#L16)来过滤掉这些层。
 - en: '[PRE12]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Finally, apply all the optimizations discussed so far:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，应用到目前为止讨论的所有优化：
 - en: '[PRE13]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Since dynamic quantization is only limited to the linear layers, convert the
     appropriate pointwise convolution layers into linear layers to maximize its benefit.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于动态量化仅限于线性层，将适当的逐点卷积层转换为线性层，以最大化其效益。
 - en: '[PRE14]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Apply dynamic quantization:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 应用动态量化：
 - en: '[PRE15]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'Finally, compile and perform inference:'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，编译并执行推理：
 - en: '[PRE16]'
+  id: totrans-70
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Applying dynamic quantization improves the latency from 2.52 seconds to 2.43
     seconds.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 应用动态量化将延迟从2.52秒降低到2.43秒。
 - en: '![](../Images/7e2e919818cd16899daafab4ae5ab1ea.png)'
+  id: totrans-72
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/7e2e919818cd16899daafab4ae5ab1ea.png)'
