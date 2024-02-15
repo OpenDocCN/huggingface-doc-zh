@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 受控生成
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/controlling_generation](https://huggingface.co/docs/diffusers/using-diffusers/controlling_generation)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/using-diffusers/controlling_generation](https://huggingface.co/docs/diffusers/using-diffusers/controlling_generation)
 - en: null
   id: totrans-2
   prefs: []
@@ -20,6 +22,7 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 控制扩散模型生成的输出长期以来一直是社区追求的目标，现在是一个活跃的研究课题。在许多流行的扩散模型中，输入（包括图像和文本提示）的微小变化可能会极大地改变输出。在理想的世界中，我们希望能够控制语义是如何被保留和改变的。
 - en: Most examples of preserving semantics reduce to being able to accurately map
     a change in input to a change in output. I.e. adding an adjective to a subject
     in a prompt preserves the entire image, only modifying the changed subject. Or,
@@ -27,12 +30,14 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数保留语义的示例都归结为能够准确地将输入的变化映射到输出的变化。即在提示中给主语添加形容词会保留整个图像，只修改已更改的主语。或者，特定主题的图像变化会保留主题的姿势。
 - en: Additionally, there are qualities of generated images that we would like to
     influence beyond semantic preservation. I.e. in general, we would like our outputs
     to be of good quality, adhere to a particular style, or be realistic.
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，我们希望影响生成图像的质量，超出语义保留的范围。即一般来说，我们希望输出具有良好的质量，符合特定风格，或者是逼真的。
 - en: We will document some of the techniques `diffusers` supports to control generation
     of diffusion models. Much is cutting edge research and can be quite nuanced. If
     something needs clarifying or you have a suggestion, don’t hesitate to open a
@@ -41,6 +46,7 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将记录一些技术，`diffusers`支持控制扩散模型的生成。许多是尖端研究，可能非常微妙。如果有什么需要澄清的地方或者您有建议，请毫不犹豫地在[论坛](https://discuss.huggingface.co/c/discussion-related-to-httpsgithubcomhuggingfacediffusers/63)上开启讨论或者在[GitHub问题](https://github.com/huggingface/diffusers/issues)上提出。
 - en: We provide a high level explanation of how the generation can be controlled
     as well as a snippet of the technicals. For more in depth explanations on the
     technicals, the original papers which are linked from the pipelines are always
@@ -48,6 +54,7 @@
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们提供了一个高层次的解释，说明如何控制生成，以及技术的片段。有关技术的更深入解释，始终可以从链接到的流水线中找到原始论文，这些是最好的资源。
 - en: Depending on the use case, one should choose a technique accordingly. In many
     cases, these techniques can be combined. For example, one can combine Textual
     Inversion with SEGA to provide more semantic guidance to the outputs generated
@@ -55,192 +62,234 @@
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据用例，应相应选择技术。在许多情况下，这些技术可以结合使用。例如，可以将文本反转与SEGA结合使用，以为使用文本反转生成的输出提供更多语义指导。
 - en: Unless otherwise mentioned, these are techniques that work with existing models
     and don’t require their own weights.
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 除非另有说明，这些都是适用于现有模型且不需要自己权重的技术。
 - en: '[InstructPix2Pix](#instruct-pix2pix)'
   id: totrans-10
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[InstructPix2Pix](#instruct-pix2pix)'
 - en: '[Pix2Pix Zero](#pix2pix-zero)'
   id: totrans-11
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[Pix2Pix Zero](#pix2pix-zero)'
 - en: '[Attend and Excite](#attend-and-excite)'
   id: totrans-12
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[关注和激励](#attend-and-excite)'
 - en: '[Semantic Guidance](#semantic-guidance-sega)'
   id: totrans-13
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[语义引导](#semantic-guidance-sega)'
 - en: '[Self-attention Guidance](#self-attention-guidance-sag)'
   id: totrans-14
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[自注意力引导](#self-attention-guidance-sag)'
 - en: '[Depth2Image](#depth2image)'
   id: totrans-15
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[深度到图像](#depth2image)'
 - en: '[MultiDiffusion Panorama](#multidiffusion-panorama)'
   id: totrans-16
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[多扩散全景](#multidiffusion-panorama)'
 - en: '[DreamBooth](#dreambooth)'
   id: totrans-17
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[梦想展台](#dreambooth)'
 - en: '[Textual Inversion](#textual-inversion)'
   id: totrans-18
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[文本反转](#textual-inversion)'
 - en: '[ControlNet](#controlnet)'
   id: totrans-19
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[ControlNet](#controlnet)'
 - en: '[Prompt Weighting](#prompt-weighting)'
   id: totrans-20
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[提示加权](#prompt-weighting)'
 - en: '[Custom Diffusion](#custom-diffusion)'
   id: totrans-21
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[自定义扩散](#custom-diffusion)'
 - en: '[Model Editing](#model-editing)'
   id: totrans-22
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[模型编辑](#model-editing)'
 - en: '[DiffEdit](#diffedit)'
   id: totrans-23
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[DiffEdit](#diffedit)'
 - en: '[T2I-Adapter](#t2i-adapter)'
   id: totrans-24
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[T2I适配器](#t2i-adapter)'
 - en: '[FABRIC](#fabric)'
   id: totrans-25
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[FABRIC](#fabric)'
 - en: For convenience, we provide a table to denote which methods are inference-only
     and which require fine-tuning/training.
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 为方便起见，我们提供了一个表格，用于表示哪些方法仅用于推断，哪些需要微调/训练。
 - en: '| **Method** | **Inference only** | **Requires training / fine-tuning** | **Comments**
     |'
   id: totrans-27
   prefs: []
   type: TYPE_TB
+  zh: '| **方法** | **仅推断** | **需要训练/微调** | **评论** |'
 - en: '| :-: | :-: | :-: | :-: |'
   id: totrans-28
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: |'
 - en: '| [InstructPix2Pix](#instruct-pix2pix) | ✅ | ❌ | Can additionally be fine-tuned
     for better'
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '| [InstructPix2Pix](#instruct-pix2pix) | ✅ | ❌ | 还可以进行微调以获得更好的效果'
 - en: performance on specific
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 特定性能
 - en: edit instructions. |
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 编辑说明。|
 - en: '| [Pix2Pix Zero](#pix2pix-zero) | ✅ | ❌ |  |'
   id: totrans-32
   prefs: []
   type: TYPE_TB
+  zh: '| [Pix2Pix Zero](#pix2pix-zero) | ✅ | ❌ |  |'
 - en: '| [Attend and Excite](#attend-and-excite) | ✅ | ❌ |  |'
   id: totrans-33
   prefs: []
   type: TYPE_TB
+  zh: '| [关注和激励](#attend-and-excite) | ✅ | ❌ |  |'
 - en: '| [Semantic Guidance](#semantic-guidance-sega) | ✅ | ❌ |  |'
   id: totrans-34
   prefs: []
   type: TYPE_TB
+  zh: '| [语义引导](#semantic-guidance-sega) | ✅ | ❌ |  |'
 - en: '| [Self-attention Guidance](#self-attention-guidance-sag) | ✅ | ❌ |  |'
   id: totrans-35
   prefs: []
   type: TYPE_TB
+  zh: '| [自注意力引导](#self-attention-guidance-sag) | ✅ | ❌ |  |'
 - en: '| [Depth2Image](#depth2image) | ✅ | ❌ |  |'
   id: totrans-36
   prefs: []
   type: TYPE_TB
+  zh: '| [深度到图像](#depth2image) | ✅ | ❌ |  |'
 - en: '| [MultiDiffusion Panorama](#multidiffusion-panorama) | ✅ | ❌ |  |'
   id: totrans-37
   prefs: []
   type: TYPE_TB
+  zh: '| [多扩散全景](#multidiffusion-panorama) | ✅ | ❌ |  |'
 - en: '| [DreamBooth](#dreambooth) | ❌ | ✅ |  |'
   id: totrans-38
   prefs: []
   type: TYPE_TB
+  zh: '| [梦想展台](#dreambooth) | ❌ | ✅ |  |'
 - en: '| [Textual Inversion](#textual-inversion) | ❌ | ✅ |  |'
   id: totrans-39
   prefs: []
   type: TYPE_TB
+  zh: '| [文本反转](#textual-inversion) | ❌ | ✅ |  |'
 - en: '| [ControlNet](#controlnet) | ✅ | ❌ | A ControlNet can be trained/fine-tuned
     on'
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '| [ControlNet](#controlnet) | ✅ | ❌ | 可以在ControlNet上进行训练/微调'
 - en: a custom conditioning. |
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 自定义条件。|
 - en: '| [Prompt Weighting](#prompt-weighting) | ✅ | ❌ |  |'
   id: totrans-42
   prefs: []
   type: TYPE_TB
+  zh: '| [提示加权](#prompt-weighting) | ✅ | ❌ |  |'
 - en: '| [Custom Diffusion](#custom-diffusion) | ❌ | ✅ |  |'
   id: totrans-43
   prefs: []
   type: TYPE_TB
+  zh: '| [自定义扩散](#custom-diffusion) | ❌ | ✅ |  |'
 - en: '| [Model Editing](#model-editing) | ✅ | ❌ |  |'
   id: totrans-44
   prefs: []
   type: TYPE_TB
+  zh: '| [模型编辑](#model-editing) | ✅ | ❌ |  |'
 - en: '| [DiffEdit](#diffedit) | ✅ | ❌ |  |'
   id: totrans-45
   prefs: []
   type: TYPE_TB
+  zh: '| [DiffEdit](#diffedit) | ✅ | ❌ |  |'
 - en: '| [T2I-Adapter](#t2i-adapter) | ✅ | ❌ |  |'
   id: totrans-46
   prefs: []
   type: TYPE_TB
+  zh: '| [T2I适配器](#t2i-adapter) | ✅ | ❌ |  |'
 - en: '| [Fabric](#fabric) | ✅ | ❌ |  |'
   id: totrans-47
   prefs: []
   type: TYPE_TB
+  zh: '| [面料](#fabric) | ✅ | ❌ |  |'
 - en: InstructPix2Pix
   id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: InstructPix2Pix
 - en: '[Paper](https://arxiv.org/abs/2211.09800)'
   id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '[论文](https://arxiv.org/abs/2211.09800)'
 - en: '[InstructPix2Pix](../api/pipelines/pix2pix) is fine-tuned from Stable Diffusion
     to support editing input images. It takes as inputs an image and a prompt describing
     an edit, and it outputs the edited image. InstructPix2Pix has been explicitly
@@ -388,58 +437,70 @@
   id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似于无分类器指导通过空提示输入提供指导，SEGA在概念提示上提供指导。可以同时应用多个这些概念提示。每个概念提示可以根据指导是积极还是消极地应用来添加或删除其概念。
 - en: Unlike Pix2Pix Zero or Attend and Excite, SEGA directly interacts with the diffusion
     process instead of performing any explicit gradient-based optimization.
   id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 与Pix2Pix Zero或Attend and Excite不同，SEGA直接与扩散过程互动，而不是执行任何显式的基于梯度的优化。
 - en: Self-attention Guidance (SAG)
   id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 自注意力指导（SAG）
 - en: '[Paper](https://arxiv.org/abs/2210.00939)'
   id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: '[论文](https://arxiv.org/abs/2210.00939)'
 - en: '[Self-attention Guidance](../api/pipelines/self_attention_guidance) improves
     the general quality of images.'
   id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: '[自注意力指导](../api/pipelines/self_attention_guidance)提高图像的总体质量。'
 - en: SAG provides guidance from predictions not conditioned on high-frequency details
     to fully conditioned images. The high frequency details are extracted out of the
     UNet self-attention maps.
   id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: SAG从不受高频细节条件的预测提供指导，到完全受条件的图像。高频细节从UNet自注意力图中提取出来。
 - en: Depth2Image
   id: totrans-75
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Depth2Image
 - en: '[Project](https://huggingface.co/stabilityai/stable-diffusion-2-depth)'
   id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: '[项目](https://huggingface.co/stabilityai/stable-diffusion-2-depth)'
 - en: '[Depth2Image](../api/pipelines/stable_diffusion/depth2img) is fine-tuned from
     Stable Diffusion to better preserve semantics for text guided image variation.'
   id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Depth2Image](../api/pipelines/stable_diffusion/depth2img)是从Stable Diffusion微调的，以更好地保留文本引导图像变化的语义。'
 - en: It conditions on a monocular depth estimate of the original image.
   id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 它以原始图像的单眼深度估计为条件。
 - en: MultiDiffusion Panorama
   id: totrans-79
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: MultiDiffusion全景
 - en: '[Paper](https://arxiv.org/abs/2302.08113)'
   id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: '[论文](https://arxiv.org/abs/2302.08113)'
 - en: '[MultiDiffusion Panorama](../api/pipelines/panorama) defines a new generation
     process over a pre-trained diffusion model. This process binds together multiple
     diffusion generation methods that can be readily applied to generate high quality
@@ -450,80 +511,96 @@
   id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: '[MultiDiffusion全景](../api/pipelines/panorama)定义了一个新的在预训练扩散模型上的生成过程。这个过程将多个扩散生成方法绑定在一起，可以方便地应用于生成高质量和多样化的图像。结果符合用户提供的控制，如期望的宽高比（例如全景），以及空间引导信号，从紧密的分割蒙版到边界框。MultiDiffusion全景允许以任意宽高比（例如全景）生成高质量的图像。'
 - en: Fine-tuning your own models
   id: totrans-82
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 微调您自己的模型
 - en: In addition to pre-trained models, Diffusers has training scripts for fine-tuning
     models on user-provided data.
   id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了预训练模型外，Diffusers还有用于在用户提供的数据上微调模型的训练脚本。
 - en: DreamBooth
   id: totrans-84
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DreamBooth
 - en: '[Project](https://dreambooth.github.io/)'
   id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: '[项目](https://dreambooth.github.io/)'
 - en: '[DreamBooth](../training/dreambooth) fine-tunes a model to teach it about a
     new subject. I.e. a few pictures of a person can be used to generate images of
     that person in different styles.'
   id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DreamBooth](../training/dreambooth)微调模型以教导它一个新主题。即一些人物的图片可以用来以不同风格生成那个人的图片。'
 - en: Textual Inversion
   id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文本反转
 - en: '[Paper](https://arxiv.org/abs/2208.01618)'
   id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: '[论文](https://arxiv.org/abs/2208.01618)'
 - en: '[Textual Inversion](../training/text_inversion) fine-tunes a model to teach
     it about a new concept. I.e. a few pictures of a style of artwork can be used
     to generate images in that style.'
   id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: '[文本反转](../training/text_inversion)微调模型以教导它一个新概念。即一些艺术风格的图片可以用来生成那种风格的图片。'
 - en: ControlNet
   id: totrans-90
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ControlNet
 - en: '[Paper](https://arxiv.org/abs/2302.05543)'
   id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: '[论文](https://arxiv.org/abs/2302.05543)'
 - en: '[ControlNet](../api/pipelines/controlnet) is an auxiliary network which adds
     an extra condition. There are 8 canonical pre-trained ControlNets trained on different
     conditionings such as edge detection, scribbles, depth maps, and semantic segmentations.'
   id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: '[ControlNet](../api/pipelines/controlnet)是一个辅助网络，它添加了额外的条件。有8个经典的预训练ControlNets，训练了不同的条件，如边缘检测、涂鸦、深度图和语义分割。'
 - en: Prompt Weighting
   id: totrans-93
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 提示加权
 - en: '[Prompt weighting](../using-diffusers/weighted_prompts) is a simple technique
     that puts more attention weight on certain parts of the text input.'
   id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: '[提示加权](../using-diffusers/weighted_prompts)是一种简单的技术，它在文本输入的某些部分上放置更多的注意权重。'
 - en: Custom Diffusion
   id: totrans-95
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 自定义扩散
 - en: '[Paper](https://arxiv.org/abs/2212.04488)'
   id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: '[论文](https://arxiv.org/abs/2212.04488)'
 - en: '[Custom Diffusion](../training/custom_diffusion) only fine-tunes the cross-attention
     maps of a pre-trained text-to-image diffusion model. It also allows for additionally
     performing Textual Inversion. It supports multi-concept training by design. Like
@@ -533,15 +610,18 @@
   id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: '[自定义扩散](../training/custom_diffusion)仅微调预训练的文本到图像扩散模型的交叉注意力图。它还允许进行文本反转。它通过设计支持多概念训练。与DreamBooth和文本反转一样，自定义扩散也用于教导预训练的文本到图像扩散模型关于新概念，以生成涉及感兴趣概念的输出。'
 - en: Model Editing
   id: totrans-98
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模型编辑
 - en: '[Paper](https://arxiv.org/abs/2303.08084)'
   id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: '[论文](https://arxiv.org/abs/2303.08084)'
 - en: The [text-to-image model editing pipeline](../api/pipelines/model_editing) helps
     you mitigate some of the incorrect implicit assumptions a pre-trained text-to-image
     diffusion model might make about the subjects present in the input prompt. For
@@ -551,15 +631,19 @@
   id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: '[text-to-image模型编辑流程](../api/pipelines/model_editing)有助于减轻预训练的文本到图像扩散模型可能对输入提示中存在的主题做出的一些不正确的隐含假设。例如，如果您提示Stable
+    Diffusion生成“一束玫瑰”的图像，生成的图像中的玫瑰更有可能是红色的。这个流程帮助您改变这种假设。'
 - en: DiffEdit
   id: totrans-101
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DiffEdit
 - en: '[Paper](https://arxiv.org/abs/2210.11427)'
   id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: '[论文](https://arxiv.org/abs/2210.11427)'
 - en: '[DiffEdit](../api/pipelines/diffedit) allows for semantic editing of input
     images along with input prompts while preserving the original input images as
     much as possible.'
