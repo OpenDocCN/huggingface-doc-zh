@@ -1,178 +1,242 @@
 - en: Quantization
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 量化
 - en: 'Original text: [https://huggingface.co/docs/optimum/concept_guides/quantization](https://huggingface.co/docs/optimum/concept_guides/quantization)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/optimum/concept_guides/quantization](https://huggingface.co/docs/optimum/concept_guides/quantization)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Quantization is a technique to reduce the computational and memory costs of
     running inference by representing the weights and activations with low-precision
     data types like 8-bit integer (`int8`) instead of the usual 32-bit floating point
     (`float32`).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 量化是一种通过使用低精度数据类型（如8位整数（`int8`））代替通常的32位浮点数（`float32`）来表示权重和激活来减少运行推断的计算和内存成本的技术。
 - en: Reducing the number of bits means the resulting model requires less memory storage,
     consumes less energy (in theory), and operations like matrix multiplication can
     be performed much faster with integer arithmetic. It also allows to run models
     on embedded devices, which sometimes only support integer data types.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 减少位数意味着结果模型需要更少的内存存储，消耗更少的能量（理论上），并且像矩阵乘法这样的操作可以通过整数运算更快地执行。它还允许在嵌入式设备上运行模型，有时这些设备只支持整数数据类型。
 - en: Theory
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 理论
 - en: 'The basic idea behind quantization is quite easy: going from high-precision
     representation (usually the regular 32-bit floating-point) for weights and activations
     to a lower precision data type. The most common lower precision data types are:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 量化的基本思想非常简单：从高精度表示（通常是常规的32位浮点数）转换为较低精度数据类型，权重和激活。最常见的较低精度数据类型是：
 - en: '`float16`, accumulation data type `float16`'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`float16`，累积数据类型`float16`'
 - en: '`bfloat16`, accumulation data type `float32`'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`bfloat16`，累积数据类型`float32`'
 - en: '`int16`, accumulation data type `int32`'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`int16`，累积数据类型`int32`'
 - en: '`int8`, accumulation data type `int32`'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`int8`，累积数据类型`int32`'
 - en: 'The accumulation data type specifies the type of the result of accumulating
     (adding, multiplying, etc) values of the data type in question. For example, let’s
     consider two `int8` values `A = 127`, `B = 127`, and let’s define `C` as the sum
     of `A` and `B`:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 累积数据类型指定累积（添加、乘法等）数据类型值的结果类型。例如，让我们考虑两个`int8`值`A = 127`，`B = 127`，并且让`C`为`A`和`B`的和：
 - en: '[PRE0]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Here the result is much bigger than the biggest representable value in `int8`,
     which is `127`. Hence the need for a larger precision data type to avoid a huge
     precision loss that would make the whole quantization process useless.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里的结果比`int8`中最大的可表示值`127`要大得多。因此，需要更大精度的数据类型以避免巨大的精度损失，否则整个量化过程将变得无用。
 - en: Quantization
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 量化
 - en: The two most common quantization cases are `float32 -> float16` and `float32
     -> int8`.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 最常见的量化情况是`float32 -> float16`和`float32 -> int8`。
 - en: Quantization to float16
+  id: totrans-16
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 量化为float16
 - en: 'Performing quantization to go from `float32` to `float16` is quite straightforward
     since both data types follow the same representation scheme. The questions to
     ask yourself when quantizing an operation to `float16` are:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 将`float32`转换为`float16`的量化是非常简单的，因为这两种数据类型遵循相同的表示方案。在将操作量化为`float16`时，要问自己的问题是：
 - en: Does my operation have a `float16` implementation?
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我的操作是否有`float16`实现？
 - en: Does my hardware suport `float16`? For instance, Intel CPUs [have been supporting
     `float16` as a storage type, but computation is done after converting to `float32`](https://scicomp.stackexchange.com/a/35193).
     Full support will come in Cooper Lake and Sapphire Rapids.
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我的硬件是否支持`float16`？例如，英特尔CPU[一直支持`float16`作为存储类型，但是计算是在转换为`float32`之后进行的](https://scicomp.stackexchange.com/a/35193)。完全支持将在Cooper
+    Lake和Sapphire Rapids中实现。
 - en: Is my operation sensitive to lower precision? For instance the value of epsilon
     in `LayerNorm` is usually very small (~ `1e-12`), but the smallest representable
     value in `float16` is ~ `6e-5`, this can cause `NaN` issues. The same applies
     for big values.
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我的操作对较低精度敏感吗？例如，在`LayerNorm`中epsilon的值通常非常小（~ `1e-12`），但在`float16`中最小的可表示值为~
+    `6e-5`，这可能会导致`NaN`问题。对于大值也是一样。
 - en: Quantization to int8
+  id: totrans-21
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 量化为int8
 - en: Performing quantization to go from `float32` to `int8` is more tricky. Only
     256 values can be represented in `int8`, while `float32` can represent a very
     wide range of values. The idea is to find the best way to project our range `[a,
     b]` of `float32` values to the `int8` space.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 将`float32`转换为`int8`的量化更加棘手。在`int8`中只能表示256个值，而`float32`可以表示非常广泛的值。关键是找到将我们的`float32`值范围`[a,
+    b]`投影到`int8`空间的最佳方法。
 - en: 'Let’s consider a float `x` in `[a, b]`, then we can write the following quantization
     scheme, also called the *affine quantization scheme*:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们考虑一个在`[a, b]`中的浮点数`x`，然后我们可以编写以下量化方案，也称为*仿射量化方案*：
 - en: '[PRE1]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'where:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 其中：
 - en: '`x_q` is the quantized `int8` value associated to `x`'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`x_q`是与`x`相关联的量化`int8`值'
 - en: '`S` and `Z` are the quantization parameters'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`S`和`Z`是量化参数'
 - en: '`S` is the scale, and is a positive `float32`'
+  id: totrans-28
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`S`是比例，是正的`float32`'
 - en: '`Z` is called the zero-point, it is the `int8` value corresponding to the value
     `0` in the `float32` realm. This is important to be able to represent exactly
     the value `0` because it is used everywhere throughout machine learning models.'
+  id: totrans-29
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`Z`称为零点，它是与`float32`领域中值`0`对应的`int8`值。这很重要，因为它用于机器学习模型中的各个地方来准确表示值`0`。'
 - en: 'The quantized value `x_q` of `x` in `[a, b]` can be computed as follows:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '`x`在`[a, b]`中的量化值`x_q`可以计算如下：'
 - en: '[PRE2]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'And `float32` values outside of the `[a, b]` range are clipped to the closest
     representable value, so for any floating-point number `x`:'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 并且超出`[a, b]`范围的`float32`值被剪切到最接近的可表示值，因此对于任何浮点数`x`：
 - en: '[PRE3]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Usually `round(a/S + Z)` corresponds to the smallest representable value in
     the considered data type, and `round(b/S + Z)` to the biggest one. But this can
     vary, for instance when using a *symmetric quantization scheme* as you will see
     in the next paragraph.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，`round(a/S + Z)` 对应于考虑的数据类型中最小的可表示值，而`round(b/S + Z)` 对应于最大的可表示值。但是这可能会有所变化，例如当使用*对称量化方案*时，您将在下一段中看到。
 - en: Symmetric and affine quantization schemes
+  id: totrans-35
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 对称和仿射量化方案
 - en: The equation above is called the *affine quantization sheme* because the mapping
     from `[a, b]` to `int8` is an affine one.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 上面的方程被称为*仿射量化方案*，因为从`[a, b]`到`int8`的映射是仿射的。
 - en: A common special case of this scheme is the *symmetric quantization scheme*,
     where we consider a symmetric range of float values `[-a, a]`. In this case the
     integer space is usally `[-127, 127]`, meaning that the `-128` is opted out of
@@ -180,360 +244,515 @@
     ranges symmetric allows to have `Z = 0`. While one value out of the 256 representable
     values is lost, it can provide a speedup since a lot of addition operations can
     be skipped.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个方案的一个常见特例是*对称量化方案*，其中我们考虑浮点值的对称范围`[-a, a]`。在这种情况下，整数空间通常是`[-127, 127]`，这意味着`-128`被排除在常规的`[-128,
+    127]`有符号`int8`范围之外。原因是两个范围都对称允许有`Z = 0`。虽然失去了256个可表示值中的一个，但它可以提供加速，因为很多加法操作可以被跳过。
 - en: '**Note**: To learn how the quantization parameters `S` and `Z` are computed,
     you can read the [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only
     Inference](https://arxiv.org/abs/1712.05877) paper, or [Lei Mao’s blog post](https://leimao.github.io/article/Neural-Networks-Quantization)
     on the subject.'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '**注意**：要了解量化参数`S`和`Z`是如何计算的，可以阅读[用于高效整数运算推断的神经网络量化和训练](https://arxiv.org/abs/1712.05877)论文，或者关于这个主题的[Lei
+    Mao的博客文章](https://leimao.github.io/article/Neural-Networks-Quantization)。'
 - en: Per-tensor and per-channel quantization
+  id: totrans-39
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 每个张量和每个通道的量化
 - en: 'Depending on the accuracy / latency trade-off you are targetting you can play
     with the granularity of the quantization parameters:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据目标准确性/延迟权衡，可以调整量化参数的粒度：
 - en: Quantization parameters can be computed on a *per-tensor* basis, meaning that
     one pair of `(S, Z)` will be used per tensor.
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 量化参数可以根据*每个张量*的基础计算，这意味着每个张量将使用一个`(S, Z)`对。
 - en: Quantization parameters can be computed on a *per-channel* basis, meaning that
     it is possible to store a pair of `(S, Z)` per element along one of the dimensions
     of a tensor. For example for a tensor of shape `[N, C, H, W]`, having *per-channel*
     quantization parameters for the second dimension would result in having `C` pairs
     of `(S, Z)`. While this can give a better accuracy, it requires more memory.
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 量化参数可以根据*每个通道*的基础计算，这意味着可以在张量的一个维度上存储一个`(S, Z)`对。例如，对于形状为`[N, C, H, W]`的张量，对第二个维度进行*每个通道*的量化参数计算将导致有`C`对`(S,
+    Z)`。虽然这可能会提供更好的准确性，但需要更多的内存。
 - en: Calibration
+  id: totrans-43
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 校准
 - en: 'The section above described how quantization from `float32` to `int8` works,
     but one question remains: how is the `[a, b]` range of `float32` values determined?
     That is where calibration comes in to play.'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 上面的部分描述了如何从`float32`到`int8`的量化工作，但一个问题仍然存在：如何确定`float32`值的`[a, b]`范围？这就是校准发挥作用的地方。
 - en: 'Calibration is the step during quantization where the `float32` ranges are
     computed. For weights it is quite easy since the actual range is known at *quantization-time*.
     But it is less clear for activations, and different approaches exist:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 校准是量化过程中计算`float32`范围的步骤。对于权重来说，这相当容易，因为在*量化时间*已知实际范围。但对于激活来说，情况不太清楚，存在不同的方法：
 - en: 'Post training **dynamic quantization**: the range for each activation is computed
     on the fly at *runtime*. While this gives great results without too much work,
     it can be a bit slower than static quantization because of the overhead introduced
     by computing the range each time. It is also not an option on certain hardware.'
+  id: totrans-46
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 训练后**动态量化**：每个激活的范围在*运行时*动态计算。虽然这样做可以获得很好的结果而不需要太多工作，但由于每次计算范围引入的开销，它可能比静态量化慢一点。在某些硬件上也不是一个选项。
 - en: 'Post training **static quantization**: the range for each activation is computed
     in advance at *quantization-time*, typically by passing representative data through
     the model and recording the activation values. In practice, the steps are:'
+  id: totrans-47
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 训练后**静态量化**：每个激活的范围在*量化时间*提前计算，通常通过将代表性数据通过模型并记录激活值来实现。在实践中，步骤是：
 - en: Observers are put on activations to record their values.
+  id: totrans-48
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在激活上放置观察器以记录它们的值。
 - en: A certain number of forward passes on a calibration dataset is done (around
     `200` examples is enough).
+  id: totrans-49
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在校准数据集上进行一定数量的前向传递（大约`200`个示例足够）。
 - en: The ranges for each computation are computed according to some *calibration
     technique*.
+  id: totrans-50
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 根据某种*校准技术*计算每个计算的范围。
 - en: '**Quantization aware training**: the range for each activation is computed
     at *training-time*, following the same idea than post training static quantization.
     But “fake quantize” operators are used instead of observers: they record values
     just as observers do, but they also simulate the error induced by quantization
     to let the model adapt to it.'
+  id: totrans-51
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '**量化感知训练**：每个激活的范围在*训练时间*计算，遵循与训练后静态量化相同的思想。但是使用“伪量化”操作符代替观察器：它们记录值就像观察器一样，但也模拟由量化引起的误差，让模型适应它。'
 - en: 'For both post training static quantization and quantization aware training,
     it is necessary to define calibration techniques, the most common are:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于训练后静态量化和量化感知训练，需要定义校准技术，最常见的是：
 - en: 'Min-max: the computed range is `[min observed value, max observed value]`,
     this works well with weights.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 最小-最大：计算的范围是`[观察到的最小值，观察到的最大值]`，这对权重效果很好。
 - en: 'Moving average min-max: the computed range is `[moving average min observed
     value, moving average max observed value]`, this works well with activations.'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 移动平均最小-最大：计算的范围是`[移动平均最小观察值，移动平均最大观察值]`，这对激活效果很好。
 - en: 'Histogram: records a histogram of values along with min and max values, then
     chooses according to some criterion:'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 直方图：记录值的直方图以及最小和最大值，然后根据某些标准进行选择：
 - en: 'Entropy: the range is computed as the one minimizing the error between the
     full-precision and the quantized data.'
+  id: totrans-56
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 熵：范围是通过最小化完整精度和量化数据之间的误差来计算的。
 - en: 'Mean Square Error: the range is computed as the one minimizing the mean square
     error between the full-precision and the quantized data.'
+  id: totrans-57
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 均方误差：范围是通过最小化全精度和量化数据之间的均方误差来计算的。
 - en: 'Percentile: the range is computed using a given percentile value `p` on the
     observed values. The idea is to try to have `p%` of the observed values in the
     computed range. While this is possible when doing affine quantization, it is not
     always possible to exactly match that when doing symmetric quantization. You can
     check [how it is done in ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/2cb12caf9317f1ded37f6db125cb03ba99320c40/onnxruntime/python/tools/quantization/calibrate.py#L698)
     for more details.'
+  id: totrans-58
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 百分位数：使用给定的百分位数值`p`在观察值上计算范围。其思想是尝试使计算范围中有`p%`的观察值。在进行仿射量化时，这是可能的，但在进行对称量化时，不总是可能完全匹配。您可以查看[ONNX
+    Runtime中的实现方式](https://github.com/microsoft/onnxruntime/blob/2cb12caf9317f1ded37f6db125cb03ba99320c40/onnxruntime/python/tools/quantization/calibrate.py#L698)以获取更多详细信息。
 - en: Pratical steps to follow to quantize a model to int8
+  id: totrans-59
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 将模型量化为int8的实用步骤
 - en: 'To effectively quantize a model to `int8`, the steps to follow are:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 要有效地将模型量化为`int8`，需要遵循以下步骤：
 - en: Choose which operators to quantize. Good operators to quantize are the one dominating
     it terms of computation time, for instance linear projections and matrix multiplications.
+  id: totrans-61
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 选择要量化的运算符。好的运算符是在计算时间方面占主导地位的运算符，例如线性投影和矩阵乘法。
 - en: Try post-training dynamic quantization, if it is fast enough stop here, otherwise
     continue to step 3.
+  id: totrans-62
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 尝试后训练动态量化，如果足够快则在此停止，否则继续到第3步。
 - en: Try post-training static quantization which can be faster than dynamic quantization
     but often with a drop in terms of accuracy. Apply observers to your models in
     places where you want to quantize.
+  id: totrans-63
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 尝试后训练静态量化，这可能比动态量化更快，但通常会导致精度下降。在希望量化的模型中应用观察器。
 - en: Choose a calibration technique and perform it.
+  id: totrans-64
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 选择校准技术并执行。
 - en: 'Convert the model to its quantized form: the observers are removed and the
     `float32` operators are converted to their `int8` coutnerparts.'
+  id: totrans-65
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将模型转换为其量化形式：观察器被移除，`float32`运算符被转换为它们的`int8`对应项。
 - en: 'Evaluate the quantized model: is the accuracy good enough? If yes, stop here,
     otherwise start again at step 3 but with quantization aware training this time.'
+  id: totrans-66
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 评估量化模型：精度是否足够好？如果是，就在这里停止，否则从第3步重新开始，但这次进行量化感知训练。
 - en: Supported tools to perform quantization in 🤗 Optimum
+  id: totrans-67
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 支持在🤗 Optimum中执行量化的工具
 - en: '🤗 Optimum provides APIs to perform quantization using different tools for different
     targets:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Optimum提供了使用不同工具为不同目标执行量化的API。
 - en: The `optimum.onnxruntime` package allows to [quantize and run ONNX models](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/quantization)
     using the ONNX Runtime tool.
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`optimum.onnxruntime`包允许[量化和运行ONNX模型](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/quantization)使用ONNX
+    Runtime工具。'
 - en: The `optimum.intel` package enables to [quantize](https://huggingface.co/docs/optimum/intel/optimization_inc)
     🤗 Transformers models while respecting accuracy and latency constraints.
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`optimum.intel`包使得可以在尊重精度和延迟约束的情况下[量化](https://huggingface.co/docs/optimum/intel/optimization_inc)🤗
+    Transformers模型。'
 - en: The `optimum.fx` package provides wrappers around the [PyTorch quantization
     functions](https://pytorch.org/docs/stable/quantization-support.html#torch-quantization-quantize-fx)
     to allow graph-mode quantization of 🤗 Transformers models in PyTorch. This is
     a lower-level API compared to the two mentioned above, giving more flexibility,
     but requiring more work on your end.
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`optimum.fx`包提供了对[PyTorch量化函数](https://pytorch.org/docs/stable/quantization-support.html#torch-quantization-quantize-fx)的包装，以允许在PyTorch中以图模式量化🤗
+    Transformers模型。与上述两种方法相比，这是一个更低级别的API，提供更多灵活性，但需要您做更多工作。'
 - en: The `optimum.gptq` package allows to [quantize and run LLM models](../llm_quantization/usage_guides/quantization)
     with GPTQ.
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`optimum.gptq`包允许使用GPTQ[量化和运行LLM模型](../llm_quantization/usage_guides/quantization)。'
 - en: 'Going further: How do machines represent numbers?'
+  id: totrans-73
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 进一步了解：机器如何表示数字？
 - en: The section is not fundamental to understand the rest. It explains in brief
     how numbers are represented in computers. Since quantization is about going from
     one representation to another, it can be useful to have some basics, but it is
     definitely not mandatory.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 本节对于理解其余部分并不是必不可少的。它简要解释了计算机中数字的表示方式。由于量化是从一种表示形式到另一种表示形式的转换，了解一些基础知识可能会有所帮助，但绝对不是强制性的。
 - en: The most fundamental unit of representation for computers is the bit. Everything
     in computers is represented as a sequence of bits, including numbers. But the
     representation varies whether the numbers in question are integers or real numbers.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 计算机的最基本的表示单位是位。计算机中的所有内容都表示为一系列位，包括数字。但是，表示方式取决于所讨论的数字是整数还是实数。
 - en: Integer representation
+  id: totrans-76
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 整数表示
 - en: 'Integers are usually represented with the following bit lengths: `8`, `16`,
     `32`, `64`. When representing integers, two cases are considered:'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 整数通常使用以下位长度表示：`8`、`16`、`32`、`64`。在表示整数时，考虑两种情况：
 - en: 'Unsigned (positive) integers: they are simply represented as a sequence of
     bits. Each bit corresponds to a power of two (from `0` to `n-1` where `n` is the
     bit-length), and the resulting number is the sum of those powers of two.'
+  id: totrans-78
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 无符号（正）整数：它们简单地表示为一系列位。每个位对应于二的幂（从`0`到`n-1`，其中`n`是位长度），结果数字是这些二的幂的和。
 - en: 'Example: `19` is represented as an unsigned int8 as `00010011` because :'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：`19`表示为无符号int8为`00010011`，因为：
 - en: '[PRE4]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Signed integers: it is less straightforward to represent signed integers, and
     multiple approachs exist, the most common being the *two’s complement*. For more
     information, you can check the [Wikipedia page](https://en.wikipedia.org/wiki/Signed_number_representations)
     on the subject.'
+  id: totrans-81
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 有符号整数：表示有符号整数不那么直接，存在多种方法，最常见的是*二进制补码*。有关更多信息，您可以查看有关该主题的[Wikipedia页面](https://en.wikipedia.org/wiki/Signed_number_representations)。
 - en: Real numbers representation
+  id: totrans-82
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 实数表示
 - en: 'Real numbers are usually represented with the following bit lengths: `16`,
     `32`, `64`. The two main ways of representing real numbers are:'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 实数通常用以下位长度表示：`16`，`32`，`64`。表示实数的两种主要方法是：
 - en: 'Fixed-point: there are fixed number of digits reserved for representing the
     integer part and the fractional part.'
+  id: totrans-84
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 定点：用于表示整数部分和小数部分的固定位数。
 - en: 'Floating-point: the number of digits for representing the integer and the fractional
     parts can vary.'
+  id: totrans-85
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 浮点：用于表示整数和小数部分的位数可以变化。
 - en: 'The floating-point representation can represent bigger ranges of values, and
     this is the one we will be focusing on since it is the most commonly used. There
     are three components in the floating-point representation:'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 浮点表示可以表示更大范围的值，这是我们将重点关注的，因为它是最常用的。浮点表示中有三个组成部分：
 - en: 'The sign bit: this is the bit specifying the sign of the number.'
+  id: totrans-87
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 符号位：这是指定数字符号的位。
 - en: The exponent part
+  id: totrans-88
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 指数部分
 - en: 5 bits in `float16`
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`float16`中有5位
 - en: 8 bits in `bfloat16`
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`bfloat16`中有8位
 - en: 8 bits in `float32`
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`float32`中有8位
 - en: 11 bits in `float64`
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`float64`中有11位
 - en: The mantissa
+  id: totrans-93
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 尾数
 - en: 11 bits in `float16` (10 explictly stored)
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`float16`中有11位（10位明确存储）
 - en: 8 bits in `bfloat16` (7 explicitly stored)
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`bfloat16`中有8位（7位明确存储）
 - en: 24 bits in `float32` (23 explictly stored)
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`float32`中有24位（23位明确存储）
 - en: 53 bits in `float64` (52 explictly stored)
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在`float64`中有53位（52位明确存储）
 - en: For more information on the bits allocation for each data type, check the nice
     illustration on the Wikipedia page about the [bfloat16 floating-point format](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format).
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关每种数据类型的位分配的更多信息，请查看维基百科页面上关于[bfloat16浮点格式](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)的漂亮插图。
 - en: 'For a real number `x` we have:'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于实数`x`，我们有：
 - en: '[PRE5]'
+  id: totrans-100
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: References
+  id: totrans-101
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参考资料
 - en: The [Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only
     Inference](https://arxiv.org/abs/1712.05877) paper
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 神经网络的量化和训练以进行高效的整数算术推断
 - en: The [Basics of Quantization in Machine Learning (ML) for Beginners](https://iq.opengenus.org/basics-of-quantization-in-ml/)
     blog post
+  id: totrans-103
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 机器学习（ML）中量化基础入门的博文
 - en: The [How to accelerate and compress neural networks with quantization](https://tivadardanka.com/blog/neural-networks-quantization)
     blog post
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 加速和压缩神经网络的量化方法的博文
 - en: The Wikipedia pages on integers representation [here](https://en.wikipedia.org/wiki/Integer_(computer_science))
     and [here](https://en.wikipedia.org/wiki/Signed_number_representations)
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 整数表示的维基百科页面[这里](https://en.wikipedia.org/wiki/Integer_(computer_science))和[这里](https://en.wikipedia.org/wiki/Signed_number_representations)
 - en: The Wikipedia pages on
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 关于维基百科页面
 - en: '[bfloat16 floating-point format](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)'
+  id: totrans-107
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[bfloat16浮点格式](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)'
 - en: '[Half-precision floating-point format](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)'
+  id: totrans-108
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[半精度浮点格式](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)'
 - en: '[Single-precision floating-point format](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)'
+  id: totrans-109
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[单精度浮点格式](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)'
 - en: '[Double-precision floating-point format](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)'
+  id: totrans-110
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[双精度浮点格式](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)'
