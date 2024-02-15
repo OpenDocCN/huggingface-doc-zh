@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在AWS Trainium上对Llama 2 7B进行微调和测试
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/tutorials/fine_tune_llama_7b](https://huggingface.co/docs/optimum-neuron/tutorials/fine_tune_llama_7b)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/optimum-neuron/tutorials/fine_tune_llama_7b](https://huggingface.co/docs/optimum-neuron/tutorials/fine_tune_llama_7b)
 - en: null
   id: totrans-2
   prefs: []
@@ -16,41 +18,50 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '*这里有一个关于该教程的笔记本版本[链接](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-generation/llama2-7b-fine-tuning.ipynb)*。'
 - en: This tutorial will teach you how to fine-tune open LLMs like [Llama 2](https://huggingface.co/meta-llama/Llama-2-7b-hf)
     on AWS Trainium. In our example, we are going to leverage Hugging Face [https://huggingface.co/docs/optimum-neuron/index](https://huggingface.co/docs/optimum-neuron/index),
     [Transformers](https://huggingface.co/docs/transformers/index) and [https://huggingface.co/docs/datasets/index](https://huggingface.co/docs/datasets/index).
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程将教您如何在AWS Trainium上微调开放的LLM（如[Llama 2](https://huggingface.co/meta-llama/Llama-2-7b-hf)）。在我们的示例中，我们将利用Hugging
+    Face [https://huggingface.co/docs/optimum-neuron/index](https://huggingface.co/docs/optimum-neuron/index)、Transformers和[https://huggingface.co/docs/datasets/index](https://huggingface.co/docs/datasets/index)。
 - en: 'You will learn how to:'
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将学习如何：
 - en: '[Setup AWS environment](#1-setup-aws-environment)'
   id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[设置AWS环境](#1-setup-aws-environment)'
 - en: '[Load and process the dataset](#2-load-and-prepare-the-dataset)'
   id: totrans-7
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[加载和处理数据集](#2-load-and-prepare-the-dataset)'
 - en: '[Fine-tune Llama on AWS Trainium using the `NeuronTrainer`](#3-fine-tune-llama-on-aws-trainium-using-the-neurontrainer)'
   id: totrans-8
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[在AWS Trainium上使用`NeuronTrainer`对Llama进行微调](#3-fine-tune-llama-on-aws-trainium-using-the-neurontrainer)'
 - en: '[Evaluate and test fine-tuned Llama model](#4-evaluate-and-test-fine-tuned-llama-model)'
   id: totrans-9
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[评估和测试微调的Llama模型](#4-evaluate-and-test-fine-tuned-llama-model)'
 - en: 'Quick intro: AWS Trainium'
   id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 快速介绍：AWS Trainium
 - en: '[AWS Trainium (Trn1)](https://aws.amazon.com/de/ec2/instance-types/trn1/) is
     a purpose-built EC2 for deep learning (DL) training workloads. Trainium is the
     successor of [AWS Inferentia](https://aws.amazon.com/ec2/instance-types/inf1/?nc1=h_ls)
@@ -61,6 +72,8 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '[AWS Trainium (Trn1)](https://aws.amazon.com/de/ec2/instance-types/trn1/)是专为深度学习（DL）训练工作负载而设计的EC2。Trainium是[AWS
+    Inferentia](https://aws.amazon.com/ec2/instance-types/inf1/?nc1=h_ls)的后继产品，专注于高性能训练工作负载。Trainium已经针对训练自然语言处理、计算机视觉和推荐模型进行了优化。该加速器支持多种数据类型，包括FP32、TF32、BF16、FP16、UINT8和可配置的FP8。'
 - en: 'The biggest Trainium instance, the `trn1.32xlarge` comes with over 500GB of
     memory, making it easy to fine-tune ~10B parameter models on a single instance.
     Below you will find an overview of the available instance types. More details
@@ -68,36 +81,44 @@
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 最大的Trainium实例，`trn1.32xlarge`配备了超过500GB的内存，使得在单个实例上对约10B参数模型进行微调变得容易。下面是可用实例类型的概述。更多细节[在这里](https://aws.amazon.com/de/ec2/instance-types/trn1/#Product_details)：
 - en: '| instance size | accelerators | accelerator memory | vCPU | CPU Memory | price
     per hour |'
   id: totrans-13
   prefs: []
   type: TYPE_TB
+  zh: '| 实例大小 | 加速器 | 加速器内存 | vCPU | CPU内存 | 每小时价格 |'
 - en: '| --- | --- | --- | --- | --- | --- |'
   id: totrans-14
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- |'
 - en: '| trn1.2xlarge | 1 | 32 | 8 | 32 | \$1.34 |'
   id: totrans-15
   prefs: []
   type: TYPE_TB
+  zh: '| trn1.2xlarge | 1 | 32 | 8 | 32 | \$1.34 |'
 - en: '| trn1.32xlarge | 16 | 512 | 128 | 512 | \$21.50 |'
   id: totrans-16
   prefs: []
   type: TYPE_TB
+  zh: '| trn1.32xlarge | 16 | 512 | 128 | 512 | \$21.50 |'
 - en: '| trn1n.32xlarge (2x bandwidth) | 16 | 512 | 128 | 512 | \$24.78 |'
   id: totrans-17
   prefs: []
   type: TYPE_TB
+  zh: '| trn1n.32xlarge (2倍带宽) | 16 | 512 | 128 | 512 | \$24.78 |'
 - en: '*Note: This tutorial was created on a trn1.32xlarge AWS EC2 Instance.*'
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：本教程是在trn1.32xlarge AWS EC2实例上创建的。*'
 - en: 1\. Setup AWS environment
   id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 1. 设置AWS环境
 - en: In this example, we will use the `trn1.32xlarge` instance on AWS with 16 Accelerator,
     including 32 Neuron Cores and the [Hugging Face Neuron Deep Learning AMI](https://aws.amazon.com/marketplace/pp/prodview-gr3e6yiscria2).
     The Hugging Face AMI comes with all important libraries, like Transformers, Datasets,
@@ -106,12 +127,16 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本示例中，我们将在AWS上使用`trn1.32xlarge`实例，其中包括16个加速器，包括32个神经元核心和[Hugging Face Neuron
+    Deep Learning AMI](https://aws.amazon.com/marketplace/pp/prodview-gr3e6yiscria2)。Hugging
+    Face AMI预先安装了所有重要的库，如Transformers、Datasets、Optimum和Neuron包。这使得入门变得非常容易，因为无需进行环境管理。
 - en: This tutorial doesn’t cover how to create the instance in detail. You can check
     out the dedicated tutorial about [“Setting up AWS Trainium for Hugging Face Transformers”](https://huggingface.co/docs/optimum-neuron/guides/setup_aws_instance),
     which includes a step-by-step guide on setting up the environment.
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程不详细介绍如何创建实例。您可以查看关于“为Hugging Face Transformers设置AWS Trainium”的专门教程，其中包括有关设置环境的逐步指南。
 - en: Once the instance is up and running, we can ssh into it. But instead of developing
     inside a terminal we want to use a `Jupyter` environment, which we can use for
     preparing our dataset and launching the training. For this, we need to add a port
@@ -120,6 +145,7 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦实例启动并运行，我们可以ssh进入它。但是，我们不想在终端内开发，而是想使用`Jupyter`环境，我们可以用来准备我们的数据集和启动训练。为此，我们需要在`ssh`命令中添加一个用于转发的端口，这将把我们的本地主机流量隧道传输到Trainium实例。
 - en: '[PRE0]'
   id: totrans-23
   prefs: []
@@ -129,6 +155,7 @@
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们拉取带有[示例笔记本和脚本](https://github.com/huggingface/optimum-neuron/tree/main/notebooks/text-generation)的最佳存储库。
 - en: '[PRE1]'
   id: totrans-25
   prefs: []
@@ -139,6 +166,7 @@
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们可以将目录更改为`notbooks/text-generation`并启动`jupyter`环境。
 - en: '[PRE2]'
   id: totrans-27
   prefs: []
@@ -148,30 +176,36 @@
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应该看到一个熟悉的**`jupyter`**输出，其中包含指向笔记本的URL。
 - en: '**`http://localhost:8080/?token=8c1739aff1755bd7958c4cfccc8d08cb5da5234f61f129a9`**'
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '**`http://localhost:8080/?token=8c1739aff1755bd7958c4cfccc8d08cb5da5234f61f129a9`**'
 - en: We can click on it, and a **`jupyter`** environment opens in our local browser.
     Open the notebook **`llama2-7b-fine-tuning.ipynb`** and lets get started.
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以单击它，在本地浏览器中打开一个**`jupyter`**环境。打开笔记本**`llama2-7b-fine-tuning.ipynb`**，然后开始吧。
 - en: '*Note: We are going to use the Jupyter environment only for preparing the dataset
     and then `torchrun` for launching our training script for distributed training.*'
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：我们将仅在Jupyter环境中准备数据集，然后使用`torchrun`启动我们的分布式训练脚本。*'
 - en: 'If you are going to use official Llama 2 checkpoint you need to login into
     our hugging face account, which has access to the model, to use your token for
     accessing the gated repository. We can do this by running the following command:'
   id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您要使用官方的Llama 2检查点，您需要登录到我们的Hugging Face帐户，该帐户可以访问模型，以使用您的令牌访问门控存储库。我们可以通过运行以下命令来实现这一点：
 - en: '*Note: We also provide an ungated checkpoint.*'
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：我们还提供了一个非门控检查点。*'
 - en: '[PRE3]'
   id: totrans-34
   prefs: []
@@ -182,6 +216,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 2\. 加载和准备数据集
 - en: We will use [Dolly](https://huggingface.co/datasets/databricks/databricks-dolly-15k)
     an open source dataset of instruction-following records on categories outlined
     in the [InstructGPT paper](https://arxiv.org/abs/2203.02155), including brainstorming,
@@ -189,6 +224,8 @@
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将使用[Dolly](https://huggingface.co/datasets/databricks/databricks-dolly-15k)，这是一个开源数据集，记录了在[InstructGPT
+    paper](https://arxiv.org/abs/2203.02155)中概述的类别上的指令跟随记录，包括头脑风暴、分类、封闭QA、生成、信息提取、开放QA和摘要。
 - en: '[PRE4]'
   id: totrans-37
   prefs: []
@@ -199,6 +236,7 @@
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载`dolly`数据集，我们使用🤗数据集库中的`load_dataset()`方法。
 - en: '[PRE5]'
   id: totrans-39
   prefs: []
@@ -210,6 +248,7 @@
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了指导调整我们的模型，我们需要将我们的结构化示例转换为通过指令描述的任务集合。我们定义一个`formatting_function`，它接受一个样本并返回一个带有我们格式指令的字符串。
 - en: '[PRE6]'
   id: totrans-41
   prefs: []
@@ -219,6 +258,7 @@
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们在一个随机示例上测试我们的格式化函数。
 - en: '[PRE7]'
   id: totrans-43
   prefs: []
@@ -234,6 +274,7 @@
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了格式化我们的样本，我们还希望将多个样本打包到一个序列中，以实现更高效的训练。这意味着我们将多个样本堆叠到一个序列中，并用EOS标记分割它们。这使得训练更加高效。打包/堆叠样本可以在训练期间或之前完成。我们将在训练之前执行此操作以节省时间。我们创建了一个实用方法[pack_dataset](https://github.com/huggingface/optimum-neuron/tree/main/notebooks/text-generation/scripts/utils/pack_dataset.py)，它接受一个数据集和一个打包函数，并返回一个打包后的数据集。
 - en: '[PRE8]'
   id: totrans-45
   prefs: []
@@ -244,22 +285,26 @@
   id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了打包/堆叠我们的数据集，我们需要首先对其进行标记化，然后我们可以使用`pack_dataset`方法对其进行打包。为了准备我们的数据集，我们现在将：
 - en: Format our samples using the template method and add an EOS token at the end
     of each sample
   id: totrans-47
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用模板方法格式化我们的样本，并在每个样本末尾添加一个EOS标记
 - en: Tokenize our dataset to convert it from text to tokens
   id: totrans-48
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将我们的数据集标记化，将其从文本转换为令牌
 - en: Pack our dataset to 2048 tokens
   id: totrans-49
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将我们的数据集打包到2048个令牌
 - en: '[PRE9]'
   id: totrans-50
   prefs: []
@@ -270,11 +315,13 @@
   id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理完数据集后，我们将其保存到磁盘。您也可以将其保存到S3或Hugging Face Hub以供以后使用。
 - en: '*Note: Packing and preprocessing your dataset can be run outside of the Trainium
     instance.*'
   id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：打包和预处理数据集可以在Trainium实例之外运行。*'
 - en: '[PRE10]'
   id: totrans-53
   prefs: []
@@ -285,12 +332,14 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 3\. 在AWS Trainium上使用NeuronTrainer对Llama进行微调
 - en: Normally you would use the **[Trainer](https://huggingface.co/docs/transformers/main/en/main_classes/trainer#transformers.Trainer)**
     and **[TrainingArguments](https://huggingface.co/docs/transformers/main/en/main_classes/trainer#transformers.TrainingArguments)**
     to fine-tune PyTorch-based transformer models.
   id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常情况下，您会使用**[Trainer](https://huggingface.co/docs/transformers/main/en/main_classes/trainer#transformers.Trainer)**和**[TrainingArguments](https://huggingface.co/docs/transformers/main/en/main_classes/trainer#transformers.TrainingArguments)**来微调基于PyTorch的变压器模型。
 - en: But together with AWS, we have developed a `NeuronTrainer` to improve performance,
     robustness, and safety when training on Trainium instances. The `NeuronTrainer`
     is part of the `optimum-neuron` library and can be used as a 1-to-1 replacement
@@ -298,6 +347,7 @@
   id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是与AWS一起，我们开发了一个`NeuronTrainer`来提高在Trainium实例上训练时的性能、稳健性和安全性。`NeuronTrainer`是`optimum-neuron`库的一部分，可以作为`Trainer`的1对1替代品使用。
 - en: 'When it comes to distributed training on AWS Trainium there are a few things
     we need to take care of. Since Llama is a big model it might not fit on a single
     accelerator, thats why we added support for different distributed training strategies
@@ -305,12 +355,14 @@
   id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 在AWS Trainium上进行分布式训练时，有一些事项需要注意。由于Llama是一个庞大的模型，可能无法适应单个加速器，因此我们为`NeuronTrainer`添加了对不同分布式训练策略的支持，包括：
 - en: '[ZeRO-1](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/frameworks/torch/torch-neuronx/tutorials/training/zero1_gpt2.html):
     shards the optimizer state over multiple devices.'
   id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[ZeRO-1](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/frameworks/torch/torch-neuronx/tutorials/training/zero1_gpt2.html)：将优化器状态分片到多个设备上。'
 - en: '[Tensor Parallelism](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/tensor_parallelism_overview.html):
     shards the model parameters along a given dimension on multiple devices, defined
     with `tensor_parallel_size`'
@@ -318,6 +370,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Tensor Parallelism](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/tensor_parallelism_overview.html)：将模型参数沿着给定维度分片到多个设备上，使用`tensor_parallel_size`定义'
 - en: '[Sequence parallelism](https://arxiv.org/pdf/2205.05198.pdf) shards the activations
     on the sequence axis outside of the tensor parallel regions. It is useful because
     it saves memory by sharding the activations.'
@@ -325,12 +378,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[序列并行](https://arxiv.org/pdf/2205.05198.pdf) 在张量并行区域之外的序列轴上分片激活。这很有用，因为它通过分片激活来节省内存。'
 - en: '[Pipeline Parallelism](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/pipeline_parallelism_overview.html):
     *coming soon*'
   id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[管道并行](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/pipeline_parallelism_overview.html)：*即将推出*'
 - en: We prepared a [run_clm.py](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-generation/scripts/run_clm.py),
     which implements those distributed training strategies for you already. If you
     want to know more about the details you can take a look at the [documentation](https://huggingface.co/docs/optimum-neuron/guides/distributed_training).
@@ -339,6 +394,7 @@
   id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们准备了一个[run_clm.py](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-generation/scripts/run_clm.py)，它已经为您实现了这些分布式训练策略。如果您想了解更多细节，可以查看[文档](https://huggingface.co/docs/optimum-neuron/guides/distributed_training)。在AWS加速器上训练模型时，我们首先需要使用训练参数编译我们的模型。
 - en: To overcome this we added a [model cache](https://huggingface.co/docs/optimum-neuron/guides/cache_system),
     which allows us to use precompiled models and configuration from Hugging Face
     Hub to skip the compilation step. But every change in the config, will lead to
@@ -346,17 +402,21 @@
   id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了克服这个问题，我们添加了一个[model cache](https://huggingface.co/docs/optimum-neuron/guides/cache_system)，它允许我们使用Hugging
+    Face Hub中预编译的模型和配置来跳过编译步骤。但是，配置的每次更改都将导致新的编译，这可能会导致一些缓存未命中。
 - en: '*Note: If your configuration is not cached please open an issue on [Github](https://github.com/huggingface/optimum-neuron/issues),
     we are happy to include it.*'
   id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：如果您的配置没有缓存，请在[Github](https://github.com/huggingface/optimum-neuron/issues)上提出问题，我们很乐意包含它。*'
 - en: We pre-compiled the config for our training already meaning you can either skip
     the cell below or rerun it will only take a few minutes since it reuses the cached
     configuration.
   id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经为我们的训练预编译了配置，这意味着您可以跳过下面的单元格，或者重新运行它只需要几分钟，因为它重用了缓存的配置。
 - en: '[PRE11]'
   id: totrans-66
   prefs: []
@@ -369,6 +429,7 @@
   id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：没有缓存的编译可能需要约40分钟。它还会在编译过程中在`dolly_llama_sharded`中创建虚拟文件，之后我们必须将它们删除。我们还需要添加`MALLOC_ARENA_MAX=64`来限制CPU分配，以避免潜在的崩溃，现在不要删除它。*'
 - en: '[PRE12]'
   id: totrans-68
   prefs: []
@@ -383,10 +444,12 @@
   id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 编译完成后，我们可以使用类似的命令开始我们的训练，只需要删除`neuron_parallel_compile`。我们将使用`torchrun`来启动我们的训练脚本。`torchrun`是一个工具，可以自动将PyTorch模型分布到多个加速器上。我们可以通过`nproc_per_node`参数传递加速器的数量以及我们的超参数。与编译命令的区别在于，我们从`max_steps=10`更改为`num_train_epochs=3`。
 - en: Launch the training, with the following command.
   id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用以下命令启动训练。
 - en: '[PRE13]'
   id: totrans-71
   prefs: []
@@ -399,6 +462,7 @@
   id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 这就是了，我们成功地在AWS Trainium上训练了Llama 7B。在dolly上进行了3个epochs的训练（15k个样本），花费了43:24分钟，而原始训练时间仅为31:46分钟。这导致在trn1.32xlarge实例上进行端到端训练的成本约为15.5美元。不错！
 - en: But before we can share and test our model we need to consolidate our model.
     Since we used Tensor Parallelism during training, we need to consolidate the model
     weights before we can use it. Tensor Parallelism shards the model weights accross
@@ -406,11 +470,14 @@
   id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 但在我们分享和测试模型之前，我们需要合并模型。由于我们在训练过程中使用了Tensor Parallelism，所以我们需要在使用之前合并模型权重。Tensor
+    Parallelism将模型权重分片到不同的工作节点，只有在训练期间才会保存分片检查点。
 - en: 'The Optimum CLI provides a way of doing that very easily via the `optimum neuron
     consolidate“ command:'
   id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: Optimum CLI通过`optimum neuron consolidate`命令提供了一种非常容易实现这一点的方式：
 - en: '[PRE14]'
   id: totrans-75
   prefs: []
@@ -421,6 +488,7 @@
   id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们删除我们的“sharded”检查点，因为我们已经将它们合并到safetensors中。
 - en: '[PRE15]'
   id: totrans-77
   prefs: []
@@ -431,6 +499,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 4. 评估和测试微调的Llama模型
 - en: Similar to training to be able to run inferece on AWS Trainium or AWS Inferentia2
     we need to compile our model for the correct use. We will use our Trainium instance
     for the inference test, but we recommend customer to switch to Inferentia2 for
@@ -438,12 +507,15 @@
   id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 与训练类似，为了能够在AWS Trainium或AWS Inferentia2上运行推断，我们需要为正确的使用编译我们的模型。我们将使用我们的Trainium实例进行推断测试，但我们建议客户切换到Inferentia2进行推断。
 - en: Optimum Neuron implements similar to Transformers AutoModel classes for easy
     inference use. We will use the `NeuronModelForCausalLM` class to load our vanilla
     transformers checkpoint and convert it to neuron.
   id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: Optimum Neuron实现了类似于Transformers AutoModel类的功能，用于简化推断使用。我们将使用`NeuronModelForCausalLM`类来加载我们的vanilla
+    transformers检查点并将其转换为neuron。
 - en: '[PRE16]'
   id: totrans-81
   prefs: []
@@ -456,6 +528,7 @@
   id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：推断编译可能需要约25分钟。幸运的是，您只需要运行一次。因为您之后可以保存模型。如果您要在Inferentia2上运行，您需要重新编译。编译是参数和硬件特定的。*'
 - en: '[PRE17]'
   id: totrans-83
   prefs: []

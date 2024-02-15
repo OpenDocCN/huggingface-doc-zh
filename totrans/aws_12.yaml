@@ -1,27 +1,24 @@
 - en: Sentence Transformers on AWS Inferentia with Optimum Neuron
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在AWS Inferentia上使用Optimum Neuron的句子转换器
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/tutorials/sentence_transformers](https://huggingface.co/docs/optimum-neuron/tutorials/sentence_transformers)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/optimum-neuron/tutorials/sentence_transformers](https://huggingface.co/docs/optimum-neuron/tutorials/sentence_transformers)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '*There is a notebook version of that tutorial [here](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/sentence-transformers/getting-started.ipynb).*'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '*这个教程有一个笔记本版本[在这里](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/sentence-transformers/getting-started.ipynb)。*'
 - en: This guide explains how to compile, load, and use [Sentence Transformers (SBERT)](https://www.sbert.net/)
     models on AWS Inferentia2 with Optimum Neuron, enabling efficient calculation
     of embeddings. Sentence Transformers are powerful models for generating sentence
@@ -29,66 +26,98 @@
     embeddings for more than 100 languages. These embeddings can then be compared
     e.g. with cosine-similarity to find sentences with a similar meaning. This can
     be useful for semantic textual similarity, semantic search, or paraphrase mining.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南解释了如何在AWS Inferentia2上使用Optimum Neuron编译、加载和使用[Sentence Transformers（SBERT）](https://www.sbert.net/)模型，实现嵌入的高效计算。句子转换器是用于生成句子嵌入的强大模型。您可以使用这个句子转换器为100多种语言计算句子/文本嵌入。然后可以将这些嵌入与余弦相似性进行比较，以找到具有相似含义的句子。这对于语义文本相似性、语义搜索或释义挖掘可能很有用。
 - en: '*Note: Currently only text models are supported, we are working on vision support
     for CLIP.*'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：目前仅支持文本模型，我们正在为CLIP添加视觉支持。*'
 - en: Convert Sentence Transformers model to AWS Inferentia2
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将句子转换器模型转换为AWS Inferentia2
 - en: First, you need to convert your Sentence Transformers model to a format compatible
     with AWS Inferentia2\. You can compile Sentence Transformers models with Optimum
     Neuron using the `optimum-cli` or `NeuronModelForSentenceTransformers` class.
     Below you will find an example for both approaches. We have to make sure `sentence-transformers`
     is installed. Thats only needed for exporting the model.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，您需要将您的句子转换器模型转换为与AWS Inferentia2兼容的格式。您可以使用`optimum-cli`或`NeuronModelForSentenceTransformers`类使用Optimum
+    Neuron编译句子转换器模型。下面您将找到两种方法的示例。我们必须确保安装了`sentence-transformers`。这仅在导出模型时需要。
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Here we will use the `NeuronModelForSentenceTransformers`, which can be used
     to convert any Sntence Transformers model to a format compatible with AWS Inferentia2
     or load already converted models. When exporting models with the `NeuronModelForSentenceTransformers`
     you need to set `export=True` and define the input shape and batch size. The input
     shape is defined by the `sequence_length` and the batch size by `batch_size`.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们将使用`NeuronModelForSentenceTransformers`，它可以用于将任何Sntence Transformers模型转换为与AWS
+    Inferentia2兼容的格式或加载已转换的模型。在使用`NeuronModelForSentenceTransformers`导出模型时，您需要设置`export=True`并定义输入形状和批量大小。输入形状由`sequence_length`定义，批量大小由`batch_size`定义。
 - en: '[PRE1]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Here we will use the `optimum-cli` to convert the model. Similar to the `NeuronModelForSentenceTransformers`
     we need to define our input shape and batch size. The input shape is defined by
     the `sequence_length` and the batch size by `batch_size`. The `optimum-cli` will
     automatically convert the model to a format compatible with AWS Inferentia2 and
     save it to the specified output directory.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们将使用`optimum-cli`来转换模型。与`NeuronModelForSentenceTransformers`类似，我们需要定义输入形状和批量大小。输入形状由`sequence_length`定义，批量大小由`batch_size`定义。`optimum-cli`将自动将模型转换为与AWS
+    Inferentia2兼容的格式，并将其保存到指定的输出目录。
 - en: '[PRE2]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Load compiled Sentence Transformers model and run inference
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载编译的句子转换器模型并运行推理
 - en: Once we have a compiled Sentence Transformers model, which we either exported
     ourselves or is available on the Hugging Face Hub, we can load it and run inference.
     For loading the model we can use the `NeuronModelForSentenceTransformers` class,
     which is an abstraction layer for the `SentenceTransformer` class. The `NeuronModelForSentenceTransformers`
     class will automatically pad the input to the specified `sequence_length` and
     run inference on AWS Inferentia2.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦我们有了编译的句子转换器模型，我们可以导出自己或在Hugging Face Hub上可用，我们可以加载它并运行推理。为了加载模型，我们可以使用`NeuronModelForSentenceTransformers`类，这是`SentenceTransformer`类的抽象层。`NeuronModelForSentenceTransformers`类将自动填充输入到指定的`sequence_length`并在AWS
+    Inferentia2上运行推理。
 - en: '[PRE3]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Production Usage
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 生产用途
 - en: For deploying these models in a production environment, refer to the [Amazon
     SageMaker Blog](https://www.philschmid.de/inferentia2-embeddings).
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在生产环境中部署这些模型，请参考[Amazon SageMaker博客](https://www.philschmid.de/inferentia2-embeddings)。
