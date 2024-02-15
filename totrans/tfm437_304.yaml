@@ -1,0 +1,1596 @@
+- en: Bark
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/bark](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/bark)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/62.7796dc5d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Bark is a transformer-based text-to-speech model proposed by Suno AI in [suno-ai/bark](https://github.com/suno-ai/bark).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Bark is made of 4 main models:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[BarkSemanticModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkSemanticModel)
+    (also referred to as the ‘text’ model): a causal auto-regressive transformer model
+    that takes as input tokenized text, and predicts semantic text tokens that capture
+    the meaning of the text.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[BarkCoarseModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCoarseModel)
+    (also referred to as the ‘coarse acoustics’ model): a causal autoregressive transformer,
+    that takes as input the results of the [BarkSemanticModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkSemanticModel)
+    model. It aims at predicting the first two audio codebooks necessary for EnCodec.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[BarkFineModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkFineModel)
+    (the ‘fine acoustics’ model), this time a non-causal autoencoder transformer,
+    which iteratively predicts the last codebooks based on the sum of the previous
+    codebooks embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having predicted all the codebook channels from the [EncodecModel](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel),
+    Bark uses it to decode the output audio array.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It should be noted that each of the first three modules can support conditional
+    speaker embeddings to condition the output sound according to specific predefined
+    voice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [Yoach Lacombe (ylacombe)](https://huggingface.co/ylacombe)
+    and [Sanchit Gandhi (sanchit-gandhi)](https://github.com/sanchit-gandhi). The
+    original code can be found [here](https://github.com/suno-ai/bark).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Optimizing Bark
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Bark can be optimized with just a few extra lines of code, which **significantly
+    reduces its memory footprint** and **accelerates inference**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using half-precision
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: You can speed up inference and reduce memory footprint by 50% simply by loading
+    the model in half-precision.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using CPU offload
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: As mentioned above, Bark is made up of 4 sub-models, which are called up sequentially
+    during audio generation. In other words, while one sub-model is in use, the other
+    sub-models are idle.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you’re using a CUDA device, a simple solution to benefit from an 80% reduction
+    in memory footprint is to offload the submodels from GPU to CPU when they’re idle.
+    This operation is called *CPU offloading*. You can use it with one line of code
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that 🤗 Accelerate must be installed before using this feature. [Here’s
+    how to install it.](https://huggingface.co/docs/accelerate/basic_tutorials/install)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Better Transformer
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Better Transformer is an 🤗 Optimum feature that performs kernel fusion under
+    the hood. You can gain 20% to 30% in speed with zero performance degradation.
+    It only requires one line of code to export the model to 🤗 Better Transformer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that 🤗 Optimum must be installed before using this feature. [Here’s how
+    to install it.](https://huggingface.co/docs/optimum/installation)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Flash Attention 2
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Flash Attention 2 is an even faster, optimized version of the previous optimization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: First, check whether your hardware is compatible with Flash Attention 2\. The
+    latest list of compatible hardware can be found in the [official documentation](https://github.com/Dao-AILab/flash-attention#installation-and-features).
+    If your hardware is not compatible with Flash Attention 2, you can still benefit
+    from attention kernel optimisations through Better Transformer support covered
+    [above](https://huggingface.co/docs/transformers/main/en/model_doc/bark#using-better-transformer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, [install](https://github.com/Dao-AILab/flash-attention#installation-and-features)
+    the latest version of Flash Attention 2:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Usage
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: 'To load a model using Flash Attention 2, we can pass the `attn_implementation="flash_attention_2"`
+    flag to [`.from_pretrained`](https://huggingface.co/docs/transformers/main/en/main_classes/model#transformers.PreTrainedModel.from_pretrained).
+    We’ll also load the model in half-precision (e.g. `torch.float16`), since it results
+    in almost no degradation to audio quality but significantly lower memory usage
+    and faster inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Performance comparison
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: 'The following diagram shows the latency for the native attention implementation
+    (no optimisation) against Better Transformer and Flash Attention 2\. In all cases,
+    we generate 400 semantic tokens on a 40GB A100 GPU with PyTorch 2.1\. Flash Attention
+    2 is also consistently faster than Better Transformer, and its performance improves
+    even more as batch sizes increase:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/62ff1093eff6a3b02e14aad370aaa0c2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: To put this into perspective, on an NVIDIA A100 and when generating 400 semantic
+    tokens with a batch size of 16, you can get 17 times the [throughput](https://huggingface.co/blog/optimizing-bark#throughput)
+    and still be 2 seconds faster than generating sentences one by one with the native
+    model implementation. In other words, all the samples will be generated 17 times
+    faster.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At batch size 8, on an NVIDIA A100, Flash Attention 2 is also 10% faster than
+    Better Transformer, and at batch size 16, 25%.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Combining optimization techniques
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: You can combine optimization techniques, and use CPU offload, half-precision
+    and Flash Attention 2 (or 🤗 Better Transformer) all at once.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Find out more on inference optimization techniques [here](https://huggingface.co/docs/transformers/perf_infer_gpu_one).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Suno offers a library of voice presets in a number of languages [here](https://suno-ai.notion.site/8b8e8749ed514b0cbf3f699013548683?v=bc67cff786b04b50b3ceb756fd05f68c).
+    These presets are also uploaded in the hub [here](https://huggingface.co/suno/bark-small/tree/main/speaker_embeddings)
+    or [here](https://huggingface.co/suno/bark/tree/main/speaker_embeddings).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Bark can generate highly realistic, **multilingual** speech as well as other
+    audio - including music, background noise and simple sound effects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The model can also produce **nonverbal communications** like laughing, sighing
+    and crying.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To save the audio, simply take the sample rate from the model config and some
+    scipy utility:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: BarkConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/configuration_bark.py#L219)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( semantic_config: Dict = None coarse_acoustics_config: Dict = None fine_acoustics_config:
+    Dict = None codec_config: Dict = None initializer_range = 0.02 **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**semantic_config** ([BarkSemanticConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkSemanticConfig),
+    *optional*) — Configuration of the underlying semantic sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**coarse_acoustics_config** ([BarkCoarseConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCoarseConfig),
+    *optional*) — Configuration of the underlying coarse acoustics sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**fine_acoustics_config** ([BarkFineConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkFineConfig),
+    *optional*) — Configuration of the underlying fine acoustics sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**codec_config** ([AutoConfig](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoConfig),
+    *optional*) — Configuration of the underlying codec sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example —
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [BarkModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkModel).
+    It is used to instantiate a Bark model according to the specified sub-models configurations,
+    defining the model architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instantiating a configuration with the defaults will yield a similar configuration
+    to that of the Bark [suno/bark](https://huggingface.co/suno/bark) architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### from_sub_model_configs'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/configuration_bark.py#L309)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( semantic_config: BarkSemanticConfig coarse_acoustics_config: BarkCoarseConfig
+    fine_acoustics_config: BarkFineConfig codec_config: PretrainedConfig **kwargs
+    ) → [BarkConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkConfig)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[BarkConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkConfig)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An instance of a configuration object
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instantiate a [BarkConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkConfig)
+    (or a derived class) from bark sub-models configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BarkProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/processing_bark.py#L34)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( tokenizer speaker_embeddings = None )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**tokenizer** ([PreTrainedTokenizer](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizer))
+    — An instance of [PreTrainedTokenizer](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizer).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**speaker_embeddings** (`Dict[Dict[str]]`, *optional*) — Optional nested speaker
+    embeddings dictionary. The first level contains voice preset names (e.g `"en_speaker_4"`).
+    The second level contains `"semantic_prompt"`, `"coarse_prompt"` and `"fine_prompt"`
+    embeddings. The values correspond to the path of the corresponding `np.ndarray`.
+    See [here](https://suno-ai.notion.site/8b8e8749ed514b0cbf3f699013548683?v=bc67cff786b04b50b3ceb756fd05f68c)
+    for a list of `voice_preset_names`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a Bark processor which wraps a text tokenizer and optional Bark voice
+    presets into a single processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/processing_bark.py#L219)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( text = None voice_preset = None return_tensors = 'pt' max_length = 256 add_special_tokens
+    = False return_attention_mask = True return_token_type_ids = False **kwargs )
+    → Tuple([BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding),
+    [BatchFeature](/docs/transformers/v4.37.2/en/main_classes/feature_extractor#transformers.BatchFeature))
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**text** (`str`, `List[str]`, `List[List[str]]`) — The sequence or batch of
+    sequences to be encoded. Each sequence can be a string or a list of strings (pretokenized
+    string). If the sequences are provided as list of strings (pretokenized), you
+    must set `is_split_into_words=True` (to lift the ambiguity with a batch of sequences).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**voice_preset** (`str`, `Dict[np.ndarray]`) — The voice preset, i.e the speaker
+    embeddings. It can either be a valid voice_preset name, e.g `"en_speaker_1"`,
+    or directly a dictionnary of `np.ndarray` embeddings for each submodel of `Bark`.
+    Or it can be a valid file name of a local `.npz` single voice preset.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or [TensorType](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.TensorType),
+    *optional*) — If set, will return tensors of a particular framework. Acceptable
+    values are:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''pt''`: Return PyTorch `torch.Tensor` objects.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''np''`: Return NumPy `np.ndarray` objects.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tuple([BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding),
+    [BatchFeature](/docs/transformers/v4.37.2/en/main_classes/feature_extractor#transformers.BatchFeature))
+  prefs: []
+  type: TYPE_NORMAL
+- en: A tuple composed of a [BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding),
+    i.e the output of the `tokenizer` and a [BatchFeature](/docs/transformers/v4.37.2/en/main_classes/feature_extractor#transformers.BatchFeature),
+    i.e the voice preset with the right tensors type.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Main method to prepare for the model one or several sequences(s). This method
+    forwards the `text` and `kwargs` arguments to the AutoTokenizer’s `__call__()`
+    to encode the text. The method also proposes a voice preset which is a dictionary
+    of arrays that conditions `Bark`’s output. `kwargs` arguments are forwarded to
+    the tokenizer and to `cached_file` method if `voice_preset` is a valid filename.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### from_pretrained'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/processing_bark.py#L64)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( pretrained_processor_name_or_path speaker_embeddings_dict_path = 'speaker_embeddings_path.json'
+    **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pretrained_model_name_or_path** (`str` or `os.PathLike`) — This can be either:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a string, the *model id* of a pretrained [BarkProcessor](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkProcessor)
+    hosted inside a model repo on huggingface.co. Valid model ids can be located at
+    the root-level, like `bert-base-uncased`, or namespaced under a user or organization
+    name, like `dbmdz/bert-base-german-cased`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a *directory* containing a processor saved using the [save_pretrained()](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkProcessor.save_pretrained)
+    method, e.g., `./my_model_directory/`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**speaker_embeddings_dict_path** (`str`, *optional*, defaults to `"speaker_embeddings_path.json"`)
+    — The name of the `.json` file containing the speaker_embeddings dictionnary located
+    in `pretrained_model_name_or_path`. If `None`, no speaker_embeddings is loaded.
+    **kwargs — Additional keyword arguments passed along to both `~tokenization_utils_base.PreTrainedTokenizer.from_pretrained`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Instantiate a Bark processor associated with a pretrained model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### save_pretrained'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/processing_bark.py#L118)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( save_directory speaker_embeddings_dict_path = ''speaker_embeddings_path.json''
+    speaker_embeddings_directory = ''speaker_embeddings'' push_to_hub: bool = False
+    **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**save_directory** (`str` or `os.PathLike`) — Directory where the tokenizer
+    files and the speaker embeddings will be saved (directory will be created if it
+    does not exist).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**speaker_embeddings_dict_path** (`str`, *optional*, defaults to `"speaker_embeddings_path.json"`)
+    — The name of the `.json` file that will contains the speaker_embeddings nested
+    path dictionnary, if it exists, and that will be located in `pretrained_model_name_or_path/speaker_embeddings_directory`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**speaker_embeddings_directory** (`str`, *optional*, defaults to `"speaker_embeddings/"`)
+    — The name of the folder in which the speaker_embeddings arrays will be saved.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**push_to_hub** (`bool`, *optional*, defaults to `False`) — Whether or not
+    to push your model to the Hugging Face model hub after saving it. You can specify
+    the repository you want to push to with `repo_id` (will default to the name of
+    `save_directory` in your namespace). kwargs — Additional key word arguments passed
+    along to the [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Saves the attributes of this processor (tokenizer…) in the specified directory
+    so that it can be reloaded using the [from_pretrained()](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkProcessor.from_pretrained)
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BarkModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L1629)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BarkConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The full Bark model, a text-to-speech model composed of 4 sub-models:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[BarkSemanticModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkSemanticModel)
+    (also referred to as the ‘text’ model): a causal auto-regressive transformer model
+    that takes as input tokenized text, and predicts semantic text tokens that capture
+    the meaning of the text.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[BarkCoarseModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCoarseModel)
+    (also refered to as the ‘coarse acoustics’ model), also a causal autoregressive
+    transformer, that takes into input the results of the last model. It aims at regressing
+    the first two audio codebooks necessary to `encodec`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[BarkFineModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkFineModel)
+    (the ‘fine acoustics’ model), this time a non-causal autoencoder transformer,
+    which iteratively predicts the last codebooks based on the sum of the previous
+    codebooks embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having predicted all the codebook channels from the [EncodecModel](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel),
+    Bark uses it to decode the output audio array.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It should be noted that each of the first three modules can support conditional
+    speaker embeddings to condition the output sound according to specific predefined
+    voice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### generate'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L1737)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None history_prompt: Optional = None return_output_lengths:
+    Optional = None **kwargs ) → By default'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`Optional[torch.Tensor]` of shape (batch_size, seq_len), *optional*)
+    — Input ids. Will be truncated up to 256 tokens. Note that the output audios will
+    be as long as the longest generation among the batch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**history_prompt** (`Optional[Dict[str,torch.Tensor]]`, *optional*) — Optional
+    `Bark` speaker prompt. Note that for now, this model takes only one speaker prompt
+    per batch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**kwargs** (*optional*) — Remaining dictionary of keyword arguments. Keyword
+    arguments are of two types:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Without a prefix, they will be entered as `**kwargs` for the `generate` method
+    of each sub-model.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: With a *semantic_*, *coarse_*, *fine_* prefix, they will be input for the `generate`
+    method of the semantic, coarse and fine respectively. It has the priority over
+    the keywords without a prefix.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This means you can, for example, specify a generation strategy for all sub-models
+    except one.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**return_output_lengths** (`bool`, *optional*) — Whether or not to return the
+    waveform lengths. Useful when batching.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**audio_waveform** (`torch.Tensor` of shape (batch_size, seq_len)): Generated
+    audio waveform. When `return_output_lengths=True`: Returns a tuple made of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**audio_waveform** (`torch.Tensor` of shape (batch_size, seq_len)): Generated
+    audio waveform.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_lengths** (`torch.Tensor` of shape (batch_size)): The length of each
+    waveform in the batch'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generates audio from an input prompt and an additional optional `Bark` speaker
+    prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### enable_cpu_offload'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L1680)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( gpu_id: Optional = 0 )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**gpu_id** (`int`, *optional*, defaults to 0) — GPU id on which the sub-models
+    will be loaded and offloaded.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Offloads all sub-models to CPU using accelerate, reducing memory usage with
+    a low impact on performance. This method moves one whole sub-model at a time to
+    the GPU when it is used, and the sub-model remains in GPU until the next sub-model
+    runs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BarkSemanticModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkSemanticModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L913)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BarkSemanticConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkSemanticConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Bark semantic (or text) model. It shares the same architecture as the coarse
+    model. It is a GPT-2 like autoregressive model with a language modeling head on
+    top. This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L749)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None past_key_values: Optional = None attention_mask:
+    Optional = None position_ids: Optional = None head_mask: Optional = None labels:
+    Optional = None input_embeds: Optional = None use_cache: Optional = None output_attentions:
+    Optional = None output_hidden_states: Optional = None return_dict: Optional =
+    None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary. Padding will be ignored
+    by default should you provide it. Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details. [What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks)
+    that can be used (see `past_key_values` input) to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids`
+    (those that don’t have their past key value states given to this model) of shape
+    `(batch_size, 1)` instead of all `input_ids` of shape `(batch_size, sequence_length)`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(encoder_layers, encoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the attention modules in the encoder.
+    Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_embeds** (`torch.FloatTensor` of shape `(batch_size, input_sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. Here, due to `Bark` particularities,
+    if `past_key_values` is used, `input_embeds` will be ignored and you have to use
+    `input_ids`. If `past_key_values` is not used and `use_cache` is set to `True`,
+    `input_embeds` is used in priority instead of `input_ids`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*) — If set to `True`, `past_key_values` key
+    value states are returned and can be used to speed up decoding (see `past_key_values`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [BarkCausalModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCausalModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BarkCoarseModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkCoarseModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L1022)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BarkCoarseConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCoarseConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Bark coarse acoustics model. It shares the same architecture as the semantic
+    (or text) model. It is a GPT-2 like autoregressive model with a language modeling
+    head on top. This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L749)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None past_key_values: Optional = None attention_mask:
+    Optional = None position_ids: Optional = None head_mask: Optional = None labels:
+    Optional = None input_embeds: Optional = None use_cache: Optional = None output_attentions:
+    Optional = None output_hidden_states: Optional = None return_dict: Optional =
+    None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary. Padding will be ignored
+    by default should you provide it. Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details. [What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks)
+    that can be used (see `past_key_values` input) to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids`
+    (those that don’t have their past key value states given to this model) of shape
+    `(batch_size, 1)` instead of all `input_ids` of shape `(batch_size, sequence_length)`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(encoder_layers, encoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the attention modules in the encoder.
+    Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_embeds** (`torch.FloatTensor` of shape `(batch_size, input_sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. Here, due to `Bark` particularities,
+    if `past_key_values` is used, `input_embeds` will be ignored and you have to use
+    `input_ids`. If `past_key_values` is not used and `use_cache` is set to `True`,
+    `input_embeds` is used in priority instead of `input_ids`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*) — If set to `True`, `past_key_values` key
+    value states are returned and can be used to speed up decoding (see `past_key_values`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [BarkCausalModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCausalModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BarkFineModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkFineModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L1243)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BarkFineConfig](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkFineConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Bark fine acoustics model. It is a non-causal GPT-like model with `config.n_codes_total`
+    embedding layers and language modeling heads, one for each codebook. This model
+    inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L1381)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( codebook_idx: int input_ids: Optional = None attention_mask: Optional = None
+    position_ids: Optional = None head_mask: Optional = None labels: Optional = None
+    input_embeds: Optional = None output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**codebook_idx** (`int`) — Index of the codebook that will be predicted.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length, number_of_codebooks)`)
+    — Indices of input sequence tokens in the vocabulary. Padding will be ignored
+    by default should you provide it. Initially, indices of the first two codebooks
+    are obtained from the `coarse` sub-model. The rest is predicted recursively by
+    attending the previously predicted channels. The model predicts on windows of
+    length 1024.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(encoder_layers, encoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the attention modules in the encoder.
+    Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*)
+    — NOT IMPLEMENTED YET.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_embeds** (`torch.FloatTensor` of shape `(batch_size, input_sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. If `past_key_values` is used,
+    optionally only the last `input_embeds` have to be input (see `past_key_values`).
+    This is useful if you want more control over how to convert `input_ids` indices
+    into associated vectors than the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [BarkFineModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkFineModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BarkCausalModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkCausalModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L658)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/modeling_bark.py#L749)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None past_key_values: Optional = None attention_mask:
+    Optional = None position_ids: Optional = None head_mask: Optional = None labels:
+    Optional = None input_embeds: Optional = None use_cache: Optional = None output_attentions:
+    Optional = None output_hidden_states: Optional = None return_dict: Optional =
+    None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary. Padding will be ignored
+    by default should you provide it. Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details. [What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks)
+    that can be used (see `past_key_values` input) to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids`
+    (those that don’t have their past key value states given to this model) of shape
+    `(batch_size, 1)` instead of all `input_ids` of shape `(batch_size, sequence_length)`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(encoder_layers, encoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the attention modules in the encoder.
+    Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_embeds** (`torch.FloatTensor` of shape `(batch_size, input_sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. Here, due to `Bark` particularities,
+    if `past_key_values` is used, `input_embeds` will be ignored and you have to use
+    `input_ids`. If `past_key_values` is not used and `use_cache` is set to `True`,
+    `input_embeds` is used in priority instead of `input_ids`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*) — If set to `True`, `past_key_values` key
+    value states are returned and can be used to speed up decoding (see `past_key_values`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [BarkCausalModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCausalModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BarkCoarseConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkCoarseConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/configuration_bark.py#L164)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( block_size = 1024 input_vocab_size = 10048 output_vocab_size = 10048 num_layers
+    = 12 num_heads = 12 hidden_size = 768 dropout = 0.0 bias = True initializer_range
+    = 0.02 use_cache = True **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**block_size** (`int`, *optional*, defaults to 1024) — The maximum sequence
+    length that this model might ever be used with. Typically set this to something
+    large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_vocab_size** (`int`, *optional*, defaults to 10_048) — Vocabulary size
+    of a Bark sub-model. Defines the number of different tokens that can be represented
+    by the `inputs_ids` passed when calling [BarkCoarseModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCoarseModel).
+    Defaults to 10_048 but should be carefully thought with regards to the chosen
+    sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_vocab_size** (`int`, *optional*, defaults to 10_048) — Output vocabulary
+    size of a Bark sub-model. Defines the number of different tokens that can be represented
+    by the: `output_ids` when passing forward a [BarkCoarseModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCoarseModel).
+    Defaults to 10_048 but should be carefully thought with regards to the chosen
+    sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_layers** (`int`, *optional*, defaults to 12) — Number of hidden layers
+    in the given sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_heads** (`int`, *optional*, defaults to 12) — Number of attention heads
+    for each attention layer in the Transformer architecture.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 768) — Dimensionality of the
+    “intermediate” (often named feed-forward) layer in the architecture.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**dropout** (`float`, *optional*, defaults to 0.0) — The dropout probability
+    for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bias** (`bool`, *optional*, defaults to `True`) — Whether or not to use bias
+    in the linear layers and layer norm layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*, defaults to `True`) — Whether or not the
+    model should return the last key/values attentions (not used by all models).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [BarkCoarseModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkCoarseModel).
+    It is used to instantiate the model according to the specified arguments, defining
+    the model architecture. Instantiating a configuration with the defaults will yield
+    a similar configuration to that of the Bark [suno/bark](https://huggingface.co/suno/bark)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: BarkFineConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkFineConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/configuration_bark.py#L186)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( tie_word_embeddings = True n_codes_total = 8 n_codes_given = 1 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**block_size** (`int`, *optional*, defaults to 1024) — The maximum sequence
+    length that this model might ever be used with. Typically set this to something
+    large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_vocab_size** (`int`, *optional*, defaults to 10_048) — Vocabulary size
+    of a Bark sub-model. Defines the number of different tokens that can be represented
+    by the `inputs_ids` passed when calling [BarkFineModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkFineModel).
+    Defaults to 10_048 but should be carefully thought with regards to the chosen
+    sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_vocab_size** (`int`, *optional*, defaults to 10_048) — Output vocabulary
+    size of a Bark sub-model. Defines the number of different tokens that can be represented
+    by the: `output_ids` when passing forward a [BarkFineModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkFineModel).
+    Defaults to 10_048 but should be carefully thought with regards to the chosen
+    sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_layers** (`int`, *optional*, defaults to 12) — Number of hidden layers
+    in the given sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_heads** (`int`, *optional*, defaults to 12) — Number of attention heads
+    for each attention layer in the Transformer architecture.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 768) — Dimensionality of the
+    “intermediate” (often named feed-forward) layer in the architecture.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**dropout** (`float`, *optional*, defaults to 0.0) — The dropout probability
+    for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bias** (`bool`, *optional*, defaults to `True`) — Whether or not to use bias
+    in the linear layers and layer norm layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*, defaults to `True`) — Whether or not the
+    model should return the last key/values attentions (not used by all models).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**n_codes_total** (`int`, *optional*, defaults to 8) — The total number of
+    audio codebooks predicted. Used in the fine acoustics sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**n_codes_given** (`int`, *optional*, defaults to 1) — The number of audio
+    codebooks predicted in the coarse acoustics sub-model. Used in the acoustics sub-models.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [BarkFineModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkFineModel).
+    It is used to instantiate the model according to the specified arguments, defining
+    the model architecture. Instantiating a configuration with the defaults will yield
+    a similar configuration to that of the Bark [suno/bark](https://huggingface.co/suno/bark)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: BarkSemanticConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BarkSemanticConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bark/configuration_bark.py#L142)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( block_size = 1024 input_vocab_size = 10048 output_vocab_size = 10048 num_layers
+    = 12 num_heads = 12 hidden_size = 768 dropout = 0.0 bias = True initializer_range
+    = 0.02 use_cache = True **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**block_size** (`int`, *optional*, defaults to 1024) — The maximum sequence
+    length that this model might ever be used with. Typically set this to something
+    large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_vocab_size** (`int`, *optional*, defaults to 10_048) — Vocabulary size
+    of a Bark sub-model. Defines the number of different tokens that can be represented
+    by the `inputs_ids` passed when calling [BarkSemanticModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkSemanticModel).
+    Defaults to 10_048 but should be carefully thought with regards to the chosen
+    sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_vocab_size** (`int`, *optional*, defaults to 10_048) — Output vocabulary
+    size of a Bark sub-model. Defines the number of different tokens that can be represented
+    by the: `output_ids` when passing forward a [BarkSemanticModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkSemanticModel).
+    Defaults to 10_048 but should be carefully thought with regards to the chosen
+    sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_layers** (`int`, *optional*, defaults to 12) — Number of hidden layers
+    in the given sub-model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_heads** (`int`, *optional*, defaults to 12) — Number of attention heads
+    for each attention layer in the Transformer architecture.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 768) — Dimensionality of the
+    “intermediate” (often named feed-forward) layer in the architecture.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**dropout** (`float`, *optional*, defaults to 0.0) — The dropout probability
+    for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bias** (`bool`, *optional*, defaults to `True`) — Whether or not to use bias
+    in the linear layers and layer norm layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*, defaults to `True`) — Whether or not the
+    model should return the last key/values attentions (not used by all models).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [BarkSemanticModel](/docs/transformers/v4.37.2/en/model_doc/bark#transformers.BarkSemanticModel).
+    It is used to instantiate the model according to the specified arguments, defining
+    the model architecture. Instantiating a configuration with the defaults will yield
+    a similar configuration to that of the Bark [suno/bark](https://huggingface.co/suno/bark)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE

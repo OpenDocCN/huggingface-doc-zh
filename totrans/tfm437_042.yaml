@@ -1,0 +1,383 @@
+- en: Visual Question Answering
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/visual_question_answering](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/visual_question_answering)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/362.beca0730.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visual Question Answering (VQA) is the task of answering open-ended questions
+    based on an image. The input to models supporting this task is typically a combination
+    of an image and a question, and the output is an answer expressed in natural language.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some noteworthy use case examples for VQA include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accessibility applications for visually impaired individuals.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Education: posing questions about visual materials presented in lectures or
+    textbooks. VQA can also be utilized in interactive museum exhibits or historical
+    sites.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Customer service and e-commerce: VQA can enhance user experience by letting
+    users ask questions about products.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Image retrieval: VQA models can be used to retrieve images with specific characteristics.
+    For example, the user can ask “Is there a dog?” to find all images with dogs from
+    a set of images.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'In this guide you’ll learn how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fine-tune a classification VQA model, specifically [ViLT](../model_doc/vilt),
+    on the [`Graphcore/vqa` dataset](https://huggingface.co/datasets/Graphcore/vqa).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use your fine-tuned ViLT for inference.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Run zero-shot VQA inference with a generative model, like BLIP-2.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Fine-tuning ViLT
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: ViLT model incorporates text embeddings into a Vision Transformer (ViT), allowing
+    it to have a minimal design for Vision-and-Language Pre-training (VLP). This model
+    can be used for several downstream tasks. For the VQA task, a classifier head
+    is placed on top (a linear layer on top of the final hidden state of the `[CLS]`
+    token) and randomly initialized. Visual Question Answering is thus treated as
+    a **classification problem**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: More recent models, such as BLIP, BLIP-2, and InstructBLIP, treat VQA as a generative
+    task. Later in this guide we illustrate how to use them for zero-shot VQA inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you begin, make sure you have all the necessary libraries installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We encourage you to share your model with the community. Log in to your Hugging
+    Face account to upload it to the 🤗 Hub. When prompted, enter your token to log
+    in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s define the model checkpoint as a global variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load the data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For illustration purposes, in this guide we use a very small sample of the annotated
+    visual question answering `Graphcore/vqa` dataset. You can find the full dataset
+    on [🤗 Hub](https://huggingface.co/datasets/Graphcore/vqa).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As an alternative to the [`Graphcore/vqa` dataset](https://huggingface.co/datasets/Graphcore/vqa),
+    you can download the same data manually from the official [VQA dataset page](https://visualqa.org/download.html).
+    If you prefer to follow the tutorial with your custom data, check out how to [Create
+    an image dataset](https://huggingface.co/docs/datasets/image_dataset#loading-script)
+    guide in the 🤗 Datasets documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s load the first 200 examples from the validation split and explore the
+    dataset’s features:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s take a look at an example to understand the dataset’s features:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The features relevant to the task include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`question`: the question to be answered from the image'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`image_id`: the path to the image the question refers to'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label`: the annotations'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We can remove the rest of the features as they won’t be necessary:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the `label` feature contains several answers to the same question
+    (called `ids` here) collected by different human annotators. This is because the
+    answer to a question can be subjective. In this case, the question is “where is
+    he looking?“. Some people annotated this with “down”, others with “at table”,
+    another one with “skateboard”, etc.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Take a look at the image and consider which answer would you give:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![VQA Image Example](../Images/236d4cd08347455e7e0a1b6648436b20.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Due to the questions’ and answers’ ambiguity, datasets like this are treated
+    as a multi-label classification problem (as multiple answers are possibly valid).
+    Moreover, rather than just creating a one-hot encoded vector, one creates a soft
+    encoding, based on the number of times a certain answer appeared in the annotations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For instance, in the example above, because the answer “down” is selected way
+    more often than other answers, it has a score (called `weight` in the dataset)
+    of 1.0, and the rest of the answers have scores < 1.0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To later instantiate the model with an appropriate classification head, let’s
+    create two dictionaries: one that maps the label name to an integer and vice versa:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now that we have the mappings, we can replace the string answers with their
+    ids, and flatten the dataset for a more convenient further preprocessing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Preprocessing data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The next step is to load a ViLT processor to prepare the image and text data
+    for the model. [ViltProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltProcessor)
+    wraps a BERT tokenizer and ViLT image processor into a convenient single processor:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: To preprocess the data we need to encode the images and questions using the
+    [ViltProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltProcessor).
+    The processor will use the [BertTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizerFast)
+    to tokenize the text and create `input_ids`, `attention_mask` and `token_type_ids`
+    for the text data. As for images, the processor will leverage [ViltImageProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltImageProcessor)
+    to resize and normalize the image, and create `pixel_values` and `pixel_mask`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All these preprocessing steps are done under the hood, we only need to call
+    the `processor`. However, we still need to prepare the target labels. In this
+    representation, each element corresponds to a possible answer (label). For correct
+    answers, the element holds their respective score (weight), while the remaining
+    elements are set to zero.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following function applies the `processor` to the images and questions
+    and formats the labels as described above:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: To apply the preprocessing function over the entire dataset, use 🤗 Datasets
+    `map` function. You can speed up `map` by setting `batched=True` to process multiple
+    elements of the dataset at once. At this point, feel free to remove the columns
+    you don’t need.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As a final step, create a batch of examples using [DefaultDataCollator](/docs/transformers/v4.37.2/en/main_classes/data_collator#transformers.DefaultDataCollator):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Train the model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You’re ready to start training your model now! Load ViLT with [ViltForQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltForQuestionAnswering).
+    Specify the number of labels along with the label mappings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'At this point, only three steps remain:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Define your training hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments):'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pass the training arguments to [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    along with the model, dataset, processor, and data collator.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    to finetune your model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once training is completed, share your model to the Hub with the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
+    method to share your final model on the 🤗 Hub:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that you have fine-tuned a ViLT model, and uploaded it to the 🤗 Hub, you
+    can use it for inference. The simplest way to try out your fine-tuned model for
+    inference is to use it in a [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The model in this guide has only been trained on 200 examples, so don’t expect
+    a lot from it. Let’s see if it at least learned something from the data and take
+    the first example from the dataset to illustrate inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Even though not very confident, the model indeed has learned something. With
+    more examples and longer training, you’ll get far better results!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also manually replicate the results of the pipeline if you’d like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take an image and a question, prepare them for the model using the processor
+    from your model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Forward the result or preprocessing through the model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: From the logits, get the most likely answer’s id, and find the actual answer
+    in the `id2label`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Zero-shot VQA
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The previous model treated VQA as a classification task. Some recent models,
+    such as BLIP, BLIP-2, and InstructBLIP approach VQA as a generative task. Let’s
+    take [BLIP-2](../model_doc/blip-2) as an example. It introduced a new visual-language
+    pre-training paradigm in which any combination of pre-trained vision encoder and
+    LLM can be used (learn more in the [BLIP-2 blog post](https://huggingface.co/blog/blip-2)).
+    This enables achieving state-of-the-art results on multiple visual-language tasks
+    including visual question answering.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s illustrate how you can use this model for VQA. First, let’s load the
+    model. Here we’ll explicitly send the model to a GPU, if available, which we didn’t
+    need to do earlier when training, as [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    handles this automatically:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The model takes image and text as input, so let’s use the exact same image/question
+    pair from the first example in the VQA dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To use BLIP-2 for visual question answering task, the textual prompt has to
+    follow a specific format: `Question: {} Answer:`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we need to preprocess the image/prompt with the model’s processor, pass
+    the processed input through the model, and decode the output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the model recognized the crowd, and the direction of the face
+    (looking down), however, it seems to miss the fact the crowd is behind the skater.
+    Still, in cases where acquiring human-annotated datasets is not feasible, this
+    approach can quickly produce useful results.
+  prefs: []
+  type: TYPE_NORMAL

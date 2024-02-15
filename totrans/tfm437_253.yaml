@@ -1,0 +1,1928 @@
+- en: BEiT
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/beit](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/beit)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/66.746e8f08.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Markdown.fef84341.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/PipelineTag.44585822.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The BEiT model was proposed in [BEiT: BERT Pre-Training of Image Transformers](https://arxiv.org/abs/2106.08254)
+    by Hangbo Bao, Li Dong and Furu Wei. Inspired by BERT, BEiT is the first paper
+    that makes self-supervised pre-training of Vision Transformers (ViTs) outperform
+    supervised pre-training. Rather than pre-training the model to predict the class
+    of an image (as done in the [original ViT paper](https://arxiv.org/abs/2010.11929)),
+    BEiT models are pre-trained to predict visual tokens from the codebook of OpenAI’s
+    [DALL-E model](https://arxiv.org/abs/2102.12092) given masked patches.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We introduce a self-supervised vision representation model BEiT, which stands
+    for Bidirectional Encoder representation from Image Transformers. Following BERT
+    developed in the natural language processing area, we propose a masked image modeling
+    task to pretrain vision Transformers. Specifically, each image has two views in
+    our pre-training, i.e, image patches (such as 16x16 pixels), and visual tokens
+    (i.e., discrete tokens). We first “tokenize” the original image into visual tokens.
+    Then we randomly mask some image patches and fed them into the backbone Transformer.
+    The pre-training objective is to recover the original visual tokens based on the
+    corrupted image patches. After pre-training BEiT, we directly fine-tune the model
+    parameters on downstream tasks by appending task layers upon the pretrained encoder.
+    Experimental results on image classification and semantic segmentation show that
+    our model achieves competitive results with previous pre-training methods. For
+    example, base-size BEiT achieves 83.2% top-1 accuracy on ImageNet-1K, significantly
+    outperforming from-scratch DeiT training (81.8%) with the same setup. Moreover,
+    large-size BEiT obtains 86.3% only using ImageNet-1K, even outperforming ViT-L
+    with supervised pre-training on ImageNet-22K (85.2%).*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [nielsr](https://huggingface.co/nielsr). The JAX/FLAX
+    version of this model was contributed by [kamalkraj](https://huggingface.co/kamalkraj).
+    The original code can be found [here](https://github.com/microsoft/unilm/tree/master/beit).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: BEiT models are regular Vision Transformers, but pre-trained in a self-supervised
+    way rather than supervised. They outperform both the [original model (ViT)](vit)
+    as well as [Data-efficient Image Transformers (DeiT)](deit) when fine-tuned on
+    ImageNet-1K and CIFAR-100\. You can check out demo notebooks regarding inference
+    as well as fine-tuning on custom data [here](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/VisionTransformer)
+    (you can just replace [ViTFeatureExtractor](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTFeatureExtractor)
+    by [BeitImageProcessor](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitImageProcessor)
+    and [ViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForImageClassification)
+    by [BeitForImageClassification](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForImageClassification)).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: There’s also a demo notebook available which showcases how to combine DALL-E’s
+    image tokenizer with BEiT for performing masked image modeling. You can find it
+    [here](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/BEiT).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As the BEiT models expect each image to be of the same size (resolution), one
+    can use [BeitImageProcessor](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitImageProcessor)
+    to resize (or rescale) and normalize images for the model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Both the patch resolution and image resolution used during pre-training or fine-tuning
+    are reflected in the name of each checkpoint. For example, `microsoft/beit-base-patch16-224`
+    refers to a base-sized architecture with patch resolution of 16x16 and fine-tuning
+    resolution of 224x224\. All checkpoints can be found on the [hub](https://huggingface.co/models?search=microsoft/beit).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The available checkpoints are either (1) pre-trained on [ImageNet-22k](http://www.image-net.org/)
+    (a collection of 14 million images and 22k classes) only, (2) also fine-tuned
+    on ImageNet-22k or (3) also fine-tuned on [ImageNet-1k](http://www.image-net.org/challenges/LSVRC/2012/)
+    (also referred to as ILSVRC 2012, a collection of 1.3 million images and 1,000
+    classes).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: BEiT uses relative position embeddings, inspired by the T5 model. During pre-training,
+    the authors shared the relative position bias among the several self-attention
+    layers. During fine-tuning, each layer’s relative position bias is initialized
+    with the shared relative position bias obtained after pre-training. Note that,
+    if one wants to pre-train a model from scratch, one needs to either set the `use_relative_position_bias`
+    or the `use_relative_position_bias` attribute of [BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig)
+    to `True` in order to add position embeddings.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![drawing](../Images/6740a7101e0ab9d00b7aec6fa2bd9f0c.png) BEiT pre-training.
+    Taken from the [original paper.](https://arxiv.org/abs/2106.08254)'
+  prefs: []
+  type: TYPE_IMG
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A list of official Hugging Face and community (indicated by 🌎) resources to
+    help you get started with BEiT.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image Classification
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[BeitForImageClassification](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForImageClassification)
+    is supported by this [example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-classification)
+    and [notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/image_classification.ipynb).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'See also: [Image classification task guide](../tasks/image_classification)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Semantic segmentation**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Semantic segmentation task guide](../tasks/semantic_segmentation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you’re interested in submitting a resource to be included here, please feel
+    free to open a Pull Request and we’ll review it! The resource should ideally demonstrate
+    something new instead of duplicating an existing resource.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BEiT specific outputs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.beit.modeling_beit.BeitModelOutputWithPooling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L69)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( last_hidden_state: FloatTensor = None pooler_output: FloatTensor = None hidden_states:
+    Optional = None attentions: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`torch.FloatTensor` of shape `(batch_size, hidden_size)`)
+    — Average of the last layer hidden states of the patch tokens (excluding the *[CLS]*
+    token) if *config.use_mean_pooling* is set to True. If set to False, then the
+    final hidden state of the *[CLS]* token will be returned.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Class for outputs of [BeitModel](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### class transformers.models.beit.modeling_flax_beit.FlaxBeitModelOutputWithPooling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_flax_beit.py#L44)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( last_hidden_state: Array = None pooler_output: Array = None hidden_states:
+    Optional = None attentions: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`jnp.ndarray` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`jnp.ndarray` of shape `(batch_size, hidden_size)`) — Average
+    of the last layer hidden states of the patch tokens (excluding the *[CLS]* token)
+    if *config.use_mean_pooling* is set to True. If set to False, then the final hidden
+    state of the *[CLS]* token will be returned.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(jnp.ndarray)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `jnp.ndarray`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(jnp.ndarray)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `jnp.ndarray` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Class for outputs of [FlaxBeitModel](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.FlaxBeitModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: BeitConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BeitConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/configuration_beit.py#L37)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_size = 8192 hidden_size = 768 num_hidden_layers = 12 num_attention_heads
+    = 12 intermediate_size = 3072 hidden_act = 'gelu' hidden_dropout_prob = 0.0 attention_probs_dropout_prob
+    = 0.0 initializer_range = 0.02 layer_norm_eps = 1e-12 image_size = 224 patch_size
+    = 16 num_channels = 3 use_mask_token = False use_absolute_position_embeddings
+    = False use_relative_position_bias = False use_shared_relative_position_bias =
+    False layer_scale_init_value = 0.1 drop_path_rate = 0.1 use_mean_pooling = True
+    pool_scales = [1, 2, 3, 6] use_auxiliary_head = True auxiliary_loss_weight = 0.4
+    auxiliary_channels = 256 auxiliary_num_convs = 1 auxiliary_concat_input = False
+    semantic_loss_ignore_index = 255 out_features = None out_indices = None add_fpn
+    = False reshape_hidden_states = True **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_size** (`int`, *optional*, defaults to 8192) — Vocabulary size of the
+    BEiT model. Defines the number of different image tokens that can be used during
+    pre-training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 768) — Dimensionality of the
+    encoder layers and the pooler layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_hidden_layers** (`int`, *optional*, defaults to 12) — Number of hidden
+    layers in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`int`, *optional*, defaults to 12) — Number of attention
+    heads for each attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**intermediate_size** (`int`, *optional*, defaults to 3072) — Dimensionality
+    of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `function`, *optional*, defaults to `"gelu"`) — The
+    non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_dropout_prob** (`float`, *optional*, defaults to 0.0) — The dropout
+    probability for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_probs_dropout_prob** (`float`, *optional*, defaults to 0.0) — The
+    dropout ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-12) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_size** (`int`, *optional*, defaults to 224) — The size (resolution)
+    of each image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**patch_size** (`int`, *optional*, defaults to 16) — The size (resolution)
+    of each patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_channels** (`int`, *optional*, defaults to 3) — The number of input channels.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_mask_token** (`bool`, *optional*, defaults to `False`) — Whether to use
+    a mask token for masked image modeling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_absolute_position_embeddings** (`bool`, *optional*, defaults to `False`)
+    — Whether to use BERT-style absolute position embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_relative_position_bias** (`bool`, *optional*, defaults to `False`) —
+    Whether to use T5-style relative position embeddings in the self-attention layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_shared_relative_position_bias** (`bool`, *optional*, defaults to `False`)
+    — Whether to use the same relative position embeddings across all self-attention
+    layers of the Transformer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_scale_init_value** (`float`, *optional*, defaults to 0.1) — Scale to
+    use in the self-attention layers. 0.1 for base, 1e-5 for large. Set 0 to disable
+    layer scale.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**drop_path_rate** (`float`, *optional*, defaults to 0.1) — Stochastic depth
+    rate per sample (when applied in the main path of residual layers).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_mean_pooling** (`bool`, *optional*, defaults to `True`) — Whether to
+    mean pool the final hidden states of the patches instead of using the final hidden
+    state of the CLS token, before applying the classification head.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pool_scales** (`Tuple[int]`, *optional*, defaults to `[1, 2, 3, 6]`) — Pooling
+    scales used in Pooling Pyramid Module applied on the last feature map.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_auxiliary_head** (`bool`, *optional*, defaults to `True`) — Whether to
+    use an auxiliary head during training.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**auxiliary_loss_weight** (`float`, *optional*, defaults to 0.4) — Weight of
+    the cross-entropy loss of the auxiliary head.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**auxiliary_channels** (`int`, *optional*, defaults to 256) — Number of channels
+    to use in the auxiliary head.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**auxiliary_num_convs** (`int`, *optional*, defaults to 1) — Number of convolutional
+    layers to use in the auxiliary head.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**auxiliary_concat_input** (`bool`, *optional*, defaults to `False`) — Whether
+    to concatenate the output of the auxiliary head with the input before the classification
+    layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**semantic_loss_ignore_index** (`int`, *optional*, defaults to 255) — The index
+    that is ignored by the loss function of the semantic segmentation model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**out_features** (`List[str]`, *optional*) — If used as backbone, list of features
+    to output. Can be any of `"stem"`, `"stage1"`, `"stage2"`, etc. (depending on
+    how many stages the model has). If unset and `out_indices` is set, will default
+    to the corresponding stages. If unset and `out_indices` is unset, will default
+    to the last stage. Must be in the same order as defined in the `stage_names` attribute.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**out_indices** (`List[int]`, *optional*) — If used as backbone, list of indices
+    of features to output. Can be any of 0, 1, 2, etc. (depending on how many stages
+    the model has). If unset and `out_features` is set, will default to the corresponding
+    stages. If unset and `out_features` is unset, will default to the last stage.
+    Must be in the same order as defined in the `stage_names` attribute.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**add_fpn** (`bool`, *optional*, defaults to `False`) — Whether to add a FPN
+    as part of the backbone. Only relevant for `BeitBackbone`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**reshape_hidden_states** (`bool`, *optional*, defaults to `True`) — Whether
+    to reshape the feature maps to 4D tensors of shape `(batch_size, hidden_size,
+    height, width)` in case the model is used as backbone. If `False`, the feature
+    maps will be 3D tensors of shape `(batch_size, seq_len, hidden_size)`. Only relevant
+    for `BeitBackbone`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [BeitModel](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitModel).
+    It is used to instantiate an BEiT model according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the BEiT [microsoft/beit-base-patch16-224-pt22k](https://huggingface.co/microsoft/beit-base-patch16-224-pt22k)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: BeitFeatureExtractor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BeitFeatureExtractor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/feature_extraction_beit.py#L26)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/image_processing_beit.py#L307)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( images segmentation_maps = None **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_semantic_segmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/image_processing_beit.py#L464)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( outputs target_sizes: List = None ) → semantic_segmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**outputs** ([BeitForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForSemanticSegmentation))
+    — Raw outputs of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**target_sizes** (`List[Tuple]` of length `batch_size`, *optional*) — List
+    of tuples corresponding to the requested final size (height, width) of each prediction.
+    If unset, predictions will not be resized.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: semantic_segmentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[torch.Tensor]` of length `batch_size`, where each item is a semantic
+    segmentation map of shape (height, width) corresponding to the target_sizes entry
+    (if `target_sizes` is specified). Each entry of each `torch.Tensor` correspond
+    to a semantic class id.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converts the output of [BeitForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForSemanticSegmentation)
+    into semantic segmentation maps. Only supports PyTorch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: BeitImageProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BeitImageProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/image_processing_beit.py#L49)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_resize: bool = True size: Dict = None resample: Resampling = <Resampling.BICUBIC:
+    3> do_center_crop: bool = True crop_size: Dict = None rescale_factor: Union =
+    0.00392156862745098 do_rescale: bool = True do_normalize: bool = True image_mean:
+    Union = None image_std: Union = None do_reduce_labels: bool = False **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Whether to resize
+    the image’s (height, width) dimensions to the specified `size`. Can be overridden
+    by the `do_resize` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]` *optional*, defaults to `{"height" -- 256, "width":
+    256}`): Size of the output image after resizing. Can be overridden by the `size`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`PILImageResampling`, *optional*, defaults to `Resampling.BICUBIC`)
+    — Resampling filter to use if resizing the image. Can be overridden by the `resample`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_center_crop** (`bool`, *optional*, defaults to `True`) — Whether to center
+    crop the image. If the input size is smaller than `crop_size` along any edge,
+    the image is padded with 0’s and then center cropped. Can be overridden by the
+    `do_center_crop` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crop_size** (`Dict[str, int]`, *optional*, defaults to `{"height" -- 224,
+    "width": 224}`): Desired output size when applying center-cropping. Only has an
+    effect if `do_center_crop` is set to `True`. Can be overridden by the `crop_size`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`int` or `float`, *optional*, defaults to `1/255`) — Scale
+    factor to use if rescaling the image. Can be overridden by the `rescale_factor`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `True`) — Whether to rescale
+    the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `True`) — Whether to normalize
+    the image. Can be overridden by the `do_normalize` parameter in the `preprocess`
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_MEAN`)
+    — The mean to use if normalizing the image. This is a float or list of floats
+    of length of the number of channels of the image. Can be overridden by the `image_mean`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_STD`)
+    — The standard deviation to use if normalizing the image. This is a float or list
+    of floats of length of the number of channels of the image. Can be overridden
+    by the `image_std` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_reduce_labels** (`bool`, *optional*, defaults to `False`) — Whether or
+    not to reduce all label values of segmentation maps by 1\. Usually used for datasets
+    where 0 is used for background, and background itself is not included in all classes
+    of a dataset (e.g. ADE20k). The background label will be replaced by 255\. Can
+    be overridden by the `do_reduce_labels` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a BEiT image processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/image_processing_beit.py#L312)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union segmentation_maps: Union = None do_resize: bool = None size:
+    Dict = None resample: Resampling = None do_center_crop: bool = None crop_size:
+    Dict = None do_rescale: bool = None rescale_factor: float = None do_normalize:
+    bool = None image_mean: Union = None image_std: Union = None do_reduce_labels:
+    Optional = None return_tensors: Union = None data_format: ChannelDimension = <ChannelDimension.FIRST:
+    ''channels_first''> input_data_format: Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**images** (`ImageInput`) — Image to preprocess. Expects a single or batch
+    of images with pixel values ranging from 0 to 255\. If passing in images with
+    pixel values between 0 and 1, set `do_rescale=False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `self.do_resize`) — Whether
+    to resize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]`, *optional*, defaults to `self.size`) — Size of
+    the image after resizing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`int`, *optional*, defaults to `self.resample`) — Resampling
+    filter to use if resizing the image. This can be one of the enum `PILImageResampling`,
+    Only has an effect if `do_resize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_center_crop** (`bool`, *optional*, defaults to `self.do_center_crop`)
+    — Whether to center crop the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crop_size** (`Dict[str, int]`, *optional*, defaults to `self.crop_size`)
+    — Size of the image after center crop. If one edge the image is smaller than `crop_size`,
+    it will be padded with zeros and then cropped'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
+    to rescale the image values between [0 - 1].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`float`, *optional*, defaults to `self.rescale_factor`)
+    — Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
+    to normalize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
+    — Image mean.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
+    — Image standard deviation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_reduce_labels** (`bool`, *optional*, defaults to `self.do_reduce_labels`)
+    — Whether or not to reduce all label values of segmentation maps by 1\. Usually
+    used for datasets where 0 is used for background, and background itself is not
+    included in all classes of a dataset (e.g. ADE20k). The background label will
+    be replaced by 255.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or `TensorType`, *optional*) — The type of tensors
+    to return. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Return a list of `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**data_format** (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
+    — The channel dimension format for the output image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Use the channel dimension format of the input image.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_data_format** (`ChannelDimension` or `str`, *optional*) — The channel
+    dimension format for the input image. If unset, the channel dimension format is
+    inferred from the input image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocess an image or batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_semantic_segmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/image_processing_beit.py#L464)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( outputs target_sizes: List = None ) → semantic_segmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**outputs** ([BeitForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForSemanticSegmentation))
+    — Raw outputs of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**target_sizes** (`List[Tuple]` of length `batch_size`, *optional*) — List
+    of tuples corresponding to the requested final size (height, width) of each prediction.
+    If unset, predictions will not be resized.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: semantic_segmentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[torch.Tensor]` of length `batch_size`, where each item is a semantic
+    segmentation map of shape (height, width) corresponding to the target_sizes entry
+    (if `target_sizes` is specified). Each entry of each `torch.Tensor` correspond
+    to a semantic class id.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converts the output of [BeitForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForSemanticSegmentation)
+    into semantic segmentation maps. Only supports PyTorch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: BeitModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BeitModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L620)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: BeitConfig add_pooling_layer: bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare Beit Model transformer outputting raw hidden-states without any specific
+    head on top. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L651)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None bool_masked_pos: Optional = None head_mask:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None return_dict: Optional = None ) → [transformers.models.beit.modeling_beit.BeitModelOutputWithPooling](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.models.beit.modeling_beit.BeitModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [BeitImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bool_masked_pos** (`torch.BoolTensor` of shape `(batch_size, num_patches)`,
+    *optional*) — Boolean masked positions. Indicates which patches are masked (1)
+    and which aren’t (0).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.beit.modeling_beit.BeitModelOutputWithPooling](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.models.beit.modeling_beit.BeitModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.beit.modeling_beit.BeitModelOutputWithPooling](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.models.beit.modeling_beit.BeitModelOutputWithPooling)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`torch.FloatTensor` of shape `(batch_size, hidden_size)`)
+    — Average of the last layer hidden states of the patch tokens (excluding the *[CLS]*
+    token) if *config.use_mean_pooling* is set to True. If set to False, then the
+    final hidden state of the *[CLS]* token will be returned.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [BeitModel](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: BeitForMaskedImageModeling
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BeitForMaskedImageModeling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L732)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: BeitConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Beit Model transformer with a ‘language’ modeling head on top. BEiT does masked
+    image modeling by predicting visual tokens of a Vector-Quantize Variational Autoencoder
+    (VQ-VAE), whereas other vision models like ViT and DeiT predict RGB pixel values.
+    As a result, this class is incompatible with [AutoModelForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForMaskedImageModeling),
+    so you will need to use [BeitForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForMaskedImageModeling)
+    directly if you wish to do masked image modeling with BEiT. This model is a PyTorch
+    [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module) subclass.
+    Use it as a regular PyTorch Module and refer to the PyTorch documentation for
+    all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L753)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None bool_masked_pos: Optional = None head_mask:
+    Optional = None labels: Optional = None output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → [transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [BeitImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bool_masked_pos** (`torch.BoolTensor` of shape `(batch_size, num_patches)`)
+    — Boolean masked positions. Indicates which patches are masked (1) and which aren’t
+    (0).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Masked language modeling (MLM) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [BeitForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForMaskedImageModeling)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: BeitForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BeitForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L832)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: BeitConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Beit Model transformer with an image classification head on top (a linear layer
+    on top of the average of the final hidden states of the patch tokens) e.g. for
+    ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L852)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None head_mask: Optional = None labels: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None ) → [transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [BeitImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each stage) of shape `(batch_size, sequence_length, hidden_size)`.
+    Hidden-states (also called feature maps) of the model at the output of each stage.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [BeitForImageClassification](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForImageClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: BeitForSemanticSegmentation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.BeitForSemanticSegmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L1156)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: BeitConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Beit Model transformer with a semantic segmentation head on top e.g. for ADE20k,
+    CityScapes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_beit.py#L1214)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None head_mask: Optional = None labels: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None ) → [transformers.modeling_outputs.SemanticSegmenterOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SemanticSegmenterOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [BeitImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, height, width)`, *optional*)
+    — Ground truth semantic segmentation maps for computing the loss. Indices should
+    be in `[0, ..., config.num_labels - 1]`. If `config.num_labels > 1`, a classification
+    loss is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.SemanticSegmenterOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SemanticSegmenterOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.SemanticSegmenterOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SemanticSegmenterOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels, logits_height,
+    logits_width)`) — Classification scores for each pixel.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: <tip warning="{true}">The logits returned do not necessarily have the same size
+    as the `pixel_values` passed as inputs. This is to avoid doing two interpolations
+    and lose some quality when a user needs to resize the logits to the original image
+    size as post-processing. You should always check your logits shape and resize
+    as needed.</tip>
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, patch_size, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [BeitForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitForSemanticSegmentation)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: JAXHide JAX content
+  prefs: []
+  type: TYPE_NORMAL
+- en: FlaxBeitModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.FlaxBeitModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_flax_beit.py#L741)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: BeitConfig input_shape = None seed: int = 0 dtype: dtype = <class
+    ''jax.numpy.float32''> _do_init: bool = True **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**dtype** (`jax.numpy.dtype`, *optional*, defaults to `jax.numpy.float32`)
+    — The data type of the computation. Can be one of `jax.numpy.float32`, `jax.numpy.float16`
+    (on GPUs) and `jax.numpy.bfloat16` (on TPUs).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This can be used to enable mixed-precision training or half-precision inference
+    on GPUs or TPUs. If specified all the computation will be performed with the given
+    `dtype`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**Note that this only specifies the dtype of the computation and does not influence
+    the dtype of model parameters.**'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If you wish to change the dtype of the model parameters, see [to_fp16()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.to_fp16)
+    and [to_bf16()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.to_bf16).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The bare Beit Model transformer outputting raw hidden-states without any specific
+    head on top.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [FlaxPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading, saving and converting weights from PyTorch
+    models)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [flax.linen.Module](https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html)
+    subclass. Use it as a regular Flax linen Module and refer to the Flax documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, this model supports inherent JAX features such as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Just-In-Time (JIT) compilation](https://jax.readthedocs.io/en/latest/jax.html#just-in-time-compilation-jit)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Automatic Differentiation](https://jax.readthedocs.io/en/latest/jax.html#automatic-differentiation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Vectorization](https://jax.readthedocs.io/en/latest/jax.html#vectorization-vmap)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Parallelization](https://jax.readthedocs.io/en/latest/jax.html#parallelization-pmap)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_flax_beit.py#L632)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values bool_masked_pos = None params: dict = None dropout_rng: PRNGKey
+    = None train: bool = False output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → [transformers.models.beit.modeling_flax_beit.FlaxBeitModelOutputWithPooling](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.models.beit.modeling_flax_beit.FlaxBeitModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.beit.modeling_flax_beit.FlaxBeitModelOutputWithPooling](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.models.beit.modeling_flax_beit.FlaxBeitModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.beit.modeling_flax_beit.FlaxBeitModelOutputWithPooling](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.models.beit.modeling_flax_beit.FlaxBeitModelOutputWithPooling)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration (`<class 'transformers.models.beit.configuration_beit.BeitConfig'>`)
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`jnp.ndarray` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`jnp.ndarray` of shape `(batch_size, hidden_size)`) — Average
+    of the last layer hidden states of the patch tokens (excluding the *[CLS]* token)
+    if *config.use_mean_pooling* is set to True. If set to False, then the final hidden
+    state of the *[CLS]* token will be returned.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(jnp.ndarray)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `jnp.ndarray`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(jnp.ndarray)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `jnp.ndarray` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `FlaxBeitPreTrainedModel` forward method, overrides the `__call__` special
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: FlaxBeitForMaskedImageModeling
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.FlaxBeitForMaskedImageModeling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_flax_beit.py#L825)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: BeitConfig input_shape = None seed: int = 0 dtype: dtype = <class
+    ''jax.numpy.float32''> _do_init: bool = True **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**dtype** (`jax.numpy.dtype`, *optional*, defaults to `jax.numpy.float32`)
+    — The data type of the computation. Can be one of `jax.numpy.float32`, `jax.numpy.float16`
+    (on GPUs) and `jax.numpy.bfloat16` (on TPUs).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This can be used to enable mixed-precision training or half-precision inference
+    on GPUs or TPUs. If specified all the computation will be performed with the given
+    `dtype`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**Note that this only specifies the dtype of the computation and does not influence
+    the dtype of model parameters.**'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If you wish to change the dtype of the model parameters, see [to_fp16()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.to_fp16)
+    and [to_bf16()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.to_bf16).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Beit Model transformer with a ‘language’ modeling head on top (to predict visual
+    tokens).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [FlaxPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading, saving and converting weights from PyTorch
+    models)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [flax.linen.Module](https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html)
+    subclass. Use it as a regular Flax linen Module and refer to the Flax documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, this model supports inherent JAX features such as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Just-In-Time (JIT) compilation](https://jax.readthedocs.io/en/latest/jax.html#just-in-time-compilation-jit)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Automatic Differentiation](https://jax.readthedocs.io/en/latest/jax.html#automatic-differentiation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Vectorization](https://jax.readthedocs.io/en/latest/jax.html#vectorization-vmap)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Parallelization](https://jax.readthedocs.io/en/latest/jax.html#parallelization-pmap)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_flax_beit.py#L632)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values bool_masked_pos = None params: dict = None dropout_rng: PRNGKey
+    = None train: bool = False output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → [transformers.modeling_flax_outputs.FlaxMaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_flax_outputs.FlaxMaskedLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_flax_outputs.FlaxMaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_flax_outputs.FlaxMaskedLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_flax_outputs.FlaxMaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_flax_outputs.FlaxMaskedLMOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration (`<class 'transformers.models.beit.configuration_beit.BeitConfig'>`)
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**logits** (`jnp.ndarray` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(jnp.ndarray)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `jnp.ndarray`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(jnp.ndarray)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `jnp.ndarray` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The `FlaxBeitPreTrainedModel` forward method, overrides the `__call__` special
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'bool_masked_pos (`numpy.ndarray` of shape `(batch_size, num_patches)`): Boolean
+    masked positions. Indicates which patches are masked (1) and which aren’t (0).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: FlaxBeitForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.FlaxBeitForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_flax_beit.py#L909)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: BeitConfig input_shape = None seed: int = 0 dtype: dtype = <class
+    ''jax.numpy.float32''> _do_init: bool = True **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([BeitConfig](/docs/transformers/v4.37.2/en/model_doc/beit#transformers.BeitConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**dtype** (`jax.numpy.dtype`, *optional*, defaults to `jax.numpy.float32`)
+    — The data type of the computation. Can be one of `jax.numpy.float32`, `jax.numpy.float16`
+    (on GPUs) and `jax.numpy.bfloat16` (on TPUs).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This can be used to enable mixed-precision training or half-precision inference
+    on GPUs or TPUs. If specified all the computation will be performed with the given
+    `dtype`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**Note that this only specifies the dtype of the computation and does not influence
+    the dtype of model parameters.**'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If you wish to change the dtype of the model parameters, see [to_fp16()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.to_fp16)
+    and [to_bf16()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel.to_bf16).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Beit Model transformer with an image classification head on top (a linear layer
+    on top of the average of the final hidden states of the patch tokens) e.g. for
+    ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [FlaxPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.FlaxPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading, saving and converting weights from PyTorch
+    models)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [flax.linen.Module](https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html)
+    subclass. Use it as a regular Flax linen Module and refer to the Flax documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, this model supports inherent JAX features such as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Just-In-Time (JIT) compilation](https://jax.readthedocs.io/en/latest/jax.html#just-in-time-compilation-jit)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Automatic Differentiation](https://jax.readthedocs.io/en/latest/jax.html#automatic-differentiation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Vectorization](https://jax.readthedocs.io/en/latest/jax.html#vectorization-vmap)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Parallelization](https://jax.readthedocs.io/en/latest/jax.html#parallelization-pmap)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/beit/modeling_flax_beit.py#L632)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values bool_masked_pos = None params: dict = None dropout_rng: PRNGKey
+    = None train: bool = False output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → [transformers.modeling_flax_outputs.FlaxSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_flax_outputs.FlaxSequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_flax_outputs.FlaxSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_flax_outputs.FlaxSequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_flax_outputs.FlaxSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_flax_outputs.FlaxSequenceClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration (`<class 'transformers.models.beit.configuration_beit.BeitConfig'>`)
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**logits** (`jnp.ndarray` of shape `(batch_size, config.num_labels)`) — Classification
+    (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(jnp.ndarray)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `jnp.ndarray`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(jnp.ndarray)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `jnp.ndarray` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The `FlaxBeitPreTrainedModel` forward method, overrides the `__call__` special
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE

@@ -1,0 +1,707 @@
+- en: CodeLlama
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/code_llama](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/code_llama)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/91.3747f5b7.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Code Llama model was proposed in [Code Llama: Open Foundation Models for
+    Code](https://ai.meta.com/research/publications/code-llama-open-foundation-models-for-code/)
+    by Baptiste Rozière, Jonas Gehring, Fabian Gloeckle, Sten Sootla, Itai Gat, Xiaoqing
+    Ellen Tan, Yossi Adi, Jingyu Liu, Tal Remez, Jérémy Rapin, Artyom Kozhevnikov,
+    Ivan Evtimov, Joanna Bitton, Manish Bhatt, Cristian Canton Ferrer, Aaron Grattafiori,
+    Wenhan Xiong, Alexandre Défossez, Jade Copet, Faisal Azhar, Hugo Touvron, Louis
+    Martin, Nicolas Usunier, Thomas Scialom, Gabriel Synnaeve.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We release Code Llama, a family of large language models for code based on
+    Llama 2 providing state-of-the-art performance among open models, infilling capabilities,
+    support for large input contexts, and zero-shot instruction following ability
+    for programming tasks. We provide multiple flavors to cover a wide range of applications:
+    foundation models (Code Llama), Python specializations (Code Llama - Python),
+    and instruction-following models (Code Llama - Instruct) with 7B, 13B and 34B
+    parameters each. All models are trained on sequences of 16k tokens and show improvements
+    on inputs with up to 100k tokens. 7B and 13B Code Llama and Code Llama - Instruct
+    variants support infilling based on surrounding content. Code Llama reaches state-of-the-art
+    performance among open models on several code benchmarks, with scores of up to
+    53% and 55% on HumanEval and MBPP, respectively. Notably, Code Llama - Python
+    7B outperforms Llama 2 70B on HumanEval and MBPP, and all our models outperform
+    every other publicly available model on MultiPL-E. We release Code Llama under
+    a permissive license that allows for both research and commercial use.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out all Code Llama model checkpoints [here](https://huggingface.co/models?search=code_llama)
+    and the officially released ones in the [codellama org](https://huggingface.co/codellama).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [ArthurZucker](https://huggingface.co/ArthurZ).
+    The original code of the authors can be found [here](https://github.com/facebookresearch/llama).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips and examples
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `Llama2` family models, on which Code Llama is based, were trained using
+    `bfloat16`, but the original inference uses `float16`. Let’s look at the different
+    precisions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`float32`: PyTorch convention on model initialization is to load models in
+    `float32`, no matter with which `dtype` the model weights were stored. `transformers`
+    also follows this convention for consistency with PyTorch. This will be picked
+    by default. If you want the `AutoModel` API to cast the load the checkpoints with
+    the storage weights type, you must specify `torch_dtype="auto"`, e.g. `model =
+    AutoModelForCausalLM.from_pretrained("path", torch_dtype = "auto")`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`bfloat16`: Code Llama was trained with this precision, so we recommend using
+    it for further training or fine-tuning.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`float16`: We recommend running inference using this precision, as it’s usually
+    faster than `bfloat16`, and evaluation metrics show no discernible degradation
+    with respect to `bfloat16`. You can also run inference using `bfloat16`, and we
+    recommend you check inference results with both `float16` and `bfloat16` after
+    fine-tuning.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As mentioned above, the `dtype` of the storage weights is mostly irrelevant
+    unless you are using `torch_dtype="auto"` when initializing a model using. The
+    reason is that the model will first be downloaded (using the `dtype` of the checkpoints
+    online) and then will be casted to the default `dtype` of `torch` (becomes `torch.float32`).
+    If there is a specified `torch_dtype`, it will be used instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Tips:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The infilling task is supported out of the box. You should be using the `tokenizer.fill_token`
+    where you want your input to be filled.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The model conversion script is the same as for the `Llama2` family:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Here is a sample usage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that executing the script requires enough CPU RAM to host the whole model
+    in float16 precision (even if the biggest versions come in several checkpoints
+    they each contain a part of each weight of the model, so we need to load them
+    all in RAM).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'After conversion, the model and tokenizer can be loaded via:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you only want the infilled part:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Under the hood, the tokenizer [automatically splits by `<FILL_ME>`](https://huggingface.co/docs/transformers/main/model_doc/code_llama#transformers.CodeLlamaTokenizer.fill_token)
+    to create a formatted input string that follows [the original training pattern](https://github.com/facebookresearch/codellama/blob/cb51c14ec761370ba2e2bc351374a79265d0465e/llama/generation.py#L402).
+    This is more robust than preparing the pattern yourself: it avoids pitfalls, such
+    as token glueing, that are very hard to debug. To see how much CPU and GPU memory
+    you need for this model or others, try [this calculator](https://huggingface.co/spaces/hf-accelerate/model-memory-usage)
+    which can help determine that value.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The LLaMA tokenizer is a BPE model based on [sentencepiece](https://github.com/google/sentencepiece).
+    One quirk of sentencepiece is that when decoding a sequence, if the first token
+    is the start of the word (e.g. “Banana”), the tokenizer does not prepend the prefix
+    space to the string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Code Llama has the same architecture as the `Llama2` models, refer to [Llama2’s
+    documentation page](llama2) for the API reference. Find Code Llama tokenizer reference
+    below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CodeLlamaTokenizer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.CodeLlamaTokenizer'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama.py#L59)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vocab_file unk_token = ''<unk>'' bos_token = ''<s>'' eos_token = ''</s>''
+    prefix_token = ''▁<PRE>'' middle_token = ''▁<MID>'' suffix_token = ''▁<SUF>''
+    eot_token = ''▁<EOT>'' fill_token = ''<FILL_ME>'' suffix_first = False sp_model_kwargs:
+    Optional = None add_bos_token = True add_eos_token = False clean_up_tokenization_spaces
+    = False additional_special_tokens = None use_default_system_prompt = False **kwargs
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_file** (`str`) — Path to the vocabulary file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unk_token** (`str`, *optional*, defaults to `"<unk>"`) — The unknown token.
+    A token that is not in the vocabulary cannot be converted to an ID and is set
+    to be this token instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`str`, *optional*, defaults to `"<s>"`) — The beginning of sequence
+    token that was used during pretraining. Can be used a sequence classifier token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eos_token** (`str`, *optional*, defaults to `"</s>"`) — The end of sequence
+    token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When building a sequence using special tokens, this is not the token that is
+    used for the end of sequence. The token used is the `sep_token`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**prefix_token** (`str`, *optional*, defaults to `"▁<PRE>"`) — Prefix token
+    used for infilling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**middle_token** (`str`, *optional*, defaults to `"▁<MID>"`) — Middle token
+    used for infilling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**suffix_token** (`str`, *optional*, defaults to `"▁<SUF>"`) — Suffix token
+    used for infilling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eot_token** (`str`, *optional*, defaults to `"▁<EOT>"`) — End of text token
+    used for infilling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**fill_token** (`str`, *optional*, defaults to `"<FILL_ME>"`) — The token used
+    to split the input between the prefix and suffix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**suffix_first** (`bool`, *optional*, defaults to `False`) — Whether the input
+    prompt and suffix should be formatted with the suffix first.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sp_model_kwargs** (`dict`, *optional*) — Will be passed to the `SentencePieceProcessor.__init__()`
+    method. The [Python wrapper for SentencePiece](https://github.com/google/sentencepiece/tree/master/python)
+    can be used, among other things, to set:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`enable_sampling`: Enable subword regularization.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size`: Sampling parameters for unigram. Invalid for BPE-Dropout.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size = {0,1}`: No sampling is performed.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size > 1`: samples from the nbest_size results.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size < 0`: assuming that nbest_size is infinite and samples from the
+    all hypothesis (lattice) using forward-filtering-and-backward-sampling algorithm.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`alpha`: Smoothing parameter for unigram sampling, and dropout probability
+    of merge operations for BPE-dropout.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**add_bos_token** (`bool`, *optional*, defaults to `True`) — Whether to add
+    a beginning of sequence token at the start of sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**add_eos_token** (`bool`, *optional*, defaults to `False`) — Whether to add
+    an end of sequence token at the end of sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_up_tokenization_spaces** (`bool`, *optional*, defaults to `False`)
+    — Whether or not to clean up the tokenization spaces.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**additional_special_tokens** (`List[str]`, *optional*) — Additional special
+    tokens used by the tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_default_system_prompt** (`bool`, *optional*, defaults to `False`) — Whether
+    or not the default system prompt for Llama should be used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Construct a CodeLlama tokenizer. Based on byte-level Byte-Pair-Encoding. The
+    default padding token is unset as there is no padding token in the original model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The default configuration match that of [codellama/CodeLlama-7b-Instruct-hf](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf/blob/main/tokenizer_config.json)
+    which supports prompt infilling.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### build_inputs_with_special_tokens'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama.py#L369)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( token_ids_0 token_ids_1 = None )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### get_special_tokens_mask'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama.py#L381)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( token_ids_0: List token_ids_1: Optional = None already_has_special_tokens:
+    bool = False ) → `List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**already_has_special_tokens** (`bool`, *optional*, defaults to `False`) —
+    Whether or not the token list is already formatted with special tokens for the
+    model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A list of integers in the range [0, 1]: 1 for a special token, 0 for a sequence
+    token.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieve sequence ids from a token list that has no special tokens added. This
+    method is called when adding special tokens using the tokenizer `prepare_for_model`
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### create_token_type_ids_from_sequences'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama.py#L419)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( token_ids_0: List token_ids_1: Optional = None ) → `List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of ids.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: List of [token type IDs](../glossary#token-type-ids) according to the given
+    sequence(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creates a mask from the two sequences passed to be used in a sequence-pair classification
+    task. An ALBERT
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'sequence pair mask has the following format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: if token_ids_1 is None, only returns the first portion of the mask (0s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### save_vocabulary'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama.py#L341)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( save_directory filename_prefix: Optional = None ) → `Tuple(str)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**save_directory** (`str`) — The directory in which to save the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Tuple(str)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Paths to the files saved.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Save the vocabulary and special tokens file to a directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CodeLlamaTokenizerFast
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.CodeLlamaTokenizerFast'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama_fast.py#L52)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_file = None tokenizer_file = None clean_up_tokenization_spaces = False
+    unk_token = '<unk>' bos_token = '<s>' eos_token = '</s>' prefix_token = '▁<PRE>'
+    middle_token = '▁<MID>' suffix_token = '▁<SUF>' eot_token = '▁<EOT>' fill_token
+    = '<FILL_ME>' additional_special_tokens = None add_bos_token = True add_eos_token
+    = False use_default_system_prompt = False **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_file** (`str`, *optional*) — [SentencePiece](https://github.com/google/sentencepiece)
+    file (generally has a .model extension) that contains the vocabulary necessary
+    to instantiate a tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer_file** (`str`, *optional*) — [tokenizers](https://github.com/huggingface/tokenizers)
+    file (generally has a .json extension) that contains everything needed to load
+    the tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_up_tokenization_spaces** (`str`, *optional*, defaults to `False`) —
+    Wether to cleanup spaces after decoding, cleanup consists in removing potential
+    artifacts like extra spaces.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unk_token** (`str`, *optional*, defaults to `"<unk>"`) — The unknown token.
+    A token that is not in the vocabulary cannot be converted to an ID and is set
+    to be this token instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`str`, *optional*, defaults to `"<s>"`) — The beginning of sequence
+    token that was used during pretraining. Can be used a sequence classifier token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eos_token** (`str`, *optional*, defaults to `"</s>"`) — The end of sequence
+    token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prefix_token** (`str`, *optional*, defaults to `"▁<PRE>"`) — Prefix token
+    used for infilling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**middle_token** (`str`, *optional*, defaults to `"▁<MID>"`) — Middle token
+    used for infilling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**suffix_token** (`str`, *optional*, defaults to `"▁<SUF>"`) — Suffix token
+    used for infilling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eot_token** (`str`, *optional*, defaults to `"▁<EOT>"`) — End of text token
+    used for infilling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**fill_token** (`str`, *optional*, defaults to `"<FILL_ME>"`) — The token used
+    to split the input between the prefix and suffix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**additional_special_tokens** (`List[str]`, *optional*) — Additional special
+    tokens used by the tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**add_bos_token** (`bool`, *optional*, defaults to `True`) — Whether to add
+    a beginning of sequence token at the start of sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**add_eos_token** (`bool`, *optional*, defaults to `False`) — Whether to add
+    an end of sequence token at the end of sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_default_system_prompt** (`bool`, *optional*, defaults to `False`) — Whether
+    or not the default system prompt for Llama should be used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Construct a Llama tokenizer. Based on byte-level Byte-Pair-Encoding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This uses notably ByteFallback and no normalization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you want to change the `bos_token` or the `eos_token`, make sure to specify
+    them when initializing the model, or call `tokenizer.update_post_processor()`
+    to make sure that the post-processing is correctly done (otherwise the values
+    of the first token and final token of an encoded sequence will not be correct).
+    For more details, checkout [post-processors] ([https://huggingface.co/docs/tokenizers/api/post-processors](https://huggingface.co/docs/tokenizers/api/post-processors))
+    documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This tokenizer inherits from [PreTrainedTokenizerFast](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizerFast)
+    which contains most of the main methods. Users should refer to this superclass
+    for more information regarding those methods. The default configuration match
+    that of [codellama/CodeLlama-7b-Instruct-hf](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf/blob/main/tokenizer_config.json)
+    which supports prompt infilling.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### build_inputs_with_special_tokens'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama_fast.py#L413)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( token_ids_0: List token_ids_1: Optional = None ) → `List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs to which the special tokens will
+    be added.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: list of [input IDs](../glossary#input-ids) with the appropriate special tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build model inputs from a sequence or a pair of sequence for sequence classification
+    tasks by concatenating and adding special tokens. The special tokens depend on
+    calling set_lang.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An NLLB sequence has the following format, where `X` represents the sequence:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input_ids` (for encoder) `X [eos, src_lang_code]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`decoder_input_ids`: (for decoder) `X [eos, tgt_lang_code]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: BOS is never used. Pairs of sequences are not the expected use case, but they
+    will be handled without a separator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### get_special_tokens_mask'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/tokenization_utils_base.py#L3772)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( token_ids_0: List token_ids_1: Optional = None already_has_special_tokens:
+    bool = False ) → A list of integers in the range [0, 1]'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of ids of the first sequence.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — List of ids of the second sequence.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**already_has_special_tokens** (`bool`, *optional*, defaults to `False`) —
+    Whether or not the token list is already formatted with special tokens for the
+    model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: A list of integers in the range [0, 1]
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1 for a special token, 0 for a sequence token.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieves sequence ids from a token list that has no special tokens added. This
+    method is called when adding special tokens using the tokenizer `prepare_for_model`
+    or `encode_plus` methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### create_token_type_ids_from_sequences'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/tokenization_utils_base.py#L3302)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( token_ids_0: List token_ids_1: Optional = None ) → `List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — The first tokenized sequence.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — The second tokenized sequence.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The token type ids.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create the token type IDs corresponding to the sequences passed. [What are token
+    type IDs?](../glossary#token-type-ids)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Should be overridden in a subclass if the model has a special way of building
+    those.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### update_post_processor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama_fast.py#L179)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Updates the underlying post processor with the current `bos_token` and `eos_token`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### save_vocabulary'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/code_llama/tokenization_code_llama_fast.py#L333)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( save_directory: str filename_prefix: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL

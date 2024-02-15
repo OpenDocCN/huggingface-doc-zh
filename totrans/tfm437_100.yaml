@@ -1,0 +1,175 @@
+- en: Padding and truncation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/pad_truncation](https://huggingface.co/docs/transformers/v4.37.2/en/pad_truncation)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/315.bc4ec042.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Batched inputs are often different lengths, so they can’t be converted to fixed-size
+    tensors. Padding and truncation are strategies for dealing with this problem,
+    to create rectangular tensors from batches of varying lengths. Padding adds a
+    special **padding token** to ensure shorter sequences will have the same length
+    as either the longest sequence in a batch or the maximum length accepted by the
+    model. Truncation works in the other direction by truncating long sequences.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In most cases, padding your batch to the length of the longest sequence and
+    truncating to the maximum length a model can accept works pretty well. However,
+    the API supports more strategies if you need them. The three arguments you need
+    to are: `padding`, `truncation` and `max_length`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `padding` argument controls padding. It can be a boolean or a string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`True` or `''longest''`: pad to the longest sequence in the batch (no padding
+    is applied if you only provide a single sequence).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''max_length''`: pad to a length specified by the `max_length` argument or
+    the maximum length accepted by the model if no `max_length` is provided (`max_length=None`).
+    Padding will still be applied if you only provide a single sequence.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`False` or `''do_not_pad''`: no padding is applied. This is the default behavior.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The `truncation` argument controls truncation. It can be a boolean or a string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`True` or `''longest_first''`: truncate to a maximum length specified by the
+    `max_length` argument or the maximum length accepted by the model if no `max_length`
+    is provided (`max_length=None`). This will truncate token by token, removing a
+    token from the longest sequence in the pair until the proper length is reached.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''only_second''`: truncate to a maximum length specified by the `max_length`
+    argument or the maximum length accepted by the model if no `max_length` is provided
+    (`max_length=None`). This will only truncate the second sentence of a pair if
+    a pair of sequences (or a batch of pairs of sequences) is provided.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''only_first''`: truncate to a maximum length specified by the `max_length`
+    argument or the maximum length accepted by the model if no `max_length` is provided
+    (`max_length=None`). This will only truncate the first sentence of a pair if a
+    pair of sequences (or a batch of pairs of sequences) is provided.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`False` or `''do_not_truncate''`: no truncation is applied. This is the default
+    behavior.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `max_length` argument controls the length of the padding and truncation.
+    It can be an integer or `None`, in which case it will default to the maximum length
+    the model can accept. If the model has no specific maximum input length, truncation
+    or padding to `max_length` is deactivated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following table summarizes the recommended way to setup padding and truncation.
+    If you use pairs of input sequences in any of the following examples, you can
+    replace `truncation=True` by a `STRATEGY` selected in `['only_first', 'only_second',
+    'longest_first']`, i.e. `truncation='only_second'` or `truncation='longest_first'`
+    to control how both sequences in the pair are truncated as detailed before.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Truncation | Padding | Instruction |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| no truncation | no padding | `tokenizer(batch_sentences)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to max sequence in batch | `tokenizer(batch_sentences, padding=True)`
+    or |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  |  | `tokenizer(batch_sentences, padding=''longest'')` |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to max model input length | `tokenizer(batch_sentences, padding=''max_length'')`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to specific length | `tokenizer(batch_sentences, padding=''max_length'',
+    max_length=42)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to a multiple of a value | `tokenizer(batch_sentences, padding=True,
+    pad_to_multiple_of=8)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| truncation to max model input length | no padding | `tokenizer(batch_sentences,
+    truncation=True)` or |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  |  | `tokenizer(batch_sentences, truncation=STRATEGY)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to max sequence in batch | `tokenizer(batch_sentences, padding=True,
+    truncation=True)` or |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  |  | `tokenizer(batch_sentences, padding=True, truncation=STRATEGY)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to max model input length | `tokenizer(batch_sentences, padding=''max_length'',
+    truncation=True)` or |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  |  | `tokenizer(batch_sentences, padding=''max_length'', truncation=STRATEGY)`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to specific length | Not possible |'
+  prefs: []
+  type: TYPE_TB
+- en: '| truncation to specific length | no padding | `tokenizer(batch_sentences,
+    truncation=True, max_length=42)` or |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  |  | `tokenizer(batch_sentences, truncation=STRATEGY, max_length=42)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to max sequence in batch | `tokenizer(batch_sentences, padding=True,
+    truncation=True, max_length=42)` or |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  |  | `tokenizer(batch_sentences, padding=True, truncation=STRATEGY, max_length=42)`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to max model input length | Not possible |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  | padding to specific length | `tokenizer(batch_sentences, padding=''max_length'',
+    truncation=True, max_length=42)` or |'
+  prefs: []
+  type: TYPE_TB
+- en: '|  |  | `tokenizer(batch_sentences, padding=''max_length'', truncation=STRATEGY,
+    max_length=42)` |'
+  prefs: []
+  type: TYPE_TB

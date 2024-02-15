@@ -1,0 +1,315 @@
+- en: Generation with LLMs
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/llm_tutorial](https://huggingface.co/docs/transformers/v4.37.2/en/llm_tutorial)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/34.237bd7dd.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: LLMs, or Large Language Models, are the key component behind text generation.
+    In a nutshell, they consist of large pretrained transformer models trained to
+    predict the next word (or, more precisely, token) given some input text. Since
+    they predict one token at a time, you need to do something more elaborate to generate
+    new sentences other than just calling the model — you need to do autoregressive
+    generation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Autoregressive generation is the inference-time procedure of iteratively calling
+    a model with its own generated outputs, given a few initial inputs. In 🤗 Transformers,
+    this is handled by the [generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
+    method, which is available to all models with generative capabilities.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This tutorial will show you how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generate text with an LLM
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Avoid common pitfalls
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Next steps to help you get the most out of your LLM
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generate text
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A language model trained for [causal language modeling](tasks/language_modeling)
+    takes a sequence of text tokens as input and returns the probability distribution
+    for the next token.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/assisted-generation/gif_1_1080p.mov>
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"Forward pass of an LLM"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A critical aspect of autoregressive generation with LLMs is how to select the
+    next token from this probability distribution. Anything goes in this step as long
+    as you end up with a token for the next iteration. This means it can be as simple
+    as selecting the most likely token from the probability distribution or as complex
+    as applying a dozen transformations before sampling from the resulting distribution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/assisted-generation/gif_2_1080p.mov>
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"Autoregressive generation iteratively selects the next token from a probability
+    distribution to generate text"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The process depicted above is repeated iteratively until some stopping condition
+    is reached. Ideally, the stopping condition is dictated by the model, which should
+    learn when to output an end-of-sequence (`EOS`) token. If this is not the case,
+    generation stops when some predefined maximum length is reached.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Properly setting up the token selection step and the stopping condition is essential
+    to make your model behave as you’d expect on your task. That is why we have a
+    [GenerationConfig](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationConfig)
+    file associated with each model, which contains a good default generative parameterization
+    and is loaded alongside your model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s talk code!
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re interested in basic LLM usage, our high-level [`Pipeline`](pipeline_tutorial)
+    interface is a great starting point. However, LLMs often require advanced features
+    like quantization and fine control of the token selection step, which is best
+    done through [generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate).
+    Autoregressive generation with LLMs is also resource-intensive and should be executed
+    on a GPU for adequate throughput.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, you need to load the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You’ll notice two flags in the `from_pretrained` call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`device_map` ensures the model is moved to your GPU(s)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`load_in_4bit` applies [4-bit dynamic quantization](main_classes/quantization)
+    to massively reduce the resource requirements'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: There are other ways to initialize a model, but this is a good baseline to begin
+    with an LLM.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, you need to preprocess your text input with a [tokenizer](tokenizer_summary).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `model_inputs` variable holds the tokenized text input, as well as the attention
+    mask. While [generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
+    does its best effort to infer the attention mask when it is not passed, we recommend
+    passing it whenever possible for optimal results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After tokenizing the inputs, you can call the [generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
+    method to returns the generated tokens. The generated tokens then should be converted
+    to text before printing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, you don’t need to do it one sequence at a time! You can batch your
+    inputs, which will greatly improve the throughput at a small latency and memory
+    cost. All you need to do is to make sure you pad your inputs properly (more on
+    that below).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: And that’s it! In a few lines of code, you can harness the power of an LLM.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Common pitfalls
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are many [generation strategies](generation_strategies), and sometimes
+    the default values may not be appropriate for your use case. If your outputs aren’t
+    aligned with what you’re expecting, we’ve created a list of the most common pitfalls
+    and how to avoid them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generated output is too short/long
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If not specified in the [GenerationConfig](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationConfig)
+    file, `generate` returns up to 20 tokens by default. We highly recommend manually
+    setting `max_new_tokens` in your `generate` call to control the maximum number
+    of new tokens it can return. Keep in mind LLMs (more precisely, [decoder-only
+    models](https://huggingface.co/learn/nlp-course/chapter1/6?fw=pt)) also return
+    the input prompt as part of the output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Incorrect generation mode
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: By default, and unless specified in the [GenerationConfig](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationConfig)
+    file, `generate` selects the most likely token at each iteration (greedy decoding).
+    Depending on your task, this may be undesirable; creative tasks like chatbots
+    or writing an essay benefit from sampling. On the other hand, input-grounded tasks
+    like audio transcription or translation benefit from greedy decoding. Enable sampling
+    with `do_sample=True`, and you can learn more about this topic in this [blog post](https://huggingface.co/blog/how-to-generate).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Wrong padding side
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: LLMs are [decoder-only](https://huggingface.co/learn/nlp-course/chapter1/6?fw=pt)
+    architectures, meaning they continue to iterate on your input prompt. If your
+    inputs do not have the same length, they need to be padded. Since LLMs are not
+    trained to continue from pad tokens, your input needs to be left-padded. Make
+    sure you also don’t forget to pass the attention mask to generate!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Wrong prompt
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Some models and tasks expect a certain input prompt format to work properly.
+    When this format is not applied, you will get a silent performance degradation:
+    the model kinda works, but not as well as if you were following the expected prompt.
+    More information about prompting, including which models and tasks need to be
+    careful, is available in this [guide](tasks/prompting). Let’s see an example with
+    a chat LLM, which makes use of [chat templating](chat_templating):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Further resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'While the autoregressive generation process is relatively straightforward,
+    making the most out of your LLM can be a challenging endeavor because there are
+    many moving parts. For your next steps to help you dive deeper into LLM usage
+    and understanding:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Advanced generate usage
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[Guide](generation_strategies) on how to control different generation methods,
+    how to set up the generation configuration file, and how to stream the output;'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Guide](chat_templating) on the prompt template for chat LLMs;'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Guide](tasks/prompting) on to get the most of prompt design;'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: API reference on [GenerationConfig](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationConfig),
+    [generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate),
+    and [generate-related classes](internal/generation_utils). Most of the classes,
+    including the logits processors, have usage examples!
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: LLM leaderboards
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard),
+    which focuses on the quality of the open-source models;'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Open LLM-Perf Leaderboard](https://huggingface.co/spaces/optimum/llm-perf-leaderboard),
+    which focuses on LLM throughput.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Latency, throughput and memory utilization
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[Guide](llm_tutorial_optimization) on how to optimize LLMs for speed and memory;'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Guide](main_classes/quantization) on quantization such as bitsandbytes and
+    autogptq, which shows you how to drastically reduce your memory requirements.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Related libraries
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[`text-generation-inference`](https://github.com/huggingface/text-generation-inference),
+    a production-ready server for LLMs;'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[`optimum`](https://github.com/huggingface/optimum), an extension of 🤗 Transformers
+    that optimizes for specific hardware devices.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

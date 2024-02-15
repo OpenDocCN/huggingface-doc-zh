@@ -1,0 +1,151 @@
+- en: Instantiating a big model
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/big_models](https://huggingface.co/docs/transformers/v4.37.2/en/big_models)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/10.1d84d9c9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When you want to use a very big pretrained model, one challenge is to minimize
+    the use of the RAM. The usual workflow from PyTorch is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create your model with random weights.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Load your pretrained weights.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Put those pretrained weights in your random model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Step 1 and 2 both require a full version of the model in memory, which is not
+    a problem in most cases, but if your model starts weighing several GigaBytes,
+    those two copies can make you get out of RAM. Even worse, if you are using `torch.distributed`
+    to launch a distributed training, each process will load the pretrained model
+    and store these two copies in RAM.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that the randomly created model is initialized with “empty” tensors, which
+    take the space in memory without filling it (thus the random values are whatever
+    was in this chunk of memory at a given time). The random initialization following
+    the appropriate distribution for the kind of model/parameters instantiated (like
+    a normal distribution for instance) is only performed after step 3 on the non-initialized
+    weights, to be as fast as possible!
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this guide, we explore the solutions Transformers offer to deal with this
+    issue. Note that this is an area of active development, so the APIs explained
+    here may change slightly in the future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sharded checkpoints
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Since version 4.18.0, model checkpoints that end up taking more than 10GB of
+    space are automatically sharded in smaller pieces. In terms of having one single
+    checkpoint when you do `model.save_pretrained(save_dir)`, you will end up with
+    several partial checkpoints (each of which being of size < 10GB) and an index
+    that maps parameter names to the files they are stored in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can control the maximum size before sharding with the `max_shard_size`
+    parameter, so for the sake of an example, we’ll use a normal-size models with
+    a small shard size: let’s take a traditional BERT model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you save it using [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained),
+    you will get a new folder with two files: the config of the model and its weights:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now let’s use a maximum shard size of 200MB:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On top of the configuration of the model, we see three different weights files,
+    and an `index.json` file which is our index. A checkpoint like this can be fully
+    reloaded using the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The main advantage of doing this for big models is that during step 2 of the
+    workflow shown above, each shard of the checkpoint is loaded after the previous
+    one, capping the memory usage in RAM to the model size plus the size of the biggest
+    shard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Behind the scenes, the index file is used to determine which keys are in the
+    checkpoint, and where the corresponding weights are stored. We can load that index
+    like any json and get a dictionary:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The metadata just consists of the total size of the model for now. We plan
+    to add other information in the future:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The weights map is the main part of this index, which maps each parameter name
+    (as usually found in a PyTorch model `state_dict`) to the file it’s stored in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to directly load such a sharded checkpoint inside a model without
+    using [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    (like you would do `model.load_state_dict()` for a full checkpoint) you should
+    use [load_sharded_checkpoint()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.modeling_utils.load_sharded_checkpoint):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Low memory loading
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sharded checkpoints reduce the memory usage during step 2 of the workflow mentioned
+    above, but in order to use that model in a low memory setting, we recommend leveraging
+    our tools based on the Accelerate library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Please read the following guide for more information: [Large model loading
+    using Accelerate](./main_classes/model#large-model-loading)'
+  prefs: []
+  type: TYPE_NORMAL

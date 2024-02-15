@@ -1,0 +1,1539 @@
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/testing](https://huggingface.co/docs/transformers/v4.37.2/en/testing)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/366.01284b05.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at how 🤗 Transformers models are tested and how you can write
+    new tests and improve the existing ones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are 2 test suites in the repository:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tests` — tests for the general API'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`examples` — tests primarily for various applications that aren’t part of the
+    API'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How transformers are tested
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once a PR is submitted it gets tested with 9 CircleCi jobs. Every new commit
+    to that PR gets retested. These jobs are defined in this [config file](https://github.com/huggingface/transformers/tree/main/.circleci/config.yml),
+    so that if needed you can reproduce the same environment on your machine.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: These CI jobs don’t run `@slow` tests.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'There are 3 jobs run by [github actions](https://github.com/huggingface/transformers/actions):'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[torch hub integration](https://github.com/huggingface/transformers/tree/main/.github/workflows/github-torch-hub.yml):
+    checks whether torch hub integration works.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[self-hosted (push)](https://github.com/huggingface/transformers/tree/main/.github/workflows/self-push.yml):
+    runs fast tests on GPU only on commits on `main`. It only runs if a commit on
+    `main` has updated the code in one of the following folders: `src`, `tests`, `.github`
+    (to prevent running on added model cards, notebooks, etc.)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[self-hosted runner](https://github.com/huggingface/transformers/tree/main/.github/workflows/self-scheduled.yml):
+    runs normal and slow tests on GPU in `tests` and `examples`:'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The results can be observed [here](https://github.com/huggingface/transformers/actions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Running tests
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Choosing which tests to run
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This document goes into many details of how tests can be run. If after reading
+    everything, you need even more details you will find them [here](https://docs.pytest.org/en/latest/usage.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Here are some most useful ways of running tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Run all:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note that the latter is defined as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'which tells pytest to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: run as many test processes as they are CPU cores (which could be too many if
+    you don’t have a ton of RAM!)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ensure that all tests from the same file will be run by the same test process
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: do not capture output
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: run in verbose mode
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Getting the list of all tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'All tests of the test suite:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'All tests of a given test file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Run a specific test module
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To run an individual test module:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Run specific tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Since unittest is used inside most of the tests, to run specific subtests you
+    need to know the name of the unittest class containing those tests. For example,
+    it could be:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tests/test_optimization.py` - the file with tests'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`OptimizationTest` - the name of the class'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`test_adam_w` - the name of the specific test function'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If the file contains multiple classes, you can choose to run only tests of
+    a given class. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: will run all the tests inside that class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As mentioned earlier you can see what tests are contained inside the `OptimizationTest`
+    class by running:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can run tests by keyword expressions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To run only tests whose name contains `adam`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Logical `and` and `or` can be used to indicate whether all keywords should match
+    or either. `not` can be used to negate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To run all tests except those whose name contains `adam`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And you can combine the two patterns in one:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example to run both `test_adafactor` and `test_adam_w` you can use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that we use `or` here, since we want either of the keywords to match to
+    include both.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you want to include only tests that include both patterns, `and` is to be
+    used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Run accelerate tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Sometimes you need to run `accelerate` tests on your models. For that you can
+    just add `-m accelerate_tests` to your command, if let’s say you want to run these
+    tests on `OPT` run:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Run documentation tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In order to test whether the documentation examples are correct, you should
+    check that the `doctests` are passing. As an example, let’s use [`WhisperModel.forward`’s
+    docstring](https://github.com/huggingface/transformers/blob/main/src/transformers/models/whisper/modeling_whisper.py#L1017-L1035):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]python'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '>>> import torch'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> from transformers import WhisperModel, WhisperFeatureExtractor'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> from datasets import load_dataset'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> model = WhisperModel.from_pretrained("openai/whisper-base")'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> feature_extractor = WhisperFeatureExtractor.from_pretrained("openai/whisper-base")'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> ds = load_dataset("hf-internal-testing/librispeech_asr_dummy", "clean",
+    split="validation")'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> inputs = feature_extractor(ds[0]["audio"]["array"], return_tensors="pt")'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> input_features = inputs.input_features'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> decoder_input_ids = torch.tensor([[1, 1]]) * model.config.decoder_start_token_id'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> last_hidden_state = model(input_features, decoder_input_ids=decoder_input_ids).last_hidden_state'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '>>> list(last_hidden_state.shape)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[1, 2, 512]'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Just run the following line to automatically test every docstring example in
+    the desired file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the file has a markdown extention, you should add the `--doctest-glob="*.md"`
+    argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Run only modified tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can run the tests related to the unstaged files or the current branch (according
+    to Git) by using [pytest-picked](https://github.com/anapaulagomes/pytest-picked).
+    This is a great way of quickly testing your changes didn’t break anything, since
+    it won’t run the tests related to files you didn’t touch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: All tests will be run from files and folders which are modified, but not yet
+    committed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Automatically rerun failed tests on source modification
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[pytest-xdist](https://github.com/pytest-dev/pytest-xdist) provides a very
+    useful feature of detecting all failed tests, and then waiting for you to modify
+    files and continuously re-rerun those failing tests until they pass while you
+    fix them. So that you don’t need to re start pytest after you made the fix. This
+    is repeated until all tests pass after which again a full run is performed.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To enter the mode: `pytest -f` or `pytest --looponfail`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'File changes are detected by looking at `looponfailroots` root directories
+    and all of their contents (recursively). If the default for this value does not
+    work for you, you can change it in your project by setting a configuration option
+    in `setup.cfg`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or `pytest.ini`/`tox.ini` files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: This would lead to only looking for file changes in the respective directories,
+    specified relatively to the ini-file’s directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[pytest-watch](https://github.com/joeyespo/pytest-watch) is an alternative
+    implementation of this functionality.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Skip a test module
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you want to run all test modules, except a few you can exclude them by giving
+    an explicit list of tests to run. For example, to run all except `test_modeling_*.py`
+    tests:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Clearing state
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'CI builds and when isolation is important (against speed), cache should be
+    cleared:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Running tests in parallel
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As mentioned earlier `make test` runs tests in parallel via `pytest-xdist` plugin
+    (`-n X` argument, e.g. `-n 2` to run 2 parallel jobs).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`pytest-xdist`’s `--dist=` option allows one to control how the tests are grouped.
+    `--dist=loadfile` puts the tests located in one file onto the same process.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since the order of executed tests is different and unpredictable, if running
+    the test suite with `pytest-xdist` produces failures (meaning we have some undetected
+    coupled tests), use [pytest-replay](https://github.com/ESSS/pytest-replay) to
+    replay the tests in the same order, which should help with then somehow reducing
+    that failing sequence to a minimum.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Test order and repetition
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: It’s good to repeat the tests several times, in sequence, randomly, or in sets,
+    to detect any potential inter-dependency and state-related bugs (tear down). And
+    the straightforward multiple repetition is just good to detect some problems that
+    get uncovered by randomness of DL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Repeat tests
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[pytest-flakefinder](https://github.com/dropbox/pytest-flakefinder):'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And then run every test multiple times (50 by default):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: This plugin doesn’t work with `-n` flag from `pytest-xdist`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is another plugin `pytest-repeat`, but it doesn’t work with `unittest`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Run tests in a random order
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Important: the presence of `pytest-random-order` will automatically randomize
+    tests, no configuration change or command line options is required.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As explained earlier this allows detection of coupled tests - where one test’s
+    state affects the state of another. When `pytest-random-order` is installed it
+    will print the random seed it used for that session, e.g:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'So that if the given particular sequence fails, you can reproduce it by adding
+    that exact seed, e.g.:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It will only reproduce the exact order if you use the exact same list of tests
+    (or no list at all). Once you start to manually narrowing down the list you can
+    no longer rely on the seed, but have to list them manually in the exact order
+    they failed and tell pytest to not randomize them instead using `--random-order-bucket=none`,
+    e.g.:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To disable the shuffling for all tests:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: By default `--random-order-bucket=module` is implied, which will shuffle the
+    files on the module levels. It can also shuffle on `class`, `package`, `global`
+    and `none` levels. For the complete details please see its [documentation](https://github.com/jbasko/pytest-random-order).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another randomization alternative is: [`pytest-randomly`](https://github.com/pytest-dev/pytest-randomly).
+    This module has a very similar functionality/interface, but it doesn’t have the
+    bucket modes available in `pytest-random-order`. It has the same problem of imposing
+    itself once installed.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Look and feel variations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: pytest-sugar
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[pytest-sugar](https://github.com/Frozenball/pytest-sugar) is a plugin that
+    improves the look-n-feel, adds a progressbar, and show tests that fail and the
+    assert instantly. It gets activated automatically upon installation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To run tests without it, run:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: or uninstall it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Report each sub-test name and its progress
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'For a single or a group of tests via `pytest` (after `pip install pytest-pspec`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Instantly shows failed tests
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[pytest-instafail](https://github.com/pytest-dev/pytest-instafail) shows failures
+    and errors instantly instead of waiting until the end of test session.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: To GPU or not to GPU
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'On a GPU-enabled setup, to test in CPU-only mode add `CUDA_VISIBLE_DEVICES=""`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or if you have multiple gpus, you can specify which one is to be used by `pytest`.
+    For example, to use only the second gpu if you have gpus `0` and `1`, you can
+    run:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is handy when you want to run different tasks on different GPUs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some tests must be run on CPU-only, others on either CPU or GPU or TPU, yet
+    others on multiple-GPUs. The following skip decorators are used to set the requirements
+    of tests CPU/GPU/TPU-wise:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`require_torch` - this test will run only under torch'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`require_torch_gpu` - as `require_torch` plus requires at least 1 GPU'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`require_torch_multi_gpu` - as `require_torch` plus requires at least 2 GPUs'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`require_torch_non_multi_gpu` - as `require_torch` plus requires 0 or 1 GPUs'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`require_torch_up_to_2_gpus` - as `require_torch` plus requires 0 or 1 or 2
+    GPUs'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`require_torch_tpu` - as `require_torch` plus requires at least 1 TPU'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Let’s depict the GPU requirements in the following table:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| n gpus | decorator | |--------+--------------------------------| | `>= 0`
+    | `@require_torch` | | `>= 1` | `@require_torch_gpu` | | `>= 2` | `@require_torch_multi_gpu`
+    | | `< 2` | `@require_torch_non_multi_gpu` | | `< 3` | `@require_torch_up_to_2_gpus`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: 'For example, here is a test that must be run only when there are 2 or more
+    GPUs available and pytorch is installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If a test requires `tensorflow` use the `require_tf` decorator. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'These decorators can be stacked. For example, if a test is slow and requires
+    at least one GPU under pytorch, here is how to set it up:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Some decorators like `@parametrized` rewrite test names, therefore `@require_*`
+    skip decorators have to be listed last for them to work correctly. Here is an
+    example of the correct usage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: This order problem doesn’t exist with `@pytest.mark.parametrize`, you can put
+    it first or last and it will still work. But it only works with non-unittests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Inside tests:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'How many GPUs are available:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: Testing with a specific PyTorch backend or device
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To run the test suite on a specific torch device add `TRANSFORMERS_TEST_DEVICE="$device"`
+    where `$device` is the target backend. For example, to test on CPU only:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: This variable is useful for testing custom or less common PyTorch backends such
+    as `mps`. It can also be used to achieve the same effect as `CUDA_VISIBLE_DEVICES`
+    by targeting specific GPUs or testing in CPU-only mode.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Certain devices will require an additional import after importing `torch` for
+    the first time. This can be specified using the environment variable `TRANSFORMERS_TEST_BACKEND`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Alternative backends may also require the replacement of device-specific functions.
+    For example `torch.cuda.manual_seed` may need to be replaced with a device-specific
+    seed setter like `torch.npu.manual_seed` to correctly set a random seed on the
+    device. To specify a new backend with backend-specific device functions when running
+    the test suite, create a Python device specification file in the format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: This format also allows for specification of any additional imports required.
+    To use this file to replace equivalent methods in the test suite, set the environment
+    variable `TRANSFORMERS_TEST_DEVICE_SPEC` to the path of the spec file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Currently, only `MANUAL_SEED_FN`, `EMPTY_CACHE_FN` and `DEVICE_COUNT_FN` are
+    supported for device-specific dispatch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distributed training
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`pytest` can’t deal with distributed training directly. If this is attempted
+    - the sub-processes don’t do the right thing and end up thinking they are `pytest`
+    and start running the test suite in loops. It works, however, if one spawns a
+    normal process that then spawns off multiple workers and manages the IO pipes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are some tests that use it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[test_trainer_distributed.py](https://github.com/huggingface/transformers/tree/main/tests/trainer/test_trainer_distributed.py)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[test_deepspeed.py](https://github.com/huggingface/transformers/tree/main/tests/deepspeed/test_deepspeed.py)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To jump right into the execution point, search for the `execute_subprocess_async`
+    call in those tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You will need at least 2 GPUs to see these tests in action:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: Output capture
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: During test execution any output sent to `stdout` and `stderr` is captured.
+    If a test or a setup method fails, its according captured output will usually
+    be shown along with the failure traceback.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To disable output capturing and to get the `stdout` and `stderr` normally,
+    use `-s` or `--capture=no`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To send test results to JUnit format output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Color control
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To have no color (e.g., yellow on white background is not readable):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sending test report to online pastebin service
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Creating a URL for each test failure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will submit test run information to a remote Paste service and provide
+    a URL for each failure. You may select tests as usual or add for example -x if
+    you only want to send one particular failure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Creating a URL for a whole test session log:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: Writing tests
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 🤗 transformers tests are based on `unittest`, but run by `pytest`, so most of
+    the time features from both systems can be used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can read [here](https://docs.pytest.org/en/stable/unittest.html) which features
+    are supported, but the important thing to remember is that most `pytest` fixtures
+    don’t work. Neither parametrization, but we use the module `parameterized` that
+    works in a similar way.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parametrization
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Often, there is a need to run the same test multiple times, but with different
+    arguments. It could be done from within the test, but then there is no way of
+    running that test for just one set of arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, by default this test will be run 3 times, each time with the last 3 arguments
+    of `test_floor` being assigned the corresponding arguments in the parameter list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'and you could run just the `negative` and `integer` sets of params with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or all but `negative` sub-tests, with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: Besides using the `-k` filter that was just mentioned, you can find out the
+    exact name of each sub-test and run any or all of them using their exact names.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'and it will list:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'So now you can run just 2 specific sub-tests:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The module [parameterized](https://pypi.org/project/parameterized/) which is
+    already in the developer dependencies of `transformers` works for both: `unittests`
+    and `pytest` tests.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If, however, the test is not a `unittest`, you may use `pytest.mark.parametrize`
+    (or you may see it being used in some existing tests, mostly under `examples`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is the same example, this time using `pytest`’s `parametrize` marker:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Same as with `parameterized`, with `pytest.mark.parametrize` you can have a
+    fine control over which sub-tests are run, if the `-k` filter doesn’t do the job.
+    Except, this parametrization function creates a slightly different set of names
+    for the sub-tests. Here is what they look like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'and it will list:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'So now you can run just the specific test:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: as in the previous example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Files and directories
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In tests often we need to know where things are relative to the current test
+    file, and it’s not trivial since the test could be invoked from more than one
+    directory or could reside in sub-directories with different depths. A helper class
+    `transformers.test_utils.TestCasePlus` solves this problem by sorting out all
+    the basic paths and provides easy accessors to them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`pathlib` objects (all fully resolved):'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`test_file_path` - the current test file path, i.e. `__file__`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`test_file_dir` - the directory containing the current test file'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tests_dir` - the directory of the `tests` test suite'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`examples_dir` - the directory of the `examples` test suite'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`repo_root_dir` - the directory of the repository'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`src_dir` - the directory of `src` (i.e. where the `transformers` sub-dir resides)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'stringified paths---same as above but these return paths as strings, rather
+    than `pathlib` objects:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`test_file_path_str`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`test_file_dir_str`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tests_dir_str`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`examples_dir_str`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`repo_root_dir_str`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`src_dir_str`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'To start using those all you need is to make sure that the test resides in
+    a subclass of `transformers.test_utils.TestCasePlus`. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you don’t need to manipulate paths via `pathlib` or you just need a path
+    as a string, you can always invoked `str()` on the `pathlib` object or use the
+    accessors ending with `_str`. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE65]'
+  prefs: []
+  type: TYPE_PRE
+- en: Temporary files and directories
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Using unique temporary files and directories are essential for parallel test
+    running, so that the tests won’t overwrite each other’s data. Also we want to
+    get the temporary files and directories removed at the end of each test that created
+    them. Therefore, using packages like `tempfile`, which address these needs is
+    essential.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, when debugging tests, you need to be able to see what goes into the
+    temporary file or directory and you want to know it’s exact path and not having
+    it randomized on every test re-run.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A helper class `transformers.test_utils.TestCasePlus` is best used for such
+    purposes. It’s a sub-class of `unittest.TestCase`, so we can easily inherit from
+    it in the test modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is an example of its usage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE66]'
+  prefs: []
+  type: TYPE_PRE
+- en: This code creates a unique temporary directory, and sets `tmp_dir` to its location.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Create a unique temporary dir:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE67]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`tmp_dir` will contain the path to the created temporary dir. It will be automatically
+    removed at the end of the test.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a temporary dir of my choice, ensure it’s empty before the test starts
+    and don’t empty it after the test.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE68]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is useful for debug when you want to monitor a specific directory and want
+    to make sure the previous tests didn’t leave any data in there.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can override the default behavior by directly overriding the `before` and
+    `after` args, leading to one of the following behaviors:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`before=True`: the temporary dir will always be cleared at the beginning of
+    the test.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`before=False`: if the temporary dir already existed, any existing files will
+    remain there.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`after=True`: the temporary dir will always be deleted at the end of the test.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`after=False`: the temporary dir will always be left intact at the end of the
+    test.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In order to run the equivalent of `rm -r` safely, only subdirs of the project
+    repository checkout are allowed if an explicit `tmp_dir` is used, so that by mistake
+    no `/tmp` or similar important part of the filesystem will get nuked. i.e. please
+    always pass paths that start with `./`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each test can register multiple temporary directories and they all will get
+    auto-removed, unless requested otherwise.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Temporary sys.path override
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you need to temporary override `sys.path` to import from another test for
+    example, you can use the `ExtendSysPath` context manager. Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE69]'
+  prefs: []
+  type: TYPE_PRE
+- en: Skipping tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This is useful when a bug is found and a new test is written, yet the bug is
+    not fixed yet. In order to be able to commit it to the main repository we need
+    make sure it’s skipped during `make test`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A **skip** means that you expect your test to pass only if some conditions are
+    met, otherwise pytest should skip running the test altogether. Common examples
+    are skipping windows-only tests on non-windows platforms, or skipping tests that
+    depend on an external resource which is not available at the moment (for example
+    a database).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A **xfail** means that you expect a test to fail for some reason. A common example
+    is a test for a feature not yet implemented, or a bug not yet fixed. When a test
+    passes despite being expected to fail (marked with pytest.mark.xfail), it’s an
+    xpass and will be reported in the test summary.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One of the important differences between the two is that `skip` doesn’t run
+    the test, and `xfail` does. So if the code that’s buggy causes some bad state
+    that will affect other tests, do not use `xfail`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Implementation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Here is how to skip whole test unconditionally:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE70]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or via pytest:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE71]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or the `xfail` way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE72]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s how to skip a test based on internal checks within the test:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE73]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or the whole module:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE74]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or the `xfail` way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE75]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here is how to skip all tests in a module if some import is missing:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE76]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Skip a test based on a condition:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE77]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE78]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or skip the whole module:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE79]'
+  prefs: []
+  type: TYPE_PRE
+- en: More details, example and ways are [here](https://docs.pytest.org/en/latest/skipping.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Slow tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The library of tests is ever-growing, and some of the tests take minutes to
+    run, therefore we can’t afford waiting for an hour for the test suite to complete
+    on CI. Therefore, with some exceptions for essential tests, slow tests should
+    be marked as in the example below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE80]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once a test is marked as `@slow`, to run such tests set `RUN_SLOW=1` env var,
+    e.g.:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE81]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Some decorators like `@parameterized` rewrite test names, therefore `@slow`
+    and the rest of the skip decorators `@require_*` have to be listed last for them
+    to work correctly. Here is an example of the correct usage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE82]'
+  prefs: []
+  type: TYPE_PRE
+- en: As explained at the beginning of this document, slow tests get to run on a scheduled
+    basis, rather than in PRs CI checks. So it’s possible that some problems will
+    be missed during a PR submission and get merged. Such problems will get caught
+    during the next scheduled CI job. But it also means that it’s important to run
+    the slow tests on your machine before submitting the PR.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is a rough decision making mechanism for choosing which tests should be
+    marked as slow:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If the test is focused on one of the library’s internal components (e.g., modeling
+    files, tokenization files, pipelines), then we should run that test in the non-slow
+    test suite. If it’s focused on an other aspect of the library, such as the documentation
+    or the examples, then we should run these tests in the slow test suite. And then,
+    to refine this approach we should have exceptions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All tests that need to download a heavy set of weights or a dataset that is
+    larger than ~50MB (e.g., model or tokenizer integration tests, pipeline integration
+    tests) should be set to slow. If you’re adding a new model, you should create
+    and upload to the hub a tiny version of it (with random weights) for integration
+    tests. This is discussed in the following paragraphs.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All tests that need to do a training not specifically optimized to be fast should
+    be set to slow.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We can introduce exceptions if some of these should-be-non-slow tests are excruciatingly
+    slow, and set them to `@slow`. Auto-modeling tests, which save and load large
+    files to disk, are a good example of tests that are marked as `@slow`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If a test completes under 1 second on CI (including downloads if any) then it
+    should be a normal test regardless.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Collectively, all the non-slow tests need to cover entirely the different internals,
+    while remaining fast. For example, a significant coverage can be achieved by testing
+    with specially created tiny models with random weights. Such models have the very
+    minimal number of layers (e.g., 2), vocab size (e.g., 1000), etc. Then the `@slow`
+    tests can use large slow models to do qualitative testing. To see the use of these
+    simply look for *tiny* models with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE83]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here is a an example of a [script](https://github.com/huggingface/transformers/tree/main/scripts/fsmt/fsmt-make-tiny-model.py)
+    that created the tiny model [stas/tiny-wmt19-en-de](https://huggingface.co/stas/tiny-wmt19-en-de).
+    You can easily adjust it to your specific model’s architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s easy to measure the run-time incorrectly if for example there is an overheard
+    of downloading a huge model, but if you test it locally the downloaded files would
+    be cached and thus the download time not measured. Hence check the execution speed
+    report in CI logs instead (the output of `pytest --durations=0 tests`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: That report is also useful to find slow outliers that aren’t marked as such,
+    or which need to be re-written to be fast. If you notice that the test suite starts
+    getting slow on CI, the top listing of this report will show the slowest tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing the stdout/stderr output
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In order to test functions that write to `stdout` and/or `stderr`, the test
+    can access those streams using the `pytest`’s [capsys system](https://docs.pytest.org/en/latest/capture.html).
+    Here is how this is accomplished:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE84]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And, of course, most of the time, `stderr` will come as a part of an exception,
+    so try/except has to be used in such a case:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE85]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Another approach to capturing stdout is via `contextlib.redirect_stdout`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE86]'
+  prefs: []
+  type: TYPE_PRE
+- en: An important potential issue with capturing stdout is that it may contain `\r`
+    characters that in normal `print` reset everything that has been printed so far.
+    There is no problem with `pytest`, but with `pytest -s` these characters get included
+    in the buffer, so to be able to have the test run with and without `-s`, you have
+    to make an extra cleanup to the captured output, using `re.sub(r'~.*\r', '', buf,
+    0, re.M)`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But, then we have a helper context manager wrapper to automatically take care
+    of it all, regardless of whether it has some `\r`’s in it or not, so it’s a simple:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE87]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here is a full test example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE88]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’d like to capture `stderr` use the `CaptureStderr` class instead:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE89]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you need to capture both streams at once, use the parent `CaptureStd` class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE90]'
+  prefs: []
+  type: TYPE_PRE
+- en: Also, to aid debugging test issues, by default these context managers automatically
+    replay the captured streams on exit from the context.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Capturing logger stream
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you need to validate the output of a logger, you can use `CaptureLogger`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE91]'
+  prefs: []
+  type: TYPE_PRE
+- en: Testing with environment variables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you want to test the impact of environment variables for a specific test
+    you can use a helper decorator `transformers.testing_utils.mockenv`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE92]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'At times an external program needs to be called, which requires setting `PYTHONPATH`
+    in `os.environ` to include multiple local paths. A helper class `transformers.test_utils.TestCasePlus`
+    comes to help:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE93]'
+  prefs: []
+  type: TYPE_PRE
+- en: Depending on whether the test file was under the `tests` test suite or `examples`
+    it’ll correctly set up `env[PYTHONPATH]` to include one of these two directories,
+    and also the `src` directory to ensure the testing is done against the current
+    repo, and finally with whatever `env[PYTHONPATH]` was already set to before the
+    test was called if anything.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This helper method creates a copy of the `os.environ` object, so the original
+    remains intact.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting reproducible results
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In some situations you may want to remove randomness for your tests. To get
+    identical reproducible results set, you will need to fix the seed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE94]'
+  prefs: []
+  type: TYPE_PRE
+- en: Debugging tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To start a debugger at the point of the warning, do this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE95]'
+  prefs: []
+  type: TYPE_PRE
+- en: Working with github actions workflows
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To trigger a self-push workflow CI job, you must:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a new branch on `transformers` origin (not a fork!).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The branch name has to start with either `ci_` or `ci-` (`main` triggers it
+    too, but we can’t do PRs on `main`). It also gets triggered only for specific
+    paths - you can find the up-to-date definition in case it changed since this document
+    has been written [here](https://github.com/huggingface/transformers/blob/main/.github/workflows/self-push.yml)
+    under *push:*
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Create a PR from this branch.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Then you can see the job appear [here](https://github.com/huggingface/transformers/actions/workflows/self-push.yml).
+    It may not run right away if there is a backlog.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Testing Experimental CI Features
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Testing CI features can be potentially problematic as it can interfere with
+    the normal CI functioning. Therefore if a new CI feature is to be added, it should
+    be done as following.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a new dedicated job that tests what needs to be tested
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The new job must always succeed so that it gives us a green ✓ (details below).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Let it run for some days to see that a variety of different PR types get to
+    run on it (user fork branches, non-forked branches, branches originating from
+    github.com UI direct file edit, various forced pushes, etc. - there are so many)
+    while monitoring the experimental job’s logs (not the overall job green as it’s
+    purposefully always green)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When it’s clear that everything is solid, then merge the new changes into existing
+    jobs.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: That way experiments on CI functionality itself won’t interfere with the normal
+    workflow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now how can we make the job always succeed while the new CI feature is being
+    developed?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some CIs, like TravisCI support ignore-step-failure and will report the overall
+    job as successful, but CircleCI and Github Actions as of this writing don’t support
+    that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So the following workaround can be used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`set +euo pipefail` at the beginning of the run command to suppress most potential
+    failures in the bash script.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'the last command must be a success: `echo "done"` or just `true` will do'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Here is an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE96]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For simple commands you could also do:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE97]'
+  prefs: []
+  type: TYPE_PRE
+- en: Of course, once satisfied with the results, integrate the experimental step
+    or job with the rest of the normal jobs, while removing `set +euo pipefail` or
+    any other things you may have added to ensure that the experimental job doesn’t
+    interfere with the normal CI functioning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This whole process would have been much easier if we only could set something
+    like `allow-failure` for the experimental step, and let it fail without impacting
+    the overall status of PRs. But as mentioned earlier CircleCI and Github Actions
+    don’t support it at the moment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can vote for this feature and see where it is at these CI-specific threads:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Github Actions:](https://github.com/actions/toolkit/issues/399)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[CircleCI:](https://ideas.circleci.com/ideas/CCI-I-344)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

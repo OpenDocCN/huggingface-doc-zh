@@ -1,0 +1,483 @@
+- en: GPU inference
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_gpu_one](https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_gpu_one)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/319.0daf4a9b.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/HfOption.6d864328.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: GPUs are the standard choice of hardware for machine learning, unlike CPUs,
+    because they are optimized for memory bandwidth and parallelism. To keep up with
+    the larger sizes of modern models or to run these large models on existing and
+    older hardware, there are several optimizations you can use to speed up GPU inference.
+    In this guide, you’ll learn how to use FlashAttention-2 (a more memory-efficient
+    attention mechanism), BetterTransformer (a PyTorch native fastpath execution),
+    and bitsandbytes to quantize your model to a lower precision. Finally, learn how
+    to use 🤗 Optimum to accelerate inference with ONNX Runtime on Nvidia and AMD GPUs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The majority of the optimizations described here also apply to multi-GPU setups!
+  prefs: []
+  type: TYPE_NORMAL
+- en: FlashAttention-2
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: FlashAttention-2 is experimental and may change considerably in future versions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[FlashAttention-2](https://huggingface.co/papers/2205.14135) is a faster and
+    more efficient implementation of the standard attention mechanism that can significantly
+    speedup inference by:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: additionally parallelizing the attention computation over sequence length
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: partitioning the work between GPU threads to reduce communication and shared
+    memory reads/writes between them
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'FlashAttention-2 is currently supported for the following architectures:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Bark](https://huggingface.co/docs/transformers/model_doc/bark#transformers.BarkModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Bart](https://huggingface.co/docs/transformers/model_doc/bart#transformers.BartModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[DistilBert](https://huggingface.co/docs/transformers/model_doc/distilbert#transformers.DistilBertModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[GPTBigCode](https://huggingface.co/docs/transformers/model_doc/gpt_bigcode#transformers.GPTBigCodeModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[GPTNeo](https://huggingface.co/docs/transformers/model_doc/gpt_neo#transformers.GPTNeoModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[GPTNeoX](https://huggingface.co/docs/transformers/model_doc/gpt_neox#transformers.GPTNeoXModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Falcon](https://huggingface.co/docs/transformers/model_doc/falcon#transformers.FalconModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Llama](https://huggingface.co/docs/transformers/model_doc/llama#transformers.LlamaModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Llava](https://huggingface.co/docs/transformers/model_doc/llava)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[VipLlava](https://huggingface.co/docs/transformers/model_doc/vipllava)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[MBart](https://huggingface.co/docs/transformers/model_doc/mbart#transformers.MBartModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Mistral](https://huggingface.co/docs/transformers/model_doc/mistral#transformers.MistralModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Mixtral](https://huggingface.co/docs/transformers/model_doc/mixtral#transformers.MixtralModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[OPT](https://huggingface.co/docs/transformers/model_doc/opt#transformers.OPTModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Phi](https://huggingface.co/docs/transformers/model_doc/phi#transformers.PhiModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Qwen2](https://huggingface.co/docs/transformers/model_doc/qwen2#transformers.Qwen2Model)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Whisper](https://huggingface.co/docs/transformers/model_doc/whisper#transformers.WhisperModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can request to add FlashAttention-2 support for another model by opening
+    a GitHub Issue or Pull Request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you begin, make sure you have FlashAttention-2 installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NVIDIAAMD
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: We strongly suggest referring to the detailed [installation instructions](https://github.com/Dao-AILab/flash-attention?tab=readme-ov-file#installation-and-features)
+    to learn more about supported hardware and data types!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To enable FlashAttention-2, pass the argument `attn_implementation="flash_attention_2"`
+    to [from_pretrained()](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.FlaxAutoModelForVision2Seq.from_pretrained):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: FlashAttention-2 can only be used when the model’s dtype is `fp16` or `bf16`.
+    Make sure to cast your model to the appropriate dtype and load them on a supported
+    device before using FlashAttention-2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also set `use_flash_attention_2=True` to enable FlashAttention-2 but
+    it is deprecated in favor of `attn_implementation="flash_attention_2"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'FlashAttention-2 can be combined with other optimization techniques like quantization
+    to further speedup inference. For example, you can combine FlashAttention-2 with
+    8-bit or 4-bit quantization:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Expected speedups
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can benefit from considerable speedups for inference, especially for inputs
+    with long sequences. However, since FlashAttention-2 does not support computing
+    attention scores with padding tokens, you must manually pad/unpad the attention
+    scores for batched inference when the sequence contains padding tokens. This leads
+    to a significant slowdown for batched generations with padding tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To overcome this, you should use FlashAttention-2 without padding tokens in
+    the sequence during training (by packing a dataset or [concatenating sequences](https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py#L516)
+    until reaching the maximum sequence length).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For a single forward pass on [tiiuae/falcon-7b](https://hf.co/tiiuae/falcon-7b)
+    with a sequence length of 4096 and various batch sizes without padding tokens,
+    the expected speedup is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/463d3f3c66f2489865a258a5082f46f7.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'For a single forward pass on [meta-llama/Llama-7b-hf](https://hf.co/meta-llama/Llama-7b-hf)
+    with a sequence length of 4096 and various batch sizes without padding tokens,
+    the expected speedup is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/7ae0be2e7a0a9e0f4d275f8884f4d7d3.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'For sequences with padding tokens (generating with padding tokens), you need
+    to unpad/pad the input sequences to correctly compute the attention scores. With
+    a relatively small sequence length, a single forward pass creates overhead leading
+    to a small speedup (in the example below, 30% of the input is filled with padding
+    tokens):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/44a86fa9a8504c27decb2bf7133621cb.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'But for larger sequence lengths, you can expect even more speedup benefits:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: FlashAttention is more memory efficient, meaning you can train on much larger
+    sequence lengths without running into out-of-memory issues. You can potentially
+    reduce memory usage up to 20x for larger sequence lengths. Take a look at the
+    [flash-attention](https://github.com/Dao-AILab/flash-attention) repository for
+    more details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/36c674b28857433397883375e3a3644d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: PyTorch scaled dot product attention
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PyTorch’s [`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention.html)
+    (SDPA) can also call FlashAttention and memory-efficient attention kernels under
+    the hood. SDPA support is currently being added natively in Transformers and is
+    used by default for `torch>=2.1.1` when an implementation is available.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For now, Transformers supports SDPA inference and training for the following
+    architectures:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Bart](https://huggingface.co/docs/transformers/model_doc/bart#transformers.BartModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[GPTBigCode](https://huggingface.co/docs/transformers/model_doc/gpt_bigcode#transformers.GPTBigCodeModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Falcon](https://huggingface.co/docs/transformers/model_doc/falcon#transformers.FalconModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Llama](https://huggingface.co/docs/transformers/model_doc/llama#transformers.LlamaModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Idefics](https://huggingface.co/docs/transformers/model_doc/idefics#transformers.IdeficsModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Whisper](https://huggingface.co/docs/transformers/model_doc/whisper#transformers.WhisperModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Mistral](https://huggingface.co/docs/transformers/model_doc/mistral#transformers.MistralModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Mixtral](https://huggingface.co/docs/transformers/model_doc/mixtral#transformers.MixtralModel)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Qwen2](https://huggingface.co/docs/transformers/model_doc/qwen2#transformers.Qwen2Model)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: FlashAttention can only be used for models with the `fp16` or `bf16` torch type,
+    so make sure to cast your model to the appropriate type first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'By default, SDPA selects the most performant kernel available but you can check
+    whether a backend is available in a given setting (hardware, problem size) with
+    [`torch.backends.cuda.sdp_kernel`](https://pytorch.org/docs/master/backends.html#torch.backends.cuda.sdp_kernel)
+    as a context manager:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you see a bug with the traceback below, try using the nightly version of
+    PyTorch which may have broader coverage for FlashAttention:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: BetterTransformer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Some BetterTransformer features are being upstreamed to Transformers with default
+    support for native `torch.nn.scaled_dot_product_attention`. BetterTransformer
+    still has a wider coverage than the Transformers SDPA integration, but you can
+    expect more and more architectures to natively support SDPA in Transformers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out our benchmarks with BetterTransformer and scaled dot product attention
+    in the [Out of the box acceleration and memory savings of 🤗 decoder models with
+    PyTorch 2.0](https://pytorch.org/blog/out-of-the-box-acceleration/) and learn
+    more about the fastpath execution in the [BetterTransformer](https://medium.com/pytorch/bettertransformer-out-of-the-box-performance-for-huggingface-transformers-3fbe27d50ab2)
+    blog post.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'BetterTransformer accelerates inference with its fastpath (native PyTorch specialized
+    implementation of Transformer functions) execution. The two optimizations in the
+    fastpath execution are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: fusion, which combines multiple sequential operations into a single “kernel”
+    to reduce the number of computation steps
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: skipping the inherent sparsity of padding tokens to avoid unnecessary computation
+    with nested tensors
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: BetterTransformer also converts all attention operations to use the more memory-efficient
+    [scaled dot product attention (SDPA)](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention),
+    and it calls optimized kernels like [FlashAttention](https://huggingface.co/papers/2205.14135)
+    under the hood.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you start, make sure you have 🤗 Optimum [installed](https://huggingface.co/docs/optimum/installation).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Then you can enable BetterTransformer with the [PreTrainedModel.to_bettertransformer()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.to_bettertransformer)
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can return the original Transformers model with the [reverse_bettertransformer()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.reverse_bettertransformer)
+    method. You should use this before saving your model to use the canonical Transformers
+    modeling:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: bitsandbytes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: bitsandbytes is a quantization library that includes support for 4-bit and 8-bit
+    quantization. Quantization reduces your model size compared to its native full
+    precision version, making it easier to fit large models onto GPUs with limited
+    memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Make sure you have bitsandbytes and 🤗 Accelerate installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 4-bit
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To load a model in 4-bit for inference, use the `load_in_4bit` parameter. The
+    `device_map` parameter is optional, but we recommend setting it to `"auto"` to
+    allow 🤗 Accelerate to automatically and efficiently allocate the model given the
+    available resources in the environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To load a model in 4-bit for inference with multiple GPUs, you can control
+    how much GPU RAM you want to allocate to each GPU. For example, to distribute
+    600MB of memory to the first GPU and 1GB of memory to the second GPU:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 8-bit
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you’re curious and interested in learning more about the concepts underlying
+    8-bit quantization, read the [Gentle Introduction to 8-bit Matrix Multiplication
+    for transformers at scale using Hugging Face Transformers, Accelerate and bitsandbytes](https://huggingface.co/blog/hf-bitsandbytes-integration)
+    blog post.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To load a model in 8-bit for inference, use the `load_in_8bit` parameter. The
+    `device_map` parameter is optional, but we recommend setting it to `"auto"` to
+    allow 🤗 Accelerate to automatically and efficiently allocate the model given the
+    available resources in the environment:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’re loading a model in 8-bit for text generation, you should use the
+    [generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
+    method instead of the [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)
+    function which is not optimized for 8-bit models and will be slower. Some sampling
+    strategies, like nucleus sampling, are also not supported by the [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)
+    for 8-bit models. You should also place all inputs on the same device as the model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To load a model in 4-bit for inference with multiple GPUs, you can control
+    how much GPU RAM you want to allocate to each GPU. For example, to distribute
+    1GB of memory to the first GPU and 2GB of memory to the second GPU:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Feel free to try running a 11 billion parameter [T5 model](https://colab.research.google.com/drive/1YORPWx4okIHXnjW7MSAidXN29mPVNT7F?usp=sharing)
+    or the 3 billion parameter [BLOOM model](https://colab.research.google.com/drive/1qOjXfQIAULfKvZqwCen8-MoWKGdSatZ4?usp=sharing)
+    for inference on Google Colab’s free tier GPUs!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🤗 Optimum
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Learn more details about using ORT with 🤗 Optimum in the [Accelerated inference
+    on NVIDIA GPUs](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/gpu#accelerated-inference-on-nvidia-gpus)
+    and [Accelerated inference on AMD GPUs](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/amdgpu#accelerated-inference-on-amd-gpus)
+    guides. This section only provides a brief and simple example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ONNX Runtime (ORT) is a model accelerator that supports accelerated inference
+    on Nvidia GPUs, and AMD GPUs that use [ROCm](https://www.amd.com/en/products/software/rocm.html)
+    stack. ORT uses optimization techniques like fusing common operations into a single
+    node and constant folding to reduce the number of computations performed and speedup
+    inference. ORT also places the most computationally intensive operations on the
+    GPU and the rest on the CPU to intelligently distribute the workload between the
+    two devices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'ORT is supported by 🤗 Optimum which can be used in 🤗 Transformers. You’ll need
+    to use an [ORTModel](https://huggingface.co/docs/optimum/v1.16.2/en/onnxruntime/package_reference/modeling_ort#optimum.onnxruntime.ORTModel)
+    for the task you’re solving, and specify the `provider` parameter which can be
+    set to either [`CUDAExecutionProvider`](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/gpu#cudaexecutionprovider),
+    [`ROCMExecutionProvider`](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/amdgpu)
+    or [`TensorrtExecutionProvider`](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/gpu#tensorrtexecutionprovider).
+    If you want to load a model that was not yet exported to ONNX, you can set `export=True`
+    to convert your model on-the-fly to the ONNX format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you’re free to use the model for inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Combine optimizations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'It is often possible to combine several of the optimization techniques described
+    above to get the best inference performance possible for your model. For example,
+    you can load a model in 4-bit, and then enable BetterTransformer with FlashAttention:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE

@@ -1,0 +1,1285 @@
+- en: Swin Transformer
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/swin](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/swin)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/254.bac84909.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Markdown.fef84341.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/PipelineTag.44585822.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Swin Transformer was proposed in [Swin Transformer: Hierarchical Vision
+    Transformer using Shifted Windows](https://arxiv.org/abs/2103.14030) by Ze Liu,
+    Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, Baining Guo.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*This paper presents a new vision Transformer, called Swin Transformer, that
+    capably serves as a general-purpose backbone for computer vision. Challenges in
+    adapting Transformer from language to vision arise from differences between the
+    two domains, such as large variations in the scale of visual entities and the
+    high resolution of pixels in images compared to words in text. To address these
+    differences, we propose a hierarchical Transformer whose representation is computed
+    with \bold{S}hifted \bold{win}dows. The shifted windowing scheme brings greater
+    efficiency by limiting self-attention computation to non-overlapping local windows
+    while also allowing for cross-window connection. This hierarchical architecture
+    has the flexibility to model at various scales and has linear computational complexity
+    with respect to image size. These qualities of Swin Transformer make it compatible
+    with a broad range of vision tasks, including image classification (87.3 top-1
+    accuracy on ImageNet-1K) and dense prediction tasks such as object detection (58.7
+    box AP and 51.1 mask AP on COCO test-dev) and semantic segmentation (53.5 mIoU
+    on ADE20K val). Its performance surpasses the previous state-of-the-art by a large
+    margin of +2.7 box AP and +2.6 mask AP on COCO, and +3.2 mIoU on ADE20K, demonstrating
+    the potential of Transformer-based models as vision backbones. The hierarchical
+    design and the shifted window approach also prove beneficial for all-MLP architectures.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![drawing](../Images/7ba1ac9b91a9ffc06d82ba989ec5ff3a.png) Swin Transformer
+    architecture. Taken from the [original paper](https://arxiv.org/abs/2102.03334).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [novice03](https://huggingface.co/novice03). The
+    Tensorflow version of this model was contributed by [amyeroberts](https://huggingface.co/amyeroberts).
+    The original code can be found [here](https://github.com/microsoft/Swin-Transformer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Swin pads the inputs supporting any input height and width (if divisible by
+    `32`).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Swin can be used as a *backbone*. When `output_hidden_states = True`, it will
+    output both `hidden_states` and `reshaped_hidden_states`. The `reshaped_hidden_states`
+    have a shape of `(batch, num_channels, height, width)` rather than `(batch_size,
+    sequence_length, num_channels)`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A list of official Hugging Face and community (indicated by 🌎) resources to
+    help you get started with Swin Transformer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image Classification
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[SwinForImageClassification](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinForImageClassification)
+    is supported by this [example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-classification)
+    and [notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/image_classification.ipynb).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'See also: [Image classification task guide](../tasks/image_classification)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Besides that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[SwinForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinForMaskedImageModeling)
+    is supported by this [example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-pretraining).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you’re interested in submitting a resource to be included here, please feel
+    free to open a Pull Request and we’ll review it! The resource should ideally demonstrate
+    something new instead of duplicating an existing resource.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SwinConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SwinConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/configuration_swin.py#L38)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( image_size = 224 patch_size = 4 num_channels = 3 embed_dim = 96 depths = [2,
+    2, 6, 2] num_heads = [3, 6, 12, 24] window_size = 7 mlp_ratio = 4.0 qkv_bias =
+    True hidden_dropout_prob = 0.0 attention_probs_dropout_prob = 0.0 drop_path_rate
+    = 0.1 hidden_act = 'gelu' use_absolute_embeddings = False initializer_range =
+    0.02 layer_norm_eps = 1e-05 encoder_stride = 32 out_features = None out_indices
+    = None **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image_size** (`int`, *optional*, defaults to 224) — The size (resolution)
+    of each image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**patch_size** (`int`, *optional*, defaults to 4) — The size (resolution) of
+    each patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_channels** (`int`, *optional*, defaults to 3) — The number of input channels.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**embed_dim** (`int`, *optional*, defaults to 96) — Dimensionality of patch
+    embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**depths** (`list(int)`, *optional*, defaults to `[2, 2, 6, 2]`) — Depth of
+    each layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_heads** (`list(int)`, *optional*, defaults to `[3, 6, 12, 24]`) — Number
+    of attention heads in each layer of the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**window_size** (`int`, *optional*, defaults to 7) — Size of windows.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mlp_ratio** (`float`, *optional*, defaults to 4.0) — Ratio of MLP hidden
+    dimensionality to embedding dimensionality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**qkv_bias** (`bool`, *optional*, defaults to `True`) — Whether or not a learnable
+    bias should be added to the queries, keys and values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_dropout_prob** (`float`, *optional*, defaults to 0.0) — The dropout
+    probability for all fully connected layers in the embeddings and encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_probs_dropout_prob** (`float`, *optional*, defaults to 0.0) — The
+    dropout ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**drop_path_rate** (`float`, *optional*, defaults to 0.1) — Stochastic depth
+    rate.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `function`, *optional*, defaults to `"gelu"`) — The
+    non-linear activation function (function or string) in the encoder. If string,
+    `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_absolute_embeddings** (`bool`, *optional*, defaults to `False`) — Whether
+    or not to add absolute position embeddings to the patch embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-05) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_stride** (`int`, *optional*, defaults to 32) — Factor to increase
+    the spatial resolution by in the decoder head for masked image modeling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**out_features** (`List[str]`, *optional*) — If used as backbone, list of features
+    to output. Can be any of `"stem"`, `"stage1"`, `"stage2"`, etc. (depending on
+    how many stages the model has). If unset and `out_indices` is set, will default
+    to the corresponding stages. If unset and `out_indices` is unset, will default
+    to the last stage. Must be in the same order as defined in the `stage_names` attribute.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**out_indices** (`List[int]`, *optional*) — If used as backbone, list of indices
+    of features to output. Can be any of 0, 1, 2, etc. (depending on how many stages
+    the model has). If unset and `out_features` is set, will default to the corresponding
+    stages. If unset and `out_features` is unset, will default to the last stage.
+    Must be in the same order as defined in the `stage_names` attribute.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [SwinModel](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinModel).
+    It is used to instantiate a Swin model according to the specified arguments, defining
+    the model architecture. Instantiating a configuration with the defaults will yield
+    a similar configuration to that of the Swin [microsoft/swin-tiny-patch4-window7-224](https://huggingface.co/microsoft/swin-tiny-patch4-window7-224)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: SwinModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SwinModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_swin.py#L931)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config add_pooling_layer = True use_mask_token = False )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**add_pooling_layer** (`bool`, *optional*, defaults to `True`) — Whether or
+    not to apply pooling layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_mask_token** (`bool`, *optional*, defaults to `False`) — Whether or not
+    to create and apply mask tokens in the embedding layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare Swin Model transformer outputting raw hidden-states without any specific
+    head on top. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_swin.py#L968)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None bool_masked_pos: Optional = None head_mask:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None return_dict: Optional = None ) → `transformers.models.swin.modeling_swin.SwinModelOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bool_masked_pos** (`torch.BoolTensor` of shape `(batch_size, num_patches)`,
+    *optional*) — Boolean masked positions. Indicates which patches are masked (1)
+    and which aren’t (0).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.swin.modeling_swin.SwinModelOutput` or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.swin.modeling_swin.SwinModelOutput` or a tuple of `torch.FloatTensor`
+    (if `return_dict=False` is passed or when `config.return_dict=False`) comprising
+    various elements depending on the configuration ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`torch.FloatTensor` of shape `(batch_size, hidden_size)`,
+    *optional*, returned when `add_pooling_layer=True` is passed) — Average pooling
+    of the last layer hidden-state.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each stage) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**reshaped_hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned
+    when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
+    — Tuple of `torch.FloatTensor` (one for the output of the embeddings + one for
+    the output of each stage) of shape `(batch_size, hidden_size, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs reshaped to include the spatial dimensions.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [SwinModel](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: SwinForMaskedImageModeling
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SwinForMaskedImageModeling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_swin.py#L1038)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Swin Model with a decoder on top for masked image modeling, as proposed in [SimMIM](https://arxiv.org/abs/2111.09886).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that we provide a script to pre-train this model on custom data in our
+    [examples directory](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-pretraining).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_swin.py#L1067)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None bool_masked_pos: Optional = None head_mask:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None return_dict: Optional = None ) → `transformers.models.swin.modeling_swin.SwinMaskedImageModelingOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bool_masked_pos** (`torch.BoolTensor` of shape `(batch_size, num_patches)`)
+    — Boolean masked positions. Indicates which patches are masked (1) and which aren’t
+    (0).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.swin.modeling_swin.SwinMaskedImageModelingOutput` or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.swin.modeling_swin.SwinMaskedImageModelingOutput` or
+    a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `bool_masked_pos`
+    is provided) — Masked image modeling (MLM) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**reconstruction** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Reconstructed pixel values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each stage) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**reshaped_hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned
+    when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
+    — Tuple of `torch.FloatTensor` (one for the output of the embeddings + one for
+    the output of each stage) of shape `(batch_size, hidden_size, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs reshaped to include the spatial dimensions.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [SwinForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinForMaskedImageModeling)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: SwinForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SwinForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_swin.py#L1154)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Swin Model transformer with an image classification head on top (a linear layer
+    on top of the final hidden state of the [CLS] token) e.g. for ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_swin.py#L1176)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None head_mask: Optional = None labels: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None ) → `transformers.models.swin.modeling_swin.SwinImageClassifierOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.swin.modeling_swin.SwinImageClassifierOutput` or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.swin.modeling_swin.SwinImageClassifierOutput` or a tuple
+    of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each stage) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**reshaped_hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned
+    when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
+    — Tuple of `torch.FloatTensor` (one for the output of the embeddings + one for
+    the output of each stage) of shape `(batch_size, hidden_size, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs reshaped to include the spatial dimensions.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [SwinForImageClassification](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinForImageClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: TFSwinModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFSwinModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_tf_swin.py#L1309)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: SwinConfig add_pooling_layer: bool = True use_mask_token: bool =
+    False **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare Swin Model transformer outputting raw hidden-states without any specific
+    head on top. This model is a Tensorflow [tf.keras.layers.Layer](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Layer)
+    sub-class. Use it as a regular Tensorflow Module and refer to the Tensorflow documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_tf_swin.py#L1321)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: tf.Tensor | None = None bool_masked_pos: tf.Tensor | None =
+    None head_mask: tf.Tensor | None = None output_attentions: Optional[bool] = None
+    output_hidden_states: Optional[bool] = None return_dict: Optional[bool] = None
+    training: bool = False ) → `transformers.models.swin.modeling_tf_swin.TFSwinModelOutput`
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`tf.Tensor` of shape `(batch_size, num_channels, height,
+    width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`tf.Tensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bool_masked_pos** (`tf.Tensor` of shape `(batch_size, num_patches)`, *optional*)
+    — Boolean masked positions. Indicates which patches are masked (1) and which aren’t
+    (0).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.swin.modeling_tf_swin.TFSwinModelOutput` or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.swin.modeling_tf_swin.TFSwinModelOutput` or a tuple of
+    `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`tf.Tensor` of shape `(batch_size, hidden_size)`, *optional*,
+    returned when `add_pooling_layer=True` is passed) — Average pooling of the last
+    layer hidden-state.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each stage) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**reshaped_hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, hidden_size, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs reshaped to include the spatial dimensions.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFSwinModel](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.TFSwinModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFSwinForMaskedImageModeling
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFSwinForMaskedImageModeling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_tf_swin.py#L1431)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: SwinConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Swin Model with a decoder on top for masked image modeling, as proposed in [SimMIM](https://arxiv.org/abs/2111.09886).
+    This model is a Tensorflow [tf.keras.layers.Layer](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Layer)
+    sub-class. Use it as a regular Tensorflow Module and refer to the Tensorflow documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_tf_swin.py#L1444)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: tf.Tensor | None = None bool_masked_pos: tf.Tensor | None =
+    None head_mask: tf.Tensor | None = None output_attentions: Optional[bool] = None
+    output_hidden_states: Optional[bool] = None return_dict: Optional[bool] = None
+    training: bool = False ) → `transformers.models.swin.modeling_tf_swin.TFSwinMaskedImageModelingOutput`
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`tf.Tensor` of shape `(batch_size, num_channels, height,
+    width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`tf.Tensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bool_masked_pos** (`tf.Tensor` of shape `(batch_size, num_patches)`) — Boolean
+    masked positions. Indicates which patches are masked (1) and which aren’t (0).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.swin.modeling_tf_swin.TFSwinMaskedImageModelingOutput`
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.swin.modeling_tf_swin.TFSwinMaskedImageModelingOutput`
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(1,)`, *optional*, returned when `bool_masked_pos`
+    is provided) — Masked image modeling (MLM) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**reconstruction** (`tf.Tensor` of shape `(batch_size, num_channels, height,
+    width)`) — Reconstructed pixel values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each stage) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**reshaped_hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, hidden_size, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs reshaped to include the spatial dimensions.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFSwinForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.TFSwinForMaskedImageModeling)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFSwinForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFSwinForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_tf_swin.py#L1552)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: SwinConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Swin Model transformer with an image classification head on top (a linear layer
+    on top of the final hidden state of the [CLS] token) e.g. for ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a Tensorflow [tf.keras.layers.Layer](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Layer)
+    sub-class. Use it as a regular Tensorflow Module and refer to the Tensorflow documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/swin/modeling_tf_swin.py#L1573)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: tf.Tensor | None = None head_mask: tf.Tensor | None = None
+    labels: tf.Tensor | None = None output_attentions: Optional[bool] = None output_hidden_states:
+    Optional[bool] = None return_dict: Optional[bool] = None training: bool = False
+    ) → `transformers.models.swin.modeling_tf_swin.TFSwinImageClassifierOutput` or
+    `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`tf.Tensor` of shape `(batch_size, num_channels, height,
+    width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`tf.Tensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`tf.Tensor` of shape `(batch_size,)`, *optional*) — Labels for
+    computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.swin.modeling_tf_swin.TFSwinImageClassifierOutput` or
+    `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.swin.modeling_tf_swin.TFSwinImageClassifierOutput` or
+    a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SwinConfig](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.SwinConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(1,)`, *optional*, returned when `labels` is
+    provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`tf.Tensor` of shape `(batch_size, config.num_labels)`) — Classification
+    (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each stage) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**reshaped_hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, hidden_size, height, width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs reshaped to include the spatial dimensions.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFSwinForImageClassification](/docs/transformers/v4.37.2/en/model_doc/swin#transformers.TFSwinForImageClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE

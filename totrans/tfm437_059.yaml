@@ -1,0 +1,231 @@
+- en: Export to TorchScript
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/torchscript](https://huggingface.co/docs/transformers/v4.37.2/en/torchscript)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/370.f0b18e61.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is the very beginning of our experiments with TorchScript and we are still
+    exploring its capabilities with variable-input-size models. It is a focus of interest
+    to us and we will deepen our analysis in upcoming releases, with more code examples,
+    a more flexible implementation, and benchmarks comparing Python-based codes with
+    compiled TorchScript.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'According to the [TorchScript documentation](https://pytorch.org/docs/stable/jit.html):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: TorchScript is a way to create serializable and optimizable models from PyTorch
+    code.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: There are two PyTorch modules, [JIT and TRACE](https://pytorch.org/docs/stable/jit.html),
+    that allow developers to export their models to be reused in other programs like
+    efficiency-oriented C++ programs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We provide an interface that allows you to export 🤗 Transformers models to TorchScript
+    so they can be reused in a different environment than PyTorch-based Python programs.
+    Here, we explain how to export and use our models using TorchScript.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Exporting a model requires two things:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: model instantiation with the `torchscript` flag
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a forward pass with dummy inputs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These necessities imply several things developers should be careful about as
+    detailed below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: TorchScript flag and tied weights
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `torchscript` flag is necessary because most of the 🤗 Transformers language
+    models have tied weights between their `Embedding` layer and their `Decoding`
+    layer. TorchScript does not allow you to export models that have tied weights,
+    so it is necessary to untie and clone the weights beforehand.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Models instantiated with the `torchscript` flag have their `Embedding` layer
+    and `Decoding` layer separated, which means that they should not be trained down
+    the line. Training would desynchronize the two layers, leading to unexpected results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is not the case for models that do not have a language model head, as those
+    do not have tied weights. These models can be safely exported without the `torchscript`
+    flag.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dummy inputs and standard lengths
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The dummy inputs are used for a models forward pass. While the inputs’ values
+    are propagated through the layers, PyTorch keeps track of the different operations
+    executed on each tensor. These recorded operations are then used to create the
+    *trace* of the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The trace is created relative to the inputs’ dimensions. It is therefore constrained
+    by the dimensions of the dummy input, and will not work for any other sequence
+    length or batch size. When trying with a different size, the following error is
+    raised:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: We recommended you trace the model with a dummy input size at least as large
+    as the largest input that will be fed to the model during inference. Padding can
+    help fill the missing values. However, since the model is traced with a larger
+    input size, the dimensions of the matrix will also be large, resulting in more
+    calculations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Be careful of the total number of operations done on each input and follow the
+    performance closely when exporting varying sequence-length models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using TorchScript in Python
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This section demonstrates how to save and load models as well as how to use
+    the trace for inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Saving a model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To export a `BertModel` with TorchScript, instantiate `BertModel` from the
+    `BertConfig` class and then save it to disk under the filename `traced_bert.pt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Loading a model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Now you can load the previously saved `BertModel`, `traced_bert.pt`, from disk
+    and use it on the previously initialised `dummy_input`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using a traced model for inference
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Use the traced model for inference by using its `__call__` dunder method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Deploy Hugging Face TorchScript models to AWS with the Neuron SDK
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'AWS introduced the [Amazon EC2 Inf1](https://aws.amazon.com/ec2/instance-types/inf1/)
+    instance family for low cost, high performance machine learning inference in the
+    cloud. The Inf1 instances are powered by the AWS Inferentia chip, a custom-built
+    hardware accelerator, specializing in deep learning inferencing workloads. [AWS
+    Neuron](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/#) is the SDK
+    for Inferentia that supports tracing and optimizing transformers models for deployment
+    on Inf1\. The Neuron SDK provides:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Easy-to-use API with one line of code change to trace and optimize a TorchScript
+    model for inference in the cloud.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Out of the box performance optimizations for [improved cost-performance](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/benchmark/%3E).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Support for Hugging Face transformers models built with either [PyTorch](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/src/examples/pytorch/bert_tutorial/tutorial_pretrained_bert.html)
+    or [TensorFlow](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/src/examples/tensorflow/huggingface_bert/huggingface_bert.html).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Implications
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Transformers models based on the [BERT (Bidirectional Encoder Representations
+    from Transformers)](https://huggingface.co/docs/transformers/main/model_doc/bert)
+    architecture, or its variants such as [distilBERT](https://huggingface.co/docs/transformers/main/model_doc/distilbert)
+    and [roBERTa](https://huggingface.co/docs/transformers/main/model_doc/roberta)
+    run best on Inf1 for non-generative tasks such as extractive question answering,
+    sequence classification, and token classification. However, text generation tasks
+    can still be adapted to run on Inf1 according to this [AWS Neuron MarianMT tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/src/examples/pytorch/transformers-marianmt.html).
+    More information about models that can be converted out of the box on Inferentia
+    can be found in the [Model Architecture Fit](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/models/models-inferentia.html#models-inferentia)
+    section of the Neuron documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dependencies
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Using AWS Neuron to convert models requires a [Neuron SDK environment](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/neuron-frameworks/pytorch-neuron/index.html#installation-guide)
+    which comes preconfigured on [AWS Deep Learning AMI](https://docs.aws.amazon.com/dlami/latest/devguide/tutorial-inferentia-launching.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converting a model for AWS Neuron
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Convert a model for AWS NEURON using the same code from [Using TorchScript
+    in Python](torchscript#using-torchscript-in-python) to trace a `BertModel`. Import
+    the `torch.neuron` framework extension to access the components of the Neuron
+    SDK through a Python API:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You only need to modify the following line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: This enables the Neuron SDK to trace the model and optimize it for Inf1 instances.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To learn more about AWS Neuron SDK features, tools, example tutorials and latest
+    updates, please see the [AWS NeuronSDK documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html).
+  prefs: []
+  type: TYPE_NORMAL

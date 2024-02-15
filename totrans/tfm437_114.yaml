@@ -1,0 +1,207 @@
+- en: Keras callbacks
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/keras_callbacks](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/keras_callbacks)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/44.bdb1affe.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When training a Transformers model with Keras, there are some library-specific
+    callbacks available to automate common tasks:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: KerasMetricCallback
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.KerasMetricCallback'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/keras_callbacks.py#L20)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( metric_fn: Callable eval_dataset: Union output_cols: Optional = None label_cols:
+    Optional = None batch_size: Optional = None predict_with_generate: bool = False
+    use_xla_generation: bool = False generate_kwargs: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**metric_fn** (`Callable`) — Metric function provided by the user. It will
+    be called with two arguments - `predictions` and `labels`. These contain the model’s
+    outputs and matching labels from the dataset. It should return a dict mapping
+    metric names to numerical values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eval_dataset** (`tf.data.Dataset` or `dict` or `tuple` or `np.ndarray` or
+    `tf.Tensor`) — Validation data to be used to generate predictions for the `metric_fn`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_cols** (`List[str], *optional*) — A list of columns to be retained
+    from the model output as the predictions. Defaults to all.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**label_cols** (’`List[str]`, *optional*’) — A list of columns to be retained
+    from the input dataset as the labels. Will be autodetected if this is not supplied.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**batch_size** (`int`, *optional*) — Batch size. Only used when the data is
+    not a pre-batched `tf.data.Dataset`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**predict_with_generate** (`bool`, *optional*, defaults to `False`) — Whether
+    we should use `model.generate()` to get outputs for the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_xla_generation** (`bool`, *optional*, defaults to `False`) — If we’re
+    generating, whether to compile model generation with XLA. This can massively increase
+    the speed of generation (up to 100X speedup) but will require a new XLA compilation
+    for each input shape. When using XLA generation, it’s a good idea to pad your
+    inputs to the same size, or to use the `pad_to_multiple_of` argument in your `tokenizer`
+    or `DataCollator`, which will reduce the number of unique input shapes and save
+    a lot of compilation time. This option has no effect is `predict_with_generate`
+    is `False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**generate_kwargs** (`dict`, *optional*) — Keyword arguments to pass to `model.generate()`
+    when generating. Has no effect if `predict_with_generate` is `False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Callback to compute metrics at the end of every epoch. Unlike normal Keras metrics,
+    these do not need to be compilable by TF. It is particularly useful for common
+    NLP metrics like BLEU and ROUGE that require string operations or generation loops
+    that cannot be compiled. Predictions (or generations) will be computed on the
+    `eval_dataset` before being passed to the `metric_fn` in `np.ndarray` format.
+    The `metric_fn` should compute metrics and return a dict mapping metric names
+    to metric values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We provide an example of a suitable metric_fn that computes ROUGE scores for
+    a summarization model below. Note that this example skips some post-processing
+    for readability and simplicity, and should probably not be used as-is!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The above function will return a dict containing values which will be logged
+    like any other Keras metric:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: PushToHubCallback
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PushToHubCallback'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/keras_callbacks.py#L268)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( output_dir: Union save_strategy: Union = ''epoch'' save_steps: Optional =
+    None tokenizer: Optional = None hub_model_id: Optional = None hub_token: Optional
+    = None checkpoint: bool = False **model_card_args )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**output_dir** (`str`) — The output directory where the model predictions and
+    checkpoints will be written and synced with the repository on the Hub.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**save_strategy** (`str` or [IntervalStrategy](/docs/transformers/v4.37.2/en/internal/trainer_utils#transformers.IntervalStrategy),
+    *optional*, defaults to `"epoch"`) — The checkpoint save strategy to adopt during
+    training. Possible values are:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"no"`: Save is done at the end of training.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"epoch"`: Save is done at the end of each epoch.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"steps"`: Save is done every `save_steps`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**save_steps** (`int`, *optional*) — The number of steps between saves when
+    using the “steps” `save_strategy`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer** (`PreTrainedTokenizerBase`, *optional*) — The tokenizer used
+    by the model. If supplied, will be uploaded to the repo alongside the weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hub_model_id** (`str`, *optional*) — The name of the repository to keep in
+    sync with the local `output_dir`. It can be a simple model ID in which case the
+    model will be pushed in your namespace. Otherwise it should be the whole repository
+    name, for instance `"user_name/model"`, which allows you to push to an organization
+    you are a member of with `"organization_name/model"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Will default to the name of `output_dir`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hub_token** (`str`, *optional*) — The token to use to push the model to the
+    Hub. Will default to the token in the cache folder obtained with `huggingface-cli
+    login`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**checkpoint** (`bool`, *optional*, defaults to `False`) — Whether to save
+    full training checkpoints (including epoch and optimizer state) to allow training
+    to be resumed. Only usable when `save_strategy` is `"epoch"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Callback that will save and push the model to the Hub regularly. By default,
+    it pushes once per epoch, but this can be changed with the `save_strategy` argument.
+    Pushed models can be accessed like any other model on the hub, such as with the
+    `from_pretrained` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE

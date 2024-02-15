@@ -1,0 +1,558 @@
+- en: NLLB
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/nllb](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/nllb)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/202.af9b5642.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Updated tokenizer behavior
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '**DISCLAIMER:** The default behaviour for the tokenizer was fixed and thus
+    changed in April 2023. The previous version adds `[self.eos_token_id, self.cur_lang_code]`
+    at the end of the token sequence for both target and source tokenization. This
+    is wrong as the NLLB paper mentions (page 48, 6.1.1\. Model Architecture) :'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Note that we prefix the source sequence with the source language, as opposed
+    to the target language as previously done in several works (Arivazhagan et al.,
+    2019; Johnson et al., 2017). This is primarily because we prioritize optimizing
+    zero-shot performance of our model on any pair of 200 languages at a minor cost
+    to supervised performance.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Previous behaviour:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: New behaviour
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Enabling the old behaviour can be done as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: For more details, feel free to check the linked [PR](https://github.com/huggingface/transformers/pull/22313)
+    and [Issue](https://github.com/huggingface/transformers/issues/19943).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The NLLB model was presented in [No Language Left Behind: Scaling Human-Centered
+    Machine Translation](https://arxiv.org/abs/2207.04672) by Marta R. Costa-jussà,
+    James Cross, Onur Çelebi, Maha Elbayad, Kenneth Heafield, Kevin Heffernan, Elahe
+    Kalbassi, Janice Lam, Daniel Licht, Jean Maillard, Anna Sun, Skyler Wang, Guillaume
+    Wenzek, Al Youngblood, Bapi Akula, Loic Barrault, Gabriel Mejia Gonzalez, Prangthip
+    Hansanti, John Hoffman, Semarley Jarrett, Kaushik Ram Sadagopan, Dirk Rowe, Shannon
+    Spruit, Chau Tran, Pierre Andrews, Necip Fazil Ayan, Shruti Bhosale, Sergey Edunov,
+    Angela Fan, Cynthia Gao, Vedanuj Goswami, Francisco Guzmán, Philipp Koehn, Alexandre
+    Mourachko, Christophe Ropers, Safiyyah Saleem, Holger Schwenk, and Jeff Wang.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract of the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Driven by the goal of eradicating language barriers on a global scale, machine
+    translation has solidified itself as a key focus of artificial intelligence research
+    today. However, such efforts have coalesced around a small subset of languages,
+    leaving behind the vast majority of mostly low-resource languages. What does it
+    take to break the 200 language barrier while ensuring safe, high quality results,
+    all while keeping ethical considerations in mind? In No Language Left Behind,
+    we took on this challenge by first contextualizing the need for low-resource language
+    translation support through exploratory interviews with native speakers. Then,
+    we created datasets and models aimed at narrowing the performance gap between
+    low and high-resource languages. More specifically, we developed a conditional
+    compute model based on Sparsely Gated Mixture of Experts that is trained on data
+    obtained with novel and effective data mining techniques tailored for low-resource
+    languages. We propose multiple architectural and training improvements to counteract
+    overfitting while training on thousands of tasks. Critically, we evaluated the
+    performance of over 40,000 different translation directions using a human-translated
+    benchmark, Flores-200, and combined human evaluation with a novel toxicity benchmark
+    covering all languages in Flores-200 to assess translation safety. Our model achieves
+    an improvement of 44% BLEU relative to the previous state-of-the-art, laying important
+    groundwork towards realizing a universal translation system.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This implementation contains the dense models available on release.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**The sparse model NLLB-MoE (Mixture of Expert) is now available! More details
+    [here](nllb-moe)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [Lysandre](https://huggingface.co/lysandre). The
+    authors’ code can be found [here](https://github.com/facebookresearch/fairseq/tree/nllb).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating with NLLB
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: While generating the target text set the `forced_bos_token_id` to the target
+    language id. The following example shows how to translate English to French using
+    the *facebook/nllb-200-distilled-600M* model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that we’re using the BCP-47 code for French `fra_Latn`. See [here](https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200)
+    for the list of all BCP-47 in the Flores 200 dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generating from any other language than English
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: English (`eng_Latn`) is set as the default language from which to translate.
+    In order to specify that you’d like to translate from a different language, you
+    should specify the BCP-47 code in the `src_lang` keyword argument of the tokenizer
+    initialization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'See example below for a translation from romanian to german:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Translation task guide](../tasks/translation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Summarization task guide](../tasks/summarization)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: NllbTokenizer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.NllbTokenizer'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nllb/tokenization_nllb.py#L47)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vocab_file bos_token = ''<s>'' eos_token = ''</s>'' sep_token = ''</s>''
+    cls_token = ''<s>'' unk_token = ''<unk>'' pad_token = ''<pad>'' mask_token = ''<mask>''
+    tokenizer_file = None src_lang = None tgt_lang = None sp_model_kwargs: Optional
+    = None additional_special_tokens = None legacy_behaviour = False **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_file** (`str`) — Path to the vocabulary file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`str`, *optional*, defaults to `"<s>"`) — The beginning of sequence
+    token that was used during pretraining. Can be used a sequence classifier token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When building a sequence using special tokens, this is not the token that is
+    used for the beginning of sequence. The token used is the `cls_token`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**eos_token** (`str`, *optional*, defaults to `"</s>"`) — The end of sequence
+    token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When building a sequence using special tokens, this is not the token that is
+    used for the end of sequence. The token used is the `sep_token`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**sep_token** (`str`, *optional*, defaults to `"</s>"`) — The separator token,
+    which is used when building a sequence from multiple sequences, e.g. two sequences
+    for sequence classification or for a text and a question for question answering.
+    It is also used as the last token of a sequence built with special tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cls_token** (`str`, *optional*, defaults to `"<s>"`) — The classifier token
+    which is used when doing sequence classification (classification of the whole
+    sequence instead of per-token classification). It is the first token of the sequence
+    when built with special tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unk_token** (`str`, *optional*, defaults to `"<unk>"`) — The unknown token.
+    A token that is not in the vocabulary cannot be converted to an ID and is set
+    to be this token instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_token** (`str`, *optional*, defaults to `"<pad>"`) — The token used for
+    padding, for example when batching sequences of different lengths.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_token** (`str`, *optional*, defaults to `"<mask>"`) — The token used
+    for masking values. This is the token used when training this model with masked
+    language modeling. This is the token which the model will try to predict.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer_file** (`str`, *optional*) — The path to a tokenizer file to use
+    instead of the vocab file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**src_lang** (`str`, *optional*) — The language to use as source language for
+    translation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tgt_lang** (`str`, *optional*) — The language to use as target language for
+    translation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sp_model_kwargs** (`Dict[str, str]`) — Additional keyword arguments to pass
+    to the model initialization.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Construct an NLLB tokenizer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adapted from [RobertaTokenizer](/docs/transformers/v4.37.2/en/model_doc/roberta#transformers.RobertaTokenizer)
+    and [XLNetTokenizer](/docs/transformers/v4.37.2/en/model_doc/xlnet#transformers.XLNetTokenizer).
+    Based on [SentencePiece](https://github.com/google/sentencepiece).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The tokenization method is `<tokens> <eos> <language code>` for source language
+    documents, and `<language code>
+  prefs: []
+  type: TYPE_NORMAL
+- en: <tokens> <eos>` for target language documents.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### build_inputs_with_special_tokens'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nllb/tokenization_nllb.py#L269)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( token_ids_0: List token_ids_1: Optional = None ) → `List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs to which the special tokens will
+    be added.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: List of [input IDs](../glossary#input-ids) with the appropriate special tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Build model inputs from a sequence or a pair of sequence for sequence classification
+    tasks by concatenating and adding special tokens. An NLLB sequence has the following
+    format, where `X` represents the sequence:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input_ids` (for encoder) `X [eos, src_lang_code]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`decoder_input_ids`: (for decoder) `X [eos, tgt_lang_code]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: BOS is never used. Pairs of sequences are not the expected use case, but they
+    will be handled without a separator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NllbTokenizerFast
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.NllbTokenizerFast'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nllb/tokenization_nllb_fast.py#L59)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_file = None tokenizer_file = None bos_token = '<s>' eos_token = '</s>'
+    sep_token = '</s>' cls_token = '<s>' unk_token = '<unk>' pad_token = '<pad>' mask_token
+    = '<mask>' src_lang = None tgt_lang = None additional_special_tokens = None legacy_behaviour
+    = False **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_file** (`str`) — Path to the vocabulary file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`str`, *optional*, defaults to `"<s>"`) — The beginning of sequence
+    token that was used during pretraining. Can be used a sequence classifier token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When building a sequence using special tokens, this is not the token that is
+    used for the beginning of sequence. The token used is the `cls_token`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**eos_token** (`str`, *optional*, defaults to `"</s>"`) — The end of sequence
+    token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When building a sequence using special tokens, this is not the token that is
+    used for the end of sequence. The token used is the `sep_token`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**sep_token** (`str`, *optional*, defaults to `"</s>"`) — The separator token,
+    which is used when building a sequence from multiple sequences, e.g. two sequences
+    for sequence classification or for a text and a question for question answering.
+    It is also used as the last token of a sequence built with special tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cls_token** (`str`, *optional*, defaults to `"<s>"`) — The classifier token
+    which is used when doing sequence classification (classification of the whole
+    sequence instead of per-token classification). It is the first token of the sequence
+    when built with special tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unk_token** (`str`, *optional*, defaults to `"<unk>"`) — The unknown token.
+    A token that is not in the vocabulary cannot be converted to an ID and is set
+    to be this token instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_token** (`str`, *optional*, defaults to `"<pad>"`) — The token used for
+    padding, for example when batching sequences of different lengths.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_token** (`str`, *optional*, defaults to `"<mask>"`) — The token used
+    for masking values. This is the token used when training this model with masked
+    language modeling. This is the token which the model will try to predict.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer_file** (`str`, *optional*) — The path to a tokenizer file to use
+    instead of the vocab file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**src_lang** (`str`, *optional*) — The language to use as source language for
+    translation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tgt_lang** (`str`, *optional*) — The language to use as target language for
+    translation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Construct a “fast” NLLB tokenizer (backed by HuggingFace’s *tokenizers* library).
+    Based on [BPE](https://huggingface.co/docs/tokenizers/python/latest/components.html?highlight=BPE#models).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This tokenizer inherits from [PreTrainedTokenizerFast](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizerFast)
+    which contains most of the main methods. Users should refer to this superclass
+    for more information regarding those methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The tokenization method is `<tokens> <eos> <language code>` for source language
+    documents, and `<language code>
+  prefs: []
+  type: TYPE_NORMAL
+- en: <tokens> <eos>` for target language documents.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### build_inputs_with_special_tokens'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nllb/tokenization_nllb_fast.py#L212)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( token_ids_0: List token_ids_1: Optional = None ) → `List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs to which the special tokens will
+    be added.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: list of [input IDs](../glossary#input-ids) with the appropriate special tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build model inputs from a sequence or a pair of sequence for sequence classification
+    tasks by concatenating and adding special tokens. The special tokens depend on
+    calling set_lang.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An NLLB sequence has the following format, where `X` represents the sequence:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input_ids` (for encoder) `X [eos, src_lang_code]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`decoder_input_ids`: (for decoder) `X [eos, tgt_lang_code]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: BOS is never used. Pairs of sequences are not the expected use case, but they
+    will be handled without a separator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### create_token_type_ids_from_sequences'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nllb/tokenization_nllb_fast.py#L241)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( token_ids_0: List token_ids_1: Optional = None ) → `List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: List of zeros.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a mask from the two sequences passed to be used in a sequence-pair classification
+    task. nllb does not make use of token type ids, therefore a list of zeros is returned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### set_src_lang_special_tokens'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nllb/tokenization_nllb_fast.py#L296)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( src_lang )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reset the special tokens to the source lang setting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In legacy mode: No prefix and suffix=[eos, src_lang_code].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'In default mode: Prefix=[src_lang_code], suffix = [eos]'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### set_tgt_lang_special_tokens'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nllb/tokenization_nllb_fast.py#L319)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( lang: str )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reset the special tokens to the target lang setting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In legacy mode: No prefix and suffix=[eos, tgt_lang_code].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'In default mode: Prefix=[tgt_lang_code], suffix = [eos]'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

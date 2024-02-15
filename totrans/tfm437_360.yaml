@@ -1,0 +1,921 @@
+- en: Nougat
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/nougat](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/nougat)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/204.4698a52e.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Nougat model was proposed in [Nougat: Neural Optical Understanding for
+    Academic Documents](https://arxiv.org/abs/2308.13418) by Lukas Blecher, Guillem
+    Cucurull, Thomas Scialom, Robert Stojnic. Nougat uses the same architecture as
+    [Donut](donut), meaning an image Transformer encoder and an autoregressive text
+    Transformer decoder to translate scientific PDFs to markdown, enabling easier
+    access to them.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Scientific knowledge is predominantly stored in books and scientific journals,
+    often in the form of PDFs. However, the PDF format leads to a loss of semantic
+    information, particularly for mathematical expressions. We propose Nougat (Neural
+    Optical Understanding for Academic Documents), a Visual Transformer model that
+    performs an Optical Character Recognition (OCR) task for processing scientific
+    documents into a markup language, and demonstrate the effectiveness of our model
+    on a new dataset of scientific documents. The proposed approach offers a promising
+    solution to enhance the accessibility of scientific knowledge in the digital age,
+    by bridging the gap between human-readable documents and machine-readable text.
+    We release the models and code to accelerate future work on scientific text recognition.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![drawing](../Images/815b74c6366c16cb9cb90a9d9b246b4c.png) Nougat high-level
+    overview. Taken from the [original paper](https://arxiv.org/abs/2308.13418).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [nielsr](https://huggingface.co/nielsr). The original
+    code can be found [here](https://github.com/facebookresearch/nougat).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The quickest way to get started with Nougat is by checking the [tutorial notebooks](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/Nougat),
+    which show how to use the model at inference time as well as fine-tuning on custom
+    data.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Nougat is always used within the [VisionEncoderDecoder](vision-encoder-decoder)
+    framework. The model is identical to [Donut](donut) in terms of architecture.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Nougat’s `VisionEncoderDecoder` model accepts images as input and makes use
+    of [generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
+    to autoregressively generate text given the input image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [NougatImageProcessor](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatImageProcessor)
+    class is responsible for preprocessing the input image and [NougatTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatTokenizerFast)
+    decodes the generated target tokens to the target string. The [NougatProcessor](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatProcessor)
+    wraps [NougatImageProcessor](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatImageProcessor)
+    and [NougatTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatTokenizerFast)
+    classes into a single instance to both extract the input features and decode the
+    predicted token ids.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Step-by-step PDF transcription
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: See the [model hub](https://huggingface.co/models?filter=nougat) to look for
+    Nougat checkpoints.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The model is identical to [Donut](donut) in terms of architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NougatImageProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.NougatImageProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/image_processing_nougat.py#L57)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_crop_margin: bool = True do_resize: bool = True size: Dict = None resample:
+    Resampling = <Resampling.BILINEAR: 2> do_thumbnail: bool = True do_align_long_axis:
+    bool = False do_pad: bool = True do_rescale: bool = True rescale_factor: Union
+    = 0.00392156862745098 do_normalize: bool = True image_mean: Union = None image_std:
+    Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_crop_margin** (`bool`, *optional*, defaults to `True`) — Whether to crop
+    the image margins.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Whether to resize
+    the image’s (height, width) dimensions to the specified `size`. Can be overridden
+    by `do_resize` in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]` *optional*, defaults to `{"height" -- 896, "width":
+    672}`): Size of the image after resizing. Can be overridden by `size` in the `preprocess`
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`PILImageResampling`, *optional*, defaults to `Resampling.BILINEAR`)
+    — Resampling filter to use if resizing the image. Can be overridden by `resample`
+    in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_thumbnail** (`bool`, *optional*, defaults to `True`) — Whether to resize
+    the image using thumbnail method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_align_long_axis** (`bool`, *optional*, defaults to `False`) — Whether
+    to align the long axis of the image with the long axis of `size` by rotating by
+    90 degrees.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_pad** (`bool`, *optional*, defaults to `True`) — Whether to pad the images
+    to the largest image size in the batch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `True`) — Whether to rescale
+    the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`int` or `float`, *optional*, defaults to `1/255`) — Scale
+    factor to use if rescaling the image. Can be overridden by the `rescale_factor`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `True`) — Whether to normalize
+    the image. Can be overridden by `do_normalize` in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_DEFAULT_MEAN`)
+    — Mean to use if normalizing the image. This is a float or list of floats the
+    length of the number of channels in the image. Can be overridden by the `image_mean`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_DEFAULT_STD`)
+    — Image standard deviation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a Nougat image processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/image_processing_nougat.py#L358)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union do_crop_margin: bool = None do_resize: bool = None size: Dict
+    = None resample: Resampling = None do_thumbnail: bool = None do_align_long_axis:
+    bool = None do_pad: bool = None do_rescale: bool = None rescale_factor: Union
+    = None do_normalize: bool = None image_mean: Union = None image_std: Union = None
+    return_tensors: Union = None data_format: Optional = <ChannelDimension.FIRST:
+    ''channels_first''> input_data_format: Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**images** (`ImageInput`) — Image to preprocess. Expects a single or batch
+    of images with pixel values ranging from 0 to 255.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_crop_margin** (`bool`, *optional*, defaults to `self.do_crop_margin`)
+    — Whether to crop the image margins.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `self.do_resize`) — Whether
+    to resize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]`, *optional*, defaults to `self.size`) — Size of
+    the image after resizing. Shortest edge of the image is resized to min(size[“height”],
+    size[“width”]) with the longest edge resized to keep the input aspect ratio.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`int`, *optional*, defaults to `self.resample`) — Resampling
+    filter to use if resizing the image. This can be one of the enum `PILImageResampling`.
+    Only has an effect if `do_resize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_thumbnail** (`bool`, *optional*, defaults to `self.do_thumbnail`) — Whether
+    to resize the image using thumbnail method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_align_long_axis** (`bool`, *optional*, defaults to `self.do_align_long_axis`)
+    — Whether to align the long axis of the image with the long axis of `size` by
+    rotating by 90 degrees.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_pad** (`bool`, *optional*, defaults to `self.do_pad`) — Whether to pad
+    the images to the largest image size in the batch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
+    to rescale the image by the specified scale `rescale_factor`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`int` or `float`, *optional*, defaults to `self.rescale_factor`)
+    — Scale factor to use if rescaling the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
+    to normalize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
+    — Image mean to use for normalization.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
+    — Image standard deviation to use for normalization.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or `TensorType`, *optional*) — The type of tensors
+    to return. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Return a list of `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**data_format** (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
+    — The channel dimension format for the output image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ChannelDimension.FIRST`: image in (num_channels, height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ChannelDimension.LAST`: image in (height, width, num_channels) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: defaults to the channel dimension format of the input image.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_data_format** (`ChannelDimension` or `str`, *optional*) — The channel
+    dimension format for the input image. If unset, the channel dimension format is
+    inferred from the input image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocess an image or batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NougatTokenizerFast
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.NougatTokenizerFast'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/tokenization_nougat_fast.py#L376)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_file = None tokenizer_file = None clean_up_tokenization_spaces = False
+    unk_token = '<unk>' bos_token = '<s>' eos_token = '</s>' pad_token = '<pad>' **kwargs
+    )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_file** (`str`, *optional*) — [SentencePiece](https://github.com/google/sentencepiece)
+    file (generally has a .model extension) that contains the vocabulary necessary
+    to instantiate a tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer_file** (`str`, *optional*) — [tokenizers](https://github.com/huggingface/tokenizers)
+    file (generally has a .json extension) that contains everything needed to load
+    the tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_up_tokenization_spaces** (`str`, *optional*, defaults to `False`) —
+    Wether to cleanup spaces after decoding, cleanup consists in removing potential
+    artifacts like extra spaces.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unk_token** (`str`, *optional*, defaults to `"<unk>"`) — The unknown token.
+    A token that is not in the vocabulary cannot be converted to an ID and is set
+    to be this token instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`str`, *optional*, defaults to `"<s>"`) — The beginning of sequence
+    token that was used during pretraining. Can be used a sequence classifier token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eos_token** (`str`, *optional*, defaults to `"</s>"`) — The end of sequence
+    token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_token** (`str`, *optional*, defaults to `"<pad>"`) — The token used for
+    padding, for example when batching sequences of different lengths.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**model_max_length** (`int`, *optional*) — The maximum length (in number of
+    tokens) for the inputs to the transformer model. When the tokenizer is loaded
+    with [from_pretrained()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.from_pretrained),
+    this will be set to the value stored for the associated model in `max_model_input_sizes`
+    (see above). If no value is provided, will default to VERY_LARGE_INTEGER (`int(1e30)`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**padding_side** (`str`, *optional*) — The side on which the model should have
+    padding applied. Should be selected between [‘right’, ‘left’]. Default value is
+    picked from the class attribute of the same name.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**truncation_side** (`str`, *optional*) — The side on which the model should
+    have truncation applied. Should be selected between [‘right’, ‘left’]. Default
+    value is picked from the class attribute of the same name.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**chat_template** (`str`, *optional*) — A Jinja template string that will be
+    used to format lists of chat messages. See [https://huggingface.co/docs/transformers/chat_templating](https://huggingface.co/docs/transformers/chat_templating)
+    for a full description.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**model_input_names** (`List[string]`, *optional*) — The list of inputs accepted
+    by the forward pass of the model (like `"token_type_ids"` or `"attention_mask"`).
+    Default value is picked from the class attribute of the same name.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`str` or `tokenizers.AddedToken`, *optional*) — A special token
+    representing the beginning of a sentence. Will be associated to `self.bos_token`
+    and `self.bos_token_id`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eos_token** (`str` or `tokenizers.AddedToken`, *optional*) — A special token
+    representing the end of a sentence. Will be associated to `self.eos_token` and
+    `self.eos_token_id`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unk_token** (`str` or `tokenizers.AddedToken`, *optional*) — A special token
+    representing an out-of-vocabulary token. Will be associated to `self.unk_token`
+    and `self.unk_token_id`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sep_token** (`str` or `tokenizers.AddedToken`, *optional*) — A special token
+    separating two different sentences in the same input (used by BERT for instance).
+    Will be associated to `self.sep_token` and `self.sep_token_id`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_token** (`str` or `tokenizers.AddedToken`, *optional*) — A special token
+    used to make arrays of tokens the same size for batching purpose. Will then be
+    ignored by attention mechanisms or loss computation. Will be associated to `self.pad_token`
+    and `self.pad_token_id`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cls_token** (`str` or `tokenizers.AddedToken`, *optional*) — A special token
+    representing the class of the input (used by BERT for instance). Will be associated
+    to `self.cls_token` and `self.cls_token_id`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_token** (`str` or `tokenizers.AddedToken`, *optional*) — A special token
+    representing a masked token (used by masked-language modeling pretraining objectives,
+    like BERT). Will be associated to `self.mask_token` and `self.mask_token_id`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**additional_special_tokens** (tuple or list of `str` or `tokenizers.AddedToken`,
+    *optional*) — A tuple or a list of additional special tokens. Add them here to
+    ensure they are skipped when decoding with `skip_special_tokens` is set to True.
+    If they are not part of the vocabulary, they will be added at the end of the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**clean_up_tokenization_spaces** (`bool`, *optional*, defaults to `True`) —
+    Whether or not the model should cleanup the spaces that were added when splitting
+    the input text during the tokenization process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**split_special_tokens** (`bool`, *optional*, defaults to `False`) — Whether
+    or not the special tokens should be split during the tokenization process. The
+    default behavior is to not split special tokens. This means that if `<s>` is the
+    `bos_token`, then `tokenizer.tokenize("<s>") = [''<s>`]. Otherwise, if `split_special_tokens=True`,
+    then `tokenizer.tokenize("<s>")` will be give `[''<'', ''s'', ''>'']`. This argument
+    is only supported for `slow` tokenizers for the moment.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer_object** (`tokenizers.Tokenizer`) — A `tokenizers.Tokenizer` object
+    from 🤗 tokenizers to instantiate from. See [Using tokenizers from 🤗 tokenizers](../fast_tokenizers)
+    for more information.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer_file** (`str`) — A path to a local JSON file representing a previously
+    serialized `tokenizers.Tokenizer` object from 🤗 tokenizers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Fast tokenizer for Nougat (backed by HuggingFace tokenizers library).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This tokenizer inherits from [PreTrainedTokenizerFast](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizerFast)
+    which contains most of the main methods. Users should refer to this superclass
+    for more information regarding those methods. This class mainly adds Nougat-specific
+    methods for postprocessing the generated text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Class attributes (overridden by derived classes)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_files_names** (`Dict[str, str]`) — A dictionary with, as keys, the
+    `__init__` keyword name of each vocabulary file required by the model, and as
+    associated values, the filename for saving the associated file (string).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pretrained_vocab_files_map** (`Dict[str, Dict[str, str]]`) — A dictionary
+    of dictionaries, with the high-level keys being the `__init__` keyword name of
+    each vocabulary file required by the model, the low-level being the `short-cut-names`
+    of the pretrained models with, as associated values, the `url` to the associated
+    pretrained vocabulary file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_model_input_sizes** (`Dict[str, Optional[int]]`) — A dictionary with,
+    as keys, the `short-cut-names` of the pretrained models, and as associated values,
+    the maximum length of the sequence inputs of this model, or `None` if the model
+    has no maximum input size.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pretrained_init_configuration** (`Dict[str, Dict[str, Any]]`) — A dictionary
+    with, as keys, the `short-cut-names` of the pretrained models, and as associated
+    values, a dictionary of specific arguments to pass to the `__init__` method of
+    the tokenizer class for this pretrained model when loading the tokenizer with
+    the [from_pretrained()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.from_pretrained)
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**model_input_names** (`List[str]`) — A list of inputs expected in the forward
+    pass of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**padding_side** (`str`) — The default value for the side on which the model
+    should have padding applied. Should be `''right''` or `''left''`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**truncation_side** (`str`) — The default value for the side on which the model
+    should have truncation applied. Should be `''right''` or `''left''`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### correct_tables'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/tokenization_nougat_fast.py#L470)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( generation: str ) → str'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**generation** (str) — The generated text to be postprocessed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: str
+  prefs: []
+  type: TYPE_NORMAL
+- en: The postprocessed text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Takes a generated string and fixes tables/tabulars to make them match the markdown
+    format needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### post_process_generation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/tokenization_nougat_fast.py#L600)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( generation: Union fix_markdown: bool = True num_workers: int = None ) → Union[str,
+    List[str]]'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**generation** (Union[str, List[str]]) — The generated text or a list of generated
+    texts.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**fix_markdown** (`bool`, *optional*, defaults to `True`) — Whether to perform
+    Markdown formatting fixes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_workers** (`int`, *optional*) — Optional number of workers to pass to
+    leverage multiprocessing (postprocessing several texts in parallel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: Union[str, List[str]]
+  prefs: []
+  type: TYPE_NORMAL
+- en: The postprocessed text or list of postprocessed texts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Postprocess a generated text or a list of generated texts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This function can be used to perform postprocessing on generated text, such
+    as fixing Markdown formatting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Postprocessing is quite slow so it is recommended to use multiprocessing to
+    speed up the process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_single'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/tokenization_nougat_fast.py#L505)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( generation: str fix_markdown: bool = True ) → str'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**generation** (str) — The generated text to be postprocessed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**fix_markdown** (bool, optional) — Whether to perform Markdown formatting
+    fixes. Default is True.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: str
+  prefs: []
+  type: TYPE_NORMAL
+- en: The postprocessed text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Postprocess a single generated text. Regular expressions used here are taken
+    directly from the Nougat article authors. These expressions are commented for
+    clarity and tested end-to-end in most cases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### remove_hallucinated_references'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/tokenization_nougat_fast.py#L440)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( text: str ) → `str`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**text** (`str`) — The input text containing references.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`str`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The text with hallucinated references removed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Remove hallucinated or missing references from the text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This function identifies and removes references that are marked as missing or
+    hallucinated from the input text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: NougatProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.NougatProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/processing_nougat.py#L27)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( image_processor tokenizer )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image_processor** ([NougatImageProcessor](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatImageProcessor))
+    — An instance of [NougatImageProcessor](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatImageProcessor).
+    The image processor is a required input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer** ([NougatTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatTokenizerFast))
+    — An instance of [NougatTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatTokenizerFast).
+    The tokenizer is a required input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a Nougat processor which wraps a Nougat image processor and a Nougat
+    tokenizer into a single processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[NougatProcessor](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatProcessor)
+    offers all the functionalities of [NougatImageProcessor](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatImageProcessor)
+    and [NougatTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatTokenizerFast).
+    See the [**call**()](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatProcessor.__call__)
+    and [decode()](/docs/transformers/v4.37.2/en/model_doc/nougat#transformers.NougatProcessor.decode)
+    for more information.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/processing_nougat.py#L49)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images = None text = None do_crop_margin: bool = None do_resize: bool = None
+    size: Dict = None resample: PILImageResampling = None do_thumbnail: bool = None
+    do_align_long_axis: bool = None do_pad: bool = None do_rescale: bool = None rescale_factor:
+    Union = None do_normalize: bool = None image_mean: Union = None image_std: Union
+    = None data_format: Optional = ''channels_first'' input_data_format: Union = None
+    text_pair: Union = None text_target: Union = None text_pair_target: Union = None
+    add_special_tokens: bool = True padding: Union = False truncation: Union = None
+    max_length: Optional = None stride: int = 0 is_split_into_words: bool = False
+    pad_to_multiple_of: Optional = None return_tensors: Union = None return_token_type_ids:
+    Optional = None return_attention_mask: Optional = None return_overflowing_tokens:
+    bool = False return_special_tokens_mask: bool = False return_offsets_mapping:
+    bool = False return_length: bool = False verbose: bool = True )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### from_pretrained'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/processing_utils.py#L406)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pretrained_model_name_or_path: Union cache_dir: Union = None force_download:
+    bool = False local_files_only: bool = False token: Union = None revision: str
+    = ''main'' **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pretrained_model_name_or_path** (`str` or `os.PathLike`) — This can be either:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a string, the *model id* of a pretrained feature_extractor hosted inside a model
+    repo on huggingface.co. Valid model ids can be located at the root-level, like
+    `bert-base-uncased`, or namespaced under a user or organization name, like `dbmdz/bert-base-german-cased`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path to a *directory* containing a feature extractor file saved using the
+    [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/feature_extractor#transformers.FeatureExtractionMixin.save_pretrained)
+    method, e.g., `./my_model_directory/`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a path or url to a saved feature extractor JSON *file*, e.g., `./my_model_directory/preprocessor_config.json`.
+    **kwargs — Additional keyword arguments passed along to both [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/feature_extractor#transformers.FeatureExtractionMixin.from_pretrained)
+    and `~tokenization_utils_base.PreTrainedTokenizer.from_pretrained`.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Instantiate a processor associated with a pretrained model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This class method is simply calling the feature extractor [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/feature_extractor#transformers.FeatureExtractionMixin.from_pretrained),
+    image processor [ImageProcessingMixin](/docs/transformers/v4.37.2/en/internal/image_processing_utils#transformers.ImageProcessingMixin)
+    and the tokenizer `~tokenization_utils_base.PreTrainedTokenizer.from_pretrained`
+    methods. Please refer to the docstrings of the methods above for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### save_pretrained'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/processing_utils.py#L167)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( save_directory push_to_hub: bool = False **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**save_directory** (`str` or `os.PathLike`) — Directory where the feature extractor
+    JSON file and the tokenizer files will be saved (directory will be created if
+    it does not exist).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**push_to_hub** (`bool`, *optional*, defaults to `False`) — Whether or not
+    to push your model to the Hugging Face model hub after saving it. You can specify
+    the repository you want to push to with `repo_id` (will default to the name of
+    `save_directory` in your namespace).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**kwargs** (`Dict[str, Any]`, *optional*) — Additional key word arguments passed
+    along to the [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Saves the attributes of this processor (feature extractor, tokenizer…) in the
+    specified directory so that it can be reloaded using the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/processors#transformers.ProcessorMixin.from_pretrained)
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This class method is simply calling [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/feature_extractor#transformers.FeatureExtractionMixin.save_pretrained)
+    and [save_pretrained()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.save_pretrained).
+    Please refer to the docstrings of the methods above for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### batch_decode'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/processing_nougat.py#L141)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method forwards all its arguments to NougatTokenizer’s [batch_decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.batch_decode).
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### decode'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/processing_nougat.py#L148)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method forwards all its arguments to NougatTokenizer’s [decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.decode).
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_generation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/nougat/processing_nougat.py#L155)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method forwards all its arguments to NougatTokenizer’s `~PreTrainedTokenizer.post_process_generation`.
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL

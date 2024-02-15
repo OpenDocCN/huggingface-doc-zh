@@ -1,0 +1,1549 @@
+- en: Vision Transformer (ViT)
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/vit](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/vit)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/283.1ebf3676.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Markdown.fef84341.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/PipelineTag.44585822.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Vision Transformer (ViT) model was proposed in [An Image is Worth 16x16
+    Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)
+    by Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua
+    Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold,
+    Sylvain Gelly, Jakob Uszkoreit, Neil Houlsby. It’s the first paper that successfully
+    trains a Transformer encoder on ImageNet, attaining very good results compared
+    to familiar convolutional architectures.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*While the Transformer architecture has become the de-facto standard for natural
+    language processing tasks, its applications to computer vision remain limited.
+    In vision, attention is either applied in conjunction with convolutional networks,
+    or used to replace certain components of convolutional networks while keeping
+    their overall structure in place. We show that this reliance on CNNs is not necessary
+    and a pure transformer applied directly to sequences of image patches can perform
+    very well on image classification tasks. When pre-trained on large amounts of
+    data and transferred to multiple mid-sized or small image recognition benchmarks
+    (ImageNet, CIFAR-100, VTAB, etc.), Vision Transformer (ViT) attains excellent
+    results compared to state-of-the-art convolutional networks while requiring substantially
+    fewer computational resources to train.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![drawing](../Images/603d60786d4fe02e975af3e3e9553816.png) ViT architecture.
+    Taken from the [original paper.](https://arxiv.org/abs/2010.11929)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Following the original Vision Transformer, some follow-up works have been made:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[DeiT](deit) (Data-efficient Image Transformers) by Facebook AI. DeiT models
+    are distilled vision transformers. The authors of DeiT also released more efficiently
+    trained ViT models, which you can directly plug into [ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel)
+    or [ViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForImageClassification).
+    There are 4 variants available (in 3 different sizes): *facebook/deit-tiny-patch16-224*,
+    *facebook/deit-small-patch16-224*, *facebook/deit-base-patch16-224* and *facebook/deit-base-patch16-384*.
+    Note that one should use [DeiTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/deit#transformers.DeiTImageProcessor)
+    in order to prepare images for the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[BEiT](beit) (BERT pre-training of Image Transformers) by Microsoft Research.
+    BEiT models outperform supervised pre-trained vision transformers using a self-supervised
+    method inspired by BERT (masked image modeling) and based on a VQ-VAE.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DINO (a method for self-supervised training of Vision Transformers) by Facebook
+    AI. Vision Transformers trained using the DINO method show very interesting properties
+    not seen with convolutional models. They are capable of segmenting objects, without
+    having ever been trained to do so. DINO checkpoints can be found on the [hub](https://huggingface.co/models?other=dino).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[MAE](vit_mae) (Masked Autoencoders) by Facebook AI. By pre-training Vision
+    Transformers to reconstruct pixel values for a high portion (75%) of masked patches
+    (using an asymmetric encoder-decoder architecture), the authors show that this
+    simple method outperforms supervised pre-training after fine-tuning.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This model was contributed by [nielsr](https://huggingface.co/nielsr). The original
+    code (written in JAX) can be found [here](https://github.com/google-research/vision_transformer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that we converted the weights from Ross Wightman’s [timm library](https://github.com/rwightman/pytorch-image-models),
+    who already converted the weights from JAX to PyTorch. Credits go to him!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To feed images to the Transformer encoder, each image is split into a sequence
+    of fixed-size non-overlapping patches, which are then linearly embedded. A [CLS]
+    token is added to serve as representation of an entire image, which can be used
+    for classification. The authors also add absolute position embeddings, and feed
+    the resulting sequence of vectors to a standard Transformer encoder.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As the Vision Transformer expects each image to be of the same size (resolution),
+    one can use [ViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTImageProcessor)
+    to resize (or rescale) and normalize images for the model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Both the patch resolution and image resolution used during pre-training or fine-tuning
+    are reflected in the name of each checkpoint. For example, `google/vit-base-patch16-224`
+    refers to a base-sized architecture with patch resolution of 16x16 and fine-tuning
+    resolution of 224x224\. All checkpoints can be found on the [hub](https://huggingface.co/models?search=vit).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The available checkpoints are either (1) pre-trained on [ImageNet-21k](http://www.image-net.org/)
+    (a collection of 14 million images and 21k classes) only, or (2) also fine-tuned
+    on [ImageNet](http://www.image-net.org/challenges/LSVRC/2012/) (also referred
+    to as ILSVRC 2012, a collection of 1.3 million images and 1,000 classes).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Vision Transformer was pre-trained using a resolution of 224x224\. During
+    fine-tuning, it is often beneficial to use a higher resolution than pre-training
+    [(Touvron et al., 2019)](https://arxiv.org/abs/1906.06423), [(Kolesnikov et al.,
+    2020)](https://arxiv.org/abs/1912.11370). In order to fine-tune at higher resolution,
+    the authors perform 2D interpolation of the pre-trained position embeddings, according
+    to their location in the original image.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The best results are obtained with supervised pre-training, which is not the
+    case in NLP. The authors also performed an experiment with a self-supervised pre-training
+    objective, namely masked patched prediction (inspired by masked language modeling).
+    With this approach, the smaller ViT-B/16 model achieves 79.9% accuracy on ImageNet,
+    a significant improvement of 2% to training from scratch, but still 4% behind
+    supervised pre-training.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Demo notebooks regarding inference as well as fine-tuning ViT on custom data
+    can be found [here](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/VisionTransformer).
+    A list of official Hugging Face and community (indicated by 🌎) resources to help
+    you get started with ViT. If you’re interested in submitting a resource to be
+    included here, please feel free to open a Pull Request and we’ll review it! The
+    resource should ideally demonstrate something new instead of duplicating an existing
+    resource.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ViTForImageClassification` is supported by:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image Classification
+  prefs: []
+  type: TYPE_NORMAL
+- en: A blog post on how to [Fine-Tune ViT for Image Classification with Hugging Face
+    Transformers](https://huggingface.co/blog/fine-tune-vit)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A blog post on [Image Classification with Hugging Face Transformers and `Keras`](https://www.philschmid.de/image-classification-huggingface-transformers-keras)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A notebook on [Fine-tuning for Image Classification with Hugging Face Transformers](https://github.com/huggingface/notebooks/blob/main/examples/image_classification.ipynb)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A notebook on how to [Fine-tune the Vision Transformer on CIFAR-10 with the
+    Hugging Face Trainer](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/VisionTransformer/Fine_tuning_the_Vision_Transformer_on_CIFAR_10_with_the_%F0%9F%A4%97_Trainer.ipynb)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A notebook on how to [Fine-tune the Vision Transformer on CIFAR-10 with PyTorch
+    Lightning](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/VisionTransformer/Fine_tuning_the_Vision_Transformer_on_CIFAR_10_with_PyTorch_Lightning.ipynb)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ⚗️ Optimization
+  prefs: []
+  type: TYPE_NORMAL
+- en: A blog post on how to [Accelerate Vision Transformer (ViT) with Quantization
+    using Optimum](https://www.philschmid.de/optimizing-vision-transformer)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ⚡️ Inference
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A notebook on [Quick demo: Vision Transformer (ViT) by Google Brain](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/VisionTransformer/Quick_demo_of_HuggingFace_version_of_Vision_Transformer_inference.ipynb)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 🚀 Deploy
+  prefs: []
+  type: TYPE_NORMAL
+- en: A blog post on [Deploying Tensorflow Vision Models in Hugging Face with TF Serving](https://huggingface.co/blog/tf-serving-vision)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A blog post on [Deploying Hugging Face ViT on Vertex AI](https://huggingface.co/blog/deploy-vertex-ai)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A blog post on [Deploying Hugging Face ViT on Kubernetes with TF Serving](https://huggingface.co/blog/deploy-tfserving-kubernetes)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ViTConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.ViTConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/configuration_vit.py#L35)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( hidden_size = 768 num_hidden_layers = 12 num_attention_heads = 12 intermediate_size
+    = 3072 hidden_act = 'gelu' hidden_dropout_prob = 0.0 attention_probs_dropout_prob
+    = 0.0 initializer_range = 0.02 layer_norm_eps = 1e-12 image_size = 224 patch_size
+    = 16 num_channels = 3 qkv_bias = True encoder_stride = 16 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 768) — Dimensionality of the
+    encoder layers and the pooler layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_hidden_layers** (`int`, *optional*, defaults to 12) — Number of hidden
+    layers in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`int`, *optional*, defaults to 12) — Number of attention
+    heads for each attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**intermediate_size** (`int`, *optional*, defaults to 3072) — Dimensionality
+    of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `function`, *optional*, defaults to `"gelu"`) — The
+    non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_dropout_prob** (`float`, *optional*, defaults to 0.0) — The dropout
+    probability for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_probs_dropout_prob** (`float`, *optional*, defaults to 0.0) — The
+    dropout ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-12) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_size** (`int`, *optional*, defaults to 224) — The size (resolution)
+    of each image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**patch_size** (`int`, *optional*, defaults to 16) — The size (resolution)
+    of each patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_channels** (`int`, *optional*, defaults to 3) — The number of input channels.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**qkv_bias** (`bool`, *optional*, defaults to `True`) — Whether to add a bias
+    to the queries, keys and values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_stride** (`int`, *optional*, defaults to 16) — Factor to increase
+    the spatial resolution by in the decoder head for masked image modeling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel).
+    It is used to instantiate an ViT model according to the specified arguments, defining
+    the model architecture. Instantiating a configuration with the defaults will yield
+    a similar configuration to that of the ViT [google/vit-base-patch16-224](https://huggingface.co/google/vit-base-patch16-224)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: ViTFeatureExtractor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.ViTFeatureExtractor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/feature_extraction_vit.py#L26)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( images **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preprocess an image or a batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ViTImageProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.ViTImageProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/image_processing_vit.py#L41)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_resize: bool = True size: Optional = None resample: Resampling = <Resampling.BILINEAR:
+    2> do_rescale: bool = True rescale_factor: Union = 0.00392156862745098 do_normalize:
+    bool = True image_mean: Union = None image_std: Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Whether to resize
+    the image’s (height, width) dimensions to the specified `(size["height"], size["width"])`.
+    Can be overridden by the `do_resize` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`dict`, *optional*, defaults to `{"height" -- 224, "width": 224}`):
+    Size of the output image after resizing. Can be overridden by the `size` parameter
+    in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`PILImageResampling`, *optional*, defaults to `Resampling.BILINEAR`)
+    — Resampling filter to use if resizing the image. Can be overridden by the `resample`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `True`) — Whether to rescale
+    the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`int` or `float`, *optional*, defaults to `1/255`) — Scale
+    factor to use if rescaling the image. Can be overridden by the `rescale_factor`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `True`) — Whether to normalize
+    the image. Can be overridden by the `do_normalize` parameter in the `preprocess`
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_MEAN`)
+    — Mean to use if normalizing the image. This is a float or list of floats the
+    length of the number of channels in the image. Can be overridden by the `image_mean`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_STD`)
+    — Standard deviation to use if normalizing the image. This is a float or list
+    of floats the length of the number of channels in the image. Can be overridden
+    by the `image_std` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a ViT image processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/image_processing_vit.py#L146)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union do_resize: Optional = None size: Dict = None resample: Resampling
+    = None do_rescale: Optional = None rescale_factor: Optional = None do_normalize:
+    Optional = None image_mean: Union = None image_std: Union = None return_tensors:
+    Union = None data_format: Union = <ChannelDimension.FIRST: ''channels_first''>
+    input_data_format: Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**images** (`ImageInput`) — Image to preprocess. Expects a single or batch
+    of images with pixel values ranging from 0 to 255\. If passing in images with
+    pixel values between 0 and 1, set `do_rescale=False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `self.do_resize`) — Whether
+    to resize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]`, *optional*, defaults to `self.size`) — Dictionary
+    in the format `{"height": h, "width": w}` specifying the size of the output image
+    after resizing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`PILImageResampling` filter, *optional*, defaults to `self.resample`)
+    — `PILImageResampling` filter to use if resizing the image e.g. `PILImageResampling.BILINEAR`.
+    Only has an effect if `do_resize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
+    to rescale the image values between [0 - 1].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`float`, *optional*, defaults to `self.rescale_factor`)
+    — Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
+    to normalize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
+    — Image mean to use if `do_normalize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
+    — Image standard deviation to use if `do_normalize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or `TensorType`, *optional*) — The type of tensors
+    to return. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Return a list of `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**data_format** (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
+    — The channel dimension format for the output image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Use the channel dimension format of the input image.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_data_format** (`ChannelDimension` or `str`, *optional*) — The channel
+    dimension format for the input image. If unset, the channel dimension format is
+    inferred from the input image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocess an image or batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: ViTModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.ViTModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L501)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: ViTConfig add_pooling_layer: bool = True use_mask_token: bool = False
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare ViT Model transformer outputting raw hidden-states without any specific
+    head on top. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L530)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None bool_masked_pos: Optional = None head_mask:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None interpolate_pos_encoding: Optional = None return_dict: Optional = None
+    ) → [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**interpolate_pos_encoding** (`bool`, *optional*) — Whether to interpolate
+    the pre-trained position encodings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bool_masked_pos** (`torch.BoolTensor` of shape `(batch_size, num_patches)`,
+    *optional*) — Boolean masked positions. Indicates which patches are masked (1)
+    and which aren’t (0).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`torch.FloatTensor` of shape `(batch_size, hidden_size)`)
+    — Last layer hidden-state of the first token of the sequence (classification token)
+    after further processing through the layers used for the auxiliary pretraining
+    task. E.g. for BERT-family of models, this returns the classification token after
+    processing through a linear layer and a tanh activation function. The linear layer
+    weights are trained from the next sentence prediction (classification) objective
+    during pretraining.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: ViTForMaskedImageModeling
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.ViTForMaskedImageModeling'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L615)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: ViTConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ViT Model with a decoder on top for masked image modeling, as proposed in [SimMIM](https://arxiv.org/abs/2111.09886).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that we provide a script to pre-train this model on custom data in our
+    [examples directory](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-pretraining).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L645)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None bool_masked_pos: Optional = None head_mask:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None interpolate_pos_encoding: Optional = None return_dict: Optional = None
+    ) → `transformers.modeling_outputs.MaskedImageModelingOutput` or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**interpolate_pos_encoding** (`bool`, *optional*) — Whether to interpolate
+    the pre-trained position encodings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bool_masked_pos** (`torch.BoolTensor` of shape `(batch_size, num_patches)`)
+    — Boolean masked positions. Indicates which patches are masked (1) and which aren’t
+    (0).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.modeling_outputs.MaskedImageModelingOutput` or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.modeling_outputs.MaskedImageModelingOutput` or a tuple of `torch.FloatTensor`
+    (if `return_dict=False` is passed or when `config.return_dict=False`) comprising
+    various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `bool_masked_pos`
+    is provided) — Reconstruction loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**reconstruction** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Reconstructed / completed images.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**when** `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each stage) of shape `(batch_size, sequence_length, hidden_size)`.
+    Hidden-states (also called feature maps) of the model at the output of each stage.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**`config.output_attentions=True`):** Tuple of `torch.FloatTensor` (one for
+    each layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`. Attentions
+    weights after the attention softmax, used to compute the weighted average in the
+    self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [ViTForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForMaskedImageModeling)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: ViTForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.ViTForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L741)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: ViTConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ViT Model transformer with an image classification head on top (a linear layer
+    on top of the final hidden state of the [CLS] token) e.g. for ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that it’s possible to fine-tune ViT on higher resolution images than the
+    ones it has been trained on, by setting `interpolate_pos_encoding` to `True` in
+    the forward of the model. This will interpolate the pre-trained position embeddings
+    to the higher resolution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L769)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None head_mask: Optional = None labels: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    interpolate_pos_encoding: Optional = None return_dict: Optional = None ) → [transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**interpolate_pos_encoding** (`bool`, *optional*) — Whether to interpolate
+    the pre-trained position encodings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each stage) of shape `(batch_size, sequence_length, hidden_size)`.
+    Hidden-states (also called feature maps) of the model at the output of each stage.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [ViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForImageClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: TFViTModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFViTModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L740)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: ViTConfig *inputs add_pooling_layer = True **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare ViT Model transformer outputting raw hidden-states without any specific
+    head on top.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a single Tensor with `pixel_values` only and nothing else: `model(pixel_values)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([pixel_values, attention_mask])` or `model([pixel_values,
+    attention_mask, token_type_ids])`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"pixel_values": pixel_values, "token_type_ids":
+    token_type_ids})`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L750)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: TFModelInputType | None = None head_mask: np.ndarray | tf.Tensor
+    | None = None output_attentions: Optional[bool] = None output_hidden_states: Optional[bool]
+    = None interpolate_pos_encoding: Optional[bool] = None return_dict: Optional[bool]
+    = None training: bool = False ) → [transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str,
+    tf.Tensor]` or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    num_channels, height, width)`) — Pixel values. Pixel values can be obtained using
+    [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`np.ndarray` or `tf.Tensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**interpolate_pos_encoding** (`bool`, *optional*) — Whether to interpolate
+    the pre-trained position encodings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple. This argument can be used in eager mode, in graph mode
+    the value will always be set to True.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**training** (`bool`, *optional*, defaults to `False“) — Whether or not to
+    use the model in training mode (some modules like dropout modules have different
+    behaviors between training and evaluation).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`tf.Tensor` of shape `(batch_size, hidden_size)`) — Last
+    layer hidden-state of the first token of the sequence (classification token) further
+    processed by a Linear layer and a Tanh activation function. The Linear layer weights
+    are trained from the next sentence prediction (classification) objective during
+    pretraining.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This output is usually *not* a good summary of the semantic content of the input,
+    you’re often better with averaging or pooling the sequence of hidden-states for
+    the whole input sequence.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.TFViTModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFViTForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFViTForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L819)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: ViTConfig *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ViT Model transformer with an image classification head on top (a linear layer
+    on top of the final hidden state of the [CLS] token) e.g. for ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that it’s possible to fine-tune ViT on higher resolution images than the
+    ones it has been trained on, by setting `interpolate_pos_encoding` to `True` in
+    the forward of the model. This will interpolate the pre-trained position embeddings
+    to the higher resolution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a single Tensor with `pixel_values` only and nothing else: `model(pixel_values)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([pixel_values, attention_mask])` or `model([pixel_values,
+    attention_mask, token_type_ids])`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"pixel_values": pixel_values, "token_type_ids":
+    token_type_ids})`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L849)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: TFModelInputType | None = None head_mask: np.ndarray | tf.Tensor
+    | None = None output_attentions: Optional[bool] = None output_hidden_states: Optional[bool]
+    = None interpolate_pos_encoding: Optional[bool] = None return_dict: Optional[bool]
+    = None labels: np.ndarray | tf.Tensor | None = None training: Optional[bool] =
+    False ) → [transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str,
+    tf.Tensor]` or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    num_channels, height, width)`) — Pixel values. Pixel values can be obtained using
+    [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`np.ndarray` or `tf.Tensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**interpolate_pos_encoding** (`bool`, *optional*) — Whether to interpolate
+    the pre-trained position encodings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple. This argument can be used in eager mode, in graph mode
+    the value will always be set to True.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**training** (`bool`, *optional*, defaults to `False“) — Whether or not to
+    use the model in training mode (some modules like dropout modules have different
+    behaviors between training and evaluation).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`tf.Tensor` or `np.ndarray` of shape `(batch_size,)`, *optional*)
+    — Labels for computing the image classification/regression loss. Indices should
+    be in `[0, ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression
+    loss is computed (Mean-Square loss), If `config.num_labels > 1` a classification
+    loss is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(batch_size, )`, *optional*, returned when
+    `labels` is provided) — Classification (or regression if config.num_labels==1)
+    loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`tf.Tensor` of shape `(batch_size, config.num_labels)`) — Classification
+    (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.TFViTForImageClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: JAXHide JAX content
+  prefs: []
+  type: TYPE_NORMAL
+- en: FlaxVitModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.FlaxViTModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_flax_vit.py#L552)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: ViTConfig input_shape = None seed: int = 0 dtype: dtype = <class
+    ''jax.numpy.float32''> _do_init: bool = True **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL

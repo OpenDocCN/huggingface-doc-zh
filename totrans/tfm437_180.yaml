@@ -1,0 +1,1296 @@
+- en: GPTBigCode
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/141.568f9c44.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The GPTBigCode model was proposed in [SantaCoder: don’t reach for the stars!](https://arxiv.org/abs/2301.03988)
+    by BigCode. The listed authors are: Loubna Ben Allal, Raymond Li, Denis Kocetkov,
+    Chenghao Mou, Christopher Akiki, Carlos Munoz Ferrandis, Niklas Muennighoff, Mayank
+    Mishra, Alex Gu, Manan Dey, Logesh Kumar Umapathi, Carolyn Jane Anderson, Yangtian
+    Zi, Joel Lamy Poirier, Hailey Schoelkopf, Sergey Troshin, Dmitry Abulkhanov, Manuel
+    Romero, Michael Lappert, Francesco De Toni, Bernardo García del Río, Qian Liu,
+    Shamik Bose, Urvashi Bhattacharyya, Terry Yue Zhuo, Ian Yu, Paulo Villegas, Marco
+    Zocca, Sourab Mangrulkar, David Lansky, Huu Nguyen, Danish Contractor, Luis Villa,
+    Jia Li, Dzmitry Bahdanau, Yacine Jernite, Sean Hughes, Daniel Fried, Arjun Guha,
+    Harm de Vries, Leandro von Werra.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The BigCode project is an open-scientific collaboration working on the responsible
+    development of large language models for code. This tech report describes the
+    progress of the collaboration until December 2022, outlining the current state
+    of the Personally Identifiable Information (PII) redaction pipeline, the experiments
+    conducted to de-risk the model architecture, and the experiments investigating
+    better preprocessing methods for the training data. We train 1.1B parameter models
+    on the Java, JavaScript, and Python subsets of The Stack and evaluate them on
+    the MultiPL-E text-to-code benchmark. We find that more aggressive filtering of
+    near-duplicates can further boost performance and, surprisingly, that selecting
+    files from repositories with 5+ GitHub stars deteriorates performance significantly.
+    Our best model outperforms previous open-source multilingual code generation models
+    (InCoder-6.7B and CodeGen-Multi-2.7B) in both left-to-right generation and infilling
+    on the Java, JavaScript, and Python portions of MultiPL-E, despite being a substantially
+    smaller model. All models are released under an OpenRAIL license at [this https
+    URL.](https://huggingface.co/bigcode)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The model is an optimized [GPT2 model](https://huggingface.co/docs/transformers/model_doc/gpt2)
+    with support for Multi-Query Attention.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Implementation details
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The main differences compared to GPT2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Added support for Multi-Query Attention.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use `gelu_pytorch_tanh` instead of classic `gelu`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Avoid unnecessary synchronizations (this has since been added to GPT2 in #20061,
+    but wasn’t in the reference codebase).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use Linear layers instead of Conv1D (good speedup but makes the checkpoints
+    incompatible).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Merge `_attn` and `_upcast_and_reordered_attn`. Always merge the matmul with
+    scaling. Rename `reorder_and_upcast_attn`->`attention_softmax_in_fp32`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Cache the attention mask value to avoid recreating it every time.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use jit to fuse the attention fp32 casting, masking, softmax, and scaling.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Combine the attention and causal masks into a single one, pre-computed for the
+    whole model instead of every layer.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Merge the key and value caches into one (this changes the format of layer_past/
+    present, does it risk creating problems?)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use the memory layout (self.num_heads, 3, self.head_dim) instead of `(3, self.num_heads,
+    self.head_dim)` for the QKV tensor with MHA. (prevents an overhead with the merged
+    key and values, but makes the checkpoints incompatible with the original gpt2
+    model).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can read more about the optimizations in the [original pull request](https://github.com/huggingface/transformers/pull/22575)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Combining Starcoder and Flash Attention 2
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: First, make sure to install the latest version of Flash Attention 2 to include
+    the sliding window attention feature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Make also sure that you have a hardware that is compatible with Flash-Attention
+    2\. Read more about it in the official documentation of flash-attn repository.
+    Make also sure to load your model in half-precision (e.g. `torch.float16“)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To load and run a model using Flash Attention 2, refer to the snippet below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Expected speedups
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Below is a expected speedup diagram that compares pure inference time between
+    the native implementation in transformers using `bigcode/starcoder` checkpoint
+    and the Flash Attention 2 version of the model using two different sequence lengths.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/fa00b56afd5c40f341c3ed5f255cb1de.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: GPTBigCodeConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.GPTBigCodeConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/configuration_gpt_bigcode.py#L28)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_size = 50257 n_positions = 1024 n_embd = 768 n_layer = 12 n_head = 12
+    n_inner = None activation_function = 'gelu_pytorch_tanh' resid_pdrop = 0.1 embd_pdrop
+    = 0.1 attn_pdrop = 0.1 layer_norm_epsilon = 1e-05 initializer_range = 0.02 scale_attn_weights
+    = True use_cache = True bos_token_id = 50256 eos_token_id = 50256 attention_softmax_in_fp32
+    = True scale_attention_softmax_in_fp32 = True multi_query = True **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_size** (`int`, *optional*, defaults to 50257) — Vocabulary size of
+    the GPT-2 model. Defines the number of different tokens that can be represented
+    by the `inputs_ids` passed when calling [GPTBigCodeModel](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**n_positions** (`int`, *optional*, defaults to 1024) — The maximum sequence
+    length that this model might ever be used with. Typically set this to something
+    large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**n_embd** (`int`, *optional*, defaults to 768) — Dimensionality of the embeddings
+    and hidden states.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**n_layer** (`int`, *optional*, defaults to 12) — Number of hidden layers in
+    the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**n_head** (`int`, *optional*, defaults to 12) — Number of attention heads
+    for each attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**n_inner** (`int`, *optional*, defaults to None) — Dimensionality of the inner
+    feed-forward layers. `None` will set it to 4 times n_embd'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**activation_function** (`str`, *optional*, defaults to `"gelu_pytorch_tanh"`)
+    — Activation function, to be selected in the list `["relu", "silu", "gelu", "tanh",
+    "gelu_new", "gelu_pytorch_tanh"]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resid_pdrop** (`float`, *optional*, defaults to 0.1) — The dropout probability
+    for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**embd_pdrop** (`float`, *optional*, defaults to 0.1) — The dropout ratio for
+    the embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attn_pdrop** (`float`, *optional*, defaults to 0.1) — The dropout ratio for
+    the attention.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_epsilon** (`float`, *optional*, defaults to 1e-5) — The epsilon
+    to use in the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scale_attn_weights** (`bool`, *optional*, defaults to `True`) — Scale attention
+    weights by dividing by sqrt(hidden_size)..'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*, defaults to `True`) — Whether or not the
+    model should return the last key/values attentions (not used by all models).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_softmax_in_fp32** (`bool`, *optional*, defaults to `True`) — Whether
+    to call the fused softmax in float32.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scale_attention_softmax_in_fp32** (`bool`, *optional*, defaults to `True`)
+    — Whether to scale the attention softmax in float32.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_type** (`bool`, *optional*, defaults to `True`) — Whether to use
+    Multi-Query Attion (`True`) or Multi-Head Attention (`False`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [GPTBigCodeModel](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeModel).
+    It is used to instantiate a GPTBigCode model according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the GPTBigCode [gpt_bigcode](https://huggingface.co/gpt_bigcode)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: GPTBigCodeModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.GPTBigCodeModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/modeling_gpt_bigcode.py#L903)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([GPTBigCodeConfig](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare GPT_BIGCODE Model transformer outputting raw hidden-states without
+    any specific head on top.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/modeling_gpt_bigcode.py#L939)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None past_key_values: Optional = None attention_mask:
+    Optional = None token_type_ids: Optional = None position_ids: Optional = None
+    head_mask: Optional = None inputs_embeds: Optional = None encoder_hidden_states:
+    Optional = None encoder_attention_mask: Optional = None use_cache: Optional =
+    None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None ) → [transformers.modeling_outputs.BaseModelOutputWithPastAndCrossAttentions](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPastAndCrossAttentions)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.Tensor` of shape `(batch_size, input_ids_length)`) —
+    `input_ids_length` = `sequence_length` if `past_key_values` is `None` else `past_key_values[0][0].shape[-2]`
+    (`sequence_length` of input past key value states). Indices of input sequence
+    tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used, only `input_ids` that do not have their past calculated
+    should be passed as `input_ids`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`Tuple[torch.Tensor]` of length `config.n_layers`) — Contains
+    precomputed hidden-states (key and values in the attention blocks) as computed
+    by the model (see `past_key_values` output below). Can be used to speed up sequential
+    decoding. The `input_ids` which have their past given to this model should not
+    be passed as `input_ids` as they have already been computed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If `past_key_values` is used, `attention_mask` needs to contain the masking
+    strategy that was used for `past_key_values`. In other words, the `attention_mask`
+    always has to have the length: `len(past_key_values) + len(input_ids)`'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.Tensor` of shape `(batch_size, input_ids_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.Tensor` of shape `(batch_size, sequence_length, hidden_size)`,
+    *optional*) — Optionally, instead of passing `input_ids` you can choose to directly
+    pass an embedded representation. This is useful if you want more control over
+    how to convert `input_ids` indices into associated vectors than the model’s internal
+    embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used, optionally only the last `inputs_embeds` have
+    to be input (see `past_key_values`).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*) — If set to `True`, `past_key_values` key
+    value states are returned and can be used to speed up decoding (see `past_key_values`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.BaseModelOutputWithPastAndCrossAttentions](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPastAndCrossAttentions)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.BaseModelOutputWithPastAndCrossAttentions](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPastAndCrossAttentions)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([GPTBigCodeConfig](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used only the last hidden-state of the sequences of
+    shape `(batch_size, 1, hidden_size)` is output.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache=True` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`) and optionally if `config.is_encoder_decoder=True`
+    2 additional tensors of shape `(batch_size, num_heads, encoder_sequence_length,
+    embed_size_per_head)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks
+    and optionally if `config.is_encoder_decoder=True` in the cross-attention blocks)
+    that can be used (see `past_key_values` input) to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` and `config.add_cross_attention=True` is passed or when
+    `config.output_attentions=True`) — Tuple of `torch.FloatTensor` (one for each
+    layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights of the decoder’s cross-attention layer, after the attention
+    softmax, used to compute the weighted average in the cross-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [GPTBigCodeModel](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: GPTBigCodeForCausalLM
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.GPTBigCodeForCausalLM'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/modeling_gpt_bigcode.py#L1153)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([GPTBigCodeConfig](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The GPT_BIGCODE Model transformer with a language modeling head on top (linear
+    layer with weights tied to the input embeddings).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/modeling_gpt_bigcode.py#L1226)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None past_key_values: Optional = None attention_mask:
+    Optional = None token_type_ids: Optional = None position_ids: Optional = None
+    head_mask: Optional = None inputs_embeds: Optional = None encoder_hidden_states:
+    Optional = None encoder_attention_mask: Optional = None labels: Optional = None
+    use_cache: Optional = None output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → [transformers.modeling_outputs.CausalLMOutputWithCrossAttentions](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.CausalLMOutputWithCrossAttentions)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.Tensor` of shape `(batch_size, input_ids_length)`) —
+    `input_ids_length` = `sequence_length` if `past_key_values` is `None` else `past_key_values[0][0].shape[-2]`
+    (`sequence_length` of input past key value states). Indices of input sequence
+    tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used, only `input_ids` that do not have their past calculated
+    should be passed as `input_ids`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`Tuple[torch.Tensor]` of length `config.n_layers`) — Contains
+    precomputed hidden-states (key and values in the attention blocks) as computed
+    by the model (see `past_key_values` output below). Can be used to speed up sequential
+    decoding. The `input_ids` which have their past given to this model should not
+    be passed as `input_ids` as they have already been computed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If `past_key_values` is used, `attention_mask` needs to contain the masking
+    strategy that was used for `past_key_values`. In other words, the `attention_mask`
+    always has to have the length: `len(past_key_values) + len(input_ids)`'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.Tensor` of shape `(batch_size, input_ids_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.Tensor` of shape `(batch_size, sequence_length, hidden_size)`,
+    *optional*) — Optionally, instead of passing `input_ids` you can choose to directly
+    pass an embedded representation. This is useful if you want more control over
+    how to convert `input_ids` indices into associated vectors than the model’s internal
+    embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used, optionally only the last `inputs_embeds` have
+    to be input (see `past_key_values`).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*) — If set to `True`, `past_key_values` key
+    value states are returned and can be used to speed up decoding (see `past_key_values`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.Tensor` of shape `(batch_size, sequence_length)`, *optional*)
+    — Labels for language modeling. Note that the labels **are shifted** inside the
+    model, i.e. you can set `labels = input_ids` Indices are selected in `[-100, 0,
+    ..., config.vocab_size]` All labels set to `-100` are ignored (masked), the loss
+    is only computed for labels in `[0, ..., config.vocab_size]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.CausalLMOutputWithCrossAttentions](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.CausalLMOutputWithCrossAttentions)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.CausalLMOutputWithCrossAttentions](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.CausalLMOutputWithCrossAttentions)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([GPTBigCodeConfig](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Language modeling loss (for next-token prediction).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Cross attentions weights after the attention softmax, used to compute the weighted
+    average in the cross-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache=True` is passed or when `config.use_cache=True`) — Tuple of `torch.FloatTensor`
+    tuples of length `config.n_layers`, with each tuple containing the cached key,
+    value states of the self-attention and the cross-attention layers if model is
+    used in encoder-decoder setting. Only relevant if `config.is_decoder = True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the attention blocks)
+    that can be used (see `past_key_values` input) to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [GPTBigCodeForCausalLM](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeForCausalLM)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: GPTBigCodeForSequenceClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.GPTBigCodeForSequenceClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/modeling_gpt_bigcode.py#L1310)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([GPTBigCodeConfig](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The GPTBigCode Model transformer with a sequence classification head on top
+    (linear layer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[GPTBigCodeForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeForSequenceClassification)
+    uses the last token in order to do the classification, as other causal models
+    (e.g. GPT-1) do.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since it does classification on the last token, it requires to know the position
+    of the last token. If a `pad_token_id` is defined in the configuration, it finds
+    the last token that is not a padding token in each row. If no `pad_token_id` is
+    defined, it simply takes the last value in each row of the batch. Since it cannot
+    guess the padding tokens when `inputs_embeds` are passed instead of `input_ids`,
+    it does the same (take the last value in each row of the batch).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/modeling_gpt_bigcode.py#L1335)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None past_key_values: Optional = None attention_mask:
+    Optional = None token_type_ids: Optional = None position_ids: Optional = None
+    head_mask: Optional = None inputs_embeds: Optional = None labels: Optional = None
+    use_cache: Optional = None output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.Tensor` of shape `(batch_size, input_ids_length)`) —
+    `input_ids_length` = `sequence_length` if `past_key_values` is `None` else `past_key_values[0][0].shape[-2]`
+    (`sequence_length` of input past key value states). Indices of input sequence
+    tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used, only `input_ids` that do not have their past calculated
+    should be passed as `input_ids`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`Tuple[torch.Tensor]` of length `config.n_layers`) — Contains
+    precomputed hidden-states (key and values in the attention blocks) as computed
+    by the model (see `past_key_values` output below). Can be used to speed up sequential
+    decoding. The `input_ids` which have their past given to this model should not
+    be passed as `input_ids` as they have already been computed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If `past_key_values` is used, `attention_mask` needs to contain the masking
+    strategy that was used for `past_key_values`. In other words, the `attention_mask`
+    always has to have the length: `len(past_key_values) + len(input_ids)`'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.Tensor` of shape `(batch_size, input_ids_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.Tensor` of shape `(batch_size, sequence_length, hidden_size)`,
+    *optional*) — Optionally, instead of passing `input_ids` you can choose to directly
+    pass an embedded representation. This is useful if you want more control over
+    how to convert `input_ids` indices into associated vectors than the model’s internal
+    embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used, optionally only the last `inputs_embeds` have
+    to be input (see `past_key_values`).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*) — If set to `True`, `past_key_values` key
+    value states are returned and can be used to speed up decoding (see `past_key_values`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.Tensor` of shape `(batch_size,)`, *optional*) — Labels for
+    computing the sequence classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [GPTBigCodeForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeForSequenceClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: GPTBigCodeForTokenClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.GPTBigCodeForTokenClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/modeling_gpt_bigcode.py#L1437)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([GPTBigCodeConfig](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: GPT_BIGCODE Model with a token classification head on top (a linear layer on
+    top of the hidden-states output) e.g. for Named-Entity-Recognition (NER) tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/gpt_bigcode/modeling_gpt_bigcode.py#L1462)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None past_key_values: Optional = None attention_mask:
+    Optional = None token_type_ids: Optional = None position_ids: Optional = None
+    head_mask: Optional = None inputs_embeds: Optional = None labels: Optional = None
+    use_cache: Optional = None output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.Tensor` of shape `(batch_size, input_ids_length)`) —
+    `input_ids_length` = `sequence_length` if `past_key_values` is `None` else `past_key_values[0][0].shape[-2]`
+    (`sequence_length` of input past key value states). Indices of input sequence
+    tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used, only `input_ids` that do not have their past calculated
+    should be passed as `input_ids`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`Tuple[torch.Tensor]` of length `config.n_layers`) — Contains
+    precomputed hidden-states (key and values in the attention blocks) as computed
+    by the model (see `past_key_values` output below). Can be used to speed up sequential
+    decoding. The `input_ids` which have their past given to this model should not
+    be passed as `input_ids` as they have already been computed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If `past_key_values` is used, `attention_mask` needs to contain the masking
+    strategy that was used for `past_key_values`. In other words, the `attention_mask`
+    always has to have the length: `len(past_key_values) + len(input_ids)`'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.Tensor` of shape `(batch_size, input_ids_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.Tensor` of shape `(batch_size, sequence_length, hidden_size)`,
+    *optional*) — Optionally, instead of passing `input_ids` you can choose to directly
+    pass an embedded representation. This is useful if you want more control over
+    how to convert `input_ids` indices into associated vectors than the model’s internal
+    embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `past_key_values` is used, optionally only the last `inputs_embeds` have
+    to be input (see `past_key_values`).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*) — If set to `True`, `past_key_values` key
+    value states are returned and can be used to speed up decoding (see `past_key_values`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.Tensor` of shape `(batch_size, sequence_length)`, *optional*)
+    — Labels for computing the sequence classification/regression loss. Indices should
+    be in `[0, ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression
+    loss is computed (Mean-Square loss), If `config.num_labels > 1` a classification
+    loss is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [GPTBigCodeForTokenClassification](/docs/transformers/v4.37.2/en/model_doc/gpt_bigcode#transformers.GPTBigCodeForTokenClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL

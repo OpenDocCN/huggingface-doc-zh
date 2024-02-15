@@ -1,0 +1,101 @@
+- en: Attention mechanisms
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/attention](https://huggingface.co/docs/transformers/v4.37.2/en/attention)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/6.b0f7ed1a.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most transformer models use full attention in the sense that the attention matrix
+    is square. It can be a big computational bottleneck when you have long texts.
+    Longformer and reformer are models that try to be more efficient and use a sparse
+    version of the attention matrix to speed up training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: LSH attention
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Reformer](#reformer) uses LSH attention. In the softmax(QK^t), only the biggest
+    elements (in the softmax dimension) of the matrix QK^t are going to give useful
+    contributions. So for each query q in Q, we can consider only the keys k in K
+    that are close to q. A hash function is used to determine if q and k are close.
+    The attention mask is modified to mask the current token (except at the first
+    position), because it will give a query and a key equal (so very similar to each
+    other). Since the hash can be a bit random, several hash functions are used in
+    practice (determined by a n_rounds parameter) and then are averaged together.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Local attention
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Longformer](#longformer) uses local attention: often, the local context (e.g.,
+    what are the two tokens to the left and right?) is enough to take action for a
+    given token. Also, by stacking attention layers that have a small window, the
+    last layer will have a receptive field of more than just the tokens in the window,
+    allowing them to build a representation of the whole sentence.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some preselected input tokens are also given global attention: for those few
+    tokens, the attention matrix can access all tokens and this process is symmetric:
+    all other tokens have access to those specific tokens (on top of the ones in their
+    local window). This is shown in Figure 2d of the paper, see below for a sample
+    attention mask:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/1e06365ec5e9b29f09eaa36653e7f0cc.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Using those attention matrices with less parameters then allows the model to
+    have inputs having a bigger sequence length.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Other tricks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Axial positional encodings
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[Reformer](#reformer) uses axial positional encodings: in traditional transformer
+    models, the positional encoding E is a matrix of size<math><semantics><mrow><mi>l</mi></mrow><annotation
+    encoding="application/x-tex">l</annotation></semantics></math>l by<math><semantics><mrow><mi>d</mi></mrow><annotation
+    encoding="application/x-tex">d</annotation></semantics></math>d,<math><semantics><mrow><mi>l</mi></mrow><annotation
+    encoding="application/x-tex">l</annotation></semantics></math>l being the sequence
+    length and<math><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math>d
+    the dimension of the hidden state. If you have very long texts, this matrix can
+    be huge and take way too much space on the GPU. To alleviate that, axial positional
+    encodings consist of factorizing that big matrix E in two smaller matrices E1
+    and E2, with dimensions<math><semantics><mrow><msub><mi>l</mi><mn>1</mn></msub><mo>×</mo><msub><mi>d</mi><mn>1</mn></msub></mrow><annotation
+    encoding="application/x-tex">l_{1} \times d_{1}</annotation></semantics></math>l1​×d1​
+    and<math><semantics><mrow><msub><mi>l</mi><mn>2</mn></msub><mo>×</mo><msub><mi>d</mi><mn>2</mn></msub></mrow><annotation
+    encoding="application/x-tex">l_{2} \times d_{2}</annotation></semantics></math>l2​×d2​,
+    such that<math><semantics><mrow><msub><mi>l</mi><mn>1</mn></msub><mo>×</mo><msub><mi>l</mi><mn>2</mn></msub><mo>=</mo><mi>l</mi></mrow><annotation
+    encoding="application/x-tex">l_{1} \times l_{2} = l</annotation></semantics></math>l1​×l2​=l
+    and<math><semantics><mrow><msub><mi>d</mi><mn>1</mn></msub><mo>+</mo><msub><mi>d</mi><mn>2</mn></msub><mo>=</mo><mi>d</mi></mrow><annotation
+    encoding="application/x-tex">d_{1} + d_{2} = d</annotation></semantics></math>d1​+d2​=d
+    (with the product for the lengths, this ends up being way smaller). The embedding
+    for time step<math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math>j
+    in E is obtained by concatenating the embeddings for timestep<math><semantics><mrow><mi>j</mi><mi
+    mathvariant="normal">%</mi><mi>l</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">j
+    \% l1</annotation></semantics></math>j%l1 in E1 and<math><semantics><mrow><mi>j</mi><mi
+    mathvariant="normal">/</mi><mi mathvariant="normal">/</mi><mi>l</mi><mn>1</mn></mrow><annotation
+    encoding="application/x-tex">j // l1</annotation></semantics></math>j//l1 in E2.'
+  prefs: []
+  type: TYPE_NORMAL

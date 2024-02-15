@@ -1,0 +1,328 @@
+- en: Efficient Training on Multiple CPUs
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_cpu_many](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_cpu_many)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/322.c7d90bf9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: When training on a single CPU is too slow, we can use multiple CPUs. This guide
+    focuses on PyTorch-based DDP enabling distributed CPU training efficiently on
+    [bare metal](#usage-in-trainer) and [Kubernetes](#usage-with-kubernetes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Intel® oneCCL Bindings for PyTorch
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Intel® oneCCL](https://github.com/oneapi-src/oneCCL) (collective communications
+    library) is a library for efficient distributed deep learning training implementing
+    such collectives like allreduce, allgather, alltoall. For more information on
+    oneCCL, please refer to the [oneCCL documentation](https://spec.oneapi.com/versions/latest/elements/oneCCL/source/index.html)
+    and [oneCCL specification](https://spec.oneapi.com/versions/latest/elements/oneCCL/source/index.html).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Module `oneccl_bindings_for_pytorch` (`torch_ccl` before version 1.12) implements
+    PyTorch C10D ProcessGroup API and can be dynamically loaded as external ProcessGroup
+    and only works on Linux platform now
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check more detailed information for [oneccl_bind_pt](https://github.com/intel/torch-ccl).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Intel® oneCCL Bindings for PyTorch installation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Wheel files are available for the following Python versions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Extension Version | Python 3.6 | Python 3.7 | Python 3.8 | Python 3.9 | Python
+    3.10 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2.1.0 |  | √ | √ | √ | √ |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2.0.0 |  | √ | √ | √ | √ |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1.13.0 |  | √ | √ | √ | √ |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1.12.100 |  | √ | √ | √ | √ |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1.12.0 |  | √ | √ | √ | √ |'
+  prefs: []
+  type: TYPE_TB
+- en: Please run `pip list | grep torch` to get your `pytorch_version`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: where `{pytorch_version}` should be your PyTorch version, for instance 2.1.0.
+    Check more approaches for [oneccl_bind_pt installation](https://github.com/intel/torch-ccl).
+    Versions of oneCCL and PyTorch must match.
+  prefs: []
+  type: TYPE_NORMAL
+- en: oneccl_bindings_for_pytorch 1.12.0 prebuilt wheel does not work with PyTorch
+    1.12.1 (it is for PyTorch 1.12.0) PyTorch 1.12.1 should work with oneccl_bindings_for_pytorch
+    1.12.100
+  prefs: []
+  type: TYPE_NORMAL
+- en: Intel® MPI library
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use this standards-based MPI implementation to deliver flexible, efficient,
+    scalable cluster messaging on Intel® architecture. This component is part of the
+    Intel® oneAPI HPC Toolkit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: oneccl_bindings_for_pytorch is installed along with the MPI tool set. Need to
+    source the environment before using it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: for Intel® oneCCL >= 1.12.0
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: for Intel® oneCCL whose version < 1.12.0
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Intel® Extension for PyTorch installation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Intel Extension for PyTorch (IPEX) provides performance optimizations for CPU
+    training with both Float32 and BFloat16 (refer to the [single CPU section](./perf_train_cpu)
+    to learn more).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following “Usage in Trainer” takes mpirun in Intel® MPI library as an example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage in Trainer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To enable multi CPU distributed training in the Trainer with the ccl backend,
+    users should add **`--ddp_backend ccl`** in the command arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s see an example with the [question-answering example](https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering)
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following command enables training with 2 processes on one Xeon node, with
+    one process running per one socket. The variables OMP_NUM_THREADS/CCL_WORKER_COUNT
+    can be tuned for optimal performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The following command enables training with a total of four processes on two
+    Xeons (node0 and node1, taking node0 as the main process), ppn (processes per
+    node) is set to 2, with one process running per one socket. The variables OMP_NUM_THREADS/CCL_WORKER_COUNT
+    can be tuned for optimal performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In node0, you need to create a configuration file which contains the IP addresses
+    of each node (for example hostfile) and pass that configuration file path as an
+    argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, run the following command in node0 and **4DDP** will be enabled in node0
+    and node1 with BF16 auto mixed precision:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Usage with Kubernetes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The same distributed training job from the previous section can be deployed
+    to a Kubernetes cluster using the [Kubeflow PyTorchJob training operator](https://www.kubeflow.org/docs/components/training/pytorch/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setup
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'This example assumes that you have:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Access to a Kubernetes cluster with [Kubeflow installed](https://www.kubeflow.org/docs/started/installing-kubeflow/)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[`kubectl`](https://kubernetes.io/docs/tasks/tools/) installed and configured
+    to access the Kubernetes cluster'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A [Persistent Volume Claim (PVC)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+    that can be used to store datasets and model files. There are multiple options
+    for setting up the PVC including using an NFS [storage class](https://kubernetes.io/docs/concepts/storage/storage-classes/)
+    or a cloud storage bucket.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A Docker container that includes your model training script and all the dependencies
+    needed to run the script. For distributed CPU training jobs, this typically includes
+    PyTorch, Transformers, Intel Extension for PyTorch, Intel oneCCL Bindings for
+    PyTorch, and OpenSSH to communicate between the containers.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The snippet below is an example of a Dockerfile that uses a base image that
+    supports distributed CPU training and then extracts a Transformers release to
+    the `/workspace` directory, so that the example scripts are included in the image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The image needs to be built and copied to the cluster’s nodes or pushed to a
+    container registry prior to deploying the PyTorchJob to the cluster.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PyTorchJob Specification File
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/components/training/pytorch/)
+    is used to run the distributed training job on the cluster. The yaml file for
+    the PyTorchJob defines parameters such as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The name of the PyTorchJob
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The number of replicas (workers)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The python script and it’s parameters that will be used to run the training
+    job
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The types of resources (node selector, memory, and CPU) needed for each worker
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The image/tag for the Docker container to use
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Environment variables
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A volume mount for the PVC
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The volume mount defines a path where the PVC will be mounted in the container
+    for each worker pod. This location can be used for the dataset, checkpoint files,
+    and the saved model after training completes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The snippet below is an example of a yaml file for a PyTorchJob with 4 workers
+    running the [question-answering example](https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: To run this example, update the yaml based on your training script and the nodes
+    in your cluster.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The CPU resource limits/requests in the yaml are defined in [cpu units](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu)
+    where 1 CPU unit is equivalent to 1 physical CPU core or 1 virtual core (depending
+    on whether the node is a physical host or a VM). The amount of CPU and memory
+    limits/requests defined in the yaml should be less than the amount of available
+    CPU/memory capacity on a single machine. It is usually a good idea to not use
+    the entire machine’s capacity in order to leave some resources for the kubelet
+    and OS. In order to get [“guaranteed”](https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#guaranteed)
+    [quality of service](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
+    for the worker pods, set the same CPU and memory amounts for both the resource
+    limits and requests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deploy
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'After the PyTorchJob spec has been updated with values appropriate for your
+    cluster and training job, it can be deployed to the cluster using:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `kubectl get pods -n kubeflow` command can then be used to list the pods
+    in the `kubeflow` namespace. You should see the worker pods for the PyTorchJob
+    that was just deployed. At first, they will probably have a status of “Pending”
+    as the containers get pulled and created, then the status should change to “Running”.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The logs for worker can be viewed using `kubectl logs -n kubeflow <pod name>`.
+    Add `-f` to stream the logs, for example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: After the training job completes, the trained model can be copied from the PVC
+    or storage location. When you are done with the job, the PyTorchJob resource can
+    be deleted from the cluster using `kubectl delete -f pytorchjob.yaml`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This guide covered running distributed PyTorch training jobs using multiple
+    CPUs on bare metal and on a Kubernetes cluster. Both cases utilize Intel Extension
+    for PyTorch and Intel oneCCL Bindings for PyTorch for optimal training performance,
+    and can be used as a template to run your own workload on multiple nodes.
+  prefs: []
+  type: TYPE_NORMAL

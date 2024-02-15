@@ -1,0 +1,438 @@
+- en: Document Question Answering
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/document_question_answering](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/document_question_answering)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/342.01ca6cdc.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Document Question Answering, also referred to as Document Visual Question Answering,
+    is a task that involves providing answers to questions posed about document images.
+    The input to models supporting this task is typically a combination of an image
+    and a question, and the output is an answer expressed in natural language. These
+    models utilize multiple modalities, including text, the positions of words (bounding
+    boxes), and the image itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This guide illustrates how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fine-tune [LayoutLMv2](../model_doc/layoutlmv2) on the [DocVQA dataset](https://huggingface.co/datasets/nielsr/docvqa_1200_examples_donut).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use your fine-tuned model for inference.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The task illustrated in this tutorial is supported by the following model architectures:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[LayoutLM](../model_doc/layoutlm), [LayoutLMv2](../model_doc/layoutlmv2), [LayoutLMv3](../model_doc/layoutlmv3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'LayoutLMv2 solves the document question-answering task by adding a question-answering
+    head on top of the final hidden states of the tokens, to predict the positions
+    of the start and end tokens of the answer. In other words, the problem is treated
+    as extractive question answering: given the context, extract which piece of information
+    answers the question. The context comes from the output of an OCR engine, here
+    it is Google’s Tesseract.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you begin, make sure you have all the necessary libraries installed.
+    LayoutLMv2 depends on detectron2, torchvision and tesseract.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once you have installed all of the dependencies, restart your runtime.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We encourage you to share your model with the community. Log in to your Hugging
+    Face account to upload it to the 🤗 Hub. When prompted, enter your token to log
+    in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s define some global variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load the data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In this guide we use a small sample of preprocessed DocVQA that you can find
+    on 🤗 Hub. If you’d like to use the full DocVQA dataset, you can register and download
+    it on [DocVQA homepage](https://rrc.cvc.uab.es/?ch=17). If you do so, to proceed
+    with this guide check out [how to load files into a 🤗 dataset](https://huggingface.co/docs/datasets/loading#local-and-remote-files).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the dataset is split into train and test sets already. Take
+    a look at a random example to familiarize yourself with the features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s what the individual fields represent:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`id`: the example’s id'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`image`: a PIL.Image.Image object containing the document image'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`query`: the question string - natural language asked question, in several
+    languages'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`answers`: a list of correct answers provided by human annotators'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`words` and `bounding_boxes`: the results of OCR, which we will not use here'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`answer`: an answer matched by a different model which we will not use here'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s leave only English questions, and drop the `answer` feature which appears
+    to contain predictions by another model. We’ll also take the first of the answers
+    from the set provided by the annotators. Alternatively, you can randomly sample
+    it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the LayoutLMv2 checkpoint that we use in this guide has been trained
+    with `max_position_embeddings = 512` (you can find this information in the [checkpoint’s
+    `config.json` file](https://huggingface.co/microsoft/layoutlmv2-base-uncased/blob/main/config.json#L18)).
+    We can truncate the examples but to avoid the situation where the answer might
+    be at the end of a large document and end up truncated, here we’ll remove the
+    few examples where the embedding is likely to end up longer than 512. If most
+    of the documents in your dataset are long, you can implement a sliding window
+    strategy - check out [this notebook](https://github.com/huggingface/notebooks/blob/main/examples/question_answering.ipynb)
+    for details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: At this point let’s also remove the OCR features from this dataset. These are
+    a result of OCR for fine-tuning a different model. They would still require some
+    processing if we wanted to use them, as they do not match the input requirements
+    of the model we use in this guide. Instead, we can use the [LayoutLMv2Processor](/docs/transformers/v4.37.2/en/model_doc/layoutlmv2#transformers.LayoutLMv2Processor)
+    on the original data for both OCR and tokenization. This way we’ll get the inputs
+    that match model’s expected input. If you want to process images manually, check
+    out the [`LayoutLMv2` model documentation](../model_doc/layoutlmv2) to learn what
+    input format the model expects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, the data exploration won’t be complete if we don’t peek at an image
+    example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![DocVQA Image Example](../Images/b537ce4132491f7d258df4f7e115b34a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Preprocess the data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Document Question Answering task is a multimodal task, and you need to make
+    sure that the inputs from each modality are preprocessed according to the model’s
+    expectations. Let’s start by loading the [LayoutLMv2Processor](/docs/transformers/v4.37.2/en/model_doc/layoutlmv2#transformers.LayoutLMv2Processor),
+    which internally combines an image processor that can handle image data and a
+    tokenizer that can encode text data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Preprocessing document images
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: First, let’s prepare the document images for the model with the help of the
+    `image_processor` from the processor. By default, image processor resizes the
+    images to 224x224, makes sure they have the correct order of color channels, applies
+    OCR with tesseract to get words and normalized bounding boxes. In this tutorial,
+    all of these defaults are exactly what we need. Write a function that applies
+    the default image processing to a batch of images and returns the results of OCR.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: To apply this preprocessing to the entire dataset in a fast way, use [map](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.map).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Preprocessing text data
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Once we have applied OCR to the images, we need to encode the text part of the
+    dataset to prepare it for the model. This involves converting the words and boxes
+    that we got in the previous step to token-level `input_ids`, `attention_mask`,
+    `token_type_ids` and `bbox`. For preprocessing text, we’ll need the `tokenizer`
+    from the processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: On top of the preprocessing mentioned above, we also need to add the labels
+    for the model. For `xxxForQuestionAnswering` models in 🤗 Transformers, the labels
+    consist of the `start_positions` and `end_positions`, indicating which token is
+    at the start and which token is at the end of the answer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s start with that. Define a helper function that can find a sublist (the
+    answer split into words) in a larger list (the words list).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This function will take two lists as input, `words_list` and `answer_list`.
+    It will then iterate over the `words_list` and check if the current word in the
+    `words_list` (words_list[i]) is equal to the first word of answer_list (answer_list[0])
+    and if the sublist of `words_list` starting from the current word and of the same
+    length as `answer_list` is equal `to answer_list`. If this condition is true,
+    it means that a match has been found, and the function will record the match,
+    its starting index (idx), and its ending index (idx + len(answer_list) - 1). If
+    more than one match was found, the function will return only the first one. If
+    no match is found, the function returns (`None`, 0, and 0).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To illustrate how this function finds the position of the answer, let’s use
+    it on an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once examples are encoded, however, they will look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’ll need to find the position of the answer in the encoded input.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`token_type_ids` tells us which tokens are part of the question, and which
+    ones are part of the document’s words.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`tokenizer.cls_token_id` will help find the special token at the beginning
+    of the input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`word_ids` will help match the answer found in the original `words` to the
+    same answer in the full encoded input and determine the start/end position of
+    the answer in the encoded input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'With that in mind, let’s create a function to encode a batch of examples in
+    the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now that we have this preprocessing function, we can encode the entire dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s check what the features of the encoded dataset look like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Evaluation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Evaluation for document question answering requires a significant amount of
+    postprocessing. To avoid taking up too much of your time, this guide skips the
+    evaluation step. The [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    still calculates the evaluation loss during training so you’re not completely
+    in the dark about your model’s performance. Extractive question answering is typically
+    evaluated using F1/exact match. If you’d like to implement it yourself, check
+    out the [Question Answering chapter](https://huggingface.co/course/chapter7/7?fw=pt#postprocessing)
+    of the Hugging Face course for inspiration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Congratulations! You’ve successfully navigated the toughest part of this guide
+    and now you are ready to train your own model. Training involves the following
+    steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load the model with [AutoModelForDocumentQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForDocumentQuestionAnswering)
+    using the same checkpoint as in the preprocessing.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Define your training hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Define a function to batch examples together, here the [DefaultDataCollator](/docs/transformers/v4.37.2/en/main_classes/data_collator#transformers.DefaultDataCollator)
+    will do just fine
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Pass the training arguments to [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    along with the model, dataset, and data collator.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    to finetune your model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
+    use `output_dir` to specify where to save your model, and configure hyperparameters
+    as you see fit. If you wish to share your model with the community, set `push_to_hub`
+    to `True` (you must be signed in to Hugging Face to upload your model). In this
+    case the `output_dir` will also be the name of the repo where your model checkpoint
+    will be pushed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Define a simple data collator to batch examples together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, bring everything together, and call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To add the final model to 🤗 Hub, create a model card and call `push_to_hub`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that you have finetuned a LayoutLMv2 model, and uploaded it to the 🤗 Hub,
+    you can use it for inference. The simplest way to try out your finetuned model
+    for inference is to use it in a [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s take an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, instantiate a pipeline for document question answering with your model,
+    and pass the image + question combination to it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also manually replicate the results of the pipeline if you’d like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take an image and a question, prepare them for the model using the processor
+    from your model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Forward the result or preprocessing through the model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The model returns `start_logits` and `end_logits`, which indicate which token
+    is at the start of the answer and which token is at the end of the answer. Both
+    have shape (batch_size, sequence_length).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Take an argmax on the last dimension of both the `start_logits` and `end_logits`
+    to get the predicted `start_idx` and `end_idx`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Decode the answer with the tokenizer.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE

@@ -1,0 +1,134 @@
+- en: Knowledge Distillation for Computer Vision
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/knowledge_distillation_for_image_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/knowledge_distillation_for_image_classification)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/347.a5b3948e.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Knowledge distillation is a technique used to transfer knowledge from a larger,
+    more complex model (teacher) to a smaller, simpler model (student). To distill
+    knowledge from one model to another, we take a pre-trained teacher model trained
+    on a certain task (image classification for this case) and randomly initialize
+    a student model to be trained on image classification. Next, we train the student
+    model to minimize the difference between it’s outputs and the teacher’s outputs,
+    thus making it mimic the behavior. It was first introduced in [Distilling the
+    Knowledge in a Neural Network by Hinton et al](https://arxiv.org/abs/1503.02531).
+    In this guide, we will do task-specific knowledge distillation. We will use the
+    [beans dataset](https://huggingface.co/datasets/beans) for this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide demonstrates how you can distill a [fine-tuned ViT model](https://huggingface.co/merve/vit-mobilenet-beans-224)
+    (teacher model) to a [MobileNet](https://huggingface.co/google/mobilenet_v2_1.4_224)
+    (student model) using the [Trainer API](https://huggingface.co/docs/transformers/en/main_classes/trainer#trainer)
+    of 🤗 Transformers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s install the libraries needed for distillation and evaluating the process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, we are using the `merve/beans-vit-224` model as teacher model.
+    It’s an image classification model, based on `google/vit-base-patch16-224-in21k`
+    fine-tuned on beans dataset. We will distill this model to a randomly initialized
+    MobileNetV2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We will now load the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can use an image processor from either of the models, as in this case they
+    return the same output with same resolution. We will use the `map()` method of
+    `dataset` to apply the preprocessing to every split of the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Essentially, we want the student model (a randomly initialized MobileNet) to
+    mimic the teacher model (fine-tuned vision transformer). To achieve this, we first
+    get the logits output from the teacher and the student. Then, we divide each of
+    them by the parameter `temperature` which controls the importance of each soft
+    target. A parameter called `lambda` weighs the importance of the distillation
+    loss. In this example, we will use `temperature=5` and `lambda=0.5`. We will use
+    the Kullback-Leibler Divergence loss to compute the divergence between the student
+    and teacher. Given two data P and Q, KL Divergence explains how much extra information
+    we need to represent P using Q. If two are identical, their KL divergence is zero,
+    as there’s no other information needed to explain P from Q. Thus, in the context
+    of knowledge distillation, KL divergence is useful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: We will now login to Hugging Face Hub so we can push our model to the Hugging
+    Face Hub through the `Trainer`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s set the `TrainingArguments`, the teacher model and the student model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can use `compute_metrics` function to evaluate our model on the test set.
+    This function will be used during the training process to compute the `accuracy`
+    & `f1` of our model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s initialize the `Trainer` with the training arguments we defined. We will
+    also initialize our data collator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can now train our model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can evaluate the model on the test set.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: On test set, our model reaches 72 percent accuracy. To have a sanity check over
+    efficiency of distillation, we also trained MobileNet on the beans dataset from
+    scratch with the same hyperparameters and observed 63 percent accuracy on the
+    test set. We invite the readers to try different pre-trained teacher models, student
+    architectures, distillation parameters and report their findings. The training
+    logs and checkpoints for distilled model can be found in [this repository](https://huggingface.co/merve/vit-mobilenet-beans-224),
+    and MobileNetV2 trained from scratch can be found in this [repository](https://huggingface.co/merve/resnet-mobilenet-beans-5).
+  prefs: []
+  type: TYPE_NORMAL

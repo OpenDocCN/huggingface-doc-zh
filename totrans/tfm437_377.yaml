@@ -1,0 +1,1935 @@
+- en: VisualBERT
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/visual_bert](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/visual_bert)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/282.028fe866.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The VisualBERT model was proposed in [VisualBERT: A Simple and Performant Baseline
+    for Vision and Language](https://arxiv.org/pdf/1908.03557) by Liunian Harold Li,
+    Mark Yatskar, Da Yin, Cho-Jui Hsieh, Kai-Wei Chang. VisualBERT is a neural network
+    trained on a variety of (image, text) pairs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We propose VisualBERT, a simple and flexible framework for modeling a broad
+    range of vision-and-language tasks. VisualBERT consists of a stack of Transformer
+    layers that implicitly align elements of an input text and regions in an associated
+    input image with self-attention. We further propose two visually-grounded language
+    model objectives for pre-training VisualBERT on image caption data. Experiments
+    on four vision-and-language tasks including VQA, VCR, NLVR2, and Flickr30K show
+    that VisualBERT outperforms or rivals with state-of-the-art models while being
+    significantly simpler. Further analysis demonstrates that VisualBERT can ground
+    elements of language to image regions without any explicit supervision and is
+    even sensitive to syntactic relationships, tracking, for example, associations
+    between verbs and image regions corresponding to their arguments.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [gchhablani](https://huggingface.co/gchhablani).
+    The original code can be found [here](https://github.com/uclanlp/visualbert).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Most of the checkpoints provided work with the [VisualBertForPreTraining](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertForPreTraining)
+    configuration. Other checkpoints provided are the fine-tuned checkpoints for down-stream
+    tasks - VQA (‘visualbert-vqa’), VCR (‘visualbert-vcr’), NLVR2 (‘visualbert-nlvr2’).
+    Hence, if you are not working on these downstream tasks, it is recommended that
+    you use the pretrained checkpoints.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: For the VCR task, the authors use a fine-tuned detector for generating visual
+    embeddings, for all the checkpoints. We do not provide the detector and its weights
+    as a part of the package, but it will be available in the research projects, and
+    the states can be loaded directly into the detector provided.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: VisualBERT is a multi-modal vision and language model. It can be used for visual
+    question answering, multiple choice, visual reasoning and region-to-phrase correspondence
+    tasks. VisualBERT uses a BERT-like transformer to prepare embeddings for image-text
+    pairs. Both the text and visual features are then projected to a latent space
+    with identical dimension.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To feed images to the model, each image is passed through a pre-trained object
+    detector and the regions and the bounding boxes are extracted. The authors use
+    the features generated after passing these regions through a pre-trained CNN like
+    ResNet as visual embeddings. They also add absolute position embeddings, and feed
+    the resulting sequence of vectors to a standard BERT model. The text input is
+    concatenated in the front of the visual embeddings in the embedding layer, and
+    is expected to be bound by [CLS] and a [SEP] tokens, as in BERT. The segment IDs
+    must also be set appropriately for the textual and visual parts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The [BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer)
+    is used to encode the text. A custom detector/image processor must be used to
+    get the visual embeddings. The following example notebooks show how to use VisualBERT
+    with Detectron-like models:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[VisualBERT VQA demo notebook](https://github.com/huggingface/transformers/tree/main/examples/research_projects/visual_bert)
+    : This notebook contains an example on VisualBERT VQA.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Generate Embeddings for VisualBERT (Colab Notebook)](https://colab.research.google.com/drive/1bLGxKdldwqnMVA5x4neY7-l_8fKGWQYI?usp=sharing)
+    : This notebook contains an example on how to generate visual embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following example shows how to get the last hidden state using [VisualBertModel](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertModel):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: VisualBertConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.VisualBertConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/configuration_visual_bert.py#L43)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_size = 30522 hidden_size = 768 visual_embedding_dim = 512 num_hidden_layers
+    = 12 num_attention_heads = 12 intermediate_size = 3072 hidden_act = 'gelu' hidden_dropout_prob
+    = 0.1 attention_probs_dropout_prob = 0.1 max_position_embeddings = 512 type_vocab_size
+    = 2 initializer_range = 0.02 layer_norm_eps = 1e-12 bypass_transformer = False
+    special_visual_initialize = True pad_token_id = 1 bos_token_id = 0 eos_token_id
+    = 2 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_size** (`int`, *optional*, defaults to 30522) — Vocabulary size of
+    the VisualBERT model. Defines the number of different tokens that can be represented
+    by the `inputs_ids` passed when calling [VisualBertModel](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertModel).
+    Vocabulary size of the model. Defines the different tokens that can be represented
+    by the `inputs_ids` passed to the forward method of [VisualBertModel](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 768) — Dimensionality of the
+    encoder layers and the pooler layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_embedding_dim** (`int`, *optional*, defaults to 512) — Dimensionality
+    of the visual embeddings to be passed to the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_hidden_layers** (`int`, *optional*, defaults to 12) — Number of hidden
+    layers in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`int`, *optional*, defaults to 12) — Number of attention
+    heads for each attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**intermediate_size** (`int`, *optional*, defaults to 3072) — Dimensionality
+    of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `function`, *optional*, defaults to `"gelu"`) — The
+    non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_dropout_prob** (`float`, *optional*, defaults to 0.1) — The dropout
+    probabilitiy for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_probs_dropout_prob** (`float`, *optional*, defaults to 0.1) — The
+    dropout ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_position_embeddings** (`int`, *optional*, defaults to 512) — The maximum
+    sequence length that this model might ever be used with. Typically set this to
+    something large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**type_vocab_size** (`int`, *optional*, defaults to 2) — The vocabulary size
+    of the `token_type_ids` passed when calling [VisualBertModel](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-12) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bypass_transformer** (`bool`, *optional*, defaults to `False`) — Whether
+    or not the model should bypass the transformer for the visual embeddings. If set
+    to `True`, the model directly concatenates the visual embeddings from `VisualBertEmbeddings`
+    with text output from transformers, and then pass it to a self-attention layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**special_visual_initialize** (`bool`, *optional*, defaults to `True`) — Whether
+    or not the visual token type and position type embedding weights should be initialized
+    the same as the textual token type and positive type embeddings. When set to `True`,
+    the weights of the textual token type and position type embeddings are copied
+    to the respective visual embedding layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [VisualBertModel](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertModel).
+    It is used to instantiate an VisualBERT model according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the VisualBERT [uclanlp/visualbert-vqa-coco-pre](https://huggingface.co/uclanlp/visualbert-vqa-coco-pre)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: VisualBertModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.VisualBertModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L664)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config add_pooling_layer = True )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare VisualBert Model transformer outputting raw hidden-states without any
+    specific head on top. This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The model can behave as an encoder (with only self-attention) following the
+    architecture described in [Attention is all you need](https://arxiv.org/abs/1706.03762)
+    by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan
+    N. Gomez, Lukasz Kaiser and Illia Polosukhin.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L707)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None head_mask: Optional = None inputs_embeds:
+    Optional = None visual_embeds: Optional = None visual_attention_mask: Optional
+    = None visual_token_type_ids: Optional = None image_text_alignment: Optional =
+    None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None ) → [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert `input_ids` indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_embeds** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length,
+    visual_embedding_dim)`, *optional*) — The embedded representation of the visual
+    inputs, generally derived using using an object detector.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_attention_mask** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Mask to avoid performing attention on visual embeddings. Mask values
+    selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**visual_token_type_ids** (`torch.LongTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Segment token indices to indicate different portions of the visual
+    embeds.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids) The authors of VisualBERT
+    set the *visual_token_type_ids* to *1* for all tokens.'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**image_text_alignment** (`torch.LongTensor` of shape `(batch_size, visual_seq_length,
+    alignment_number)`, *optional*) — Image-Text alignment uses to decide the position
+    IDs of the visual embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`torch.FloatTensor` of shape `(batch_size, hidden_size)`)
+    — Last layer hidden-state of the first token of the sequence (classification token)
+    after further processing through the layers used for the auxiliary pretraining
+    task. E.g. for BERT-family of models, this returns the classification token after
+    processing through a linear layer and a tanh activation function. The linear layer
+    weights are trained from the next sentence prediction (classification) objective
+    during pretraining.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [VisualBertModel](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: VisualBertForPreTraining
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.VisualBertForPreTraining'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L858)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'VisualBert Model with two heads on top as done during the pretraining: a `masked
+    language modeling` head and a `sentence-image prediction (classification)` head.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L883)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None head_mask: Optional = None inputs_embeds:
+    Optional = None visual_embeds: Optional = None visual_attention_mask: Optional
+    = None visual_token_type_ids: Optional = None image_text_alignment: Optional =
+    None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None labels: Optional = None sentence_image_labels: Optional
+    = None ) → `transformers.models.visual_bert.modeling_visual_bert.VisualBertForPreTrainingOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert `input_ids` indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_embeds** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length,
+    visual_embedding_dim)`, *optional*) — The embedded representation of the visual
+    inputs, generally derived using using an object detector.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_attention_mask** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Mask to avoid performing attention on visual embeddings. Mask values
+    selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**visual_token_type_ids** (`torch.LongTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Segment token indices to indicate different portions of the visual
+    embeds.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids) The authors of VisualBERT
+    set the *visual_token_type_ids* to *1* for all tokens.'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**image_text_alignment** (`torch.LongTensor` of shape `(batch_size, visual_seq_length,
+    alignment_number)`, *optional*) — Image-Text alignment uses to decide the position
+    IDs of the visual embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, total_sequence_length)`,
+    *optional*) — Labels for computing the masked language modeling loss. Indices
+    should be in `[-100, 0, ..., config.vocab_size]` (see `input_ids` docstring) Tokens
+    with indices set to `-100` are ignored (masked), the loss is only computed for
+    the tokens with labels in `[0, ..., config.vocab_size]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sentence_image_labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*)
+    — Labels for computing the sentence-image prediction (classification) loss. Input
+    should be a sequence pair (see `input_ids` docstring) Indices should be in `[0,
+    1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates sequence B is a matching pair of sequence A for the given image,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates sequence B is a random sequence w.r.t A for the given image.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.visual_bert.modeling_visual_bert.VisualBertForPreTrainingOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.visual_bert.modeling_visual_bert.VisualBertForPreTrainingOutput`
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (*optional*, returned when `labels` is provided, `torch.FloatTensor`
+    of shape `(1,)`) — Total loss as the sum of the masked language modeling loss
+    and the sentence-image prediction (classification) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prediction_logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    config.vocab_size)`) — Prediction scores of the language modeling head (scores
+    for each vocabulary token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**seq_relationship_logits** (`torch.FloatTensor` of shape `(batch_size, 2)`)
+    — Prediction scores of the sentence-image prediction (classification) head (scores
+    of True/False continuation before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [VisualBertForPreTraining](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertForPreTraining)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: VisualBertForQuestionAnswering
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.VisualBertForQuestionAnswering'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L1162)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VisualBert Model with a classification/regression head on top (a dropout and
+    a linear layer on top of the pooled output) for VQA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L1181)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None head_mask: Optional = None inputs_embeds:
+    Optional = None visual_embeds: Optional = None visual_attention_mask: Optional
+    = None visual_token_type_ids: Optional = None image_text_alignment: Optional =
+    None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None labels: Optional = None ) → [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert `input_ids` indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_embeds** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length,
+    visual_embedding_dim)`, *optional*) — The embedded representation of the visual
+    inputs, generally derived using using an object detector.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_attention_mask** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Mask to avoid performing attention on visual embeddings. Mask values
+    selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**visual_token_type_ids** (`torch.LongTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Segment token indices to indicate different portions of the visual
+    embeds.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids) The authors of VisualBERT
+    set the *visual_token_type_ids* to *1* for all tokens.'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**image_text_alignment** (`torch.LongTensor` of shape `(batch_size, visual_seq_length,
+    alignment_number)`, *optional*) — Image-Text alignment uses to decide the position
+    IDs of the visual embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, total_sequence_length)`,
+    *optional*) — Labels for computing the sequence classification/regression loss.
+    Indices should be in `[0, ..., config.num_labels - 1]`. A KLDivLoss is computed
+    between the labels and the returned logits.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [VisualBertForQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertForQuestionAnswering)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: VisualBertForMultipleChoice
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.VisualBertForMultipleChoice'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L1009)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VisualBert Model with a multiple choice classification head on top (a linear
+    layer on top of the pooled output and a softmax) e.g. for VCR tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L1027)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None head_mask: Optional = None inputs_embeds:
+    Optional = None visual_embeds: Optional = None visual_attention_mask: Optional
+    = None visual_token_type_ids: Optional = None image_text_alignment: Optional =
+    None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None labels: Optional = None ) → [transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, num_choices, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, num_choices,
+    sequence_length)`, *optional*) — Mask to avoid performing attention on padding
+    token indices. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, num_choices,
+    sequence_length)`, *optional*) — Segment token indices to indicate first and second
+    portions of the inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, num_choices, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, num_choices,
+    sequence_length, hidden_size)`, *optional*) — Optionally, instead of passing `input_ids`
+    you can choose to directly pass an embedded representation. This is useful if
+    you want more control over how to convert `input_ids` indices into associated
+    vectors than the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_embeds** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length,
+    visual_embedding_dim)`, *optional*) — The embedded representation of the visual
+    inputs, generally derived using using an object detector.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_attention_mask** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Mask to avoid performing attention on visual embeddings. Mask values
+    selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**visual_token_type_ids** (`torch.LongTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Segment token indices to indicate different portions of the visual
+    embeds.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids) The authors of VisualBERT
+    set the *visual_token_type_ids* to *1* for all tokens.'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**image_text_alignment** (`torch.LongTensor` of shape `(batch_size, visual_seq_length,
+    alignment_number)`, *optional*) — Image-Text alignment uses to decide the position
+    IDs of the visual embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the multiple choice classification loss. Indices should be in `[0,
+    ..., num_choices-1]` where `num_choices` is the size of the second dimension of
+    the input tensors. (See `input_ids` above)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape *(1,)*, *optional*, returned when `labels`
+    is provided) — Classification loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, num_choices)`) — *num_choices*
+    is the second dimension of the input tensors. (see *input_ids* above).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Classification scores (before SoftMax).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [VisualBertForMultipleChoice](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertForMultipleChoice)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: VisualBertForVisualReasoning
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.VisualBertForVisualReasoning'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L1288)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VisualBert Model with a sequence classification head on top (a dropout and a
+    linear layer on top of the pooled output) for Visual Reasoning e.g. for NLVR task.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L1307)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None head_mask: Optional = None inputs_embeds:
+    Optional = None visual_embeds: Optional = None visual_attention_mask: Optional
+    = None visual_token_type_ids: Optional = None image_text_alignment: Optional =
+    None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None labels: Optional = None ) → [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert `input_ids` indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_embeds** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length,
+    visual_embedding_dim)`, *optional*) — The embedded representation of the visual
+    inputs, generally derived using using an object detector.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_attention_mask** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Mask to avoid performing attention on visual embeddings. Mask values
+    selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**visual_token_type_ids** (`torch.LongTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Segment token indices to indicate different portions of the visual
+    embeds.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids) The authors of VisualBERT
+    set the *visual_token_type_ids* to *1* for all tokens.'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**image_text_alignment** (`torch.LongTensor` of shape `(batch_size, visual_seq_length,
+    alignment_number)`, *optional*) — Image-Text alignment uses to decide the position
+    IDs of the visual embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the sequence classification/regression loss. Indices should be in
+    `[0, ..., config.num_labels - 1]`. A classification loss is computed (Cross-Entropy)
+    against these labels.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [VisualBertForVisualReasoning](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertForVisualReasoning)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: VisualBertForRegionToPhraseAlignment
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.VisualBertForRegionToPhraseAlignment'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L1448)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VisualBert Model with a Masked Language Modeling head and an attention layer
+    on top for Region-to-Phrase Alignment e.g. for Flickr30 Entities task.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/visual_bert/modeling_visual_bert.py#L1469)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None head_mask: Optional = None inputs_embeds:
+    Optional = None visual_embeds: Optional = None visual_attention_mask: Optional
+    = None visual_token_type_ids: Optional = None image_text_alignment: Optional =
+    None output_attentions: Optional = None output_hidden_states: Optional = None
+    return_dict: Optional = None region_to_phrase_position: Optional = None labels:
+    Optional = None ) → [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert `input_ids` indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_embeds** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length,
+    visual_embedding_dim)`, *optional*) — The embedded representation of the visual
+    inputs, generally derived using using an object detector.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**visual_attention_mask** (`torch.FloatTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Mask to avoid performing attention on visual embeddings. Mask values
+    selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**visual_token_type_ids** (`torch.LongTensor` of shape `(batch_size, visual_seq_length)`,
+    *optional*) — Segment token indices to indicate different portions of the visual
+    embeds.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids) The authors of VisualBERT
+    set the *visual_token_type_ids* to *1* for all tokens.'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**image_text_alignment** (`torch.LongTensor` of shape `(batch_size, visual_seq_length,
+    alignment_number)`, *optional*) — Image-Text alignment uses to decide the position
+    IDs of the visual embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**region_to_phrase_position** (`torch.LongTensor` of shape `(batch_size, total_sequence_length)`,
+    *optional*) — The positions depicting the position of the image embedding corresponding
+    to the textual tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, total_sequence_length,
+    visual_sequence_length)`, *optional*) — Labels for computing the masked language
+    modeling loss. KLDivLoss is computed against these labels and the outputs from
+    the attention layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([VisualBertConfig](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [VisualBertForRegionToPhraseAlignment](/docs/transformers/v4.37.2/en/model_doc/visual_bert#transformers.VisualBertForRegionToPhraseAlignment)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE

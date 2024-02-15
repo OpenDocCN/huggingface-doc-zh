@@ -1,0 +1,588 @@
+- en: Image Segmentation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/semantic_segmentation](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/semantic_segmentation)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/355.d89c0932.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Youtube.e1129c6f.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Markdown.fef84341.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://www.youtube-nocookie.com/embed/dKE8SIt9C-w](https://www.youtube-nocookie.com/embed/dKE8SIt9C-w)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Image segmentation models separate areas corresponding to different areas of
+    interest in an image. These models work by assigning a label to each pixel. There
+    are several types of segmentation: semantic segmentation, instance segmentation,
+    and panoptic segmentation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this guide, we will:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Take a look at different types of segmentation](#types-of-segmentation).'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Have an end-to-end fine-tuning example for semantic segmentation](#fine-tuning-a-model-for-segmentation).'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We encourage you to log in to your Hugging Face account so you can upload and
+    share your model with the community. When prompted, enter your token to log in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Types of Segmentation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Semantic segmentation assigns a label or class to every single pixel in an image.
+    Let’s take a look at a semantic segmentation model output. It will assign the
+    same class to every instance of an object it comes across in an image, for example,
+    all cats will be labeled as “cat” instead of “cat-1”, “cat-2”. We can use transformers’
+    image segmentation pipeline to quickly infer a semantic segmentation model. Let’s
+    take a look at the example image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Segmentation Input](../Images/64569586219c10ac0e1d0e7dcb95de24.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: We will use [nvidia/segformer-b1-finetuned-cityscapes-1024-1024](https://huggingface.co/nvidia/segformer-b1-finetuned-cityscapes-1024-1024).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The segmentation pipeline output includes a mask for every predicted class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Taking a look at the mask for the car class, we can see every car is classified
+    with the same mask.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Semantic Segmentation Output](../Images/b6bfa966a8f6ae7291a1b6e1dd4d6e5a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: In instance segmentation, the goal is not to classify every pixel, but to predict
+    a mask for **every instance of an object** in a given image. It works very similar
+    to object detection, where there is a bounding box for every instance, there’s
+    a segmentation mask instead. We will use [facebook/mask2former-swin-large-cityscapes-instance](https://huggingface.co/facebook/mask2former-swin-large-cityscapes-instance)
+    for this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see below, there are multiple cars classified, and there’s no classification
+    for pixels other than pixels that belong to car and person instances.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Checking out one of the car masks below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Semantic Segmentation Output](../Images/b99b68749dae50fc56726918431cadc3.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Panoptic segmentation combines semantic segmentation and instance segmentation,
+    where every pixel is classified into a class and an instance of that class, and
+    there are multiple masks for each instance of a class. We can use [facebook/mask2former-swin-large-cityscapes-panoptic](https://huggingface.co/facebook/mask2former-swin-large-cityscapes-panoptic)
+    for this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see below, we have more classes. We will later illustrate to see
+    that every pixel is classified into one of the classes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s have a side by side comparison for all types of segmentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Segmentation Maps Compared](../Images/3c09fa36de09454c16c19c1b23a22865.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Seeing all types of segmentation, let’s have a deep dive on fine-tuning a model
+    for semantic segmentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Common real-world applications of semantic segmentation include training self-driving
+    cars to identify pedestrians and important traffic information, identifying cells
+    and abnormalities in medical imagery, and monitoring environmental changes from
+    satellite imagery.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fine-tuning a Model for Segmentation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We will now:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finetune [SegFormer](https://huggingface.co/docs/transformers/main/en/model_doc/segformer#segformer)
+    on the [SceneParse150](https://huggingface.co/datasets/scene_parse_150) dataset.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use your fine-tuned model for inference.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The task illustrated in this tutorial is supported by the following model architectures:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[BEiT](../model_doc/beit), [Data2VecVision](../model_doc/data2vec-vision),
+    [DPT](../model_doc/dpt), [MobileNetV2](../model_doc/mobilenet_v2), [MobileViT](../model_doc/mobilevit),
+    [MobileViTV2](../model_doc/mobilevitv2), [SegFormer](../model_doc/segformer),
+    [UPerNet](../model_doc/upernet)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load SceneParse150 dataset
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Start by loading a smaller subset of the SceneParse150 dataset from the 🤗 Datasets
+    library. This’ll give you a chance to experiment and make sure everything works
+    before spending more time training on the full dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Split the dataset’s `train` split into a train and test set with the [train_test_split](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.train_test_split)
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then take a look at an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`image`: a PIL image of the scene.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`annotation`: a PIL image of the segmentation map, which is also the model’s
+    target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`scene_category`: a category id that describes the image scene like “kitchen”
+    or “office”. In this guide, you’ll only need `image` and `annotation`, both of
+    which are PIL images.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'You’ll also want to create a dictionary that maps a label id to a label class
+    which will be useful when you set up the model later. Download the mappings from
+    the Hub and create the `id2label` and `label2id` dictionaries:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Custom dataset
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'You could also create and use your own dataset if you prefer to train with
+    the [run_semantic_segmentation.py](https://github.com/huggingface/transformers/blob/main/examples/pytorch/semantic-segmentation/run_semantic_segmentation.py)
+    script instead of a notebook instance. The script requires:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: a [DatasetDict](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.DatasetDict)
+    with two [Image](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Image)
+    columns, “image” and “label”
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: an id2label dictionary mapping the class integers to their class names
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: As an example, take a look at this [example dataset](https://huggingface.co/datasets/nielsr/ade20k-demo)
+    which was created with the steps shown above.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preprocess
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The next step is to load a SegFormer image processor to prepare the images
+    and annotations for the model. Some datasets, like this one, use the zero-index
+    as the background class. However, the background class isn’t actually included
+    in the 150 classes, so you’ll need to set `reduce_labels=True` to subtract one
+    from all the labels. The zero-index is replaced by `255` so it’s ignored by SegFormer’s
+    loss function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is common to apply some data augmentations to an image dataset to make a
+    model more robust against overfitting. In this guide, you’ll use the [`ColorJitter`](https://pytorch.org/vision/stable/generated/torchvision.transforms.ColorJitter.html)
+    function from [torchvision](https://pytorch.org/vision/stable/index.html) to randomly
+    change the color properties of an image, but you can also use any image library
+    you like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now create two preprocessing functions to prepare the images and annotations
+    for the model. These functions convert the images into `pixel_values` and annotations
+    to `labels`. For the training set, `jitter` is applied before providing the images
+    to the image processor. For the test set, the image processor crops and normalizes
+    the `images`, and only crops the `labels` because no data augmentation is applied
+    during testing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To apply the `jitter` over the entire dataset, use the 🤗 Datasets [set_transform](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    function. The transform is applied on the fly which is faster and consumes less
+    disk space:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It is common to apply some data augmentations to an image dataset to make a
+    model more robust against overfitting. In this guide, you’ll use [`tf.image`](https://www.tensorflow.org/api_docs/python/tf/image)
+    to randomly change the color properties of an image, but you can also use any
+    image library you like. Define two separate transformation functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: training data transformations that include image augmentation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: validation data transformations that only transpose the images, since computer
+    vision models in 🤗 Transformers expect channels-first layout
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, create two preprocessing functions to prepare batches of images and annotations
+    for the model. These functions apply the image transformations and use the earlier
+    loaded `image_processor` to convert the images into `pixel_values` and annotations
+    to `labels`. `ImageProcessor` also takes care of resizing and normalizing the
+    images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To apply the preprocessing transformations over the entire dataset, use the
+    🤗 Datasets [set_transform](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    function. The transform is applied on the fly which is faster and consumes less
+    disk space:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Evaluate
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Including a metric during training is often helpful for evaluating your model’s
+    performance. You can quickly load an evaluation method with the 🤗 [Evaluate](https://huggingface.co/docs/evaluate/index)
+    library. For this task, load the [mean Intersection over Union](https://huggingface.co/spaces/evaluate-metric/accuracy)
+    (IoU) metric (see the 🤗 Evaluate [quick tour](https://huggingface.co/docs/evaluate/a_quick_tour)
+    to learn more about how to load and compute a metric):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then create a function to `compute` the metrics. Your predictions need to be
+    converted to logits first, and then reshaped to match the size of the labels before
+    you can call `compute`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Your `compute_metrics` function is ready to go now, and you’ll return to it
+    when you setup your training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you aren’t familiar with finetuning a model with the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
+    take a look at the basic tutorial [here](../training#finetune-with-trainer)!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You’re ready to start training your model now! Load SegFormer with [AutoModelForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForSemanticSegmentation),
+    and pass the model the mapping between label ids and label classes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'At this point, only three steps remain:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Define your training hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+    It is important you don’t remove unused columns because this’ll drop the `image`
+    column. Without the `image` column, you can’t create `pixel_values`. Set `remove_unused_columns=False`
+    to prevent this behavior! The only other required parameter is `output_dir` which
+    specifies where to save your model. You’ll push this model to the Hub by setting
+    `push_to_hub=True` (you need to be signed in to Hugging Face to upload your model).
+    At the end of each epoch, the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    will evaluate the IoU metric and save the training checkpoint.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Pass the training arguments to [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    along with the model, dataset, tokenizer, data collator, and `compute_metrics`
+    function.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    to finetune your model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once training is completed, share your model to the Hub with the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
+    method so everyone can use your model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you are unfamiliar with fine-tuning a model with Keras, check out the [basic
+    tutorial](./training#train-a-tensorflow-model-with-keras) first!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To fine-tune a model in TensorFlow, follow these steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Define the training hyperparameters, and set up an optimizer and a learning
+    rate schedule.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Instantiate a pretrained model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Convert a 🤗 Dataset to a `tf.data.Dataset`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Compile your model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Add callbacks to calculate metrics and upload your model to 🤗 Hub
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use the `fit()` method to run the training.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Start by defining the hyperparameters, optimizer and learning rate schedule:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, load SegFormer with [TFAutoModelForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.TFAutoModelForSemanticSegmentation)
+    along with the label mappings, and compile it with the optimizer. Note that Transformers
+    models all have a default task-relevant loss function, so you don’t need to specify
+    one unless you want to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Convert your datasets to the `tf.data.Dataset` format using the [to_tf_dataset](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.to_tf_dataset)
+    and the [DefaultDataCollator](/docs/transformers/v4.37.2/en/main_classes/data_collator#transformers.DefaultDataCollator):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To compute the accuracy from the predictions and push your model to the 🤗 Hub,
+    use [Keras callbacks](../main_classes/keras_callbacks). Pass your `compute_metrics`
+    function to [KerasMetricCallback](/docs/transformers/v4.37.2/en/main_classes/keras_callbacks#transformers.KerasMetricCallback),
+    and use the [PushToHubCallback](/docs/transformers/v4.37.2/en/main_classes/keras_callbacks#transformers.PushToHubCallback)
+    to upload the model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, you are ready to train your model! Call `fit()` with your training
+    and validation datasets, the number of epochs, and your callbacks to fine-tune
+    the model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Congratulations! You have fine-tuned your model and shared it on the 🤗 Hub.
+    You can now use it for inference!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inference
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Great, now that you’ve finetuned a model, you can use it for inference!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load an image for inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Image of bedroom](../Images/1f1abe71d12160da7bd59d35ef05323c.png)PytorchHide
+    Pytorch content'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We will now see how to infer without a pipeline. Process the image with an
+    image processor and place the `pixel_values` on a GPU:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass your input to the model and return the `logits`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, rescale the logits to the original image size:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load an image processor to preprocess the image and return the input as TensorFlow
+    tensors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass your input to the model and return the `logits`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, rescale the logits to the original image size and apply argmax on the
+    class dimension:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To visualize the results, load the [dataset color palette](https://github.com/tensorflow/models/blob/3f1ca33afe3c1631b733ea7e40c294273b9e406d/research/deeplab/utils/get_dataset_colormap.py#L51)
+    as `ade_palette()` that maps each class to their RGB values. Then you can combine
+    and plot your image and the predicted segmentation map:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Image of bedroom overlaid with segmentation map](../Images/2bc12ae66cec2ea434945aaaa1e5c6bf.png)'
+  prefs: []
+  type: TYPE_IMG

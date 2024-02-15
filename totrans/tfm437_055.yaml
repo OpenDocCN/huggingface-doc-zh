@@ -1,0 +1,384 @@
+- en: Trainer
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/trainer](https://huggingface.co/docs/transformers/v4.37.2/en/trainer)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/371.11f33413.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/HfOption.6d864328.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    is a complete training and evaluation loop for PyTorch models implemented in the
+    Transformers library. You only need to pass it the necessary pieces for training
+    (model, tokenizer, dataset, evaluation function, training hyperparameters, etc.),
+    and the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class takes care of the rest. This makes it easier to start training faster without
+    manually writing your own training loop. But at the same time, [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    is very customizable and offers a ton of training options so you can tailor it
+    to your exact training needs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In addition to the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class, Transformers also provides a [Seq2SeqTrainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Seq2SeqTrainer)
+    class for sequence-to-sequence tasks like translation or summarization. There
+    is also the [SFTTrainer](https://huggingface.co/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
+    class from the [TRL](https://hf.co/docs/trl) library which wraps the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class and is optimized for training language models like Llama-2 and Mistral with
+    autoregressive techniques. [SFTTrainer](https://huggingface.co/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
+    also supports features like sequence packing, LoRA, quantization, and DeepSpeed
+    for efficiently scaling to any model size.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Feel free to check out the [API reference](./main_classes/trainer) for these
+    other [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)-type
+    classes to learn more about when to use which one. In general, [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    is the most versatile option and is appropriate for a broad spectrum of tasks.
+    [Seq2SeqTrainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Seq2SeqTrainer)
+    is designed for sequence-to-sequence tasks and [SFTTrainer](https://huggingface.co/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
+    is designed for training language models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you start, make sure [Accelerate](https://hf.co/docs/accelerate) - a
+    library for enabling and running PyTorch training across distributed environments
+    - is installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: This guide provides an overview of the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basic usage
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    includes all the code you’ll find in a basic training loop:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: perform a training step to calculate the loss
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: calculate the gradients with the [backward](https://huggingface.co/docs/accelerate/v0.26.1/en/package_reference/accelerator#accelerate.Accelerator.backward)
+    method
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: update the weights based on the gradients
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: repeat this process until you’ve reached a predetermined number of epochs
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class abstracts all of this code away so you don’t have to worry about manually
+    writing a training loop every time or if you’re just getting started with PyTorch
+    and training. You only need to provide the essential components required for training,
+    such as a model and a dataset, and the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class handles everything else.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to specify any training options or hyperparameters, you can find
+    them in the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
+    class. For example, let’s define where to save the model in `output_dir` and push
+    the model to the Hub after training with `push_to_hub=True`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pass `training_args` to the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    along with a model, dataset, something to preprocess the dataset with (depending
+    on your data type it could be a tokenizer, feature extractor or image processor),
+    a data collator, and a function to compute the metrics you want to track during
+    training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    to start training!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Checkpoints
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class saves your model checkpoints to the directory specified in the `output_dir`
+    parameter of [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+    You’ll find the checkpoints saved in a `checkpoint-000` subfolder where the numbers
+    at the end correspond to the training step. Saving checkpoints are useful for
+    resuming training later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can save your checkpoints (the optimizer state is not saved by default)
+    to the Hub by setting `push_to_hub=True` in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
+    to commit and push them. Other options for deciding how your checkpoints are saved
+    are set up in the [`hub_strategy`](https://huggingface.co/docs/transformers/main_classes/trainer#transformers.TrainingArguments.hub_strategy)
+    parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`hub_strategy="checkpoint"` pushes the latest checkpoint to a subfolder named
+    “last-checkpoint” from which you can resume training'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`hug_strategy="all_checkpoints"` pushes all checkpoints to the directory defined
+    in `output_dir` (you’ll see one checkpoint per folder in your model repository)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When you resume training from a checkpoint, the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    tries to keep the Python, NumPy, and PyTorch RNG states the same as they were
+    when the checkpoint was saved. But because PyTorch has various non-deterministic
+    default settings, the RNG states aren’t guaranteed to be the same. If you want
+    to enable full determinism, take a look at the [Controlling sources of randomness](https://pytorch.org/docs/stable/notes/randomness#controlling-sources-of-randomness)
+    guide to learn what you can enable to make your training fully deterministic.
+    Keep in mind though that by making certain settings deterministic, training may
+    be slower.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Customize the Trainer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'While the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class is designed to be accessible and easy-to-use, it also offers a lot of customizability
+    for more adventurous users. Many of the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)’s
+    method can be subclassed and overridden to support the functionality you want,
+    without having to rewrite the entire training loop from scratch to accommodate
+    it. These methods include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[get_train_dataloader()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.get_train_dataloader)
+    creates a training DataLoader'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[get_eval_dataloader()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.get_eval_dataloader)
+    creates an evaluation DataLoader'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[get_test_dataloader()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.get_test_dataloader)
+    creates a test DataLoader'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[log()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.log)
+    logs information on the various objects that watch training'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[create_optimizer_and_scheduler()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.create_optimizer_and_scheduler)
+    creates an optimizer and learning rate scheduler if they weren’t passed in the
+    `__init__`; these can also be separately customized with [create_optimizer()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.create_optimizer)
+    and [create_scheduler()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.create_scheduler)
+    respectively'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[compute_loss()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.compute_loss)
+    computes the loss on a batch of training inputs'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[training_step()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.training_step)
+    performs the training step'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[prediction_step()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.prediction_step)
+    performs the prediction and test step'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[evaluate()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.evaluate)
+    evaluates the model and returns the evaluation metrics'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[predict()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.predict)
+    makes predictions (with metrics if labels are available) on the test set'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For example, if you want to customize the [compute_loss()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.compute_loss)
+    method to use a weighted loss instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Callbacks
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Another option for customizing the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    is to use [callbacks](callbacks). Callbacks *don’t change* anything in the training
+    loop. They inspect the training loop state and then execute some action (early
+    stopping, logging results, etc.) depending on the state. In other words, a callback
+    can’t be used to implement something like a custom loss function and you’ll need
+    to subclass and override the [compute_loss()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.compute_loss)
+    method for that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, if you want to add an early stopping callback to the training loop
+    after 10 steps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then pass it to the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)’s
+    `callback` parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Logging
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Check out the [logging](./main_classes/logging) API reference for more information
+    about the different logging levels.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    is set to `logging.INFO` by default which reports errors, warnings, and other
+    basic information. A [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    replica - in distributed environments - is set to `logging.WARNING` which only
+    reports errors and warnings. You can change the logging level with the [`log_level`](https://huggingface.co/docs/transformers/main_classes/trainer#transformers.TrainingArguments.log_level)
+    and [`log_level_replica`](https://huggingface.co/docs/transformers/main_classes/trainer#transformers.TrainingArguments.log_level_replica)
+    parameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To configure the log level setting for each node, use the [`log_on_each_node`](https://huggingface.co/docs/transformers/main/en/main_classes/trainer#transformers.TrainingArguments.log_on_each_node)
+    parameter to determine whether to use the log level on each node or only on the
+    main node.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    sets the log level separately for each node in the `Trainer.__init__()` method,
+    so you may want to consider setting this sooner if you’re using other Transformers
+    functionalities before creating the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    object.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, to set your main code and modules to use the same log level according
+    to each node:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use different combinations of `log_level` and `log_level_replica` to configure
+    what gets logged on each of the nodes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: single nodemulti-node
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: NEFTune
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[NEFTune](https://hf.co/papers/2310.05914) is a technique that can improve
+    performance by adding noise to the embedding vectors during training. To enable
+    it in [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
+    set the `neftune_noise_alpha` parameter in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
+    to control how much noise is added.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: NEFTune is disabled after training to restore the original embedding layer to
+    avoid any unexpected behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accelerate and Trainer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class is powered by [Accelerate](https://hf.co/docs/accelerate), a library for
+    easily training PyTorch models in distributed environments with support for integrations
+    such as [FullyShardedDataParallel (FSDP)](https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/)
+    and [DeepSpeed](https://www.deepspeed.ai/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Learn more about FSDP sharding strategies, CPU offloading, and more with the
+    [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    in the [Fully Sharded Data Parallel](fsdp) guide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use Accelerate with [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
+    run the [`accelerate.config`](https://huggingface.co/docs/accelerate/package_reference/cli#accelerate-config)
+    command to set up training for your training environment. This command creates
+    a `config_file.yaml` that’ll be used when you launch your training script. For
+    example, some example configurations you can setup are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: DistributedDataParallelFSDPDeepSpeedDeepSpeed with Accelerate plugin
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: The [`accelerate_launch`](https://huggingface.co/docs/accelerate/package_reference/cli#accelerate-launch)
+    command is the recommended way to launch your training script on a distributed
+    system with Accelerate and [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    with the parameters specified in `config_file.yaml`. This file is saved to the
+    Accelerate cache folder and automatically loaded when you run `accelerate_launch`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, to run the [run_glue.py](https://github.com/huggingface/transformers/blob/f4db565b695582891e43a5e042e5d318e28f20b8/examples/pytorch/text-classification/run_glue.py#L4)
+    training script with the FSDP configuration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You could also specify the parameters from the `config_file.yaml` file directly
+    in the command line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Check out the [Launching your Accelerate scripts](https://huggingface.co/docs/accelerate/basic_tutorials/launch)
+    tutorial to learn more about `accelerate_launch` and custom configurations.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,125 @@
+- en: Efficient Training on CPU
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_cpu](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_cpu)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/321.8121a9cc.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide focuses on training large models efficiently on CPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mixed precision with IPEX
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: IPEX is optimized for CPUs with AVX-512 or above, and functionally works for
+    CPUs with only AVX2\. So, it is expected to bring performance benefit for Intel
+    CPU generations with AVX-512 or above while CPUs with only AVX2 (e.g., AMD CPUs
+    or older Intel CPUs) might result in a better performance under IPEX, but not
+    guaranteed. IPEX provides performance optimizations for CPU training with both
+    Float32 and BFloat16\. The usage of BFloat16 is the main focus of the following
+    sections.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Low precision data type BFloat16 has been natively supported on the 3rd Generation
+    Xeon® Scalable Processors (aka Cooper Lake) with AVX512 instruction set and will
+    be supported on the next generation of Intel® Xeon® Scalable Processors with Intel®
+    Advanced Matrix Extensions (Intel® AMX) instruction set with further boosted performance.
+    The Auto Mixed Precision for CPU backend has been enabled since PyTorch-1.10\.
+    At the same time, the support of Auto Mixed Precision with BFloat16 for CPU and
+    BFloat16 optimization of operators has been massively enabled in Intel® Extension
+    for PyTorch, and partially upstreamed to PyTorch master branch. Users can get
+    better performance and user experience with IPEX Auto Mixed Precision.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check more detailed information for [Auto Mixed Precision](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/tutorials/features/amp.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'IPEX installation:'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'IPEX release is following PyTorch, to install via pip:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| PyTorch Version | IPEX version |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2.1.x | 2.1.100+cpu |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2.0.x | 2.0.100+cpu |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1.13 | 1.13.0+cpu |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1.12 | 1.12.300+cpu |'
+  prefs: []
+  type: TYPE_TB
+- en: Please run `pip list | grep torch` to get your `pytorch_version`, so you can
+    get the `IPEX version_name`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can check the latest versions in [ipex-whl-stable-cpu](https://developer.intel.com/ipex-whl-stable-cpu)
+    if needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check more approaches for [IPEX installation](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/tutorials/installation.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage in Trainer
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To enable auto mixed precision with IPEX in Trainer, users should add `use_ipex`,
+    `bf16` and `no_cuda` in training command arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take an example of the use cases on [Transformers question-answering](https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Training with IPEX using BF16 auto mixed precision on CPU:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'If you want to enable `use_ipex` and `bf16` in your script, add these parameters
+    to `TrainingArguments` like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Practice example
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Blog: [Accelerating PyTorch Transformers with Intel Sapphire Rapids](https://huggingface.co/blog/intel-sapphire-rapids)'
+  prefs: []
+  type: TYPE_NORMAL

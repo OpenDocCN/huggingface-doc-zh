@@ -1,0 +1,230 @@
+- en: Export to ONNX
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/serialization](https://huggingface.co/docs/transformers/v4.37.2/en/serialization)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/338.100d57bc.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deploying 🤗 Transformers models in production environments often requires, or
+    can benefit from exporting the models into a serialized format that can be loaded
+    and executed on specialized runtimes and hardware.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🤗 Optimum is an extension of Transformers that enables exporting models from
+    PyTorch or TensorFlow to serialized formats such as ONNX and TFLite through its
+    `exporters` module. 🤗 Optimum also provides a set of performance optimization
+    tools to train and run models on targeted hardware with maximum efficiency.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide demonstrates how you can export 🤗 Transformers models to ONNX with
+    🤗 Optimum, for the guide on exporting models to TFLite, please refer to the [Export
+    to TFLite page](tflite).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Export to ONNX
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[ONNX (Open Neural Network eXchange)](http://onnx.ai) is an open standard that
+    defines a common set of operators and a common file format to represent deep learning
+    models in a wide variety of frameworks, including PyTorch and TensorFlow. When
+    a model is exported to the ONNX format, these operators are used to construct
+    a computational graph (often called an *intermediate representation*) which represents
+    the flow of data through the neural network.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: By exposing a graph with standardized operators and data types, ONNX makes it
+    easy to switch between frameworks. For example, a model trained in PyTorch can
+    be exported to ONNX format and then imported in TensorFlow (and vice versa).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once exported to ONNX format, a model can be:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: optimized for inference via techniques such as [graph optimization](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/optimization)
+    and [quantization](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/quantization).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: run with ONNX Runtime via [`ORTModelForXXX` classes](https://huggingface.co/docs/optimum/onnxruntime/package_reference/modeling_ort),
+    which follow the same `AutoModel` API as the one you are used to in 🤗 Transformers.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: run with [optimized inference pipelines](https://huggingface.co/docs/optimum/main/en/onnxruntime/usage_guides/pipelines),
+    which has the same API as the [pipeline()](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.pipeline)
+    function in 🤗 Transformers.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 🤗 Optimum provides support for the ONNX export by leveraging configuration objects.
+    These configuration objects come ready-made for a number of model architectures,
+    and are designed to be easily extendable to other architectures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For the list of ready-made configurations, please refer to [🤗 Optimum documentation](https://huggingface.co/docs/optimum/exporters/onnx/overview).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two ways to export a 🤗 Transformers model to ONNX, here we show both:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: export with 🤗 Optimum via CLI.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: export with 🤗 Optimum with `optimum.onnxruntime`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Exporting a 🤗 Transformers model to ONNX with CLI
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To export a 🤗 Transformers model to ONNX, first install an extra dependency:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To check out all available arguments, refer to the [🤗 Optimum docs](https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/export_a_model#exporting-a-model-to-onnx-using-the-cli),
+    or view help in command line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To export a model’s checkpoint from the 🤗 Hub, for example, `distilbert-base-uncased-distilled-squad`,
+    run the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You should see the logs indicating progress and showing where the resulting
+    `model.onnx` is saved, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The example above illustrates exporting a checkpoint from 🤗 Hub. When exporting
+    a local model, first make sure that you saved both the model’s weights and tokenizer
+    files in the same directory (`local_path`). When using CLI, pass the `local_path`
+    to the `model` argument instead of the checkpoint name on 🤗 Hub and provide the
+    `--task` argument. You can review the list of supported tasks in the [🤗 Optimum
+    documentation](https://huggingface.co/docs/optimum/exporters/task_manager). If
+    `task` argument is not provided, it will default to the model architecture without
+    any task specific head.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The resulting `model.onnx` file can then be run on one of the [many accelerators](https://onnx.ai/supported-tools.html#deployModel)
+    that support the ONNX standard. For example, we can load and run the model with
+    [ONNX Runtime](https://onnxruntime.ai/) as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The process is identical for TensorFlow checkpoints on the Hub. For instance,
+    here’s how you would export a pure TensorFlow checkpoint from the [Keras organization](https://huggingface.co/keras-io):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Exporting a 🤗 Transformers model to ONNX with optimum.onnxruntime
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Alternative to CLI, you can export a 🤗 Transformers model to ONNX programmatically
+    like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Exporting a model for an unsupported architecture
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you wish to contribute by adding support for a model that cannot be currently
+    exported, you should first check if it is supported in [`optimum.exporters.onnx`](https://huggingface.co/docs/optimum/exporters/onnx/overview),
+    and if it is not, [contribute to 🤗 Optimum](https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/contribute)
+    directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Exporting a model with transformers.onnx
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`tranformers.onnx` is no longer maintained, please export models with 🤗 Optimum
+    as described above. This section will be removed in the future versions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To export a 🤗 Transformers model to ONNX with `tranformers.onnx`, install extra
+    dependencies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use `transformers.onnx` package as a Python module to export a checkpoint using
+    a ready-made configuration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This exports an ONNX graph of the checkpoint defined by the `--model` argument.
+    Pass any checkpoint on the 🤗 Hub or one that’s stored locally. The resulting `model.onnx`
+    file can then be run on one of the many accelerators that support the ONNX standard.
+    For example, load and run the model with ONNX Runtime as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The required output names (like `["last_hidden_state"]`) can be obtained by
+    taking a look at the ONNX configuration of each model. For example, for DistilBERT
+    we have:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The process is identical for TensorFlow checkpoints on the Hub. For example,
+    export a pure TensorFlow checkpoint like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To export a model that’s stored locally, save the model’s weights and tokenizer
+    files in the same directory (e.g. `local-pt-checkpoint`), then export it to ONNX
+    by pointing the `--model` argument of the `transformers.onnx` package to the desired
+    directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE

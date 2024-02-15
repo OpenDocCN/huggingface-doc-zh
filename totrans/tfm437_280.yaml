@@ -1,0 +1,767 @@
+- en: PoolFormer
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/poolformer](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/poolformer)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/222.83dc239d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/PipelineTag.44585822.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The PoolFormer model was proposed in [MetaFormer is Actually What You Need for
+    Vision](https://arxiv.org/abs/2111.11418) by Sea AI Labs. Instead of designing
+    complicated token mixer to achieve SOTA performance, the target of this work is
+    to demonstrate the competence of transformer models largely stem from the general
+    architecture MetaFormer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Transformers have shown great potential in computer vision tasks. A common
+    belief is their attention-based token mixer module contributes most to their competence.
+    However, recent works show the attention-based module in transformers can be replaced
+    by spatial MLPs and the resulted models still perform quite well. Based on this
+    observation, we hypothesize that the general architecture of the transformers,
+    instead of the specific token mixer module, is more essential to the model’s performance.
+    To verify this, we deliberately replace the attention module in transformers with
+    an embarrassingly simple spatial pooling operator to conduct only the most basic
+    token mixing. Surprisingly, we observe that the derived model, termed as PoolFormer,
+    achieves competitive performance on multiple computer vision tasks. For example,
+    on ImageNet-1K, PoolFormer achieves 82.1% top-1 accuracy, surpassing well-tuned
+    vision transformer/MLP-like baselines DeiT-B/ResMLP-B24 by 0.3%/1.1% accuracy
+    with 35%/52% fewer parameters and 48%/60% fewer MACs. The effectiveness of PoolFormer
+    verifies our hypothesis and urges us to initiate the concept of “MetaFormer”,
+    a general architecture abstracted from transformers without specifying the token
+    mixer. Based on the extensive experiments, we argue that MetaFormer is the key
+    player in achieving superior results for recent transformer and MLP-like models
+    on vision tasks. This work calls for more future research dedicated to improving
+    MetaFormer instead of focusing on the token mixer modules. Additionally, our proposed
+    PoolFormer could serve as a starting baseline for future MetaFormer architecture
+    design.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The figure below illustrates the architecture of PoolFormer. Taken from the
+    [original paper](https://arxiv.org/abs/2111.11418).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/3034170d23213533d28047793aeaaeed.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: This model was contributed by [heytanay](https://huggingface.co/heytanay). The
+    original code can be found [here](https://github.com/sail-sg/poolformer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PoolFormer has a hierarchical architecture, where instead of Attention, a simple
+    Average Pooling layer is present. All checkpoints of the model can be found on
+    the [hub](https://huggingface.co/models?other=poolformer).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One can use [PoolFormerImageProcessor](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerImageProcessor)
+    to prepare images for the model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As most models, PoolFormer comes in different sizes, the details of which can
+    be found in the table below.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '| **Model variant** | **Depths** | **Hidden sizes** | **Params (M)** | **ImageNet-1k
+    Top 1** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | --- | --- | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| s12 | [2, 2, 6, 2] | [64, 128, 320, 512] | 12 | 77.2 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| s24 | [4, 4, 12, 4] | [64, 128, 320, 512] | 21 | 80.3 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| s36 | [6, 6, 18, 6] | [64, 128, 320, 512] | 31 | 81.4 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| m36 | [6, 6, 18, 6] | [96, 192, 384, 768] | 56 | 82.1 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| m48 | [8, 8, 24, 8] | [96, 192, 384, 768] | 73 | 82.5 |'
+  prefs: []
+  type: TYPE_TB
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A list of official Hugging Face and community (indicated by 🌎) resources to
+    help you get started with PoolFormer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image Classification
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PoolFormerForImageClassification](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerForImageClassification)
+    is supported by this [example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-classification)
+    and [notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/image_classification.ipynb).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'See also: [Image classification task guide](../tasks/image_classification)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you’re interested in submitting a resource to be included here, please feel
+    free to open a Pull Request and we’ll review it! The resource should ideally demonstrate
+    something new instead of duplicating an existing resource.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PoolFormerConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PoolFormerConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/poolformer/configuration_poolformer.py#L34)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( num_channels = 3 patch_size = 16 stride = 16 pool_size = 3 mlp_ratio = 4.0
+    depths = [2, 2, 6, 2] hidden_sizes = [64, 128, 320, 512] patch_sizes = [7, 3,
+    3, 3] strides = [4, 2, 2, 2] padding = [2, 1, 1, 1] num_encoder_blocks = 4 drop_path_rate
+    = 0.0 hidden_act = 'gelu' use_layer_scale = True layer_scale_init_value = 1e-05
+    initializer_range = 0.02 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**num_channels** (`int`, *optional*, defaults to 3) — The number of channels
+    in the input image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**patch_size** (`int`, *optional*, defaults to 16) — The size of the input
+    patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**stride** (`int`, *optional*, defaults to 16) — The stride of the input patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pool_size** (`int`, *optional*, defaults to 3) — The size of the pooling
+    window.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mlp_ratio** (`float`, *optional*, defaults to 4.0) — The ratio of the number
+    of channels in the output of the MLP to the number of channels in the input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**depths** (`list`, *optional*, defaults to `[2, 2, 6, 2]`) — The depth of
+    each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_sizes** (`list`, *optional*, defaults to `[64, 128, 320, 512]`) —
+    The hidden sizes of each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**patch_sizes** (`list`, *optional*, defaults to `[7, 3, 3, 3]`) — The size
+    of the input patch for each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strides** (`list`, *optional*, defaults to `[4, 2, 2, 2]`) — The stride of
+    the input patch for each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**padding** (`list`, *optional*, defaults to `[2, 1, 1, 1]`) — The padding
+    of the input patch for each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_encoder_blocks** (`int`, *optional*, defaults to 4) — The number of encoder
+    blocks.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**drop_path_rate** (`float`, *optional*, defaults to 0.0) — The dropout rate
+    for the dropout layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str`, *optional*, defaults to `"gelu"`) — The activation function
+    for the hidden layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_layer_scale** (`bool`, *optional*, defaults to `True`) — Whether to use
+    layer scale.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_scale_init_value** (`float`, *optional*, defaults to 1e-05) — The initial
+    value for the layer scale.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The initializer
+    range for the weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of [PoolFormerModel](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerModel).
+    It is used to instantiate a PoolFormer model according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the PoolFormer [sail/poolformer_s12](https://huggingface.co/sail/poolformer_s12)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: PoolFormerFeatureExtractor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PoolFormerFeatureExtractor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/poolformer/feature_extraction_poolformer.py#L26)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( images **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preprocess an image or a batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PoolFormerImageProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PoolFormerImageProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/poolformer/image_processing_poolformer.py#L49)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_resize: bool = True size: Dict = None crop_pct: int = 0.9 resample: Resampling
+    = <Resampling.BICUBIC: 3> do_center_crop: bool = True crop_size: Dict = None rescale_factor:
+    Union = 0.00392156862745098 do_rescale: bool = True do_normalize: bool = True
+    image_mean: Union = None image_std: Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Whether to resize
+    the image’s (height, width) dimensions to the specified `size`. Can be overridden
+    by `do_resize` in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]` *optional*, defaults to `{"shortest_edge" -- 224}`):
+    Size of the image after resizing. Can be overridden by `size` in the `preprocess`
+    method. If crop_pct is unset:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'size is `{"height": h, "width": w}`: the image is resized to `(h, w)`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'size is `{"shortest_edge": s}`: the shortest edge of the image is resized to
+    s whilst maintaining the aspect ratio.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If crop_pct is set:'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'size is `{"height": h, "width": w}`: the image is resized to `(int(floor(h/crop_pct)),
+    int(floor(w/crop_pct)))`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'size is `{"height": c, "width": c}`: the shortest edge of the image is resized
+    to `int(floor(c/crop_pct)` whilst maintaining the aspect ratio.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'size is `{"shortest_edge": c}`: the shortest edge of the image is resized to
+    `int(floor(c/crop_pct)` whilst maintaining the aspect ratio.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crop_pct** (`float`, *optional*, defaults to 0.9) — Percentage of the image
+    to crop from the center. Can be overridden by `crop_pct` in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`PILImageResampling`, *optional*, defaults to `Resampling.BICUBIC`)
+    — Resampling filter to use if resizing the image. Can be overridden by `resample`
+    in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_center_crop** (`bool`, *optional*, defaults to `True`) — Whether to center
+    crop the image. If the input size is smaller than `crop_size` along any edge,
+    the image is padded with 0’s and then center cropped. Can be overridden by `do_center_crop`
+    in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crop_size** (`Dict[str, int]`, *optional*, defaults to `{"height" -- 224,
+    "width": 224}`): Size of the image after applying center crop. Only has an effect
+    if `do_center_crop` is set to `True`. Can be overridden by the `crop_size` parameter
+    in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`int` or `float`, *optional*, defaults to `1/255`) — Scale
+    factor to use if rescaling the image. Can be overridden by the `rescale_factor`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `True`) — Whether to rescale
+    the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `True`) — Controls whether
+    to normalize the image. Can be overridden by the `do_normalize` parameter in the
+    `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_MEAN`)
+    — Mean to use if normalizing the image. This is a float or list of floats the
+    length of the number of channels in the image. Can be overridden by the `image_mean`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_STD`)
+    — Standard deviation to use if normalizing the image. This is a float or list
+    of floats the length of the number of channels in the image. Can be overridden
+    by the `image_std` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a PoolFormer image processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/poolformer/image_processing_poolformer.py#L211)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union do_resize: bool = None size: Dict = None crop_pct: int = None
+    resample: Resampling = None do_center_crop: bool = None crop_size: Dict = None
+    do_rescale: bool = None rescale_factor: float = None do_normalize: bool = None
+    image_mean: Union = None image_std: Union = None return_tensors: Union = None
+    data_format: ChannelDimension = <ChannelDimension.FIRST: ''channels_first''> input_data_format:
+    Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**images** (`ImageInput`) — Image to preprocess. Expects a single or batch
+    of images with pixel values ranging from 0 to 255\. If passing in images with
+    pixel values between 0 and 1, set `do_rescale=False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `self.do_resize`) — Whether
+    to resize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]`, *optional*, defaults to `self.size`) — Size of
+    the image after applying resize.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crop_pct** (`float`, *optional*, defaults to `self.crop_pct`) — Percentage
+    of the image to crop. Only has an effect if `do_resize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`int`, *optional*, defaults to `self.resample`) — Resampling
+    filter to use if resizing the image. This can be one of the enum `PILImageResampling`,
+    Only has an effect if `do_resize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_center_crop** (`bool`, *optional*, defaults to `self.do_center_crop`)
+    — Whether to center crop the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crop_size** (`Dict[str, int]`, *optional*, defaults to `self.crop_size`)
+    — Size of the image after applying center crop.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
+    to rescale the image values between [0 - 1].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`float`, *optional*, defaults to `self.rescale_factor`)
+    — Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
+    to normalize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
+    — Image mean.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
+    — Image standard deviation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or `TensorType`, *optional*) — The type of tensors
+    to return. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Return a list of `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**data_format** (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
+    — The channel dimension format for the output image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ChannelDimension.FIRST`: image in (num_channels, height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ChannelDimension.LAST`: image in (height, width, num_channels) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_data_format** (`ChannelDimension` or `str`, *optional*) — The channel
+    dimension format for the input image. If unset, the channel dimension format is
+    inferred from the input image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocess an image or batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PoolFormerModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PoolFormerModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/poolformer/modeling_poolformer.py#L304)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PoolFormerConfig](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare PoolFormer Model transformer outputting raw hidden-states without any
+    specific head on top. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/poolformer/modeling_poolformer.py#L321)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None output_hidden_states: Optional = None return_dict:
+    Optional = None ) → `transformers.modeling_outputs.BaseModelOutputWithNoAttention`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [PoolFormerImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.modeling_outputs.BaseModelOutputWithNoAttention` or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.modeling_outputs.BaseModelOutputWithNoAttention` or a tuple
+    of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PoolFormerConfig](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, num_channels, height,
+    width)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [PoolFormerModel](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: PoolFormerForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PoolFormerForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/poolformer/modeling_poolformer.py#L369)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PoolFormerConfig](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PoolFormer Model transformer with an image classification head on top
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/poolformer/modeling_poolformer.py#L391)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None labels: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → [transformers.modeling_outputs.ImageClassifierOutputWithNoAttention](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutputWithNoAttention)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [PoolFormerImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.ImageClassifierOutputWithNoAttention](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutputWithNoAttention)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.ImageClassifierOutputWithNoAttention](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutputWithNoAttention)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PoolFormerConfig](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each stage) of shape `(batch_size, num_channels, height,
+    width)`. Hidden-states (also called feature maps) of the model at the output of
+    each stage.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PoolFormerForImageClassification](/docs/transformers/v4.37.2/en/model_doc/poolformer#transformers.PoolFormerForImageClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE

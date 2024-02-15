@@ -1,0 +1,215 @@
+- en: Image captioning
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/image_captioning](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/image_captioning)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/344.0eb7caa9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image captioning is the task of predicting a caption for a given image. Common
+    real world applications of it include aiding visually impaired people that can
+    help them navigate through different situations. Therefore, image captioning helps
+    to improve content accessibility for people by describing images to them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This guide will show you how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fine-tune an image captioning model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use the fine-tuned model for inference.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We encourage you to log in to your Hugging Face account so you can upload and
+    share your model with the community. When prompted, enter your token to log in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load the Pokémon BLIP captions dataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use the 🤗 Dataset library to load a dataset that consists of {image-caption}
+    pairs. To create your own image captioning dataset in PyTorch, you can follow
+    [this notebook](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/GIT/Fine_tune_GIT_on_an_image_captioning_dataset.ipynb).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The dataset has two features, `image` and `text`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Many image captioning datasets contain multiple captions per image. In those
+    cases, a common strategy is to randomly sample a caption amongst the available
+    ones during training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Split the dataset’s train split into a train and test set with the [~datasets.Dataset.train_test_split]
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s visualize a couple of samples from the training set.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Sample training images](../Images/465bc374aa742ae3c24da1893b1ca2b5.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Preprocess the dataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Since the dataset has two modalities (image and text), the pre-processing pipeline
+    will preprocess images and the captions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To do so, load the processor class associated with the model you are about to
+    fine-tune.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The processor will internally pre-process the image (which includes resizing,
+    and pixel scaling) and tokenize the caption.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: With the dataset ready, you can now set up the model for fine-tuning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load a base model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Load the [“microsoft/git-base”](https://huggingface.co/microsoft/git-base) into
+    a [`AutoModelForCausalLM`](https://huggingface.co/docs/transformers/model_doc/auto#transformers.AutoModelForCausalLM)
+    object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Evaluate
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Image captioning models are typically evaluated with the [Rouge Score](https://huggingface.co/spaces/evaluate-metric/rouge)
+    or [Word Error Rate](https://huggingface.co/spaces/evaluate-metric/wer). For this
+    guide, you will use the Word Error Rate (WER).
+  prefs: []
+  type: TYPE_NORMAL
+- en: We use the 🤗 Evaluate library to do so. For potential limitations and other
+    gotchas of the WER, refer to [this guide](https://huggingface.co/spaces/evaluate-metric/wer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Train!
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now, you are ready to start fine-tuning the model. You will use the 🤗 [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    for this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, define the training arguments using [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then pass them along with the datasets and the model to 🤗 Trainer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: To start training, simply call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    on the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: You should see the training loss drop smoothly as training progresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once training is completed, share your model to the Hub with the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
+    method so everyone can use your model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Take a sample image from `test_ds` to test the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Test image](../Images/8106832a19bcb32bb4f42e5d637f0640.png)Prepare image
+    for the model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Call `generate` and decode the predictions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Looks like the fine-tuned model generated a pretty good caption!
+  prefs: []
+  type: TYPE_NORMAL

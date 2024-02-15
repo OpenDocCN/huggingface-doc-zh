@@ -1,0 +1,3703 @@
+- en: DeBERTa-v2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/deberta-v2](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/deberta-v2)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/103.d6562b49.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Markdown.fef84341.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen It is based on Google’s BERT model released in 2018 and Facebook’s
+    RoBERTa model released in 2019.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It builds on RoBERTa with disentangled attention and enhanced mask decoder training
+    with half of the data used in RoBERTa.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Recent progress in pre-trained neural language models has significantly improved
+    the performance of many natural language processing (NLP) tasks. In this paper
+    we propose a new model architecture DeBERTa (Decoding-enhanced BERT with disentangled
+    attention) that improves the BERT and RoBERTa models using two novel techniques.
+    The first is the disentangled attention mechanism, where each word is represented
+    using two vectors that encode its content and position, respectively, and the
+    attention weights among words are computed using disentangled matrices on their
+    contents and relative positions. Second, an enhanced mask decoder is used to replace
+    the output softmax layer to predict the masked tokens for model pretraining. We
+    show that these two techniques significantly improve the efficiency of model pretraining
+    and performance of downstream tasks. Compared to RoBERTa-Large, a DeBERTa model
+    trained on half of the training data performs consistently better on a wide range
+    of NLP tasks, achieving improvements on MNLI by +0.9% (90.2% vs. 91.1%), on SQuAD
+    v2.0 by +2.3% (88.4% vs. 90.7%) and RACE by +3.6% (83.2% vs. 86.8%). The DeBERTa
+    code and pre-trained models will be made publicly available at [https://github.com/microsoft/DeBERTa](https://github.com/microsoft/DeBERTa).*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following information is visible directly on the [original implementation
+    repository](https://github.com/microsoft/DeBERTa). DeBERTa v2 is the second version
+    of the DeBERTa model. It includes the 1.5B model used for the SuperGLUE single-model
+    submission and achieving 89.9, versus human baseline 89.8\. You can find more
+    details about this submission in the authors’ [blog](https://www.microsoft.com/en-us/research/blog/microsoft-deberta-surpasses-human-performance-on-the-superglue-benchmark/)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'New in v2:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Vocabulary** In v2 the tokenizer is changed to use a new vocabulary of size
+    128K built from the training data. Instead of a GPT2-based tokenizer, the tokenizer
+    is now [sentencepiece-based](https://github.com/google/sentencepiece) tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**nGiE(nGram Induced Input Encoding)** The DeBERTa-v2 model uses an additional
+    convolution layer aside with the first transformer layer to better learn the local
+    dependency of input tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Sharing position projection matrix with content projection matrix in attention
+    layer** Based on previous experiments, this can save parameters without affecting
+    the performance.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Apply bucket to encode relative positions** The DeBERTa-v2 model uses log
+    bucket to encode relative positions similar to T5.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**900M model & 1.5B model** Two additional model sizes are available: 900M
+    and 1.5B, which significantly improves the performance of downstream tasks.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This model was contributed by [DeBERTa](https://huggingface.co/DeBERTa). This
+    model TF 2.0 implementation was contributed by [kamalkraj](https://huggingface.co/kamalkraj).
+    The original code can be found [here](https://github.com/microsoft/DeBERTa).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Text classification task guide](../tasks/sequence_classification)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Token classification task guide](../tasks/token_classification)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Question answering task guide](../tasks/question_answering)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Masked language modeling task guide](../tasks/masked_language_modeling)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Multiple choice task guide](../tasks/multiple_choice)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DebertaV2Config
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2Config'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/configuration_deberta_v2.py#L42)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_size = 128100 hidden_size = 1536 num_hidden_layers = 24 num_attention_heads
+    = 24 intermediate_size = 6144 hidden_act = 'gelu' hidden_dropout_prob = 0.1 attention_probs_dropout_prob
+    = 0.1 max_position_embeddings = 512 type_vocab_size = 0 initializer_range = 0.02
+    layer_norm_eps = 1e-07 relative_attention = False max_relative_positions = -1
+    pad_token_id = 0 position_biased_input = True pos_att_type = None pooler_dropout
+    = 0 pooler_hidden_act = 'gelu' **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_size** (`int`, *optional*, defaults to 128100) — Vocabulary size of
+    the DeBERTa-v2 model. Defines the number of different tokens that can be represented
+    by the `inputs_ids` passed when calling [DebertaV2Model](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Model).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 1536) — Dimensionality of the
+    encoder layers and the pooler layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_hidden_layers** (`int`, *optional*, defaults to 24) — Number of hidden
+    layers in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`int`, *optional*, defaults to 24) — Number of attention
+    heads for each attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**intermediate_size** (`int`, *optional*, defaults to 6144) — Dimensionality
+    of the “intermediate” (often named feed-forward) layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `Callable`, *optional*, defaults to `"gelu"`) — The
+    non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"silu"`, `"gelu"`, `"tanh"`, `"gelu_fast"`, `"mish"`,
+    `"linear"`, `"sigmoid"` and `"gelu_new"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_dropout_prob** (`float`, *optional*, defaults to 0.1) — The dropout
+    probability for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_probs_dropout_prob** (`float`, *optional*, defaults to 0.1) — The
+    dropout ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_position_embeddings** (`int`, *optional*, defaults to 512) — The maximum
+    sequence length that this model might ever be used with. Typically set this to
+    something large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**type_vocab_size** (`int`, *optional*, defaults to 0) — The vocabulary size
+    of the `token_type_ids` passed when calling [DebertaModel](/docs/transformers/v4.37.2/en/model_doc/deberta#transformers.DebertaModel)
+    or [TFDebertaModel](/docs/transformers/v4.37.2/en/model_doc/deberta#transformers.TFDebertaModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-7) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**relative_attention** (`bool`, *optional*, defaults to `True`) — Whether use
+    relative position encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_relative_positions** (`int`, *optional*, defaults to -1) — The range
+    of relative positions `[-max_position_embeddings, max_position_embeddings]`. Use
+    the same value as `max_position_embeddings`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_token_id** (`int`, *optional*, defaults to 0) — The value used to pad
+    input_ids.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**position_biased_input** (`bool`, *optional*, defaults to `False`) — Whether
+    add absolute position embedding to content embedding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pos_att_type** (`List[str]`, *optional*) — The type of relative position
+    attention, it can be a combination of `["p2c", "c2p"]`, e.g. `["p2c"]`, `["p2c",
+    "c2p"]`, `["p2c", "c2p"]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, optional, defaults to 1e-12) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [DebertaV2Model](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Model).
+    It is used to instantiate a DeBERTa-v2 model according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the DeBERTa [microsoft/deberta-v2-xlarge](https://huggingface.co/microsoft/deberta-v2-xlarge)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: DebertaV2Tokenizer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2Tokenizer'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/tokenization_deberta_v2.py#L59)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( vocab_file do_lower_case = False split_by_punct = False bos_token = ''[CLS]''
+    eos_token = ''[SEP]'' unk_token = ''[UNK]'' sep_token = ''[SEP]'' pad_token =
+    ''[PAD]'' cls_token = ''[CLS]'' mask_token = ''[MASK]'' sp_model_kwargs: Optional
+    = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_file** (`str`) — [SentencePiece](https://github.com/google/sentencepiece)
+    file (generally has a *.spm* extension) that contains the vocabulary necessary
+    to instantiate a tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_lower_case** (`bool`, *optional*, defaults to `False`) — Whether or not
+    to lowercase the input when tokenizing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`string`, *optional*, defaults to `"[CLS]"`) — The beginning
+    of sequence token that was used during pre-training. Can be used a sequence classifier
+    token. When building a sequence using special tokens, this is not the token that
+    is used for the beginning of sequence. The token used is the `cls_token`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eos_token** (`string`, *optional*, defaults to `"[SEP]"`) — The end of sequence
+    token. When building a sequence using special tokens, this is not the token that
+    is used for the end of sequence. The token used is the `sep_token`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unk_token** (`str`, *optional*, defaults to `"[UNK]"`) — The unknown token.
+    A token that is not in the vocabulary cannot be converted to an ID and is set
+    to be this token instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sep_token** (`str`, *optional*, defaults to `"[SEP]"`) — The separator token,
+    which is used when building a sequence from multiple sequences, e.g. two sequences
+    for sequence classification or for a text and a question for question answering.
+    It is also used as the last token of a sequence built with special tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_token** (`str`, *optional*, defaults to `"[PAD]"`) — The token used for
+    padding, for example when batching sequences of different lengths.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cls_token** (`str`, *optional*, defaults to `"[CLS]"`) — The classifier token
+    which is used when doing sequence classification (classification of the whole
+    sequence instead of per-token classification). It is the first token of the sequence
+    when built with special tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_token** (`str`, *optional*, defaults to `"[MASK]"`) — The token used
+    for masking values. This is the token used when training this model with masked
+    language modeling. This is the token which the model will try to predict.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sp_model_kwargs** (`dict`, *optional*) — Will be passed to the `SentencePieceProcessor.__init__()`
+    method. The [Python wrapper for SentencePiece](https://github.com/google/sentencepiece/tree/master/python)
+    can be used, among other things, to set:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`enable_sampling`: Enable subword regularization.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size`: Sampling parameters for unigram. Invalid for BPE-Dropout.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size = {0,1}`: No sampling is performed.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size > 1`: samples from the nbest_size results.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size < 0`: assuming that nbest_size is infinite and samples from the
+    all hypothesis (lattice) using forward-filtering-and-backward-sampling algorithm.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`alpha`: Smoothing parameter for unigram sampling, and dropout probability
+    of merge operations for BPE-dropout.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a DeBERTa-v2 tokenizer. Based on [SentencePiece](https://github.com/google/sentencepiece).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### build_inputs_with_special_tokens'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/tokenization_deberta_v2.py#L188)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( token_ids_0 token_ids_1 = None ) → `List[int]`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs to which the special tokens will
+    be added.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: List of [input IDs](../glossary#input-ids) with the appropriate special tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Build model inputs from a sequence or a pair of sequence for sequence classification
+    tasks by concatenating and adding special tokens. A DeBERTa sequence has the following
+    format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'single sequence: [CLS] X [SEP]'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'pair of sequences: [CLS] A [SEP] B [SEP]'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### get_special_tokens_mask'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/tokenization_deberta_v2.py#L212)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( token_ids_0 token_ids_1 = None already_has_special_tokens = False ) → `List[int]`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**already_has_special_tokens** (`bool`, *optional*, defaults to `False`) —
+    Whether or not the token list is already formatted with special tokens for the
+    model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A list of integers in the range [0, 1]: 1 for a special token, 0 for a sequence
+    token.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieves sequence ids from a token list that has no special tokens added. This
+    method is called when adding special tokens using the tokenizer `prepare_for_model`
+    or `encode_plus` methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### create_token_type_ids_from_sequences'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/tokenization_deberta_v2.py#L238)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( token_ids_0 token_ids_1 = None ) → `List[int]`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: List of [token type IDs](../glossary#token-type-ids) according to the given
+    sequence(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a mask from the two sequences passed to be used in a sequence-pair classification
+    task. A DeBERTa
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'sequence pair mask has the following format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: If `token_ids_1` is `None`, this method only returns the first portion of the
+    mask (0s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### save_vocabulary'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/tokenization_deberta_v2.py#L271)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( save_directory: str filename_prefix: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: DebertaV2TokenizerFast
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2TokenizerFast'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/tokenization_deberta_v2_fast.py#L63)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_file = None tokenizer_file = None do_lower_case = False split_by_punct
+    = False bos_token = '[CLS]' eos_token = '[SEP]' unk_token = '[UNK]' sep_token
+    = '[SEP]' pad_token = '[PAD]' cls_token = '[CLS]' mask_token = '[MASK]' **kwargs
+    )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_file** (`str`) — [SentencePiece](https://github.com/google/sentencepiece)
+    file (generally has a *.spm* extension) that contains the vocabulary necessary
+    to instantiate a tokenizer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_lower_case** (`bool`, *optional*, defaults to `False`) — Whether or not
+    to lowercase the input when tokenizing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`string`, *optional*, defaults to `"[CLS]"`) — The beginning
+    of sequence token that was used during pre-training. Can be used a sequence classifier
+    token. When building a sequence using special tokens, this is not the token that
+    is used for the beginning of sequence. The token used is the `cls_token`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eos_token** (`string`, *optional*, defaults to `"[SEP]"`) — The end of sequence
+    token. When building a sequence using special tokens, this is not the token that
+    is used for the end of sequence. The token used is the `sep_token`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**unk_token** (`str`, *optional*, defaults to `"[UNK]"`) — The unknown token.
+    A token that is not in the vocabulary cannot be converted to an ID and is set
+    to be this token instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sep_token** (`str`, *optional*, defaults to `"[SEP]"`) — The separator token,
+    which is used when building a sequence from multiple sequences, e.g. two sequences
+    for sequence classification or for a text and a question for question answering.
+    It is also used as the last token of a sequence built with special tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_token** (`str`, *optional*, defaults to `"[PAD]"`) — The token used for
+    padding, for example when batching sequences of different lengths.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cls_token** (`str`, *optional*, defaults to `"[CLS]"`) — The classifier token
+    which is used when doing sequence classification (classification of the whole
+    sequence instead of per-token classification). It is the first token of the sequence
+    when built with special tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_token** (`str`, *optional*, defaults to `"[MASK]"`) — The token used
+    for masking values. This is the token used when training this model with masked
+    language modeling. This is the token which the model will try to predict.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sp_model_kwargs** (`dict`, *optional*) — Will be passed to the `SentencePieceProcessor.__init__()`
+    method. The [Python wrapper for SentencePiece](https://github.com/google/sentencepiece/tree/master/python)
+    can be used, among other things, to set:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`enable_sampling`: Enable subword regularization.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size`: Sampling parameters for unigram. Invalid for BPE-Dropout.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size = {0,1}`: No sampling is performed.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size > 1`: samples from the nbest_size results.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`nbest_size < 0`: assuming that nbest_size is infinite and samples from the
+    all hypothesis (lattice) using forward-filtering-and-backward-sampling algorithm.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`alpha`: Smoothing parameter for unigram sampling, and dropout probability
+    of merge operations for BPE-dropout.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a DeBERTa-v2 fast tokenizer. Based on [SentencePiece](https://github.com/google/sentencepiece).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### build_inputs_with_special_tokens'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/tokenization_deberta_v2_fast.py#L156)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( token_ids_0 token_ids_1 = None ) → `List[int]`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs to which the special tokens will
+    be added.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: List of [input IDs](../glossary#input-ids) with the appropriate special tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Build model inputs from a sequence or a pair of sequence for sequence classification
+    tasks by concatenating and adding special tokens. A DeBERTa sequence has the following
+    format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'single sequence: [CLS] X [SEP]'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'pair of sequences: [CLS] A [SEP] B [SEP]'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### create_token_type_ids_from_sequences'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/tokenization_deberta_v2_fast.py#L206)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( token_ids_0 token_ids_1 = None ) → `List[int]`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**token_ids_0** (`List[int]`) — List of IDs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**token_ids_1** (`List[int]`, *optional*) — Optional second list of IDs for
+    sequence pairs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[int]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: List of [token type IDs](../glossary#token-type-ids) according to the given
+    sequence(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a mask from the two sequences passed to be used in a sequence-pair classification
+    task. A DeBERTa
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'sequence pair mask has the following format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: If `token_ids_1` is `None`, this method only returns the first portion of the
+    mask (0s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: DebertaV2Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2Model'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L993)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The bare DeBERTa Model transformer outputting raw hidden-states without any
+    specific head on top. The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced
+    BERT with Disentangled Attention](https://arxiv.org/abs/2006.03654) by Pengcheng
+    He, Xiaodong Liu, Jianfeng Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa
+    with two improvements, i.e. disentangled attention and enhanced mask decoder.
+    With those two improvements, it out perform BERT/RoBERTa on a majority of tasks
+    with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1022)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None inputs_embeds: Optional = None output_attentions:
+    Optional = None output_hidden_states: Optional = None return_dict: Optional =
+    None ) → [transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [DebertaV2Model](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Model)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: DebertaV2PreTrainedModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2PreTrainedModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L907)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PretrainedConfig *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An abstract class to handle weights initialization and a simple interface for
+    downloading and loading pretrained models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### _forward_unimplemented'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/torch/nn/modules/module.py#L361)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( *input: Any )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defines the computation performed at every call.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Should be overridden by all subclasses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the registered hooks while the latter silently ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DebertaV2ForMaskedLM
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2ForMaskedLM'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1109)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'DeBERTa Model with a `language modeling` head on top. The DeBERTa model was
+    proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled Attention](https://arxiv.org/abs/2006.03654)
+    by Pengcheng He, Xiaodong Liu, Jianfeng Gao, Weizhu Chen. It’s build on top of
+    BERT/RoBERTa with two improvements, i.e. disentangled attention and enhanced mask
+    decoder. With those two improvements, it out perform BERT/RoBERTa on a majority
+    of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1128)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None inputs_embeds: Optional = None labels:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None return_dict: Optional = None ) → [transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*)
+    — Labels for computing the masked language modeling loss. Indices should be in
+    `[-100, 0, ..., config.vocab_size]` (see `input_ids` docstring) Tokens with indices
+    set to `-100` are ignored (masked), the loss is only computed for the tokens with
+    labels in `[0, ..., config.vocab_size]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Masked language modeling (MLM) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [DebertaV2ForMaskedLM](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2ForMaskedLM)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: DebertaV2ForSequenceClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2ForSequenceClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1241)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DeBERTa Model transformer with a sequence classification/regression head on
+    top (a linear layer on top of the pooled output) e.g. for GLUE tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa with two improvements, i.e.
+    disentangled attention and enhanced mask decoder. With those two improvements,
+    it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1273)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None inputs_embeds: Optional = None labels:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None return_dict: Optional = None ) → [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the sequence classification/regression loss. Indices should be in
+    `[0, ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss
+    is computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [DebertaV2ForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2ForSequenceClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example of single-label classification:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Example of multi-label classification:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: DebertaV2ForTokenClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2ForTokenClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1360)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DeBERTa Model with a token classification head on top (a linear layer on top
+    of the hidden-states output) e.g. for Named-Entity-Recognition (NER) tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa with two improvements, i.e.
+    disentangled attention and enhanced mask decoder. With those two improvements,
+    it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1380)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None inputs_embeds: Optional = None labels:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None return_dict: Optional = None ) → [transformers.modeling_outputs.TokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.TokenClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*)
+    — Labels for computing the token classification loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.TokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.TokenClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.TokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.TokenClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.num_labels)`)
+    — Classification scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [DebertaV2ForTokenClassification](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2ForTokenClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: DebertaV2ForQuestionAnswering
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2ForQuestionAnswering'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1434)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DeBERTa Model with a span classification head on top for extractive question-answering
+    tasks like SQuAD (a linear layers on top of the hidden-states output to compute
+    `span start logits` and `span end logits`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa with two improvements, i.e.
+    disentangled attention and enhanced mask decoder. With those two improvements,
+    it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1452)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None inputs_embeds: Optional = None start_positions:
+    Optional = None end_positions: Optional = None output_attentions: Optional = None
+    output_hidden_states: Optional = None return_dict: Optional = None ) → [transformers.modeling_outputs.QuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.QuestionAnsweringModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**start_positions** (`torch.LongTensor` of shape `(batch_size,)`, *optional*)
+    — Labels for position (index) of the start of the labelled span for computing
+    the token classification loss. Positions are clamped to the length of the sequence
+    (`sequence_length`). Position outside of the sequence are not taken into account
+    for computing the loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**end_positions** (`torch.LongTensor` of shape `(batch_size,)`, *optional*)
+    — Labels for position (index) of the end of the labelled span for computing the
+    token classification loss. Positions are clamped to the length of the sequence
+    (`sequence_length`). Position outside of the sequence are not taken into account
+    for computing the loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.QuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.QuestionAnsweringModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.QuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.QuestionAnsweringModelOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Total span extraction loss is the sum of a Cross-Entropy for the
+    start and end positions.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**start_logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`)
+    — Span-start scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**end_logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`)
+    — Span-end scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [DebertaV2ForQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2ForQuestionAnswering)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: DebertaV2ForMultipleChoice
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.DebertaV2ForMultipleChoice'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1534)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DeBERTa Model with a multiple choice classification head on top (a linear layer
+    on top of the pooled output and a softmax) e.g. for RocStories/SWAG tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa with two improvements, i.e.
+    disentangled attention and enhanced mask decoder. With those two improvements,
+    it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_deberta_v2.py#L1565)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None token_type_ids:
+    Optional = None position_ids: Optional = None inputs_embeds: Optional = None labels:
+    Optional = None output_attentions: Optional = None output_hidden_states: Optional
+    = None return_dict: Optional = None ) → [transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the multiple choice classification loss. Indices should be in `[0,
+    ..., num_choices-1]` where `num_choices` is the size of the second dimension of
+    the input tensors. (See `input_ids` above)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape *(1,)*, *optional*, returned when `labels`
+    is provided) — Classification loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, num_choices)`) — *num_choices*
+    is the second dimension of the input tensors. (see *input_ids* above).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Classification scores (before SoftMax).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [DebertaV2ForMultipleChoice](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2ForMultipleChoice)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: TFDebertaV2Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFDebertaV2Model'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1347)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: DebertaV2Config *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The bare DeBERTa Model transformer outputting raw hidden-states without any
+    specific head on top. The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced
+    BERT with Disentangled Attention](https://arxiv.org/abs/2006.03654) by Pengcheng
+    He, Xiaodong Liu, Jianfeng Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa
+    with two improvements, i.e. disentangled attention and enhanced mask decoder.
+    With those two improvements, it out perform BERT/RoBERTa on a majority of tasks
+    with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a single Tensor with `input_ids` only and nothing else: `model(input_ids)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([input_ids, attention_mask])` or `model([input_ids, attention_mask,
+    token_type_ids])`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"input_ids": input_ids, "token_type_ids": token_type_ids})`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1358)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: TFModelInputType | None = None attention_mask: np.ndarray | tf.Tensor
+    | None = None token_type_ids: np.ndarray | tf.Tensor | None = None position_ids:
+    np.ndarray | tf.Tensor | None = None inputs_embeds: np.ndarray | tf.Tensor | None
+    = None output_attentions: Optional[bool] = None output_hidden_states: Optional[bool]
+    = None return_dict: Optional[bool] = None training: Optional[bool] = False ) →
+    [transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str, tf.Tensor]`
+    or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    sequence_length)`) — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [`~utils.ModelOutput“]
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFDebertaV2Model](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.TFDebertaV2Model)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFDebertaV2PreTrainedModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFDebertaV2PreTrainedModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1251)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: An abstract class to handle weights initialization and a simple interface for
+    downloading and loading pretrained models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/keras/src/engine/training.py#L592)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( inputs training = None mask = None )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Calls the model on new inputs and returns the outputs as tensors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this case `call()` just reapplies all ops in the graph to the new inputs
+    (e.g. build a new computational graph from the provided inputs).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: This method should not be called directly. It is only meant to be overridden
+    when subclassing `tf.keras.Model`. To call a model on an input, always use the
+    `__call__()` method, i.e. `model(inputs)`, which relies on the underlying `call()`
+    method.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: TFDebertaV2ForMaskedLM
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFDebertaV2ForMaskedLM'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1400)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: DebertaV2Config *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'DeBERTa Model with a `language modeling` head on top. The DeBERTa model was
+    proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled Attention](https://arxiv.org/abs/2006.03654)
+    by Pengcheng He, Xiaodong Liu, Jianfeng Gao, Weizhu Chen. It’s build on top of
+    BERT/RoBERTa with two improvements, i.e. disentangled attention and enhanced mask
+    decoder. With those two improvements, it out perform BERT/RoBERTa on a majority
+    of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a single Tensor with `input_ids` only and nothing else: `model(input_ids)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([input_ids, attention_mask])` or `model([input_ids, attention_mask,
+    token_type_ids])`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"input_ids": input_ids, "token_type_ids": token_type_ids})`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1418)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: TFModelInputType | None = None attention_mask: np.ndarray | tf.Tensor
+    | None = None token_type_ids: np.ndarray | tf.Tensor | None = None position_ids:
+    np.ndarray | tf.Tensor | None = None inputs_embeds: np.ndarray | tf.Tensor | None
+    = None output_attentions: Optional[bool] = None output_hidden_states: Optional[bool]
+    = None return_dict: Optional[bool] = None labels: np.ndarray | tf.Tensor | None
+    = None training: Optional[bool] = False ) → [transformers.modeling_tf_outputs.TFMaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFMaskedLMOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str, tf.Tensor]`
+    or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    sequence_length)`) — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [`~utils.ModelOutput“]
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`tf.Tensor` or `np.ndarray` of shape `(batch_size, sequence_length)`,
+    *optional*) — Labels for computing the masked language modeling loss. Indices
+    should be in `[-100, 0, ..., config.vocab_size]` (see `input_ids` docstring) Tokens
+    with indices set to `-100` are ignored (masked), the loss is only computed for
+    the tokens with labels in `[0, ..., config.vocab_size]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFMaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFMaskedLMOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFMaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFMaskedLMOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(n,)`, *optional*, where n is the number of
+    non-masked labels, returned when `labels` is provided) — Masked language modeling
+    (MLM) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`tf.Tensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFDebertaV2ForMaskedLM](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.TFDebertaV2ForMaskedLM)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFDebertaV2ForSequenceClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFDebertaV2ForSequenceClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1482)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: DebertaV2Config *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DeBERTa Model transformer with a sequence classification/regression head on
+    top (a linear layer on top of the pooled output) e.g. for GLUE tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa with two improvements, i.e.
+    disentangled attention and enhanced mask decoder. With those two improvements,
+    it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a single Tensor with `input_ids` only and nothing else: `model(input_ids)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([input_ids, attention_mask])` or `model([input_ids, attention_mask,
+    token_type_ids])`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"input_ids": input_ids, "token_type_ids": token_type_ids})`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1509)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: TFModelInputType | None = None attention_mask: np.ndarray | tf.Tensor
+    | None = None token_type_ids: np.ndarray | tf.Tensor | None = None position_ids:
+    np.ndarray | tf.Tensor | None = None inputs_embeds: np.ndarray | tf.Tensor | None
+    = None output_attentions: Optional[bool] = None output_hidden_states: Optional[bool]
+    = None return_dict: Optional[bool] = None labels: np.ndarray | tf.Tensor | None
+    = None training: Optional[bool] = False ) → [transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str, tf.Tensor]`
+    or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    sequence_length)`) — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [`~utils.ModelOutput“]
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`tf.Tensor` or `np.ndarray` of shape `(batch_size,)`, *optional*)
+    — Labels for computing the sequence classification/regression loss. Indices should
+    be in `[0, ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression
+    loss is computed (Mean-Square loss), If `config.num_labels > 1` a classification
+    loss is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(batch_size, )`, *optional*, returned when
+    `labels` is provided) — Classification (or regression if config.num_labels==1)
+    loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`tf.Tensor` of shape `(batch_size, config.num_labels)`) — Classification
+    (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFDebertaV2ForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.TFDebertaV2ForSequenceClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFDebertaV2ForTokenClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFDebertaV2ForTokenClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1582)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: DebertaV2Config *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DeBERTa Model with a token classification head on top (a linear layer on top
+    of the hidden-states output) e.g. for Named-Entity-Recognition (NER) tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa with two improvements, i.e.
+    disentangled attention and enhanced mask decoder. With those two improvements,
+    it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a single Tensor with `input_ids` only and nothing else: `model(input_ids)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([input_ids, attention_mask])` or `model([input_ids, attention_mask,
+    token_type_ids])`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"input_ids": input_ids, "token_type_ids": token_type_ids})`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1603)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: TFModelInputType | None = None attention_mask: np.ndarray | tf.Tensor
+    | None = None token_type_ids: np.ndarray | tf.Tensor | None = None position_ids:
+    np.ndarray | tf.Tensor | None = None inputs_embeds: np.ndarray | tf.Tensor | None
+    = None output_attentions: Optional[bool] = None output_hidden_states: Optional[bool]
+    = None return_dict: Optional[bool] = None labels: np.ndarray | tf.Tensor | None
+    = None training: Optional[bool] = False ) → [transformers.modeling_tf_outputs.TFTokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFTokenClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str, tf.Tensor]`
+    or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    sequence_length)`) — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [`~utils.ModelOutput“]
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`tf.Tensor` or `np.ndarray` of shape `(batch_size, sequence_length)`,
+    *optional*) — Labels for computing the token classification loss. Indices should
+    be in `[0, ..., config.num_labels - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFTokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFTokenClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFTokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFTokenClassifierOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(n,)`, *optional*, where n is the number of
+    unmasked labels, returned when `labels` is provided) — Classification loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`tf.Tensor` of shape `(batch_size, sequence_length, config.num_labels)`)
+    — Classification scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFDebertaV2ForTokenClassification](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.TFDebertaV2ForTokenClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFDebertaV2ForQuestionAnswering
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFDebertaV2ForQuestionAnswering'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1666)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: DebertaV2Config *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DeBERTa Model with a span classification head on top for extractive question-answering
+    tasks like SQuAD (a linear layers on top of the hidden-states output to compute
+    `span start logits` and `span end logits`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa with two improvements, i.e.
+    disentangled attention and enhanced mask decoder. With those two improvements,
+    it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a single Tensor with `input_ids` only and nothing else: `model(input_ids)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([input_ids, attention_mask])` or `model([input_ids, attention_mask,
+    token_type_ids])`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"input_ids": input_ids, "token_type_ids": token_type_ids})`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1686)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: TFModelInputType | None = None attention_mask: np.ndarray | tf.Tensor
+    | None = None token_type_ids: np.ndarray | tf.Tensor | None = None position_ids:
+    np.ndarray | tf.Tensor | None = None inputs_embeds: np.ndarray | tf.Tensor | None
+    = None output_attentions: Optional[bool] = None output_hidden_states: Optional[bool]
+    = None return_dict: Optional[bool] = None start_positions: np.ndarray | tf.Tensor
+    | None = None end_positions: np.ndarray | tf.Tensor | None = None training: Optional[bool]
+    = False ) → [transformers.modeling_tf_outputs.TFQuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFQuestionAnsweringModelOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str, tf.Tensor]`
+    or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    sequence_length)`) — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Segment token indices to indicate first and second portions of the
+    inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Indices of positions of each input sequence tokens in the position
+    embeddings. Selected in the range `[0, config.max_position_embeddings - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert *input_ids* indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [`~utils.ModelOutput“]
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**start_positions** (`tf.Tensor` or `np.ndarray` of shape `(batch_size,)`,
+    *optional*) — Labels for position (index) of the start of the labelled span for
+    computing the token classification loss. Positions are clamped to the length of
+    the sequence (`sequence_length`). Position outside of the sequence are not taken
+    into account for computing the loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**end_positions** (`tf.Tensor` or `np.ndarray` of shape `(batch_size,)`, *optional*)
+    — Labels for position (index) of the end of the labelled span for computing the
+    token classification loss. Positions are clamped to the length of the sequence
+    (`sequence_length`). Position outside of the sequence are not taken into account
+    for computing the loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFQuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFQuestionAnsweringModelOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFQuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFQuestionAnsweringModelOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(batch_size, )`, *optional*, returned when
+    `start_positions` and `end_positions` are provided) — Total span extraction loss
+    is the sum of a Cross-Entropy for the start and end positions.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**start_logits** (`tf.Tensor` of shape `(batch_size, sequence_length)`) — Span-start
+    scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**end_logits** (`tf.Tensor` of shape `(batch_size, sequence_length)`) — Span-end
+    scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFDebertaV2ForQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.TFDebertaV2ForQuestionAnswering)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFDebertaV2ForMultipleChoice
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFDebertaV2ForMultipleChoice'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1764)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: DebertaV2Config *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DeBERTa Model with a multiple choice classification head on top (a linear layer
+    on top of the pooled output and a softmax) e.g. for RocStories/SWAG tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The DeBERTa model was proposed in [DeBERTa: Decoding-enhanced BERT with Disentangled
+    Attention](https://arxiv.org/abs/2006.03654) by Pengcheng He, Xiaodong Liu, Jianfeng
+    Gao, Weizhu Chen. It’s build on top of BERT/RoBERTa with two improvements, i.e.
+    disentangled attention and enhanced mask decoder. With those two improvements,
+    it out perform BERT/RoBERTa on a majority of tasks with 80GB pretraining data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'a single Tensor with `input_ids` only and nothing else: `model(input_ids)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([input_ids, attention_mask])` or `model([input_ids, attention_mask,
+    token_type_ids])`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"input_ids": input_ids, "token_type_ids": token_type_ids})`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/deberta_v2/modeling_tf_deberta_v2.py#L1787)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: TFModelInputType | None = None attention_mask: np.ndarray | tf.Tensor
+    | None = None token_type_ids: np.ndarray | tf.Tensor | None = None position_ids:
+    np.ndarray | tf.Tensor | None = None inputs_embeds: np.ndarray | tf.Tensor | None
+    = None output_attentions: Optional[bool] = None output_hidden_states: Optional[bool]
+    = None return_dict: Optional[bool] = None labels: np.ndarray | tf.Tensor | None
+    = None training: Optional[bool] = False ) → [transformers.modeling_tf_outputs.TFMultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFMultipleChoiceModelOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str, tf.Tensor]`
+    or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    num_choices, sequence_length)`) — Indices of input sequence tokens in the vocabulary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, num_choices,
+    sequence_length)`, *optional*) — Mask to avoid performing attention on padding
+    token indices. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, num_choices,
+    sequence_length)`, *optional*) — Segment token indices to indicate first and second
+    portions of the inputs. Indices are selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 corresponds to a *sentence A* token,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 corresponds to a *sentence B* token.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**position_ids** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, num_choices,
+    sequence_length)`, *optional*) — Indices of positions of each input sequence tokens
+    in the position embeddings. Selected in the range `[0, config.max_position_embeddings
+    - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are position IDs?](../glossary#position-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`np.ndarray` or `tf.Tensor` of shape `(batch_size, num_choices,
+    sequence_length, hidden_size)`, *optional*) — Optionally, instead of passing `input_ids`
+    you can choose to directly pass an embedded representation. This is useful if
+    you want more control over how to convert *input_ids* indices into associated
+    vectors than the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [`~utils.ModelOutput“]
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`tf.Tensor` or `np.ndarray` of shape `(batch_size,)`, *optional*)
+    — Labels for computing the multiple choice classification loss. Indices should
+    be in `[0, ..., num_choices]` where `num_choices` is the size of the second dimension
+    of the input tensors. (See `input_ids` above)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFMultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFMultipleChoiceModelOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFMultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFMultipleChoiceModelOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([DebertaV2Config](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.DebertaV2Config))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape *(batch_size, )*, *optional*, returned when
+    `labels` is provided) — Classification loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`tf.Tensor` of shape `(batch_size, num_choices)`) — *num_choices*
+    is the second dimension of the input tensors. (see *input_ids* above).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Classification scores (before SoftMax).
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFDebertaV2ForMultipleChoice](/docs/transformers/v4.37.2/en/model_doc/deberta-v2#transformers.TFDebertaV2ForMultipleChoice)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE

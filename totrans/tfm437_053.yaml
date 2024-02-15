@@ -1,0 +1,328 @@
+- en: Building custom models
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/custom_models](https://huggingface.co/docs/transformers/v4.37.2/en/custom_models)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/15.bfb9db2f.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 🤗 Transformers library is designed to be easily extensible. Every model
+    is fully coded in a given subfolder of the repository with no abstraction, so
+    you can easily copy a modeling file and tweak it to your needs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you are writing a brand new model, it might be easier to start from scratch.
+    In this tutorial, we will show you how to write a custom model and its configuration
+    so it can be used inside Transformers, and how you can share it with the community
+    (with the code it relies on) so that anyone can use it, even if it’s not present
+    in the 🤗 Transformers library. We’ll see how to build upon transformers and extend
+    the framework with your hooks and custom code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We will illustrate all of this on a ResNet model, by wrapping the ResNet class
+    of the [timm library](https://github.com/rwightman/pytorch-image-models) into
+    a [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing a custom configuration
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Before we dive into the model, let’s first write its configuration. The configuration
+    of a model is an object that will contain all the necessary information to build
+    the model. As we will see in the next section, the model can only take a `config`
+    to be initialized, so we really need that object to be as complete as possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our example, we will take a couple of arguments of the ResNet class that
+    we might want to tweak. Different configurations will then give us the different
+    types of ResNets that are possible. We then just store those arguments, after
+    checking the validity of a few of them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The three important things to remember when writing you own configuration are
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: you have to inherit from `PretrainedConfig`,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: the `__init__` of your `PretrainedConfig` must accept any kwargs,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: those `kwargs` need to be passed to the superclass `__init__`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The inheritance is to make sure you get all the functionality from the 🤗 Transformers
+    library, while the two other constraints come from the fact a `PretrainedConfig`
+    has more fields than the ones you are setting. When reloading a config with the
+    `from_pretrained` method, those fields need to be accepted by your config and
+    then sent to the superclass.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining a `model_type` for your configuration (here `model_type="resnet"`)
+    is not mandatory, unless you want to register your model with the auto classes
+    (see last section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With this done, you can easily create and save your configuration like you
+    would do with any other model config of the library. Here is how we can create
+    a resnet50d config and save it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will save a file named `config.json` inside the folder `custom-resnet`.
+    You can then reload your config with the `from_pretrained` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also use any other method of the [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    class, like [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)
+    to directly upload your config to the Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing a custom model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Now that we have our ResNet configuration, we can go on writing the model.
+    We will actually write two: one that extracts the hidden features from a batch
+    of images (like [BertModel](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertModel))
+    and one that is suitable for image classification (like [BertForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertForSequenceClassification)).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As we mentioned before, we’ll only write a loose wrapper of the model to keep
+    it simple for this example. The only thing we need to do before writing this class
+    is a map between the block types and actual block classes. Then the model is defined
+    from the configuration by passing everything to the `ResNet` class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For the model that will classify images, we just change the forward method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: In both cases, notice how we inherit from `PreTrainedModel` and call the superclass
+    initialization with the `config` (a bit like when you write a regular `torch.nn.Module`).
+    The line that sets the `config_class` is not mandatory, unless you want to register
+    your model with the auto classes (see last section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If your model is very similar to a model inside the library, you can re-use
+    the same configuration as this model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can have your model return anything you want, but returning a dictionary
+    like we did for `ResnetModelForImageClassification`, with the loss included when
+    labels are passed, will make your model directly usable inside the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class. Using another output format is fine as long as you are planning on using
+    your own training loop or another library for training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now that we have our model class, let’s create one:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Again, you can use any of the methods of [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel),
+    like [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)
+    or [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub).
+    We will use the second in the next section, and see how to push the model weights
+    with the code of our model. But first, let’s load some pretrained weights inside
+    our model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In your own use case, you will probably be training your custom model on your
+    own data. To go fast for this tutorial, we will use the pretrained version of
+    the resnet50d. Since our model is just a wrapper around it, it’s going to be easy
+    to transfer those weights:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now let’s see how to make sure that when we do [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)
+    or [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub),
+    the code of the model is saved.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Registering a model with custom code to the auto classes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you are writing a library that extends 🤗 Transformers, you may want to extend
+    the auto classes to include your own model. This is different from pushing the
+    code to the Hub in the sense that users will need to import your library to get
+    the custom models (contrarily to automatically downloading the model code from
+    the Hub).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As long as your config has a `model_type` attribute that is different from
+    existing model types, and that your model classes have the right `config_class`
+    attributes, you can just add them to the auto classes like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the first argument used when registering your custom config to [AutoConfig](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoConfig)
+    needs to match the `model_type` of your custom config, and the first argument
+    used when registering your custom models to any auto model class needs to match
+    the `config_class` of those models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sending the code to the Hub
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This API is experimental and may have some slight breaking changes in the next
+    releases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, make sure your model is fully defined in a `.py` file. It can rely on
+    relative imports to some other files as long as all the files are in the same
+    directory (we don’t support submodules for this feature yet). For our example,
+    we’ll define a `modeling_resnet.py` file and a `configuration_resnet.py` file
+    in a folder of the current working directory named `resnet_model`. The configuration
+    file contains the code for `ResnetConfig` and the modeling file contains the code
+    of `ResnetModel` and `ResnetModelForImageClassification`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `__init__.py` can be empty, it’s just there so that Python detects `resnet_model`
+    can be use as a module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If copying a modeling files from the library, you will need to replace all the
+    relative imports at the top of the file to import from the `transformers` package.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that you can re-use (or subclass) an existing configuration/model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To share your model with the community, follow those steps: first import the
+    ResNet model and config from the newly created files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then you have to tell the library you want to copy the code files of those
+    objects when using the `save_pretrained` method and properly register them with
+    a given Auto class (especially for models), just run:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that there is no need to specify an auto class for the configuration (there
+    is only one auto class for them, [AutoConfig](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoConfig))
+    but it’s different for models. Your custom model could be suitable for many different
+    tasks, so you have to specify which one of the auto classes is the correct one
+    for your model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use `register_for_auto_class()` if you want the code files to be copied. If
+    you instead prefer to use code on the Hub from another repo, you don’t need to
+    call it. In cases where there’s more than one auto class, you can modify the `config.json`
+    directly using the following structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, let’s create the config and models as we did before:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now to send the model to the Hub, make sure you are logged in. Either run in
+    your terminal:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or from a notebook:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can then push to your own namespace (or an organization you are a member
+    of) like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: On top of the modeling weights and the configuration in json format, this also
+    copied the modeling and configuration `.py` files in the folder `custom-resnet50d`
+    and uploaded the result to the Hub. You can check the result in this [model repo](https://huggingface.co/sgugger/custom-resnet50d).
+  prefs: []
+  type: TYPE_NORMAL
+- en: See the [sharing tutorial](model_sharing) for more information on the push to
+    Hub method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a model with custom code
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can use any configuration, model or tokenizer with custom code files in
+    its repository with the auto-classes and the `from_pretrained` method. All files
+    and code uploaded to the Hub are scanned for malware (refer to the [Hub security](https://huggingface.co/docs/hub/security#malware-scanning)
+    documentation for more information), but you should still review the model code
+    and author to avoid executing malicious code on your machine. Set `trust_remote_code=True`
+    to use a model with custom code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is also strongly encouraged to pass a commit hash as a `revision` to make
+    sure the author of the models did not update the code with some malicious new
+    lines (unless you fully trust the authors of the models).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that when browsing the commit history of the model repo on the Hub, there
+    is a button to easily copy the commit hash of any commit.
+  prefs: []
+  type: TYPE_NORMAL

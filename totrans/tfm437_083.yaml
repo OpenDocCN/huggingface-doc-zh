@@ -1,0 +1,206 @@
+- en: XLA Integration for TensorFlow Models
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tf_xla](https://huggingface.co/docs/transformers/v4.37.2/en/tf_xla)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/367.d58c5abd.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Accelerated Linear Algebra, dubbed XLA, is a compiler for accelerating the
+    runtime of TensorFlow Models. From the [official documentation](https://www.tensorflow.org/xla):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: XLA (Accelerated Linear Algebra) is a domain-specific compiler for linear algebra
+    that can accelerate TensorFlow models with potentially no source code changes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using XLA in TensorFlow is simple – it comes packaged inside the `tensorflow`
+    library, and it can be triggered with the `jit_compile` argument in any graph-creating
+    function such as [`tf.function`](https://www.tensorflow.org/guide/intro_to_graphs).
+    When using Keras methods like `fit()` and `predict()`, you can enable XLA simply
+    by passing the `jit_compile` argument to `model.compile()`. However, XLA is not
+    limited to these methods - it can also be used to accelerate any arbitrary `tf.function`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Several TensorFlow methods in 🤗 Transformers have been rewritten to be XLA-compatible,
+    including text generation for models such as [GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2),
+    [T5](https://huggingface.co/docs/transformers/model_doc/t5) and [OPT](https://huggingface.co/docs/transformers/model_doc/opt),
+    as well as speech processing for models such as [Whisper](https://huggingface.co/docs/transformers/model_doc/whisper).
+  prefs: []
+  type: TYPE_NORMAL
+- en: While the exact amount of speed-up is very much model-dependent, for TensorFlow
+    text generation models inside 🤗 Transformers, we noticed a speed-up of ~100x.
+    This document will explain how you can use XLA for these models to get the maximum
+    amount of performance. We’ll also provide links to additional resources if you’re
+    interested to learn more about the benchmarks and our design philosophy behind
+    the XLA integration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Running TF functions with XLA
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let us consider the following model in TensorFlow:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The above model accepts inputs having a dimension of `(10, )`. We can use the
+    model for running a forward pass like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In order to run the forward pass with an XLA-compiled function, we’d need to
+    do:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The default `call()` function of the `model` is used for compiling the XLA
+    graph. But if there’s any other model function you want to compile into XLA that’s
+    also possible with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Running a TF text generation model with XLA from 🤗 Transformers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To enable XLA-accelerated generation within 🤗 Transformers, you need to have
+    a recent version of `transformers` installed. You can install it by running:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And then you can run the following code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can notice, enabling XLA on `generate()` is just a single line of code.
+    The rest of the code remains unchanged. However, there are a couple of gotchas
+    in the above code snippet that are specific to XLA. You need to be aware of those
+    to realize the speed-ups that XLA can bring in. We discuss these in the following
+    section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gotchas to be aware of
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When you are executing an XLA-enabled function (like `xla_generate()` above)
+    for the first time, it will internally try to infer the computation graph, which
+    is time-consuming. This process is known as [“tracing”](https://www.tensorflow.org/guide/intro_to_graphs#when_is_a_function_tracing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You might notice that the generation time is not fast. Successive calls of `xla_generate()`
+    (or any other XLA-enabled function) won’t have to infer the computation graph,
+    given the inputs to the function follow the same shape with which the computation
+    graph was initially built. While this is not a problem for modalities with fixed
+    input shapes (e.g., images), you must pay attention if you are working with variable
+    input shape modalities (e.g., text).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To ensure `xla_generate()` always operates with the same input shapes, you can
+    specify the `padding` arguments when calling the tokenizer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This way, you can ensure that the inputs to `xla_generate()` will always receive
+    inputs with the shape it was traced with and thus leading to speed-ups in the
+    generation time. You can verify this with the code below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On a Tesla T4 GPU, you can expect the outputs like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first call to `xla_generate()` is time-consuming because of tracing, but
+    the successive calls are orders of magnitude faster. Keep in mind that any change
+    in the generation options at any point with trigger re-tracing and thus leading
+    to slow-downs in the generation time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We didn’t cover all the text generation options 🤗 Transformers provides in this
+    document. We encourage you to read the documentation for advanced use cases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additional Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Here, we leave you with some additional resources if you want to delve deeper
+    into XLA in 🤗 Transformers and in general.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[This Colab Notebook](https://colab.research.google.com/github/huggingface/blog/blob/main/notebooks/91_tf_xla_generate.ipynb)
+    provides an interactive demonstration if you want to fiddle with the XLA-compatible
+    encoder-decoder (like [T5](https://huggingface.co/docs/transformers/model_doc/t5))
+    and decoder-only (like [GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2))
+    text generation models.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[This blog post](https://huggingface.co/blog/tf-xla-generate) provides an overview
+    of the comparison benchmarks for XLA-compatible models along with a friendly introduction
+    to XLA in TensorFlow.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[This blog post](https://blog.tensorflow.org/2022/11/how-hugging-face-improved-text-generation-performance-with-xla.html)
+    discusses our design philosophy behind adding XLA support to the TensorFlow models
+    in 🤗 Transformers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Recommended posts for learning more about XLA and TensorFlow graphs in general:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[XLA: Optimizing Compiler for Machine Learning](https://www.tensorflow.org/xla)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Introduction to graphs and tf.function](https://www.tensorflow.org/guide/intro_to_graphs)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Better performance with tf.function](https://www.tensorflow.org/guide/function)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL

@@ -1,0 +1,1613 @@
+- en: SegFormer
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/segformer](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/segformer)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/243.8ee016b0.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Markdown.fef84341.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/PipelineTag.44585822.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The SegFormer model was proposed in [SegFormer: Simple and Efficient Design
+    for Semantic Segmentation with Transformers](https://arxiv.org/abs/2105.15203)
+    by Enze Xie, Wenhai Wang, Zhiding Yu, Anima Anandkumar, Jose M. Alvarez, Ping
+    Luo. The model consists of a hierarchical Transformer encoder and a lightweight
+    all-MLP decode head to achieve great results on image segmentation benchmarks
+    such as ADE20K and Cityscapes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We present SegFormer, a simple, efficient yet powerful semantic segmentation
+    framework which unifies Transformers with lightweight multilayer perception (MLP)
+    decoders. SegFormer has two appealing features: 1) SegFormer comprises a novel
+    hierarchically structured Transformer encoder which outputs multiscale features.
+    It does not need positional encoding, thereby avoiding the interpolation of positional
+    codes which leads to decreased performance when the testing resolution differs
+    from training. 2) SegFormer avoids complex decoders. The proposed MLP decoder
+    aggregates information from different layers, and thus combining both local attention
+    and global attention to render powerful representations. We show that this simple
+    and lightweight design is the key to efficient segmentation on Transformers. We
+    scale our approach up to obtain a series of models from SegFormer-B0 to SegFormer-B5,
+    reaching significantly better performance and efficiency than previous counterparts.
+    For example, SegFormer-B4 achieves 50.3% mIoU on ADE20K with 64M parameters, being
+    5x smaller and 2.2% better than the previous best method. Our best model, SegFormer-B5,
+    achieves 84.0% mIoU on Cityscapes validation set and shows excellent zero-shot
+    robustness on Cityscapes-C.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The figure below illustrates the architecture of SegFormer. Taken from the [original
+    paper](https://arxiv.org/abs/2105.15203).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/4c2d8bd007218640297abc69459ddbd1.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: This model was contributed by [nielsr](https://huggingface.co/nielsr). The TensorFlow
+    version of the model was contributed by [sayakpaul](https://huggingface.co/sayakpaul).
+    The original code can be found [here](https://github.com/NVlabs/SegFormer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: SegFormer consists of a hierarchical Transformer encoder, and a lightweight
+    all-MLP decoder head. [SegformerModel](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerModel)
+    is the hierarchical Transformer encoder (which in the paper is also referred to
+    as Mix Transformer or MiT). [SegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForSemanticSegmentation)
+    adds the all-MLP decoder head on top to perform semantic segmentation of images.
+    In addition, there’s [SegformerForImageClassification](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForImageClassification)
+    which can be used to - you guessed it - classify images. The authors of SegFormer
+    first pre-trained the Transformer encoder on ImageNet-1k to classify images. Next,
+    they throw away the classification head, and replace it by the all-MLP decode
+    head. Next, they fine-tune the model altogether on ADE20K, Cityscapes and COCO-stuff,
+    which are important benchmarks for semantic segmentation. All checkpoints can
+    be found on the [hub](https://huggingface.co/models?other=segformer).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The quickest way to get started with SegFormer is by checking the [example notebooks](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/SegFormer)
+    (which showcase both inference and fine-tuning on custom data). One can also check
+    out the [blog post](https://huggingface.co/blog/fine-tune-segformer) introducing
+    SegFormer and illustrating how it can be fine-tuned on custom data.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: TensorFlow users should refer to [this repository](https://github.com/deep-diver/segformer-tf-transformers)
+    that shows off-the-shelf inference and fine-tuning.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One can also check out [this interactive demo on Hugging Face Spaces](https://huggingface.co/spaces/chansung/segformer-tf-transformers)
+    to try out a SegFormer model on custom images.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: SegFormer works on any input size, as it pads the input to be divisible by `config.patch_sizes`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One can use [SegformerImageProcessor](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerImageProcessor)
+    to prepare images and corresponding segmentation maps for the model. Note that
+    this image processor is fairly basic and does not include all data augmentations
+    used in the original paper. The original preprocessing pipelines (for the ADE20k
+    dataset for instance) can be found [here](https://github.com/NVlabs/SegFormer/blob/master/local_configs/_base_/datasets/ade20k_repeat.py).
+    The most important preprocessing step is that images and segmentation maps are
+    randomly cropped and padded to the same size, such as 512x512 or 640x640, after
+    which they are normalized.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One additional thing to keep in mind is that one can initialize [SegformerImageProcessor](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerImageProcessor)
+    with `reduce_labels` set to `True` or `False`. In some datasets (like ADE20k),
+    the 0 index is used in the annotated segmentation maps for background. However,
+    ADE20k doesn’t include the “background” class in its 150 labels. Therefore, `reduce_labels`
+    is used to reduce all labels by 1, and to make sure no loss is computed for the
+    background class (i.e. it replaces 0 in the annotated maps by 255, which is the
+    *ignore_index* of the loss function used by [SegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForSemanticSegmentation)).
+    However, other datasets use the 0 index as background class and include this class
+    as part of all labels. In that case, `reduce_labels` should be set to `False`,
+    as loss should also be computed for the background class.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As most models, SegFormer comes in different sizes, the details of which can
+    be found in the table below (taken from Table 7 of the [original paper](https://arxiv.org/abs/2105.15203)).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '| **Model variant** | **Depths** | **Hidden sizes** | **Decoder hidden size**
+    | **Params (M)** | **ImageNet-1k Top 1** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | --- | --- | :-: | :-: | :-: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| MiT-b0 | [2, 2, 2, 2] | [32, 64, 160, 256] | 256 | 3.7 | 70.5 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| MiT-b1 | [2, 2, 2, 2] | [64, 128, 320, 512] | 256 | 14.0 | 78.7 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| MiT-b2 | [3, 4, 6, 3] | [64, 128, 320, 512] | 768 | 25.4 | 81.6 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| MiT-b3 | [3, 4, 18, 3] | [64, 128, 320, 512] | 768 | 45.2 | 83.1 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| MiT-b4 | [3, 8, 27, 3] | [64, 128, 320, 512] | 768 | 62.6 | 83.6 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| MiT-b5 | [3, 6, 40, 3] | [64, 128, 320, 512] | 768 | 82.0 | 83.8 |'
+  prefs: []
+  type: TYPE_TB
+- en: Note that MiT in the above table refers to the Mix Transformer encoder backbone
+    introduced in SegFormer. For SegFormer’s results on the segmentation datasets
+    like ADE20k, refer to the [paper](https://arxiv.org/abs/2105.15203).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A list of official Hugging Face and community (indicated by 🌎) resources to
+    help you get started with SegFormer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image Classification
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[SegformerForImageClassification](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForImageClassification)
+    is supported by this [example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-classification)
+    and [notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/image_classification.ipynb).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Image classification task guide](../tasks/image_classification)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Semantic segmentation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[SegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForSemanticSegmentation)
+    is supported by this [example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/semantic-segmentation).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A blog on fine-tuning SegFormer on a custom dataset can be found [here](https://huggingface.co/blog/fine-tune-segformer).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: More demo notebooks on SegFormer (both inference + fine-tuning on a custom dataset)
+    can be found [here](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/SegFormer).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[TFSegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.TFSegformerForSemanticSegmentation)
+    is supported by this [example notebook](https://github.com/huggingface/notebooks/blob/main/examples/semantic_segmentation-tf.ipynb).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Semantic segmentation task guide](../tasks/semantic_segmentation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you’re interested in submitting a resource to be included here, please feel
+    free to open a Pull Request and we’ll review it! The resource should ideally demonstrate
+    something new instead of duplicating an existing resource.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SegformerConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SegformerConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/configuration_segformer.py#L38)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( num_channels = 3 num_encoder_blocks = 4 depths = [2, 2, 2, 2] sr_ratios =
+    [8, 4, 2, 1] hidden_sizes = [32, 64, 160, 256] patch_sizes = [7, 3, 3, 3] strides
+    = [4, 2, 2, 2] num_attention_heads = [1, 2, 5, 8] mlp_ratios = [4, 4, 4, 4] hidden_act
+    = 'gelu' hidden_dropout_prob = 0.0 attention_probs_dropout_prob = 0.0 classifier_dropout_prob
+    = 0.1 initializer_range = 0.02 drop_path_rate = 0.1 layer_norm_eps = 1e-06 decoder_hidden_size
+    = 256 semantic_loss_ignore_index = 255 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**num_channels** (`int`, *optional*, defaults to 3) — The number of input channels.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_encoder_blocks** (`int`, *optional*, defaults to 4) — The number of encoder
+    blocks (i.e. stages in the Mix Transformer encoder).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**depths** (`List[int]`, *optional*, defaults to `[2, 2, 2, 2]`) — The number
+    of layers in each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sr_ratios** (`List[int]`, *optional*, defaults to `[8, 4, 2, 1]`) — Sequence
+    reduction ratios in each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_sizes** (`List[int]`, *optional*, defaults to `[32, 64, 160, 256]`)
+    — Dimension of each of the encoder blocks.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**patch_sizes** (`List[int]`, *optional*, defaults to `[7, 3, 3, 3]`) — Patch
+    size before each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**strides** (`List[int]`, *optional*, defaults to `[4, 2, 2, 2]`) — Stride
+    before each encoder block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`List[int]`, *optional*, defaults to `[1, 2, 5, 8]`)
+    — Number of attention heads for each attention layer in each block of the Transformer
+    encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mlp_ratios** (`List[int]`, *optional*, defaults to `[4, 4, 4, 4]`) — Ratio
+    of the size of the hidden layer compared to the size of the input layer of the
+    Mix FFNs in the encoder blocks.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `function`, *optional*, defaults to `"gelu"`) — The
+    non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_dropout_prob** (`float`, *optional*, defaults to 0.0) — The dropout
+    probability for all fully connected layers in the embeddings, encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_probs_dropout_prob** (`float`, *optional*, defaults to 0.0) — The
+    dropout ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**classifier_dropout_prob** (`float`, *optional*, defaults to 0.1) — The dropout
+    probability before the classification head.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**drop_path_rate** (`float`, *optional*, defaults to 0.1) — The dropout probability
+    for stochastic depth, used in the blocks of the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-06) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder_hidden_size** (`int`, *optional*, defaults to 256) — The dimension
+    of the all-MLP decode head.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**semantic_loss_ignore_index** (`int`, *optional*, defaults to 255) — The index
+    that is ignored by the loss function of the semantic segmentation model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [SegformerModel](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerModel).
+    It is used to instantiate an SegFormer model according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the SegFormer [nvidia/segformer-b0-finetuned-ade-512-512](https://huggingface.co/nvidia/segformer-b0-finetuned-ade-512-512)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: SegformerFeatureExtractor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SegformerFeatureExtractor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/feature_extraction_segformer.py#L26)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/image_processing_segformer.py#L296)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( images segmentation_maps = None **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preprocesses a batch of images and optionally segmentation maps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overrides the `__call__` method of the `Preprocessor` class so that both images
+    and segmentation maps can be passed in as positional arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_semantic_segmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/image_processing_segformer.py#L441)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( outputs target_sizes: List = None ) → semantic_segmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**outputs** ([SegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForSemanticSegmentation))
+    — Raw outputs of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**target_sizes** (`List[Tuple]` of length `batch_size`, *optional*) — List
+    of tuples corresponding to the requested final size (height, width) of each prediction.
+    If unset, predictions will not be resized.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: semantic_segmentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[torch.Tensor]` of length `batch_size`, where each item is a semantic
+    segmentation map of shape (height, width) corresponding to the target_sizes entry
+    (if `target_sizes` is specified). Each entry of each `torch.Tensor` correspond
+    to a semantic class id.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converts the output of [SegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForSemanticSegmentation)
+    into semantic segmentation maps. Only supports PyTorch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SegformerImageProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SegformerImageProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/image_processing_segformer.py#L49)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_resize: bool = True size: Dict = None resample: Resampling = <Resampling.BILINEAR:
+    2> do_rescale: bool = True rescale_factor: Union = 0.00392156862745098 do_normalize:
+    bool = True image_mean: Union = None image_std: Union = None do_reduce_labels:
+    bool = False **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Whether to resize
+    the image’s (height, width) dimensions to the specified `(size["height"], size["width"])`.
+    Can be overridden by the `do_resize` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]` *optional*, defaults to `{"height" -- 512, "width":
+    512}`): Size of the output image after resizing. Can be overridden by the `size`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`PILImageResampling`, *optional*, defaults to `Resampling.BILINEAR`)
+    — Resampling filter to use if resizing the image. Can be overridden by the `resample`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `True`) — Whether to rescale
+    the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`int` or `float`, *optional*, defaults to `1/255`) — Whether
+    to normalize the image. Can be overridden by the `do_normalize` parameter in the
+    `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `True`) — Whether to normalize
+    the image. Can be overridden by the `do_normalize` parameter in the `preprocess`
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_MEAN`)
+    — Mean to use if normalizing the image. This is a float or list of floats the
+    length of the number of channels in the image. Can be overridden by the `image_mean`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_STD`)
+    — Standard deviation to use if normalizing the image. This is a float or list
+    of floats the length of the number of channels in the image. Can be overridden
+    by the `image_std` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_reduce_labels** (`bool`, *optional*, defaults to `False`) — Whether or
+    not to reduce all label values of segmentation maps by 1\. Usually used for datasets
+    where 0 is used for background, and background itself is not included in all classes
+    of a dataset (e.g. ADE20k). The background label will be replaced by 255\. Can
+    be overridden by the `do_reduce_labels` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a Segformer image processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/image_processing_segformer.py#L305)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union segmentation_maps: Union = None do_resize: Optional = None
+    size: Optional = None resample: Resampling = None do_rescale: Optional = None
+    rescale_factor: Optional = None do_normalize: Optional = None image_mean: Union
+    = None image_std: Union = None do_reduce_labels: Optional = None return_tensors:
+    Union = None data_format: ChannelDimension = <ChannelDimension.FIRST: ''channels_first''>
+    input_data_format: Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**images** (`ImageInput`) — Image to preprocess. Expects a single or batch
+    of images with pixel values ranging from 0 to 255\. If passing in images with
+    pixel values between 0 and 1, set `do_rescale=False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**segmentation_maps** (`ImageInput`, *optional*) — Segmentation map to preprocess.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `self.do_resize`) — Whether
+    to resize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]`, *optional*, defaults to `self.size`) — Size of
+    the image after `resize` is applied.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`int`, *optional*, defaults to `self.resample`) — Resampling
+    filter to use if resizing the image. This can be one of the enum `PILImageResampling`,
+    Only has an effect if `do_resize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
+    to rescale the image values between [0 - 1].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`float`, *optional*, defaults to `self.rescale_factor`)
+    — Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
+    to normalize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
+    — Image mean.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
+    — Image standard deviation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_reduce_labels** (`bool`, *optional*, defaults to `self.do_reduce_labels`)
+    — Whether or not to reduce all label values of segmentation maps by 1\. Usually
+    used for datasets where 0 is used for background, and background itself is not
+    included in all classes of a dataset (e.g. ADE20k). The background label will
+    be replaced by 255.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or `TensorType`, *optional*) — The type of tensors
+    to return. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Return a list of `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**data_format** (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
+    — The channel dimension format for the output image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ChannelDimension.FIRST`: image in (num_channels, height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ChannelDimension.LAST`: image in (height, width, num_channels) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_data_format** (`ChannelDimension` or `str`, *optional*) — The channel
+    dimension format for the input image. If unset, the channel dimension format is
+    inferred from the input image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocess an image or batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_semantic_segmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/image_processing_segformer.py#L441)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( outputs target_sizes: List = None ) → semantic_segmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**outputs** ([SegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForSemanticSegmentation))
+    — Raw outputs of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**target_sizes** (`List[Tuple]` of length `batch_size`, *optional*) — List
+    of tuples corresponding to the requested final size (height, width) of each prediction.
+    If unset, predictions will not be resized.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: semantic_segmentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[torch.Tensor]` of length `batch_size`, where each item is a semantic
+    segmentation map of shape (height, width) corresponding to the target_sizes entry
+    (if `target_sizes` is specified). Each entry of each `torch.Tensor` correspond
+    to a semantic class id.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converts the output of [SegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForSemanticSegmentation)
+    into semantic segmentation maps. Only supports PyTorch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PytorchHide Pytorch content
+  prefs: []
+  type: TYPE_NORMAL
+- en: SegformerModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SegformerModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_segformer.py#L506)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare SegFormer encoder (Mix-Transformer) outputting raw hidden-states without
+    any specific head on top. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_segformer.py#L529)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: FloatTensor output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → [transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Padding will be ignored by default should you
+    provide it. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [SegformerImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [SegformerModel](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: SegformerDecodeHead
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SegformerDecodeHead'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_segformer.py#L681)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_segformer.py#L706)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( encoder_hidden_states: FloatTensor )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: SegformerForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SegformerForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_segformer.py#L568)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: SegFormer Model transformer with an image classification head on top (a linear
+    layer on top of the final hidden states) e.g. for ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_segformer.py#L588)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None labels: Optional = None output_attentions:
+    Optional = None output_hidden_states: Optional = None return_dict: Optional =
+    None ) → `transformers.models.segformer.modeling_segformer.SegFormerImageClassifierOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Padding will be ignored by default should you
+    provide it. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [SegformerImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.segformer.modeling_segformer.SegFormerImageClassifierOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.segformer.modeling_segformer.SegFormerImageClassifierOutput`
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each stage) of shape `(batch_size, num_channels, height,
+    width)`. Hidden-states (also called feature maps) of the model at the output of
+    each stage.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [SegformerForImageClassification](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForImageClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: SegformerForSemanticSegmentation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.SegformerForSemanticSegmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_segformer.py#L739)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: SegFormer Model transformer with an all-MLP decode head on top e.g. for ADE20k,
+    CityScapes. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_segformer.py#L752)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: FloatTensor labels: Optional = None output_attentions: Optional
+    = None output_hidden_states: Optional = None return_dict: Optional = None ) →
+    [transformers.modeling_outputs.SemanticSegmenterOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SemanticSegmenterOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values. Padding will be ignored by default should you
+    provide it. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [SegformerImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, height, width)`, *optional*)
+    — Ground truth semantic segmentation maps for computing the loss. Indices should
+    be in `[0, ..., config.num_labels - 1]`. If `config.num_labels > 1`, a classification
+    loss is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.SemanticSegmenterOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SemanticSegmenterOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.SemanticSegmenterOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SemanticSegmenterOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels, logits_height,
+    logits_width)`) — Classification scores for each pixel.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: <tip warning="{true}">The logits returned do not necessarily have the same size
+    as the `pixel_values` passed as inputs. This is to avoid doing two interpolations
+    and lose some quality when a user needs to resize the logits to the original image
+    size as post-processing. You should always check your logits shape and resize
+    as needed.</tip>
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, patch_size, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [SegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerForSemanticSegmentation)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: TensorFlowHide TensorFlow content
+  prefs: []
+  type: TYPE_NORMAL
+- en: TFSegformerDecodeHead
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFSegformerDecodeHead'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_tf_segformer.py#L842)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: SegformerConfig **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_tf_segformer.py#L864)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( encoder_hidden_states: tf.Tensor training: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: TFSegformerModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFSegformerModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_tf_segformer.py#L693)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: SegformerConfig *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare SegFormer encoder (Mix-Transformer) outputting raw hidden-states without
+    any specific head on top. This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_tf_segformer.py#L705)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: tf.Tensor output_attentions: Optional[bool] = None output_hidden_states:
+    Optional[bool] = None return_dict: Optional[bool] = None training: bool = False
+    ) → [transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str,
+    tf.Tensor]` or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    num_channels, height, width)`) — Pixel values. Pixel values can be obtained using
+    [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [SegformerImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple. This argument can be used in eager mode, in graph mode
+    the value will always be set to True.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**training** (`bool`, *optional*, defaults to `False“) — Whether or not to
+    use the model in training mode (some modules like dropout modules have different
+    behaviors between training and evaluation).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`tf.Tensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFSegformerModel](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.TFSegformerModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFSegformerForImageClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFSegformerForImageClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_tf_segformer.py#L740)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: SegformerConfig *inputs **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: SegFormer Model transformer with an image classification head on top (a linear
+    layer on top of the final hidden states) e.g. for ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_tf_segformer.py#L758)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: tf.Tensor | None = None labels: tf.Tensor | None = None output_attentions:
+    Optional[bool] = None output_hidden_states: Optional[bool] = None return_dict:
+    Optional[bool] = None ) → [transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str,
+    tf.Tensor]` or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    num_channels, height, width)`) — Pixel values. Pixel values can be obtained using
+    [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [SegformerImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple. This argument can be used in eager mode, in graph mode
+    the value will always be set to True.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**training** (`bool`, *optional*, defaults to `False“) — Whether or not to
+    use the model in training mode (some modules like dropout modules have different
+    behaviors between training and evaluation).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(batch_size, )`, *optional*, returned when
+    `labels` is provided) — Classification (or regression if config.num_labels==1)
+    loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`tf.Tensor` of shape `(batch_size, config.num_labels)`) — Classification
+    (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFSegformerForImageClassification](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.TFSegformerForImageClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: TFSegformerForSemanticSegmentation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.TFSegformerForSemanticSegmentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_tf_segformer.py#L917)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: SegformerConfig **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: SegFormer Model transformer with an all-MLP decode head on top e.g. for ADE20k,
+    CityScapes. This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### call'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/segformer/modeling_tf_segformer.py#L947)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: tf.Tensor labels: tf.Tensor | None = None output_attentions:
+    Optional[bool] = None output_hidden_states: Optional[bool] = None return_dict:
+    Optional[bool] = None ) → `transformers.modeling_tf_outputs.TFSemanticSegmenterOutput`
+    or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str,
+    tf.Tensor]` or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    num_channels, height, width)`) — Pixel values. Pixel values can be obtained using
+    [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [SegformerImageProcessor.**call**()](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerFeatureExtractor.__call__)
+    for details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple. This argument can be used in eager mode, in graph mode
+    the value will always be set to True.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**training** (`bool`, *optional*, defaults to `False“) — Whether or not to
+    use the model in training mode (some modules like dropout modules have different
+    behaviors between training and evaluation).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`tf.Tensor` of shape `(batch_size, height, width)`, *optional*)
+    — Ground truth semantic segmentation maps for computing the loss. Indices should
+    be in `[0, ..., config.num_labels - 1]`. If `config.num_labels > 1`, a (per-pixel)
+    classification loss is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.modeling_tf_outputs.TFSemanticSegmenterOutput` or `tuple(tf.Tensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.modeling_tf_outputs.TFSemanticSegmenterOutput` or a tuple of
+    `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([SegformerConfig](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.SegformerConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`tf.Tensor` of shape `(1,)`, *optional*, returned when `labels` is
+    provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`tf.Tensor` of shape `(batch_size, config.num_labels, logits_height,
+    logits_width)`) — Classification scores for each pixel.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: <tip warning="{true}">The logits returned do not necessarily have the same size
+    as the `pixel_values` passed as inputs. This is to avoid doing two interpolations
+    and lose some quality when a user needs to resize the logits to the original image
+    size as post-processing. You should always check your logits shape and resize
+    as needed.</tip>
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings, if the model has an embedding layer, + one for
+    the output of each layer) of shape `(batch_size, patch_size, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [TFSegformerForSemanticSegmentation](/docs/transformers/v4.37.2/en/model_doc/segformer#transformers.TFSegformerForSemanticSegmentation)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE

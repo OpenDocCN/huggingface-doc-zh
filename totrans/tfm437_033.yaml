@@ -1,0 +1,415 @@
+- en: Object detection
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/object_detection](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/object_detection)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/352.8fbb044c.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Object detection is the computer vision task of detecting instances (such as
+    humans, buildings, or cars) in an image. Object detection models receive an image
+    as input and output coordinates of the bounding boxes and associated labels of
+    the detected objects. An image can contain multiple objects, each with its own
+    bounding box and a label (e.g. it can have a car and a building), and each object
+    can be present in different parts of an image (e.g. the image can have several
+    cars). This task is commonly used in autonomous driving for detecting things like
+    pedestrians, road signs, and traffic lights. Other applications include counting
+    objects in images, image search, and more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this guide, you will learn how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finetune [DETR](https://huggingface.co/docs/transformers/model_doc/detr), a
+    model that combines a convolutional backbone with an encoder-decoder Transformer,
+    on the [CPPE-5](https://huggingface.co/datasets/cppe-5) dataset.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use your finetuned model for inference.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The task illustrated in this tutorial is supported by the following model architectures:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Conditional DETR](../model_doc/conditional_detr), [Deformable DETR](../model_doc/deformable_detr),
+    [DETA](../model_doc/deta), [DETR](../model_doc/detr), [Table Transformer](../model_doc/table-transformer),
+    [YOLOS](../model_doc/yolos)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll use 🤗 Datasets to load a dataset from the Hugging Face Hub, 🤗 Transformers
+    to train your model, and `albumentations` to augment the data. `timm` is currently
+    required to load a convolutional backbone for the DETR model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We encourage you to share your model with the community. Log in to your Hugging
+    Face account to upload it to the Hub. When prompted, enter your token to log in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load the CPPE-5 dataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [CPPE-5 dataset](https://huggingface.co/datasets/cppe-5) contains images
+    with annotations identifying medical personal protective equipment (PPE) in the
+    context of the COVID-19 pandemic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start by loading the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll see that this dataset already comes with a training set containing 1000
+    images and a test set with 29 images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get familiar with the data, explore what the examples look like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The examples in the dataset have the following fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`image_id`: the example image id'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`image`: a `PIL.Image.Image` object containing the image'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`width`: width of the image'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`height`: height of the image'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`objects`: a dictionary containing bounding box metadata for the objects in
+    the image:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`id`: the annotation id'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`area`: the area of the bounding box'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`bbox`: the object’s bounding box (in the [COCO format](https://albumentations.ai/docs/getting_started/bounding_boxes_augmentation/#coco)
+    )'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`category`: the object’s category, with possible values including `Coverall
+    (0)`, `Face_Shield (1)`, `Gloves (2)`, `Goggles (3)` and `Mask (4)`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You may notice that the `bbox` field follows the COCO format, which is the format
+    that the DETR model expects. However, the grouping of the fields inside `objects`
+    differs from the annotation format DETR requires. You will need to apply some
+    preprocessing transformations before using this data for training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get an even better understanding of the data, visualize an example in the
+    dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![CPPE-5 Image Example](../Images/dc3ce9ec7d52953b62801d6b8b583148.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: To visualize the bounding boxes with associated labels, you can get the labels
+    from the dataset’s metadata, specifically the `category` field. You’ll also want
+    to create dictionaries that map a label id to a label class (`id2label`) and the
+    other way around (`label2id`). You can use them later when setting up the model.
+    Including these maps will make your model reusable by others if you share it on
+    the Hugging Face Hub. Please note that, the part of above code that draws the
+    bounding boxes assume that it is in `XYWH` (x,y co-ordinates and width and height
+    of the box) format. It might not work for other formats like `(x1, y1, x2, y2)`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a final step of getting familiar with the data, explore it for potential
+    issues. One common problem with datasets for object detection is bounding boxes
+    that “stretch” beyond the edge of the image. Such “runaway” bounding boxes can
+    raise errors during training and should be addressed at this stage. There are
+    a few examples with this issue in this dataset. To keep things simple in this
+    guide, we remove these images from the data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Preprocess the data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To finetune a model, you must preprocess the data you plan to use to match
+    precisely the approach used for the pre-trained model. [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)
+    takes care of processing image data to create `pixel_values`, `pixel_mask`, and
+    `labels` that a DETR model can train with. The image processor has some attributes
+    that you won’t have to worry about:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`image_mean = [0.485, 0.456, 0.406 ]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`image_std = [0.229, 0.224, 0.225]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These are the mean and standard deviation used to normalize images during the
+    model pre-training. These values are crucial to replicate when doing inference
+    or finetuning a pre-trained image model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instantiate the image processor from the same checkpoint as the model you want
+    to finetune.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Before passing the images to the `image_processor`, apply two preprocessing
+    transformations to the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Augmenting images
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Reformatting annotations to meet DETR expectations
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'First, to make sure the model does not overfit on the training data, you can
+    apply image augmentation with any data augmentation library. Here we use [Albumentations](https://albumentations.ai/docs/)
+    … This library ensures that transformations affect the image and update the bounding
+    boxes accordingly. The 🤗 Datasets library documentation has a detailed [guide
+    on how to augment images for object detection](https://huggingface.co/docs/datasets/object_detection),
+    and it uses the exact same dataset as an example. Apply the same approach here,
+    resize each image to (480, 480), flip it horizontally, and brighten it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `image_processor` expects the annotations to be in the following format:
+    `{''image_id'': int, ''annotations'': List[Dict]}`, where each dictionary is a
+    COCO object annotation. Let’s add a function to reformat annotations for a single
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you can combine the image and annotation transformations to use on a batch
+    of examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Apply this preprocessing function to the entire dataset using 🤗 Datasets [with_transform](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.with_transform)
+    method. This method applies transformations on the fly when you load an element
+    of the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At this point, you can check what an example from the dataset looks like after
+    the transformations. You should see a tensor with `pixel_values`, a tensor with
+    `pixel_mask`, and `labels`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: You have successfully augmented the individual images and prepared their annotations.
+    However, preprocessing isn’t complete yet. In the final step, create a custom
+    `collate_fn` to batch images together. Pad images (which are now `pixel_values`)
+    to the largest image in a batch, and create a corresponding `pixel_mask` to indicate
+    which pixels are real (1) and which are padding (0).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Training the DETR model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You have done most of the heavy lifting in the previous sections, so now you
+    are ready to train your model! The images in this dataset are still quite large,
+    even after resizing. This means that finetuning this model will require at least
+    one GPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Training involves the following steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load the model with [AutoModelForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForObjectDetection)
+    using the same checkpoint as in the preprocessing.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Define your training hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Pass the training arguments to [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    along with the model, dataset, image processor, and data collator.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    to finetune your model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When loading the model from the same checkpoint that you used for the preprocessing,
+    remember to pass the `label2id` and `id2label` maps that you created earlier from
+    the dataset’s metadata. Additionally, we specify `ignore_mismatched_sizes=True`
+    to replace the existing classification head with a new one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
+    use `output_dir` to specify where to save your model, then configure hyperparameters
+    as you see fit. It is important you do not remove unused columns because this
+    will drop the image column. Without the image column, you can’t create `pixel_values`.
+    For this reason, set `remove_unused_columns` to `False`. If you wish to share
+    your model by pushing to the Hub, set `push_to_hub` to `True` (you must be signed
+    in to Hugging Face to upload your model).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, bring everything together, and call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you have set `push_to_hub` to `True` in the `training_args`, the training
+    checkpoints are pushed to the Hugging Face Hub. Upon training completion, push
+    the final model to the Hub as well by calling the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Evaluate
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Object detection models are commonly evaluated with a set of [COCO-style metrics](https://cocodataset.org/#detection-eval).
+    You can use one of the existing metrics implementations, but here you’ll use the
+    one from `torchvision` to evaluate the final model that you pushed to the Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To use the `torchvision` evaluator, you’ll need to prepare a ground truth COCO
+    dataset. The API to build a COCO dataset requires the data to be stored in a certain
+    format, so you’ll need to save images and annotations to disk first. Just like
+    when you prepared your data for training, the annotations from the `cppe5["test"]`
+    need to be formatted. However, images should stay as they are.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The evaluation step requires a bit of work, but it can be split in three major
+    steps. First, prepare the `cppe5["test"]` set: format the annotations and save
+    the data to disk.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, prepare an instance of a `CocoDetection` class that can be used with `cocoevaluator`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, load the metrics and run the evaluation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: These results can be further improved by adjusting the hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
+    Give it a go!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Now that you have finetuned a DETR model, evaluated it, and uploaded it to
+    the Hugging Face Hub, you can use it for inference. The simplest way to try out
+    your finetuned model for inference is to use it in a [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline).
+    Instantiate a pipeline for object detection with your model, and pass an image
+    to it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also manually replicate the results of the pipeline if you’d like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s plot the result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Object detection result on a new image](../Images/b288908d50f68ec172bde6778dc19ead.png)'
+  prefs: []
+  type: TYPE_IMG

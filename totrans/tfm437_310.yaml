@@ -1,0 +1,1469 @@
+- en: MusicGen
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/musicgen](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/musicgen)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/198.b0c1f68a.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The MusicGen model was proposed in the paper [Simple and Controllable Music
+    Generation](https://arxiv.org/abs/2306.05284) by Jade Copet, Felix Kreuk, Itai
+    Gat, Tal Remez, David Kant, Gabriel Synnaeve, Yossi Adi and Alexandre Défossez.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MusicGen is a single stage auto-regressive Transformer model capable of generating
+    high-quality music samples conditioned on text descriptions or audio prompts.
+    The text descriptions are passed through a frozen text encoder model to obtain
+    a sequence of hidden-state representations. MusicGen is then trained to predict
+    discrete audio tokens, or *audio codes*, conditioned on these hidden-states. These
+    audio tokens are then decoded using an audio compression model, such as EnCodec,
+    to recover the audio waveform.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Through an efficient token interleaving pattern, MusicGen does not require a
+    self-supervised semantic representation of the text/audio prompts, thus eliminating
+    the need to cascade multiple models to predict a set of codebooks (e.g. hierarchically
+    or upsampling). Instead, it is able to generate all the codebooks in a single
+    forward pass.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We tackle the task of conditional music generation. We introduce MusicGen,
+    a single Language Model (LM) that operates over several streams of compressed
+    discrete music representation, i.e., tokens. Unlike prior work, MusicGen is comprised
+    of a single-stage transformer LM together with efficient token interleaving patterns,
+    which eliminates the need for cascading several models, e.g., hierarchically or
+    upsampling. Following this approach, we demonstrate how MusicGen can generate
+    high-quality samples, while being conditioned on textual description or melodic
+    features, allowing better controls over the generated output. We conduct extensive
+    empirical evaluation, considering both automatic and human studies, showing the
+    proposed approach is superior to the evaluated baselines on a standard text-to-music
+    benchmark. Through ablation studies, we shed light over the importance of each
+    of the components comprising MusicGen.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [sanchit-gandhi](https://huggingface.co/sanchit-gandhi).
+    The original code can be found [here](https://github.com/facebookresearch/audiocraft).
+    The pre-trained checkpoints can be found on the [Hugging Face Hub](https://huggingface.co/models?sort=downloads&search=facebook%2Fmusicgen-).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage tips
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'After downloading the original checkpoints from [here](https://github.com/facebookresearch/audiocraft/blob/main/docs/MUSICGEN.md#importing--exporting-models)
+    , you can convert them using the **conversion script** available at `src/transformers/models/musicgen/convert_musicgen_transformers.py`
+    with the following command:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'MusicGen is compatible with two generation modes: greedy and sampling. In practice,
+    sampling leads to significantly better results than greedy, thus we encourage
+    sampling mode to be used where possible. Sampling is enabled by default, and can
+    be explicitly specified by setting `do_sample=True` in the call to `MusicgenForConditionalGeneration.generate()`,
+    or by overriding the model’s generation config (see below).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generation is limited by the sinusoidal positional embeddings to 30 second inputs.
+    Meaning, MusicGen cannot generate more than 30 seconds of audio (1503 tokens),
+    and input audio passed by Audio-Prompted Generation contributes to this limit
+    so, given an input of 20 seconds of audio, MusicGen cannot generate more than
+    10 seconds of additional audio.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Transformers supports both mono (1-channel) and stereo (2-channel) variants
+    of MusicGen. The mono channel versions generate a single set of codebooks. The
+    stereo versions generate 2 sets of codebooks, 1 for each channel (left/right),
+    and each set of codebooks is decoded independently through the audio compression
+    model. The audio streams for each channel are combined to give the final stereo
+    output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unconditional Generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The inputs for unconditional (or ‘null’) generation can be obtained through
+    the method `MusicgenForConditionalGeneration.get_unconditional_inputs()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The audio outputs are a three-dimensional Torch tensor of shape `(batch_size,
+    num_channels, sequence_length)`. To listen to the generated audio samples, you
+    can either play them in an ipynb notebook:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or save them as a `.wav` file using a third-party library, e.g. `scipy`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-Conditional Generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The model can generate an audio sample conditioned on a text prompt through
+    use of the [MusicgenProcessor](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenProcessor)
+    to pre-process the inputs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `guidance_scale` is used in classifier free guidance (CFG), setting the
+    weighting between the conditional logits (which are predicted from the text prompts)
+    and the unconditional logits (which are predicted from an unconditional or ‘null’
+    prompt). Higher guidance scale encourages the model to generate samples that are
+    more closely linked to the input prompt, usually at the expense of poorer audio
+    quality. CFG is enabled by setting `guidance_scale > 1`. For best results, use
+    `guidance_scale=3` (default).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Audio-Prompted Generation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The same [MusicgenProcessor](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenProcessor)
+    can be used to pre-process an audio prompt that is used for audio continuation.
+    In the following example, we load an audio file using the 🤗 Datasets library,
+    which can be pip installed through the command below:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For batched audio-prompted generation, the generated `audio_values` can be
+    post-processed to remove padding by using the [MusicgenProcessor](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenProcessor)
+    class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generation Configuration
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The default parameters that control the generation process, such as sampling,
+    guidance scale and number of generated tokens, can be found in the model’s generation
+    config, and updated as desired:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that any arguments passed to the generate method will **supersede** those
+    in the generation config, so setting `do_sample=False` in the call to generate
+    will supersede the setting of `model.generation_config.do_sample` in the generation
+    config.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Model Structure
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The MusicGen model can be de-composed into three distinct stages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Text encoder: maps the text inputs to a sequence of hidden-state representations.
+    The pre-trained MusicGen models use a frozen text encoder from either T5 or Flan-T5'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'MusicGen decoder: a language model (LM) that auto-regressively generates audio
+    tokens (or codes) conditional on the encoder hidden-state representations'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Audio encoder/decoder: used to encode an audio prompt to use as prompt tokens,
+    and recover the audio waveform from the audio tokens predicted by the decoder'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Thus, the MusicGen model can either be used as a standalone decoder model,
+    corresponding to the class [MusicgenForCausalLM](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenForCausalLM),
+    or as a composite model that includes the text encoder and audio encoder/decoder,
+    corresponding to the class [MusicgenForConditionalGeneration](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenForConditionalGeneration).
+    If only the decoder needs to be loaded from the pre-trained checkpoint, it can
+    be loaded by first specifying the correct config, or be accessed through the `.decoder`
+    attribute of the composite model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since the text encoder and audio encoder/decoder models are frozen during training,
+    the MusicGen decoder [MusicgenForCausalLM](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenForCausalLM)
+    can be trained standalone on a dataset of encoder hidden-states and audio codes.
+    For inference, the trained decoder can be combined with the frozen text encoder
+    and audio encoder/decoders to recover the composite [MusicgenForConditionalGeneration](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenForConditionalGeneration)
+    model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Tips:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: MusicGen is trained on the 32kHz checkpoint of Encodec. You should ensure you
+    use a compatible version of the Encodec model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Sampling mode tends to deliver better results than greedy - you can toggle sampling
+    with the variable `do_sample` in the call to `MusicgenForConditionalGeneration.generate()`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: MusicgenDecoderConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.MusicgenDecoderConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/configuration_musicgen.py#L30)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_size = 2048 max_position_embeddings = 2048 num_hidden_layers = 24 ffn_dim
+    = 4096 num_attention_heads = 16 layerdrop = 0.0 use_cache = True activation_function
+    = 'gelu' hidden_size = 1024 dropout = 0.1 attention_dropout = 0.0 activation_dropout
+    = 0.0 initializer_factor = 0.02 scale_embedding = False num_codebooks = 4 audio_channels
+    = 1 pad_token_id = 2048 bos_token_id = 2048 eos_token_id = None tie_word_embeddings
+    = False **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_size** (`int`, *optional*, defaults to 2048) — Vocabulary size of the
+    MusicgenDecoder model. Defines the number of different tokens that can be represented
+    by the `inputs_ids` passed when calling `MusicgenDecoder`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 1024) — Dimensionality of the
+    layers and the pooler layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_hidden_layers** (`int`, *optional*, defaults to 24) — Number of decoder
+    layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`int`, *optional*, defaults to 16) — Number of attention
+    heads for each attention layer in the Transformer block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**ffn_dim** (`int`, *optional*, defaults to 4096) — Dimensionality of the “intermediate”
+    (often named feed-forward) layer in the Transformer block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**activation_function** (`str` or `function`, *optional*, defaults to `"gelu"`)
+    — The non-linear activation function (function or string) in the decoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"silu"` and `"gelu_new"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**dropout** (`float`, *optional*, defaults to 0.1) — The dropout probability
+    for all fully connected layers in the embeddings, text_encoder, and pooler.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_dropout** (`float`, *optional*, defaults to 0.0) — The dropout
+    ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**activation_dropout** (`float`, *optional*, defaults to 0.0) — The dropout
+    ratio for activations inside the fully connected layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_position_embeddings** (`int`, *optional*, defaults to 2048) — The maximum
+    sequence length that this model might ever be used with. Typically, set this to
+    something large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_factor** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layerdrop** (`float`, *optional*, defaults to 0.0) — The LayerDrop probability
+    for the decoder. See the [LayerDrop paper](see [https://arxiv.org/abs/1909.11556](https://arxiv.org/abs/1909.11556))
+    for more details.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**scale_embedding** (`bool`, *optional*, defaults to `False`) — Scale embeddings
+    by diving by sqrt(hidden_size).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*, defaults to `True`) — Whether the model
+    should return the last key/values attentions (not used by all models)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_codebooks** (`int`, *optional*, defaults to 4) — The number of parallel
+    codebooks forwarded to the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tie_word_embeddings(`bool`,** *optional*, defaults to `False`) — Whether
+    input and output word embeddings should be tied.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**audio_channels** (`int`, *optional*, defaults to 1 — Number of channels in
+    the audio data. Either 1 for mono or 2 for stereo. Stereo models generate a separate
+    audio stream for the left/right output channels. Mono models generate a single
+    audio stream output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of an `MusicgenDecoder`.
+    It is used to instantiate a MusicGen decoder according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the MusicGen [facebook/musicgen-small](https://huggingface.co/facebook/musicgen-small)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MusicgenConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.MusicgenConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/configuration_musicgen.py#L139)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**kwargs** (*optional*) — Dictionary of keyword arguments. Notably:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_encoder** ([PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig),
+    *optional*) — An instance of a configuration object that defines the text encoder
+    config.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**audio_encoder** ([PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig),
+    *optional*) — An instance of a configuration object that defines the audio encoder
+    config.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder** ([PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig),
+    *optional*) — An instance of a configuration object that defines the decoder config.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [MusicgenModel](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenModel).
+    It is used to instantiate a MusicGen model according to the specified arguments,
+    defining the text encoder, audio encoder and MusicGen decoder configs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### from_sub_models_config'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/configuration_musicgen.py#L217)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( text_encoder_config: PretrainedConfig audio_encoder_config: PretrainedConfig
+    decoder_config: MusicgenDecoderConfig **kwargs ) → [MusicgenConfig](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenConfig)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[MusicgenConfig](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenConfig)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An instance of a configuration object
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instantiate a [MusicgenConfig](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenConfig)
+    (or a derived class) from text encoder, audio encoder and decoder configurations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MusicgenProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.MusicgenProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/processing_musicgen.py#L26)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( feature_extractor tokenizer )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**feature_extractor** (`EncodecFeatureExtractor`) — An instance of [EncodecFeatureExtractor](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecFeatureExtractor).
+    The feature extractor is a required input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer** (`T5Tokenizer`) — An instance of [T5Tokenizer](/docs/transformers/v4.37.2/en/model_doc/mt5#transformers.T5Tokenizer).
+    The tokenizer is a required input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a MusicGen processor which wraps an EnCodec feature extractor and
+    a T5 tokenizer into a single processor class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[MusicgenProcessor](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenProcessor)
+    offers all the functionalities of [EncodecFeatureExtractor](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecFeatureExtractor)
+    and `TTokenizer`. See `__call__()` and [decode()](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenProcessor.decode)
+    for more information.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### batch_decode'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/processing_musicgen.py#L90)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method is used to decode either batches of audio outputs from the MusicGen
+    model, or batches of token ids from the tokenizer. In the case of decoding token
+    ids, this method forwards all its arguments to T5Tokenizer’s [batch_decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.batch_decode).
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### decode'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/processing_musicgen.py#L108)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method forwards all its arguments to T5Tokenizer’s [decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.decode).
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MusicgenModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.MusicgenModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/modeling_musicgen.py#L835)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: MusicgenDecoderConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([MusicgenConfig](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The bare Musicgen decoder model outputting raw hidden-states without any specific
+    head on top.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Musicgen model was proposed in [Simple and Controllable Music Generation](https://arxiv.org/abs/2306.05284)
+    by Jade Copet, Felix Kreuk, Itai Gat, Tal Remez, David Kant, Gabriel Synnaeve,
+    Yossi Adi, Alexandre Défossez. It is an encoder decoder transformer trained on
+    the task of conditional music generation
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/modeling_musicgen.py#L855)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: LongTensor = None attention_mask: Optional = None encoder_hidden_states:
+    Optional = None encoder_attention_mask: Optional = None head_mask: Optional =
+    None cross_attn_head_mask: Optional = None past_key_values: Optional = None inputs_embeds:
+    Optional = None use_cache: Optional = None output_attentions: Optional = None
+    output_hidden_states: Optional = None return_dict: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size * num_codebooks, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary, corresponding to the sequence
+    of audio codes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained by encoding an audio prompt with an audio encoder model
+    to predict audio codes, such as with the [EncodecModel](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel).
+    See [EncodecModel.encode()](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel.encode)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The `input_ids` will automatically be converted from shape `(batch_size * num_codebooks,
+    target_sequence_length)` to `(batch_size, num_codebooks, target_sequence_length)`
+    in the forward pass. If you obtain audio codes from an audio encoding model, such
+    as [EncodecModel](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel),
+    ensure that the number of frames is equal to 1, and that you reshape the audio
+    codes from `(frames, batch_size, num_codebooks, target_sequence_length)` to `(batch_size
+    * num_codebooks, target_sequence_length)` prior to passing them as `input_ids`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states** (`torch.FloatTensor` of shape `(batch_size, encoder_sequence_length,
+    hidden_size)`, *optional*) — Sequence of hidden-states at the output of the last
+    layer of the encoder. Used in the cross-attention of the decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_attention_mask** (`torch.LongTensor` of shape `(batch_size, encoder_sequence_length)`,
+    *optional*) — Mask to avoid performing cross-attention on padding tokens indices
+    of encoder input_ids. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(decoder_layers, decoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the attention modules. Mask values
+    selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attn_head_mask** (`torch.Tensor` of shape `(decoder_layers, decoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the cross-attention modules in
+    the decoder to avoid performing cross-attention on hidden heads. Mask values selected
+    in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache=True` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`) and 2 additional tensors of
+    shape `(batch_size, num_heads, encoder_sequence_length, embed_size_per_head)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks
+    and in the cross-attention blocks) that can be used (see `past_key_values` input)
+    to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids`
+    (those that don’t have their past key value states given to this model) of shape
+    `(batch_size, 1)` instead of all `decoder_input_ids` of shape `(batch_size, sequence_length)`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert `input_ids` indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [MusicgenModel](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MusicgenForCausalLM
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.MusicgenForCausalLM'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/modeling_musicgen.py#L906)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: MusicgenDecoderConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([MusicgenConfig](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The MusicGen decoder model with a language modelling head on top.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Musicgen model was proposed in [Simple and Controllable Music Generation](https://arxiv.org/abs/2306.05284)
+    by Jade Copet, Felix Kreuk, Itai Gat, Tal Remez, David Kant, Gabriel Synnaeve,
+    Yossi Adi, Alexandre Défossez. It is an encoder decoder transformer trained on
+    the task of conditional music generation
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/modeling_musicgen.py#L942)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: LongTensor = None attention_mask: Optional = None encoder_hidden_states:
+    Optional = None encoder_attention_mask: Optional = None head_mask: Optional =
+    None cross_attn_head_mask: Optional = None past_key_values: Optional = None inputs_embeds:
+    Optional = None labels: Optional = None use_cache: Optional = None output_attentions:
+    Optional = None output_hidden_states: Optional = None return_dict: Optional =
+    None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size * num_codebooks, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary, corresponding to the sequence
+    of audio codes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained by encoding an audio prompt with an audio encoder model
+    to predict audio codes, such as with the [EncodecModel](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel).
+    See [EncodecModel.encode()](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel.encode)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The `input_ids` will automatically be converted from shape `(batch_size * num_codebooks,
+    target_sequence_length)` to `(batch_size, num_codebooks, target_sequence_length)`
+    in the forward pass. If you obtain audio codes from an audio encoding model, such
+    as [EncodecModel](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel),
+    ensure that the number of frames is equal to 1, and that you reshape the audio
+    codes from `(frames, batch_size, num_codebooks, target_sequence_length)` to `(batch_size
+    * num_codebooks, target_sequence_length)` prior to passing them as `input_ids`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states** (`torch.FloatTensor` of shape `(batch_size, encoder_sequence_length,
+    hidden_size)`, *optional*) — Sequence of hidden-states at the output of the last
+    layer of the encoder. Used in the cross-attention of the decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_attention_mask** (`torch.LongTensor` of shape `(batch_size, encoder_sequence_length)`,
+    *optional*) — Mask to avoid performing cross-attention on padding tokens indices
+    of encoder input_ids. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(decoder_layers, decoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the attention modules. Mask values
+    selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attn_head_mask** (`torch.Tensor` of shape `(decoder_layers, decoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the cross-attention modules in
+    the decoder to avoid performing cross-attention on hidden heads. Mask values selected
+    in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache=True` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`) and 2 additional tensors of
+    shape `(batch_size, num_heads, encoder_sequence_length, embed_size_per_head)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks
+    and in the cross-attention blocks) that can be used (see `past_key_values` input)
+    to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids`
+    (those that don’t have their past key value states given to this model) of shape
+    `(batch_size, 1)` instead of all `decoder_input_ids` of shape `(batch_size, sequence_length)`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert `input_ids` indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*)
+    — Labels for language modeling. Note that the labels **are shifted** inside the
+    model, i.e. you can set `labels = input_ids` Indices are selected in `[-100, 0,
+    ..., config.vocab_size]` All labels set to `-100` are ignored (masked), the loss
+    is only computed for labels in `[0, ..., config.vocab_size]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Returns: [transformers.modeling_outputs.Seq2SeqLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.Seq2SeqLMOutput)
+    or `tuple(torch.FloatTensor)`: A [transformers.modeling_outputs.Seq2SeqLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.Seq2SeqLMOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([MusicgenConfig](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenConfig))
+    and inputs.'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Language modeling loss.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache=True` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`) and 2 additional tensors of
+    shape `(batch_size, num_heads, encoder_sequence_length, embed_size_per_head)`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks
+    and in the cross-attention blocks) that can be used (see `past_key_values` input)
+    to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**decoder_hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned
+    when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
+    — Tuple of `torch.FloatTensor` (one for the output of the embeddings, if the model
+    has an embedding layer, + one for the output of each layer) of shape `(batch_size,
+    sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the decoder at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**decoder_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights of the decoder, after the attention softmax, used to compute
+    the weighted average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights of the decoder’s cross-attention layer, after the attention
+    softmax, used to compute the weighted average in the cross-attention heads.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**encoder_last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Sequence of hidden-states at the output of the last
+    layer of the encoder of the model.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned
+    when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
+    — Tuple of `torch.FloatTensor` (one for the output of the embeddings, if the model
+    has an embedding layer, + one for the output of each layer) of shape `(batch_size,
+    sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the encoder at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**encoder_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights of the encoder, after the attention softmax, used to compute
+    the weighted average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [MusicgenForCausalLM](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenForCausalLM)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: MusicgenForConditionalGeneration
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.MusicgenForConditionalGeneration'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/modeling_musicgen.py#L1404)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: Optional = None text_encoder: Optional = None audio_encoder: Optional
+    = None decoder: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([MusicgenConfig](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The composite MusicGen model with a text encoder, audio encoder and Musicgen
+    decoder, for music generation tasks with one or both of text and audio prompts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Musicgen model was proposed in [Simple and Controllable Music Generation](https://arxiv.org/abs/2306.05284)
+    by Jade Copet, Felix Kreuk, Itai Gat, Tal Remez, David Kant, Gabriel Synnaeve,
+    Yossi Adi, Alexandre Défossez. It is an encoder decoder transformer trained on
+    the task of conditional music generation
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/musicgen/modeling_musicgen.py#L1760)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None input_values:
+    Optional = None padding_mask: Optional = None decoder_input_ids: Optional = None
+    decoder_attention_mask: Optional = None encoder_outputs: Optional = None past_key_values:
+    Tuple = None inputs_embeds: Optional = None decoder_inputs_embeds: Optional =
+    None labels: Optional = None use_cache: Optional = None output_attentions: Optional
+    = None output_hidden_states: Optional = None return_dict: Optional = None **kwargs
+    ) → [transformers.modeling_outputs.Seq2SeqLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.Seq2SeqLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary. Padding will be ignored
+    by default should you provide it.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**decoder_input_ids** (`torch.LongTensor` of shape `(batch_size * num_codebooks,
+    target_sequence_length)`, *optional*) — Indices of decoder input sequence tokens
+    in the vocabulary, corresponding to the sequence of audio codes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Indices can be obtained by encoding an audio prompt with an audio encoder model
+    to predict audio codes, such as with the [EncodecModel](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel).
+    See [EncodecModel.encode()](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel.encode)
+    for details.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[What are decoder input IDs?](../glossary#decoder-input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The `decoder_input_ids` will automatically be converted from shape `(batch_size
+    * num_codebooks, target_sequence_length)` to `(batch_size, num_codebooks, target_sequence_length)`
+    in the forward pass. If you obtain audio codes from an audio encoding model, such
+    as [EncodecModel](/docs/transformers/v4.37.2/en/model_doc/encodec#transformers.EncodecModel),
+    ensure that the number of frames is equal to 1, and that you reshape the audio
+    codes from `(frames, batch_size, num_codebooks, target_sequence_length)` to `(batch_size
+    * num_codebooks, target_sequence_length)` prior to passing them as `decoder_input_ids`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**decoder_attention_mask** (`torch.LongTensor` of shape `(batch_size, target_sequence_length)`,
+    *optional*) — Default behavior: generate a tensor that ignores pad tokens in `decoder_input_ids`.
+    Causal mask will also be used by default.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.Tensor` of shape `(encoder_layers, encoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the attention modules in the encoder.
+    Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder_head_mask** (`torch.Tensor` of shape `(decoder_layers, decoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the attention modules in the decoder.
+    Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attn_head_mask** (`torch.Tensor` of shape `(decoder_layers, decoder_attention_heads)`,
+    *optional*) — Mask to nullify selected heads of the cross-attention modules in
+    the decoder. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_outputs** (`tuple(tuple(torch.FloatTensor)`, *optional*) — Tuple
+    consists of (`last_hidden_state`, *optional*: `hidden_states`, *optional*: `attentions`)
+    `last_hidden_state` of shape `(batch_size, sequence_length, hidden_size)`, *optional*)
+    is a sequence of hidden-states at the output of the last layer of the encoder.
+    Used in the cross-attention of the decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache=True` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`) and 2 additional tensors of
+    shape `(batch_size, num_heads, encoder_sequence_length, embed_size_per_head)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks
+    and in the cross-attention blocks) that can be used (see `past_key_values` input)
+    to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If `past_key_values` are used, the user can optionally input only the last `decoder_input_ids`
+    (those that don’t have their past key value states given to this model) of shape
+    `(batch_size, 1)` instead of all `decoder_input_ids` of shape `(batch_size, sequence_length)`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
+    choose to directly pass an embedded representation. This is useful if you want
+    more control over how to convert `input_ids` indices into associated vectors than
+    the model’s internal embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder_inputs_embeds** (`torch.FloatTensor` of shape `(batch_size, target_sequence_length,
+    hidden_size)`, *optional*) — Optionally, instead of passing `decoder_input_ids`
+    you can choose to directly pass an embedded representation. If `past_key_values`
+    is used, optionally only the last `decoder_inputs_embeds` have to be input (see
+    `past_key_values`). This is useful if you want more control over how to convert
+    `decoder_input_ids` indices into associated vectors than the model’s internal
+    embedding lookup matrix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `decoder_input_ids` and `decoder_inputs_embeds` are both unset, `decoder_inputs_embeds`
+    takes the value of `inputs_embeds`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**use_cache** (`bool`, *optional*) — If set to `True`, `past_key_values` key
+    value states are returned and can be used to speed up decoding (see `past_key_values`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.Seq2SeqLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.Seq2SeqLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.Seq2SeqLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.Seq2SeqLMOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([MusicgenConfig](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Language modeling loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**past_key_values** (`tuple(tuple(torch.FloatTensor))`, *optional*, returned
+    when `use_cache=True` is passed or when `config.use_cache=True`) — Tuple of `tuple(torch.FloatTensor)`
+    of length `config.n_layers`, with each tuple having 2 tensors of shape `(batch_size,
+    num_heads, sequence_length, embed_size_per_head)`) and 2 additional tensors of
+    shape `(batch_size, num_heads, encoder_sequence_length, embed_size_per_head)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contains pre-computed hidden-states (key and values in the self-attention blocks
+    and in the cross-attention blocks) that can be used (see `past_key_values` input)
+    to speed up sequential decoding.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**decoder_hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned
+    when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
+    — Tuple of `torch.FloatTensor` (one for the output of the embeddings, if the model
+    has an embedding layer, + one for the output of each layer) of shape `(batch_size,
+    sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the decoder at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**decoder_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights of the decoder, after the attention softmax, used to compute
+    the weighted average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights of the decoder’s cross-attention layer, after the attention
+    softmax, used to compute the weighted average in the cross-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**encoder_last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — Sequence of hidden-states at the output of the last
+    layer of the encoder of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**encoder_hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned
+    when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
+    — Tuple of `torch.FloatTensor` (one for the output of the embeddings, if the model
+    has an embedding layer, + one for the output of each layer) of shape `(batch_size,
+    sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the encoder at the output of each layer plus the initial embedding
+    outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**encoder_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights of the encoder, after the attention softmax, used to compute
+    the weighted average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [MusicgenForConditionalGeneration](/docs/transformers/v4.37.2/en/model_doc/musicgen#transformers.MusicgenForConditionalGeneration)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE

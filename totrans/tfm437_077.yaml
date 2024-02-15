@@ -1,0 +1,128 @@
+- en: Hyperparameter Search using Trainer API
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/hpo_train](https://huggingface.co/docs/transformers/v4.37.2/en/hpo_train)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/22.38a3f629.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🤗 Transformers provides a [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class optimized for training 🤗 Transformers models, making it easier to start
+    training without manually writing your own training loop. The [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    provides API for hyperparameter search. This doc shows how to enable it in example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hyperparameter Search backend
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    supports four hyperparameter search backends currently: [optuna](https://optuna.org/),
+    [sigopt](https://sigopt.com/), [raytune](https://docs.ray.io/en/latest/tune/index.html)
+    and [wandb](https://wandb.ai/site/sweeps).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: you should install them before using them as the hyperparameter search backend
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: How to enable Hyperparameter search in example
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Define the hyperparameter search space, different backends need different format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For sigopt, see sigopt [object_parameter](https://docs.sigopt.com/ai-module-api-references/api_reference/objects/object_parameter),
+    it’s like following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For optuna, see optuna [object_parameter](https://optuna.readthedocs.io/en/stable/tutorial/10_key_features/002_configurations.html#sphx-glr-tutorial-10-key-features-002-configurations-py),
+    it’s like following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Optuna provides multi-objective HPO. You can pass `direction` in `hyperparameter_search`
+    and define your own compute_objective to return multiple objective values. The
+    Pareto Front (`List[BestRun]`) will be returned in hyperparameter_search, you
+    should refer to the test case `TrainerHyperParameterMultiObjectOptunaIntegrationTest`
+    in [test_trainer](https://github.com/huggingface/transformers/blob/main/tests/trainer/test_trainer.py).
+    It’s like following
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For raytune, see raytune [object_parameter](https://docs.ray.io/en/latest/tune/api/search_space.html),
+    it’s like following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For wandb, see wandb [object_parameter](https://docs.wandb.ai/guides/sweeps/configuration),
+    it’s like following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Define a `model_init` function and pass it to the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
+    as an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Create a [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    with your `model_init` function, training arguments, training and test datasets,
+    and evaluation function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Call hyperparameter search, get the best trial parameters, backend could be
+    `"optuna"`/`"sigopt"`/`"wandb"`/`"ray"`. direction can be`"minimize"` or `"maximize"`,
+    which indicates whether to optimize greater or lower objective.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You could define your own compute_objective function, if not defined, the default
+    compute_objective will be called, and the sum of eval metric like f1 is returned
+    as objective value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Hyperparameter search For DDP finetune
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Currently, Hyperparameter search for DDP is enabled for optuna and sigopt. Only
+    the rank-zero process will generate the search trial and pass the argument to
+    other ranks.
+  prefs: []
+  type: TYPE_NORMAL

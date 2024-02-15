@@ -1,0 +1,3269 @@
+- en: Perceiver
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/perceiver](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/perceiver)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/216.00d2a3fe.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The Perceiver IO model was proposed in [Perceiver IO: A General Architecture
+    for Structured Inputs & Outputs](https://arxiv.org/abs/2107.14795) by Andrew Jaegle,
+    Sebastian Borgeaud, Jean-Baptiste Alayrac, Carl Doersch, Catalin Ionescu, David
+    Ding, Skanda Koppula, Daniel Zoran, Andrew Brock, Evan Shelhamer, Olivier Hénaff,
+    Matthew M. Botvinick, Andrew Zisserman, Oriol Vinyals, João Carreira.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Perceiver IO is a generalization of [Perceiver](https://arxiv.org/abs/2103.03206)
+    to handle arbitrary outputs in addition to arbitrary inputs. The original Perceiver
+    only produced a single classification label. In addition to classification labels,
+    Perceiver IO can produce (for example) language, optical flow, and multimodal
+    videos with audio. This is done using the same building blocks as the original
+    Perceiver. The computational complexity of Perceiver IO is linear in the input
+    and output size and the bulk of the processing occurs in the latent space, allowing
+    us to process inputs and outputs that are much larger than can be handled by standard
+    Transformers. This means, for example, Perceiver IO can do BERT-style masked language
+    modeling directly using bytes instead of tokenized inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The recently-proposed Perceiver model obtains good results on several domains
+    (images, audio, multimodal, point clouds) while scaling linearly in compute and
+    memory with the input size. While the Perceiver supports many kinds of inputs,
+    it can only produce very simple outputs such as class scores. Perceiver IO overcomes
+    this limitation without sacrificing the original’s appealing properties by learning
+    to flexibly query the model’s latent space to produce outputs of arbitrary size
+    and semantics. Perceiver IO still decouples model depth from data size and still
+    scales linearly with data size, but now with respect to both input and output
+    sizes. The full Perceiver IO model achieves strong results on tasks with highly
+    structured output spaces, such as natural language and visual understanding, StarCraft
+    II, and multi-task and multi-modal domains. As highlights, Perceiver IO matches
+    a Transformer-based BERT baseline on the GLUE language benchmark without the need
+    for input tokenization and achieves state-of-the-art performance on Sintel optical
+    flow estimation.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s a TLDR explaining how Perceiver works:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The main problem with the self-attention mechanism of the Transformer is that
+    the time and memory requirements scale quadratically with the sequence length.
+    Hence, models like BERT and RoBERTa are limited to a max sequence length of 512
+    tokens. Perceiver aims to solve this issue by, instead of performing self-attention
+    on the inputs, perform it on a set of latent variables, and only use the inputs
+    for cross-attention. In this way, the time and memory requirements don’t depend
+    on the length of the inputs anymore, as one uses a fixed amount of latent variables,
+    like 256 or 512\. These are randomly initialized, after which they are trained
+    end-to-end using backpropagation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Internally, [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
+    will create the latents, which is a tensor of shape `(batch_size, num_latents,
+    d_latents)`. One must provide `inputs` (which could be text, images, audio, you
+    name it!) to the model, which it will use to perform cross-attention with the
+    latents. The output of the Perceiver encoder is a tensor of the same shape. One
+    can then, similar to BERT, convert the last hidden states of the latents to classification
+    logits by averaging along the sequence dimension, and placing a linear layer on
+    top of that to project the `d_latents` to `num_labels`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This was the idea of the original Perceiver paper. However, it could only output
+    classification logits. In a follow-up work, PerceiverIO, they generalized it to
+    let the model also produce outputs of arbitrary size. How, you might ask? The
+    idea is actually relatively simple: one defines outputs of an arbitrary size,
+    and then applies cross-attention with the last hidden states of the latents, using
+    the outputs as queries, and the latents as keys and values.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So let’s say one wants to perform masked language modeling (BERT-style) with
+    the Perceiver. As the Perceiver’s input length will not have an impact on the
+    computation time of the self-attention layers, one can provide raw bytes, providing
+    `inputs` of length 2048 to the model. If one now masks out certain of these 2048
+    tokens, one can define the `outputs` as being of shape: `(batch_size, 2048, 768)`.
+    Next, one performs cross-attention with the final hidden states of the latents
+    to update the `outputs` tensor. After cross-attention, one still has a tensor
+    of shape `(batch_size, 2048, 768)`. One can then place a regular language modeling
+    head on top, to project the last dimension to the vocabulary size of the model,
+    i.e. creating logits of shape `(batch_size, 2048, 262)` (as Perceiver uses a vocabulary
+    size of 262 byte IDs).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![drawing](../Images/acb47bab9c3f6167f99d55d174c267c0.png) Perceiver IO architecture.
+    Taken from the [original paper](https://arxiv.org/abs/2105.15203)'
+  prefs: []
+  type: TYPE_IMG
+- en: This model was contributed by [nielsr](https://huggingface.co/nielsr). The original
+    code can be found [here](https://github.com/deepmind/deepmind-research/tree/master/perceiver).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Perceiver does **not** work with `torch.nn.DataParallel` due to a bug in PyTorch,
+    see [issue #36035](https://github.com/pytorch/pytorch/issues/36035)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The quickest way to get started with the Perceiver is by checking the [tutorial
+    notebooks](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/Perceiver).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Refer to the [blog post](https://huggingface.co/blog/perceiver) if you want
+    to fully understand how the model works and is implemented in the library. Note
+    that the models available in the library only showcase some examples of what you
+    can do with the Perceiver. There are many more use cases, including question answering,
+    named-entity recognition, object detection, audio classification, video classification,
+    etc.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Text classification task guide](../tasks/sequence_classification)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Masked language modeling task guide](../tasks/masked_language_modeling)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Image classification task guide](../tasks/image_classification)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Perceiver specific outputs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L60)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( logits: FloatTensor = None last_hidden_state: FloatTensor = None hidden_states:
+    Optional = None attentions: Optional = None cross_attentions: Optional = None
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, num_labels)`) — Classification
+    (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Base class for Perceiver base model’s outputs, with potential hidden states,
+    attentions and cross-attentions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverDecoderOutput'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L91)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( logits: FloatTensor = None cross_attentions: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, num_labels)`) — Output
+    of the basic decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Base class for Perceiver decoder outputs, with potential cross-attentions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L109)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( loss: Optional = None logits: FloatTensor = None hidden_states: Optional
+    = None attentions: Optional = None cross_attentions: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Masked language modeling (MLM) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, num_latents, num_latents)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Base class for Perceiver’s masked language model outputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L140)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( loss: Optional = None logits: FloatTensor = None hidden_states: Optional
+    = None attentions: Optional = None cross_attentions: Optional = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Base class for Perceiver’s outputs of sequence/image classification models,
+    optical flow and multimodal autoencoding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/configuration_perceiver.py#L36)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( num_latents = 256 d_latents = 1280 d_model = 768 num_blocks = 1 num_self_attends_per_block
+    = 26 num_self_attention_heads = 8 num_cross_attention_heads = 8 qk_channels =
+    None v_channels = None cross_attention_shape_for_attention = 'kv' self_attention_widening_factor
+    = 1 cross_attention_widening_factor = 1 hidden_act = 'gelu' attention_probs_dropout_prob
+    = 0.1 initializer_range = 0.02 layer_norm_eps = 1e-12 use_query_residual = True
+    vocab_size = 262 max_position_embeddings = 2048 image_size = 56 train_size = [368,
+    496] num_frames = 16 audio_samples_per_frame = 1920 samples_per_patch = 16 output_shape
+    = [1, 16, 224, 224] output_num_channels = 512 _label_trainable_num_channels =
+    1024 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**num_latents** (`int`, *optional*, defaults to 256) — The number of latents.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**d_latents** (`int`, *optional*, defaults to 1280) — Dimension of the latent
+    embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**d_model** (`int`, *optional*, defaults to 768) — Dimension of the inputs.
+    Should only be provided in case [*PerceiverTextPreprocessor*] is used or no preprocessor
+    is provided.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_blocks** (`int`, *optional*, defaults to 1) — Number of blocks in the
+    Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_self_attends_per_block** (`int`, *optional*, defaults to 26) — The number
+    of self-attention layers per block.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_self_attention_heads** (`int`, *optional*, defaults to 8) — Number of
+    attention heads for each self-attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_cross_attention_heads** (`int`, *optional*, defaults to 8) — Number of
+    attention heads for each cross-attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**qk_channels** (`int`, *optional*) — Dimension to project the queries + keys
+    before applying attention in the cross-attention and self-attention layers of
+    the encoder. Will default to preserving the dimension of the queries if not specified.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**v_channels** (`int`, *optional*) — Dimension to project the values before
+    applying attention in the cross-attention and self-attention layers of the encoder.
+    Will default to preserving the dimension of the queries if not specified.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_shape_for_attention** (`str`, *optional*, defaults to `"kv"`)
+    — Dimension to use when downsampling the queries and keys in the cross-attention
+    layer of the encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**self_attention_widening_factor** (`int`, *optional*, defaults to 1) — Dimension
+    of the feed-forward layer in the cross-attention layer of the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attention_widening_factor** (`int`, *optional*, defaults to 1) — Dimension
+    of the feed-forward layer in the self-attention layers of the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `function`, *optional*, defaults to `"gelu"`) — The
+    non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_probs_dropout_prob** (`float`, *optional*, defaults to 0.1) — The
+    dropout ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-12) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_query_residual** (`float`, *optional*, defaults to `True`) — Whether
+    to add a query residual in the cross-attention layer of the encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vocab_size** (`int`, *optional*, defaults to 262) — Vocabulary size for the
+    masked language modeling model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_position_embeddings** (`int`, *optional*, defaults to 2048) — The maximum
+    sequence length that the masked language modeling model might ever be used with.
+    Typically set this to something large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_size** (`int`, *optional*, defaults to 56) — Size of the images after
+    preprocessing, for [PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**train_size** (`List[int]`, *optional*, defaults to `[368, 496]`) — Training
+    size of the images for the optical flow model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_frames** (`int`, *optional*, defaults to 16) — Number of video frames
+    used for the multimodal autoencoding model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**audio_samples_per_frame** (`int`, *optional*, defaults to 1920) — Number
+    of audio samples per frame for the multimodal autoencoding model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**samples_per_patch** (`int`, *optional*, defaults to 16) — Number of audio
+    samples per patch when preprocessing the audio for the multimodal autoencoding
+    model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_shape** (`List[int]`, *optional*, defaults to `[1, 16, 224, 224]`)
+    — Shape of the output (batch_size, num_frames, height, width) for the video decoder
+    queries of the multimodal autoencoding model. This excludes the channel dimension.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_num_channels** (`int`, *optional*, defaults to 512) — Number of output
+    channels for each modalitiy decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel).
+    It is used to instantiate an Perceiver model according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the Perceiver [deepmind/language-perceiver](https://huggingface.co/deepmind/language-perceiver)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: PerceiverTokenizer
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverTokenizer'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/tokenization_perceiver.py#L27)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( pad_token = '[PAD]' bos_token = '[BOS]' eos_token = '[EOS]' mask_token = '[MASK]'
+    cls_token = '[CLS]' sep_token = '[SEP]' model_max_length = 2048 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pad_token** (`str`, *optional*, defaults to `"[PAD]"`) — The token used for
+    padding, for example when batching sequences of different lengths.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token** (`str`, *optional*, defaults to `"[BOS]"`) — The BOS token (reserved
+    in the vocab, but not actually used).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eos_token** (`str`, *optional*, defaults to `"[EOS]"`) — The end of sequence
+    token (reserved in the vocab, but not actually used).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When building a sequence using special tokens, this is not the token that is
+    used for the end of sequence. The token used is the `sep_token`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**mask_token** (`str`, *optional*, defaults to `"[MASK]"`) — The MASK token,
+    useful for masked language modeling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cls_token** (`str`, *optional*, defaults to `"[CLS]"`) — The CLS token (reserved
+    in the vocab, but not actually used).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**sep_token** (`str`, *optional*, defaults to `"[SEP]"`) — The separator token,
+    which is used when building a sequence from two sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Construct a Perceiver tokenizer. The Perceiver simply uses raw bytes utf-8 encoding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This tokenizer inherits from [PreTrainedTokenizer](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizer)
+    which contains most of the main methods. Users should refer to this superclass
+    for more information regarding those methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/tokenization_utils_base.py#L2729)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( text: Union = None text_pair: Union = None text_target: Union = None text_pair_target:
+    Union = None add_special_tokens: bool = True padding: Union = False truncation:
+    Union = None max_length: Optional = None stride: int = 0 is_split_into_words:
+    bool = False pad_to_multiple_of: Optional = None return_tensors: Union = None
+    return_token_type_ids: Optional = None return_attention_mask: Optional = None
+    return_overflowing_tokens: bool = False return_special_tokens_mask: bool = False
+    return_offsets_mapping: bool = False return_length: bool = False verbose: bool
+    = True **kwargs ) → [BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**text** (`str`, `List[str]`, `List[List[str]]`, *optional*) — The sequence
+    or batch of sequences to be encoded. Each sequence can be a string or a list of
+    strings (pretokenized string). If the sequences are provided as list of strings
+    (pretokenized), you must set `is_split_into_words=True` (to lift the ambiguity
+    with a batch of sequences).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_pair** (`str`, `List[str]`, `List[List[str]]`, *optional*) — The sequence
+    or batch of sequences to be encoded. Each sequence can be a string or a list of
+    strings (pretokenized string). If the sequences are provided as list of strings
+    (pretokenized), you must set `is_split_into_words=True` (to lift the ambiguity
+    with a batch of sequences).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_target** (`str`, `List[str]`, `List[List[str]]`, *optional*) — The sequence
+    or batch of sequences to be encoded as target texts. Each sequence can be a string
+    or a list of strings (pretokenized string). If the sequences are provided as list
+    of strings (pretokenized), you must set `is_split_into_words=True` (to lift the
+    ambiguity with a batch of sequences).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_pair_target** (`str`, `List[str]`, `List[List[str]]`, *optional*) —
+    The sequence or batch of sequences to be encoded as target texts. Each sequence
+    can be a string or a list of strings (pretokenized string). If the sequences are
+    provided as list of strings (pretokenized), you must set `is_split_into_words=True`
+    (to lift the ambiguity with a batch of sequences).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**add_special_tokens** (`bool`, *optional*, defaults to `True`) — Whether or
+    not to add special tokens when encoding the sequences. This will use the underlying
+    `PretrainedTokenizerBase.build_inputs_with_special_tokens` function, which defines
+    which tokens are automatically added to the input ids. This is usefull if you
+    want to add `bos` or `eos` tokens automatically.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**padding** (`bool`, `str` or [PaddingStrategy](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.utils.PaddingStrategy),
+    *optional*, defaults to `False`) — Activates and controls padding. Accepts the
+    following values:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`True` or `''longest''`: Pad to the longest sequence in the batch (or no padding
+    if only a single sequence if provided).'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''max_length''`: Pad to a maximum length specified with the argument `max_length`
+    or to the maximum acceptable input length for the model if that argument is not
+    provided.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`False` or `''do_not_pad''` (default): No padding (i.e., can output a batch
+    with sequences of different lengths).'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**truncation** (`bool`, `str` or [TruncationStrategy](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.tokenization_utils_base.TruncationStrategy),
+    *optional*, defaults to `False`) — Activates and controls truncation. Accepts
+    the following values:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`True` or `''longest_first''`: Truncate to a maximum length specified with
+    the argument `max_length` or to the maximum acceptable input length for the model
+    if that argument is not provided. This will truncate token by token, removing
+    a token from the longest sequence in the pair if a pair of sequences (or a batch
+    of pairs) is provided.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''only_first''`: Truncate to a maximum length specified with the argument
+    `max_length` or to the maximum acceptable input length for the model if that argument
+    is not provided. This will only truncate the first sequence of a pair if a pair
+    of sequences (or a batch of pairs) is provided.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''only_second''`: Truncate to a maximum length specified with the argument
+    `max_length` or to the maximum acceptable input length for the model if that argument
+    is not provided. This will only truncate the second sequence of a pair if a pair
+    of sequences (or a batch of pairs) is provided.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`False` or `''do_not_truncate''` (default): No truncation (i.e., can output
+    batch with sequence lengths greater than the model maximum admissible input size).'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_length** (`int`, *optional*) — Controls the maximum length to use by
+    one of the truncation/padding parameters.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If left unset or set to `None`, this will use the predefined model maximum length
+    if a maximum length is required by one of the truncation/padding parameters. If
+    the model has no specific maximum input length (like XLNet) truncation/padding
+    to a maximum length will be deactivated.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**stride** (`int`, *optional*, defaults to 0) — If set to a number along with
+    `max_length`, the overflowing tokens returned when `return_overflowing_tokens=True`
+    will contain some tokens from the end of the truncated sequence returned to provide
+    some overlap between truncated and overflowing sequences. The value of this argument
+    defines the number of overlapping tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**is_split_into_words** (`bool`, *optional*, defaults to `False`) — Whether
+    or not the input is already pre-tokenized (e.g., split into words). If set to
+    `True`, the tokenizer assumes the input is already split into words (for instance,
+    by splitting it on whitespace) which it will tokenize. This is useful for NER
+    or token classification.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_to_multiple_of** (`int`, *optional*) — If set will pad the sequence to
+    a multiple of the provided value. Requires `padding` to be activated. This is
+    especially useful to enable the use of Tensor Cores on NVIDIA hardware with compute
+    capability `>= 7.5` (Volta).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or [TensorType](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.TensorType),
+    *optional*) — If set, will return tensors instead of list of python integers.
+    Acceptable values are:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''tf''`: Return TensorFlow `tf.constant` objects.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''pt''`: Return PyTorch `torch.Tensor` objects.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`''np''`: Return Numpy `np.ndarray` objects.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_token_type_ids** (`bool`, *optional*) — Whether to return token type
+    IDs. If left to the default, will return the token type IDs according to the specific
+    tokenizer’s default, defined by the `return_outputs` attribute.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**return_attention_mask** (`bool`, *optional*) — Whether to return the attention
+    mask. If left to the default, will return the attention mask according to the
+    specific tokenizer’s default, defined by the `return_outputs` attribute.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**return_overflowing_tokens** (`bool`, *optional*, defaults to `False`) — Whether
+    or not to return overflowing token sequences. If a pair of sequences of input
+    ids (or a batch of pairs) is provided with `truncation_strategy = longest_first`
+    or `True`, an error is raised instead of returning overflowing tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_special_tokens_mask** (`bool`, *optional*, defaults to `False`) —
+    Whether or not to return special tokens mask information.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_offsets_mapping** (`bool`, *optional*, defaults to `False`) — Whether
+    or not to return `(char_start, char_end)` for each token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is only available on fast tokenizers inheriting from [PreTrainedTokenizerFast](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizerFast),
+    if using Python’s tokenizer, this method will raise `NotImplementedError`.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**return_length** (`bool`, *optional*, defaults to `False`) — Whether or not
+    to return the lengths of the encoded inputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**verbose** (`bool`, *optional*, defaults to `True`) — Whether or not to print
+    more information and warnings. **kwargs — passed to the `self.tokenize()` method'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A [BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)
+    with the following fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** — List of token ids to be fed to a model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**token_type_ids** — List of token type ids to be fed to a model (when `return_token_type_ids=True`
+    or if *“token_type_ids”* is in `self.model_input_names`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are token type IDs?](../glossary#token-type-ids)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attention_mask** — List of indices specifying which tokens should be attended
+    to by the model (when `return_attention_mask=True` or if *“attention_mask”* is
+    in `self.model_input_names`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**overflowing_tokens** — List of overflowing tokens sequences (when a `max_length`
+    is specified and `return_overflowing_tokens=True`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_truncated_tokens** — Number of tokens truncated (when a `max_length`
+    is specified and `return_overflowing_tokens=True`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**special_tokens_mask** — List of 0s and 1s, with 1 specifying added special
+    tokens and 0 specifying regular sequence tokens (when `add_special_tokens=True`
+    and `return_special_tokens_mask=True`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**length** — The length of the inputs (when `return_length=True`)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Main method to tokenize and prepare for the model one or several sequence(s)
+    or one or several pair(s) of sequences.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverFeatureExtractor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverFeatureExtractor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/feature_extraction_perceiver.py#L26)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### __call__'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( images **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preprocess an image or a batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverImageProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverImageProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/image_processing_perceiver.py#L46)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_center_crop: bool = True crop_size: Dict = None do_resize: bool = True
+    size: Dict = None resample: Resampling = <Resampling.BICUBIC: 3> do_rescale: bool
+    = True rescale_factor: Union = 0.00392156862745098 do_normalize: bool = True image_mean:
+    Union = None image_std: Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_center_crop** (`bool`, `optional`, defaults to `True`) — Whether or not
+    to center crop the image. If the input size if smaller than `crop_size` along
+    any edge, the image will be padded with zeros and then center cropped. Can be
+    overridden by the `do_center_crop` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crop_size** (`Dict[str, int]`, *optional*, defaults to `{"height" -- 256,
+    "width": 256}`): Desired output size when applying center-cropping. Can be overridden
+    by the `crop_size` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Whether to resize
+    the image to `(size["height"], size["width"])`. Can be overridden by the `do_resize`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]` *optional*, defaults to `{"height" -- 224, "width":
+    224}`): Size of the image after resizing. Can be overridden by the `size` parameter
+    in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`PILImageResampling`, *optional*, defaults to `PILImageResampling.BICUBIC`)
+    — Defines the resampling filter to use if resizing the image. Can be overridden
+    by the `resample` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `True`) — Whether to rescale
+    the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`int` or `float`, *optional*, defaults to `1/255`) — Defines
+    the scale factor to use if rescaling the image. Can be overridden by the `rescale_factor`
+    parameter in the `preprocess` method. do_normalize — Whether to normalize the
+    image. Can be overridden by the `do_normalize` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_MEAN`)
+    — Mean to use if normalizing the image. This is a float or list of floats the
+    length of the number of channels in the image. Can be overridden by the `image_mean`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_STD`)
+    — Standard deviation to use if normalizing the image. This is a float or list
+    of floats the length of the number of channels in the image. Can be overridden
+    by the `image_std` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs a Perceiver image processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/image_processing_perceiver.py#L209)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union do_center_crop: Optional = None crop_size: Optional = None
+    do_resize: Optional = None size: Optional = None resample: Resampling = None do_rescale:
+    Optional = None rescale_factor: Optional = None do_normalize: Optional = None
+    image_mean: Union = None image_std: Union = None return_tensors: Union = None
+    data_format: ChannelDimension = <ChannelDimension.FIRST: ''channels_first''> input_data_format:
+    Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**images** (`ImageInput`) — Image to preprocess. Expects a single or batch
+    of images with pixel values ranging from 0 to 255\. If passing in images with
+    pixel values between 0 and 1, set `do_rescale=False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_center_crop** (`bool`, *optional*, defaults to `self.do_center_crop`)
+    — Whether to center crop the image to `crop_size`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**crop_size** (`Dict[str, int]`, *optional*, defaults to `self.crop_size`)
+    — Desired output size after applying the center crop.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `self.do_resize`) — Whether
+    to resize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]`, *optional*, defaults to `self.size`) — Size of
+    the image after resizing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`int`, *optional*, defaults to `self.resample`) — Resampling
+    filter to use if resizing the image. This can be one of the enum `PILImageResampling`,
+    Only has an effect if `do_resize` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
+    to rescale the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`float`, *optional*, defaults to `self.rescale_factor`)
+    — Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
+    to normalize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
+    — Image mean.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
+    — Image standard deviation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or `TensorType`, *optional*) — The type of tensors
+    to return. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Return a list of `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**data_format** (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
+    — The channel dimension format for the output image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ChannelDimension.FIRST`: image in (num_channels, height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ChannelDimension.LAST`: image in (height, width, num_channels) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_data_format** (`ChannelDimension` or `str`, *optional*) — The channel
+    dimension format for the input image. If unset, the channel dimension format is
+    inferred from the input image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocess an image or batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverTextPreprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverTextPreprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2846)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Text preprocessing for Perceiver Encoder. Can be used to embed `inputs` and
+    add positional encodings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The dimensionality of the embeddings is determined by the `d_model` attribute
+    of the configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverImagePreprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverImagePreprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L3003)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config prep_type = ''conv'' spatial_downsample: int = 4 temporal_downsample:
+    int = 1 position_encoding_type: str = ''fourier'' in_channels: int = 3 out_channels:
+    int = 64 conv_after_patching: bool = False conv_after_patching_in_channels: int
+    = 54 conv2d_use_batchnorm: bool = True concat_or_add_pos: str = ''concat'' project_pos_dim:
+    int = -1 **position_encoding_kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([*PerceiverConfig*]) — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prep_type** (`str`, *optional*, defaults to `"conv"`) — Preprocessing type.
+    Can be “conv1x1”, “conv”, “patches”, “pixels”.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**spatial_downsample** (`int`, *optional*, defaults to 4) — Spatial downsampling
+    factor.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**temporal_downsample** (`int`, *optional*, defaults to 1) — Temporal downsampling
+    factor (only relevant in case a time dimension is present).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**position_encoding_type** (`str`, *optional*, defaults to `"fourier"`) — Position
+    encoding type. Can be “fourier” or “trainable”.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**in_channels** (`int`, *optional*, defaults to 3) — Number of channels in
+    the input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**out_channels** (`int`, *optional*, defaults to 64) — Number of channels in
+    the output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**conv_after_patching** (`bool`, *optional*, defaults to `False`) — Whether
+    to apply a convolutional layer after patching.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**conv_after_patching_in_channels** (`int`, *optional*, defaults to 54) — Number
+    of channels in the input of the convolutional layer after patching.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**conv2d_use_batchnorm** (`bool`, *optional*, defaults to `True`) — Whether
+    to use batch normalization in the convolutional layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**concat_or_add_pos** (`str`, *optional*, defaults to `"concat"`) — How to
+    concatenate the position encoding to the input. Can be “concat” or “add”.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**project_pos_dim** (`int`, *optional*, defaults to -1) — Dimension of the
+    position encoding to project to. If -1, no projection is applied.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '****position_encoding_kwargs** (`Dict`, *optional*) — Keyword arguments for
+    the position encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Image preprocessing for Perceiver Encoder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: the *out_channels* argument refers to the output channels of a convolutional
+    layer, if *prep_type* is set to “conv1x1” or “conv”. If one adds absolute position
+    embeddings, one must make sure the *num_channels* of the position encoding kwargs
+    are set equal to the *out_channels*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverOneHotPreprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverOneHotPreprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L3232)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One-hot preprocessor for Perceiver Encoder. Can be used to add a dummy index
+    dimension to the input.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverAudioPreprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverAudioPreprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L3258)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config prep_type: str = ''patches'' samples_per_patch: int = 96 position_encoding_type:
+    str = ''fourier'' concat_or_add_pos: str = ''concat'' out_channels = 64 project_pos_dim
+    = -1 **position_encoding_kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([*PerceiverConfig*]) — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**prep_type** (`str`, *optional*, defaults to `"patches"`) — Preprocessor type
+    to use. Only “patches” is supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**samples_per_patch** (`int`, *optional*, defaults to 96) — Number of samples
+    per patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**position_encoding_type** (`str`, *optional*, defaults to `"fourier"`) — Type
+    of position encoding to use. Can be “trainable” or “fourier”.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**concat_or_add_pos** (`str`, *optional*, defaults to `"concat"`) — How to
+    concatenate the position encoding to the input. Can be “concat” or “add”.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**out_channels** (`int`, *optional*, defaults to 64) — Number of channels in
+    the output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**project_pos_dim** (`int`, *optional*, defaults to -1) — Dimension of the
+    position encoding to project to. If -1, no projection is applied.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '****position_encoding_kwargs** (`Dict`, *optional*) — Keyword arguments for
+    the position encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Audio preprocessing for Perceiver Encoder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverMultimodalPreprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPreprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L3355)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( modalities: Mapping mask_probs: Optional = None min_padding_size: int = 2
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**modalities** (`Mapping[str, PreprocessorType]`) — Dict mapping modality name
+    to preprocessor.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**mask_probs** (`Dict[str, float]`) — Dict mapping modality name to masking
+    probability of that modality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**min_padding_size** (`int`, *optional*, defaults to 2) — The minimum padding
+    size for all modalities. The final output will have num_channels equal to the
+    maximum channels across all modalities plus min_padding_size.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multimodal preprocessing for Perceiver Encoder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inputs for each modality are preprocessed, then padded with trainable position
+    embeddings to have the same number of channels.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverProjectionDecoder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverProjectionDecoder'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2051)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Baseline projection decoder (no cross-attention).
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverBasicDecoder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverBasicDecoder'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2077)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig output_num_channels: int position_encoding_type:
+    Optional = ''trainable'' output_index_dims: Optional = None num_channels: Optional
+    = 128 subsampled_index_dims: Optional = None qk_channels: Optional = None v_channels:
+    Optional = None num_heads: Optional = 1 widening_factor: Optional = 1 use_query_residual:
+    Optional = False concat_preprocessed_input: Optional = False final_project: Optional
+    = True position_encoding_only: Optional = False **position_encoding_kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([*PerceiverConfig*]) — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_num_channels** (`int`, *optional*) — The number of channels in the
+    output. Will only be used in case *final_project* is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**position_encoding_type** (`str`, *optional*, defaults to “trainable”) — The
+    type of position encoding to use. Can be either “trainable”, “fourier”, or “none”.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_index_dims** (`int`, *optional*) — The number of dimensions of the
+    output queries. Ignored if ‘position_encoding_type’ == ‘none’.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_channels** (`int`, *optional*, defaults to 128) — The number of channels
+    of the decoder queries. Ignored if ‘position_encoding_type’ == ‘none’.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**qk_channels** (`int`, *optional*) — The number of channels of the queries
+    and keys in the cross-attention layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**v_channels** (`int`, *optional*) — The number of channels of the values in
+    the cross-attention layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_heads** (`int`, *optional*, defaults to 1) — The number of attention
+    heads in the cross-attention layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**widening_factor** (`int`, *optional*, defaults to 1) — The widening factor
+    of the cross-attention layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**use_query_residual** (`bool`, *optional*, defaults to `False`) — Whether
+    to use a residual connection between the query and the output of the cross-attention
+    layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**concat_preprocessed_input** (`bool`, *optional*, defaults to `False`) — Whether
+    to concatenate the preprocessed input to the query.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**final_project** (`bool`, *optional*, defaults to `True`) — Whether to project
+    the output of the cross-attention layer to a target dimension.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**position_encoding_only** (`bool`, *optional*, defaults to `False`) — Whether
+    to only use this class to define output queries.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Cross-attention-based decoder. This class can be used to decode the final hidden
+    states of the latents using a cross-attention operation, in which the latents
+    produce keys and values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The shape of the output of this class depends on how one defines the output
+    queries (also called decoder queries).
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverClassificationDecoder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2263)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config **decoder_kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Cross-attention based classification decoder. Light-weight wrapper of `PerceiverBasicDecoder`
+    for logit output. Will turn the output of the Perceiver encoder which is of shape
+    (batch_size, num_latents, d_latents) to a tensor of shape (batch_size, num_labels).
+    The queries are of shape (batch_size, 1, num_labels).
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverOpticalFlowDecoder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverOpticalFlowDecoder'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2309)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config output_image_shape output_num_channels = 2 rescale_factor = 100.0 **decoder_kwargs
+    )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cross-attention based optical flow decoder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverBasicVideoAutoencodingDecoder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverBasicVideoAutoencodingDecoder'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2344)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig output_shape: List position_encoding_type: str **decoder_kwargs
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([*PerceiverConfig*]) — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_shape** (`List[int]`) — Shape of the output as (batch_size, num_frames,
+    height, width), excluding the channel dimension.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**position_encoding_type** (`str`) — The type of position encoding to use.
+    Can be either “trainable”, “fourier”, or “none”.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Cross-attention based video-autoencoding decoder. Light-weight wrapper of [*PerceiverBasicDecoder*]
+    with video reshaping logic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverMultimodalDecoder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalDecoder'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2421)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig modalities: Dict num_outputs: int output_num_channels:
+    int min_padding_size: Optional = 2 subsampled_index_dims: Optional = None **decoder_kwargs
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([*PerceiverConfig*]) — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**modalities** (`Dict[str, PerceiverAbstractDecoder]`) — Dictionary mapping
+    modality name to the decoder of that modality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_outputs** (`int`) — The number of outputs of the decoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_num_channels** (`int`) — The number of channels in the output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**min_padding_size** (`int`, *optional*, defaults to 2) — The minimum padding
+    size for all modalities. The final output will have num_channels equal to the
+    maximum channels across all modalities plus min_padding_size.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**subsampled_index_dims** (`Dict[str, PerceiverAbstractDecoder]`, *optional*)
+    — Dictionary mapping modality name to the subsampled index dimensions to use for
+    the decoder query of that modality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multimodal decoding by composing uni-modal decoders. The *modalities* argument
+    of the constructor is a dictionary mapping modality name to the decoder of that
+    modality. That decoder will be used to construct queries for that modality. Modality-specific
+    queries are padded with trainable modality-specific parameters, after which they
+    are concatenated along the time dimension.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, there is a shared cross attention operation across all modalities.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverProjectionPostprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverProjectionPostprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2982)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( in_channels: int out_channels: int )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**in_channels** (`int`) — Number of channels in the input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**out_channels** (`int`) — Number of channels in the output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Projection postprocessing for Perceiver. Can be used to project the channels
+    of the decoder output to a lower dimension.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverAudioPostprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverAudioPostprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2955)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig in_channels: int postproc_type: str = ''patches''
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([*PerceiverConfig*]) — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**in_channels** (`int`) — Number of channels in the input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**postproc_type** (`str`, *optional*, defaults to `"patches"`) — Postprocessor
+    type to use. Currently, only “patches” is supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Audio postprocessing for Perceiver. Can be used to convert the decoder output
+    to audio features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverClassificationPostprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverClassificationPostprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2935)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig in_channels: int )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([*PerceiverConfig*]) — Model configuration.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**in_channels** (`int`) — Number of channels in the input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Classification postprocessing for Perceiver. Can be used to convert the decoder
+    output to classification logits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverMultimodalPostprocessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPostprocessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2901)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( modalities: Mapping input_is_dict: bool = False )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**modalities** (`Mapping[str, PostprocessorType]`) — Dictionary mapping modality
+    name to postprocessor class for that modality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_is_dict** (`bool`, *optional*, defaults to `False`) — If True, input
+    is assumed to be dictionary structured, and outputs keep the same dictionary shape.
+    If False, input is a tensor which is sliced up during postprocessing by *modality_sizes*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Multimodal postprocessing for Perceiver. Can be used to combine modality-specific
+    postprocessors into a single postprocessor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PerceiverModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L712)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config decoder = None input_preprocessor: Callable = None output_postprocessor:
+    Callable = None )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**decoder** (*DecoderType*, *optional*) — Optional decoder to use to decode
+    the latent representation of the encoder. Examples include *transformers.models.perceiver.modeling_perceiver.PerceiverBasicDecoder*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalDecoder*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_preprocessor** (*PreprocessorType*, *optional*) — Optional input preprocessor
+    to use. Examples include *transformers.models.perceiver.modeling_perceiver.PerceiverImagePreprocessor*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverAudioPreprocessor*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverTextPreprocessor*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPreprocessor*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_postprocessor** (*PostprocessorType*, *optional*) — Optional output
+    postprocessor to use. Examples include *transformers.models.perceiver.modeling_perceiver.PerceiverImagePostprocessor*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverAudioPostprocessor*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverClassificationPostprocessor*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverProjectionPostprocessor*,
+    *transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPostprocessor*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Note** that you can define your own decoders, preprocessors and/or postprocessors
+    to fit your use-case. —'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The Perceiver: a scalable, fully attentional architecture. This model is a
+    PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L752)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs: FloatTensor attention_mask: Optional = None subsampled_output_points:
+    Optional = None head_mask: Optional = None output_attentions: Optional = None
+    output_hidden_states: Optional = None return_dict: Optional = None ) → [transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs** (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
+    images, text, audio, video, etc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, num_labels)`) — Classification
+    (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: PerceiverForMaskedLM
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverForMaskedLM'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L953)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example use of Perceiver for masked language modeling. This model is a PyTorch
+    [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module) sub-class.
+    Use it as a regular PyTorch Module and refer to the PyTorch documentation for
+    all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L986)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs: Optional = None attention_mask: Optional = None head_mask: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    labels: Optional = None return_dict: Optional = None input_ids: Optional = None
+    ) → [transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs** (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
+    images, text, audio, video, etc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `batch_size, sequence_length`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*)
+    — Labels for computing the masked language modeling loss. Indices should be in
+    `[-100, 0, ..., config.vocab_size]` (see `input_ids` docstring) Tokens with indices
+    set to `-100` are ignored (masked), the loss is only computed for the tokens with
+    labels in `[0, ..., config.vocab_size]`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Masked language modeling (MLM) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
+    — Prediction scores of the language modeling head (scores for each vocabulary
+    token before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, num_latents, num_latents)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PerceiverForMaskedLM](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForMaskedLM)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: PerceiverForSequenceClassification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverForSequenceClassification'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1088)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example use of Perceiver for text classification. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1110)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs: Optional = None attention_mask: Optional = None head_mask: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    labels: Optional = None return_dict: Optional = None input_ids: Optional = None
+    ) → [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs** (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
+    images, text, audio, video, etc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `batch_size, sequence_length`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the classification/regression loss. Indices should be in `[0, ...,
+    config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is computed
+    (Mean-Square loss), If `config.num_labels > 1` a classification loss is computed
+    (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PerceiverForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForSequenceClassification)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: PerceiverForImageClassificationLearned
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverForImageClassificationLearned'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1200)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example use of Perceiver for image classification, for tasks such as ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model uses learned position embeddings. In other words, this model is not
+    given any privileged information about the structure of images. As shown in the
+    paper, this model can achieve a top-1 accuracy of 72.7 on ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)
+    uses [PerceiverImagePreprocessor](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverImagePreprocessor)
+    (with `prep_type="conv1x1"`) to preprocess the input images, and [PerceiverClassificationDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder)
+    to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
+    into classification logits.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1245)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs: Optional = None attention_mask: Optional = None head_mask: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    labels: Optional = None return_dict: Optional = None pixel_values: Optional =
+    None ) → [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs** (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
+    images, text, audio, video, etc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `batch_size, sequence_length`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: PerceiverForImageClassificationFourier
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverForImageClassificationFourier'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1343)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example use of Perceiver for image classification, for tasks such as ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model uses fixed 2D Fourier position embeddings. As shown in the paper,
+    this model can achieve a top-1 accuracy of 79.0 on ImageNet, and 84.5 when pre-trained
+    on a large-scale dataset (i.e. JFT).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)
+    uses [PerceiverImagePreprocessor](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverImagePreprocessor)
+    (with `prep_type="pixels"`) to preprocess the input images, and [PerceiverClassificationDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder)
+    to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
+    into classification logits.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1389)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs: Optional = None attention_mask: Optional = None head_mask: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    labels: Optional = None return_dict: Optional = None pixel_values: Optional =
+    None ) → [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs** (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
+    images, text, audio, video, etc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `batch_size, sequence_length`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PerceiverForImageClassificationFourier](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationFourier)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: PerceiverForImageClassificationConvProcessing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverForImageClassificationConvProcessing'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1486)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example use of Perceiver for image classification, for tasks such as ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model uses a 2D conv+maxpool preprocessing network. As shown in the paper,
+    this model can achieve a top-1 accuracy of 82.1 on ImageNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)
+    uses [PerceiverImagePreprocessor](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverImagePreprocessor)
+    (with `prep_type="conv"`) to preprocess the input images, and [PerceiverClassificationDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder)
+    to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
+    into classification logits.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1533)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs: Optional = None attention_mask: Optional = None head_mask: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    labels: Optional = None return_dict: Optional = None pixel_values: Optional =
+    None ) → [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs** (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
+    images, text, audio, video, etc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `batch_size, sequence_length`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PerceiverForImageClassificationConvProcessing](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationConvProcessing)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: PerceiverForOpticalFlow
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverForOpticalFlow'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1630)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( config )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example use of Perceiver for optical flow, for tasks such as Sintel and KITTI.
+    [PerceiverForOpticalFlow](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForOpticalFlow)
+    uses [PerceiverImagePreprocessor](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverImagePreprocessor)
+    (with *prep_type=“patches”*) to preprocess the input images, and [PerceiverOpticalFlowDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverOpticalFlowDecoder)
+    to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As input, one concatenates 2 subsequent frames along the channel dimension and
+    extract a 3 x 3 patch around each pixel (leading to 3 x 3 x 3 x 2 = 54 values
+    for each pixel). Fixed Fourier position encodings are used to encode the position
+    of each pixel in the patch. Next, one applies the Perceiver encoder. To decode,
+    one queries the latent representation using the same encoding used for the input.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1694)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs: Optional = None attention_mask: Optional = None head_mask: Optional
+    = None output_attentions: Optional = None output_hidden_states: Optional = None
+    labels: Optional = None return_dict: Optional = None ) → [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs** (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
+    images, text, audio, video, etc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `batch_size, sequence_length`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the optical flow loss. Indices should be in `[0, ..., config.num_labels
+    - 1]`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PerceiverForOpticalFlow](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForOpticalFlow)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: PerceiverForMultimodalAutoencoding
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.PerceiverForMultimodalAutoencoding'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1759)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: PerceiverConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example use of Perceiver for multimodal (video) autoencoding, for tasks such
+    as Kinetics-700.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PerceiverForMultimodalAutoencoding](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForMultimodalAutoencoding)
+    uses [PerceiverMultimodalPreprocessor](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPreprocessor)
+    to preprocess the 3 modalities: images, audio and class labels. This preprocessor
+    uses modality-specific preprocessors to preprocess every modality separately,
+    after which they are concatenated. Trainable position embeddings are used to pad
+    each modality to the same number of channels to make concatenation along the time
+    dimension possible. Next, one applies the Perceiver encoder.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PerceiverMultimodalDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalDecoder)
+    is used to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel).
+    This decoder uses each modality-specific decoder to construct queries. The decoder
+    queries are created based on the inputs after preprocessing. However, autoencoding
+    an entire video in a single forward pass is computationally infeasible, hence
+    one only uses parts of the decoder queries to do cross-attention with the latent
+    representation. This is determined by the subsampled indices for each modality,
+    which can be provided as additional input to the forward pass of [PerceiverForMultimodalAutoencoding](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForMultimodalAutoencoding).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PerceiverMultimodalDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalDecoder)
+    also pads the decoder queries of the different modalities to the same number of
+    channels, in order to concatenate them along the time dimension. Next, cross-attention
+    is performed with the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, `~models.perceiver.modeling_perceiver.PerceiverMultiModalPostprocessor`
+    is used to turn this tensor into an actual video. It first splits up the output
+    into the different modalities, and then applies the respective postprocessor for
+    each modality.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that, by masking the classification label during evaluation (i.e. simply
+    providing a tensor of zeros for the “label” modality), this auto-encoding model
+    becomes a Kinetics 700 video classifier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1905)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( inputs: Optional = None attention_mask: Optional = None subsampled_output_points:
+    Optional = None head_mask: Optional = None output_attentions: Optional = None
+    output_hidden_states: Optional = None labels: Optional = None return_dict: Optional
+    = None ) → [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**inputs** (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
+    images, text, audio, video, etc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.FloatTensor` of shape `batch_size, sequence_length`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[What are attention masks?](../glossary#attention-mask)'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**head_mask** (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 indicates the head is **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 indicates the head is **masked**.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**labels** (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`)
+    — Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
+    output of each layer plus the initial embedding outputs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
+    Attentions weights after the attention softmax, used to compute the weighted average
+    in the self-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**cross_attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when
+    `output_attentions=True` is passed or when `config.output_attentions=True`) —
+    Tuple of `torch.FloatTensor` (one for each layer) of shape `(batch_size, num_heads,
+    sequence_length, sequence_length)`. Attentions weights of the decoder’s cross-attention
+    layer, after the attention softmax, used to compute the weighted average in the
+    cross-attention heads.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [PerceiverForMultimodalAutoencoding](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForMultimodalAutoencoding)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE

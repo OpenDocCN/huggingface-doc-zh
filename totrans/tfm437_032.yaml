@@ -1,0 +1,368 @@
+- en: Video classification
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/video_classification](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/video_classification)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/361.eebf9470.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Video classification is the task of assigning a label or class to an entire
+    video. Videos are expected to have only one class for each video. Video classification
+    models take a video as input and return a prediction about which class the video
+    belongs to. These models can be used to categorize what a video is all about.
+    A real-world application of video classification is action / activity recognition,
+    which is useful for fitness applications. It is also helpful for vision-impaired
+    individuals, especially when they are commuting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This guide will show you how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fine-tune [VideoMAE](https://huggingface.co/docs/transformers/main/en/model_doc/videomae)
+    on a subset of the [UCF101](https://www.crcv.ucf.edu/data/UCF101.php) dataset.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use your fine-tuned model for inference.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The task illustrated in this tutorial is supported by the following model architectures:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[TimeSformer](../model_doc/timesformer), [VideoMAE](../model_doc/videomae),
+    [ViViT](../model_doc/vivit)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You will use [PyTorchVideo](https://pytorchvideo.org/) (dubbed `pytorchvideo`)
+    to process and prepare the videos.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We encourage you to log in to your Hugging Face account so you can upload and
+    share your model with the community. When prompted, enter your token to log in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load UCF101 dataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Start by loading a subset of the [UCF-101 dataset](https://www.crcv.ucf.edu/data/UCF101.php).
+    This will give you a chance to experiment and make sure everything works before
+    spending more time training on the full dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After the subset has been downloaded, you need to extract the compressed archive:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'At a high level, the dataset is organized like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The (`sorted`) video paths appear like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: You will notice that there are video clips belonging to the same group / scene
+    where group is denoted by `g` in the video file paths. `v_ApplyEyeMakeup_g07_c04.avi`
+    and `v_ApplyEyeMakeup_g07_c06.avi`, for example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For the validation and evaluation splits, you wouldn’t want to have video clips
+    from the same group / scene to prevent [data leakage](https://www.kaggle.com/code/alexisbcook/data-leakage).
+    The subset that you are using in this tutorial takes this information into account.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next up, you will derive the set of labels present in the dataset. Also, create
+    two dictionaries that’ll be helpful when initializing the model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`label2id`: maps the class names to integers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`id2label`: maps the integers to class names.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: There are 10 unique classes. For each class, there are 30 videos in the training
+    set.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load a model to fine-tune
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Instantiate a video classification model from a pretrained checkpoint and its
+    associated image processor. The model’s encoder comes with pre-trained parameters,
+    and the classification head is randomly initialized. The image processor will
+    come in handy when writing the preprocessing pipeline for our dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'While the model is loading, you might notice the following warning:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The warning is telling us we are throwing away some weights (e.g. the weights
+    and bias of the `classifier` layer) and randomly initializing some others (the
+    weights and bias of a new `classifier` layer). This is expected in this case,
+    because we are adding a new head for which we don’t have pretrained weights, so
+    the library warns us we should fine-tune this model before using it for inference,
+    which is exactly what we are going to do.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Note** that [this checkpoint](https://huggingface.co/MCG-NJU/videomae-base-finetuned-kinetics)
+    leads to better performance on this task as the checkpoint was obtained fine-tuning
+    on a similar downstream task having considerable domain overlap. You can check
+    out [this checkpoint](https://huggingface.co/sayakpaul/videomae-base-finetuned-kinetics-finetuned-ucf101-subset)
+    which was obtained by fine-tuning `MCG-NJU/videomae-base-finetuned-kinetics`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prepare the datasets for training
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For preprocessing the videos, you will leverage the [PyTorchVideo library](https://pytorchvideo.org/).
+    Start by importing the dependencies we need.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: For the training dataset transformations, use a combination of uniform temporal
+    subsampling, pixel normalization, random cropping, and random horizontal flipping.
+    For the validation and evaluation dataset transformations, keep the same transformation
+    chain except for random cropping and horizontal flipping. To learn more about
+    the details of these transformations check out the [official documentation of
+    PyTorchVideo](https://pytorchvideo.org).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the `image_processor` associated with the pre-trained model to obtain the
+    following information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image mean and standard deviation with which the video frame pixels will be
+    normalized.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Spatial resolution to which the video frames will be resized.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Start by defining some constants.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, define the dataset-specific transformations and the datasets respectively.
+    Starting with the training set:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The same sequence of workflow can be applied to the validation and evaluation
+    sets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**Note**: The above dataset pipelines are taken from the [official PyTorchVideo
+    example](https://pytorchvideo.org/docs/tutorial_classification#dataset). We’re
+    using the [`pytorchvideo.data.Ucf101()`](https://pytorchvideo.readthedocs.io/en/latest/api/data/data.html#pytorchvideo.data.Ucf101)
+    function because it’s tailored for the UCF-101 dataset. Under the hood, it returns
+    a [`pytorchvideo.data.labeled_video_dataset.LabeledVideoDataset`](https://pytorchvideo.readthedocs.io/en/latest/api/data/data.html#pytorchvideo.data.LabeledVideoDataset)
+    object. `LabeledVideoDataset` class is the base class for all things video in
+    the PyTorchVideo dataset. So, if you want to use a custom dataset not supported
+    off-the-shelf by PyTorchVideo, you can extend the `LabeledVideoDataset` class
+    accordingly. Refer to the `data` API [documentation to](https://pytorchvideo.readthedocs.io/en/latest/api/data/data.html)
+    learn more. Also, if your dataset follows a similar structure (as shown above),
+    then using the `pytorchvideo.data.Ucf101()` should work just fine.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can access the `num_videos` argument to know the number of videos in the
+    dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Visualize the preprocessed video for better debugging
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Person playing basketball](../Images/094cb43675960282973ed2c77587e204.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Train the model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Leverage [`Trainer`](https://huggingface.co/docs/transformers/main_classes/trainer)
+    from 🤗 Transformers for training the model. To instantiate a `Trainer`, you need
+    to define the training configuration and an evaluation metric. The most important
+    is the [`TrainingArguments`](https://huggingface.co/transformers/main_classes/trainer.html#transformers.TrainingArguments),
+    which is a class that contains all the attributes to configure the training. It
+    requires an output folder name, which will be used to save the checkpoints of
+    the model. It also helps sync all the information in the model repository on 🤗
+    Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most of the training arguments are self-explanatory, but one that is quite important
+    here is `remove_unused_columns=False`. This one will drop any features not used
+    by the model’s call function. By default it’s `True` because usually it’s ideal
+    to drop unused feature columns, making it easier to unpack inputs into the model’s
+    call function. But, in this case, you need the unused features (‘video’ in particular)
+    in order to create `pixel_values` (which is a mandatory key our model expects
+    in its inputs).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: The dataset returned by `pytorchvideo.data.Ucf101()` doesn’t implement the `__len__`
+    method. As such, we must define `max_steps` when instantiating `TrainingArguments`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, you need to define a function to compute the metrics from the predictions,
+    which will use the `metric` you’ll load now. The only preprocessing you have to
+    do is to take the argmax of our predicted logits:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**A note on evaluation**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the [VideoMAE paper](https://arxiv.org/abs/2203.12602), the authors use the
+    following evaluation strategy. They evaluate the model on several clips from test
+    videos and apply different crops to those clips and report the aggregate score.
+    However, in the interest of simplicity and brevity, we don’t consider that in
+    this tutorial.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also, define a `collate_fn`, which will be used to batch examples together.
+    Each batch consists of 2 keys, namely `pixel_values` and `labels`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then you just pass all of this along with the datasets to `Trainer`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: You might wonder why you passed along the `image_processor` as a tokenizer when
+    you preprocessed the data already. This is only to make sure the image processor
+    configuration file (stored as JSON) will also be uploaded to the repo on the Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now fine-tune our model by calling the `train` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once training is completed, share your model to the Hub with the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
+    method so everyone can use your model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Great, now that you have fine-tuned a model, you can use it for inference!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Load a video for inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Teams playing basketball](../Images/27c05b85bfaaba1e373898da43772d52.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'The simplest way to try out your fine-tuned model for inference is to use it
+    in a [`pipeline`](https://huggingface.co/docs/transformers/main/en/main_classes/pipelines#transformers.VideoClassificationPipeline).
+    Instantiate a `pipeline` for video classification with your model, and pass your
+    video to it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also manually replicate the results of the `pipeline` if you’d like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, pass your input to the model and return the `logits`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Decoding the `logits`, we get:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE

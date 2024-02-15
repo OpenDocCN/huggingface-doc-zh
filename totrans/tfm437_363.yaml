@@ -1,0 +1,1662 @@
+- en: OWLv2
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/owlv2](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/owlv2)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/210.987a42a9.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Docstring.17db21ae.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/ExampleCodeBlock.4f515aa9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: OWLv2 was proposed in [Scaling Open-Vocabulary Object Detection](https://arxiv.org/abs/2306.09683)
+    by Matthias Minderer, Alexey Gritsenko, Neil Houlsby. OWLv2 scales up [OWL-ViT](owlvit)
+    using self-training, which uses an existing detector to generate pseudo-box annotations
+    on image-text pairs. This results in large gains over the previous state-of-the-art
+    for zero-shot object detection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Open-vocabulary object detection has benefited greatly from pretrained vision-language
+    models, but is still limited by the amount of available detection training data.
+    While detection training data can be expanded by using Web image-text pairs as
+    weak supervision, this has not been done at scales comparable to image-level pretraining.
+    Here, we scale up detection data with self-training, which uses an existing detector
+    to generate pseudo-box annotations on image-text pairs. Major challenges in scaling
+    self-training are the choice of label space, pseudo-annotation filtering, and
+    training efficiency. We present the OWLv2 model and OWL-ST self-training recipe,
+    which address these challenges. OWLv2 surpasses the performance of previous state-of-the-art
+    open-vocabulary detectors already at comparable training scales (~10M examples).
+    However, with OWL-ST, we can scale to over 1B examples, yielding further large
+    improvement: With an L/14 architecture, OWL-ST improves AP on LVIS rare classes,
+    for which the model has seen no human box annotations, from 31.2% to 44.6% (43%
+    relative improvement). OWL-ST unlocks Web-scale training for open-world localization,
+    similar to what has been seen for image classification and language modelling.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![drawing](../Images/66332976ce32b94eca100b548d25f741.png) OWLv2 high-level
+    overview. Taken from the [original paper](https://arxiv.org/abs/2306.09683).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model was contributed by [nielsr](https://huggingface.co/nielsr). The original
+    code can be found [here](https://github.com/google-research/scenic/tree/main/scenic/projects/owl_vit).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usage example
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: OWLv2 is, just like its predecessor [OWL-ViT](owlvit), a zero-shot text-conditioned
+    object detection model. OWL-ViT uses [CLIP](clip) as its multi-modal backbone,
+    with a ViT-like Transformer to get visual features and a causal language model
+    to get the text features. To use CLIP for detection, OWL-ViT removes the final
+    token pooling layer of the vision model and attaches a lightweight classification
+    and box head to each transformer output token. Open-vocabulary classification
+    is enabled by replacing the fixed classification layer weights with the class-name
+    embeddings obtained from the text model. The authors first train CLIP from scratch
+    and fine-tune it end-to-end with the classification and box heads on standard
+    detection datasets using a bipartite matching loss. One or multiple text queries
+    per image can be used to perform zero-shot text-conditioned object detection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Owlv2ImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ImageProcessor)
+    can be used to resize (or rescale) and normalize images for the model and [CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)
+    is used to encode the text. [Owlv2Processor](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Processor)
+    wraps [Owlv2ImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ImageProcessor)
+    and [CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)
+    into a single instance to both encode the text and prepare the images. The following
+    example shows how to perform object detection using [Owlv2Processor](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Processor)
+    and [Owlv2ForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ForObjectDetection).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A demo notebook on using OWLv2 for zero- and one-shot (image-guided) object
+    detection can be found [here](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/OWLv2).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Zero-shot object detection task guide](../tasks/zero_shot_object_detection)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The architecture of OWLv2 is identical to [OWL-ViT](owlvit), however the object
+    detection head now also includes an objectness classifier, which predicts the
+    (query-agnostic) likelihood that a predicted box contains an object (as opposed
+    to background). The objectness score can be used to rank or filter predictions
+    independently of text queries. Usage of OWLv2 is identical to [OWL-ViT](owlvit)
+    with a new, updated image processor ([Owlv2ImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ImageProcessor)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Owlv2Config
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2Config'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/configuration_owlv2.py#L256)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( text_config = None vision_config = None projection_dim = 512 logit_scale_init_value
+    = 2.6592 return_dict = True **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**text_config** (`dict`, *optional*) — Dictionary of configuration options
+    used to initialize [Owlv2TextConfig](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextConfig).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vision_config** (`dict`, *optional*) — Dictionary of configuration options
+    used to initialize [Owlv2VisionConfig](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionConfig).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**projection_dim** (`int`, *optional*, defaults to 512) — Dimensionality of
+    text and vision projection layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logit_scale_init_value** (`float`, *optional*, defaults to 2.6592) — The
+    inital value of the *logit_scale* parameter. Default is used as per the original
+    OWLv2 implementation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*, defaults to `True`) — Whether or not the
+    model should return a dictionary. If `False`, returns a tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**kwargs** (*optional*) — Dictionary of keyword arguments.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Owlv2Config](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Config)
+    is the configuration class to store the configuration of an [Owlv2Model](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Model).
+    It is used to instantiate an OWLv2 model according to the specified arguments,
+    defining the text model and vision model configs. Instantiating a configuration
+    with the defaults will yield a similar configuration to that of the OWLv2 [google/owlv2-base-patch16](https://huggingface.co/google/owlv2-base-patch16)
+    architecture.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### from_text_vision_configs'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/configuration_owlv2.py#L325)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( text_config: Dict vision_config: Dict **kwargs ) → [Owlv2Config](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Config)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Owlv2Config](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Config)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An instance of a configuration object
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instantiate a [Owlv2Config](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Config)
+    (or a derived class) from owlv2 text model configuration and owlv2 vision model
+    configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Owlv2TextConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2TextConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/configuration_owlv2.py#L36)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( vocab_size = 49408 hidden_size = 512 intermediate_size = 2048 num_hidden_layers
+    = 12 num_attention_heads = 8 max_position_embeddings = 16 hidden_act = 'quick_gelu'
+    layer_norm_eps = 1e-05 attention_dropout = 0.0 initializer_range = 0.02 initializer_factor
+    = 1.0 pad_token_id = 0 bos_token_id = 49406 eos_token_id = 49407 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**vocab_size** (`int`, *optional*, defaults to 49408) — Vocabulary size of
+    the OWLv2 text model. Defines the number of different tokens that can be represented
+    by the `inputs_ids` passed when calling [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 512) — Dimensionality of the
+    encoder layers and the pooler layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**intermediate_size** (`int`, *optional*, defaults to 2048) — Dimensionality
+    of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_hidden_layers** (`int`, *optional*, defaults to 12) — Number of hidden
+    layers in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`int`, *optional*, defaults to 8) — Number of attention
+    heads for each attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**max_position_embeddings** (`int`, *optional*, defaults to 16) — The maximum
+    sequence length that this model might ever be used with. Typically set this to
+    something large just in case (e.g., 512 or 1024 or 2048).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `function`, *optional*, defaults to `"quick_gelu"`)
+    — The non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` ``"quick_gelu"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-05) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_dropout** (`float`, *optional*, defaults to 0.0) — The dropout
+    ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_factor** (`float`, *optional*, defaults to 1.0) — A factor for
+    initializing all weight matrices (should be kept to 1, used internally for initialization
+    testing).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pad_token_id** (`int`, *optional*, defaults to 0) — The id of the padding
+    token in the input sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**bos_token_id** (`int`, *optional*, defaults to 49406) — The id of the beginning-of-sequence
+    token in the input sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**eos_token_id** (`int`, *optional*, defaults to 49407) — The id of the end-of-sequence
+    token in the input sequences.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of an [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel).
+    It is used to instantiate an Owlv2 text encoder according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the Owlv2 [google/owlv2-base-patch16](https://huggingface.co/google/owlv2-base-patch16)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Owlv2VisionConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2VisionConfig'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/configuration_owlv2.py#L150)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( hidden_size = 768 intermediate_size = 3072 num_hidden_layers = 12 num_attention_heads
+    = 12 num_channels = 3 image_size = 768 patch_size = 16 hidden_act = 'quick_gelu'
+    layer_norm_eps = 1e-05 attention_dropout = 0.0 initializer_range = 0.02 initializer_factor
+    = 1.0 **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**hidden_size** (`int`, *optional*, defaults to 768) — Dimensionality of the
+    encoder layers and the pooler layer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**intermediate_size** (`int`, *optional*, defaults to 3072) — Dimensionality
+    of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_hidden_layers** (`int`, *optional*, defaults to 12) — Number of hidden
+    layers in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_attention_heads** (`int`, *optional*, defaults to 12) — Number of attention
+    heads for each attention layer in the Transformer encoder.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**num_channels** (`int`, *optional*, defaults to 3) — Number of channels in
+    the input images.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_size** (`int`, *optional*, defaults to 768) — The size (resolution)
+    of each image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**patch_size** (`int`, *optional*, defaults to 16) — The size (resolution)
+    of each patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_act** (`str` or `function`, *optional*, defaults to `"quick_gelu"`)
+    — The non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` ``"quick_gelu"` are supported.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**layer_norm_eps** (`float`, *optional*, defaults to 1e-05) — The epsilon used
+    by the layer normalization layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_dropout** (`float`, *optional*, defaults to 0.0) — The dropout
+    ratio for the attention probabilities.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_range** (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**initializer_factor** (`float`, *optional*, defaults to 1.0) — A factor for
+    initializing all weight matrices (should be kept to 1, used internally for initialization
+    testing).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of an [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).
+    It is used to instantiate an OWLv2 image encoder according to the specified arguments,
+    defining the model architecture. Instantiating a configuration with the defaults
+    will yield a similar configuration to that of the OWLv2 [google/owlv2-base-patch16](https://huggingface.co/google/owlv2-base-patch16)
+    architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Owlv2ImageProcessor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2ImageProcessor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/image_processing_owlv2.py#L176)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( do_rescale: bool = True rescale_factor: Union = 0.00392156862745098 do_pad:
+    bool = True do_resize: bool = True size: Dict = None resample: Resampling = <Resampling.BILINEAR:
+    2> do_normalize: bool = True image_mean: Union = None image_std: Union = None
+    **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `True`) — Whether to rescale
+    the image by the specified scale `rescale_factor`. Can be overriden by `do_rescale`
+    in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`int` or `float`, *optional*, defaults to `1/255`) — Scale
+    factor to use if rescaling the image. Can be overriden by `rescale_factor` in
+    the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_pad** (`bool`, *optional*, defaults to `True`) — Whether to pad the image
+    to a square with gray pixels on the bottom and the right. Can be overriden by
+    `do_pad` in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `True`) — Controls whether to
+    resize the image’s (height, width) dimensions to the specified `size`. Can be
+    overriden by `do_resize` in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]` *optional*, defaults to `{"height" -- 960, "width":
+    960}`): Size to resize the image to. Can be overriden by `size` in the `preprocess`
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**resample** (`PILImageResampling`, *optional*, defaults to `Resampling.BILINEAR`)
+    — Resampling method to use if resizing the image. Can be overriden by `resample`
+    in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `True`) — Whether to normalize
+    the image. Can be overridden by the `do_normalize` parameter in the `preprocess`
+    method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `OPENAI_CLIP_MEAN`)
+    — Mean to use if normalizing the image. This is a float or list of floats the
+    length of the number of channels in the image. Can be overridden by the `image_mean`
+    parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `OPENAI_CLIP_STD`)
+    — Standard deviation to use if normalizing the image. This is a float or list
+    of floats the length of the number of channels in the image. Can be overridden
+    by the `image_std` parameter in the `preprocess` method.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs an OWLv2 image processor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### preprocess'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/image_processing_owlv2.py#L333)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( images: Union do_pad: bool = None do_resize: bool = None size: Dict = None
+    do_rescale: bool = None rescale_factor: float = None do_normalize: bool = None
+    image_mean: Union = None image_std: Union = None return_tensors: Union = None
+    data_format: ChannelDimension = <ChannelDimension.FIRST: ''channels_first''> input_data_format:
+    Union = None **kwargs )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**images** (`ImageInput`) — Image to preprocess. Expects a single or batch
+    of images with pixel values ranging from 0 to 255\. If passing in images with
+    pixel values between 0 and 1, set `do_rescale=False`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_pad** (`bool`, *optional*, defaults to `self.do_pad`) — Whether to pad
+    the image to a square with gray pixels on the bottom and the right.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_resize** (`bool`, *optional*, defaults to `self.do_resize`) — Whether
+    to resize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**size** (`Dict[str, int]`, *optional*, defaults to `self.size`) — Size to
+    resize the image to.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_rescale** (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
+    to rescale the image values between [0 - 1].'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**rescale_factor** (`float`, *optional*, defaults to `self.rescale_factor`)
+    — Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**do_normalize** (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
+    to normalize the image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_mean** (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
+    — Image mean.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_std** (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
+    — Image standard deviation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_tensors** (`str` or `TensorType`, *optional*) — The type of tensors
+    to return. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Return a list of `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**data_format** (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
+    — The channel dimension format for the output image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unset: Use the channel dimension format of the input image.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_data_format** (`ChannelDimension` or `str`, *optional*) — The channel
+    dimension format for the input image. If unset, the channel dimension format is
+    inferred from the input image. Can be one of:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocess an image or batch of images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_object_detection'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/image_processing_owlv2.py#L464)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( outputs threshold: float = 0.1 target_sizes: Union = None ) → `List[Dict]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**outputs** (`OwlViTObjectDetectionOutput`) — Raw outputs of the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**threshold** (`float`, *optional*) — Score threshold to keep object detection
+    predictions.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**target_sizes** (`torch.Tensor` or `List[Tuple[int, int]]`, *optional*) —
+    Tensor of shape `(batch_size, 2)` or list of tuples (`Tuple[int, int]`) containing
+    the target size `(height, width)` of each image in the batch. If unset, predictions
+    will not be resized.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[Dict]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A list of dictionaries, each dictionary containing the scores, labels and boxes
+    for an image in the batch as predicted by the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converts the raw output of [OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection)
+    into final bounding boxes in (top_left_x, top_left_y, bottom_right_x, bottom_right_y)
+    format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_image_guided_detection'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/image_processing_owlv2.py#L520)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( outputs threshold = 0.0 nms_threshold = 0.3 target_sizes = None ) → `List[Dict]`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**outputs** (`OwlViTImageGuidedObjectDetectionOutput`) — Raw outputs of the
+    model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**threshold** (`float`, *optional*, defaults to 0.0) — Minimum confidence threshold
+    to use to filter out predicted boxes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**nms_threshold** (`float`, *optional*, defaults to 0.3) — IoU threshold for
+    non-maximum suppression of overlapping boxes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**target_sizes** (`torch.Tensor`, *optional*) — Tensor of shape (batch_size,
+    2) where each entry is the (height, width) of the corresponding image in the batch.
+    If set, predicted normalized bounding boxes are rescaled to the target sizes.
+    If left to None, predictions will not be unnormalized.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`List[Dict]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A list of dictionaries, each dictionary containing the scores, labels and boxes
+    for an image in the batch as predicted by the model. All labels are set to None
+    as `OwlViTForObjectDetection.image_guided_detection` perform one-shot object detection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Converts the output of [OwlViTForObjectDetection.image_guided_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection.image_guided_detection)
+    into the format expected by the COCO api.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Owlv2Processor
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2Processor'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/processing_owlv2.py#L28)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( image_processor tokenizer **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**image_processor** ([Owlv2ImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ImageProcessor))
+    — The image processor is a required input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**tokenizer** ([`CLIPTokenizer`, `CLIPTokenizerFast`]) — The tokenizer is a
+    required input.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Constructs an Owlv2 processor which wraps [Owlv2ImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ImageProcessor)
+    and [CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)/[CLIPTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizerFast)
+    into a single processor that interits both the image processor and tokenizer functionalities.
+    See the `__call__()` and [decode()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTProcessor.decode)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### batch_decode'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/processing_owlv2.py#L178)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method forwards all its arguments to CLIPTokenizerFast’s [batch_decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.batch_decode).
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### decode'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/processing_owlv2.py#L186)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method forwards all its arguments to CLIPTokenizerFast’s [decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.decode).
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_image_guided_detection'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/processing_owlv2.py#L170)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method forwards all its arguments to `OwlViTImageProcessor.post_process_one_shot_object_detection`.
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### post_process_object_detection'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/processing_owlv2.py#L162)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ( *args **kwargs )
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method forwards all its arguments to [OwlViTImageProcessor.post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor.post_process_object_detection).
+    Please refer to the docstring of this method for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Owlv2Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2Model'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L1014)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: Owlv2Config )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**config** (`Owvl2Config`) — Model configuration class with all the parameters
+    of the model. Initializing with a config file does not load the weights associated
+    with the model, only the configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L1131)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None pixel_values: Optional = None attention_mask:
+    Optional = None return_loss: Optional = None output_attentions: Optional = None
+    output_hidden_states: Optional = None return_base_image_embeds: Optional = None
+    return_dict: Optional = None ) → `transformers.models.owlv2.modeling_owlv2.Owlv2Output`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size, sequence_length)`)
+    — Indices of input sequence tokens in the vocabulary. Indices can be obtained
+    using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details. [What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — Mask to avoid performing attention on padding token indices. Mask
+    values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**. [What are attention masks?](../glossary#attention-mask)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_loss** (`bool`, *optional*) — Whether or not to return the contrastive
+    loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_base_image_embeds** (`bool`, *optional*) — Whether or not to return
+    the base image embeddings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.owlv2.modeling_owlv2.Owlv2Output` or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.owlv2.modeling_owlv2.Owlv2Output` or a tuple of `torch.FloatTensor`
+    (if `return_dict=False` is passed or when `config.return_dict=False`) comprising
+    various elements depending on the configuration (`<class 'transformers.models.owlv2.configuration_owlv2.Owlv2Config'>`)
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `return_loss`
+    is `True`) — Contrastive loss for image-text similarity.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits_per_image** (`torch.FloatTensor` of shape `(image_batch_size, text_batch_size)`)
+    — The scaled dot product scores between `image_embeds` and `text_embeds`. This
+    represents the image-text similarity scores.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits_per_text** (`torch.FloatTensor` of shape `(text_batch_size, image_batch_size)`)
+    — The scaled dot product scores between `text_embeds` and `image_embeds`. This
+    represents the text-image similarity scores.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_embeds** (`torch.FloatTensor` of shape `(batch_size * num_max_text_queries,
+    output_dim`) — The text embeddings obtained by applying the projection layer to
+    the pooled output of [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_embeds** (`torch.FloatTensor` of shape `(batch_size, output_dim`) —
+    The image embeddings obtained by applying the projection layer to the pooled output
+    of [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_model_output** (Tuple`BaseModelOutputWithPooling`) — The output of the
+    [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vision_model_output** (`BaseModelOutputWithPooling`) — The output of the
+    [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [Owlv2Model](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Model)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### get_text_features'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L1051)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Optional = None attention_mask: Optional = None output_attentions:
+    Optional = None output_hidden_states: Optional = None return_dict: Optional =
+    None ) → text_features (`torch.FloatTensor` of shape `(batch_size, output_dim`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size * num_max_text_queries,
+    sequence_length)`) — Indices of input sequence tokens in the vocabulary. Indices
+    can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details. [What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, num_max_text_queries,
+    sequence_length)`, *optional*) — Mask to avoid performing attention on padding
+    token indices. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**. [What are attention masks?](../glossary#attention-mask)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: text_features (`torch.FloatTensor` of shape `(batch_size, output_dim`)
+  prefs: []
+  type: TYPE_NORMAL
+- en: The text embeddings obtained by applying the projection layer to the pooled
+    output of [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Owlv2Model](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Model)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### get_image_features'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L1086)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → image_features (`torch.FloatTensor`
+    of shape `(batch_size, output_dim`)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: image_features (`torch.FloatTensor` of shape `(batch_size, output_dim`)
+  prefs: []
+  type: TYPE_NORMAL
+- en: The image embeddings obtained by applying the projection layer to the pooled
+    output of [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Owlv2Model](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2Model)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Owlv2TextModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2TextModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L852)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: Owlv2TextConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L867)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Tensor attention_mask: Optional = None output_attentions: Optional
+    = None output_hidden_states: Optional = None return_dict: Optional = None ) →
+    [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size * num_max_text_queries,
+    sequence_length)`) — Indices of input sequence tokens in the vocabulary. Indices
+    can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details. [What are input IDs?](../glossary#input-ids)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, num_max_text_queries,
+    sequence_length)`, *optional*) — Mask to avoid performing attention on padding
+    token indices. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**. [What are attention masks?](../glossary#attention-mask)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration (`<class 'transformers.models.owlv2.configuration_owlv2.Owlv2TextConfig'>`)
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`torch.FloatTensor` of shape `(batch_size, hidden_size)`)
+    — Last layer hidden-state of the first token of the sequence (classification token)
+    after further processing through the layers used for the auxiliary pretraining
+    task. E.g. for BERT-family of models, this returns the classification token after
+    processing through a linear layer and a tanh activation function. The linear layer
+    weights are trained from the next sentence prediction (classification) objective
+    during pretraining.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Owlv2VisionModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2VisionModel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L964)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: Owlv2VisionConfig )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L977)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: Optional = None output_attentions: Optional = None output_hidden_states:
+    Optional = None return_dict: Optional = None ) → [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration (`<class 'transformers.models.owlv2.configuration_owlv2.Owlv2VisionConfig'>`)
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**last_hidden_state** (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pooler_output** (`torch.FloatTensor` of shape `(batch_size, hidden_size)`)
+    — Last layer hidden-state of the first token of the sequence (classification token)
+    after further processing through the layers used for the auxiliary pretraining
+    task. E.g. for BERT-family of models, this returns the classification token after
+    processing through a linear layer and a tanh activation function. The linear layer
+    weights are trained from the next sentence prediction (classification) objective
+    during pretraining.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**hidden_states** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '**attentions** (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Owlv2ForObjectDetection
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### class transformers.Owlv2ForObjectDetection'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L1300)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( config: Owlv2Config )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### forward'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L1654)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( input_ids: Tensor pixel_values: FloatTensor attention_mask: Optional = None
+    output_attentions: Optional = None output_hidden_states: Optional = None return_dict:
+    Optional = None ) → `transformers.models.owlv2.modeling_owlv2.Owlv2ObjectDetectionOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**input_ids** (`torch.LongTensor` of shape `(batch_size * num_max_text_queries,
+    sequence_length)`, *optional*) — Indices of input sequence tokens in the vocabulary.
+    Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
+    See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    and [PreTrainedTokenizer.**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
+    for details. [What are input IDs?](../glossary#input-ids).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**attention_mask** (`torch.Tensor` of shape `(batch_size, num_max_text_queries,
+    sequence_length)`, *optional*) — Mask to avoid performing attention on padding
+    token indices. Mask values selected in `[0, 1]`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 1 for tokens that are **not masked**,
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 0 for tokens that are **masked**. [What are attention masks?](../glossary#attention-mask)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    last hidden state. See `text_model_last_hidden_state` and `vision_model_last_hidden_state`
+    under returned tensors for more detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.owlv2.modeling_owlv2.Owlv2ObjectDetectionOutput` or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.owlv2.modeling_owlv2.Owlv2ObjectDetectionOutput` or a
+    tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration (`<class 'transformers.models.owlv2.configuration_owlv2.Owlv2Config'>`)
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**loss** (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    are provided)) — Total loss as a linear combination of a negative log-likehood
+    (cross-entropy) for class prediction and a bounding box loss. The latter is defined
+    as a linear combination of the L1 loss and the generalized scale-invariant IoU
+    loss.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**loss_dict** (`Dict`, *optional*) — A dictionary containing the individual
+    losses. Useful for logging.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, num_patches, num_queries)`)
+    — Classification logits (including no-object) for all queries.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**objectness_logits** (`torch.FloatTensor` of shape `(batch_size, num_patches,
+    1)`) — The objectness logits of all image patches. OWL-ViT represents images as
+    a set of image patches where the total number of patches is (image_size / patch_size)**2.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**pred_boxes** (`torch.FloatTensor` of shape `(batch_size, num_patches, 4)`)
+    — Normalized boxes coordinates for all queries, represented as (center_x, center_y,
+    width, height). These values are normalized in [0, 1], relative to the size of
+    each individual image in the batch (disregarding possible padding). You can use
+    [post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ImageProcessor.post_process_object_detection)
+    to retrieve the unnormalized bounding boxes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_embeds** (`torch.FloatTensor` of shape `(batch_size, num_max_text_queries,
+    output_dim`) — The text embeddings obtained by applying the projection layer to
+    the pooled output of [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_embeds** (`torch.FloatTensor` of shape `(batch_size, patch_size, patch_size,
+    output_dim`) — Pooled output of [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).
+    OWLv2 represents images as a set of image patches and computes image embeddings
+    for each patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**class_embeds** (`torch.FloatTensor` of shape `(batch_size, num_patches, hidden_size)`)
+    — Class embeddings of all image patches. OWLv2 represents images as a set of image
+    patches where the total number of patches is (image_size / patch_size)**2.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_model_output** (Tuple`BaseModelOutputWithPooling`) — The output of the
+    [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vision_model_output** (`BaseModelOutputWithPooling`) — The output of the
+    [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [Owlv2ForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ForObjectDetection)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### image_guided_detection'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlv2/modeling_owlv2.py#L1529)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '( pixel_values: FloatTensor query_pixel_values: Optional = None output_attentions:
+    Optional = None output_hidden_states: Optional = None return_dict: Optional =
+    None ) → `transformers.models.owlv2.modeling_owlv2.Owlv2ImageGuidedObjectDetectionOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**query_pixel_values** (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Pixel values of query image(s) to be detected. Pass in one
+    query image per target image.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_attentions** (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**output_hidden_states** (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**return_dict** (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`transformers.models.owlv2.modeling_owlv2.Owlv2ImageGuidedObjectDetectionOutput`
+    or `tuple(torch.FloatTensor)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `transformers.models.owlv2.modeling_owlv2.Owlv2ImageGuidedObjectDetectionOutput`
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration (`<class 'transformers.models.owlv2.configuration_owlv2.Owlv2Config'>`)
+    and inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**logits** (`torch.FloatTensor` of shape `(batch_size, num_patches, num_queries)`)
+    — Classification logits (including no-object) for all queries.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**target_pred_boxes** (`torch.FloatTensor` of shape `(batch_size, num_patches,
+    4)`) — Normalized boxes coordinates for all queries, represented as (center_x,
+    center_y, width, height). These values are normalized in [0, 1], relative to the
+    size of each individual target image in the batch (disregarding possible padding).
+    You can use [post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ImageProcessor.post_process_object_detection)
+    to retrieve the unnormalized bounding boxes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**query_pred_boxes** (`torch.FloatTensor` of shape `(batch_size, num_patches,
+    4)`) — Normalized boxes coordinates for all queries, represented as (center_x,
+    center_y, width, height). These values are normalized in [0, 1], relative to the
+    size of each individual query image in the batch (disregarding possible padding).
+    You can use [post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ImageProcessor.post_process_object_detection)
+    to retrieve the unnormalized bounding boxes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**image_embeds** (`torch.FloatTensor` of shape `(batch_size, patch_size, patch_size,
+    output_dim`) — Pooled output of [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).
+    OWLv2 represents images as a set of image patches and computes image embeddings
+    for each patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**query_image_embeds** (`torch.FloatTensor` of shape `(batch_size, patch_size,
+    patch_size, output_dim`) — Pooled output of [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).
+    OWLv2 represents images as a set of image patches and computes image embeddings
+    for each patch.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**class_embeds** (`torch.FloatTensor` of shape `(batch_size, num_patches, hidden_size)`)
+    — Class embeddings of all image patches. OWLv2 represents images as a set of image
+    patches where the total number of patches is (image_size / patch_size)**2.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**text_model_output** (Tuple`BaseModelOutputWithPooling`) — The output of the
+    [Owlv2TextModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2TextModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**vision_model_output** (`BaseModelOutputWithPooling`) — The output of the
+    [Owlv2VisionModel](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2VisionModel).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [Owlv2ForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlv2#transformers.Owlv2ForObjectDetection)
+    forward method, overrides the `__call__` special method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE

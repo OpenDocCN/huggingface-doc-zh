@@ -1,0 +1,171 @@
+- en: Perplexity of fixed-length models
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/perplexity](https://huggingface.co/docs/transformers/v4.37.2/en/perplexity)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/328.a694dba5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Perplexity (PPL) is one of the most common metrics for evaluating language models.
+    Before diving in, we should note that the metric applies specifically to classical
+    language models (sometimes called autoregressive or causal language models) and
+    is not well defined for masked language models like BERT (see [summary of the
+    models](model_summary)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Perplexity is defined as the exponentiated average negative log-likelihood of
+    a sequence. If we have a tokenized sequence<math><semantics><mrow><mi>X</mi><mo>=</mo><mo
+    stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo separator="true">,</mo><msub><mi>x</mi><mn>1</mn></msub><mo
+    separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>x</mi><mi>t</mi></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">X = (x_0,
+    x_1, \dots, x_t)</annotation></semantics></math>X=(x0​,x1​,…,xt​), then the perplexity
+    of<math><semantics><mrow><mi>X</mi></mrow><annotation encoding="application/x-tex">X</annotation></semantics></math>X
+    is, <math display="block"><semantics><mrow><mtext>PPL</mtext><mo stretchy="false">(</mo><mi>X</mi><mo
+    stretchy="false">)</mo><mo>=</mo><mi>exp</mi><mo>⁡</mo><mrow><mo fence="true">{</mo><mrow><mo>−</mo><mfrac><mn>1</mn><mi>t</mi></mfrac><munderover><mo>∑</mo><mi>i</mi><mi>t</mi></munderover><mi>log</mi><mo>⁡</mo><msub><mi>p</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><msub><mi>x</mi><mrow><mo><</mo><mi>i</mi></mrow></msub><mo
+    stretchy="false">)</mo></mrow><mo fence="true">}</mo></mrow></mrow><annotation
+    encoding="application/x-tex">\text{PPL}(X) = \exp \left\{ {-\frac{1}{t}\sum_i^t
+    \log p_\theta (x_i|x_{<i}) } \right\}</annotation></semantics></math>PPL(X)=exp{−t1​i∑t​logpθ​(xi​∣x<i​)}
+  prefs: []
+  type: TYPE_NORMAL
+- en: where<math><semantics><mrow><mi>log</mi><mo>⁡</mo><msub><mi>p</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><msub><mi>x</mi><mrow><mo><</mo><mi>i</mi></mrow></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log p_\theta
+    (x_i|x_{<i})</annotation></semantics></math>logpθ​(xi​∣x<i​) is the log-likelihood
+    of the ith token conditioned on the preceding tokens<math><semantics><mrow><msub><mi>x</mi><mrow><mo><</mo><mi>i</mi></mrow></msub></mrow><annotation
+    encoding="application/x-tex">x_{<i}</annotation></semantics></math>x<i​ according
+    to our model. Intuitively, it can be thought of as an evaluation of the model’s
+    ability to predict uniformly among the set of specified tokens in a corpus. Importantly,
+    this means that the tokenization procedure has a direct impact on a model’s perplexity
+    which should always be taken into consideration when comparing different models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is also equivalent to the exponentiation of the cross-entropy between the
+    data and model predictions. For more intuition about perplexity and its relationship
+    to Bits Per Character (BPC) and data compression, check out this [fantastic blog
+    post on The Gradient](https://thegradient.pub/understanding-evaluation-metrics-for-language-models/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Calculating PPL with fixed-length models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If we weren’t limited by a model’s context size, we would evaluate the model’s
+    perplexity by autoregressively factorizing a sequence and conditioning on the
+    entire preceding subsequence at each step, as shown below.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Full decomposition of a sequence with unlimited context length](../Images/c3c9c9f2fa6dbedcb4e30aa153057b06.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: When working with approximate models, however, we typically have a constraint
+    on the number of tokens the model can process. The largest version of [GPT-2](model_doc/gpt2),
+    for example, has a fixed length of 1024 tokens, so we cannot calculate<math><semantics><mrow><msub><mi>p</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mi mathvariant="normal">∣</mi><msub><mi>x</mi><mrow><mo><</mo><mi>t</mi></mrow></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p_\theta(x_t|x_{<t})</annotation></semantics></math>pθ​(xt​∣x<t​)
+    directly when<math><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math>t
+    is greater than 1024.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instead, the sequence is typically broken into subsequences equal to the model’s
+    maximum input size. If a model’s max input size is<math><semantics><mrow><mi>k</mi></mrow><annotation
+    encoding="application/x-tex">k</annotation></semantics></math>k, we then approximate
+    the likelihood of a token<math><semantics><mrow><msub><mi>x</mi><mi>t</mi></msub></mrow><annotation
+    encoding="application/x-tex">x_t</annotation></semantics></math>xt​ by conditioning
+    only on the<math><semantics><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow><annotation
+    encoding="application/x-tex">k-1</annotation></semantics></math>k−1 tokens that
+    precede it rather than the entire context. When evaluating the model’s perplexity
+    of a sequence, a tempting but suboptimal approach is to break the sequence into
+    disjoint chunks and add up the decomposed log-likelihoods of each segment independently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Suboptimal PPL not taking advantage of full available context](../Images/a231ea5a2c820c729fc5f3842f0db183.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: This is quick to compute since the perplexity of each segment can be computed
+    in one forward pass, but serves as a poor approximation of the fully-factorized
+    perplexity and will typically yield a higher (worse) PPL because the model will
+    have less context at most of the prediction steps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instead, the PPL of fixed-length models should be evaluated with a sliding-window
+    strategy. This involves repeatedly sliding the context window so that the model
+    has more context when making each prediction.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Sliding window PPL taking advantage of all available context](../Images/0a3c903fc4e391fe3b97c4c5c986742c.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: This is a closer approximation to the true decomposition of the sequence probability
+    and will typically yield a more favorable score. The downside is that it requires
+    a separate forward pass for each token in the corpus. A good practical compromise
+    is to employ a strided sliding window, moving the context by larger strides rather
+    than sliding by 1 token a time. This allows computation to proceed much faster
+    while still giving the model a large context to make predictions at each step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example: Calculating perplexity with GPT-2 in 🤗 Transformers'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s demonstrate this process with GPT-2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’ll load in the WikiText-2 dataset and evaluate the perplexity using a few
+    different sliding-window strategies. Since this dataset is small and we’re just
+    doing one forward pass over the set, we can just load and encode the entire dataset
+    in memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: With 🤗 Transformers, we can simply pass the `input_ids` as the `labels` to our
+    model, and the average negative log-likelihood for each token is returned as the
+    loss. With our sliding window approach, however, there is overlap in the tokens
+    we pass to the model at each iteration. We don’t want the log-likelihood for the
+    tokens we’re just treating as context to be included in our loss, so we can set
+    these targets to `-100` so that they are ignored. The following is an example
+    of how we could do this with a stride of `512`. This means that the model will
+    have at least 512 tokens for context when calculating the conditional likelihood
+    of any one token (provided there are 512 preceding tokens available to condition
+    on).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Running this with the stride length equal to the max input length is equivalent
+    to the suboptimal, non-sliding-window strategy we discussed above. The smaller
+    the stride, the more context the model will have in making each prediction, and
+    the better the reported perplexity will typically be.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When we run the above with `stride = 1024`, i.e. no overlap, the resulting PPL
+    is `19.44`, which is about the same as the `19.93` reported in the GPT-2 paper.
+    By using `stride = 512` and thereby employing our striding window strategy, this
+    jumps down to `16.45`. This is not only a more favorable score, but is calculated
+    in a way that is closer to the true autoregressive decomposition of a sequence
+    likelihood.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,227 @@
+- en: Zero-shot object detection
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/zero_shot_object_detection](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/zero_shot_object_detection)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/364.bd648844.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/DocNotebookDropdown.3e6b3817.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/globals.7f7f1b26.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Traditionally, models used for [object detection](object_detection) require
+    labeled image datasets for training, and are limited to detecting the set of classes
+    from the training data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Zero-shot object detection is supported by the [OWL-ViT](../model_doc/owlvit)
+    model which uses a different approach. OWL-ViT is an open-vocabulary object detector.
+    It means that it can detect objects in images based on free-text queries without
+    the need to fine-tune the model on labeled datasets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: OWL-ViT leverages multi-modal representations to perform open-vocabulary detection.
+    It combines [CLIP](../model_doc/clip) with lightweight object classification and
+    localization heads. Open-vocabulary detection is achieved by embedding free-text
+    queries with the text encoder of CLIP and using them as input to the object classification
+    and localization heads. associate images and their corresponding textual descriptions,
+    and ViT processes image patches as inputs. The authors of OWL-ViT first trained
+    CLIP from scratch and then fine-tuned OWL-ViT end to end on standard object detection
+    datasets using a bipartite matching loss.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With this approach, the model can detect objects based on textual descriptions
+    without prior training on labeled datasets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this guide, you will learn how to use OWL-ViT:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: to detect objects based on text prompts
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: for batch object detection
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: for image-guided object detection
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure you have all the necessary libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Zero-shot object detection pipeline
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The simplest way to try out inference with OWL-ViT is to use it in a [pipeline()](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.pipeline).
+    Instantiate a pipeline for zero-shot object detection from a [checkpoint on the
+    Hugging Face Hub](https://huggingface.co/models?other=owlvit):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, choose an image you’d like to detect objects in. Here we’ll use the image
+    of astronaut Eileen Collins that is a part of the [NASA](https://www.nasa.gov/multimedia/imagegallery/index.html)
+    Great Images dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Astronaut Eileen Collins](../Images/96b84ae6b3724360765220a32947ac55.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Pass the image and the candidate object labels to look for to the pipeline.
+    Here we pass the image directly; other suitable options include a local path to
+    an image or an image url. We also pass text descriptions for all items we want
+    to query the image for.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s visualize the predictions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Visualized predictions on NASA image](../Images/feb704c325d7a61bdcec14c2946ccd78.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Text-prompted zero-shot object detection by hand
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that you’ve seen how to use the zero-shot object detection pipeline, let’s
+    replicate the same result manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start by loading the model and associated processor from a [checkpoint on the
+    Hugging Face Hub](https://huggingface.co/models?other=owlvit). Here we’ll use
+    the same checkpoint as before:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s take a different image to switch things up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Beach photo](../Images/113adca13e3c6860545da1a86b83790e.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Use the processor to prepare the inputs for the model. The processor combines
+    an image processor that prepares the image for the model by resizing and normalizing
+    it, and a [CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)
+    that takes care of the text inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass the inputs through the model, post-process, and visualize the results.
+    Since the image processor resized images before feeding them to the model, you
+    need to use the [post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor.post_process_object_detection)
+    method to make sure the predicted bounding boxes have the correct coordinates
+    relative to the original image:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Beach photo with detected objects](../Images/15bf65ba7808914dddfb0bc50e7be255.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Batch processing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can pass multiple sets of images and text queries to search for different
+    (or same) objects in several images. Let’s use both an astronaut image and the
+    beach image together. For batch processing, you should pass text queries as a
+    nested list to the processor and images as lists of PIL images, PyTorch tensors,
+    or NumPy arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Previously for post-processing you passed the single image’s size as a tensor,
+    but you can also pass a tuple, or, in case of several images, a list of tuples.
+    Let’s create predictions for the two examples, and visualize the second one (`image_idx
+    = 1`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Beach photo with detected objects](../Images/15bf65ba7808914dddfb0bc50e7be255.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Image-guided object detection
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In addition to zero-shot object detection with text queries, OWL-ViT offers
+    image-guided object detection. This means you can use an image query to find similar
+    objects in the target image. Unlike text queries, only a single example image
+    is allowed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s take an image with two cats on a couch as a target image, and an image
+    of a single cat as a query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s take a quick look at the images:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Cats](../Images/8494ff7169eabc8d8637dec8997e45c2.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'In the preprocessing step, instead of text queries, you now need to use `query_images`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: For predictions, instead of passing the inputs to the model, pass them to [image_guided_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection.image_guided_detection).
+    Draw the predictions as before except now there are no labels.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Cats with bounding boxes](../Images/2894fbe4429cbea3d46c5b6776d179b0.png)'
+  prefs: []
+  type: TYPE_IMG

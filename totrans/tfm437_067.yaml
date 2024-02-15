@@ -1,0 +1,601 @@
+- en: Quantization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/quantization](https://huggingface.co/docs/transformers/v4.37.2/en/quantization)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/transformers/v4.37.2/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/start.1af50ed5.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/scheduler.9bc65507.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/singletons.a2d7fdf1.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.3b203c72.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/paths.b8f1dad4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/entry/app.59e74a31.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/index.707bf1b6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/0.dbd8cc12.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/nodes/334.e270fcee.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Tip.c2ecdbf4.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/CodeBlock.54a9f38d.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/Heading.342b1fa6.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/HfOption.6d864328.js">
+    <link rel="modulepreload" href="/docs/transformers/v4.37.2/en/_app/immutable/chunks/stores.c16bc1a5.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quantization techniques focus on representing data with less information while
+    also trying to not lose too much accuracy. This often means converting a data
+    type to represent the same information with fewer bits. For example, if your model
+    weights are stored as 32-bit floating points and they’re quantized to 16-bit floating
+    points, this halves the model size which makes it easier to store and reduces
+    memory-usage. Lower precision can also speedup inference because it takes less
+    time to perform calculations with fewer bits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Transformers supports several quantization schemes to help you run inference
+    with large language models (LLMs) and finetune adapters on quantized models. This
+    guide will show you how to use Activation-aware Weight Quantization (AWQ), AutoGPTQ,
+    and bitsandbytes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: AWQ
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Try AWQ quantization with this [notebook](https://colab.research.google.com/drive/1HzZH89yAXJaZgwJDhQj9LqSBux932BvY)!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Activation-aware Weight Quantization (AWQ)](https://hf.co/papers/2306.00978)
+    doesn’t quantize all the weights in a model, and instead, it preserves a small
+    percentage of weights that are important for LLM performance. This significantly
+    reduces quantization loss such that you can run models in 4-bit precision without
+    experiencing any performance degradation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several libraries for quantizing models with the AWQ algorithm, such
+    as [llm-awq](https://github.com/mit-han-lab/llm-awq), [autoawq](https://github.com/casper-hansen/AutoAWQ)
+    or [optimum-intel](https://huggingface.co/docs/optimum/main/en/intel/optimization_inc).
+    Transformers supports loading models quantized with the llm-awq and autoawq libraries.
+    This guide will show you how to load models quantized with autoawq, but the processs
+    is similar for llm-awq quantized models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Make sure you have autoawq installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'AWQ-quantized models can be identified by checking the `quantization_config`
+    attribute in the model’s [config.json](https://huggingface.co/TheBloke/zephyr-7B-alpha-AWQ/blob/main/config.json)
+    file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A quantized model is loaded with the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method. If you loaded your model on the CPU, make sure to move it to a GPU device
+    first. Use the `device_map` parameter to specify where to place the model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Loading an AWQ-quantized model automatically sets other weights to fp16 by
+    default for performance reasons. If you want to load these other weights in a
+    different format, use the `torch_dtype` parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'AWQ quantization can also be combined with [FlashAttention-2](perf_infer_gpu_one#flashattention-2)
+    to further accelerate inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Fused modules
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Fused modules offers improved accuracy and performance and it is supported out-of-the-box
+    for AWQ modules for [Llama](https://huggingface.co/meta-llama) and [Mistral](https://huggingface.co/mistralai/Mistral-7B-v0.1)
+    architectures, but you can also fuse AWQ modules for unsupported architectures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fused modules cannot be combined with other optimization techniques such as
+    FlashAttention-2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: supported architecturesunsupported architectures
+  prefs: []
+  type: TYPE_NORMAL
+- en: To enable fused modules for supported architectures, create an [AwqConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.AwqConfig)
+    and set the parameters `fuse_max_seq_len` and `do_fuse=True`. The `fuse_max_seq_len`
+    parameter is the total sequence length and it should include the context length
+    and the expected generation length. You can set it to a larger value to be safe.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, to fuse the AWQ modules of the [TheBloke/Mistral-7B-OpenOrca-AWQ](https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-AWQ)
+    model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: AutoGPTQ
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Try GPTQ quantization with PEFT in this [notebook](https://colab.research.google.com/drive/1_TIrmuKOFhuRRiTWN94iLKUFu6ZX4ceb?usp=sharing)
+    and learn more about it’s details in this [blog post](https://huggingface.co/blog/gptq-integration)!
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [AutoGPTQ](https://github.com/PanQiWei/AutoGPTQ) library implements the
+    GPTQ algorithm, a post-training quantization technique where each row of the weight
+    matrix is quantized independently to find a version of the weights that minimizes
+    the error. These weights are quantized to int4, but they’re restored to fp16 on
+    the fly during inference. This can save your memory-usage by 4x because the int4
+    weights are dequantized in a fused kernel rather than a GPU’s global memory, and
+    you can also expect a speedup in inference because using a lower bitwidth takes
+    less time to communicate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before you begin, make sure the following libraries are installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: To quantize a model (currently only supported for text models), you need to
+    create a [GPTQConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.GPTQConfig)
+    class and set the number of bits to quantize to, a dataset to calibrate the weights
+    for quantization, and a tokenizer to prepare the dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: You could also pass your own dataset as a list of strings, but it is highly
+    recommended to use the same dataset from the GPTQ paper.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load a model to quantize and pass the `gptq_config` to the [from_pretrained()](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.FlaxAutoModelForVision2Seq.from_pretrained)
+    method. Set `device_map="auto"` to automatically offload the model to a CPU to
+    help fit the model in memory, and allow the model modules to be moved between
+    the CPU and GPU for quantization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’re running out of memory because a dataset is too large, disk offloading
+    is not supported. If this is the case, try passing the `max_memory` parameter
+    to allocate the amount of memory to use on your device (GPU and CPU):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Depending on your hardware, it can take some time to quantize a model from scratch.
+    It can take ~5 minutes to quantize the faceboook/opt-350m model on a free-tier
+    Google Colab GPU, but it’ll take ~4 hours to quantize a 175B parameter model on
+    a NVIDIA A100\. Before you quantize a model, it is a good idea to check the Hub
+    if a GPTQ-quantized version of the model already exists.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once your model is quantized, you can push the model and tokenizer to the Hub
+    where it can be easily shared and accessed. Use the [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)
+    method to save the [GPTQConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.GPTQConfig):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You could also save your quantized model locally with the [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)
+    method. If the model was quantized with the `device_map` parameter, make sure
+    to move the entire model to a GPU or CPU before saving it. For example, to save
+    the model on a CPU:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Reload a quantized model with the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method, and set `device_map="auto"` to automatically distribute the model on all
+    available GPUs to load the model faster without using more memory than needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: ExLlama
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[ExLlama](https://github.com/turboderp/exllama) is a Python/C++/CUDA implementation
+    of the [Llama](model_doc/llama) model that is designed for faster inference with
+    4-bit GPTQ weights (check out these [benchmarks](https://github.com/huggingface/optimum/tree/main/tests/benchmark#gptq-benchmark)).
+    The ExLlama kernel is activated by default when you create a [GPTQConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.GPTQConfig)
+    object. To boost inference speed even further, use the [ExLlamaV2](https://github.com/turboderp/exllamav2)
+    kernels by configuring the `exllama_config` parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Only 4-bit models are supported, and we recommend deactivating the ExLlama kernels
+    if you’re finetuning a quantized model with PEFT.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The ExLlama kernels are only supported when the entire model is on the GPU.
+    If you’re doing inference on a CPU with AutoGPTQ (version > 0.4.2), then you’ll
+    need to disable the ExLlama kernel. This overwrites the attributes related to
+    the ExLlama kernels in the quantization config of the config.json file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: bitsandbytes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[bitsandbytes](https://github.com/TimDettmers/bitsandbytes) is the easiest
+    option for quantizing a model to 8 and 4-bit. 8-bit quantization multiplies outliers
+    in fp16 with non-outliers in int8, converts the non-outlier values back to fp16,
+    and then adds them together to return the weights in fp16\. This reduces the degradative
+    effect outlier values have on a model’s performance. 4-bit quantization compresses
+    a model even further, and it is commonly used with [QLoRA](https://hf.co/papers/2305.14314)
+    to finetune quantized LLMs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use bitsandbytes, make sure you have the following libraries installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 8-bit4-bit
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now you can quantize a model with the `load_in_8bit` or `load_in_4bit` parameters
+    in the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method. This works for any model in any modality, as long as it supports loading
+    with Accelerate and contains `torch.nn.Linear` layers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 8-bit4-bit
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Quantizing a model in 8-bit halves the memory-usage, and for large models,
+    set `device_map="auto"` to efficiently use the GPUs available:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'By default, all the other modules such as `torch.nn.LayerNorm` are converted
+    to `torch.float16`. You can change the data type of these modules with the `torch_dtype`
+    parameter if you want:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once a model is quantized to 8-bit, you can’t push the quantized weights to
+    the Hub unless you’re using the latest version of Transformers and bitsandbytes.
+    If you have the latest versions, then you can push the 8-bit model to the Hub
+    with the [push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)
+    method. The quantization config.json file is pushed first, followed by the quantized
+    model weights.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Training with 8-bit and 4-bit weights are only supported for training *extra*
+    parameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can check your memory footprint with the `get_memory_footprint` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Quantized models can be loaded from the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method without needing to specify the `load_in_8bit` or `load_in_4bit` parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 8-bit
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Learn more about the details of 8-bit quantization in this [blog post](https://huggingface.co/blog/hf-bitsandbytes-integration)!
+  prefs: []
+  type: TYPE_NORMAL
+- en: This section explores some of the specific features of 8-bit models, such as
+    offloading, outlier thresholds, skipping module conversion, and finetuning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Offloading
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '8-bit models can offload weights between the CPU and GPU to support fitting
+    very large models into memory. The weights dispatched to the CPU are actually
+    stored in **float32**, and aren’t converted to 8-bit. For example, to enable offloading
+    for the [bigscience/bloom-1b7](https://huggingface.co/bigscience/bloom-1b7) model,
+    start by creating a [BitsAndBytesConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.BitsAndBytesConfig):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Design a custom device map to fit everything on your GPU except for the `lm_head`,
+    which you’ll dispatch to the CPU:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now load your model with the custom `device_map` and `quantization_config`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Outlier threshold
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: An “outlier” is a hidden state value greater than a certain threshold, and these
+    values are computed in fp16\. While the values are usually normally distributed
+    ([-3.5, 3.5]), this distribution can be very different for large models ([-60,
+    6] or [6, 60]). 8-bit quantization works well for values ~5, but beyond that,
+    there is a significant performance penalty. A good default threshold value is
+    6, but a lower threshold may be needed for more unstable models (small models
+    or finetuning).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To find the best threshold for your model, we recommend experimenting with
+    the `llm_int8_threshold` parameter in [BitsAndBytesConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.BitsAndBytesConfig):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Skip module conversion
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'For some models, like [Jukebox](model_doc/jukebox), you don’t need to quantize
+    every module to 8-bit which can actually cause instability. With Jukebox, there
+    are several `lm_head` modules that should be skipped using the `llm_int8_skip_modules`
+    parameter in [BitsAndBytesConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.BitsAndBytesConfig):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finetuning
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: With the [PEFT](https://github.com/huggingface/peft) library, you can finetune
+    large models like [flan-t5-large](https://huggingface.co/google/flan-t5-large)
+    and [facebook/opt-6.7b](https://huggingface.co/facebook/opt-6.7b) with 8-bit quantization.
+    You don’t need to pass the `device_map` parameter for training because it’ll automatically
+    load your model on a GPU. However, you can still customize the device map with
+    the `device_map` parameter if you want to (`device_map="auto"` should only be
+    used for inference).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4-bit
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Try 4-bit quantization in this [notebook](https://colab.research.google.com/drive/1ge2F1QSK8Q7h0hn3YKuBCOAS0bK8E0wf)
+    and learn more about it’s details in this [blog post](https://huggingface.co/blog/4bit-transformers-bitsandbytes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This section explores some of the specific features of 4-bit models, such as
+    changing the compute data type, using the Normal Float 4 (NF4) data type, and
+    using nested quantization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compute data type
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'To speedup computation, you can change the data type from float32 (the default
+    value) to bf16 using the `bnb_4bit_compute_dtype` parameter in [BitsAndBytesConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.BitsAndBytesConfig):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Normal Float 4 (NF4)
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'NF4 is a 4-bit data type from the [QLoRA](https://hf.co/papers/2305.14314)
+    paper, adapted for weights initialized from a normal distribution. You should
+    use NF4 for training 4-bit base models. This can be configured with the `bnb_4bit_quant_type`
+    parameter in the [BitsAndBytesConfig](/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.BitsAndBytesConfig):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: For inference, the `bnb_4bit_quant_type` does not have a huge impact on performance.
+    However, to remain consistent with the model weights, you should use the `bnb_4bit_compute_dtype`
+    and `torch_dtype` values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nested quantization
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Nested quantization is a technique that can save additional memory at no additional
+    performance cost. This feature performs a second quantization of the already quantized
+    weights to save an addition 0.4 bits/parameter. For example, with nested quantization,
+    you can finetune a [Llama-13b](https://huggingface.co/meta-llama/Llama-2-13b)
+    model on a 16GB NVIDIA T4 GPU with a sequence length of 1024, a batch size of
+    1, and enabling gradient accumulation with 4 steps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Optimum
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [Optimum](https://huggingface.co/docs/optimum/index) library supports quantization
+    for Intel, Furiosa, ONNX Runtime, GPTQ, and lower-level PyTorch quantization functions.
+    Consider using Optimum for quantization if you’re using specific and optimized
+    hardware like Intel CPUs, Furiosa NPUs or a model accelerator like ONNX Runtime.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Benchmarks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To compare the speed, throughput, and latency of each quantization scheme, check
+    the following benchmarks obtained from the [optimum-benchmark](https://github.com/huggingface/optimum-benchmark)
+    library. The benchmark was run on a NVIDIA A1000 for the [TheBloke/Mistral-7B-v0.1-AWQ](https://huggingface.co/TheBloke/Mistral-7B-v0.1-AWQ)
+    and [TheBloke/Mistral-7B-v0.1-GPTQ](https://huggingface.co/TheBloke/Mistral-7B-v0.1-GPTQ)
+    models. These were also tested against the bitsandbytes quantization methods as
+    well as a native fp16 model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![forward peak memory per batch size](../Images/7f7a45cc2b5704faa291fb7c3ca255d6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: forward peak memory/batch size
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![generate peak memory per batch size](../Images/c53e9d1c99d4b8ce87793021dc7f7393.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generate peak memory/batch size
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![generate throughput per batch size](../Images/40d57cb1a4c4282ec140a27de593156a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generate throughput/batch size
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![forward latency per batch size](../Images/67c3f5ce2fa384e77579473e9efb77fa.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: forward latency/batch size
+  prefs: []
+  type: TYPE_NORMAL
+- en: The benchmarks indicate AWQ quantization is the fastest for inference, text
+    generation, and has the lowest peak memory for text generation. However, AWQ has
+    the largest forward latency per batch size. For a more detailed discussion about
+    the pros and cons of each quantization method, read the [Overview of natively
+    supported quantization schemes in 🤗 Transformers](https://huggingface.co/blog/overview-quantization-transformers)
+    blog post.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fused AWQ modules
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The [TheBloke/Mistral-7B-OpenOrca-AWQ](https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-AWQ)
+    model was benchmarked with `batch_size=1` with and without fused modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unfused module
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Batch Size | Prefill Length | Decode Length | Prefill tokens/s | Decode tokens/s
+    | Memory (VRAM) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --: | --: | --: | --: | --: | :-- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 32 | 32 | 60.0984 | 38.4537 | 4.50 GB (5.68%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 64 | 64 | 1333.67 | 31.6604 | 4.50 GB (5.68%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 128 | 128 | 2434.06 | 31.6272 | 4.50 GB (5.68%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 256 | 256 | 3072.26 | 38.1731 | 4.50 GB (5.68%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 512 | 512 | 3184.74 | 31.6819 | 4.59 GB (5.80%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 1024 | 1024 | 3148.18 | 36.8031 | 4.81 GB (6.07%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 2048 | 2048 | 2927.33 | 35.2676 | 5.73 GB (7.23%) |'
+  prefs: []
+  type: TYPE_TB
+- en: Fused module
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Batch Size | Prefill Length | Decode Length | Prefill tokens/s | Decode tokens/s
+    | Memory (VRAM) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --: | --: | --: | --: | --: | :-- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 32 | 32 | 81.4899 | 80.2569 | 4.00 GB (5.05%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 64 | 64 | 1756.1 | 106.26 | 4.00 GB (5.05%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 128 | 128 | 2479.32 | 105.631 | 4.00 GB (5.06%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 256 | 256 | 1813.6 | 85.7485 | 4.01 GB (5.06%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 512 | 512 | 2848.9 | 97.701 | 4.11 GB (5.19%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 1024 | 1024 | 3044.35 | 87.7323 | 4.41 GB (5.57%) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | 2048 | 2048 | 2715.11 | 89.4709 | 5.57 GB (7.04%) |'
+  prefs: []
+  type: TYPE_TB
+- en: The speed and throughput of fused and unfused modules were also tested with
+    the [optimum-benchmark](https://github.com/huggingface/optimum-benchmark) library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![generate throughput per batch size](../Images/c73fad074a31449cad262be148000a7b.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: foward peak memory/batch size
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![forward latency per batch size](../Images/a6ca88db796d9aca9bc439edc51f861d.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: generate throughput/batch size
+  prefs: []
+  type: TYPE_NORMAL
