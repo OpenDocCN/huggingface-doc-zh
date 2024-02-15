@@ -1,128 +1,182 @@
 - en: Migrating your code to 🤗 Accelerate
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 将您的代码迁移到 🤗 Accelerate
 - en: 'Original text: [https://huggingface.co/docs/accelerate/basic_tutorials/migration](https://huggingface.co/docs/accelerate/basic_tutorials/migration)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/accelerate/basic_tutorials/migration](https://huggingface.co/docs/accelerate/basic_tutorials/migration)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This tutorial will detail how to easily convert existing PyTorch code to use
     🤗 Accelerate! You’ll see that by just changing a few lines of code, 🤗 Accelerate
     can perform its magic and get you on your way toward running your code on distributed
     systems with ease!
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程将详细介绍如何轻松将现有的 PyTorch 代码转换为使用 🤗 Accelerate！您将看到，通过仅更改几行代码，🤗 Accelerate 就可以发挥其魔力，让您轻松地将代码运行在分布式系统上！
 - en: The base training loop
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 基本训练循环
 - en: To begin, write out a very basic PyTorch training loop.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，编写一个非常基本的 PyTorch 训练循环。
 - en: We are under the presumption that `training_dataloader`, `model`, `optimizer`,
     `scheduler`, and `loss_function` have been defined beforehand.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们假设 `training_dataloader`、`model`、`optimizer`、`scheduler` 和 `loss_function`
+    已经事先定义好。
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Add in 🤗 Accelerate
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 添加 🤗 Accelerate
 - en: 'To start using 🤗 Accelerate, first import and create an [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     instance:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 要开始使用 🤗 Accelerate，请首先导入并创建一个 [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    实例：
 - en: '[PRE1]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     is the main force behind utilizing all the possible options for distributed training!'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    是利用分布式训练的所有可能选项的主要力量！'
 - en: Setting the right device
+  id: totrans-12
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 设置正确的设备
 - en: 'The [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     class knows the right device to move any PyTorch object to at any time, so you
     should change the definition of `device` to come from [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator):'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    类知道任何时候将任何 PyTorch 对象移动到正确设备，因此您应该将 `device` 的定义更改为来自 [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)：'
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Preparing your objects
+  id: totrans-15
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 准备您的对象
 - en: 'Next, you need to pass all of the important objects related to training into
     [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).
     🤗 Accelerate will make sure everything is setup in the current environment for
     you to start training:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您需要将所有与训练相关的重要对象传递给 [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)。🤗
+    Accelerate 将确保一切都在当前环境中设置好，以便您开始训练：
 - en: '[PRE3]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: These objects are returned in the same order they were sent in. By default when
     using `device_placement=True`, all of the objects that can be sent to the right
     device will be. If you need to work with data that isn’t passed to [~Accelerator.prepare]
     but should be on the active device, you should pass in the `device` you made earlier.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些对象以发送顺序返回。默认情况下，当使用 `device_placement=True` 时，所有可以发送到正确设备的对象都会被发送。如果您需要处理未传递给
+    [~Accelerator.prepare] 但应该在活动设备上的数据，您应该传入之前创建的 `device`。
 - en: Accelerate will only prepare objects that inherit from their respective PyTorch
     classes (such as `torch.optim.Optimizer`).
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: Accelerate 仅会准备从各自的 PyTorch 类继承的对象（如 `torch.optim.Optimizer`）。
 - en: Modifying the training loop
+  id: totrans-20
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 修改训练循环
 - en: 'Finally, three lines of code need to be changed in the training loop. 🤗 Accelerate’s
     DataLoader classes will automatically handle the device placement by default,
     and [backward()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.backward)
     should be used for performing the backward pass:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，在训练循环中需要更改三行代码。🤗 Accelerate 的 DataLoader 类将默认自动处理设备放置，并且应使用 [backward()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.backward)
+    来执行反向传播：
 - en: '[PRE4]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: With that, your training loop is now ready to use 🤗 Accelerate!
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这些，您的训练循环现在已准备好使用 🤗 Accelerate！
 - en: The finished code
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 完成的代码
 - en: 'Below is the final version of the converted code:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是转换后代码的最终版本：
 - en: '[PRE5]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: More Resources
+  id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 更多资源
 - en: To check out more ways on how to migrate to 🤗 Accelerate, check out our [interactive
     migration tutorial](https://huggingface.co/docs/accelerate/usage_guides/explore)
     which showcases other items that need to be watched for when using Accelerate
     and how to do so quickly.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解更多关于如何迁移到 🤗 Accelerate 的方法，请查看我们的 [交互式迁移教程](https://huggingface.co/docs/accelerate/usage_guides/explore)，展示了在使用
+    Accelerate 时需要注意的其他项目以及如何快速实现。
