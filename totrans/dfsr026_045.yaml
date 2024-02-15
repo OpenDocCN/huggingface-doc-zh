@@ -1,24 +1,17 @@
 - en: Pipeline callbacks
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 管道回调
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/callback](https://huggingface.co/docs/diffusers/using-diffusers/callback)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: '[原文链接](https://huggingface.co/docs/diffusers/using-diffusers/callback)'
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The denoising loop of a pipeline can be modified with custom defined functions
@@ -27,27 +20,37 @@
     of callbacks opens up some interesting use-cases such as changing the prompt embeddings
     at each timestep, assigning different weights to the prompt embeddings, and editing
     the guidance scale.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`callback_on_step_end`参数可以通过自定义定义的函数修改管道的去噪循环。这对于*动态*调整某些管道属性或修改张量变量非常有用。回调的灵活性开启了一些有趣的用例，例如在每个时间步更改提示嵌入、为提示嵌入分配不同的权重以及编辑指导比例。
 - en: This guide will show you how to use the `callback_on_step_end` parameter to
     disable classifier-free guidance (CFG) after 40% of the inference steps to save
     compute with minimal cost to performance.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何使用`callback_on_step_end`参数在推理步骤的40%后禁用无分类器引导（CFG），以节省计算资源而对性能的影响最小。
 - en: 'The callback function should have the following arguments:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 回调函数应具有以下参数：
 - en: '`pipe` (or the pipeline instance) provides access to useful properties such
     as `num_timestep` and `guidance_scale`. You can modify these properties by updating
     the underlying attributes. For this example, you’ll disable CFG by setting `pipe._guidance_scale=0.0`.'
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pipe`（或管道实例）提供对诸如`num_timestep`和`guidance_scale`等有用属性的访问。您可以通过更新底层属性来修改这些属性。在本例中，您将通过设置`pipe._guidance_scale=0.0`来禁用CFG。'
 - en: '`step_index` and `timestep` tell you where you are in the denoising loop. Use
     `step_index` to turn off CFG after reaching 40% of `num_timestep`.'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`step_index`和`timestep`告诉您在去噪循环中的位置。使用`step_index`在达到`num_timestep`的40%后关闭CFG。'
 - en: '`callback_kwargs` is a dict that contains tensor variables you can modify during
     the denoising loop. It only includes variables specified in the `callback_on_step_end_tensor_inputs`
     argument, which is passed to the pipeline’s `__call__` method. Different pipelines
@@ -55,61 +58,89 @@
     attribute for the list of variables you can modify. Some common variables include
     `latents` and `prompt_embeds`. For this function, change the batch size of `prompt_embeds`
     after setting `guidance_scale=0.0` in order for it to work properly.'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`callback_kwargs`是一个包含您可以在去噪循环中修改的张量变量的字典。它仅包括在传递给管道的`__call__`方法的`callback_on_step_end_tensor_inputs`参数中指定的变量。不同的管道可能使用不同的变量集，因此请检查管道的`_callback_tensor_inputs`属性，以获取您可以修改的变量列表。一些常见的变量包括`latents`和`prompt_embeds`。对于此函数，在设置`guidance_scale=0.0`后，更改`prompt_embeds`的批处理大小，以使其正常工作。'
 - en: 'Your callback function should look something like this:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 您的回调函数应该类似于这样：
 - en: '[PRE0]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Now, you can pass the callback function to the `callback_on_step_end` parameter
     and the `prompt_embeds` to `callback_on_step_end_tensor_inputs`.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您可以将回调函数传递给`callback_on_step_end`参数，并将`prompt_embeds`传递给`callback_on_step_end_tensor_inputs`。
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: The callback function is executed at the end of each denoising step, and modifies
     the pipeline attributes and tensor variables for the next denoising step.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 回调函数在每个去噪步骤结束时执行，并修改下一个去噪步骤的管道属性和张量变量。
 - en: With callbacks, you can implement features such as dynamic CFG without having
     to modify the underlying code at all!
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用回调，您可以实现动态CFG等功能，而无需修改底层代码！
 - en: 🤗 Diffusers currently only supports `callback_on_step_end`, but feel free to
     open a [feature request](https://github.com/huggingface/diffusers/issues/new/choose)
     if you have a cool use-case and require a callback function with a different execution
     point!
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Diffusers目前仅支持`callback_on_step_end`，但如果您有一个很酷的用例并需要在不同的执行点上具有回调函数，请随时提出[功能请求](https://github.com/huggingface/diffusers/issues/new/choose)！
 - en: Interrupt the diffusion process
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 中断扩散过程
 - en: Interrupting the diffusion process is particularly useful when building UIs
     that work with Diffusers because it allows users to stop the generation process
     if they’re unhappy with the intermediate results. You can incorporate this into
     your pipeline with a callback.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在构建与扩散器一起工作的UI时，中断扩散过程特别有用，因为它允许用户在对中间结果不满意时停止生成过程。您可以通过回调将此功能整合到您的管道中。
 - en: The interruption callback is supported for text-to-image, image-to-image, and
     inpainting for the [StableDiffusionPipeline](../api/pipelines/stable_diffusion/overview)
     and [StableDiffusionXLPipeline](../api/pipelines/stable_diffusion/stable_diffusion_xl).
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 中断回调支持文本到图像、图像到图像和修复图像的[StableDiffusionPipeline](../api/pipelines/stable_diffusion/overview)和[StableDiffusionXLPipeline](../api/pipelines/stable_diffusion/stable_diffusion_xl)。
 - en: 'This callback function should take the following arguments: `pipe`, `i`, `t`,
     and `callback_kwargs` (this must be returned). Set the pipeline’s `_interrupt`
     attribute to `True` to stop the diffusion process after a certain number of steps.
     You are also free to implement your own custom stopping logic inside the callback.'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个回调函数应该接受以下参数：`pipe`、`i`、`t`和`callback_kwargs`（必须返回）。将管道的`_interrupt`属性设置为`True`，以在一定步数后停止扩散过程。您也可以自由地在回调函数内部实现自定义的停止逻辑。
 - en: In this example, the diffusion process is stopped after 10 steps even though
     `num_inference_steps` is set to 50.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本例中，尽管`num_inference_steps`设置为50，但扩散过程在10步后停止。
 - en: '[PRE2]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
