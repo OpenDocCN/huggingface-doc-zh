@@ -1,24 +1,17 @@
 - en: How to run Stable Diffusion with Core ML
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 如何在Core ML中运行稳定扩散
 - en: 'Original text: [https://huggingface.co/docs/diffusers/optimization/coreml](https://huggingface.co/docs/diffusers/optimization/coreml)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/optimization/coreml](https://huggingface.co/docs/diffusers/optimization/coreml)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[Core ML](https://developer.apple.com/documentation/coreml) is the model format
@@ -26,265 +19,383 @@
     in running Stable Diffusion models inside your macOS or iOS/iPadOS apps, this
     guide will show you how to convert existing PyTorch checkpoints into the Core
     ML format and use them for inference with Python or Swift.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Core ML是由Apple框架支持的模型格式和机器学习库。如果您有兴趣在macOS或iOS/iPadOS应用程序中运行Stable Diffusion模型，本指南将向您展示如何将现有的PyTorch检查点转换为Core
+    ML格式，并使用Python或Swift进行推断。
 - en: 'Core ML models can leverage all the compute engines available in Apple devices:
     the CPU, the GPU, and the Apple Neural Engine (or ANE, a tensor-optimized accelerator
     available in Apple Silicon Macs and modern iPhones/iPads). Depending on the model
     and the device it’s running on, Core ML can mix and match compute engines too,
     so some portions of the model may run on the CPU while others run on GPU, for
     example.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: Core ML模型可以利用Apple设备中的所有计算引擎：CPU、GPU和Apple神经引擎（或ANE，一种在Apple Silicon Mac和现代iPhone/iPad中可用的张量优化加速器）。根据模型和运行设备，Core
+    ML也可以混合匹配计算引擎，因此模型的某些部分可能在CPU上运行，而其他部分可能在GPU上运行，例如。
 - en: You can also run the `diffusers` Python codebase on Apple Silicon Macs using
     the `mps` accelerator built into PyTorch. This approach is explained in depth
     in [the mps guide](mps), but it is not compatible with native apps.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以在Apple Silicon Mac上使用内置于PyTorch中的mps加速器运行`diffusers` Python代码库。这种方法在mps指南中有详细说明，但不兼容本机应用程序。
 - en: Stable Diffusion Core ML Checkpoints
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 稳定扩散Core ML检查点
 - en: Stable Diffusion weights (or checkpoints) are stored in the PyTorch format,
     so you need to convert them to the Core ML format before we can use them inside
     native apps.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 稳定扩散权重（或检查点）存储在PyTorch格式中，因此您需要将它们转换为Core ML格式，然后我们才能在本机应用程序中使用它们。
 - en: Thankfully, Apple engineers developed [a conversion tool](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml)
     based on `diffusers` to convert the PyTorch checkpoints to Core ML.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，Apple工程师基于`diffusers`开发了[一个转换工具](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml)，用于将PyTorch检查点转换为Core
+    ML。
 - en: 'Before you convert a model, though, take a moment to explore the Hugging Face
     Hub – chances are the model you’re interested in is already available in Core
     ML format:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在转换模型之前，请花点时间探索Hugging Face Hub - 你感兴趣的模型很可能已经以Core ML格式可用：
 - en: the [Apple](https://huggingface.co/apple) organization includes Stable Diffusion
     versions 1.4, 1.5, 2.0 base, and 2.1 base
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Apple组织包括稳定扩散版本1.4、1.5、2.0基础和2.1基础
 - en: '[coreml community](https://huggingface.co/coreml-community) includes custom
     finetuned models'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`coreml community`包括自定义微调模型'
 - en: use this [filter](https://huggingface.co/models?pipeline_tag=text-to-image&library=coreml&p=2&sort=likes)
     to return all available Core ML checkpoints
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用此过滤器返回所有可用的Core ML检查点
 - en: If you can’t find the model you’re interested in, we recommend you follow the
     instructions for [Converting Models to Core ML](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml)
     by Apple.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果找不到您感兴趣的模型，我们建议您按照Apple提供的[将模型转换为Core ML](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml)说明进行操作。
 - en: Selecting the Core ML Variant to Use
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 选择要使用的Core ML变体
 - en: 'Stable Diffusion models can be converted to different Core ML variants intended
     for different purposes:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 稳定扩散模型可以转换为用于不同目的的不同Core ML变体：
 - en: 'The type of attention blocks used. The attention operation is used to “pay
     attention” to the relationship between different areas in the image representations
     and to understand how the image and text representations are related. Attention
     is compute- and memory-intensive, so different implementations exist that consider
     the hardware characteristics of different devices. For Core ML Stable Diffusion
     models, there are two attention variants:'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用的注意力块类型。注意力操作用于“关注”图像表示中不同区域之间的关系，并理解图像和文本表示之间的关系。注意力是计算和内存密集型的，因此存在不同的实现，考虑了不同设备的硬件特性。对于Core
+    ML Stable Diffusion模型，有两种注意力变体：
 - en: '`split_einsum` ([introduced by Apple](https://machinelearning.apple.com/research/neural-engine-transformers))
     is optimized for ANE devices, which is available in modern iPhones, iPads and
     M-series computers.'
+  id: totrans-17
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`split_einsum`（由Apple引入）经过优化，适用于现代iPhone、iPad和M系列计算机中可用的ANE设备。'
 - en: The “original” attention (the base implementation used in `diffusers`) is only
     compatible with CPU/GPU and not ANE. It can be *faster* to run your model on CPU
     + GPU using `original` attention than ANE. See [this performance benchmark](https://huggingface.co/blog/fast-mac-diffusers#performance-benchmarks)
     as well as some [additional measures provided by the community](https://github.com/huggingface/swift-coreml-diffusers/issues/31)
     for additional details.
+  id: totrans-18
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: “原始”注意力（在`diffusers`中使用的基本实现）仅与CPU/GPU兼容，而不与ANE兼容。使用`original`注意力在CPU + GPU上运行模型可能比ANE更快。查看此性能基准以及社区提供的一些其他措施，以获取更多详细信息。
 - en: The supported inference framework.
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 支持的推断框架。
 - en: '`packages` are suitable for Python inference. This can be used to test converted
     Core ML models before attempting to integrate them inside native apps, or if you
     want to explore Core ML performance but don’t need to support native apps. For
     example, an application with a web UI could perfectly use a Python Core ML backend.'
+  id: totrans-20
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`packages`适用于Python推断。这可以用于在尝试将其集成到本机应用程序之前测试转换的Core ML模型，或者如果您想探索Core ML性能但不需要支持本机应用程序。例如，具有Web
+    UI的应用程序可以完美地使用Python Core ML后端。'
 - en: '`compiled` models are required for Swift code. The `compiled` models in the
     Hub split the large UNet model weights into several files for compatibility with
     iOS and iPadOS devices. This corresponds to the [`--chunk-unet` conversion option](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml).
     If you want to support native apps, then you need to select the `compiled` variant.'
+  id: totrans-21
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Swift代码需要`compiled`模型。Hub中的`compiled`模型将大型UNet模型权重拆分为几个文件，以便与iOS和iPadOS设备兼容。这对应于[`--chunk-unet`转换选项](https://github.com/apple/ml-stable-diffusion#-converting-models-to-core-ml)。如果要支持原生应用程序，则需要选择`compiled`变体。
 - en: 'The official Core ML Stable Diffusion [models](https://huggingface.co/apple/coreml-stable-diffusion-v1-4/tree/main)
     include these variants, but the community ones may vary:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 官方的Core ML Stable Diffusion [模型](https://huggingface.co/apple/coreml-stable-diffusion-v1-4/tree/main)包括这些变体，但社区的可能会有所不同：
 - en: '[PRE0]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: You can download and use the variant you need as shown below.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以按照下面的方式下载并使用您需要的变体。
 - en: Core ML Inference in Python
+  id: totrans-25
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Python中的Core ML推断
 - en: 'Install the following libraries to run Core ML inference in Python:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装以下库以在Python中运行Core ML推断：
 - en: '[PRE1]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Download the Model Checkpoints
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 下载模型检查点
 - en: To run inference in Python, use one of the versions stored in the `packages`
     folders because the `compiled` ones are only compatible with Swift. You may choose
     whether you want to use `original` or `split_einsum` attention.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在Python中运行推断，请使用存储在`packages`文件夹中的版本，因为`compiled`版本仅与Swift兼容。您可以选择是否要使用`original`或`split_einsum`注意力。
 - en: 'This is how you’d download the `original` attention variant from the Hub to
     a directory called `models`:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是您如何从Hub下载`original`注意力变体到名为`models`的目录中：
 - en: '[PRE2]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Inference
+  id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 推断
 - en: Once you have downloaded a snapshot of the model, you can test it using Apple’s
     Python script.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您下载了模型的快照，您可以使用Apple的Python脚本进行测试。
 - en: '[PRE3]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Pass the path of the downloaded checkpoint with `-i` flag to the script. `--compute-unit`
     indicates the hardware you want to allow for inference. It must be one of the
     following options: `ALL`, `CPU_AND_GPU`, `CPU_ONLY`, `CPU_AND_NE`. You may also
     provide an optional output path, and a seed for reproducibility.'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`-i`标志将下载的检查点路径传递给脚本。`--compute-unit`指示您要允许用于推断的硬件。它必须是以下选项之一：`ALL`、`CPU_AND_GPU`、`CPU_ONLY`、`CPU_AND_NE`。您还可以提供可选的输出路径和一个用于可重现性的种子。
 - en: The inference script assumes you’re using the original version of the Stable
     Diffusion model, `CompVis/stable-diffusion-v1-4`. If you use another model, you
     *have* to specify its Hub id in the inference command line, using the `--model-version`
     option. This works for models already supported and custom models you trained
     or fine-tuned yourself.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 推断脚本假定您正在使用Stable Diffusion模型的原始版本，`CompVis/stable-diffusion-v1-4`。如果您使用另一个模型，则*必须*在推断命令行中指定其Hub
+    id，使用`--model-version`选项。这适用于已支持的模型和您自己训练或微调的自定义模型。
 - en: 'For example, if you want to use [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5):'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，如果您想使用[`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)：
 - en: '[PRE4]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Core ML inference in Swift
+  id: totrans-39
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Swift中的Core ML推断
 - en: Running inference in Swift is slightly faster than in Python because the models
     are already compiled in the `mlmodelc` format. This is noticeable on app startup
     when the model is loaded but shouldn’t be noticeable if you run several generations
     afterward.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Swift中运行推断比在Python中稍快，因为模型已经以`mlmodelc`格式编译。这在应用程序启动时加载模型时会有所注意，但如果之后运行几代，就不应该有明显的感觉。
 - en: Download
+  id: totrans-41
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 下载
 - en: 'To run inference in Swift on your Mac, you need one of the `compiled` checkpoint
     versions. We recommend you download them locally using Python code similar to
     the previous example, but with one of the `compiled` variants:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在Mac上的Swift中运行推断，您需要其中一个`compiled`检查点版本。我们建议您使用类似于上一个示例的Python代码在本地下载它们，但使用其中一个`compiled`变体：
 - en: '[PRE5]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Inference
+  id: totrans-44
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 推断
 - en: 'To run inference, please clone Apple’s repo:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 要运行推断，请克隆Apple的存储库：
 - en: '[PRE6]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'And then use Apple’s command line tool, [Swift Package Manager](https://www.swift.org/package-manager/#):'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后使用Apple的命令行工具，[Swift Package Manager](https://www.swift.org/package-manager/#)：
 - en: '[PRE7]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'You have to specify in `--resource-path` one of the checkpoints downloaded
     in the previous step, so please make sure it contains compiled Core ML bundles
     with the extension `.mlmodelc`. The `--compute-units` has to be one of these values:
     `all`, `cpuOnly`, `cpuAndGPU`, `cpuAndNeuralEngine`.'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 在`--resource-path`中指定在上一步中下载的检查点之一，因此请确保它包含扩展名为`.mlmodelc`的已编译的Core ML捆绑包。`--compute-units`必须是以下值之一：`all`、`cpuOnly`、`cpuAndGPU`、`cpuAndNeuralEngine`。
 - en: For more details, please refer to the [instructions in Apple’s repo](https://github.com/apple/ml-stable-diffusion).
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关更多详细信息，请参考[Apple存储库中的说明](https://github.com/apple/ml-stable-diffusion)。
 - en: Supported Diffusers Features
+  id: totrans-51
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 支持的Diffusers功能
 - en: 'The Core ML models and inference code don’t support many of the features, options,
     and flexibility of 🧨 Diffusers. These are some of the limitations to keep in mind:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: Core ML模型和推断代码不支持🧨 Diffusers的许多功能、选项和灵活性。这些是需要牢记的一些限制：
 - en: Core ML models are only suitable for inference. They can’t be used for training
     or fine-tuning.
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Core ML模型仅适用于推断。它们不能用于训练或微调。
 - en: Only two schedulers have been ported to Swift, the default one used by Stable
     Diffusion and `DPMSolverMultistepScheduler`, which we ported to Swift from our
     `diffusers` implementation. We recommend you use `DPMSolverMultistepScheduler`,
     since it produces the same quality in about half the steps.
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 只有两个调度程序已经移植到Swift，一个是Stable Diffusion使用的默认调度程序，另一个是我们从我们的`diffusers`实现中移植到Swift的`DPMSolverMultistepScheduler`。我们建议您使用`DPMSolverMultistepScheduler`，因为它在大约一半的步骤中产生相同的质量。
 - en: Negative prompts, classifier-free guidance scale, and image-to-image tasks are
     available in the inference code. Advanced features such as depth guidance, ControlNet,
     and latent upscalers are not available yet.
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 负面提示、无分类器指导比例和图像到图像任务在推断代码中可用。高级功能，如深度指导、ControlNet和潜在的放大器目前还不可用。
 - en: Apple’s [conversion and inference repo](https://github.com/apple/ml-stable-diffusion)
     and our own [swift-coreml-diffusers](https://github.com/huggingface/swift-coreml-diffusers)
     repos are intended as technology demonstrators to enable other developers to build
     upon.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 苹果的[转换和推理存储库](https://github.com/apple/ml-stable-diffusion)和我们自己的[swift-coreml-diffusers](https://github.com/huggingface/swift-coreml-diffusers)存储库旨在作为技术演示，以使其他开发人员能够构建在其基础上。
 - en: If you feel strongly about any missing features, please feel free to open a
     feature request or, better yet, a contribution PR 🙂.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您对任何缺失的功能感到强烈，请随时提出功能请求或更好地提交贡献 PR🙂。
 - en: Native Diffusers Swift app
+  id: totrans-58
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 本地扩散器 Swift 应用程序
 - en: One easy way to run Stable Diffusion on your own Apple hardware is to use [our
     open-source Swift repo](https://github.com/huggingface/swift-coreml-diffusers),
     based on `diffusers` and Apple’s conversion and inference repo. You can study
@@ -295,5 +406,10 @@
     and have determined that Core ML is the best solution to build your Stable Diffusion
     app, then you can use the rest of this guide to get started with your project.
     We can’t wait to see what you’ll build 🙂.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 在您自己的苹果硬件上运行 Stable Diffusion 的一种简单方法是使用[我们的开源 Swift 存储库](https://github.com/huggingface/swift-coreml-diffusers)，基于
+    `diffusers` 和苹果的转换和推理存储库。您可以研究代码，使用[Xcode](https://developer.apple.com/xcode/)编译它，并根据自己的需求进行调整。为了方便起见，还有一个[独立的
+    Mac 应用程序在 App Store 中](https://apps.apple.com/app/diffusers/id1666309574)，这样您就可以在不必处理代码或
+    IDE 的情况下进行操作。如果您是开发人员，并且已确定 Core ML 是构建 Stable Diffusion 应用程序的最佳解决方案，那么您可以使用本指南的其余部分开始您的项目。我们迫不及待地想看到您将会构建的内容🙂。
