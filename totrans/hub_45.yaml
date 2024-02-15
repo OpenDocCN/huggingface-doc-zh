@@ -1,210 +1,260 @@
 - en: Adding a Sign-In with HF button to your Space
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/hub/spaces-oauth](https://huggingface.co/docs/hub/spaces-oauth)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: You can enable a built-in sign-in flow in your Space by seamlessly creating
     and associating an [OAuth/OpenID connect](https://developer.okta.com/blog/2019/10/21/illustrated-guide-to-oauth-and-oidc)
     app so users can log in with their HF account.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: This enables new use cases for your Space. For instance, when combined with
     [Persistent Storage](https://huggingface.co/docs/hub/spaces-storage), a generative
     AI Space could allow users to log in to access their previous generations, only
     accessible to them.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: This guide will take you through the process of integrating a *Sign-In with
     HF* button into any Space. If you’re seeking a fast and simple method to implement
     this in a **Gradio** Space, take a look at its [built-in integration](https://www.gradio.app/guides/sharing-your-app#o-auth-login-via-hugging-face).
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: You can also use the HF OAuth flow to create a “Sign in with HF” flow in any
     website or App, outside of Spaces. [Read our general OAuth page](./oauth).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: Create an OAuth app
+  id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'All you need to do is add `hf_oauth: true` to your Space’s metadata inside
     your `README.md` file.'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: 'Here’s an example of metadata for a Gradio Space:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: You can check out the [configuration reference docs](./spaces-config-reference)
     for more information.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: 'This will add the following [environment variables](https://huggingface.co/docs/hub/spaces-overview#helper-environment-variables)
     to your space:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: '`OAUTH_CLIENT_ID`: the client ID of your OAuth app (public)'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`OAUTH_CLIENT_SECRET`: the client secret of your OAuth app'
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`OAUTH_SCOPES`: scopes accessible by your OAuth app.'
+  id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`OPENID_PROVIDER_URL`: The URL of the OpenID provider. The OpenID metadata
     will be available at [`{OPENID_PROVIDER_URL}/.well-known/openid-configuration`](https://huggingface.co/.well-known/openid-configuration).'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: As for any other environment variable, you can use them in your code by using
     `os.getenv("OAUTH_CLIENT_ID")`, for example.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: Redirect URLs
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: You can use any redirect URL you want, as long as it targets your Space.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: Note that `SPACE_HOST` is [available](https://huggingface.co/docs/hub/spaces-overview#helper-environment-variables)
     as an environment variable.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: For example, you can use `https://{SPACE_HOST}/login/callback` as a redirect
     URI.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: Scopes
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'The following scopes are always included for Spaces:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: '`openid`: Get the ID token in addition to the access token.'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`profile`: Get the user’s profile information (username, avatar, etc.)'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Those scopes are optional and can be added by setting `hf_oauth_scopes` in
     your Space’s metadata:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: '`email`: Get the user’s email address.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`read-repos`: Get read access to the user’s personal repos.'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`write-repos`: Get write access to the user’s personal repos. Does not grant
     read access on its own, you need to include `read-repos` as well.'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`manage-repos`: Get access to a repo’s settings. Also grants repo creation
     and deletion.'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`inference-api`: Get access to the [Inference API](https://huggingface.co/docs/api-inference/index),
     you will be able to make inference requests on behalf of the user.'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Adding the button to your Space
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: You now have all the information to add a “Sign-in with HF” button to your Space.
     Some libraries ([Python](https://github.com/lepture/authlib), [NodeJS](https://github.com/panva/node-openid-client))
     can help you implement the OpenID/OAuth protocol.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: Gradio and hugginface.js also provide **built-in support**, making implementing
     the Sign-in with HF button a breeze; you can check out the associated guides with
     [gradio](https://www.gradio.app/guides/sharing-your-app#o-auth-login-via-hugging-face)
     and with [hugginface.js](https://huggingface.co/docs/huggingface.js/hub/README#oauth-login).
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
 - en: 'Basically, you need to:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: Redirect the user to `https://huggingface.co/oauth/authorize?redirect_uri={REDIRECT_URI}&scope=openid%20profile&client_id={CLIENT_ID}&state={STATE}`,
     where `STATE` is a random string that you will need to verify later.
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将用户重定向到`https://huggingface.co/oauth/authorize?redirect_uri={REDIRECT_URI}&scope=openid%20profile&client_id={CLIENT_ID}&state={STATE}`，其中`STATE`是一个随机字符串，稍后您需要验证。
 - en: Handle the callback on `/auth/callback` or `/login/callback` (or your own custom
     callback URL) and verify the `state` parameter.
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 处理`/auth/callback`或`/login/callback`（或您自己的自定义回调URL）上的回调，并验证`state`参数。
 - en: 'Use the `code` query parameter to get an access token and id token from `https://huggingface.co/oauth/token`
     (POST request with `client_id`, `code`, `grant_type=authorization_code` and `redirect_uri`
     as form data, and with `Authorization: Basic {base64(client_id:client_secret)}`
     as a header).'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '使用`code`查询参数从`https://huggingface.co/oauth/token`获取访问令牌和id令牌（使用`client_id`，`code`，`grant_type=authorization_code`和`redirect_uri`作为表单数据进行POST请求，并使用`Authorization:
+    Basic {base64(client_id:client_secret)}`作为标头）。'
 - en: You should use `target=_blank` on the button to open the sign-in page in a new
     tab, unless you run the space outside its `iframe`. Otherwise, you might encounter
     issues with cookies on some browsers.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 在按钮上使用`target=_blank`，在新标签页中打开登录页面，除非您在其`iframe`之外运行空间。否则，您可能会在某些浏览器上遇到有关cookie的问题。
 - en: 'Examples:'
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[Gradio test app](https://huggingface.co/spaces/Wauplin/gradio-oauth-test)'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Gradio测试应用程序](https://huggingface.co/spaces/Wauplin/gradio-oauth-test)'
 - en: '[Hugging Chat (NodeJS/SvelteKit)](https://huggingface.co/spaces/huggingchat/chat-ui)'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Hugging Chat（NodeJS/SvelteKit）](https://huggingface.co/spaces/huggingchat/chat-ui)'
 - en: '[Inference Widgets (Auth.js/SvelteKit)](https://huggingface.co/spaces/huggingfacejs/inference-widgets),
     uses the `inference-api` scope to make inference requests on behalf of the user.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[推理小部件（Auth.js/SvelteKit）](https://huggingface.co/spaces/huggingfacejs/inference-widgets)，使用`inference-api`范围代表用户进行推理请求。'
 - en: '[Client-Side in a Static Space (huggingface.js)](https://huggingface.co/spaces/huggingfacejs/client-side-oauth)
     - very simple JavaScript example.'
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[客户端在静态空间中（huggingface.js）](https://huggingface.co/spaces/huggingfacejs/client-side-oauth)
+    - 非常简单的JavaScript示例。'
 - en: 'JS Code example:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: JS代码示例：
 - en: '[PRE1]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
