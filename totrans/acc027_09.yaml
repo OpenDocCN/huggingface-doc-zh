@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 从Jupyter环境启动多GPU训练
 - en: 'Original text: [https://huggingface.co/docs/accelerate/basic_tutorials/notebook](https://huggingface.co/docs/accelerate/basic_tutorials/notebook)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/basic_tutorials/notebook](https://huggingface.co/docs/accelerate/basic_tutorials/notebook)
 - en: null
   id: totrans-2
   prefs: []
@@ -19,21 +21,25 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程将教您如何使用🤗 Accelerate从Jupyter Notebook在分布式系统上微调计算机视觉模型。您还将学习如何设置确保环境正确配置、数据已正确准备以及最终如何启动训练所需的一些要求。
 - en: This tutorial is also available as a Jupyter Notebook [here](https://github.com/huggingface/notebooks/blob/main/examples/accelerate_examples/simple_cv_example.ipynb)
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程也可作为Jupyter Notebook [在这里](https://github.com/huggingface/notebooks/blob/main/examples/accelerate_examples/simple_cv_example.ipynb)查看
 - en: Configuring the Environment
   id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 配置环境
 - en: 'Before any training can be performed, a 🤗 Accelerate config file must exist
     in the system. Usually this can be done by running the following in a terminal
     and answering the prompts:'
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在执行任何训练之前，系统中必须存在一个🤗 Accelerate配置文件。通常可以通过在终端中运行以下命令并回答提示来完成：
 - en: '[PRE0]'
   id: totrans-7
   prefs: []
@@ -44,17 +50,20 @@
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，如果通用默认值是可以接受的，并且您*不*在TPU上运行，🤗Accelerate有一个实用程序，可以通过[utils.write_basic_config()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.commands.config.default.write_basic_config)快速将您的GPU配置写入配置文件。
 - en: The following code will restart Jupyter after writing the configuration, as
     CUDA code was called to perform this.
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下代码将在写入配置后重新启动Jupyter，因为调用了CUDA代码来执行此操作。
 - en: CUDA can’t be initialized more than once on a multi-GPU system. It’s fine to
     debug in the notebook and have calls to CUDA, but in order to finally train a
     full cleanup and restart will need to be performed.
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在多GPU系统上，CUDA不能被初始化多次。在笔记本中进行调试并调用CUDA是可以的，但为了最终训练，需要执行完全清理和重新启动。
 - en: '[PRE1]'
   id: totrans-11
   prefs: []
@@ -65,21 +74,25 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 准备数据集和模型
 - en: Next you should prepare your dataset. As mentioned at earlier, great care should
     be taken when preparing the `DataLoaders` and model to make sure that **nothing**
     is put on *any* GPU.
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您应该准备您的数据集。如前所述，在准备`DataLoaders`和模型时应格外小心，以确保**任何**东西都不会放在*任何* GPU上。
 - en: If you do, it is recommended to put that specific code into a function and call
     that from within the notebook launcher interface, which will be shown later.
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您这样做，建议将该特定代码放入一个函数中，并从笔记本启动器界面中调用该函数，稍后将显示该界面。
 - en: Make sure the dataset is downloaded based on the directions [here](https://github.com/huggingface/accelerate/tree/main/examples#simple-vision-example)
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保根据[这里](https://github.com/huggingface/accelerate/tree/main/examples#simple-vision-example)的说明下载数据集
 - en: '[PRE2]'
   id: totrans-16
   prefs: []
@@ -89,6 +102,7 @@
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，您需要创建一个函数，根据文件名提取类名：
 - en: '[PRE3]'
   id: totrans-18
   prefs: []
@@ -104,6 +118,7 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，标签是`beagle`。使用正则表达式可以从文件名中提取标签：
 - en: '[PRE5]'
   id: totrans-21
   prefs: []
@@ -118,6 +133,7 @@
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以看到它正确返回了我们文件的正确名称：
 - en: '[PRE7]'
   id: totrans-24
   prefs: []
@@ -128,6 +144,7 @@
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来应该制作一个`Dataset`类来处理获取图像和标签：
 - en: '[PRE8]'
   id: totrans-26
   prefs: []
@@ -138,6 +155,7 @@
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在开始构建数据集。在训练函数之外，您可以找到并声明所有的文件名和标签，并将它们用作启动函数内的参考：
 - en: '[PRE9]'
   id: totrans-28
   prefs: []
@@ -147,6 +165,7 @@
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来收集所有的标签：
 - en: '[PRE10]'
   id: totrans-30
   prefs: []
@@ -159,6 +178,7 @@
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您应该制作一个`get_dataloaders`函数，该函数将为您返回构建的数据加载器。如前所述，如果在构建`DataLoaders`时数据会自动发送到GPU或TPU设备，则必须使用此方法构建它们。
 - en: '[PRE11]'
   id: totrans-32
   prefs: []
@@ -168,6 +188,7 @@
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，您应该导入稍后要使用的调度程序：
 - en: '[PRE12]'
   id: totrans-34
   prefs: []
@@ -178,21 +199,25 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 编写训练函数
 - en: Now you can build the training loop. [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
     works by passing in a function to call that will be ran across the distributed
     system.
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在可以构建训练循环。[notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)通过传入一个要调用的函数来工作，该函数将在分布式系统中运行。
 - en: 'Here is a basic training loop for the animal classification problem:'
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个用于动物分类问题的基本训练循环：
 - en: The code has been split up to allow for explanations on each section. A full
     version that can be copy and pasted will be available at the end
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 代码已经分割开来，以便对每个部分进行解释。可以复制并粘贴的完整版本将在最后提供
 - en: '[PRE13]'
   id: totrans-39
   prefs: []
@@ -203,16 +228,19 @@
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，您应该尽早在训练循环中设置种子并创建一个[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)对象。
 - en: If training on the TPU, your training loop should take in the model as a parameter
     and it should be instantiated outside of the training loop function. See the [TPU
     best practices](../concept_guides/training_tpu) to learn why
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果在TPU上训练，您的训练循环应将模型作为参数传入，并且应在训练循环函数之外实例化。请参阅[TPU最佳实践](../concept_guides/training_tpu)以了解原因
 - en: 'Next you should build your dataloaders and create your model:'
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您应该构建您的数据加载器并创建您的模型：
 - en: '[PRE14]'
   id: totrans-43
   prefs: []
@@ -222,6 +250,7 @@
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里构建模型，以便种子也控制新的权重初始化
 - en: 'As you are performing transfer learning in this example, the encoder of the
     model starts out frozen so the head of the model can be trained only initially:'
   id: totrans-45
