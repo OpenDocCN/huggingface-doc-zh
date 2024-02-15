@@ -1,125 +1,152 @@
 - en: Using Datasets with TensorFlow
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/datasets/use_with_tensorflow](https://huggingface.co/docs/datasets/use_with_tensorflow)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This document is a quick introduction to using `datasets` with TensorFlow, with
     a particular focus on how to get `tf.Tensor` objects out of our datasets, and
     how to stream data from Hugging Face `Dataset` objects to Keras methods like `model.fit()`.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: Dataset format
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'By default, datasets return regular Python objects: integers, floats, strings,
     lists, etc.'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: 'To get TensorFlow tensors instead, you can set the format of the dataset to
     `tf`:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: A [Dataset](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset)
     object is a wrapper of an Arrow table, which allows fast reads from arrays in
     the dataset to TensorFlow tensors.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: 'This can be useful for converting your dataset to a dict of `Tensor` objects,
     or for writing a generator to load TF samples from it. If you wish to convert
     the entire dataset to `Tensor`, simply query the full dataset:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: N-dimensional arrays
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'If your dataset consists of N-dimensional arrays, you will see that by default
     they are considered as nested lists. In particular, a TensorFlow formatted dataset
     outputs a `RaggedTensor` instead of a single tensor:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To get a single tensor, you must explicitly use the `Array` feature type and
     specify the shape of your tensors:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Other feature types
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '[ClassLabel](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.ClassLabel)
     data are properly converted to tensors:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Strings and binary objects are also supported:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'You can also explicitly format certain columns and leave the other columns
     unformatted:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: String and binary objects are unchanged, since PyTorch only supports numbers.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: The [Image](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
     and [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
     feature types are also supported.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: To use the [Image](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
     feature type, you’ll need to install the `vision` extra as `pip install datasets[vision]`.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: To use the [Audio](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Audio)
     feature type, you’ll need to install the `audio` extra as `pip install datasets[audio]`.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Data loading
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -129,6 +156,7 @@
     dataset and `fit()` on that, but that sounds like a lot of unnecessary work. Instead,
     if you want to stream data from your dataset on-the-fly, we recommend converting
     your dataset to a `tf.data.Dataset` using the `to_tf_dataset()` method.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
 - en: The `tf.data.Dataset` class covers a wide range of use-cases - it is often created
@@ -140,6 +168,7 @@
     is iterated over, usually during model training or inference. This is different
     from the `map()` method of Hugging Face `Dataset` objects, which runs the map
     function immediately and saves the new or changed columns.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: Since the entire data preprocessing pipeline can be compiled in a `tf.data.Dataset`,
@@ -151,27 +180,35 @@
     to `tf.data.Dataset` afterwards using `to_tf_dataset()` to get a batched dataset
     ready for training. To see examples of this approach, please see the [examples](https://github.com/huggingface/transformers/tree/main/examples)
     or [notebooks](https://huggingface.co/docs/transformers/notebooks) for `transformers`.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
 - en: Using to_tf_dataset()
+  id: totrans-33
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'Using `to_tf_dataset()` is straightforward. Once your dataset is preprocessed
     and ready, simply call it like so:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'The returned `tf_ds` object here is now fully ready to train on, and can be
     passed directly to `model.fit()`. Note that you set the batch size when creating
     the dataset, and so you don’t need to specify it when calling `fit()`:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: For a full description of the arguments, please see the [to_tf_dataset()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.to_tf_dataset)
     documentation. In many cases, you will also need to add a `collate_fn` to your
     call. This is a function that takes multiple elements of the dataset and combines
@@ -183,15 +220,18 @@
     NLP [examples](https://github.com/huggingface/transformers/tree/main/examples)
     and [notebooks](https://huggingface.co/docs/transformers/notebooks), where variable
     sequence lengths are very common.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
 - en: If you find that loading with `to_tf_dataset` is slow, you can also use the
     `num_workers` argument. This spins up multiple subprocesses to load data in parallel.
     This feature is recent and still somewhat experimental - please file an issue
     if you encounter any bugs while using it!
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: When to use to_tf_dataset
+  id: totrans-40
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -201,15 +241,18 @@
     `.with_format('tf')`, or you can convert the dataset to a `tf.data.Dataset` with
     `to_tf_dataset()`. Either of these can be passed to `model.fit()`, so which should
     you choose?
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: 'The key thing to recognize is that when you convert the whole dataset to `Tensor`s,
     it is static and fully loaded into RAM. This is simple and convenient, but if
     any of the following apply, you should probably use `to_tf_dataset()` instead:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
 - en: Your dataset is too large to fit in RAM. `to_tf_dataset()` streams only one
     batch at a time, so even very large datasets can be handled with this method.
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -219,6 +262,7 @@
     Using `to_tf_dataset()` will apply those transformations at the moment when a
     batch is loaded, which means the same samples will get different augmentations
     each time they are loaded. This is usually what you want.
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -230,14 +274,20 @@
     want to convert such a dataset to dense `Tensor`s, then you will have to pad samples
     to the length of the longest sample in *the entire dataset!* This can result in
     huge amounts of padding, which wastes memory and reduces your model’s speed.
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您的数据具有可变维度，例如自然语言处理中的输入文本，其中包含不同数量的标记。当您创建一个包含可变维度样本的批次时，标准解决方案是将较短的样本填充到最长样本的长度。当您从数据集中流式传输样本时，可以通过您的`collate_fn`将此填充应用于每个批次。但是，如果您想将这样的数据集转换为稠密的`Tensor`，那么您将不得不将样本填充到*整个数据集中最长样本的长度*！这可能导致大量的填充，浪费内存并降低模型的速度。
 - en: Caveats and limitations
+  id: totrans-46
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 注意事项和限制
 - en: Right now, `to_tf_dataset()` always returns a batched dataset - we will add
     support for unbatched datasets soon!
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 目前，`to_tf_dataset()`始终返回一个批处理的数据集 - 我们将很快添加对未批处理数据集的支持！
