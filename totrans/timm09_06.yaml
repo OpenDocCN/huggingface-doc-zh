@@ -1,0 +1,214 @@
+- en: Feature Extraction
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/timm/feature_extraction](https://huggingface.co/docs/timm/feature_extraction)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/timm/v0.9.12/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/entry/start.c775fc75.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/chunks/scheduler.85c25b89.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/chunks/singletons.602dd09e.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/chunks/paths.2e0ff118.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/entry/app.8203bc6a.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/chunks/index.c9837788.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/nodes/0.d2b01217.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/nodes/2.9fd71115.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/chunks/CodeBlock.52fa569e.js">
+    <link rel="modulepreload" href="/docs/timm/v0.9.12/en/_app/immutable/chunks/Heading.3097d2ed.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: All of the models in `timm` have consistent mechanisms for obtaining various
+    types of features from the model for tasks besides classification.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Penultimate Layer Features (Pre-Classifier Features)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The features from the penultimate model layer can be obtained in several ways
+    without requiring model surgery (although feel free to do surgery). One must first
+    decide if they want pooled or un-pooled features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unpooled
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are three ways to obtain unpooled features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Without modifying the network, one can call `model.forward_features(input)`
+    on any model instead of the usual `model(input)`. This will bypass the head classifier
+    and global pooling for networks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If one wants to explicitly modify the network to return unpooled features, they
+    can either create the model without a classifier and pooling, or remove it later.
+    Both paths remove the parameters associated with the classifier from the network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: forward_features()
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Create with no classifier and pooling
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Remove it later
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pooled
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To modify the network to return pooled features, one can use `forward_features()`
+    and pool/flatten the result themselves, or modify the network like above but keep
+    pooling intact.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create with no classifier
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Remove it later
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Multi-scale Feature Maps (Feature Pyramid)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Object detection, segmentation, keypoint, and a variety of dense pixel tasks
+    require access to feature maps from the backbone network at multiple scales. This
+    is often done by modifying the original classification network. Since each network
+    varies quite a bit in structure, it’s not uncommon to see only a few backbones
+    supported in any given obj detection or segmentation library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`timm` allows a consistent interface for creating any of the included models
+    as feature backbones that output feature maps for selected levels.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A feature backbone can be created by adding the argument `features_only=True`
+    to any `create_model` call. By default 5 strides will be output from most models
+    (not all have that many), with the first starting at 2 (some start at 1 or 4).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a feature map extraction model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Query the feature information
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: After a feature backbone has been created, it can be queried to provide channel
+    or resolution reduction information to the downstream heads without requiring
+    static config or hardcoded constants. The `.feature_info` attribute is a class
+    encapsulating the information about the feature extraction points.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Select specific feature levels or limit the stride
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are two additional creation arguments impacting the output features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`out_indices` selects which indices to output'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`output_stride` limits the feature output stride of the network (also works
+    in classification mode BTW)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`out_indices` is supported by all models, but not all models have the same
+    index to feature stride mapping. Look at the code or check feature_info to compare.
+    The out indices generally correspond to the `C(i+1)th` feature level (a `2^(i+1)`
+    reduction). For most models, index 0 is the stride 2 features, and index 4 is
+    stride 32.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`output_stride` is achieved by converting layers to use dilated convolutions.
+    Doing so is not always straightforward, some networks only support `output_stride=32`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
