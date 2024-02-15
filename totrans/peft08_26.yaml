@@ -1,30 +1,25 @@
 - en: IA3
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: IA3
 - en: 'Original text: [https://huggingface.co/docs/peft/conceptual_guides/ia3](https://huggingface.co/docs/peft/conceptual_guides/ia3)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/peft/conceptual_guides/ia3](https://huggingface.co/docs/peft/conceptual_guides/ia3)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This conceptual guide gives a brief overview of [IA3](https://arxiv.org/abs/2205.05638),
     a parameter-efficient fine tuning technique that is intended to improve over [LoRA](./lora).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个概念指南简要概述了[IA3](https://arxiv.org/abs/2205.05638)，这是一种旨在改进[LoRA](./lora)的参数高效微调技术。
 - en: To make fine-tuning more efficient, IA3 (Infused Adapter by Inhibiting and Amplifying
     Inner Activations) rescales inner activations with learned vectors. These learned
     vectors are injected in the attention and feedforward modules in a typical transformer-based
@@ -32,99 +27,141 @@
     and thus the original weights remain frozen. Dealing with learned vectors (as
     opposed to learned low-rank updates to a weight matrix like LoRA) keeps the number
     of trainable parameters much smaller.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了使微调更加高效，IA3（通过抑制和放大内部激活注入的适配器）使用学习向量重新缩放内部激活。这些学习向量被注入到典型基于Transformer的架构中的注意力和前馈模块中。这些学习向量是微调期间唯一可训练的参数，因此原始权重保持冻结。处理学习向量（而不是像LoRA那样学习权重矩阵的低秩更新）可以使可训练参数的数量大大减少。
 - en: 'Being similar to LoRA, IA3 carries many of the same advantages:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 与LoRA类似，IA3具有许多相同的优势：
 - en: IA3 makes fine-tuning more efficient by drastically reducing the number of trainable
     parameters. (For T0, an IA3 model only has about 0.01% trainable parameters, while
     even LoRA has > 0.1%)
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IA3通过大幅减少可训练参数使微调更加高效。（对于T0，IA3模型只有大约0.01%的可训练参数，而即使LoRA也有> 0.1%）
 - en: The original pre-trained weights are kept frozen, which means you can have multiple
     lightweight and portable IA3 models for various downstream tasks built on top
     of them.
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 原始预训练权重保持冻结，这意味着您可以基于它们构建多个轻量级和便携的IA3模型，用于各种下游任务。
 - en: Performance of models fine-tuned using IA3 is comparable to the performance
     of fully fine-tuned models.
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用IA3进行微调的模型性能与完全微调的模型性能相当。
 - en: IA3 does not add any inference latency because adapter weights can be merged
     with the base model.
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IA3不会增加任何推理延迟，因为适配器权重可以与基础模型合并。
 - en: In principle, IA3 can be applied to any subset of weight matrices in a neural
     network to reduce the number of trainable parameters. Following the authors’ implementation,
     IA3 weights are added to the key, value and feedforward layers of a Transformer
     model. To be specific, for transformer models, IA3 weights are added to the outputs
     of key and value layers, and to the input of the second feedforward layer in each
     transformer block.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 原则上，IA3可以应用于神经网络中的任何权重矩阵子集，以减少可训练参数的数量。根据作者的实现，IA3权重被添加到Transformer模型的关键、值和前馈层中。具体来说，对于Transformer模型，IA3权重被添加到关键和值层的输出，以及每个Transformer块中第二个前馈层的输入。
 - en: Given the target layers for injecting IA3 parameters, the number of trainable
     parameters can be determined based on the size of the weight matrices.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据注入IA3参数的目标层，可以根据权重矩阵的大小确定可训练参数的数量。
 - en: Common IA3 parameters in PEFT
+  id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: PEFT中常见的IA3参数
 - en: 'As with other methods supported by PEFT, to fine-tune a model using IA3, you
     need to:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 与PEFT支持的其他方法一样，要使用IA3微调模型，您需要：
 - en: Instantiate a base model.
+  id: totrans-14
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 实例化一个基础模型。
 - en: Create a configuration (`IA3Config`) where you define IA3-specific parameters.
+  id: totrans-15
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 创建一个配置（`IA3Config`），在其中定义IA3特定的参数。
 - en: Wrap the base model with `get_peft_model()` to get a trainable `PeftModel`.
+  id: totrans-16
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用`get_peft_model()`包装基础模型以获得可训练的`PeftModel`。
 - en: Train the `PeftModel` as you normally would train the base model.
+  id: totrans-17
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 像通常训练基础模型一样训练`PeftModel`。
 - en: '`IA3Config` allows you to control how IA3 is applied to the base model through
     the following parameters:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '`IA3Config`允许您通过以下参数控制如何将IA3应用于基础模型：'
 - en: '`target_modules`: The modules (for example, attention blocks) to apply the
     IA3 vectors.'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`target_modules`：应用IA3向量的模块（例如，注意力块）。'
 - en: '`feedforward_modules`: The list of modules to be treated as feedforward layers
     in `target_modules`. While learned vectors are multiplied with the output activation
     for attention blocks, the vectors are multiplied with the input for classic feedforward
     layers. Note that `feedforward_modules` must be a subset of `target_modules`.'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`feedforward_modules`：在`target_modules`中作为前馈层处理的模块列表。虽然学习向量与注意力块的输出激活相乘，但这些向量与经典前馈层的输入相乘。请注意，`feedforward_modules`必须是`target_modules`的子集。'
 - en: '`modules_to_save`: List of modules apart from IA3 layers to be set as trainable
     and saved in the final checkpoint. These typically include model’s custom head
     that is randomly initialized for the fine-tuning task.'
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`modules_to_save`：除IA3层之外要设置为可训练并保存在最终检查点中的模块列表。这些通常包括为微调任务随机初始化的模型自定义头部。'
 - en: Example Usage
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 示例用法
 - en: 'For the task of sequence classification, one can initialize the IA3 config
     for a Llama model as follows:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于序列分类任务，可以如下初始化Llama模型的IA3配置：
 - en: '[PRE0]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
