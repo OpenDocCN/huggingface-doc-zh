@@ -1,317 +1,448 @@
 - en: Launching Multi-GPU Training from a Jupyter Environment
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/accelerate/basic_tutorials/notebook](https://huggingface.co/docs/accelerate/basic_tutorials/notebook)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This tutorial teaches you how to fine tune a computer vision model with 🤗 Accelerate
     from a Jupyter Notebook on a distributed system. You will also learn how to setup
     a few requirements needed for ensuring your environment is configured properly,
     your data has been prepared properly, and finally how to launch training.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: This tutorial is also available as a Jupyter Notebook [here](https://github.com/huggingface/notebooks/blob/main/examples/accelerate_examples/simple_cv_example.ipynb)
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: Configuring the Environment
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Before any training can be performed, a 🤗 Accelerate config file must exist
     in the system. Usually this can be done by running the following in a terminal
     and answering the prompts:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: However, if general defaults are fine and you are *not* running on a TPU, 🤗Accelerate
     has a utility to quickly write your GPU configuration into a config file via [utils.write_basic_config()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.commands.config.default.write_basic_config).
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: The following code will restart Jupyter after writing the configuration, as
     CUDA code was called to perform this.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: CUDA can’t be initialized more than once on a multi-GPU system. It’s fine to
     debug in the notebook and have calls to CUDA, but in order to finally train a
     full cleanup and restart will need to be performed.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Preparing the Dataset and Model
+  id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Next you should prepare your dataset. As mentioned at earlier, great care should
     be taken when preparing the `DataLoaders` and model to make sure that **nothing**
     is put on *any* GPU.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
 - en: If you do, it is recommended to put that specific code into a function and call
     that from within the notebook launcher interface, which will be shown later.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: Make sure the dataset is downloaded based on the directions [here](https://github.com/huggingface/accelerate/tree/main/examples#simple-vision-example)
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'First you need to create a function to extract the class name based on a filename:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '[PRE4]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'In the case here, the label is `beagle`. Using regex you can extract the label
     from the filename:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '[PRE6]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'And you can see it properly returned the right name for our file:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Next a `Dataset` class should be made to handle grabbing the image and the
     label:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Now to build the dataset. Outside the training function you can find and declare
     all the filenames and labels and use them as references inside the launched function:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Next gather all the labels:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Next, you should make a `get_dataloaders` function that will return your built
     dataloaders for you. As mentioned earlier, if data is automatically sent to the
     GPU or a TPU device when building your `DataLoaders`, they must be built using
     this method.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Finally, you should import the scheduler to be used later:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Writing the Training Function
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Now you can build the training loop. [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
     works by passing in a function to call that will be ran across the distributed
     system.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
 - en: 'Here is a basic training loop for the animal classification problem:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
 - en: The code has been split up to allow for explanations on each section. A full
     version that can be copy and pasted will be available at the end
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE13]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: First you should set the seed and create an [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     object as early in the training loop as possible.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
 - en: If training on the TPU, your training loop should take in the model as a parameter
     and it should be instantiated outside of the training loop function. See the [TPU
     best practices](../concept_guides/training_tpu) to learn why
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: 'Next you should build your dataloaders and create your model:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE14]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: You build the model here so that the seed also controls the new weight initialization
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
 - en: 'As you are performing transfer learning in this example, the encoder of the
     model starts out frozen so the head of the model can be trained only initially:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 在此示例中进行迁移学习时，模型的编码器开始时是冻结的，因此模型的头部只能最初进行训练：
 - en: '[PRE15]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'Normalizing the batches of images will make training a little faster:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 对图像批次进行归一化将使训练速度稍快：
 - en: '[PRE16]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'To make these constants available on the active device, you should set it to
     the Accelerator’s device:'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了使这些常量在活动设备上可用，您应该将其设置为加速器的设备：
 - en: '[PRE17]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'Next instantiate the rest of the PyTorch classes used for training:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来实例化用于训练的其余PyTorch类：
 - en: '[PRE18]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Before passing everything to [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare).
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 在将所有内容传递给[prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)之前。
 - en: There is no specific order to remember, you just need to unpack the objects
     in the same order you gave them to the prepare method.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有特定的顺序需要记住，您只需要按照与prepare方法中给出的相同顺序解包对象。
 - en: '[PRE19]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'Now train the model:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在训练模型：
 - en: '[PRE20]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'The evaluation loop will look slightly different compared to the training loop.
     The number of elements passed as well as the overall total accuracy of each batch
     will be added to two constants:'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 评估循环与训练循环相比会稍有不同。传递的元素数量以及每个批次的总体准确率将添加到两个常量中：
 - en: '[PRE21]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'Next you have the rest of your standard PyTorch loop:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来是您标准PyTorch循环的其余部分：
 - en: '[PRE22]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Before finally the last major difference.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后是最后一个主要区别。
 - en: 'When performing distributed evaluation, the predictions and labels need to
     be passed through [gather()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather)
     so that all of the data is available on the current device and a properly calculated
     metric can be achieved:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 在进行分布式评估时，需要通过[gather()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.gather)传递预测和标签，以便所有数据都在当前设备上可用，并且可以实现正确计算的指标：
 - en: '[PRE23]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'Now you just need to calculate the actual metric for this problem, and you
     can print it on the main process using [print()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.print):'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您只需要计算此问题的实际指标，并可以在主进程上使用[print()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.print)打印它：
 - en: '[PRE24]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'A full version of this training loop is available below:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面提供了完整版本的训练循环：
 - en: '[PRE25]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: Using the notebook_launcher
+  id: totrans-69
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用notebook_launcher
 - en: All that’s left is to use the [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher).
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 剩下的就是使用[notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)。
 - en: You pass in the function, the arguments (as a tuple), and the number of processes
     to train on. (See the [documentation](../package_reference/launchers) for more
     information)
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 您传入函数、参数（作为元组）以及要训练的进程数。（有关更多信息，请参阅[文档](../package_reference/launchers)）
 - en: '[PRE26]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: '[PRE27]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: In the case of running on multiple nodes, you need to set up a Jupyter session
     at each node and run the launching cell at the same time.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 在多个节点上运行时，您需要在每个节点设置一个Jupyter会话，并同时运行启动单元格。
 - en: 'For an environment containing 2 nodes (computers) with 8 GPUs each and the
     main computer with an IP address of “172.31.43.8”, it would look like so:'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于包含每台计算机有8个GPU的2个节点（计算机）的环境，主计算机的IP地址为“172.31.43.8”，会是这样的：
 - en: '[PRE28]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'And in the second Jupyter session on the other machine:'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 在另一台机器上的第二个Jupyter会话中：
 - en: Notice how the `node_rank` has changed
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意`node_rank`已更改
 - en: '[PRE29]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: 'In the case of running on the TPU, it would look like so:'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 在TPU上运行时，会是这样的：
 - en: '[PRE30]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'As it’s running it will print the progress as well as state how many devices
     you ran on. This tutorial was ran with two GPUs:'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 在运行时，它将打印进度，并说明您运行在多少设备上。本教程使用了两个GPU：
 - en: '[PRE31]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: And that’s it!
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 就是这样！
 - en: Debugging
+  id: totrans-85
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 调试
 - en: A common issue when running the `notebook_launcher` is receiving a CUDA has
     already been initialized issue. This usually stems from an import or prior code
     in the notebook that makes a call to the PyTorch `torch.cuda` sublibrary. To help
@@ -319,27 +450,39 @@
     in your environment and an additional check will be made when spawning that a
     regular process can be created and utilize CUDA without issue. (Your CUDA code
     can still be ran afterwards).
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 在运行`notebook_launcher`时常见的问题是收到CUDA已经初始化的问题。这通常源于笔记本中的导入或先前代码调用PyTorch的`torch.cuda`子库。为了帮助缩小问题范围，您可以在环境中使用`ACCELERATE_DEBUG_MODE=yes`启动`notebook_launcher`，并在生成时进行额外检查，以确保可以创建常规进程并无问题地利用CUDA。（您的CUDA代码仍然可以在之后运行）。
 - en: Conclusion
+  id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 结论
 - en: 'This notebook showed how to perform distributed training from inside of a Jupyter
     Notebook. Some key notes to remember:'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 本笔记本展示了如何从Jupyter Notebook内执行分布式训练。请记住一些关键要点：
 - en: Make sure to save any code that use CUDA (or CUDA imports) for the function
     passed to [notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 确保保存使用CUDA的任何代码（或CUDA导入）以传递给[notebook_launcher()](/docs/accelerate/v0.27.2/en/package_reference/launchers#accelerate.notebook_launcher)的函数。
 - en: Set the `num_processes` to be the number of devices used for training (such
     as number of GPUs, CPUs, TPUs, etc)
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将`num_processes`设置为用于训练的设备数量（例如GPU、CPU、TPU等的数量）
 - en: If using the TPU, declare your model outside the training loop function
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果使用TPU，请在训练循环函数之外声明您的模型
