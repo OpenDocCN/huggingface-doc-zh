@@ -1,109 +1,140 @@
 - en: Server infrastructure
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 服务器基础设施
 - en: 'Original text: [https://huggingface.co/docs/datasets-server/server](https://huggingface.co/docs/datasets-server/server)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/datasets-server/server](https://huggingface.co/docs/datasets-server/server)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'The [Datasets Server](https://github.com/huggingface/datasets-server) has two
     main components that work together to return queries about a dataset instantly:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[数据集服务器](https://github.com/huggingface/datasets-server)有两个主要组件，它们共同工作以立即返回有关数据集的查询：'
 - en: a user-facing web API for exploring and returning information about a dataset
+  id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于探索和返回有关数据集的信息的面向用户的Web API
 - en: a server runs the queries ahead of time and caches them in a database
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 服务器提前运行查询并将其缓存在数据库中
 - en: While most of the documentation is focused on the web API, the server is crucial
     because it performs all the time-consuming preprocessing and stores the results
     so the web API can retrieve and serve them to the user. This saves a user time
     because instead of generating the response every time it gets requested, Datasets
     Server can return the preprocessed results instantly from the cache.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然大部分文档都集中在Web API上，但服务器至关重要，因为它执行所有耗时的预处理工作，并将结果存储，以便Web API可以检索并提供给用户。这样可以节省用户的时间，因为数据集服务器可以立即从缓存中返回预处理结果，而不是每次请求时生成响应。
 - en: 'There are three elements that keep the server running: the job queue, workers,
     and the cache.'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 有三个元素使服务器保持运行：作业队列、工作人员和缓存。
 - en: Job queue
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 作业队列
 - en: The job queue is a list of jobs stored in a Mongo database that should be completed
     by the workers. The jobs are practically identical to the endpoints the user uses;
     only the server runs the jobs ahead of time, and the user gets the results when
     they use the endpoint.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 作业队列是存储在Mongo数据库中的作业列表，应由工作人员完成。这些作业与用户使用的端点几乎相同；只有服务器提前运行作业，用户在使用端点时获得结果。
 - en: 'There are three jobs:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 有三个工作：
 - en: '`/splits` corresponds to the `/splits` endpoint. It refreshes a dataset and
     then returns that dataset’s splits and configurations. For every split in the
     dataset, it’ll create a new job.'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`/splits`对应于`/splits`端点。它刷新一个数据集，然后返回该数据集的拆分和配置。对于数据集中的每个拆分，它将创建一个新作业。'
 - en: '`/first-rows` corresponds to the `/first-rows` endpoint. It gets the first
     100 rows and columns of a dataset split.'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`/first-rows`对应于`/first-rows`端点。它获取数据集拆分的前100行和列。'
 - en: '`/parquet` corresponds to the `/parquet` endpoint. It downloads the whole dataset,
     converts it to [parquet](https://parquet.apache.org/) and publishes the parquet
     files to the Hub.'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`/parquet`对应于`/parquet`端点。它下载整个数据集，将其转换为[parquet](https://parquet.apache.org/)并将parquet文件发布到Hub。'
 - en: You might’ve noticed the `/rows` and `/search` endpoints don’t have a job in
     the queue. The responses from these endpoints are generated on demand.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能已经注意到`/rows`和`/search`端点在队列中没有作业。这些端点的响应是按需生成的。
 - en: Workers
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 工作人员
 - en: Workers are responsible for executing the jobs in the queue. They complete the
     actual preprocessing requests, such as getting a list of splits and configurations.
     The workers can be controlled by configurable environment variables, like the
     minimum or the maximum number of rows returned by a worker or the maximum number
     of jobs to start per dataset user or organization.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 工作人员负责执行队列中的工作。他们完成实际的预处理请求，比如获取拆分和配置列表。工作人员可以通过可配置的环境变量来控制，比如工作人员返回的最小或最大行数，每个数据集用户或组织启动的最大作业数。
 - en: Take a look at the [workers configuration](https://github.com/huggingface/datasets-server/tree/main/services/worker#configuration)
     for a complete list of the environment variables if you’re interested in learning
     more.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想了解更多信息，请查看[工作人员配置](https://github.com/huggingface/datasets-server/tree/main/services/worker#configuration)以获取环境变量的完整列表。
 - en: Cache
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 缓存
 - en: Once the workers complete a job, the results are stored - or *cached* - in a
     Mongo database. When a user makes a request with an endpoint like `/first-rows`,
     Datasets Server retrieves the preprocessed response from the cache, and serves
     it to the user. This eliminates the time a user would’ve waited if the server
     hadn’t already completed the job and stored the response.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦工作人员完成一个工作，结果就会被存储 - 或者*缓存* - 在Mongo数据库中。当用户使用类似`/first-rows`这样的端点发出请求时，数据集服务器会从缓存中检索预处理的响应，并提供给用户。这消除了用户等待的时间，如果服务器尚未完成工作并存储响应，用户将等待的时间。
 - en: As a result, users can get their requested information about a dataset (even
     large ones) nearly instantaneously!
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，用户可以几乎立即获得关于数据集（甚至是大型数据集）的请求信息！
