@@ -1,26 +1,17 @@
 - en: Effective and efficient diffusion
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 有效和高效的扩散
 - en: 'Original text: [https://huggingface.co/docs/diffusers/stable_diffusion](https://huggingface.co/docs/diffusers/stable_diffusion)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/stable_diffusion](https://huggingface.co/docs/diffusers/stable_diffusion)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Getting the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
@@ -29,167 +20,246 @@
     several times before you end up with an image you’re happy with. But generating
     something out of nothing is a computationally intensive process, especially if
     you’re running inference over and over again.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 让[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)生成特定风格的图像或包含您想要的内容可能有些棘手。通常情况下，您必须多次运行[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)才能得到满意的图像。但是从无到有地生成东西是一个计算密集型的过程，特别是如果您一遍又一遍地运行推理。
 - en: This is why it’s important to get the most *computational* (speed) and *memory*
     (GPU vRAM) efficiency from the pipeline to reduce the time between inference cycles
     so you can iterate faster.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 这就是为什么从管道中获得最高的*计算*（速度）和*内存*（GPU vRAM）效率非常重要，以减少推理周期之间的时间，使您可以更快地迭代。
 - en: This tutorial walks you through how to generate faster and better with the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline).
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程将指导您如何使用[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)更快更好地生成。
 - en: 'Begin by loading the [`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)
     model:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先加载[`runwayml/stable-diffusion-v1-5`](https://huggingface.co/runwayml/stable-diffusion-v1-5)模型：
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'The example prompt you’ll use is a portrait of an old warrior chief, but feel
     free to use your own prompt:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将使用的示例提示是一位老战士首领的肖像，但请随意使用您自己的提示：
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Speed
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 速度
 - en: 💡 If you don’t have access to a GPU, you can use one for free from a GPU provider
     like [Colab](https://colab.research.google.com/)!
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 如果您没有GPU访问权限，您可以免费使用GPU提供商（如[Colab](https://colab.research.google.com/)）的GPU！
 - en: 'One of the simplest ways to speed up inference is to place the pipeline on
     a GPU the same way you would with any PyTorch module:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 加快推理的最简单方法之一是将管道放在GPU上，就像您对任何PyTorch模块所做的那样：
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To make sure you can use the same image and improve on it, use a [`Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)
     and set a seed for [reproducibility](./using-diffusers/reproducibility):'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了确保您可以使用相同的图像并对其进行改进，请使用[`Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)并为[可重现性](./using-diffusers/reproducibility)设置一个种子：
 - en: '[PRE3]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Now you can generate an image:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以生成图像：
 - en: '[PRE4]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '![](../Images/97b4b76d7c052f96d96b7a8b402a25ce.png)'
+  id: totrans-18
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/97b4b76d7c052f96d96b7a8b402a25ce.png)'
 - en: This process took ~30 seconds on a T4 GPU (it might be faster if your allocated
     GPU is better than a T4). By default, the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
     runs inference with full `float32` precision for 50 inference steps. You can speed
     this up by switching to a lower precision like `float16` or running fewer inference
     steps.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个过程在T4 GPU上花费了~30秒（如果您分配的GPU比T4更好，则可能会更快）。默认情况下，[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)以完整的`float32`精度运行50个推理步骤。您可以通过切换到较低精度（如`float16`）或减少推理步骤来加快速度。
 - en: 'Let’s start by loading the model in `float16` and generate an image:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从在`float16`中加载模型并生成图像开始：
 - en: '[PRE5]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '![](../Images/66880d2cc1c9bb78b8e03483b16d1ca3.png)'
+  id: totrans-22
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/66880d2cc1c9bb78b8e03483b16d1ca3.png)'
 - en: This time, it only took ~11 seconds to generate the image, which is almost 3x
     faster than before!
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 这次，生成图像仅花费了~11秒，比以前快了近3倍！
 - en: 💡 We strongly suggest always running your pipelines in `float16`, and so far,
     we’ve rarely seen any degradation in output quality.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 我们强烈建议始终在`float16`中运行您的管道，到目前为止，我们很少看到输出质量下降。
 - en: 'Another option is to reduce the number of inference steps. Choosing a more
     efficient scheduler could help decrease the number of steps without sacrificing
     output quality. You can find which schedulers are compatible with the current
     model in the [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
     by calling the `compatibles` method:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个选项是减少推理步骤的数量。选择更高效的调度器可以帮助减少步骤数量，而不会牺牲输出质量。您可以通过调用`compatibles`方法在[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)中找到与当前模型兼容的调度器：
 - en: '[PRE6]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'The Stable Diffusion model uses the [PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler)
     by default which usually requires ~50 inference steps, but more performant schedulers
     like [DPMSolverMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/multistep_dpm_solver#diffusers.DPMSolverMultistepScheduler),
     require only ~20 or 25 inference steps. Use the [from_config()](/docs/diffusers/v0.26.3/en/api/configuration#diffusers.ConfigMixin.from_config)
     method to load a new scheduler:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 稳定的扩散模型默认使用[PNDMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/pndm#diffusers.PNDMScheduler)，通常需要~50个推理步骤，但性能更好的调度器如[DPMSolverMultistepScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/multistep_dpm_solver#diffusers.DPMSolverMultistepScheduler)，只需要~20或25个推理步骤。使用[from_config()](/docs/diffusers/v0.26.3/en/api/configuration#diffusers.ConfigMixin.from_config)方法加载新的调度器：
 - en: '[PRE7]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Now set the `num_inference_steps` to 20:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在将`num_inference_steps`设置为20：
 - en: '[PRE8]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '![](../Images/a0e3931ebf91a12e3caef2d780586fec.png)'
+  id: totrans-31
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/a0e3931ebf91a12e3caef2d780586fec.png)'
 - en: Great, you’ve managed to cut the inference time to just 4 seconds! ⚡️
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 很好，您已经成功将推理时间缩短到仅为4秒！⚡️
 - en: Memory
+  id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 内存
 - en: The other key to improving pipeline performance is consuming less memory, which
     indirectly implies more speed, since you’re often trying to maximize the number
     of images generated per second. The easiest way to see how many images you can
     generate at once is to try out different batch sizes until you get an `OutOfMemoryError`
     (OOM).
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 改进管道性能的另一个关键是消耗更少的内存，这间接意味着更快的速度，因为您通常试图最大化每秒生成的图像数量。查看您可以一次生成多少图像的最简单方法是尝试不同的批处理大小，直到出现`OutOfMemoryError`（OOM）。
 - en: Create a function that’ll generate a batch of images from a list of prompts
     and `Generators`. Make sure to assign each `Generator` a seed so you can reuse
     it if it produces a good result.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Start with `batch_size=4` and see how much memory you’ve consumed:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Unless you have a GPU with more vRAM, the code above probably returned an `OOM`
     error! Most of the memory is taken up by the cross-attention layers. Instead of
     running this operation in a batch, you can run it sequentially to save a significant
     amount of memory. All you have to do is configure the pipeline to use the [enable_attention_slicing()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/upscale#diffusers.StableDiffusionUpscalePipeline.enable_attention_slicing)
     function:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Now try increasing the `batch_size` to 8!
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '![](../Images/f242684980096d86bea7fa383ccd606a.png)'
+  id: totrans-43
   prefs: []
   type: TYPE_IMG
 - en: Whereas before you couldn’t even generate a batch of 4 images, now you can generate
     a batch of 8 images at ~3.5 seconds per image! This is probably the fastest you
     can go on a T4 GPU without sacrificing quality.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
 - en: Quality
+  id: totrans-45
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -197,9 +267,11 @@
     by using `fp16`, reducing the number of inference steps by using a more performant
     scheduler, and enabling attention slicing to reduce memory consumption. Now you’re
     going to focus on how to improve the quality of generated images.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
 - en: Better checkpoints
+  id: totrans-47
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -209,75 +281,98 @@
     mean you’ll get better results. You’ll still have to experiment with different
     checkpoints yourself, and do a little research (such as using [negative prompts](https://minimaxir.com/2022/11/stable-diffusion-negative-prompt/))
     to get the best results.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
 - en: As the field grows, there are more and more high-quality checkpoints finetuned
     to produce certain styles. Try exploring the [Hub](https://huggingface.co/models?library=diffusers&sort=downloads)
     and [Diffusers Gallery](https://huggingface.co/spaces/huggingface-projects/diffusers-gallery)
     to find one you’re interested in!
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
 - en: Better pipeline components
+  id: totrans-50
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'You can also try replacing the current pipeline components with a newer version.
     Let’s try loading the latest [autoencoder](https://huggingface.co/stabilityai/stable-diffusion-2-1/tree/main/vae)
     from Stability AI into the pipeline, and generate some images:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE13]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '![](../Images/f35b7f9a028460ebed6e9b753a1241d3.png)'
+  id: totrans-53
   prefs: []
   type: TYPE_IMG
 - en: Better prompt engineering
+  id: totrans-54
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'The text prompt you use to generate an image is super important, so much so
     that it is called *prompt engineering*. Some considerations to keep during prompt
     engineering are:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
 - en: How is the image or similar images of the one I want to generate stored on the
     internet?
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: What additional detail can I give that steers the model towards the style I
     want?
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'With this in mind, let’s improve the prompt to include color and higher quality
     details:'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE14]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Generate a batch of images with the new prompt:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE15]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: '![](../Images/52c687d1d7c73bcf4a482dc45feea714.png)'
+  id: totrans-62
   prefs: []
   type: TYPE_IMG
 - en: 'Pretty impressive! Let’s tweak the second image - corresponding to the `Generator`
     with a seed of `1` - a bit more by adding some text about the age of the subject:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE16]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '![](../Images/181d5d3b3b595630cddf8064c033ea4f.png)'
+  id: totrans-65
   prefs: []
   type: TYPE_IMG
 - en: Next steps
+  id: totrans-66
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -285,22 +380,29 @@
     for computational and memory efficiency as well as improving the quality of generated
     outputs. If you’re interested in making your pipeline even faster, take a look
     at the following resources:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
 - en: Learn how [PyTorch 2.0](./optimization/torch2.0) and [`torch.compile`](https://pytorch.org/docs/stable/generated/torch.compile.html)
     can yield 5 - 300% faster inference speed. On an A100 GPU, inference can be up
     to 50% faster!
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: If you can’t use PyTorch 2, we recommend you install [xFormers](./optimization/xformers).
     Its memory-efficient attention mechanism works great with PyTorch 1.13.1 for faster
     speed and reduced memory consumption.
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果你不能使用PyTorch 2，我们建议你安装[xFormers](./optimization/xformers)。它的内存高效的注意力机制与PyTorch
+    1.13.1非常搭配，可以实现更快的速度和减少内存消耗。
 - en: Other optimization techniques, such as model offloading, are covered in [this
     guide](./optimization/fp16).
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 其他优化技术，比如模型卸载，在[这个指南](./optimization/fp16)中有介绍。
