@@ -1,99 +1,130 @@
 - en: The Deep Q-Network (DQN)
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 深度Q网络（DQN）
 - en: 'Original text: [https://huggingface.co/learn/deep-rl-course/unit3/deep-q-network](https://huggingface.co/learn/deep-rl-course/unit3/deep-q-network)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/learn/deep-rl-course/unit3/deep-q-network](https://huggingface.co/learn/deep-rl-course/unit3/deep-q-network)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'This is the architecture of our Deep Q-Learning network:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是我们深度Q学习网络的架构：
 - en: '![Deep Q Network](../Images/ae1d15faad114a179990b8f1f33104d4.png)'
+  id: totrans-4
   prefs: []
   type: TYPE_IMG
+  zh: '![深度Q网络](../Images/ae1d15faad114a179990b8f1f33104d4.png)'
 - en: As input, we take a **stack of 4 frames** passed through the network as a state
     and output a **vector of Q-values for each possible action at that state**. Then,
     like with Q-Learning, we just need to use our epsilon-greedy policy to select
     which action to take.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为输入，我们将通过网络传递的4个帧堆叠在一起作为状态，并输出该状态下每个可能动作的Q值向量。然后，就像Q学习一样，我们只需要使用epsilon-greedy策略来选择要采取的动作。
 - en: When the Neural Network is initialized, **the Q-value estimation is terrible**.
     But during training, our Deep Q-Network agent will associate a situation with
     the appropriate action and **learn to play the game well**.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 当神经网络初始化时，Q值的估计很糟糕。但在训练过程中，我们的深度Q网络代理将把一种情况与适当的动作联系起来，并学会玩游戏。
 - en: Preprocessing the input and temporal limitation
+  id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 对输入进行预处理和时间限制。
 - en: We need to **preprocess the input**. It’s an essential step since we want to
     **reduce the complexity of our state to reduce the computation time needed for
     training**.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们需要对输入进行预处理。这是一个必不可少的步骤，因为我们希望减少状态的复杂性，以减少训练所需的计算时间。
 - en: To achieve this, we **reduce the state space to 84x84 and grayscale it**. We
     can do this since the colors in Atari environments don’t add important information.
     This is a big improvement since we **reduce our three color channels (RGB) to
     1**.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了实现这一点，我们将状态空间减少到84x84并将其灰度化。我们可以这样做，因为Atari环境中的颜色不会添加重要信息。这是一个很大的改进，因为我们将我们的三个颜色通道（RGB）减少到1。
 - en: We can also **crop a part of the screen in some games** if it does not contain
     important information. Then we stack four frames together.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在某些游戏中，如果屏幕上没有重要信息，我们也可以裁剪一部分。然后我们将四个帧堆叠在一起。
 - en: '![Preprocessing](../Images/30478bfb5d8bf377a5c066b55e0d3f0d.png)'
+  id: totrans-11
   prefs: []
   type: TYPE_IMG
+  zh: '![预处理](../Images/30478bfb5d8bf377a5c066b55e0d3f0d.png)'
 - en: '**Why do we stack four frames together?** We stack frames together because
     it helps us **handle the problem of temporal limitation**. Let’s take an example
     with the game of Pong. When you see this frame:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 为什么我们要将四个帧堆叠在一起？我们将帧堆叠在一起是因为它帮助我们处理时间限制的问题。让我们以乒乓球游戏为例。当你看到这个帧时：
 - en: '![Temporal Limitation](../Images/916225d18ad696514245f8c4e88a5a56.png)'
+  id: totrans-13
   prefs: []
   type: TYPE_IMG
+  zh: '![时间限制](../Images/916225d18ad696514245f8c4e88a5a56.png)'
 - en: Can you tell me where the ball is going? No, because one frame is not enough
     to have a sense of motion! But what if I add three more frames? **Here you can
     see that the ball is going to the right**.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 你能告诉我球要去哪里吗？不行，因为一个帧不足以让我们感受到运动！但如果我再加三个帧呢？在这里你可以看到球要往右边走。
 - en: '![Temporal Limitation](../Images/e35a3e3cfeefe6f7a16b681ab91dfa7b.png) That’s
     why, to capture temporal information, we stack four frames together.'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '![时间限制](../Images/e35a3e3cfeefe6f7a16b681ab91dfa7b.png) 这就是为什么为了捕捉时间信息，我们将四个帧堆叠在一起。'
 - en: Then the stacked frames are processed by three convolutional layers. These layers
     **allow us to capture and exploit spatial relationships in images**. But also,
     because the frames are stacked together, **we can exploit some temporal properties
     across those frames**.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，堆叠的帧经过三个卷积层处理。这些层使我们能够捕捉和利用图像中的空间关系。但也因为帧被堆叠在一起，我们可以利用这些帧之间的一些时间属性。
 - en: If you don’t know what convolutional layers are, don’t worry. You can check
     out [Lesson 4 of this free Deep Learning Course by Udacity](https://www.udacity.com/course/deep-learning-pytorch--ud188)
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你不知道什么是卷积层，不用担心。你可以查看Udacity的这门免费深度学习课程的第4课。
 - en: Finally, we have a couple of fully connected layers that output a Q-value for
     each possible action at that state.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，我们有几个全连接层，为该状态下的每个可能动作输出一个Q值。
 - en: '![Deep Q Network](../Images/ae1d15faad114a179990b8f1f33104d4.png)'
+  id: totrans-19
   prefs: []
   type: TYPE_IMG
+  zh: '![深度Q网络](../Images/ae1d15faad114a179990b8f1f33104d4.png)'
 - en: So, we see that Deep Q-Learning uses a neural network to approximate, given
     a state, the different Q-values for each possible action at that state. Now let’s
     study the Deep Q-Learning algorithm.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，我们看到深度Q学习使用神经网络来近似，在给定状态时，该状态下每个可能动作的不同Q值。现在让我们来研究深度Q学习算法。

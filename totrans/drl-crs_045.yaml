@@ -1,58 +1,69 @@
 - en: From Q-Learning to Deep Q-Learning
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 从Q-Learning到深度Q-Learning
 - en: 'Original text: [https://huggingface.co/learn/deep-rl-course/unit3/from-q-to-dqn](https://huggingface.co/learn/deep-rl-course/unit3/from-q-to-dqn)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/learn/deep-rl-course/unit3/from-q-to-dqn](https://huggingface.co/learn/deep-rl-course/unit3/from-q-to-dqn)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: We learned that **Q-Learning is an algorithm we use to train our Q-Function**,
     an **action-value function** that determines the value of being at a particular
     state and taking a specific action at that state.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们学到了**Q-Learning是一种用来训练我们的Q函数的算法**，这是一个**动作值函数**，用来确定在特定状态下采取特定动作的价值。
 - en: '![Q-function](../Images/d98598351e812f60049067f862f79c69.png)'
+  id: totrans-4
   prefs: []
   type: TYPE_IMG
+  zh: '![Q函数](../Images/d98598351e812f60049067f862f79c69.png)'
 - en: The **Q comes from “the Quality” of that action at that state.**
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '**Q来自于“在那个状态下那个动作的质量”。**'
 - en: Internally, our Q-function is encoded by **a Q-table, a table where each cell
     corresponds to a state-action pair value.** Think of this Q-table as **the memory
     or cheat sheet of our Q-function.**
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在内部，我们的Q函数由**Q表编码，一个表格，其中每个单元格对应于一个状态-动作对值。**将这个Q表想象成**我们Q函数的记忆或备忘录。**
 - en: 'The problem is that Q-Learning is a *tabular method*. This becomes a problem
     if the states and actions spaces **are not small enough to be represented efficiently
     by arrays and tables**. In other words: it is **not scalable**. Q-Learning worked
     well with small state space environments like:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 问题在于Q-Learning是一种*表格方法*。如果状态和动作空间**不足以通过数组和表格有效表示**，这就成为了问题。换句话说：它**不可扩展**。Q-Learning在小状态空间环境中效果很好，比如：
 - en: FrozenLake, we had 16 states.
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: FrozenLake，我们有16个状态。
 - en: Taxi-v3, we had 500 states.
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Taxi-v3，我们有500个状态。
 - en: 'But think of what we’re going to do today: we will train an agent to learn
     to play Space Invaders, a more complex game, using the frames as input.'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 但想想今天我们要做什么：我们将训练一个代理学习玩太空侵略者，一个更复杂的游戏，使用帧作为输入。
 - en: As **[Nikita Melkozerov mentioned](https://twitter.com/meln1k), Atari environments** have
     an observation space with a shape of (210, 160, 3)*, containing values ranging
     from 0 to 255 so that gives us<math><semantics><mrow><mn>25</mn><msup><mn>6</mn><mrow><mn>210</mn><mo>×</mo><mn>160</mn><mo>×</mo><mn>3</mn></mrow></msup><mo>=</mo><mn>25</mn><msup><mn>6</mn><mn>100800</mn></msup></mrow><annotation
@@ -60,33 +71,52 @@
     possible observations (for comparison, we have approximately<math><semantics><mrow><mn>1</mn><msup><mn>0</mn><mn>80</mn></msup></mrow><annotation
     encoding="application/x-tex">10^{80}</annotation></semantics></math>1080 atoms
     in the observable universe).
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如**[Nikita Melkozerov提到的](https://twitter.com/meln1k)，Atari环境**的观察空间形状为(210,
+    160, 3)*，包含值从0到255，这给了我们<math><semantics><mrow><mn>25</mn><msup><mn>6</mn><mrow><mn>210</mn><mo>×</mo><mn>160</mn><mo>×</mo><mn>3</mn></mrow></msup><mo>=</mo><mn>25</mn><msup><mn>6</mn><mn>100800</mn></msup></mrow><annotation
+    encoding="application/x-tex">256^{210 \times 160 \times 3} = 256^{100800}</annotation></semantics></math>256210×160×3=256100800个可能的观察（作为比较，我们大约有<math><semantics><mrow><mn>1</mn><msup><mn>0</mn><mn>80</mn></msup></mrow><annotation
+    encoding="application/x-tex">10^{80}</annotation></semantics></math>1080个原子在可观察宇宙中）。
 - en: A single frame in Atari is composed of an image of 210x160 pixels. Given that
     the images are in color (RGB), there are 3 channels. This is why the shape is
     (210, 160, 3). For each pixel, the value can go from 0 to 255.
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Atari中的单帧由一个210x160像素的图像组成。考虑到图像是彩色的（RGB），有3个通道。这就是形状为(210, 160, 3)的原因。对于每个像素，值可以从0到255。
 - en: '![Atari State Space](../Images/51e288086cae4a16b8a0ca90888a8264.png)'
+  id: totrans-13
   prefs: []
   type: TYPE_IMG
+  zh: '![Atari状态空间](../Images/51e288086cae4a16b8a0ca90888a8264.png)'
 - en: Therefore, the state space is gigantic; due to this, creating and updating a
     Q-table for that environment would not be efficient. In this case, the best idea
     is to approximate the Q-values using a parametrized Q-function <math><semantics><mrow><msub><mi>Q</mi><mi>θ</mi></msub><mo
     stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation
     encoding="application/x-tex">Q_{\theta}(s,a)</annotation></semantics></math>Qθ​(s,a)
     .
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，状态空间是巨大的；因此，在该环境中创建和更新Q表将不是有效的。在这种情况下，最好的想法是使用参数化的Q函数来近似Q值<math><semantics><mrow><msub><mi>Q</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation
+    encoding="application/x-tex">Q_{\theta}(s,a)</annotation></semantics></math>Qθ​(s,a)。
 - en: This neural network will approximate, given a state, the different Q-values
     for each possible action at that state. And that’s exactly what Deep Q-Learning
     does.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个神经网络将近似，给定一个状态，该状态下每个可能动作的不同Q值。这正是深度Q学习所做的。
 - en: '![Deep Q Learning](../Images/1e4c6acfdf811be054c82941f53e5853.png)'
+  id: totrans-16
   prefs: []
   type: TYPE_IMG
+  zh: '![深度Q学习](../Images/1e4c6acfdf811be054c82941f53e5853.png)'
 - en: Now that we understand Deep Q-Learning, let’s dive deeper into the Deep Q-Network.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们了解了深度Q学习，让我们深入了解深度Q网络。
