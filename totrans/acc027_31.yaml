@@ -1,49 +1,54 @@
 - en: Handling big models for inference
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 处理推断中的大型模型
 - en: 'Original text: [https://huggingface.co/docs/accelerate/concept_guides/big_model_inference](https://huggingface.co/docs/accelerate/concept_guides/big_model_inference)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/concept_guides/big_model_inference](https://huggingface.co/docs/accelerate/concept_guides/big_model_inference)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'When loading a pre-trained model in PyTorch, the usual workflow looks like
     this:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PyTorch中加载预训练模型时，通常的工作流程如下：
 - en: '[PRE0]'
+  id: totrans-4
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'In plain English, those steps are:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 用简单的英语来说，这些步骤是：
 - en: Create the model with randomly initialized weights
+  id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 创建具有随机初始化权重的模型
 - en: Load the model weights (in a dictionary usually called a state dict) from the
     disk
+  id: totrans-7
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 从磁盘加载模型权重（通常称为状态字典的字典）
 - en: Load those weights inside the model
+  id: totrans-8
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将这些权重加载到模型中
 - en: 'While this works very well for regularly sized models, this workflow has some
     clear limitations when we deal with a huge model: in step 1, we load a full version
     of the model in RAM, and spend some time randomly initializing the weights (which
@@ -51,261 +56,391 @@
     in RAM, with the pre-trained weights. If you’re loading a model with 6 billion
     parameters, this means you will need 24GB of RAM for each copy of the model, so
     48GB in total (half of it to load the model in FP16).'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然这对于常规大小的模型非常有效，但是当我们处理一个巨大的模型时，这个工作流程有一些明显的局限性：在步骤1中，我们在RAM中加载模型的完整版本，并花费一些时间随机初始化权重（这些权重将在步骤3中被丢弃）。在步骤2中，我们在RAM中加载另一个模型的完整版本，其中包含预训练的权重。如果您加载一个具有60亿参数的模型，这意味着您将需要每个模型副本24GB的RAM，因此总共需要48GB（其中一半用于以FP16加载模型）。
 - en: This API is quite new and still in its experimental stage. While we strive to
     provide a stable API, it’s possible some small parts of the public API will change
     in the future.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个API是相当新的，仍处于实验阶段。虽然我们努力提供一个稳定的API，但未来可能会更改公共API的一些小部分。
 - en: 'How the Process Works: A Quick Overview'
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 流程如何工作：快速概述
 - en: '[https://www.youtube-nocookie.com/embed/MWCSGj9jEAo](https://www.youtube-nocookie.com/embed/MWCSGj9jEAo)'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://www.youtube-nocookie.com/embed/MWCSGj9jEAo](https://www.youtube-nocookie.com/embed/MWCSGj9jEAo)'
 - en: 'How the Process Works: Working with Code'
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 流程如何工作：使用代码
 - en: Instantiating an empty model
+  id: totrans-14
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 实例化一个空模型
 - en: 'The first tool 🤗 Accelerate introduces to help with big models is a context
     manager [init_empty_weights()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.init_empty_weights)
     that helps you initialize a model without using any RAM so that step 1 can be
     done on models of any size. Here is how it works:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate引入的第一个工具是一个上下文管理器 [init_empty_weights()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.init_empty_weights)，它可以帮助您初始化一个模型，而不使用任何RAM，以便可以对任何大小的模型执行步骤1。这是它的工作原理：
 - en: '[PRE1]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'For instance:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如：
 - en: '[PRE2]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: initializes an empty model with a bit more than 100B parameters. Behind the
     scenes, this relies on the meta device introduced in PyTorch 1.9\. During the
     initialization under the context manager, each time a parameter is created, it
     is instantly moved to that device.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用超过100B参数初始化一个空模型。在幕后，这依赖于PyTorch 1.9中引入的元设备。在上下文管理器下的初始化过程中，每次创建参数时，它都会立即移动到该设备。
 - en: You can’t move a model initialized like this on CPU or another device directly,
     since it doesn’t have any data. It’s also very likely that a forward pass with
     that empty model will fail, as not all operations are supported on the meta device.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 您不能直接将像这样初始化的模型移动到CPU或另一个设备，因为它没有任何数据。使用这种空模型进行前向传递很可能会失败，因为并非所有操作都支持在元设备上进行。
 - en: Sharded checkpoints
+  id: totrans-21
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 分片检查点
 - en: 'It’s possible your model is so big that even a single copy won’t fit in RAM.
     That doesn’t mean it can’t be loaded: if you have one or several GPUs, this is
     more memory available to store your model. In this case, it’s better if your checkpoint
     is split into several smaller files that we call checkpoint shards.'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 可能您的模型太大，即使单个副本也无法放入RAM。这并不意味着它不能被加载：如果您有一个或多个GPU，这意味着有更多内存可用于存储您的模型。在这种情况下，最好将您的检查点分成几个更小的文件，我们称之为检查点分片。
 - en: '🤗 Accelerate will handle sharded checkpoints as long as you follow the following
     format: your checkpoint should be in a folder, with several files containing the
     partial state dicts, and there should be an index in the JSON format that contains
     a dictionary mapping parameter names to the file containing their weights. You
     can easily shard your model with [save_model()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_model).
     For instance, we could have a folder containing:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate将处理分片检查点，只要您遵循以下格式：您的检查点应该在一个文件夹中，其中包含几个包含部分状态字典的文件，并且应该有一个以JSON格式的索引，其中包含将参数名称映射到包含其权重的文件的字典。您可以使用
+    [save_model()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.save_model)
+    轻松地将模型分片。例如，我们可以有一个包含的文件夹：
 - en: '[PRE3]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'with index.json being the following file:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: index.json 是以下文件：
 - en: '[PRE4]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: and `first_state_dict.bin` containing the weights for `"linear1.weight"` and
     `"linear1.bias"`, `second_state_dict.bin` the ones for `"linear2.weight"` and
     `"linear2.bias"`
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 和 `first_state_dict.bin` 包含 `"linear1.weight"` 和 `"linear1.bias"` 的权重，`second_state_dict.bin`
+    包含 `"linear2.weight"` 和 `"linear2.bias"` 的权重
 - en: Loading weights
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 加载权重
 - en: The second tool 🤗 Accelerate introduces is a function [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch),
     that will allow you to load a checkpoint inside your empty model. This supports
     full checkpoints (a single file containing the whole state dict) as well as sharded
     checkpoints. It will also automatically dispatch those weights across the devices
     you have available (GPUs, CPU RAM), so if you are loading a sharded checkpoint,
     the maximum RAM usage will be the size of the biggest shard.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate引入的第二个工具是一个函数 [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch)，它将允许您在空模型中加载检查点。这支持完整检查点（包含整个状态字典的单个文件）以及分片检查点。它还将自动将这些权重分配到您可用的设备上（GPU、CPU
+    RAM），因此如果您加载一个分片检查点，最大的RAM使用量将是最大分片的大小。
 - en: If you want to use big model inference with 🤗 Transformers models, check out
     this [documentation](https://huggingface.co/docs/transformers/main/en/main_classes/model#large-model-loading).
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想使用 🤗 Transformers 模型进行大型模型推断，请查看这个[文档](https://huggingface.co/docs/transformers/main/en/main_classes/model#large-model-loading)。
 - en: Here is how we can use this to load the [GPT2-1.5B](https://huggingface.co/marcsun13/gpt2-xl-linear-sharded)
     model.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是我们如何使用这个加载 [GPT2-1.5B](https://huggingface.co/marcsun13/gpt2-xl-linear-sharded)
+    模型。
 - en: Let’s download the sharded version of this model.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们下载这个模型的分片版本。
 - en: '[PRE5]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '[PRE6]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: In order to initialize the model, we will use the library minGPT.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了初始化模型，我们将使用 minGPT 库。
 - en: '[PRE7]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '[PRE8]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Then, load the checkpoint we just downloaded with:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，加载我们刚下载的检查点：
 - en: '[PRE9]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'By passing `device_map="auto"`, we tell 🤗 Accelerate to determine automatically
     where to put each layer of the model depending on the available resources:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过传递 `device_map="auto"`，我们告诉 🤗 Accelerate 根据可用资源自动确定将模型的每一层放在哪里：
 - en: first, we use the maximum space available on the GPU(s)
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 首先，我们使用 GPU 上可用的最大空间
 - en: if we still need space, we store the remaining weights on the CPU
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果我们仍然需要空间，我们将剩余的权重存储在 CPU 上
 - en: if there is not enough RAM, we store the remaining weights on the hard drive
     as memory-mapped tensors
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果没有足够的 RAM，我们将剩余的权重存储在硬盘上作为内存映射张量
 - en: no_split_module_classes
+  id: totrans-44
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 不要分割模块类
 - en: This parameter will indicate that some of the modules with the name `"Block"`
     should not be split across different devices. You should set here all blocks that
     include a residual connection of some kind.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 此参数将指示一些名称为 "Block" 的模块不应该在不同设备之间分割。您应该在这里设置包括某种残差连接的所有块。
 - en: The device_map
+  id: totrans-46
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 设备映射
 - en: 'You can see the `device_map` that 🤗 Accelerate picked by accessing the `hf_device_map`
     attribute of your model:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过访问您的模型的 `hf_device_map` 属性来查看 🤗 Accelerate 选择的 `device_map`：
 - en: '[PRE10]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '[PRE11]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'It’s fully possible to create your own device map for the layers to use as
     well, specifying the GPU device to use (a number), `"cpu"`, or `"disk"` and pass
     this in:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 完全可以为层创建自己的设备映射，指定要使用的 GPU 设备（一个数字）、"cpu" 或 "disk"，然后传入：
 - en: '[PRE12]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Run the model
+  id: totrans-52
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 运行模型
 - en: 'Now that we have done this, our model lies across several devices, and maybe
     the hard drive. But it can still be used as a regular PyTorch model:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们已经完成了这一步，我们的模型分布在几个设备上，也许还有硬盘。但它仍然可以像常规的 PyTorch 模型一样使用：
 - en: '[PRE13]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Behind the scenes, 🤗 Accelerate added hooks to the model, so that:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 在幕后，🤗 Accelerate 为模型添加了钩子，以便：
 - en: at each layer, the inputs are put on the right device (so even if your model
     is spread across several GPUs, it works)
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在每一层，输入都被放在正确的设备上（所以即使您的模型分布在几个 GPU 上，它也可以工作）
 - en: for the weights offloaded on the CPU, they are put on a GPU just before the
     forward pass and cleaned up just after
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于卸载到 CPU 上的权重，在前向传递之前将它们放在 GPU 上，然后在后面清理
 - en: for the weights offloaded on the hard drive, they are loaded in RAM then put
     on a GPU just before the forward pass and cleaned up just after
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于卸载到硬盘上的权重，在前向传递之前将它们加载到 RAM 中，然后在后面清理
 - en: This way, your model can run for inference even if it doesn’t fit on one of
     the GPUs or the CPU RAM!
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样，即使模型不适合在一个 GPU 或 CPU RAM 上运行推断，也可以运行您的模型！
 - en: This only supports the inference of your model, not training. Most of the computation
     happens behind `torch.no_grad()` context managers to avoid spending some GPU memory
     with intermediate activations.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 这只支持模型的推断，不支持训练。大部分计算发生在 `torch.no_grad()` 上下文管理器中，以避免用中间激活消耗一些 GPU 内存。
 - en: Designing a device map
+  id: totrans-61
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 设计设备映射
 - en: You can let 🤗 Accelerate handle the device map computation by setting `device_map`
     to one of the supported options (`"auto"`, `"balanced"`, `"balanced_low_0"`, `"sequential"`)
     or create one yourself if you want more control over where each layer should go.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以让 🤗 Accelerate 处理设备映射计算，方法是将 `device_map` 设置为支持的选项之一（"auto"、"balanced"、"balanced_low_0"、"sequential"），或者如果您想更多地控制每个层应该放在哪里，可以自己创建一个。
 - en: You can derive all sizes of the model (and thus compute a `device_map`) on a
     model that is on the meta device.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在元设备上的模型上推导出模型的所有大小（从而计算出 `device_map`）。
 - en: All the options will produce the same result when you don’t have enough GPU
     memory to accommodate the whole model (which is to fit everything that can on
     the GPU, then offload weights on the CPU or even on the disk if there is not enough
     RAM).
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 当没有足够的 GPU 内存来容纳整个模型时，所有选项都会产生相同的结果（即将可以放在 GPU 上的所有内容放在 GPU 上，然后将权重卸载到 CPU 上，甚至在没有足够的
+    RAM 时也可以放在磁盘上）。
 - en: 'When you have more GPU memory available than the model size, here is the difference
     between each option:'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您拥有比模型大小更多的 GPU 内存时，每个选项之间的区别如下：
 - en: '`"auto"` and `"balanced"` evenly split the model on all available GPUs, making
     it possible for you to use a batch size greater than 1.'
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '"auto" 和 "balanced" 将模型均匀分割在所有可用的 GPU 上，使您可以使用大于 1 的批量大小。'
 - en: '`"balanced_low_0"` evenly splits the model on all GPUs except the first one,
     and only puts on GPU 0 what does not fit on the others. This option is great when
     you need to use GPU 0 for some processing of the outputs, like when using the
     `generate` function for Transformers models'
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '"balanced_low_0" 将模型均匀分割在除第一个之外的所有 GPU 上，并且只将不适合其他 GPU 的内容放在 GPU 0 上。当您需要使用
+    GPU 0 处理输出时，比如使用 Transformers 模型的 `generate` 函数时，这个选项非常适用'
 - en: '`"sequential"` will fit what it can on GPU 0, then move on GPU 1 and so forth
     (so won’t use the last GPUs if it doesn’t need to).'
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '"sequential" 将尽可能多地放在 GPU 0 上，然后移动到 GPU 1 等等（如果不需要，就不会使用最后的 GPU）。'
 - en: The options `"auto"` and `"balanced"` produce the same results for now, but
     the behavior of `"auto"` might change in the future if we find a strategy that
     makes more sense, while `"balanced"` will stay stable.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: '"auto" 和 "balanced" 选项目前产生相同的结果，但是如果我们找到更合理的策略，"auto" 的行为可能会在将来发生变化，而 "balanced"
+    将保持稳定。'
 - en: First note that you can limit the memory used on each GPU by using the `max_memory`
     argument (available in [infer_auto_device_map()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.infer_auto_device_map)
     and in all functions using it). When setting `max_memory`, you should pass along
@@ -313,25 +448,35 @@
     `"cpu"` key for the maximum RAM you want to use for CPU offload. The values can
     either be an integer (in bytes) or a string representing a number with its unit,
     such as `"10GiB"` or `"10GB"`.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先请注意，您可以使用`max_memory`参数（在[infer_auto_device_map()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.infer_auto_device_map)和所有使用它的函数中可用）限制每个GPU上使用的内存。设置`max_memory`时，应传递一个包含GPU标识符（例如`0`、`1`等）和`"cpu"`键的字典，用于CPU卸载的最大RAM。值可以是整数（以字节为单位）或表示带单位的数字的字符串，例如`"10GiB"`或`"10GB"`。
 - en: 'Here is an example where we don’t want to use more than 10GiB on each of the
     two GPUs and no more than 30GiB of CPU RAM for the model weights:'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是一个示例，在这个示例中，我们不希望在两个GPU上使用超过10GiB，并且模型权重的CPU RAM不超过30GiB：
 - en: '[PRE14]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: When a first allocation happens in PyTorch, it loads CUDA kernels which take
     about 1-2GB of memory depending on the GPU. Therefore you always have less usable
     memory than the actual size of the GPU. To see how much memory is actually used
     do `torch.ones(1).cuda()` and look at the memory usage.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 当PyTorch中发生第一次分配时，它会加载大约1-2GB的CUDA内核，具体取决于GPU。因此，您始终比GPU的实际大小可用内存少。要查看实际使用了多少内存，请执行`torch.ones(1).cuda()`并查看内存使用情况。
 - en: Therefore when you create memory maps with `max_memory` make sure to adjust
     the available memory accordingly to avoid out-of-memory errors.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，当您使用`max_memory`创建内存映射时，请确保根据可用内存进行相应调整，以避免内存不足错误。
 - en: 'Additionally, if you do some additional operations with your outputs without
     placing them back on the CPU (for instance inside the `generate` method of Transformers)
     and if you placed your inputs on a GPU, that GPU will consume more memory than
@@ -339,14 +484,21 @@
     Therefore if you would like to optimize the maximum batch size and you have many
     GPUs, give the first GPU less memory. For example, with BLOOM-176B on 8x80 A100
     setup, the close-to-ideal map is:'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，如果您对输出执行一些额外的操作，而不将其放回CPU（例如在Transformers的`generate`方法中），并且将输入放在GPU上，则该GPU将消耗比其他GPU更多的内存（Accelerate始终将输出放回到输入设备）。因此，如果您想要优化最大批处理大小，并且您有许多GPU，请给第一个GPU分配更少的内存。例如，在8x80
+    A100设置中使用BLOOM-176B，接近理想的映射是：
 - en: '[PRE15]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: as you can see we gave the remaining 7 GPUs ~50% more memory than GPU 0.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，我们给剩下的7个GPU分配了比GPU 0多约50%的内存。
 - en: 'If you opt to fully design the `device_map` yourself, it should be a dictionary
     with keys being module names of your model and values being a valid device identifier
     (for instance an integer for the GPUs) or `"cpu"` for CPU offload, `"disk"` for
@@ -354,44 +506,65 @@
     device map as you wish: for instance, if your model has two blocks (let’s say
     `block1` and `block2`) which each contain three linear layers (let’s say `linear1`,
     `linear2` and `linear3`), a valid device map can be:'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您选择完全自己设计`device_map`，它应该是一个字典，其中键是您模型的模块名称，值是有效的设备标识符（例如GPU的整数）或`"cpu"`表示CPU卸载，`"disk"`表示磁盘卸载。键需要覆盖整个模型，然后您可以根据需要定义设备映射：例如，如果您的模型有两个块（假设是`block1`和`block2`），每个块包含三个线性层（假设是`linear1`、`linear2`和`linear3`），一个有效的设备映射可以是：
 - en: '[PRE16]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'another one that is valid could be:'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个有效的示例可能是：
 - en: '[PRE17]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'On the other hand, this one is not valid as it does not cover every parameter
     of the model:'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一方面，这个映射是无效的，因为它没有涵盖模型的每个参数：
 - en: '[PRE18]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: To be the most efficient, make sure your device map puts the parameters on the
     GPUs in a sequential manner (e.g. don’t put one of the first weights on GPU 0,
     then weights on GPU 1 and the last weight back to GPU 0) to avoid making many
     transfers of data between the GPUs.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了最有效地使用，请确保您的设备映射以顺序方式将参数放在GPU上（例如，不要将第一个权重放在GPU 0上，然后将权重放在GPU 1上，最后将权重放回GPU
+    0），以避免在GPU之间进行多次数据传输。
 - en: CPU offload only
+  id: totrans-85
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 仅CPU卸载
 - en: If you want to offload your model on CPU, you can use [cpu_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload).
     As a result, all parameters of the model will be offloaded and only one copy of
     the state dict of the model will be kept. During the forward pass, parameters
     will be extracted from that state dict and put on the execution device and passed
     as they are needed, then offloaded again.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要在CPU上卸载模型，可以使用[cpu_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload)。结果，模型的所有参数将被卸载，模型的状态字典只会保留一份副本。在前向传递过程中，参数将从该状态字典中提取出来，并放在执行设备上，并在需要时传递，然后再次卸载。
 - en: '[PRE19]'
+  id: totrans-87
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'You can also use [cpu_offload_with_hook()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload_with_hook).
     This function will offloads a model on the CPU and puts it back to an execution
     device when executed. The difference with [cpu_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload)
@@ -400,32 +573,46 @@
     [cpu_offload_with_hook()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload_with_hook)
     is more performant but less memory saving. It is useful for pipelines running
     a model in a loop:'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用[cpu_offload_with_hook()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload_with_hook)。此函数将模型卸载到CPU，并在执行时将其放回执行设备。与[cpu_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload)的区别在于，模型在前向传递后仍保留在执行设备上，并且仅在调用返回的`hook`的`offload`方法时再次卸载。此外，[cpu_offload_with_hook()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload_with_hook)更高效但节省的内存较少。它适用于在循环中运行模型的管道：
 - en: '[PRE20]'
+  id: totrans-89
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Disk offload only
+  id: totrans-90
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 仅磁盘卸载
 - en: To perform disk offload, you can use [disk_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.disk_offload).
     As a result, all parameters of the model will be offloaded as memory-mapped array
     in a given folder. During the forward pass, parameters will be accessed from that
     folder and put on the execution device passed as they are needed, then offloaded
     again.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 要执行磁盘卸载，您可以使用[disk_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.disk_offload)。结果，模型的所有参数将作为内存映射数组卸载到给定文件夹中。在前向传递期间，参数将从该文件夹访问，并在需要时放在传递的执行设备上，然后再次卸载。
 - en: '[PRE21]'
+  id: totrans-92
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Limits and further development
+  id: totrans-93
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 限制和进一步发展
 - en: 'We are aware of the current limitations in the API:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们意识到API中目前的限制：
 - en: '[infer_auto_device_map()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.infer_auto_device_map)
     (or `device_map="auto"` in [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch))
     tries to maximize GPU and CPU RAM it sees available when you execute it. While
@@ -433,39 +620,52 @@
     not needed), it’s not entirely true with Python and CPU RAM. Therefore, an automatically
     computed device map might be too intense on the CPU. Move a few modules to the
     disk device if you get crashes due to a lack of RAM.'
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[infer_auto_device_map()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.infer_auto_device_map)（或在[load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch)中使用`device_map="auto"`）会尝试在执行时最大化它看到的可用GPU和CPU
+    RAM。虽然PyTorch非常擅长有效管理GPU RAM（并在不需要时将其归还），但对于Python和CPU RAM来说并非完全如此。因此，自动计算的设备映射可能对CPU太过密集。如果由于RAM不足而导致崩溃，请将一些模块移动到磁盘设备。'
 - en: '[infer_auto_device_map()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.infer_auto_device_map)
     (or `device_map="auto"` in [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch))
     attributes devices sequentially (to avoid moving things back and forth) so if
     your first layer is bigger than the size of the GPU you have, it will end up with
     everything on the CPU/Disk.'
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[infer_auto_device_map()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.infer_auto_device_map)（或在[load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch)中使用`device_map="auto"`）属性会按顺序分配设备（以避免来回移动），因此如果您的第一层比您拥有的GPU大小还要大，它最终会将所有内容放在CPU/磁盘上。'
 - en: '[load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch)
     and [load_checkpoint_in_model()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.load_checkpoint_in_model)
     do not perform any check on the correctness of your state dict compared to your
     model at the moment (this will be fixed in a future version), so you may get some
     weird errors if trying to load a checkpoint with mismatched or missing keys.'
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch)和[load_checkpoint_in_model()](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.load_checkpoint_in_model)目前不会对您的状态字典与模型的正确性进行任何检查（这将在未来版本中修复），因此如果尝试加载具有不匹配或缺失键的检查点，则可能会出现一些奇怪的错误。'
 - en: The model parallelism used when your model is split on several GPUs is naive
     and not optimized, meaning that only one GPU works at a given time and the other
     sits idle.
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当您的模型在多个GPU上分割时使用的模型并行性是天真的并且没有优化，这意味着只有一个GPU在给定时间工作，而另一个处于空闲状态。
 - en: When weights are offloaded on the CPU/hard drive, there is no pre-fetching (yet,
     we will work on this for future versions) which means the weights are put on the
     GPU when they are needed and not before.
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当权重被转移到CPU/硬盘上时，没有预取（但我们将在未来版本中解决这个问题），这意味着权重在需要时才会放在GPU上，而不是之前。
 - en: Hard-drive offloading might be very slow if the hardware you run on does not
     have fast communication between disk and CPU (like NVMes).
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果您运行的硬件之间的磁盘和CPU之间没有快速通信（如NVMes），硬盘卸载可能会非常慢。
