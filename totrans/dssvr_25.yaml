@@ -1,0 +1,110 @@
+- en: Server infrastructure
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets-server/server](https://huggingface.co/docs/datasets-server/server)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets-server/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/entry/start.72deb59f.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/scheduler.db6b1edd.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/singletons.08f900c0.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/index.badce0ed.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/paths.8205e2a2.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/entry/app.9c9f50af.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/index.ef84021a.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/nodes/0.895e992d.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/nodes/18.9145e7ff.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/Heading.87f70b00.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The [Datasets Server](https://github.com/huggingface/datasets-server) has two
+    main components that work together to return queries about a dataset instantly:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: a user-facing web API for exploring and returning information about a dataset
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: a server runs the queries ahead of time and caches them in a database
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: While most of the documentation is focused on the web API, the server is crucial
+    because it performs all the time-consuming preprocessing and stores the results
+    so the web API can retrieve and serve them to the user. This saves a user time
+    because instead of generating the response every time it gets requested, Datasets
+    Server can return the preprocessed results instantly from the cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are three elements that keep the server running: the job queue, workers,
+    and the cache.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Job queue
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The job queue is a list of jobs stored in a Mongo database that should be completed
+    by the workers. The jobs are practically identical to the endpoints the user uses;
+    only the server runs the jobs ahead of time, and the user gets the results when
+    they use the endpoint.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are three jobs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`/splits` corresponds to the `/splits` endpoint. It refreshes a dataset and
+    then returns that dataset’s splits and configurations. For every split in the
+    dataset, it’ll create a new job.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`/first-rows` corresponds to the `/first-rows` endpoint. It gets the first
+    100 rows and columns of a dataset split.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`/parquet` corresponds to the `/parquet` endpoint. It downloads the whole dataset,
+    converts it to [parquet](https://parquet.apache.org/) and publishes the parquet
+    files to the Hub.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You might’ve noticed the `/rows` and `/search` endpoints don’t have a job in
+    the queue. The responses from these endpoints are generated on demand.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Workers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Workers are responsible for executing the jobs in the queue. They complete the
+    actual preprocessing requests, such as getting a list of splits and configurations.
+    The workers can be controlled by configurable environment variables, like the
+    minimum or the maximum number of rows returned by a worker or the maximum number
+    of jobs to start per dataset user or organization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at the [workers configuration](https://github.com/huggingface/datasets-server/tree/main/services/worker#configuration)
+    for a complete list of the environment variables if you’re interested in learning
+    more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cache
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once the workers complete a job, the results are stored - or *cached* - in a
+    Mongo database. When a user makes a request with an endpoint like `/first-rows`,
+    Datasets Server retrieves the preprocessed response from the cache, and serves
+    it to the user. This eliminates the time a user would’ve waited if the server
+    hadn’t already completed the job and stored the response.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a result, users can get their requested information about a dataset (even
+    large ones) nearly instantaneously!
+  prefs: []
+  type: TYPE_NORMAL

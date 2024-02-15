@@ -1,0 +1,203 @@
+- en: List Parquet files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/datasets-server/parquet](https://huggingface.co/docs/datasets-server/parquet)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/datasets-server/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/entry/start.72deb59f.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/scheduler.db6b1edd.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/singletons.08f900c0.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/index.badce0ed.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/paths.8205e2a2.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/entry/app.9c9f50af.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/index.ef84021a.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/nodes/0.895e992d.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/nodes/12.cabc8210.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/Tip.67451c24.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/CodeBlock.786162a6.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/InferenceApi.4a0db4d5.js">
+    <link rel="modulepreload" href="/docs/datasets-server/main/en/_app/immutable/chunks/Heading.87f70b00.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Datasets can be published in any format (CSV, JSONL, directories of images,
+    etc.) to the Hub, and they are easily accessed with the 🤗 [Datasets](https://huggingface.co/docs/datasets/)
+    library. For a more performant experience (especially when it comes to large datasets),
+    Datasets Server automatically converts every dataset to the [Parquet](https://parquet.apache.org/)
+    format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is Parquet?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Parquet is a columnar storage format optimized for querying and processing large
+    datasets. Parquet is a popular choice for big data processing and analytics and
+    is widely used for data processing and machine learning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In Parquet, data is divided into chunks called “row groups”, and within each
+    row group, it is stored in columns rather than rows. Each row group column is
+    compressed separately using the best compression algorithm depending on the data,
+    and contains metadata and statistics (min/max value, number of NULL values) about
+    the data it contains.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This structure allows for efficient data reading and querying:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: only the necessary columns are read from disk (projection pushdown); no need
+    to read the entire file. This reduces the memory requirement for working with
+    Parquet data.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: entire row groups are skipped if the statistics stored in its metadata do not
+    match the data of interest (automatic filtering)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: the data is compressed, which reduces the amount of data that needs to be stored
+    and transferred.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A Parquet file contains a single table. If a dataset has multiple tables (e.g.
+    multiple splits or configurations), each table is stored in a separate Parquet
+    file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conversion to Parquet
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Parquet files are published to the Hub on a specific `refs/convert/parquet`
+    branch (like this `amazon_polarity` [branch](https://huggingface.co/datasets/amazon_polarity/tree/refs%2Fconvert%2Fparquet)
+    for example) that parallels the `main` branch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In order for Datasets Server to generate a Parquet version of a dataset, the
+    dataset must be *public*, or owned by a [PRO user](https://huggingface.co/pricing)
+    or an [Enterprise Hub organization](https://huggingface.co/enterprise).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the Datasets Server API
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This guide shows you how to use Datasets Server’s `/parquet` endpoint to retrieve
+    a list of a dataset’s files converted to Parquet. Feel free to also try it out
+    with [Postman](https://www.postman.com/huggingface/workspace/hugging-face-apis/request/23242779-f0cde3b9-c2ee-4062-aaca-65c4cfdd96f8),
+    [RapidAPI](https://rapidapi.com/hugging-face-hugging-face-default/api/hugging-face-datasets-api),
+    or [ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json#operation/listSplits).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `/parquet` endpoint accepts the dataset name as its query parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonJavaScriptcURL
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The endpoint response is a JSON containing a list of the dataset’s files in
+    the Parquet format. For example, the [`ibm/duorc`](https://huggingface.co/datasets/ibm/duorc)
+    dataset has six Parquet files, which corresponds to the `test`, `train` and `validation`
+    splits of its two configurations, `ParaphraseRC` and `SelfRC` (see the [List splits
+    and configurations](./splits) guide for more details about splits and configurations).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The endpoint also gives the filename and size of each file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sharded Parquet files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Big datasets are partitioned into Parquet files (shards) of about 500MB each.
+    The filename contains the name of the dataset, the split, the shard index, and
+    the total number of shards (`dataset-name-train-0000-of-0004.parquet`). For a
+    given split, the elements in the list are sorted by their shard index, in ascending
+    order. For example, the `train` split of the [`amazon_polarity`](https://datasets-server.huggingface.co/parquet?dataset=amazon_polarity)
+    dataset is partitioned into 4 shards:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: To read and query the Parquet files, take a look at the [Query datasets from
+    Datasets Server](parquet_process) guide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Partially converted datasets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Parquet version can be partial if the dataset is not already in Parquet
+    format or if it is bigger than 5GB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In that case the Parquet files are generated up to 5GB and placed in a split
+    directory prefixed with “partial”, e.g. “partial-train” instead of “train”.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parquet-native datasets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When the dataset is already in Parquet format, the data are not converted and
+    the files in `refs/convert/parquet` are links to the original files. This rule
+    suffers an exception to ensure the Datasets Server API to stay fast: if the [row
+    group](https://parquet.apache.org/docs/concepts/) size of the original Parquet
+    files is too big, new Parquet files are generated.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the Hugging Face Hub API
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For convenience, you can directly use the Hugging Face Hub `/api/parquet` endpoint
+    which returns the list of Parquet URLs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonJavaScriptcURL
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The endpoint response is a JSON containing a list of the dataset’s files URLs
+    in the Parquet format for each split and configuration. For example, the [`ibm/duorc`](https://huggingface.co/datasets/ibm/duorc)
+    dataset has one Parquet file for the train split of the “ParaphraseRC” configuration
+    (see the [List splits and configurations](./splits) guide for more details about
+    splits and configurations).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Optionally you can specify which configuration name to return, as well as which
+    split:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PythonJavaScriptcURL
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Each parquet file can also be accessed using its shard index: `https://huggingface.co/api/datasets/ibm/duorc/parquet/ParaphraseRC/train/0.parquet`
+    redirects to `https://huggingface.co/datasets/ibm/duorc/resolve/refs%2Fconvert%2Fparquet/ParaphraseRC/train/0000.parquet`
+    for example.'
+  prefs: []
+  type: TYPE_NORMAL
