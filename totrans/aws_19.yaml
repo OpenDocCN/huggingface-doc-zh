@@ -1,248 +1,344 @@
 - en: Distributed Training with optimum-neuron
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用optimum-neuron进行分布式训练
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/guides/distributed_training](https://huggingface.co/docs/optimum-neuron/guides/distributed_training)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/optimum-neuron/guides/distributed_training](https://huggingface.co/docs/optimum-neuron/guides/distributed_training)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[AWS Trainium instances](https://aws.amazon.com/machine-learning/trainium/)
     are great to train models. They can contain up to 16 Neuron devices, each device
     containing 2 Neuron cores and has 32GB of memory (16GB per core). For example
     a `trn1.32xlarge` instance has 32 x 16 = 512GB of memory.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[AWS Trainium实例](https://aws.amazon.com/machine-learning/trainium/)非常适合训练模型。它们可以包含多达16个Neuron设备，每个设备包含2个Neuron核，内存为32GB（每个核为16GB）。例如，`trn1.32xlarge`实例具有32
+    x 16 = 512GB的内存。'
 - en: 'But there is a caveat: each Neuron core is an independent data-parallel worker
     by default. It means that the model, the gradient state and the optimizer state,
     amounting to approximately 4 times the model size, must fit in each of the Neuron
     cores (16GB) to be able to train. If that is the case, then the activations must
     also fit in the remaining memory.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 但有一个警告：每个Neuron核默认是一个独立的数据并行工作者。这意味着模型、梯度状态和优化器状态，大约是模型大小的4倍，必须适合每个Neuron核（16GB）才能进行训练。如果是这种情况，则激活也必须适合剩余内存。
 - en: 'To alleviate that, `optimum-neuron` supports parallelism features enabling
     you to harness the full power of your Trainium instance:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了缓解这一点，`optimum-neuron`支持并行特性，使您能够充分利用您的Trainium实例的全部功能：
 - en: '[ZeRO-1](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/frameworks/torch/torch-neuronx/tutorials/training/zero1_gpt2.html):
     It is an optimization of data-parallelism which consists in sharding the optimizer
     state (which usually represents half of the memory needed on the device) over
     the data-parallel ranks.'
+  id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[ZeRO-1](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/frameworks/torch/torch-neuronx/tutorials/training/zero1_gpt2.html)：这是数据并行优化，它通过在数据并行等级上分片优化器状态（通常代表设备上所需内存的一半）来实现。'
 - en: '[Tensor Parallelism](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/tensor_parallelism_overview.html):
     It is a technique which consists in sharding each of your model parameters along
     a given dimension on multiple devices. The number of devices to shard your parameters
     on is called the `tensor_parallel_size`.'
+  id: totrans-7
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[张量并行性](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/tensor_parallelism_overview.html)：这是一种技术，它通过在多个设备上沿着给定维度分片每个模型参数来实现。要在参数上分片的设备数量称为`tensor_parallel_size`。'
 - en: '[Pipeline Parallelism](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/pipeline_parallelism_overview.html):
     **coming soon!**'
+  id: totrans-8
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[流水线并行性](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/pipeline_parallelism_overview.html)：**即将推出！**'
 - en: The good news is that is it possible to combine those techniques, and `optimum-neuron`
     makes it very easy!
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 好消息是可以结合这些技术，而且`optimum-neuron`使这变得非常容易！
 - en: All the example scripts provided in the optimum-neuron repo have those features
     implemented via the `NeuronTrainer`.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: optimum-neuron存储库中提供的所有示例脚本都通过`NeuronTrainer`实现了这些功能。
 - en: How to enable ZeRO-1?
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 如何启用ZeRO-1？
 - en: Whether you use the [NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)
     or decide to have your own training script that uses the `NeuronAccelerator`,
     it is very easy to enable the ZeRO-1 optimization.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论您使用[NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)还是决定使用自己的训练脚本来使用`NeuronAccelerator`，都可以很容易地启用ZeRO-1优化。
 - en: Via the NeuronTrainer
+  id: totrans-13
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 通过NeuronTrainer
 - en: '[PRE0]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Since the example scripts use the `NeuronTrainer`, you can enable ZeRO-1 when
     using them by add the `--zero_1` flag to your command line.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于示例脚本使用`NeuronTrainer`，因此在使用它们时，可以通过在命令行中添加`--zero_1`标志来启用ZeRO-1。
 - en: 'For example:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如：
 - en: '[PRE1]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Via the NeuronAccelerator
+  id: totrans-18
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 通过NeuronAccelerator
 - en: 'There is a little bit more work to do when not using the `NeuronTrainer`:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 当不使用`NeuronTrainer`时，需要做一些额外的工作：
 - en: (Optional) Wrap the optimizer class to make it lazy. When ZeRO-1 is enabled
     the original optimizer is overridden to use a sharded version of it. Hence, it
     is possible to load the original optimizer lazily so that the optimizer state
     is not materialized until it is actually sharded.
+  id: totrans-20
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: （可选）包装优化器类以使其惰性化。当启用ZeRO-1时，原始优化器将被覆盖以使用其分片版本。因此，可以使原始优化器惰性加载，以便优化器状态在实际分片之前不会被实现。
 - en: '[PRE2]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Set the `zero_1` argument to `True` when instantiating the `NeuronAccelerator`.
+  id: totrans-22
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在实例化`NeuronAccelerator`时，将`zero_1`参数设置为`True`。
 - en: '[PRE3]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: How to enable Tensor Parallelism?
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 如何启用张量并行性？
 - en: Just as for ZeRO-1, it is possible to apply Tensor Parallelism either with the
     [NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)
     or the `NeuronAccelerator`.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像对于ZeRO-1一样，可以使用[NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)或`NeuronAccelerator`来应用张量并行性。
 - en: 'When doing Tensor Parallelism, you have different settings:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 在进行张量并行性时，有不同的设置：
 - en: The `tensor_parallel_size`. Ideally it should be smallest value for which the
     model fits.
+  id: totrans-27
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`tensor_parallel_size`。理想情况下，应该是模型适合的最小值。'
 - en: Whether or not sequence parallelism should be enabled. [Sequence parallelism](https://arxiv.org/pdf/2205.05198.pdf)
     shards the activations on the sequence axis outside of the tensor parallel regions.
     It is useful because it saves memory by sharding the activations.
+  id: totrans-28
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 是否应该启用序列并行性。[序列并行性](https://arxiv.org/pdf/2205.05198.pdf)在张量并行区域之外的序列轴上分片激活。这很有用，因为它通过分片激活来节省内存。
 - en: 'Whether or not parallelization of the embedding layer should be done. By default
     it is done because it offers multiple benefits:'
+  id: totrans-29
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 是否应该对嵌入层进行并行化。默认情况下会进行，因为它提供了多种好处：
 - en: Parallelizing the embedding layer saves memory, which can enable fitting a bigger
     batch size and/or sequence length.
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 并行化嵌入层可以节省内存，从而可以使批量大小和/或序列长度更大。
 - en: For language models, where the embedding layer weights and the language-modeling
     head weights are usually tied, the language-modeling head ends up parallel and
     does not require to `all-gather` its output since it is fed to a cross entropy
     loss compatible with parallelism, saving expensive communication.
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于语言模型，其中嵌入层权重和语言建模头权重通常是绑定的，语言建模头最终是并行的，不需要`all-gather`其输出，因为它被馈送到与并行兼容的交叉熵损失，节省了昂贵的通信。
 - en: 'On top of that, it is very important to make sure that the original model is
     loaded in an efficient manner: the training script is going to be called by `torchrun`,
     which will dispatch it to workers, one worker per core. If each worker (there
     are 32 of them in a `trn1.32xlarge` instance) loads the full model weights, it
     can take a lot of time and go out-of-memory really fast.'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，非常重要的是确保原始模型以高效的方式加载：训练脚本将由`torchrun`调用，它将将其分派给工作人员，每个核心一个工作人员。如果每个工作人员（在`trn1.32xlarge`实例中有32个工作人员）加载完整的模型权重，可能会花费很长时间，并且很快会耗尽内存。
 - en: '`optimum-neuron` provides a context-manager [distributed.lazy_load_for_parallelism()](/docs/optimum.neuron/main/en/package_reference/distributed#optimum.neuron.distributed.lazy_load_for_parallelism)
     that loads the model lazily to prevent that, only the parameters of the corresponding
     model shard will be materialized in each worker.'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '`optimum-neuron`提供了一个上下文管理器[distributed.lazy_load_for_parallelism()](/docs/optimum.neuron/main/en/package_reference/distributed#optimum.neuron.distributed.lazy_load_for_parallelism)，它懒加载模型以防止，每个工作人员中只会实现相应模型分片的参数。'
 - en: Via the NeuronTrainer
+  id: totrans-34
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 通过NeuronTrainer
 - en: '[PRE4]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Since the example scripts use the `NeuronTrainer`, you can enable Tensor Parallelism
     when using them by specifying the `--tensor_parallel_size` argument, and optionally
     the `disable_embedding_parallelization` and `disable_sequence_parallel` flags.
     to your command line.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于示例脚本使用`NeuronTrainer`，您可以通过在命令行中指定`--tensor_parallel_size`参数以及可选的`disable_embedding_parallelization`和`disable_sequence_parallel`标志来在使用它们时启用Tensor
+    Parallelism。
 - en: 'For example:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如：
 - en: '[PRE5]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Via the NeuronAccelerator
+  id: totrans-39
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 通过NeuronAccelerator
 - en: 'Just as for ZeRO-1, it is possible to wrap the optimizer class to make it lazy.
     Since the model parameters are going to be sharded, it is not needed to materialize
     the optimizer state prior to model parallelization: the wrapper makes sure that
     it stays unmaterialized.'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像对于ZeRO-1一样，可以包装优化器类使其变为懒加载。由于模型参数将被分片，因此在模型并行化之前不需要实现优化器状态：包装器确保其保持未实现状态。
 - en: '[PRE6]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Checkpoint consolidation
+  id: totrans-42
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 检查点整合
 - en: Since Tensor Parallelism consists in sharding the model weights accross different
     workers, only sharded checkpoints will be saved during training. It is necessary
     to consolidate the sharded checkpoints to be able to share and use them outside
     of the specific training configuration there were created under.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于Tensor Parallelism包括将模型权重分片到不同的工作人员中，因此在训练期间只会保存分片检查点。需要整合分片检查点以便能够在特定训练配置之外共享和使用它们。
 - en: 'The Optimum CLI provides a way of doing that very easily via the `optimum neuron
     consolidate` command:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: Optimum CLI通过`optimum neuron consolidate`命令提供了一种非常简单的方法来实现这一点：
 - en: '[PRE7]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: All you need to do is specify the sharded checkpoints directory and the output
     directory that will contain the consolidated checkpoints, and the command takes
     care of the rest. It is also possible to specify the output format of the consolidated
     checkpoints, by default it will export them to the `safetensors` format, which
     is the recommend format to use.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 您只需要指定分片检查点目录和包含整合检查点的输出目录，命令会处理其余部分。还可以指定整合检查点的输出格式，默认情况下将其导出为`safetensors`格式，这是推荐使用的格式。
 - en: 'Example:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如：
 - en: 'Training with Tensor Parallelism just completed and the output dir is called
     `my_training`. The directory looks like the following:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用Tensor Parallelism进行训练刚刚完成，输出目录称为`my_training`。该目录看起来如下：
 - en: '[PRE8]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'It is possible to consolidate the sharded checkpoints in `my_training/tensor_parallel_shards`,
     which correspond to the sharded checkpoints saved at the end of the training,
     by running the following command:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 在`my_training/tensor_parallel_shards`中可以 consolide 分片检查点，这些检查点对应于训练结束时保存的分片检查点，通过运行以下命令：
 - en: '[PRE9]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: The sharded checkpoints are saved under a directory called `tensor_parallel_shards`.
     The `optimum-cli neuron consolidate` command accept as input both a directory
     that contains a `tensor_parallel_shards` directory, or the `tensor_parallel_shards`
     directory itself.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 分片检查点保存在一个名为`tensor_parallel_shards`的目录下。`optimum-cli neuron consolidate`命令接受一个包含`tensor_parallel_shards`目录的目录，或者`tensor_parallel_shards`目录本身作为输入。
