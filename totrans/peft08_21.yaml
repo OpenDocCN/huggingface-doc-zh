@@ -1,25 +1,17 @@
 - en: DeepSpeed
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: DeepSpeed
 - en: 'Original text: [https://huggingface.co/docs/peft/accelerate/deepspeed-zero3-offload](https://huggingface.co/docs/peft/accelerate/deepspeed-zero3-offload)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: '原文链接: [https://huggingface.co/docs/peft/accelerate/deepspeed-zero3-offload](https://huggingface.co/docs/peft/accelerate/deepspeed-zero3-offload)'
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[DeepSpeed](https://www.deepspeed.ai/) is a library designed for speed and
@@ -29,142 +21,216 @@
     This drastically reduces memory usage, allowing you to scale your training to
     billion parameter models. To unlock even more memory efficiency, ZeRO-Offload
     reduces GPU compute and memory by leveraging CPU resources during optimization.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DeepSpeed](https://www.deepspeed.ai/) 是一个专为大型模型分布式训练的速度和规模而设计的库，具有数十亿参数。其核心是
+    Zero Redundancy Optimizer (ZeRO)，它将优化器状态 (ZeRO-1)、梯度 (ZeRO-2) 和参数 (ZeRO-3) 分片到数据并行进程中。这大大减少了内存使用，使您可以将训练扩展到数十亿参数模型。为了进一步提高内存效率，ZeRO-Offload
+    通过利用 CPU 资源在优化过程中减少 GPU 计算和内存。'
 - en: Both of these features are supported in 🤗 Accelerate, and you can use them with
     🤗 PEFT. This guide will help you learn how to use our DeepSpeed [training script](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py).
     You’ll configure the script to train a large model for conditional generation
     with ZeRO-3 and ZeRO-Offload.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 这两个功能都受到 🤗 Accelerate 的支持，您可以在 🤗 PEFT 中使用它们。本指南将帮助您学习如何使用我们的 DeepSpeed [训练脚本](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py)。您将配置脚本以使用
+    ZeRO-3 和 ZeRO-Offload 训练大型条件生成模型。
 - en: 💡 To help you get started, check out our example training scripts for [causal
     language modeling](https://github.com/huggingface/peft/blob/main/examples/causal_language_modeling/peft_lora_clm_accelerate_ds_zero3_offload.py)
     and [conditional generation](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py).
     You can adapt these scripts for your own applications or even use them out of
     the box if your task is similar to the one in the scripts.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 为了帮助您入门，请查看我们的示例训练脚本，用于[因果语言建模](https://github.com/huggingface/peft/blob/main/examples/causal_language_modeling/peft_lora_clm_accelerate_ds_zero3_offload.py)和[条件生成](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py)。您可以为自己的应用程序调整这些脚本，甚至在您的任务类似于脚本中的任务时直接使用它们。
 - en: Configuration
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 配置
 - en: Start by running the following command to [create a DeepSpeed configuration
     file](https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script)
     with 🤗 Accelerate. The `--config_file` flag allows you to save the configuration
     file to a specific location, otherwise it is saved as a `default_config.yaml`
     file in the 🤗 Accelerate cache.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先运行以下命令来[创建一个 DeepSpeed 配置文件](https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script)与
+    🤗 Accelerate。`--config_file` 标志允许您将配置文件保存到特定位置，否则它将保存为 `default_config.yaml` 文件在
+    🤗 Accelerate 缓存中。
 - en: The configuration file is used to set the default options when you launch the
     training script.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置文件用于在启动训练脚本时设置默认选项。
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: You’ll be asked a few questions about your setup, and configure the following
     arguments. In this example, you’ll use ZeRO-3 and ZeRO-Offload so make sure you
     pick those options.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将被问及有关您的设置的几个问题，并配置以下参数。在此示例中，您将使用 ZeRO-3 和 ZeRO-Offload，请确保选择这些选项。
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: An example [configuration file](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/accelerate_ds_zero3_cpu_offload_config.yaml)
     might look like the following. The most important thing to notice is that `zero_stage`
     is set to `3`, and `offload_optimizer_device` and `offload_param_device` are set
     to the `cpu`.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个[配置文件](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/accelerate_ds_zero3_cpu_offload_config.yaml)可能如下所示。最重要的是要注意
+    `zero_stage` 设置为 `3`，`offload_optimizer_device` 和 `offload_param_device` 设置为 `cpu`。
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: The important parts
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 重要部分
 - en: Let’s dive a little deeper into the script so you can see what’s going on, and
     understand how it works.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们深入了解脚本，以便您了解正在发生的事情，并理解它是如何工作的。
 - en: Within the [`main`](https://github.com/huggingface/peft/blob/2822398fbe896f25d4dac5e468624dc5fd65a51b/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py#L103)
     function, the script creates an [Accelerator](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     class to initialize all the necessary requirements for distributed training.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 [`main`](https://github.com/huggingface/peft/blob/2822398fbe896f25d4dac5e468624dc5fd65a51b/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py#L103)
+    函数中，脚本创建了一个 [Accelerator](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    类来初始化分布式训练所需的所有必要条件。
 - en: 💡 Feel free to change the model and dataset inside the `main` function. If your
     dataset format is different from the one in the script, you may also need to write
     your own preprocessing function.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 随意更改 `main` 函数中的模型和数据集。如果您的数据集格式与脚本中的不同，您可能还需要编写自己的预处理函数。
 - en: The script also creates a configuration for the 🤗 PEFT method you’re using,
     which in this case, is LoRA. The [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
     specifies the task type and important parameters such as the dimension of the
     low-rank matrices, the matrices scaling factor, and the dropout probability of
     the LoRA layers. If you want to use a different 🤗 PEFT method, make sure you replace
     `LoraConfig` with the appropriate [class](../package_reference/tuners).
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 脚本还为您正在使用的 🤗 PEFT 方法创建配置，本例中为 LoRA。[LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
+    指定了任务类型和重要参数，如低秩矩阵的维度、矩阵缩放因子以及 LoRA 层的 dropout 概率。如果您想使用其他 🤗 PEFT 方法，请确保将 `LoraConfig`
+    替换为适当的 [class](../package_reference/tuners)。
 - en: '[PRE3]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Throughout the script, you’ll see the [main_process_first](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.main_process_first)
     and [wait_for_everyone](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.wait_for_everyone)
     functions which help control and synchronize when processes are executed.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 在整个脚本中，您将看到[main_process_first](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.main_process_first)和[wait_for_everyone](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.wait_for_everyone)函数，它们有助于控制和同步进程的执行时间。
 - en: 'The [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
     function takes a base model and the `peft_config` you prepared earlier to create
     a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel):'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '[get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)函数接受一个基础模型和您之前准备的`peft_config`，以创建一个[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)：'
 - en: '[PRE4]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Pass all the relevant training objects to 🤗 Accelerate’s [prepare](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
     which makes sure everything is ready for training:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 将所有相关的训练对象传递给🤗 Accelerate的[prepare](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)，确保一切准备就绪：
 - en: '[PRE5]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'The next bit of code checks whether the DeepSpeed plugin is used in the `Accelerator`,
     and if the plugin exists, then the `Accelerator` uses ZeRO-3 as specified in the
     configuration file:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来的代码段检查`Accelerator`中是否使用了DeepSpeed插件，如果插件存在，则`Accelerator`将根据配置文件中指定的ZeRO-3来使用它：
 - en: '[PRE6]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Inside the training loop, the usual `loss.backward()` is replaced by 🤗 Accelerate’s
     [backward](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.backward)
     which uses the correct `backward()` method based on your configuration:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 在训练循环中，通常的`loss.backward()`被🤗 Accelerate的[backward](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.backward)替换，它根据您的配置使用正确的`backward()`方法：
 - en: '[PRE7]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: That is all! The rest of the script handles the training loop, evaluation, and
     even pushes it to the Hub for you.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 就这些了！脚本的其余部分处理训练循环、评估，甚至为您将其推送到Hub。
 - en: Train
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练
 - en: 'Run the following command to launch the training script. Earlier, you saved
     the configuration file to `ds_zero3_cpu.yaml`, so you’ll need to pass the path
     to the launcher with the `--config_file` argument like this:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 运行以下命令启动训练脚本。之前，您将配置文件保存为`ds_zero3_cpu.yaml`，因此您需要通过`--config_file`参数将路径传递给启动器，就像这样：
 - en: '[PRE8]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'You’ll see some output logs that track memory usage during training, and once
     it’s completed, the script returns the accuracy and compares the predictions to
     the labels:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将看到一些跟踪内存使用情况的输出日志，在训练完成后，脚本将返回准确性并将预测与标签进行比较：
 - en: '[PRE9]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
