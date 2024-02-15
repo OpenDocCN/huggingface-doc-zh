@@ -1,265 +1,374 @@
 - en: Reduce memory usage
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 减少内存使用
 - en: 'Original text: [https://huggingface.co/docs/diffusers/optimization/memory](https://huggingface.co/docs/diffusers/optimization/memory)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/optimization/memory](https://huggingface.co/docs/diffusers/optimization/memory)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: A barrier to using diffusion models is the large amount of memory required.
     To overcome this challenge, there are several memory-reducing techniques you can
     use to run even some of the largest models on free-tier or consumer GPUs. Some
     of these techniques can even be combined to further reduce memory usage.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用扩散模型的障碍是所需的大量内存。为了克服这一挑战，您可以使用几种减少内存的技术，甚至可以在免费或消费级GPU上运行一些最大的模型。有些技术甚至可以结合使用以进一步减少内存使用。
 - en: In many cases, optimizing for memory or speed leads to improved performance
     in the other, so you should try to optimize for both whenever you can. This guide
     focuses on minimizing memory usage, but you can also learn more about how to [Speed
     up inference](fp16).
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在许多情况下，优化内存或速度会导致另一个方面的性能提高，因此您应该尽可能同时优化两者。本指南侧重于最小化内存使用，但您也可以了解有关如何[加速推断](fp16)的更多信息。
 - en: The results below are obtained from generating a single 512x512 image from the
     prompt a photo of an astronaut riding a horse on mars with 50 DDIM steps on a
     Nvidia Titan RTX, demonstrating the speed-up you can expect as a result of reduced
     memory consumption.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下结果是从在Nvidia Titan RTX上使用50个DDIM步骤从一个在火星上骑马的宇航员的照片生成单个512x512图像获得的，展示了由于减少内存消耗而可以期望的加速。
 - en: '|  | latency | speed-up |'
+  id: totrans-6
   prefs: []
   type: TYPE_TB
+  zh: '|  | 延迟 | 加速 |'
 - en: '| --- | --- | --- |'
+  id: totrans-7
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| original | 9.50s | x1 |'
+  id: totrans-8
   prefs: []
   type: TYPE_TB
+  zh: '| 原始 | 9.50秒 | x1 |'
 - en: '| fp16 | 3.61s | x2.63 |'
+  id: totrans-9
   prefs: []
   type: TYPE_TB
+  zh: '| fp16 | 3.61秒 | x2.63 |'
 - en: '| channels last | 3.30s | x2.88 |'
+  id: totrans-10
   prefs: []
   type: TYPE_TB
+  zh: '| 通道最后 | 3.30秒 | x2.88 |'
 - en: '| traced UNet | 3.21s | x2.96 |'
+  id: totrans-11
   prefs: []
   type: TYPE_TB
+  zh: '| 追踪的UNet | 3.21秒 | x2.96 |'
 - en: '| memory-efficient attention | 2.63s | x3.61 |'
+  id: totrans-12
   prefs: []
   type: TYPE_TB
+  zh: '| 内存高效注意力 | 2.63秒 | x3.61 |'
 - en: Sliced VAE
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 切片的VAE
 - en: Sliced VAE enables decoding large batches of images with limited VRAM or batches
     with 32 images or more by decoding the batches of latents one image at a time.
     You’ll likely want to couple this with [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)
     to reduce memory use further if you have xFormers installed.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 切片的VAE通过逐个解码潜在的批量图像或包含32张或更多图像的批次来解码大批量图像，从而使有限的VRAM或批次处理更容易。如果您安装了xFormers，您可能还想将其与[enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)结合使用以进一步减少内存使用。
 - en: 'To use sliced VAE, call [enable_vae_slicing()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.enable_vae_slicing)
     on your pipeline before inference:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用切片的VAE，请在推断之前在您的管道上调用[enable_vae_slicing()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.enable_vae_slicing)：
 - en: '[PRE0]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: You may see a small performance boost in VAE decoding on multi-image batches,
     and there should be no performance impact on single-image batches.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在多图像批次上进行VAE解码可能会带来轻微的性能提升，并且对于单图像批次不应该有性能影响。
 - en: Tiled VAE
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 平铺的VAE
 - en: Tiled VAE processing also enables working with large images on limited VRAM
     (for example, generating 4k images on 8GB of VRAM) by splitting the image into
     overlapping tiles, decoding the tiles, and then blending the outputs together
     to compose the final image. You should also used tiled VAE with [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)
     to reduce memory use further if you have xFormers installed.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 平铺的VAE处理还可以通过将图像分成重叠的瓦片，解码瓦片，然后将输出混合在一起来组成最终图像，从而在有限的VRAM上处理大图像（例如，在8GB的VRAM上生成4k图像）。如果您安装了xFormers，还应该使用[enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)来进一步减少内存使用。
 - en: 'To use tiled VAE processing, call [enable_vae_tiling()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.enable_vae_tiling)
     on your pipeline before inference:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用平铺的VAE处理，请在推断之前在您的管道上调用[enable_vae_tiling()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.enable_vae_tiling)：
 - en: '[PRE1]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: The output image has some tile-to-tile tone variation because the tiles are
     decoded separately, but you shouldn’t see any sharp and obvious seams between
     the tiles. Tiling is turned off for images that are 512x512 or smaller.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 输出图像存在一些瓦片之间的色调变化，因为瓦片是分开解码的，但您不应该看到瓦片之间的明显缝隙。对于尺寸为512x512或更小的图像，瓦片功能已关闭。
 - en: CPU offloading
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: CPU卸载
 - en: Offloading the weights to the CPU and only loading them on the GPU when performing
     the forward pass can also save memory. Often, this technique can reduce memory
     consumption to less than 3GB.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 将权重卸载到CPU，并仅在执行前向传递时加载它们到GPU上也可以节省内存。通常，这种技术可以将内存消耗减少到不到3GB。
 - en: 'To perform CPU offloading, call [enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload):'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: '要执行CPU卸载，请在推断之前在您的管道上调用[enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload):'
 - en: '[PRE2]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: CPU offloading works on submodules rather than whole models. This is the best
     way to minimize memory consumption, but inference is much slower due to the iterative
     nature of the diffusion process. The UNet component of the pipeline runs several
     times (as many as `num_inference_steps`); each time, the different UNet submodules
     are sequentially onloaded and offloaded as needed, resulting in a large number
     of memory transfers.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: CPU卸载适用于子模块而不是整个模型。这是最小化内存消耗的最佳方法，但由于扩散过程的迭代性质，推断速度要慢得多。管道的UNet组件运行多次（最多`num_inference_steps`次）；每次，不同的UNet子模块根据需要顺序加载和卸载，导致大量的内存传输。
 - en: Consider using [model offloading](#model-offloading) if you want to optimize
     for speed because it is much faster. The tradeoff is your memory savings won’t
     be as large.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要优化速度，考虑使用[model offloading](#model-offloading)，因为它速度更快。权衡是您的内存节省量不会那么大。
 - en: When using [enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload),
     don’t move the pipeline to CUDA beforehand or else the gain in memory consumption
     will only be minimal (see this [issue](https://github.com/huggingface/diffusers/issues/1934)
     for more information).
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用[enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload)时，不要事先将管道移动到CUDA，否则内存消耗的增益将只是微不足道的（有关更多信息，请参见此[问题](https://github.com/huggingface/diffusers/issues/1934)）。
 - en: '[enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload)
     is a stateful operation that installs hooks on the models.'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '[enable_sequential_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/latent_upscale#diffusers.StableDiffusionLatentUpscalePipeline.enable_sequential_cpu_offload)是一个有状态的操作，它在模型上安装钩子。'
 - en: Model offloading
+  id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模型卸载
 - en: Model offloading requires 🤗 Accelerate version 0.17.0 or higher.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 模型卸载需要🤗 Accelerate版本0.17.0或更高版本。
 - en: '[Sequential CPU offloading](#cpu-offloading) preserves a lot of memory but
     it makes inference slower because submodules are moved to GPU as needed, and they’re
     immediately returned to the CPU when a new module runs.'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Sequential CPU offloading](#cpu-offloading)保留了大量内存，但使推理速度变慢，因为子模块在需要时移动到GPU，并在新模块运行时立即返回到CPU。'
 - en: Full-model offloading is an alternative that moves whole models to the GPU,
     instead of handling each model’s constituent *submodules*. There is a negligible
     impact on inference time (compared with moving the pipeline to `cuda`), and it
     still provides some memory savings.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 完整模型卸载是一种将整个模型移动到GPU的替代方法，而不是处理每个模型的组成*子模块*。与将管道移动到`cuda`相比，对推理时间几乎没有影响，并且仍然提供一些内存节省。
 - en: During model offloading, only one of the main components of the pipeline (typically
     the text encoder, UNet and VAE) is placed on the GPU while the others wait on
     the CPU. Components like the UNet that run for multiple iterations stay on the
     GPU until they’re no longer needed.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 在模型卸载期间，管道的主要组件之一（通常是文本编码器、UNet和VAE）被放置在GPU上，而其他组件则在CPU上等待。像UNet这样运行多次迭代的组件会一直保留在GPU上，直到不再需要为止。
 - en: 'Enable model offloading by calling [enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
     on the pipeline:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过在管道上调用[enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)启用模型卸载：
 - en: '[PRE3]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: In order to properly offload models after they’re called, it is required to
     run the entire pipeline and models are called in the pipeline’s expected order.
     Exercise caution if models are reused outside the context of the pipeline after
     hooks have been installed. See [Removing Hooks](https://huggingface.co/docs/accelerate/en/package_reference/big_modeling#accelerate.hooks.remove_hook_from_module)
     for more information.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了在调用模型后正确卸载模型，需要运行整个管道，并按照管道的预期顺序调用模型。如果在安装钩子后在管道上下文之外重用模型，请谨慎行事。有关更多信息，请参见[Removing
+    Hooks](https://huggingface.co/docs/accelerate/en/package_reference/big_modeling#accelerate.hooks.remove_hook_from_module)。
 - en: '[enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
     is a stateful operation that installs hooks on the models and state on the pipeline.'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '[enable_model_cpu_offload()](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/gligen#diffusers.StableDiffusionGLIGENTextImagePipeline.enable_model_cpu_offload)
+    是一个有状态的操作，它在模型上安装钩子，并在管道上安装状态。'
 - en: Channels-last memory format
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 通道最后的内存格式
 - en: The channels-last memory format is an alternative way of ordering NCHW tensors
     in memory to preserve dimension ordering. Channels-last tensors are ordered in
     such a way that the channels become the densest dimension (storing images pixel-per-pixel).
     Since not all operators currently support the channels-last format, it may result
     in worst performance but you should still try and see if it works for your model.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 通道最后的内存格式是在内存中对NCHW张量进行排序的另一种方式，以保留维度排序。通道最后的张量是按照通道成为最密集维度的方式排序的（以像素为单位存储图像）。由于目前并非所有运算符都支持通道最后的格式，可能会导致性能较差，但您仍应尝试并查看它是否适用于您的模型。
 - en: 'For example, to set the pipeline’s UNet to use the channels-last format:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要将管道的UNet设置为使用通道最后的格式：
 - en: '[PRE4]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Tracing
+  id: totrans-44
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 跟踪
 - en: Tracing runs an example input tensor through the model and captures the operations
     that are performed on it as that input makes its way through the model’s layers.
     The executable or `ScriptFunction` that is returned is optimized with just-in-time
     compilation.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 跟踪通过模型的示例输入张量，并捕获在其通过模型的层时执行的操作。返回的可执行文件或`ScriptFunction`经过即时编译进行了优化。
 - en: 'To trace a UNet:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 要跟踪一个UNet：
 - en: '[PRE5]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Replace the `unet` attribute of the pipeline with the traced model:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 用跟踪的模型替换管道的`unet`属性：
 - en: '[PRE6]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Memory-efficient attention
+  id: totrans-50
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 内存高效的注意力
 - en: Recent work on optimizing bandwidth in the attention block has generated huge
     speed-ups and reductions in GPU memory usage. The most recent type of memory-efficient
     attention is [Flash Attention](https://arxiv.org/abs/2205.14135) (you can check
     out the original code at [HazyResearch/flash-attention](https://github.com/HazyResearch/flash-attention)).
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 最近关于在注意力块中优化带宽的工作产生了巨大的加速和GPU内存使用量的减少。最新的内存高效注意力类型是[Flash Attention](https://arxiv.org/abs/2205.14135)（您可以在[HazyResearch/flash-attention](https://github.com/HazyResearch/flash-attention)查看原始代码）。
 - en: If you have PyTorch >= 2.0 installed, you should not expect a speed-up for inference
     when enabling `xformers`.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果已安装PyTorch >= 2.0，则在启用`xformers`时不应期望推理速度提升。
 - en: 'To use Flash Attention, install the following:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用Flash Attention，安装以下内容：
 - en: PyTorch > 1.12
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: PyTorch > 1.12
 - en: CUDA available
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: CUDA可用
 - en: '[xFormers](xformers)'
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[xFormers](xformers)'
 - en: 'Then call [enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)
     on the pipeline:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后在管道上调用[enable_xformers_memory_efficient_attention()](/docs/diffusers/v0.26.3/en/api/models/overview#diffusers.ModelMixin.enable_xformers_memory_efficient_attention)：
 - en: '[PRE7]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: The iteration speed when using `xformers` should match the iteration speed of
     PyTorch 2.0 as described [here](torch2.0).
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`xformers`时的迭代速度应该与PyTorch 2.0的迭代速度相匹配，如[torch2.0](torch2.0)中所述。

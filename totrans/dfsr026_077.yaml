@@ -1,67 +1,83 @@
 - en: Speed up inference
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 加速推理
 - en: 'Original text: [https://huggingface.co/docs/diffusers/optimization/fp16](https://huggingface.co/docs/diffusers/optimization/fp16)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/optimization/fp16](https://huggingface.co/docs/diffusers/optimization/fp16)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: There are several ways to optimize 🤗 Diffusers for inference speed. As a general
     rule of thumb, we recommend using either [xFormers](xformers) or `torch.nn.functional.scaled_dot_product_attention`
     in PyTorch 2.0 for their memory-efficient attention.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 有几种方法可以优化🤗 Diffusers以提高推理速度。作为一个经验法则，我们建议在PyTorch 2.0中使用[xFormers](xformers)或`torch.nn.functional.scaled_dot_product_attention`进行内存高效的注意力。
 - en: In many cases, optimizing for speed or memory leads to improved performance
     in the other, so you should try to optimize for both whenever you can. This guide
     focuses on inference speed, but you can learn more about preserving memory in
     the [Reduce memory usage](memory) guide.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在许多情况下，为了提高速度或内存而进行优化会导致另一方面的性能提升，因此您应该尽可能在两者上进行优化。本指南侧重于推理速度，但您可以在[减少内存使用](memory)指南中了解更多关于保留内存的信息。
 - en: The results below are obtained from generating a single 512x512 image from the
     prompt `a photo of an astronaut riding a horse on mars` with 50 DDIM steps on
     a Nvidia Titan RTX, demonstrating the speed-up you can expect.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的结果是在Nvidia Titan RTX上使用50个DDIM步骤从提示`a photo of an astronaut riding a horse
+    on mars`生成单个512x512图像获得的，展示了您可以期望的加速。
 - en: '|  | latency | speed-up |'
+  id: totrans-6
   prefs: []
   type: TYPE_TB
+  zh: '|  | 延迟 | 加速 |'
 - en: '| --- | --- | --- |'
+  id: totrans-7
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| original | 9.50s | x1 |'
+  id: totrans-8
   prefs: []
   type: TYPE_TB
+  zh: '| 原始 | 9.50秒 | x1 |'
 - en: '| fp16 | 3.61s | x2.63 |'
+  id: totrans-9
   prefs: []
   type: TYPE_TB
+  zh: '| fp16 | 3.61秒 | x2.63 |'
 - en: '| channels last | 3.30s | x2.88 |'
+  id: totrans-10
   prefs: []
   type: TYPE_TB
+  zh: '| 通道最后 | 3.30秒 | x2.88 |'
 - en: '| traced UNet | 3.21s | x2.96 |'
+  id: totrans-11
   prefs: []
   type: TYPE_TB
+  zh: '| 追踪的UNet | 3.21秒 | x2.96 |'
 - en: '| memory efficient attention | 2.63s | x3.61 |'
+  id: totrans-12
   prefs: []
   type: TYPE_TB
+  zh: '| 内存高效的注意力 | 2.63秒 | x3.61 |'
 - en: Use TensorFloat-32
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用TensorFloat-32
 - en: On Ampere and later CUDA devices, matrix multiplications and convolutions can
     use the [TensorFloat-32 (TF32)](https://blogs.nvidia.com/blog/2020/05/14/tensorfloat-32-precision-format/)
     mode for faster, but slightly less accurate computations. By default, PyTorch
@@ -69,28 +85,42 @@
     network requires full float32 precision, we recommend enabling TF32 for matrix
     multiplications. It can significantly speeds up computations with typically negligible
     loss in numerical accuracy.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 在安培及更高版本的CUDA设备上，矩阵乘法和卷积可以使用[张量浮点32（TF32）](https://blogs.nvidia.com/blog/2020/05/14/tensorfloat-32-precision-format/)模式进行更快但略微不准确的计算。默认情况下，PyTorch为卷积启用TF32模式，但不为矩阵乘法启用。除非您的网络需要完整的float32精度，否则我们建议为矩阵乘法启用TF32。它可以显着加快计算速度，通常几乎不会损失数值精度。
 - en: '[PRE0]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: You can learn more about TF32 in the [Mixed precision training](https://huggingface.co/docs/transformers/en/perf_train_gpu_one#tf32)
     guide.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在[混合精度训练](https://huggingface.co/docs/transformers/en/perf_train_gpu_one#tf32)指南中了解有关TF32的更多信息。
 - en: Half-precision weights
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 半精度权重
 - en: 'To save GPU memory and get more speed, try loading and running the model weights
     directly in half-precision or float16:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了节省GPU内存并获得更快速度，请尝试直接在半精度或float16中加载和运行模型权重：
 - en: '[PRE1]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Don’t use [`torch.autocast`](https://pytorch.org/docs/stable/amp.html#torch.autocast)
     in any of the pipelines as it can lead to black images and is always slower than
     pure float16 precision.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 在任何流水线中不要使用[`torch.autocast`](https://pytorch.org/docs/stable/amp.html#torch.autocast)，因为它可能导致黑色图像，并且始终比纯float16精度慢。
