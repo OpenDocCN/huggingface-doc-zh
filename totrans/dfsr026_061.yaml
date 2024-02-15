@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Wuerstchen
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/wuerstchen](https://huggingface.co/docs/diffusers/training/wuerstchen)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/training/wuerstchen](https://huggingface.co/docs/diffusers/training/wuerstchen)
 - en: null
   id: totrans-2
   prefs: []
@@ -21,22 +23,27 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Wuerstchen](https://hf.co/papers/2306.00637)模型通过将潜在空间压缩42倍，大幅降低计算成本，而不影响图像质量并加速推理。在训练过程中，Wuerstchen使用两个模型（VQGAN
+    + 自动编码器）来压缩潜在空间，然后第三个模型（文本条件潜在扩散模型）在这个高度压缩的空间上进行条件生成图像。'
 - en: To fit the prior model into GPU memory and to speedup training, try enabling
     `gradient_accumulation_steps`, `gradient_checkpointing`, and `mixed_precision`
     respectively.
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了将先验模型适配到GPU内存并加快训练速度，请尝试分别启用`gradient_accumulation_steps`、`gradient_checkpointing`和`mixed_precision`。
 - en: This guide explores the [train_text_to_image_prior.py](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_prior.py)
     script to help you become more familiar with it, and how you can adapt it for
     your own use-case.
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南探讨了[train_text_to_image_prior.py](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_prior.py)脚本，以帮助您更熟悉它，以及如何为自己的用例进行调整。
 - en: 'Before running the script, make sure you install the library from source:'
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在运行脚本之前，请确保您从源代码安装库：
 - en: '[PRE0]'
   id: totrans-7
   prefs: []
@@ -47,6 +54,7 @@
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后导航到包含训练脚本的示例文件夹，并为您正在使用的脚本安装所需的依赖项：
 - en: '[PRE1]'
   id: totrans-9
   prefs: []
@@ -59,10 +67,13 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate是一个帮助您在多个GPU/TPU上进行训练或使用混合精度的库。它将根据您的硬件和环境自动配置您的训练设置。查看🤗 Accelerate
+    [快速入门](https://huggingface.co/docs/accelerate/quicktour)以了解更多。
 - en: 'Initialize an 🤗 Accelerate environment:'
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 初始化🤗 Accelerate环境：
 - en: '[PRE2]'
   id: totrans-12
   prefs: []
@@ -72,6 +83,7 @@
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 要设置默认的🤗 Accelerate环境而不选择任何配置：
 - en: '[PRE3]'
   id: totrans-14
   prefs: []
@@ -82,6 +94,7 @@
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，如果您的环境不支持交互式shell，比如笔记本，您可以使用：
 - en: '[PRE4]'
   id: totrans-16
   prefs: []
@@ -93,6 +106,7 @@
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，如果您想在自己的数据集上训练模型，请查看[创建用于训练的数据集](create_dataset)指南，了解如何创建一个适用于训练脚本的数据集。
 - en: The following sections highlight parts of the training scripts that are important
     for understanding how to modify it, but it doesn’t cover every aspect of the [script](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_prior.py)
     in detail. If you’re interested in learning more, feel free to read through the
@@ -100,11 +114,13 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下部分突出了训练脚本中重要的部分，以便了解如何修改它，但并未详细涵盖[脚本](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/train_text_to_image_prior.py)的每个方面。如果您有兴趣了解更多，请随时阅读脚本，并告诉我们您是否有任何问题或疑虑。
 - en: Script parameters
   id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 脚本参数
 - en: The training scripts provides many parameters to help you customize your training
     run. All of the parameters and their descriptions are found in the [`parse_args()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L192)
     function. It provides default values for each parameter, such as the training
@@ -113,11 +129,13 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本提供了许多参数，以帮助您自定义训练运行。所有参数及其描述都可以在[`parse_args()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L192)函数中找到。它为每个参数提供了默认值，如训练批量大小和学习率，但如果您愿意，也可以在训练命令中设置自己的值。
 - en: 'For example, to speedup training with mixed precision using the fp16 format,
     add the `--mixed_precision` parameter to the training command:'
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要使用fp16格式加速训练，请在训练命令中添加`--mixed_precision`参数：
 - en: '[PRE5]'
   id: totrans-22
   prefs: []
@@ -128,23 +146,29 @@
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数参数与[文本到图像](text2image#script-parameters)训练指南中的参数相同，因此让我们直接进入Wuerstchen训练脚本！
 - en: Training script
   id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练脚本
 - en: The training script is also similar to the [Text-to-image](text2image#training-script)
     training guide, but it’s been modified to support Wuerstchen. This guide focuses
     on the code that is unique to the Wuerstchen training script.
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本也类似于[文本到图像](text2image#training-script)训练指南，但已经修改以支持Wuerstchen。本指南重点介绍了与Wuerstchen训练脚本独有的代码。
 - en: The [`main()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L441)
     function starts by initializing the image encoder - an [EfficientNet](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/modeling_efficient_net_encoder.py)
     - in addition to the usual scheduler and tokenizer.
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`main()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/wuerstchen/text_to_image/train_text_to_image_prior.py#L441)函数首先通过初始化图像编码器
+    - 一个[EfficientNet](https://github.com/huggingface/diffusers/blob/main/examples/wuerstchen/text_to_image/modeling_efficient_net_encoder.py)
+    - 以及通常的调度程序和标记器来开始。'
 - en: '[PRE6]'
   id: totrans-27
   prefs: []
@@ -154,6 +178,7 @@
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还将加载`WuerstchenPrior`模型进行优化。
 - en: '[PRE7]'
   id: totrans-29
   prefs: []

@@ -1,24 +1,15 @@
 - en: T2I-Adapter
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/t2i_adapters](https://huggingface.co/docs/diffusers/training/t2i_adapters)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[T2I-Adapter](https://hf.co/papers/2302.08453) is a lightweight adapter model
@@ -26,58 +17,78 @@
     depth, pose) to better control image generation. It is similar to a ControlNet,
     but it is a lot smaller (~77M parameters and ~300MB file size) because its only
     inserts weights into the UNet instead of copying and training it.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: The T2I-Adapter is only available for training with the Stable Diffusion XL
     (SDXL) model.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: This guide will explore the [train_t2i_adapter_sdxl.py](https://github.com/huggingface/diffusers/blob/main/examples/t2i_adapter/train_t2i_adapter_sdxl.py)
     training script to help you become familiar with it, and how you can adapt it
     for your own use-case.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: 'Before running the script, make sure you install the library from source:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then navigate to the example folder containing the training script and install
     the required dependencies for the script you’re using:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 🤗 Accelerate is a library for helping you train on multiple GPUs/TPUs or with
     mixed-precision. It’ll automatically configure your training setup based on your
     hardware and environment. Take a look at the 🤗 Accelerate [Quick tour](https://huggingface.co/docs/accelerate/quicktour)
     to learn more.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: 'Initialize an 🤗 Accelerate environment:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To setup a default 🤗 Accelerate environment without choosing any configurations:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Or if your environment doesn’t support an interactive shell, like a notebook,
     you can use:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Lastly, if you want to train a model on your own dataset, take a look at the
     [Create a dataset for training](create_dataset) guide to learn how to create a
     dataset that works with the training script.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: The following sections highlight parts of the training script that are important
@@ -85,9 +96,11 @@
     in detail. If you’re interested in learning more, feel free to read through the
     [script](https://github.com/huggingface/diffusers/blob/main/examples/t2i_adapter/train_t2i_adapter_sdxl.py)
     and let us know if you have any questions or concerns.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: Script parameters
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -96,134 +109,190 @@
     function. It provides default values for each parameter, such as the training
     batch size and learning rate, but you can also set your own values in the training
     command if you’d like.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: 'For example, to activate gradient accumulation, add the `--gradient_accumulation_steps`
     parameter to the training command:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Many of the basic and important parameters are described in the [Text-to-image](text2image#script-parameters)
     training guide, so this guide just focuses on the relevant T2I-Adapter parameters:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: '`--pretrained_vae_model_name_or_path`: path to a pretrained VAE; the SDXL VAE
     is known to suffer from numerical instability, so this parameter allows you to
     specify a better [VAE](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix)'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--crops_coords_top_left_h` and `--crops_coords_top_left_w`: height and width
     coordinates to include in SDXL’s crop coordinate embeddings'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--conditioning_image_column`: the column of the conditioning images in the
     dataset'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`--proportion_empty_prompts`: the proportion of image prompts to replace with
     empty strings'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Training script
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: As with the script parameters, a walkthrough of the training script is provided
     in the [Text-to-image](text2image#training-script) training guide. Instead, this
     guide takes a look at the T2I-Adapter relevant parts of the script.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: The training script begins by preparing the dataset. This incudes [tokenizing](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L674)
     the prompt and [applying transforms](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L714)
     to the images and conditioning images.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本从准备数据集开始。这包括[tokenizing](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L674)提示和[应用变换](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L714)到图像和调节图像。
 - en: '[PRE6]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Within the [`main()`](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L770)
     function, the T2I-Adapter is either loaded from a pretrained adapter or it is
     randomly initialized:'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[`main()`](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L770)函数中，T2I-Adapter要么从预训练的适配器加载，要么随机初始化：
 - en: '[PRE7]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'The [optimizer](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L952)
     is initialized for the T2I-Adapter parameters:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '[optimizer](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L952)已初始化为T2I-Adapter参数：'
 - en: '[PRE8]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Lastly, in the [training loop](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L1086),
     the adapter conditioning image and the text embeddings are passed to the UNet
     to predict the noise residual:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，在[training loop](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/t2i_adapter/train_t2i_adapter_sdxl.py#L1086)中，适配器调节图像和文本嵌入被传递给UNet以预测噪声残差：
 - en: '[PRE9]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: If you want to learn more about how the training loop works, check out the [Understanding
     pipelines, models and schedulers](../using-diffusers/write_own_pipeline) tutorial
     which breaks down the basic pattern of the denoising process.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想了解训练循环的工作原理，请查看[Understanding pipelines, models and schedulers](../using-diffusers/write_own_pipeline)教程，该教程解析了去噪过程的基本模式。
 - en: Launch the script
+  id: totrans-39
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 启动脚本
 - en: Now you’re ready to launch the training script! 🚀
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经准备好启动训练脚本了！🚀
 - en: For this example training, you’ll use the [fusing/fill50k](https://huggingface.co/datasets/fusing/fill50k)
     dataset. You can also create and use your own dataset if you want (see the [Create
     a dataset for training](https://moon-ci-docs.huggingface.co/docs/diffusers/pr_5512/en/training/create_dataset)
     guide).
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于这个示例训练，您将使用[fusing/fill50k](https://huggingface.co/datasets/fusing/fill50k)数据集。如果您愿意，您也可以创建并使用自己的数据集（请参阅[Create
+    a dataset for training](https://moon-ci-docs.huggingface.co/docs/diffusers/pr_5512/en/training/create_dataset)指南）。
 - en: Set the environment variable `MODEL_DIR` to a model id on the Hub or a path
     to a local model and `OUTPUT_DIR` to where you want to save the model.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 将环境变量`MODEL_DIR`设置为Hub上的模型ID或本地模型的路径，将`OUTPUT_DIR`设置为您想要保存模型的位置。
 - en: 'Download the following images to condition your training with:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 下载以下图像以调节您的训练：
 - en: '[PRE10]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: To monitor training progress with Weights & Biases, add the `--report_to=wandb`
     parameter to the training command. You’ll also need to add the `--validation_image`,
     `--validation_prompt`, and `--validation_steps` to the training command to keep
     track of results. This can be really useful for debugging the model and viewing
     intermediate results.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用Weights & Biases监控训练进度，将`--report_to=wandb`参数添加到训练命令中。您还需要将`--validation_image`，`--validation_prompt`和`--validation_steps`添加到训练命令中以跟踪结果。这对于调试模型和查看中间结果非常有用。
 - en: '[PRE11]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Once training is complete, you can use your T2I-Adapter for inference:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用您的T2I-Adapter进行推断。
 - en: '[PRE12]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Next steps
+  id: totrans-49
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'Congratulations on training a T2I-Adapter model! 🎉 To learn more:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 恭喜您训练了一个T2I-Adapter模型！🎉 要了解更多：
 - en: Read the [Efficient Controllable Generation for SDXL with T2I-Adapters](https://huggingface.co/blog/t2i-sdxl-adapters)
     blog post to learn more details about the experimental results from the T2I-Adapter
     team.
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 阅读[Efficient Controllable Generation for SDXL with T2I-Adapters](https://huggingface.co/blog/t2i-sdxl-adapters)博文，了解T2I-Adapter团队的实验结果的更多细节。
