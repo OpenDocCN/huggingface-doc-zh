@@ -1,0 +1,204 @@
+- en: Prompt-based methods
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/task_guides/prompt_based_methods](https://huggingface.co/docs/peft/task_guides/prompt_based_methods)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/37.97ddb574.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Tip.9bd3babf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/HfOption.84c24d39.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: A prompt can describe a task or provide an example of a task you want the model
+    to learn. Instead of manually creating these prompts, soft prompting methods add
+    learnable parameters to the input embeddings that can be optimized for a specific
+    task while keeping the pretrained model’s parameters frozen. This makes it both
+    faster and easier to finetune large language models (LLMs) for new downstream
+    tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The PEFT library supports several types of prompting methods (p-tuning, prefix
+    tuning, prompt tuning) and you can learn more about how these methods work conceptually
+    in the [Soft prompts](../conceptual_guides/prompting) guide. If you’re interested
+    in applying these methods to other tasks and use cases, take a look at our [notebook
+    collection](https://huggingface.co/spaces/PEFT/soft-prompting)!
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will show you how to train a causal language model - with a soft
+    prompting method - to *generate a classification* for whether a tweet is a complaint
+    or not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some familiarity with the general process of training a causal language model
+    would be really helpful and allow you to focus on the soft prompting methods.
+    If you’re new, we recommend taking a look at the [Causal language modeling](https://huggingface.co/docs/transformers/tasks/language_modeling)
+    guide first from the Transformers documentation. When you’re ready, come back
+    and see how easy it is to drop PEFT in to your training!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you begin, make sure you have all the necessary libraries installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Dataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For this guide, you’ll use the `twitter_complaints` subset of the [RAFT](https://huggingface.co/datasets/ought/raft)
+    dataset. The `twitter_complaints` subset contains tweets labeled as `complaint`
+    and `no complaint` and you can check out the [dataset viewer](https://huggingface.co/datasets/ought/raft/viewer/twitter_complaints)
+    for a better idea of what the data looks like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the [load_dataset](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
+    function to load the dataset and create a new `text_label` column so it is easier
+    to understand what the `Label` values, `1` and `2` mean.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load a tokenizer, define the padding token to use, and determine the maximum
+    length of the tokenized label.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Create a preprocessing function that tokenizes the tweet text and labels, pad
+    the inputs and labels in each batch, create an attention mask, and truncate sequences
+    to the `max_length`. Then convert the `input_ids`, `attention_mask`, and `labels`
+    to PyTorch tensors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Apply the preprocessing function to the entire dataset with the [map](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    function, and remove the unprocessed columns because the model won’t need them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, create a training and evaluation [`DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader).
+    You can set `pin_memory=True` to speed up the data transfer to the GPU during
+    training if the samples in your dataset are on a CPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now let’s load a pretrained model to use as the base model for the soft prompt
+    method. This guide uses the [bigscience/bloomz-560m](https://huggingface.co/bigscience/bloomz-560m)
+    model, but you can use any causal language model you want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: PEFT configuration and model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For any PEFT method, you’ll need to create a configuration which contains all
+    the parameters that specify how the PEFT method should be applied. Once the configuration
+    is setup, pass it to the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
+    function along with the base model to create a trainable [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Call the [print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)
+    method to compare the number of trainable parameters of [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
+    versus the number of parameters in the base model!
+  prefs: []
+  type: TYPE_NORMAL
+- en: p-tuningprefix tuningprompt tuning
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[P-tuning](../conceptual_guides/prompting#p-tuning) adds a trainable embedding
+    tensor where the prompt tokens can be added anywhere in the input sequence. Create
+    a [PromptEncoderConfig](/docs/peft/v0.8.2/en/package_reference/p_tuning#peft.PromptEncoderConfig)
+    with the task type, the number of virtual tokens to add and learn, and the hidden
+    size of the encoder for learning the prompt parameters.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Training
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Set up an optimizer and learning rate scheduler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Move the model to the GPU and create a training loop that reports the loss and
+    perplexity for each epoch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Share your model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once training is complete, you can upload your model to the Hub with the [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
+    method. You’ll need to login to your Hugging Face account first and enter your
+    token when prompted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you check the model file size in the repository, you’ll see that it is a
+    lot smaller than a full sized model!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/5e34ae8912ca7fcb5554d98cb511bc58.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: For example, the adapter weights for a opt-350m model stored on the Hub are
+    only ~6MB compared to the full model size which can be ~700MB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s load the model for inference and test it out on a tweet!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Call the [generate](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
+    method to generate the predicted classification label.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE

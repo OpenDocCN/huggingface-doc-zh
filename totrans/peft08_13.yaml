@@ -1,0 +1,189 @@
+- en: Quantization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/developer_guides/quantization](https://huggingface.co/docs/peft/developer_guides/quantization)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/12.087a9f53.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Tip.9bd3babf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Quantization represents data with fewer bits, making it a useful technique
+    for reducing memory-usage and accelerating inference especially when it comes
+    to large language models (LLMs). There are several ways to quantize a model including:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: optimizing which model weights are quantized with the [AWQ](https://hf.co/papers/2306.00978)
+    algorithm
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: independently quantizing each row of a weight matrix with the [GPTQ](https://hf.co/papers/2210.17323)
+    algorithm
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: quantizing to 8-bit and 4-bit precision with the [bitsandbytes](https://github.com/TimDettmers/bitsandbytes)
+    library
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: However, after a model is quantized it isn’t typically further trained for downstream
+    tasks because training can be unstable due to the lower precision of the weights
+    and activations. But since PEFT methods only add *extra* trainable parameters,
+    this allows you to train a quantized model with a PEFT adapter on top! Combining
+    quantization with PEFT can be a good strategy for training even the largest models
+    on a single GPU. For example, [QLoRA](https://hf.co/papers/2305.14314) is a method
+    that quantizes a model to 4-bits and then trains it with LoRA. This method allows
+    you to finetune a 65B parameter model on a single 48GB GPU!
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this guide, you’ll see how to quantize a model to 4-bits and train it with
+    LoRA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quantize a model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[bitsandbytes](https://github.com/TimDettmers/bitsandbytes) is a quantization
+    library with a Transformers integration. With this integration, you can quantize
+    a model to 8 or 4-bits and enable many other options by configuring the [BitsAndBytesConfig](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.BitsAndBytesConfig)
+    class. For example, you can:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: set `load_in_4bit=True` to quantize the model to 4-bits when you load it
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: set `bnb_4bit_quant_type="nf4"` to use a special 4-bit data type for weights
+    initialized from a normal distribution
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: set `bnb_4bit_use_double_quant=True` to use a nested quantization scheme to
+    quantize the already quantized weights
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: set `bnb_4bit_compute_dtype=torch.bfloat16` to use bfloat16 for faster computation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pass the `config` to the [from_pretrained](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForCausalLM.from_pretrained)
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, you should call the [prepare_model_for_kbit_training()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.prepare_model_for_kbit_training)
+    function to preprocess the quantized model for traininng.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now that the quantized model is ready, let’s set up a configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: LoraConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Create a [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
+    with the following parameters (or choose your own):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then use the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
+    function to create a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
+    from the quantized model and configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’re all set for training with whichever training method you prefer!
+  prefs: []
+  type: TYPE_NORMAL
+- en: LoftQ initialization
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[LoftQ](https://hf.co/papers/2310.08659) initializes LoRA weights such that
+    the quantization error is minimized, and it can improve performance when training
+    quantized models. To get started, create a `LoftQConfig` and set `loftq_bits=4`
+    for 4-bit quantization.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: LoftQ initialization does not require quantizing the base model with the `load_in_4bits`
+    parameter in the [from_pretrained](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForCausalLM.from_pretrained)
+    method! Learn more about LoftQ initialization in the [Initialization options](../developer_guides/lora#initialization)
+    section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: You can only perform LoftQ initialization on a GPU.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now pass the `loftq_config` to the [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
+    to enable LoftQ initialization, and create a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
+    for training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: QLoRA-style training
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'QLoRA adds trainable weights to all the linear layers in the transformer architecture.
+    Since the attribute names for these linear layers can vary across architectures,
+    set `target_modules` to `"all-linear"` to add LoRA to all the linear layers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next steps
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you’re interested in learning more about quantization, the following may
+    be helpful:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Learn more about details about QLoRA and check out some benchmarks on its impact
+    in the [Making LLMs even more accessible with bitsandbytes, 4-bit quantization
+    and QLoRA](https://huggingface.co/blog/4bit-transformers-bitsandbytes) blog post.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Read more about different quantization schemes in the Transformers [Quantization](https://hf.co/docs/transformers/main/quantization)
+    guide.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

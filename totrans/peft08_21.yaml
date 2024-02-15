@@ -1,0 +1,170 @@
+- en: DeepSpeed
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/accelerate/deepspeed-zero3-offload](https://huggingface.co/docs/peft/accelerate/deepspeed-zero3-offload)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/2.dc2d5cda.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Tip.9bd3babf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[DeepSpeed](https://www.deepspeed.ai/) is a library designed for speed and
+    scale for distributed training of large models with billions of parameters. At
+    its core is the Zero Redundancy Optimizer (ZeRO) that shards optimizer states
+    (ZeRO-1), gradients (ZeRO-2), and parameters (ZeRO-3) across data parallel processes.
+    This drastically reduces memory usage, allowing you to scale your training to
+    billion parameter models. To unlock even more memory efficiency, ZeRO-Offload
+    reduces GPU compute and memory by leveraging CPU resources during optimization.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both of these features are supported in 🤗 Accelerate, and you can use them with
+    🤗 PEFT. This guide will help you learn how to use our DeepSpeed [training script](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py).
+    You’ll configure the script to train a large model for conditional generation
+    with ZeRO-3 and ZeRO-Offload.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 💡 To help you get started, check out our example training scripts for [causal
+    language modeling](https://github.com/huggingface/peft/blob/main/examples/causal_language_modeling/peft_lora_clm_accelerate_ds_zero3_offload.py)
+    and [conditional generation](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py).
+    You can adapt these scripts for your own applications or even use them out of
+    the box if your task is similar to the one in the scripts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Start by running the following command to [create a DeepSpeed configuration
+    file](https://huggingface.co/docs/accelerate/quicktour#launching-your-distributed-script)
+    with 🤗 Accelerate. The `--config_file` flag allows you to save the configuration
+    file to a specific location, otherwise it is saved as a `default_config.yaml`
+    file in the 🤗 Accelerate cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The configuration file is used to set the default options when you launch the
+    training script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll be asked a few questions about your setup, and configure the following
+    arguments. In this example, you’ll use ZeRO-3 and ZeRO-Offload so make sure you
+    pick those options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: An example [configuration file](https://github.com/huggingface/peft/blob/main/examples/conditional_generation/accelerate_ds_zero3_cpu_offload_config.yaml)
+    might look like the following. The most important thing to notice is that `zero_stage`
+    is set to `3`, and `offload_optimizer_device` and `offload_param_device` are set
+    to the `cpu`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The important parts
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s dive a little deeper into the script so you can see what’s going on, and
+    understand how it works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Within the [`main`](https://github.com/huggingface/peft/blob/2822398fbe896f25d4dac5e468624dc5fd65a51b/examples/conditional_generation/peft_lora_seq2seq_accelerate_ds_zero3_offload.py#L103)
+    function, the script creates an [Accelerator](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
+    class to initialize all the necessary requirements for distributed training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 💡 Feel free to change the model and dataset inside the `main` function. If your
+    dataset format is different from the one in the script, you may also need to write
+    your own preprocessing function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The script also creates a configuration for the 🤗 PEFT method you’re using,
+    which in this case, is LoRA. The [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
+    specifies the task type and important parameters such as the dimension of the
+    low-rank matrices, the matrices scaling factor, and the dropout probability of
+    the LoRA layers. If you want to use a different 🤗 PEFT method, make sure you replace
+    `LoraConfig` with the appropriate [class](../package_reference/tuners).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Throughout the script, you’ll see the [main_process_first](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.main_process_first)
+    and [wait_for_everyone](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.wait_for_everyone)
+    functions which help control and synchronize when processes are executed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
+    function takes a base model and the `peft_config` you prepared earlier to create
+    a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass all the relevant training objects to 🤗 Accelerate’s [prepare](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)
+    which makes sure everything is ready for training:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The next bit of code checks whether the DeepSpeed plugin is used in the `Accelerator`,
+    and if the plugin exists, then the `Accelerator` uses ZeRO-3 as specified in the
+    configuration file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Inside the training loop, the usual `loss.backward()` is replaced by 🤗 Accelerate’s
+    [backward](https://huggingface.co/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.backward)
+    which uses the correct `backward()` method based on your configuration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: That is all! The rest of the script handles the training loop, evaluation, and
+    even pushes it to the Hub for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Run the following command to launch the training script. Earlier, you saved
+    the configuration file to `ds_zero3_cpu.yaml`, so you’ll need to pass the path
+    to the launcher with the `--config_file` argument like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You’ll see some output logs that track memory usage during training, and once
+    it’s completed, the script returns the accuracy and compares the predictions to
+    the labels:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE

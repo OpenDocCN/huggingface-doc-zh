@@ -1,0 +1,238 @@
+- en: LoRA methods
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/task_guides/lora_based_methods](https://huggingface.co/docs/peft/task_guides/lora_based_methods)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/36.ba14e104.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Tip.9bd3babf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/HfOption.84c24d39.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: A popular way to efficiently train large models is to insert (typically in the
+    attention blocks) smaller trainable matrices that are a low-rank decomposition
+    of the delta weight matrix to be learnt during finetuning. The pretrained model’s
+    original weight matrix is frozen and only the smaller matrices are updated during
+    training. This reduces the number of trainable parameters, reducing memory usage
+    and training time which can be very expensive for large models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several different ways to express the weight matrix as a low-rank
+    decomposition, but [Low-Rank Adaptation (LoRA)](../conceptual_guides/adapter#low-rank-adaptation-lora)
+    is the most common method. The PEFT library supports several other LoRA variants,
+    such as [Low-Rank Hadamard Product (LoHa)](../conceptual_guides/adapter#low-rank-hadamard-product-loha),
+    [Low-Rank Kronecker Product (LoKr)](../conceptual_guides/adapter#low-rank-kronecker-product-lokr),
+    and [Adaptive Low-Rank Adaptation (AdaLoRA)](../conceptual_guides/adapter#adaptive-low-rank-adaptation-adalora).
+    You can learn more about how these methods work conceptually in the [Adapters](../conceptual_guides/adapter)
+    guide. If you’re interested in applying these methods to other tasks and use cases
+    like semantic segmentation, token classification, take a look at our [notebook
+    collection](https://huggingface.co/collections/PEFT/notebooks-6573b28b33e5a4bf5b157fc1)!
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will show you how to quickly train an image classification model
+    - with a low-rank decomposition method - to identify the class of food shown in
+    an image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some familiarity with the general process of training an image classification
+    model would be really helpful and allow you to focus on the low-rank decomposition
+    methods. If you’re new, we recommend taking a look at the [Image classification](https://huggingface.co/docs/transformers/tasks/image_classification)
+    guide first from the Transformers documentation. When you’re ready, come back
+    and see how easy it is to drop PEFT in to your training!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you begin, make sure you have all the necessary libraries installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Dataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In this guide, you’ll use the [Food-101](https://huggingface.co/datasets/food101)
+    dataset which contains images of 101 food classes (take a look at the [dataset
+    viewer](https://huggingface.co/datasets/food101/viewer/default/train) to get a
+    better idea of what the dataset looks like).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load the dataset with the [load_dataset](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
+    function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Each food class is labeled with an integer, so to make it easier to understand
+    what these integers represent, you’ll create a `label2id` and `id2label` dictionary
+    to map the integer to its class label.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Load an image processor to properly resize and normalize the pixel values of
+    the training and evaluation images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also use the image processor to prepare some transformation functions
+    for data augmentation and pixel scaling.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Define the training and validation datasets, and use the [set_transform](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
+    function to apply the transformations on-the-fly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, you’ll need a data collator to create a batch of training and evaluation
+    data and convert the labels to `torch.tensor` objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now let’s load a pretrained model to use as the base model. This guide uses
+    the [google/vit-base-patch16-224-in21k](https://huggingface.co/google/vit-base-patch16-224-in21k)
+    model, but you can use any image classification model you want. Pass the `label2id`
+    and `id2label` dictionaries to the model so it knows how to map the integer labels
+    to their class labels, and you can optionally pass the `ignore_mismatched_sizes=True`
+    parameter if you’re finetuning a checkpoint that has already been finetuned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: PEFT configuration and model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Every PEFT method requires a configuration that holds all the parameters specifying
+    how the PEFT method should be applied. Once the configuration is setup, pass it
+    to the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
+    function along with the base model to create a trainable [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Call the [print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)
+    method to compare the number of parameters of [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
+    versus the number of parameters in the base model!
+  prefs: []
+  type: TYPE_NORMAL
+- en: LoRALoHaLoKrAdaLoRA
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[LoRA](../conceptual_guides/adapter#low-rank-adaptation-lora) decomposes the
+    weight update matrix into *two* smaller matrices. The size of these low-rank matrices
+    is determined by its *rank* or `r`. A higher rank means the model has more parameters
+    to train, but it also means the model has more learning capacity. You’ll also
+    want to specify the `target_modules` which determine where the smaller matrices
+    are inserted. For this guide, you’ll target the *query* and *value* matrices of
+    the attention blocks. Other important parameters to set are `lora_alpha` (scaling
+    factor), `bias` (whether `none`, `all` or only the LoRA bias parameters should
+    be trained), and `modules_to_save` (the modules apart from the LoRA layers to
+    be trained and saved). All of these parameters - and more - are found in the [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Training
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For training, let’s use the [Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class from Transformers. The `Trainer` contains a PyTorch training loop, and when
+    you’re ready, call [train](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    to start training. To customize the training run, configure the training hyperparameters
+    in the [TrainingArguments](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
+    class. With LoRA-like methods, you can afford to use a higher batch size and learning
+    rate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: AdaLoRA has an [update_and_allocate()](/docs/peft/v0.8.2/en/package_reference/adalora#peft.AdaLoraModel.update_and_allocate)
+    method that should be called at each training step to update the parameter budget
+    and mask, otherwise the adaptation step is not performed. This requires writing
+    a custom training loop or subclassing the [Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    to incorporate this method. As an example, take a look at this [custom training
+    loop](https://github.com/huggingface/peft/blob/912ad41e96e03652cabf47522cd876076f7a0c4f/examples/conditional_generation/peft_adalora_seq2seq.py#L120).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Begin training with [train](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Share your model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once training is complete, you can upload your model to the Hub with the [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
+    method. You’ll need to login to your Hugging Face account first and enter your
+    token when prompted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Call [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
+    to save your model to your repositoy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s load the model from the Hub and test it out on a food image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/e7384973c0a1457da0f0be34f4e94f38.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Convert the image to RGB and return the underlying PyTorch tensors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now run the model and return the predicted class!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE

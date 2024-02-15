@@ -1,0 +1,157 @@
+- en: Llama-Adapter
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/package_reference/llama_adapter](https://huggingface.co/docs/peft/package_reference/llama_adapter)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/21.eb9edc28.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Docstring.270658d8.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Llama-Adapter](https://hf.co/papers/2303.16199) is a PEFT method specifically
+    designed for turning Llama into an instruction-following model. The Llama model
+    is frozen and only a set of adaptation prompts prefixed to the input instruction
+    tokens are learned. Since randomly initialized modules inserted into the model
+    can cause the model to lose some of its existing knowledge, Llama-Adapter uses
+    zero-initialized attention with zero gating to progressively add the instructional
+    prompts to the model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We present LLaMA-Adapter, a lightweight adaption method to efficiently fine-tune
+    LLaMA into an instruction-following model. Using 52K self-instruct demonstrations,
+    LLaMA-Adapter only introduces 1.2M learnable parameters upon the frozen LLaMA
+    7B model, and costs less than one hour for fine-tuning on 8 A100 GPUs. Specifically,
+    we adopt a set of learnable adaption prompts, and prepend them to the input text
+    tokens at higher transformer layers. Then, a zero-init attention mechanism with
+    zero gating is proposed, which adaptively injects the new instructional cues into
+    LLaMA, while effectively preserves its pre-trained knowledge. With efficient training,
+    LLaMA-Adapter generates high-quality responses, comparable to Alpaca with fully
+    fine-tuned 7B parameters. Furthermore, our approach can be simply extended to
+    multi-modal input, e.g., images, for image-conditioned LLaMA, which achieves superior
+    reasoning capacity on ScienceQA. We release our code at [https://github.com/ZrrSkywalker/LLaMA-Adapter](https://github.com/ZrrSkywalker/LLaMA-Adapter)*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: AdaptionPromptConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class peft.AdaptionPromptConfig`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/adaption_prompt/config.py#L24)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Stores the configuration of an [AdaptionPromptModel](/docs/peft/v0.8.2/en/package_reference/llama_adapter#peft.AdaptionPromptModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: AdaptionPromptModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class peft.AdaptionPromptModel`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/adaption_prompt/model.py#L26)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Implements adaption prompts as described in [https://arxiv.org/pdf/2303.16199.pdf](https://arxiv.org/pdf/2303.16199.pdf).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The top L attention modules are replaced with AdaptedAttention modules that
+    wrap the original ones, but insert trainable prompts with gates (for zero init).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Notes on the multi-adapter pattern:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We store the states of different adapters by keeping a dictionary of AdaptedAttention
+    modules indexed by adapter name.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Every time we switch adapters, we remove the modules of the currently active
+    adapter from the model, store them in the dictionary, and replace them with the
+    modules of the new adapter.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To avoid duplicated and potentially inconsistent state, the currently active
+    adapter is always removed from the dictionary.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Disabling the adapter would also result in the modules being removed from the
+    model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### `add_adapter`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/adaption_prompt/model.py#L61)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Add an adapter with the given name and config.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `disable_adapter_layers`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/adaption_prompt/model.py#L115)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Disable adapter layers by swapping out AdaptedAttention modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `enable_adapter_layers`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/adaption_prompt/model.py#L110)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Enable adapter layers by swapping in cached AdaptedAttention modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `set_adapter`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/adaption_prompt/model.py#L97)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Set the model to use the adapter with the given name.
+  prefs: []
+  type: TYPE_NORMAL

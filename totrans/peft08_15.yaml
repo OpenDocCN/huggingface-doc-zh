@@ -1,0 +1,230 @@
+- en: Custom models
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/developer_guides/custom_models](https://huggingface.co/docs/peft/developer_guides/custom_models)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/8.aa579ed2.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Tip.9bd3babf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some fine-tuning techniques, such as prompt tuning, are specific to language
+    models. That means in 🤗 PEFT, it is assumed a 🤗 Transformers model is being used.
+    However, other fine-tuning techniques - like [LoRA](../conceptual_guides/lora)
+    - are not restricted to specific model types.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this guide, we will see how LoRA can be applied to a multilayer perceptron,
+    a computer vision model from the [timm](https://huggingface.co/docs/timm/index)
+    library, or a new 🤗 Transformers architecture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multilayer perceptron
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s assume that we want to fine-tune a multilayer perceptron with LoRA. Here
+    is the definition:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is a straightforward multilayer perceptron with an input layer, a hidden
+    layer, and an output layer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this toy example, we choose an exceedingly large number of hidden units
+    to highlight the efficiency gains from PEFT, but those gains are in line with
+    more realistic examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are a few linear layers in this model that could be tuned with LoRA.
+    When working with common 🤗 Transformers models, PEFT will know which layers to
+    apply LoRA to, but in this case, it is up to us as a user to choose the layers.
+    To determine the names of the layers to tune:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This should print:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s say we want to apply LoRA to the input layer and to the hidden layer,
+    those are `''seq.0''` and `''seq.2''`. Moreover, let’s assume we want to update
+    the output layer without LoRA, that would be `''seq.4''`. The corresponding config
+    would be:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With that, we can create our PEFT model and check the fraction of parameters
+    trained:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, we can use any training framework we like, or write our own fit loop,
+    to train the `peft_model`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a complete example, check out [this notebook](https://github.com/huggingface/peft/blob/main/examples/multilayer_perceptron/multilayer_perceptron_lora.ipynb).
+  prefs: []
+  type: TYPE_NORMAL
+- en: timm models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [timm](https://huggingface.co/docs/timm/index) library contains a large
+    number of pretrained computer vision models. Those can also be fine-tuned with
+    PEFT. Let’s check out how this works in practice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To start, ensure that timm is installed in the Python environment:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next we load a timm model for an image classification task:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Again, we need to make a decision about what layers to apply LoRA to. Since
+    LoRA supports 2D conv layers, and since those are a major building block of this
+    model, we should apply LoRA to the 2D conv layers. To identify the names of those
+    layers, let’s look at all the layer names:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will print a very long list, we’ll only show the first few:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Upon closer inspection, we see that the 2D conv layers have names such as `"stages.0.blocks.0.mlp.fc1"`
+    and `"stages.0.blocks.0.mlp.fc2"`. How can we match those layer names specifically?
+    You can write a [regular expressions](https://docs.python.org/3/library/re.html)
+    to match the layer names. For our case, the regex `r".*\.mlp\.fc\d"` should do
+    the job.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Furthermore, as in the first example, we should ensure that the output layer,
+    in this case the classification head, is also updated. Looking at the end of the
+    list printed above, we can see that it’s named `''head.fc''`. With that in mind,
+    here is our LoRA config:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then we only need to create the PEFT model by passing our base model and the
+    config to `get_peft_model`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: This shows us that we only need to train less than 2% of all parameters, which
+    is a huge efficiency gain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a complete example, check out [this notebook](https://github.com/huggingface/peft/blob/main/examples/image_classification/image_classification_timm_peft_lora.ipynb).
+  prefs: []
+  type: TYPE_NORMAL
+- en: New transformers architectures
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When new popular transformers architectures are released, we do our best to
+    quickly add them to PEFT. If you come across a transformers model that is not
+    supported out of the box, don’t worry, it will most likely still work if the config
+    is set correctly. Specifically, you have to identify the layers that should be
+    adapted and set them correctly when initializing the corresponding config class,
+    e.g. `LoraConfig`. Here are some tips to help with this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As a first step, it is a good idea is to check the existing models for inspiration.
+    You can find them inside of [constants.py](https://github.com/huggingface/peft/blob/main/src/peft/utils/constants.py)
+    in the PEFT repository. Often, you’ll find a similar architecture that uses the
+    same names. For example, if the new model architecture is a variation of the “mistral”
+    model and you want to apply LoRA, you can see that the entry for “mistral” in
+    `TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING` contains `["q_proj", "v_proj"]`.
+    This tells you that for “mistral” models, the `target_modules` for LoRA should
+    be `["q_proj", "v_proj"]`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: If that doesn’t help, check the existing modules in your model architecture
+    with the `named_modules` method and try to identify the attention layers, especially
+    the key, query, and value layers. Those will often have names such as `c_attn`,
+    `query`, `q_proj`, etc. The key layer is not always adapted, and ideally, you
+    should check whether including it results in better performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, linear layers are common targets to be adapted (e.g. in [QLoRA
+    paper](https://arxiv.org/abs/2305.14314), authors suggest to adapt them as well).
+    Their names will often contain the strings `fc` or `dense`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to add a new model to PEFT, please create an entry in [constants.py](https://github.com/huggingface/peft/blob/main/src/peft/utils/constants.py)
+    and open a pull request on the [repository](https://github.com/huggingface/peft/pulls).
+    Don’t forget to update the [README](https://github.com/huggingface/peft#models-support-matrix)
+    as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Verify parameters and layers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can verify whether you’ve correctly applied a PEFT method to your model
+    in a few ways.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check the fraction of parameters that are trainable with the [print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)
+    method. If this number is lower or higher than expected, check the model `repr`
+    by printing the model. This shows the names of all the layer types in the model.
+    Ensure that only the intended target layers are replaced by the adapter layers.
+    For example, if LoRA is applied to `nn.Linear` layers, then you should only see
+    `lora.Linear` layers being used.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Another way you can view the adapted layers is to use the `targeted_module_names`
+    attribute to list the name of each module that was adapted.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE

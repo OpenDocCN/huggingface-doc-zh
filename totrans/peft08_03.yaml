@@ -1,0 +1,211 @@
+- en: Quicktour
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/quicktour](https://huggingface.co/docs/peft/quicktour)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/34.78675ba7.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Tip.9bd3babf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: PEFT offers parameter-efficient methods for finetuning large pretrained models.
+    The traditional paradigm is to finetune all of a model’s parameters for each downstream
+    task, but this is becoming exceedingly costly and impractical because of the enormous
+    number of parameters in models today. Instead, it is more efficient to train a
+    smaller number of prompt parameters or use a reparametrization method like low-rank
+    adaptation (LoRA) to reduce the number of trainable parameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This quicktour will show you PEFT’s main features and how you can train or run
+    inference on large models that would typically be inaccessible on consumer devices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Train
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Each PEFT method is defined by a [PeftConfig](/docs/peft/v0.8.2/en/package_reference/config#peft.PeftConfig)
+    class that stores all the important parameters for building a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel).
+    For example, to train with LoRA, load and create a [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
+    class and specify the following parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`task_type`: the task to train for (sequence-to-sequence language modeling
+    in this case)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`inference_mode`: whether you’re using the model for inference or not'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`r`: the dimension of the low-rank matrices'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`lora_alpha`: the scaling factor for the low-rank matrices'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`lora_dropout`: the dropout probability of the LoRA layers'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: See the [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
+    reference for more details about other parameters you can adjust, such as the
+    modules to target or the bias type.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
+    is setup, create a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
+    with the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
+    function. It takes a base model - which you can load from the Transformers library
+    - and the [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
+    containing the parameters for how to configure a model for training with LoRA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load the base model you want to finetune.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Wrap the base model and `peft_config` with the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
+    function to create a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel).
+    To get a sense of the number of trainable parameters in your model, use the `print_trainable_parameters`
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Out of [bigscience/mt0-large’s](https://huggingface.co/bigscience/mt0-large)
+    1.2B parameters, you’re only training 0.19% of them!
+  prefs: []
+  type: TYPE_NORMAL
+- en: That is it 🎉! Now you can train the model with the Transformers [Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
+    Accelerate, or any custom PyTorch training loop.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, to train with the [Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    class, setup a [TrainingArguments](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
+    class with some training hyperparameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pass the model, training arguments, dataset, tokenizer, and any other necessary
+    component to the [Trainer](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
+    and call [train](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    to start training.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Save model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: After your model is finished training, you can save your model to a directory
+    using the [save_pretrained](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)
+    function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also save your model to the Hub (make sure you’re logged in to your
+    Hugging Face account first) with the [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
+    function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Both methods only save the extra PEFT weights that were trained, meaning it
+    is super efficient to store, transfer, and load. For example, this [facebook/opt-350m](https://huggingface.co/ybelkada/opt-350m-lora)
+    model trained with LoRA only contains two files: `adapter_config.json` and `adapter_model.safetensors`.
+    The `adapter_model.safetensors` file is just 6.3MB!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](../Images/5e34ae8912ca7fcb5554d98cb511bc58.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: The adapter weights for a opt-350m model stored on the Hub are only ~6MB compared
+    to the full size of the model weights, which can be ~700MB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Take a look at the [AutoPeftModel](package_reference/auto_class) API reference
+    for a complete list of available `AutoPeftModel` classes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Easily load any PEFT-trained model for inference with the [AutoPeftModel](/docs/peft/v0.8.2/en/package_reference/auto_class#peft.AutoPeftModel)
+    class and the [from_pretrained](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: For other tasks that aren’t explicitly supported with an `AutoPeftModelFor`
+    class - such as automatic speech recognition - you can still use the base [AutoPeftModel](/docs/peft/v0.8.2/en/package_reference/auto_class#peft.AutoPeftModel)
+    class to load a model for the task.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next steps
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Now that you’ve seen how to train a model with one of the PEFT methods, we
+    encourage you to try out some of the other methods like prompt tuning. The steps
+    are very similar to the ones shown in the quicktour:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: prepare a [PeftConfig](/docs/peft/v0.8.2/en/package_reference/config#peft.PeftConfig)
+    for a PEFT method
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: use the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
+    method to create a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
+    from the configuration and base model
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Then you can train it however you like! To load a PEFT model for inference,
+    you can use the [AutoPeftModel](/docs/peft/v0.8.2/en/package_reference/auto_class#peft.AutoPeftModel)
+    class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Feel free to also take a look at the task guides if you’re interested in training
+    a model with another PEFT method for a specific task such as semantic segmentation,
+    multilingual automatic speech recognition, DreamBooth, token classification, and
+    more.
+  prefs: []
+  type: TYPE_NORMAL

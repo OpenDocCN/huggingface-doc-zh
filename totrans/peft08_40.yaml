@@ -1,0 +1,435 @@
+- en: LoRA
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/package_reference/lora](https://huggingface.co/docs/peft/package_reference/lora)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/24.2eb7f2c9.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Docstring.270658d8.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/ExampleCodeBlock.a22db1c3.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Low-Rank Adaptation ([LoRA](https://huggingface.co/papers/2309.15223)) is a
+    PEFT method that decomposes a large matrix into two smaller low-rank matrices
+    in the attention layers. This drastically reduces the number of parameters that
+    need to be fine-tuned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*We propose a neural language modeling system based on low-rank adaptation
+    (LoRA) for speech recognition output rescoring. Although pretrained language models
+    (LMs) like BERT have shown superior performance in second-pass rescoring, the
+    high computational cost of scaling up the pretraining stage and adapting the pretrained
+    models to specific domains limit their practical use in rescoring. Here we present
+    a method based on low-rank decomposition to train a rescoring BERT model and adapt
+    it to new domains using only a fraction (0.08%) of the pretrained parameters.
+    These inserted matrices are optimized through a discriminative training objective
+    along with a correlation-based regularization loss. The proposed low-rank adaptation
+    Rescore-BERT (LoRB) architecture is evaluated on LibriSpeech and internal datasets
+    with decreased training times by factors between 5.4 and 3.6.*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: LoraConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class peft.LoraConfig`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/config.py#L43)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`r` (`int`) — Lora attention dimension (the “rank”).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_modules` (`Optional[Union[List[str], str]]`) — The names of the modules
+    to apply the adapter to. If this is specified, only the modules with the specified
+    names will be replaced. When passing a string, a regex match will be performed.
+    When passing a list of strings, either an exact match will be performed or it
+    is checked if the name of the module ends with any of the passed strings. If this
+    is specified as ‘all-linear’, then all linear/Conv1D modules are chosen, excluding
+    the output layer. If this is not specified, modules will be chosen according to
+    the model architecture. If the architecture is not known, an error will be raised
+    — in this case, you should specify the target modules manually.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`lora_alpha` (`int`) — The alpha parameter for Lora scaling.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`lora_dropout` (`float`) — The dropout probability for Lora layers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`fan_in_fan_out` (`bool`) — Set this to True if the layer to replace stores
+    weight like (fan_in, fan_out). For example, gpt-2 uses `Conv1D` which stores weights
+    like (fan_in, fan_out) and hence this should be set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`bias` (`str`) — Bias type for LoRA. Can be ‘none’, ‘all’ or ‘lora_only’. If
+    ‘all’ or ‘lora_only’, the corresponding biases will be updated during training.
+    Be aware that this means that, even when disabling the adapters, the model will
+    not produce the same output as the base model would have without adaptation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`use_rslora` (`bool`) — When set to True, uses [Rank-Stabilized LoRA](https://doi.org/10.48550/arXiv.2312.03732)
+    which sets the adapter scaling factor to `lora_alpha/math.sqrt(r)`, since it was
+    proven to work better. Otherwise, it will use the original default value of `lora_alpha/r`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`modules_to_save` (`List[str]`) — List of modules apart from adapter layers
+    to be set as trainable and saved in the final checkpoint.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`init_lora_weights` (`bool` | `Literal["gaussian", "loftq"]`) — How to initialize
+    the weights of the adapter layers. Passing True (default) results in the default
+    initialization from the reference implementation from Microsoft. Passing ‘gaussian’
+    results in Gaussian initialization scaled by the LoRA rank for linear and layers.
+    Setting the initialization to False leads to completely random initialization
+    and is discouraged. Pass `''loftq''` to use LoftQ initialization.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`layers_to_transform` (`Union[List[int], int]`) — The layer indices to transform.
+    If a list of ints is passed, it will apply the adapter to the layer indices that
+    are specified in this list. If a single integer is passed, it will apply the transformations
+    on the layer at this index.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`layers_pattern` (`str`) — The layer pattern name, used only if `layers_to_transform`
+    is different from `None`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`rank_pattern` (`dict`) — The mapping from layer names or regexp expression
+    to ranks which are different from the default rank specified by `r`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`alpha_pattern` (`dict`) — The mapping from layer names or regexp expression
+    to alphas which are different from the default alpha specified by `lora_alpha`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`megatron_config` (`Optional[dict]`) — The TransformerConfig arguments for
+    Megatron. It is used to create LoRA’s parallel linear layer. You can get it like
+    this, `core_transformer_config_from_args(get_args())`, these two functions being
+    from Megatron. The arguments will be used to initialize the TransformerConfig
+    of Megatron. You need to specify this parameter when you want to apply LoRA to
+    the ColumnParallelLinear and RowParallelLinear layers of megatron.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`megatron_core` (`Optional[str]`) — The core module from Megatron to use, defaults
+    to `"megatron.core"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`loftq_config` (`Optional[LoftQConfig]`) — The configuration of LoftQ. If this
+    is not None, then LoftQ will be used to quantize the backbone weights and initialize
+    Lora layers. Also pass `init_lora_weights=''loftq''`. Note that you should not
+    pass a quantized model in this case, as LoftQ will quantize the model itself.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [LoraModel](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: LoraModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class peft.LoraModel`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/model.py#L47)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` (`torch.nn.Module`) — The model to be adapted.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`config` ([LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig))
+    — The configuration of the Lora model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`adapter_name` (`str`) — The name of the adapter, defaults to `"default"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.nn.Module`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Lora model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creates Low Rank Adapter (LoRA) model from a pretrained transformers model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The method is described in detail in [https://arxiv.org/abs/2106.09685](https://arxiv.org/abs/2106.09685).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**Attributes**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` ([PreTrainedModel](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel))
+    — The model to be adapted.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`peft_config` ([LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)):
+    The configuration of the Lora model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### `add_weighted_adapter`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/model.py#L369)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`adapters` (`list`) — List of adapter names to be merged.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`weights` (`list`) — List of weights for each adapter.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`adapter_name` (`str`) — Name of the new adapter.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`combination_type` (`str`) — The merging type can be one of [`svd`, `linear`,
+    `cat`, `ties`, `ties_svd`, `dare_ties`, `dare_linear`, `dare_ties_svd`, `dare_linear_svd`].
+    When using the `cat` combination_type, the rank of the resulting adapter is equal
+    to the sum of all adapters ranks (the mixed adapter may be too big and result
+    in OOM errors).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`svd_rank` (`int`, *optional*) — Rank of output adapter for svd. If None provided,
+    will use max rank of merging adapters.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`svd_clamp` (`float`, *optional*) — A quantile threshold for clamping SVD decomposition
+    output. If None is provided, do not perform clamping. Defaults to None.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`svd_full_matrices` (`bool`, *optional*) — Controls whether to compute the
+    full or reduced SVD, and consequently, the shape of the returned tensors U and
+    Vh. Defaults to True.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`svd_driver` (`str`, *optional*) — Name of the cuSOLVER method to be used.
+    This keyword argument only works when merging on CUDA. Can be one of [None, `gesvd`,
+    `gesvdj`, `gesvda`]. For more info please refer to `torch.linalg.svd` documentation.
+    Defaults to None.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`density` (`float`, *optional*) — Value between 0 and 1\. 0 means all values
+    are pruned and 1 means no values are pruned. Should be used with [`ties`, `ties_svd`,
+    `dare_ties`, `dare_linear`, `dare_ties_svd`, `dare_linear_svd`]'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`majority_sign_method` (`str`) — The method, should be one of [“total”, “frequency”],
+    to use to get the magnitude of the sign values. Should be used with [`ties`, `ties_svd`,
+    `dare_ties`, `dare_ties_svd`]'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This method adds a new adapter by merging the given adapters with the given
+    weights.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When using the `cat` combination_type you should be aware that rank of the resulting
+    adapter will be equal to the sum of all adapters ranks. So it’s possible that
+    the mixed adapter may become too big and result in OOM errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `delete_adapter`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/model.py#L640)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`adapter_name` (str) — Name of the adapter to be deleted.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Deletes an existing adapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `disable_adapter_layers`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/model.py#L292)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Disable all adapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When disabling all adapters, the model output corresponds to the output of the
+    base model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `enable_adapter_layers`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/model.py#L285)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Enable all adapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Call this if you have previously disabled all adapters and want to re-enable
+    them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `merge_and_unload`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/model.py#L662)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`progressbar` (`bool`) — whether to show a progressbar indicating the unload
+    and merge process'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`safe_merge` (`bool`) — whether to activate the safe merging check to check
+    if there is any potential Nan in the adapter weights'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`adapter_names` (`List[str]`, *optional*) — The list of adapter names that
+    should be merged. If None, all active adapters will be merged. Defaults to `None`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This method merges the LoRa layers into the base model. This is needed if someone
+    wants to use the base model as a standalone model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `set_adapter`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/model.py#L307)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`adapter_name` (`str` or `list[str]`) — Name of the adapter(s) to be activated.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Set the active adapter(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, this function will set the specified adapters to trainable (i.e.,
+    requires_grad=True). If this is not desired, use the following code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `unload`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/lora/model.py#L694)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Gets back the base model by removing all the lora modules without merging. This
+    gives back the original base model.
+  prefs: []
+  type: TYPE_NORMAL

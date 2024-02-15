@@ -1,0 +1,130 @@
+- en: IA3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/conceptual_guides/ia3](https://huggingface.co/docs/peft/conceptual_guides/ia3)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/5.ed6865c6.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: This conceptual guide gives a brief overview of [IA3](https://arxiv.org/abs/2205.05638),
+    a parameter-efficient fine tuning technique that is intended to improve over [LoRA](./lora).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make fine-tuning more efficient, IA3 (Infused Adapter by Inhibiting and Amplifying
+    Inner Activations) rescales inner activations with learned vectors. These learned
+    vectors are injected in the attention and feedforward modules in a typical transformer-based
+    architecture. These learned vectors are the only trainable parameters during fine-tuning,
+    and thus the original weights remain frozen. Dealing with learned vectors (as
+    opposed to learned low-rank updates to a weight matrix like LoRA) keeps the number
+    of trainable parameters much smaller.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Being similar to LoRA, IA3 carries many of the same advantages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IA3 makes fine-tuning more efficient by drastically reducing the number of trainable
+    parameters. (For T0, an IA3 model only has about 0.01% trainable parameters, while
+    even LoRA has > 0.1%)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The original pre-trained weights are kept frozen, which means you can have multiple
+    lightweight and portable IA3 models for various downstream tasks built on top
+    of them.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Performance of models fine-tuned using IA3 is comparable to the performance
+    of fully fine-tuned models.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: IA3 does not add any inference latency because adapter weights can be merged
+    with the base model.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In principle, IA3 can be applied to any subset of weight matrices in a neural
+    network to reduce the number of trainable parameters. Following the authors’ implementation,
+    IA3 weights are added to the key, value and feedforward layers of a Transformer
+    model. To be specific, for transformer models, IA3 weights are added to the outputs
+    of key and value layers, and to the input of the second feedforward layer in each
+    transformer block.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Given the target layers for injecting IA3 parameters, the number of trainable
+    parameters can be determined based on the size of the weight matrices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Common IA3 parameters in PEFT
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As with other methods supported by PEFT, to fine-tune a model using IA3, you
+    need to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instantiate a base model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Create a configuration (`IA3Config`) where you define IA3-specific parameters.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Wrap the base model with `get_peft_model()` to get a trainable `PeftModel`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Train the `PeftModel` as you normally would train the base model.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`IA3Config` allows you to control how IA3 is applied to the base model through
+    the following parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`target_modules`: The modules (for example, attention blocks) to apply the
+    IA3 vectors.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`feedforward_modules`: The list of modules to be treated as feedforward layers
+    in `target_modules`. While learned vectors are multiplied with the output activation
+    for attention blocks, the vectors are multiplied with the input for classic feedforward
+    layers. Note that `feedforward_modules` must be a subset of `target_modules`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`modules_to_save`: List of modules apart from IA3 layers to be set as trainable
+    and saved in the final checkpoint. These typically include model’s custom head
+    that is randomly initialized for the fine-tuning task.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example Usage
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For the task of sequence classification, one can initialize the IA3 config
+    for a Llama model as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE

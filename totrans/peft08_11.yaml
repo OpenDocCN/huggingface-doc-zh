@@ -1,0 +1,180 @@
+- en: IA3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/task_guides/ia3](https://huggingface.co/docs/peft/task_guides/ia3)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/35.57990f88.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Tip.9bd3babf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[IA3](../conceptual_guides/ia3) multiplies the model’s activations (the keys
+    and values in the self-attention and encoder-decoder attention blocks, and the
+    intermediate activation of the position-wise feedforward network) by three learned
+    vectors. This PEFT method introduces an even smaller number of trainable parameters
+    than LoRA which introduces weight matrices instead of vectors. The original model’s
+    parameters are kept frozen and only these vectors are updated. As a result, it
+    is faster, cheaper and more efficient to finetune for a new downstream task.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will show you how to train a sequence-to-sequence model with IA3
+    to *generate a sentiment* given some financial news.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some familiarity with the general process of training a sequence-to-sequence
+    would be really helpful and allow you to focus on how to apply IA3\. If you’re
+    new, we recommend taking a look at the [Translation](https://huggingface.co/docs/transformers/tasks/translation)
+    and [Summarization](https://huggingface.co/docs/transformers/tasks/summarization)
+    guides first from the Transformers documentation. When you’re ready, come back
+    and see how easy it is to drop PEFT in to your training!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dataset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You’ll use the sentences_allagree subset of the [financial_phrasebank](https://huggingface.co/datasets/financial_phrasebank)
+    dataset. This subset contains financial news with 100% annotator agreement on
+    the sentiment label. Take a look at the [dataset viewer](https://huggingface.co/datasets/financial_phrasebank/viewer/sentences_allagree)
+    for a better idea of the data and sentences you’ll be working with.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Load the dataset with the [load_dataset](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
+    function. This subset of the dataset only contains a train split, so use the `train_test_split`
+    function to create a train and validation split. Create a new `text_label` column
+    so it is easier to understand what the `label` values `0`, `1`, and `2` mean.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Load a tokenizer and create a preprocessing function that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: tokenizes the inputs, pads and truncates the sequence to the `max_length`
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: apply the same tokenizer to the labels but with a shorter `max_length` that
+    corresponds to the label
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: mask the padding tokens
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use the [map](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
+    function to apply the preprocessing function to the entire dataset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Create a training and evaluation [`DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader),
+    and set `pin_memory=True` to speed up data transfer to the GPU during training
+    if your dataset samples are on a CPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now you can load a pretrained model to use as the base model for IA3\. This
+    guide uses the [bigscience/mt0-large](https://huggingface.co/bigscience/mt0-large)
+    model, but you can use any sequence-to-sequence model you like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: PEFT configuration and model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: All PEFT methods need a configuration that contains and specifies all the parameters
+    for how the PEFT method should be applied. Create an [IA3Config](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Config)
+    with the task type and set the inference mode to `False`. You can find additional
+    parameters for this configuration in the [API reference](../package_reference/ia3#ia3config).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Call the [print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)
+    method to compare the number of trainable parameters of [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
+    versus the number of parameters in the base model!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the configuration is setup, pass it to the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
+    function along with the base model to create a trainable [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Training
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Set up an optimizer and learning rate scheduler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Move the model to the GPU and create a training loop that reports the loss and
+    perplexity for each epoch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Share your model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: After training is complete, you can upload your model to the Hub with the [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
+    method. You’ll need to login to your Hugging Face account first and enter your
+    token when prompted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To load the model for inference, use the [from_pretrained()](/docs/peft/v0.8.2/en/package_reference/auto_class#peft.AutoPeftModel.from_pretrained)
+    method. Let’s also load a sentence of financial news from the dataset to generate
+    a sentiment for.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Call the [generate](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
+    method to generate the predicted sentiment label.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE

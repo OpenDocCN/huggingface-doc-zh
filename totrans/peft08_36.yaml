@@ -1,0 +1,292 @@
+- en: IA3
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/peft/package_reference/ia3](https://huggingface.co/docs/peft/package_reference/ia3)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/peft/v0.8.2/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/start.c9bed6ec.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/scheduler.d627b047.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/singletons.95cf6adf.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.a57a1c33.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/paths.5d07c46f.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/entry/app.72c78cae.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/index.d48c4817.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/0.aa346fde.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/nodes/20.fa99fb4e.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Docstring.270658d8.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/Heading.47e562a9.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/CodeBlock.5da89496.js">
+    <link rel="modulepreload" href="/docs/peft/v0.8.2/en/_app/immutable/chunks/ExampleCodeBlock.a22db1c3.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Infused Adapter by Inhibiting and Amplifying Inner Activations, or [IA3](https://hf.co/papers/2205.05638),
+    is a method that adds three learned vectors to rescale the keys and values of
+    the self-attention and encoder-decoder attention layers, and the intermediate
+    activation of the position-wise feed-forward network.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The abstract from the paper is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Few-shot in-context learning (ICL) enables pre-trained language models to
+    perform a previously-unseen task without any gradient-based training by feeding
+    a small number of training examples as part of the input. ICL incurs substantial
+    computational, memory, and storage costs because it involves processing all of
+    the training examples every time a prediction is made. Parameter-efficient fine-tuning
+    (PEFT) (e.g. adapter modules, prompt tuning, sparse update methods, etc.) offers
+    an alternative paradigm where a small set of parameters are trained to enable
+    a model to perform the new task. In this paper, we rigorously compare few-shot
+    ICL and PEFT and demonstrate that the latter offers better accuracy as well as
+    dramatically lower computational costs. Along the way, we introduce a new PEFT
+    method called (IA)^3 that scales activations by learned vectors, attaining stronger
+    performance while only introducing a relatively tiny amount of new parameters.
+    We also propose a simple recipe based on the T0 model called T-Few that can be
+    applied to new tasks without task-specific tuning or modifications. We validate
+    the effectiveness of T-Few on completely unseen tasks by applying it to the RAFT
+    benchmark, attaining super-human performance for the first time and outperforming
+    the state-of-the-art by 6% absolute. All of the code used in our experiments is
+    publicly available*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: IA3Config
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class peft.IA3Config`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/config.py#L22)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`target_modules` (`Optional[Union[List[str], str]]`) — The names of the modules
+    to apply the adapter to. If this is specified, only the modules with the specified
+    names will be replaced. When passing a string, a regex match will be performed.
+    When passing a list of strings, either an exact match will be performed or it
+    is checked if the name of the module ends with any of the passed strings. If this
+    is specified as ‘all-linear’, then all linear/Conv1D modules are chosen, excluding
+    the output layer. If this is not specified, modules will be chosen according to
+    the model architecture. If the architecture is not known, an error will be raised
+    — in this case, you should specify the target modules manually.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`feedforward_modules` (`Optional[Union[List[str], str]]`) — The names of the
+    modules to be treated as feedforward modules, as in the original paper. These
+    modules will have (IA)³ vectors multiplied to the input, instead of the output.
+    `feedforward_modules` must be a name or a subset of names present in `target_modules`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`fan_in_fan_out` (`bool`) — Set this to True if the layer to replace stores
+    weight like (fan_in, fan_out). For example, gpt-2 uses `Conv1D` which stores weights
+    like (fan_in, fan_out) and hence this should be set to `True`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`modules_to_save` (`Optional[List[str]]`) — List of modules apart from (IA)³
+    layers to be set as trainable and saved in the final checkpoint.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`init_ia3_weights` (`bool`) — Whether to initialize the vectors in the (IA)³
+    layers, defaults to `True`. Setting this to `False` is discouraged.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is the configuration class to store the configuration of a [IA3Model](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Model).
+  prefs: []
+  type: TYPE_NORMAL
+- en: IA3Model
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '### `class peft.IA3Model`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L38)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` ([PreTrainedModel](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel))
+    — The model to be adapted.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`config` ([IA3Config](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Config))
+    — The configuration of the (IA)^3 model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`adapter_name` (`str`) — The name of the adapter, defaults to `"default"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Returns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`torch.nn.Module`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The (IA)^3 model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creates a Infused Adapter by Inhibiting and Amplifying Inner Activations ((IA)^3)
+    model from a pretrained transformers model. The method is described in detail
+    in [https://arxiv.org/abs/2205.05638](https://arxiv.org/abs/2205.05638)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**Attributes**:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`model` ([PreTrainedModel](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel))
+    — The model to be adapted.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`peft_config` (`ia3Config`): The configuration of the (IA)^3 model.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '#### `delete_adapter`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L368)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`adapter_name` (str) — Name of the adapter to be deleted.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Deletes an existing adapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `disable_adapter_layers`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L252)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Disable all adapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When disabling all adapters, the model output corresponds to the output of the
+    base model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `enable_adapter_layers`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L245)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Enable all adapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Call this if you have previously disabled all adapters and want to re-enable
+    them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '#### `merge_and_unload`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L334)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`safe_merge` (`bool`) — whether to activate the safe merging check to check
+    if there is any potential Nan in the adapter weights'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`adapter_names` (`List[str]`, *optional*) — The list of adapter names that
+    should be merged. If None, all active adapters will be merged. Defaults to `None`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This method merges the IA³ layers into the base model. This is needed if someone
+    wants to use the base model as a standalone model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `set_adapter`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L259)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`adapter_name` (`str` or `list[str]`) — Name of the adapter(s) to be activated.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Set the active adapter(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, this function will set the specified adapters to trainable (i.e.,
+    requires_grad=True). If this is not desired, use the following code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '#### `unload`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[< source >](https://github.com/huggingface/peft/blob/v0.8.2/src/peft/tuners/ia3/model.py#L361)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Gets back the base model by removing all the IA³ modules without merging. This
+    gives back the original base model.
+  prefs: []
+  type: TYPE_NORMAL
