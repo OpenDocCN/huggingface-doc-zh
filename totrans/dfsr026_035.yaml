@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 提示加权
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts](https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts](https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts)
 - en: null
   id: totrans-2
   prefs: []
@@ -21,6 +23,8 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示加权提供了一种强调或减弱提示中某些部分的方法，从而更好地控制生成的图像。提示可以包含多个概念，这些概念会转化为上下文化的文本嵌入。这些嵌入被模型用于调节其交叉注意力层以生成图像（阅读Stable
+    Diffusion的[博文](https://huggingface.co/blog/stable_diffusion)以了解更多工作原理）。
 - en: Prompt weighting works by increasing or decreasing the scale of the text embedding
     vector that corresponds to its concept in the prompt because you may not necessarily
     want the model to focus on all concepts equally. The easiest way to prepare the
@@ -34,21 +38,25 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示加权通过增加或减少与提示中概念对应的文本嵌入向量的比例来工作，因为您可能并不一定希望模型平等关注所有概念。准备提示加权嵌入的最简单方法是使用[Compel](https://github.com/damian0815/compel)，一个文本提示加权和混合库。一旦您有了提示加权的嵌入，您可以将它们传递给任何具有[`prompt_embeds`](https://huggingface.co/docs/diffusers/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.__call__.prompt_embeds)（以及可选的[`negative_prompt_embeds`](https://huggingface.co/docs/diffusers/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.__call__.negative_prompt_embeds)）参数的管道，例如[StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)、[StableDiffusionControlNetPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/controlnet#diffusers.StableDiffusionControlNetPipeline)和[StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline)。
 - en: If your favorite pipeline doesn’t have a `prompt_embeds` parameter, please open
     an [issue](https://github.com/huggingface/diffusers/issues/new/choose) so we can
     add it!
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您喜欢的管道没有`prompt_embeds`参数，请打开一个[问题](https://github.com/huggingface/diffusers/issues/new/choose)，以便我们可以添加它！
 - en: This guide will show you how to weight and blend your prompts with Compel in
     🤗 Diffusers.
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何在🤗 Diffusers中使用Compel对提示进行加权和混合。
 - en: 'Before you begin, make sure you have the latest version of Compel installed:'
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装了最新版本的Compel：
 - en: '[PRE0]'
   id: totrans-8
   prefs: []
@@ -59,6 +67,7 @@
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，让我们使用[StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)生成一个带有提示“一只红色的猫正在玩球”的图像：
 - en: '[PRE1]'
   id: totrans-10
   prefs: []
@@ -68,17 +77,20 @@
   id: totrans-11
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/24306b5413fb415e890bea8d0fc47df3.png)'
 - en: Weighting
   id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加权
 - en: 'You’ll notice there is no “ball” in the image! Let’s use compel to upweight
     the concept of “ball” in the prompt. Create a [`Compel`](https://github.com/damian0815/compel/blob/main/doc/compel.md#compel-objects)
     object, and pass it a tokenizer and text encoder:'
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 您会注意到图像中没有“球”！让我们使用compel来增加提示中“球”的概念。创建一个[`Compel`](https://github.com/damian0815/compel/blob/main/doc/compel.md#compel-objects)对象，并传递一个分词器和文本编码器：
 - en: '[PRE2]'
   id: totrans-14
   prefs: []
@@ -89,12 +101,14 @@
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: compel使用`+`或`-`来增加或减少提示中单词的权重。要增加“球”的权重：
 - en: '`+` corresponds to the value `1.1`, `++` corresponds to `1.1^2`, and so on.
     Similarly, `-` corresponds to `0.9` and `--` corresponds to `0.9^2`. Feel free
     to experiment with adding more `+` or `-` in your prompt!'
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '`+` 对应值`1.1`，`++` 对应`1.1^2`，依此类推。同样，`-` 对应`0.9`，`--` 对应`0.9^2`。请随意尝试在您的提示中添加更多的`+`或`-`！'
 - en: '[PRE3]'
   id: totrans-17
   prefs: []
@@ -105,6 +119,7 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 将提示传递给`compel_proc`以创建新的提示嵌入，然后传递给管道：
 - en: '[PRE4]'
   id: totrans-19
   prefs: []
@@ -114,10 +129,12 @@
   id: totrans-20
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/a6ea0a8316ec0e299ce79bd94f29d7a8.png)'
 - en: 'To downweight parts of the prompt, use the `-` suffix:'
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 要减少提示的某些部分的权重，请使用`-`后缀：
 - en: '[PRE5]'
   id: totrans-22
   prefs: []
@@ -127,10 +144,12 @@
   id: totrans-23
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/eed909df9ef11a12b97771b8f85ab810.png)'
 - en: 'You can even up or downweight multiple concepts in the same prompt:'
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 您甚至可以在同一个提示中增加或减少多个概念：
 - en: '[PRE6]'
   id: totrans-25
   prefs: []
@@ -140,11 +159,13 @@
   id: totrans-26
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/b82d3f52e501e13a58f1b034a7a8f0ad.png)'
 - en: Blending
   id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 混合
 - en: You can also create a weighted *blend* of prompts by adding `.blend()` to a
     list of prompts and passing it some weights. Your blend may not always produce
     the result you expect because it breaks some assumptions about how the text encoder
@@ -152,6 +173,7 @@
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以通过将`.blend()`添加到提示列表并传递一些权重来创建加权的*混合*提示。您的混合可能不总是产生您期望的结果，因为它会打破有关文本编码器功能的一些假设，所以只是玩得开心，尝试一下！
 - en: '[PRE7]'
   id: totrans-29
   prefs: []
@@ -161,11 +183,13 @@
   id: totrans-30
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/103f3c5f3fa90b6e9ec2d9e26bbb49cc.png)'
 - en: Conjunction
   id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 连接
 - en: 'A conjunction diffuses each prompt independently and concatenates their results
     by their weighted sum. Add `.and()` to the end of a list of prompts to create
     a conjunction:'
