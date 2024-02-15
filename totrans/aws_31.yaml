@@ -1,134 +1,192 @@
 - en: Llama performance on AWS Inferentia2 (Latency & Througput)
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Llama 在 AWS Inferentia2 上的性能（延迟和吞吐量）
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2](https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2](https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: How fast is Llama on Inferentia2? Let’s figure out!
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Llama 在 Inferentia2 上有多快？让我们来看看！
 - en: 'For this benchmark we will use the LLama 2 7B and 13B models with different
     configurations:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在此基准测试中，我们将使用具有不同配置的 LLama 2 7B 和 13B 模型：
 - en: '| Model type | num cores | batch_size |'
+  id: totrans-5
   prefs: []
   type: TYPE_TB
+  zh: '| 模型类型 | 核心数 | 批处理大小 |'
 - en: '| --- | --- | --- |'
+  id: totrans-6
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| Llama2 7B - L (latency) | 24 | 1 |'
+  id: totrans-7
   prefs: []
   type: TYPE_TB
+  zh: '| Llama2 7B - L（延迟） | 24 | 1 |'
 - en: '| Llama2 7B - T (throughput) | 24 | 4 |'
+  id: totrans-8
   prefs: []
   type: TYPE_TB
+  zh: '| Llama2 7B - T（吞吐量） | 24 | 4 |'
 - en: '| Llama2 13B - L (latency) | 24 | 1 |'
+  id: totrans-9
   prefs: []
   type: TYPE_TB
+  zh: '| Llama2 13B - L（延迟） | 24 | 1 |'
 - en: '| Llama2 13B - T (throughput) | 24 | 4 |'
+  id: totrans-10
   prefs: []
   type: TYPE_TB
+  zh: '| Llama2 13B - T（吞吐量） | 24 | 4 |'
 - en: '*Note: all models are compiled with a maximum sequence length of 2048.*'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：所有模型都编译为最大序列长度为2048。*'
 - en: All models are compiled to use the full extent of cores available on the `inf2.48xlarge`
     instance.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有模型都经过编译，以充分利用`inf2.48xlarge`实例上可用的核心。
 - en: '*Note: please refer to the [inferentia2 product page](https://aws.amazon.com/ec2/instance-types/inf2/)
     for details on the available instances.*'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '*注意：请参考 [inferentia2 产品页面](https://aws.amazon.com/ec2/instance-types/inf2/)
+    以获取可用实例的详细信息。*'
 - en: We created two “latency” oriented configurations for the `llama2 7B` and `llama2
     13B` models that can serve only one request at a time, but at full speed and two
     “throughput” oriented configurations to serve up to four requests in parallel.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们为`llama2 7B`和`llama2 13B`模型创建了两种“延迟”导向的配置，每次只能处理一个请求，但速度全开，以及两种“吞吐量”导向的配置，可以同时处理最多四个请求。
 - en: To evaluate the models, we generate tokens up to a total sequence length of
     1024, starting from 256 input tokens (i.e. we generate 256, 512 and 768 tokens).
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了评估模型，我们生成标记，直到总序列长度达到1024，从256个输入标记开始（即我们生成256、512和768个标记）。
 - en: Encoding time (time to first token)
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 编码时间（第一个标记的时间）
 - en: The encoding time or time to first token is the time required to process the
     input tokens and generate the first output token. It is a very important metric,
     as it corresponds to the latency directly perceived by the user when streaming
     generated tokens.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 编码时间或第一个标记的时间是处理输入标记并生成第一个输出标记所需的时间。这是一个非常重要的指标，因为它对应于用户在流式生成标记时直接感知到的延迟。
 - en: We test the encoding time for increasing context sizes, 256 input tokens corresponding
     roughly to a typical Q/A usage, while 768 is more typical of a Retrieval Augmented
     Generation (RAG) use-case.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们测试了不断增加上下文大小的编码时间，256个输入标记大致对应于典型的问答用途，而768个标记更典型于检索增强生成（RAG）用例。
 - en: Encoding time is expressed in **seconds**.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 编码时间以**秒**表示。
 - en: '![Llama2 inferentia2 encoding-time](../Images/4a24344393cd32610767dc0c18991f14.png
     "Encoding time")'
+  id: totrans-20
   prefs: []
   type: TYPE_IMG
+  zh: '![Llama2 inferentia2 编码时间](../Images/4a24344393cd32610767dc0c18991f14.png "编码时间")'
 - en: We can see that all deployed models exhibit excellent response times, even for
     long contexts.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以看到所有部署的模型都表现出优秀的响应时间，即使是对于长上下文也是如此。
 - en: End-to-end Latency
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 端到端延迟
 - en: The end-to-end latency corresponds to the total time to reach a sequence length
     of 1024 tokens.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 端到端延迟对应于达到1024个标记的总时间。
 - en: It therefore includes the encoding and generation time.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，它包括编码和生成时间。
 - en: Latency is expressed in **seconds**.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 延迟以**秒**表示。
 - en: '![Llama2 inferentia2 end-to-end latency](../Images/aef10229af949f79c57b7cb6231c4b64.png
     "Latency")'
+  id: totrans-26
   prefs: []
   type: TYPE_IMG
+  zh: '![Llama2 inferentia2 端到端延迟](../Images/aef10229af949f79c57b7cb6231c4b64.png
+    "延迟")'
 - en: All models deployed on the high-end instance exhibit a good latency, even those
     actually configured to optimize throughput.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 在高端实例上部署的所有模型都表现出良好的延迟，即使那些实际上配置为优化吞吐量的模型也是如此。
 - en: Throughput
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 吞吐量
 - en: We adopt the same convention as other benchmarks to evaluate the throughput,
     by dividing the end-to-end latency by the sum of both input and output tokens.
     In other words, we divide the end-to-end latency by `batch_size * sequence_length`
     to obtain the number of generated tokens per second.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们采用与其他基准测试相同的约定来评估吞吐量，即通过将端到端延迟除以输入和输出标记的总和来计算。换句话说，我们将端到端延迟除以`批处理大小 * 序列长度`以获得每秒生成的标记数。
 - en: Throughput is expressed in **tokens/second**.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 吞吐量以**标记/秒**表示。
 - en: '![Llama2 inferentia2 throughput](../Images/fb110c43ea808abcf0c0d28995cfb244.png
     "Throughput")'
+  id: totrans-31
   prefs: []
   type: TYPE_IMG
+  zh: '![Llama2 inferentia2 吞吐量](../Images/fb110c43ea808abcf0c0d28995cfb244.png "吞吐量")'
 - en: Again, the models deployed on the high-end instance have a very good throughput,
     even those optimized for latency.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 在高端实例上部署的模型具有非常好的吞吐量，即使是为延迟进行优化的模型也是如此。
