@@ -1,0 +1,303 @@
+- en: Export a model to Inferentia
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/optimum-neuron/guides/export_model](https://huggingface.co/docs/optimum-neuron/guides/export_model)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/optimum.neuron/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/start.abfe5599.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/singletons.9144bb03.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/paths.e169ac99.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/app.df8ec0a0.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/index.cdcc3d35.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/0.a52c6f40.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/6.097461ed.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Tip.6f74db41.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/CodeBlock.e3ac94d9.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Heading.96ce3702.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Exporting a PyTorch model to Neuron model is as simple as
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Check out the help for more options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Why compile to Neuron model?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'AWS provides two generations of the Inferentia accelerator built for machine
+    learning inference with higher throughput, lower latency but lower cost: [inf2
+    (NeuronCore-v2)](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/inf2-arch.html)
+    and [inf1 (NeuronCore-v1)](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/inf1-arch.html#aws-inf1-arch).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In production environments, to deploy 🤗 [Transformers](https://huggingface.co/docs/transformers/index)
+    models on Neuron devices, you need to compile your models and export them to a
+    serialized format before inference. Through Ahead-Of-Time (AOT) compilation with
+    Neuron Compiler( [neuronx-cc](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/release-notes/compiler/neuronx-cc/index.html)
+    or [neuron-cc](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/release-notes/compiler/neuron-cc/neuron-cc.html)
+    ), your models will be converted to serialized and optimized [TorchScript modules](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To understand a little bit more about the compilation, here are general steps
+    executed under the hood: ![Compilation flow](../Images/3da5312c8a92cea4b2c1cbc3d4bb83f0.png
+    "Compilation flow")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**NEFF**: Neuron Executable File Format which is a binary executable on Neuron
+    devices.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Although pre-compilation avoids overhead during the inference, traced Neuron
+    module has some limitations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Traced Neuron module will be static, which requires fixed input shapes and data
+    types used during the compilation. As the model won’t be dynamically recompiled,
+    the inference will fail if any of the above conditions change. (*But these limitations
+    could be bypass with [dynamic batching](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/frameworks/torch/torch-neuronx/api-reference-guide/inference/api-torch-neuronx-trace.html#dynamic-batching)
+    and [bucketing](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/appnotes/torch-neuron/bucketing-app-note.html#bucketing-app-note)*).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Neuron models are hardware-specialized, which means:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Models traced with Neuron can no longer be executed in non-Neuron environment.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Models compiled for inf1 (NeuronCore-v1) are not compatible with inf2 (NeuronCore-v2),
+    and vice versa.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In this guide, we’ll show you how to export your models to serialized models
+    optimized for Neuron devices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🤗 Optimum provides support for the Neuron export by leveraging configuration
+    objects. These configuration objects come ready made for a number of model architectures,
+    and are designed to be easily extendable to other architectures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**To check the supported architectures, go to the [configuration reference
+    page](../package_reference/configuration).**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Exporting a model to Neuron using the CLI
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To export a 🤗 Transformers model to Neuron, you’ll first need to install some
+    extra dependencies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**For Inf2**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**For Inf1**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The Optimum Neuron export can be used through Optimum command-line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the last section, you can see some input shape options to pass for exporting
+    static neuron model, meaning that exact shape inputs should be used during the
+    inference as given during compilation. If you are going to use variable-size inputs,
+    you can pad your inputs to the shape used for compilation as a workaround. If
+    you want the batch size to be dynamic, you can pass `--dynamic-batch-size` to
+    enable dynamic batching, which means that you will be able to use inputs with
+    difference batch size during inference, but it comes with a potential tradeoff
+    in terms of latency.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Exporting a checkpoint can be done as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You should see the following logs which validate the model on Neuron devices
+    by comparing with PyTorch model on CPU:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: This exports a neuron-compiled TorchScript module of the checkpoint defined
+    by the `--model` argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As you can see, the task was automatically detected. This was possible because
+    the model was on the Hub. For local models, providing the `--task` argument is
+    needed or it will default to the model architecture without any task specific
+    head:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that providing the `--task` argument for a model on the Hub will disable
+    the automatic task detection. The resulting `model.neuron` file, can then be loaded
+    and run on Neuron devices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Exporting a model to Neuron via NeuronModel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You will also be able to export your models to Neuron format with `optimum.neuron.NeuronModelForXXX`
+    model classes. Here is an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And the exported model can be used for inference directly with the `NeuronModelForXXX`
+    class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Exporting Stable Diffusion to Neuron
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: With the Optimum CLI you can compile components in the Stable Diffusion pipeline
+    to gain acceleration on neuron devices during the inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So far, we support the export of following components in the pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CLIP text encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: U-Net
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VAE encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VAE decoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: “These blocks are chosen because they represent the bulk of the compute in the
+    pipeline, and performance benchmarking has shown that running them on Neuron yields
+    significant performance benefit.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: Besides, don’t hesitate to tweak the compilation configuration to find the best
+    tradeoff between performance v.s accuracy in your use case. By default, we suggest
+    casting FP32 matrix multiplication operations to BF16 which offers good performance
+    with moderate sacrifice of the accuracy. Check out the guide from [AWS Neuron
+    documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/appnotes/neuronx-cc/neuronx-cc-training-mixed-precision.html#neuronx-cc-training-mixed-precision)
+    to better understand the options for your compilation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Exporting a stable diffusion checkpoint can be done using the CLI:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Exporting Stable Diffusion XL to Neuron
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Similar to Stable Diffusion, you will be able to use Optimum CLI to compile
+    components in the SDXL pipeline for inference on neuron devices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We support the export of following components in the pipeline to boost the
+    speed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Second text encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: U-Net (a three times larger UNet than the one in Stable Diffusion pipeline)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VAE encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VAE decoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: “Stable Diffusion XL works especially well with images between 768 and 1024.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Exporting a SDXL checkpoint can be done using the CLI:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Selecting a task
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Specifying a `--task` should not be necessary in most cases when exporting from
+    a model on the Hugging Face Hub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, in case you need to check for a given a model architecture what tasks
+    the Neuron export supports, we got you covered. First, you can check the list
+    of supported tasks [here](https://huggingface.co/docs/optimum/exporters/task_manager#pytorch).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For each model architecture, you can find the list of supported tasks via the
+    `~exporters.tasks.TasksManager`. For example, for DistilBERT, for the Neuron export,
+    we have:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can then pass one of these tasks to the `--task` argument in the `optimum-cli
+    export neuron` command, as mentioned above.
+  prefs: []
+  type: TYPE_NORMAL

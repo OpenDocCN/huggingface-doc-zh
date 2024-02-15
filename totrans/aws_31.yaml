@@ -1,0 +1,135 @@
+- en: Llama performance on AWS Inferentia2 (Latency & Througput)
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2](https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/optimum.neuron/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/start.abfe5599.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/singletons.9144bb03.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/paths.e169ac99.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/app.df8ec0a0.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/index.cdcc3d35.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/0.a52c6f40.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/2.213424c2.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Heading.96ce3702.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: How fast is Llama on Inferentia2? Let’s figure out!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For this benchmark we will use the LLama 2 7B and 13B models with different
+    configurations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Model type | num cores | batch_size |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Llama2 7B - L (latency) | 24 | 1 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Llama2 7B - T (throughput) | 24 | 4 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Llama2 13B - L (latency) | 24 | 1 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Llama2 13B - T (throughput) | 24 | 4 |'
+  prefs: []
+  type: TYPE_TB
+- en: '*Note: all models are compiled with a maximum sequence length of 2048.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All models are compiled to use the full extent of cores available on the `inf2.48xlarge`
+    instance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Note: please refer to the [inferentia2 product page](https://aws.amazon.com/ec2/instance-types/inf2/)
+    for details on the available instances.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We created two “latency” oriented configurations for the `llama2 7B` and `llama2
+    13B` models that can serve only one request at a time, but at full speed and two
+    “throughput” oriented configurations to serve up to four requests in parallel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To evaluate the models, we generate tokens up to a total sequence length of
+    1024, starting from 256 input tokens (i.e. we generate 256, 512 and 768 tokens).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encoding time (time to first token)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The encoding time or time to first token is the time required to process the
+    input tokens and generate the first output token. It is a very important metric,
+    as it corresponds to the latency directly perceived by the user when streaming
+    generated tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We test the encoding time for increasing context sizes, 256 input tokens corresponding
+    roughly to a typical Q/A usage, while 768 is more typical of a Retrieval Augmented
+    Generation (RAG) use-case.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encoding time is expressed in **seconds**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Llama2 inferentia2 encoding-time](../Images/4a24344393cd32610767dc0c18991f14.png
+    "Encoding time")'
+  prefs: []
+  type: TYPE_IMG
+- en: We can see that all deployed models exhibit excellent response times, even for
+    long contexts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: End-to-end Latency
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The end-to-end latency corresponds to the total time to reach a sequence length
+    of 1024 tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It therefore includes the encoding and generation time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Latency is expressed in **seconds**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Llama2 inferentia2 end-to-end latency](../Images/aef10229af949f79c57b7cb6231c4b64.png
+    "Latency")'
+  prefs: []
+  type: TYPE_IMG
+- en: All models deployed on the high-end instance exhibit a good latency, even those
+    actually configured to optimize throughput.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Throughput
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We adopt the same convention as other benchmarks to evaluate the throughput,
+    by dividing the end-to-end latency by the sum of both input and output tokens.
+    In other words, we divide the end-to-end latency by `batch_size * sequence_length`
+    to obtain the number of generated tokens per second.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Throughput is expressed in **tokens/second**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Llama2 inferentia2 throughput](../Images/fb110c43ea808abcf0c0d28995cfb244.png
+    "Throughput")'
+  prefs: []
+  type: TYPE_IMG
+- en: Again, the models deployed on the high-end instance have a very good throughput,
+    even those optimized for latency.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,460 @@
+- en: Generate images with Stable Diffusion models on AWS Inferentia
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion](https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/optimum.neuron/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/start.abfe5599.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/singletons.9144bb03.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/paths.e169ac99.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/app.df8ec0a0.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/index.cdcc3d35.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/0.a52c6f40.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/26.3c246fdd.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Tip.6f74db41.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/CodeBlock.e3ac94d9.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Heading.96ce3702.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stable Diffusion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*There is a notebook version of that tutorial [here](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/stable-diffusion/stable-diffusion-txt2img.ipynb)*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 🤗 `Optimum` extends `Diffusers` to support inference on the second generation
+    of Neuron devices(powering Trainium and Inferentia 2). It aims at inheriting the
+    ease of Diffusers on Neuron.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To get started, make sure you have [configured your inf2 / trn1 instance](../installation),
+    and installed optimum:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Compile Stable Diffusion
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To deploy models, you will need to compile them to TorchScript optimized for
+    AWS Neuron. In the case of Stable Diffusion, there are four components which need
+    to be exported to the `.neuron` format to boost the performance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: U-Net
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VAE encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VAE decoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can either compile and export a Stable Diffusion Checkpoint via CLI or `NeuronStableDiffusionPipeline`
+    class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '***Export via CLI***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is an example of exporting stable diffusion components with `Optimum`
+    CLI:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: We recommend using a `inf2.8xlarge` or a larger instance for the model compilation.
+    You will also be able to compile the model with the Optimum CLI on a CPU-only
+    instance (needs ~35 GB memory), and then run the pre-compiled model on `inf2.xlarge`
+    to reduce the expenses. In this case, don’t forget to disable validation of inference
+    by adding the `--disable-validation` argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '***Export via Python API***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is an example of exporting stable diffusion components with `NeuronStableDiffusionPipeline`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To apply optimized compute of Unet’s attention score, please configure your
+    environment variable with `export NEURON_FUSE_SOFTMAX=1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Besides, don’t hesitate to tweak the compilation configuration to find the best
+    tradeoff between performance v.s accuracy in your use case. By default, we suggest
+    casting FP32 matrix multiplication operations to BF16 which offers good performance
+    with moderate sacrifice of the accuracy. Check out the guide from [AWS Neuron
+    documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/appnotes/neuronx-cc/neuronx-cc-training-mixed-precision.html#neuronx-cc-training-mixed-precision)
+    to better understand the options for your compilation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-to-Image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`NeuronStableDiffusionPipeline` class allows you to generate images from a
+    text prompt on neuron devices similar to the experience with `Diffusers`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With pre-compiled Stable Diffusion models, now generate an image with a prompt
+    on Neuron:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![stable diffusion generated image](../Images/e9bdfbe61952c061089cfa95a2059afb.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Image-to-Image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With the `NeuronStableDiffusionImg2ImgPipeline` class, you can generate a new
+    image conditioned on a text prompt and an initial image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '| `image` | `prompt` | output |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | --: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ![landscape photo](../Images/a03c8be4cac347c435e8607dd6ced9a4.png) | ***ghibli
+    style, a fantasy landscape with snowcapped mountains, trees, lake with detailed
+    reflection. warm colors, 8K*** | ![drawing](../Images/9f3025ed17a13258842023d761eaee3c.png)
+    |  |'
+  prefs: []
+  type: TYPE_TB
+- en: Inpaint
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With the `NeuronStableDiffusionInpaintPipeline` class, you can edit specific
+    parts of an image by providing a mask and a text prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '| `image` | `mask_image` | `prompt` | output |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | --: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ![drawing](../Images/ccaa29fadd7036eecdf16d6ed327b788.png) | ![drawing](../Images/845ec3d502fa4754b97332a095702af9.png)
+    | ***Face of a yellow cat, high resolution, sitting on a park bench*** | ![drawing](../Images/229c5966ac3cee6ead365a6a1b86e209.png)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: Stable Diffusion XL
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*There is a notebook version of that tutorial [here](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/stable-diffusion/stable-diffusion-xl-txt2img.ipynb)*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stable Diffusion XL (SDXL) is a latent diffusion model for text-to-image. Compared
+    to the previous versions of Stable Diffusion models, it improves the quality of
+    generated images with a times larger UNet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compile Stable Diffusion XL
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To deploy SDXL models, we will also start by compiling the models. We support
+    the export of following components in the pipeline to boost the speed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Second text encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: U-Net (a three times larger UNet than the one in Stable Diffusion pipeline)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VAE encoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: VAE decoder
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '***Export via CLI***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is an example of exporting SDXL components with `Optimum` CLI:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: We recommend using a `inf2.8xlarge` or a larger instance for the model compilation.
+    You will also be able to compile the model with Optimum CLI on a CPU-only instance
+    (needs ~92 GB memory), and then run the pre-compiled models on `inf2.xlarge` to
+    reduce the expenses. In this case, don’t forget to disable validation of inference
+    by adding the `--disable-validation` argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '***Export via Python API***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is an example of exporting stable diffusion components with `NeuronStableDiffusionXLPipeline`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-to-Image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'With pre-compiled SDXL models, now generate an image with a text prompt on
+    Neuron:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![sdxl generated image](../Images/459955f189c918feb31cbea2635a34a6.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Image-to-Image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'With `NeuronStableDiffusionXLImg2ImgPipeline`, you can pass an initial image,
+    and a text prompt to condition generated images:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '| `image` | `prompt` | output |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | --: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ![castle photo](../Images/e5215d4ce7ccbc07b76cb40644414686.png) | ***a dog
+    running, lake, moat*** | ![castle with dog](../Images/29129c40c7a3a79920bce7731bc121d1.png)
+    |  |'
+  prefs: []
+  type: TYPE_TB
+- en: Inpaint
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With `NeuronStableDiffusionXLInpaintPipeline`, pass the original image and a
+    mask of what you want to replace in the original image. Then replace the masked
+    area with content described in a prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '| `image` | `mask_image` | `prompt` | output |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | :-: | :-: | --: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ![drawing](../Images/47eb848e4e09fd8ca2c920b1f98d089d.png) | ![drawing](../Images/8b01e9765d5fea46006fd0c5b7114470.png)
+    | ***A deep sea diver floating*** | ![drawing](../Images/6b61a673bfb3f2ec07bfa522a6e3a183.png)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: Refine Image Quality
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'SDXL includes a [refiner model](https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0)
+    to denoise low-noise stage images generated from the base model. There are two
+    ways to use the refiner:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: use the base and refiner model together to produce a refined image.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: use the base model to produce an image, and subsequently use the refiner model
+    to add more details to the image.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Base + refiner model
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![sdxl base + refiner](../Images/59c8ddd276bac26aa0202d6cef205b32.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Base to refiner model
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '| `Base Image` | Refined Image |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-: | --: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ![drawing](../Images/40389db8dd5d1a686e6a53d11695fce3.png) | ![drawing](../Images/4e196d834fb8351ee9138956a8b23cd3.png)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: To avoid Neuron device out of memory, it’s suggested to finish all base inference
+    and release the device memory before running the refiner.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Latent Consistency Models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Latent Consistency Models (LCMs) were proposed in [Latent Consistency Models:
+    Synthesizing High-Resolution Images with Few-Step Inference by Simian Luo, Yiqin
+    Tan, Longbo Huang, Jian Li, and Hang Zhao](https://huggingface.co/papers/2310.04378).
+    LCMs enable inference with fewer steps on any pre-trained LDMs, including Stable
+    Diffusion and SDXL.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In `optimum-neuron`, you can:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the class `NeuronLatentConsistencyModelPipeline` to compile and run inference
+    of LCMs distilled from Stable Diffusion (SD) models.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: And continue to use the class `NeuronStableDiffusionXLPipeline` for LCMs distilled
+    from SDXL models.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Here are examples to compile the LCMs of Stable Diffusion ( [SimianLuo/LCM_Dreamshaper_v7](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)
+    ) and Stable Diffusion XL( [latent-consistency/lcm-sdxl](https://huggingface.co/latent-consistency/lcm-sdxl)
+    ), and then run inference on AWS Inferentia 2 :'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compile LCM
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '***LCM of Stable Diffusion***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '***LCM of Stable Diffusion XL***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-to-Image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Now we can generate images from text prompts on Inf2 using the pre-compiled
+    model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '***LCM of Stable Diffusion***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '***LCM of Stable Diffusion XL***'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Stable Diffusion XL Turbo
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: SDXL Turbo is an adversarial time-distilled Stable Diffusion XL (SDXL) model
+    capable of running inference in as little as 1 step ([check `🤗diffusers` for more
+    details](https://huggingface.co/docs/diffusers/using-diffusers/sdxl_turbo)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In `optimum-neuron`, you can:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the class `NeuronStableDiffusionXLPipeline` to compile and run inference.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Here we will compile the [`stabilityai/sdxl-turbo`](https://huggingface.co/stabilityai/sdxl-turbo)
+    model with Optimum CLI.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compile SDXL Turbo
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Text-to-Image
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Now we can generate images from text prompts on Inf2 using the pre-compiled
+    model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inf2 instances contain one or more Neuron devices, and each Neuron device includes
+    2 NeuronCore-v2\. By default, we load the whole pipeline of LCM to both Neuron
+    cores. It means that when the batch size is divisible by 2, you can fully leverage
+    the compute power of both cores.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Are there any other stable diffusion features that you want us to support in
+    🤗`Optimum-neuron`? Please file an issue to [`Optimum-neuron` Github repo](https://github.com/huggingface/optimum-neuron)
+    or discuss with us on [HuggingFace’s community forum](https://discuss.huggingface.co/c/optimum/),
+    cheers 🤗 !
+  prefs: []
+  type: TYPE_NORMAL

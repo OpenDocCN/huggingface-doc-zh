@@ -1,0 +1,232 @@
+- en: Neuron Model Inference
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/optimum-neuron/guides/models](https://huggingface.co/docs/optimum-neuron/guides/models)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/optimum.neuron/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/start.abfe5599.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/singletons.9144bb03.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/paths.e169ac99.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/app.df8ec0a0.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/index.cdcc3d35.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/0.a52c6f40.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/8.8fc31034.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Tip.6f74db41.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/CodeBlock.e3ac94d9.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Heading.96ce3702.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The APIs presented in the following documentation are relevant for the inference
+    on [inf2](https://aws.amazon.com/ec2/instance-types/inf2/), [trn1](https://aws.amazon.com/ec2/instance-types/trn1/)
+    and [inf1](https://aws.amazon.com/ec2/instance-types/inf1/).*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`NeuronModelForXXX` classes help to load models from the [Hugging Face Hub](hf.co/models)
+    and compile them to a serialized format optimized for neuron devices. You will
+    then be able to load the model and run inference with the acceleration powered
+    by AWS Neuron devices.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Switching from Transformers to Optimum
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `optimum.neuron.NeuronModelForXXX` model classes are APIs compatible with
+    Hugging Face Transformers models. This means seamless integration with Hugging
+    Face’s ecosystem. You can just replace your `AutoModelForXXX` class with the corresponding
+    `NeuronModelForXXX` class in `optimum.neuron`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you already use Transformers, you will be able to reuse your code just by
+    replacing model classes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: As shown above, when you use `NeuronModelForXXX` for the first time, you will
+    need to set `export=True` to compile your model from PyTorch to a neuron-compatible
+    format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You will also need to pass Neuron specific parameters to configure the export.
+    Each model architecture has its own set of parameters, as detailed in the next
+    paragraphs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once your model has been exported, you can save it either on your local or
+    in the [Hugging Face Model Hub](https://hf.co/models):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And the next time when you want to run inference, just load your compiled model
+    which will save you the compilation time:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you see, there is no need to pass the neuron arguments used during the export
+    as they are saved in a `config.json` file, and will be restored automatically
+    by `NeuronModelForXXX` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When running inference for the first time, there is a warmup phase when you
+    run the pipeline for the first time. This run would take 3x-4x higher latency
+    than a regular run.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discriminative NLP models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As explained in the previous section, you will need only few modifications
+    to your Transformers code to export and run NLP models:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`compiler_args` are optional arguments for the compiler, these arguments usually
+    control how the compiler makes tradeoff between the inference performance (latency
+    and throughput) and the accuracy. Here we cast FP32 operations to BF16 using the
+    Neuron matrix-multiplication engine.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input_shapes` are mandatory static shape information that you need to send
+    to the neuron compiler. Wondering what shapes are mandatory for your model? Check
+    it out with the following code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Be careful, the input shapes used for compilation should be inferior than the
+    size of inputs that you will feed into the model during the inference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What if input sizes are smaller than compilation input shapes?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: No worries, `NeuronModelForXXX` class will pad your inputs to an eligible shape.
+    Besides you can set `dynamic_batch_size=True` in the `from_pretrained` method
+    to enable dynamic batching, which means that your inputs can have variable batch
+    size.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*(Just keep in mind: dynamicity and padding comes with not only flexibility
+    but also performance drop. Fair enough!)*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generative NLP models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As explained before, you will need only a few modifications to your Transformers
+    code to export and run NLP models:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring the export of a generative model
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'As for non-generative models, two sets of parameters can be passed to the `from_pretrained()`
+    method to configure how a transformers checkpoint is exported to a neuron optimized
+    model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`compiler_args = { num_cores, auto_cast_type }` are optional arguments for
+    the compiler, these arguments usually control how the compiler makes tradeoff
+    between the inference latency and throughput and the accuracy.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`input_shapes = { batch_size, sequence_length }` correspond to the static shape
+    of the model input and the KV-cache (attention keys and values for past tokens).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`num_cores` is the number of neuron cores used when instantiating the model.
+    Each neuron core has 16 Gb of memory, which means that bigger models need to be
+    split on multiple cores. Defaults to 1,'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`auto_cast_type` specifies the format to encode the weights. It can be one
+    of `fp32` (`float32`), `fp16` (`float16`) or `bf16` (`bfloat16`). Defaults to
+    `fp32`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`batch_size` is the number of input sequences that the model will accept. Defaults
+    to 1,'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`sequence_length` is the maximum number of tokens in an input sequence. Defaults
+    to `max_position_embeddings` (`n_positions` for older models).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As explained before, these parameters can only be configured during export.
+    This means in particular that during inference:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: the `batch_size` of the inputs should be equal to the `batch_size` used during
+    export,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: the `length` of the input sequences should be lower than the `sequence_length`
+    used during export,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: the maximum number of tokens (input + generated) cannot exceed the `sequence_length`
+    used during export.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Text generation inference
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As with the original transformers models, use `generate()` instead of `forward()`
+    to generate text sequences.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The generation is highly configurable. Please refer to [https://huggingface.co/docs/transformers/generation_strategies](https://huggingface.co/docs/transformers/generation_strategies)
+    for details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Please be aware that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: for each model architecture, default values are provided for all parameters,
+    but values passed to the `generate` method will take precedence,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: the generation parameters can be stored in a `generation_config.json` file.
+    When such a file is present in model directory, it will be parsed to set the default
+    parameters (the values passed to the `generate` method still take precedence).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Happy inference with Neuron! 🚀
+  prefs: []
+  type: TYPE_NORMAL

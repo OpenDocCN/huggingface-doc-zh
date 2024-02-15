@@ -1,0 +1,274 @@
+- en: Create your own chatbot with llama-2-13B on AWS Inferentia
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/optimum-neuron/tutorials/llama2-13b-chatbot](https://huggingface.co/docs/optimum-neuron/tutorials/llama2-13b-chatbot)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/optimum.neuron/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/start.abfe5599.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/singletons.9144bb03.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/paths.e169ac99.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/app.df8ec0a0.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/index.cdcc3d35.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/0.a52c6f40.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/22.4c13628c.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/CodeBlock.e3ac94d9.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Heading.96ce3702.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*There is a notebook version of that tutorial [here](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/text-generation/llama2-13b-chatbot.ipynb)*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will detail how to export, deploy and run a **LLama-2 13B** chat
+    model on AWS inferentia.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You will learn how to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: export the Llama-2 model to the Neuron format,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: push the exported model to the Hugging Face Hub,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: deploy the model and use it in a chat application.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Note: This tutorial was created on a inf2.48xlarge AWS EC2 Instance.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1\. Export the Llama 2 model to Neuron
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For this guide, we will use the non-gated [NousResearch/Llama-2-13b-chat-hf](https://huggingface.co/NousResearch/Llama-2-13b-chat-hf)
+    model, which is functionally equivalent to the original [meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This model is part of the **Llama 2** family of models, and has been tuned to
+    recognize chat interactions between a *user* and an *assistant* (more on that
+    later).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As explained in the [optimum-neuron documentation](https://huggingface.co/docs/optimum-neuron/guides/export_model#why-compile-to-neuron-model)
+    , models need to be compiled and exported to a serialized format before running
+    them on Neuron devices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fortunately, 🤗 **optimum-neuron** offers a [very simple API](https://huggingface.co/docs/optimum-neuron/guides/models#configuring-the-export-of-a-generative-model)
+    to export standard 🤗 [transformers models](https://huggingface.co/docs/transformers/index)
+    to the Neuron format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When exporting the model, we will specify two sets of parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: using *compiler_args*, we specify on how many cores we want the model to be
+    deployed (each neuron device has two cores), and with which precision (here *float16*),
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: using *input_shapes*, we set the static input and output dimensions of the model.
+    All model compilers require static shapes, and neuron makes no exception. Note
+    that the *sequence_length* not only constrains the length of the input context,
+    but also the length of the Key/Value cache, and thus, the output length.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Depending on your choice of parameters and inferentia host, this may take from
+    a few minutes to more than an hour.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For your convenience, we host a pre-compiled version of that model on the Hugging
+    Face hub, so you can skip the export and start using the model immediately in
+    section 2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will probably take a while.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fortunately, you will need to do this only once because you can save your model
+    and reload it later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Even better, you can push it to the [Hugging Face hub](https://huggingface.co/models).
+  prefs: []
+  type: TYPE_NORMAL
+- en: For that, you need to be logged in to a [HuggingFace account](https://huggingface.co/join).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the terminal, just type the following command and paste your Hugging Face
+    token when requested:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: By default, the model will be uploaded to your account (organization equal to
+    your user name).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Feel free to edit the code below if you want to upload the model to a specific
+    [Hugging Face organization](https://huggingface.co/docs/hub/organizations).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: A few more words about export parameters.
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The minimum memory required to load a model can be computed with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The **Llama 2 13B** model uses *float16* weights (stored on 2 bytes) and has
+    13 billion parameters, which means it requires at least 2 * 13B or ~26GB of memory
+    to store its weights.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each NeuronCore has 16GB of memory which means that a 26GB model cannot fit
+    on a single NeuronCore.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In reality, the total space required is much greater than just the number of
+    parameters due to caching attention layer projections (KV caching). This caching
+    mechanism grows memory allocations linearly with sequence length and batch size.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Here we set the *batch_size* to 1, meaning that we can only process one input
+    prompt in parallel. We set the *sequence_length* to 2048, which corresponds to
+    half the model maximum capacity (4096).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The formula to evaluate the size of the KV cache is more involved as it also
+    depends on parameters related to the model architecture, such as the width of
+    the embeddings and the number of decoder blocks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Bottom-line is, to get very large language models to fit, tensor parallelism
+    is used to split weights, data, and compute across multiple NeuronCores, keeping
+    in mind that the memory on each core cannot exceed 16GB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that increasing the number of cores beyond the minimum requirement almost
+    always results in a faster model. Increasing the tensor parallelism degree improves
+    memory bandwidth which improves model performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To optimize performance it’s recommended to use all cores available on the instance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this guide we use all the 24 cores of the *inf2.48xlarge*, but this should
+    be changed to 12 if you are using a *inf2.24xlarge* instance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 2\. Generate text using Llama 2 on AWS Inferentia2
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once your model has been exported, you can generate text using the transformers
+    library, as it has been described in [detail in this post](https://huggingface.co/blog/how-to-generate).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If as suggested you skipped the first section, don’t worry: we will use a precompiled
+    model already present on the hub instead.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: We will need a *Llama 2* tokenizer to convert the prompt strings to text tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The following generation strategies are supported:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: greedy search,
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: multinomial sampling with top-k and top-p (with temperature).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Most logits pre-processing/filters (such as repetition penalty) are supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 3\. Create a chat application using llama on AWS Inferentia2
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We specifically selected a **Llama 2** chat variant to illustrate the excellent
+    behaviour of the exported model when the length of the encoding context grows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The model expects the prompts to be formatted following a specific template
+    corresponding to the interactions between a *user* role and an *assistant* role.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each chat model has its own convention for encoding such contents, and we will
+    not go into too much details in this guide, because we will directly use the [Hugging
+    Face chat templates](https://huggingface.co/blog/chat-templates) corresponding
+    to our model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The utility function below converts a list of exchanges between the user and
+    the model into a well-formatted chat prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: We are now equipped to build a simplistic chat application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We simply store the interactions between the user and the assistant in a list
+    that we use to generate the input prompt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To test the chat application you can use for instance the following sequence
+    of prompts:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: <Warning>
+  prefs: []
+  type: TYPE_NORMAL
+- en: While very powerful, Large language models can sometimes *hallucinate*. We call
+    *hallucinations* generated content that is irrelevant or made-up but presented
+    by the model as if it was accurate. This is a flaw of LLMs and is not a side effect
+    of using them on Trainium / Inferentia.
+  prefs: []
+  type: TYPE_NORMAL
+- en: </Warning>
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,249 @@
+- en: Distributed Training with optimum-neuron
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/optimum-neuron/guides/distributed_training](https://huggingface.co/docs/optimum-neuron/guides/distributed_training)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/optimum.neuron/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/start.abfe5599.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/scheduler.9039eef2.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/singletons.9144bb03.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/paths.e169ac99.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/entry/app.df8ec0a0.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/index.cdcc3d35.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/0.a52c6f40.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/nodes/5.d28282fe.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Tip.6f74db41.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/CodeBlock.e3ac94d9.js">
+    <link rel="modulepreload" href="/docs/optimum.neuron/main/en/_app/immutable/chunks/Heading.96ce3702.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[AWS Trainium instances](https://aws.amazon.com/machine-learning/trainium/)
+    are great to train models. They can contain up to 16 Neuron devices, each device
+    containing 2 Neuron cores and has 32GB of memory (16GB per core). For example
+    a `trn1.32xlarge` instance has 32 x 16 = 512GB of memory.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But there is a caveat: each Neuron core is an independent data-parallel worker
+    by default. It means that the model, the gradient state and the optimizer state,
+    amounting to approximately 4 times the model size, must fit in each of the Neuron
+    cores (16GB) to be able to train. If that is the case, then the activations must
+    also fit in the remaining memory.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To alleviate that, `optimum-neuron` supports parallelism features enabling
+    you to harness the full power of your Trainium instance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[ZeRO-1](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/frameworks/torch/torch-neuronx/tutorials/training/zero1_gpt2.html):
+    It is an optimization of data-parallelism which consists in sharding the optimizer
+    state (which usually represents half of the memory needed on the device) over
+    the data-parallel ranks.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Tensor Parallelism](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/tensor_parallelism_overview.html):
+    It is a technique which consists in sharding each of your model parameters along
+    a given dimension on multiple devices. The number of devices to shard your parameters
+    on is called the `tensor_parallel_size`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Pipeline Parallelism](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/libraries/neuronx-distributed/pipeline_parallelism_overview.html):
+    **coming soon!**'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The good news is that is it possible to combine those techniques, and `optimum-neuron`
+    makes it very easy!
+  prefs: []
+  type: TYPE_NORMAL
+- en: All the example scripts provided in the optimum-neuron repo have those features
+    implemented via the `NeuronTrainer`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to enable ZeRO-1?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Whether you use the [NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)
+    or decide to have your own training script that uses the `NeuronAccelerator`,
+    it is very easy to enable the ZeRO-1 optimization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Via the NeuronTrainer
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since the example scripts use the `NeuronTrainer`, you can enable ZeRO-1 when
+    using them by add the `--zero_1` flag to your command line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Via the NeuronAccelerator
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There is a little bit more work to do when not using the `NeuronTrainer`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: (Optional) Wrap the optimizer class to make it lazy. When ZeRO-1 is enabled
+    the original optimizer is overridden to use a sharded version of it. Hence, it
+    is possible to load the original optimizer lazily so that the optimizer state
+    is not materialized until it is actually sharded.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Set the `zero_1` argument to `True` when instantiating the `NeuronAccelerator`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: How to enable Tensor Parallelism?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Just as for ZeRO-1, it is possible to apply Tensor Parallelism either with the
+    [NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)
+    or the `NeuronAccelerator`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When doing Tensor Parallelism, you have different settings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `tensor_parallel_size`. Ideally it should be smallest value for which the
+    model fits.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Whether or not sequence parallelism should be enabled. [Sequence parallelism](https://arxiv.org/pdf/2205.05198.pdf)
+    shards the activations on the sequence axis outside of the tensor parallel regions.
+    It is useful because it saves memory by sharding the activations.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Whether or not parallelization of the embedding layer should be done. By default
+    it is done because it offers multiple benefits:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Parallelizing the embedding layer saves memory, which can enable fitting a bigger
+    batch size and/or sequence length.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For language models, where the embedding layer weights and the language-modeling
+    head weights are usually tied, the language-modeling head ends up parallel and
+    does not require to `all-gather` its output since it is fed to a cross entropy
+    loss compatible with parallelism, saving expensive communication.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'On top of that, it is very important to make sure that the original model is
+    loaded in an efficient manner: the training script is going to be called by `torchrun`,
+    which will dispatch it to workers, one worker per core. If each worker (there
+    are 32 of them in a `trn1.32xlarge` instance) loads the full model weights, it
+    can take a lot of time and go out-of-memory really fast.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`optimum-neuron` provides a context-manager [distributed.lazy_load_for_parallelism()](/docs/optimum.neuron/main/en/package_reference/distributed#optimum.neuron.distributed.lazy_load_for_parallelism)
+    that loads the model lazily to prevent that, only the parameters of the corresponding
+    model shard will be materialized in each worker.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Via the NeuronTrainer
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since the example scripts use the `NeuronTrainer`, you can enable Tensor Parallelism
+    when using them by specifying the `--tensor_parallel_size` argument, and optionally
+    the `disable_embedding_parallelization` and `disable_sequence_parallel` flags.
+    to your command line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Via the NeuronAccelerator
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Just as for ZeRO-1, it is possible to wrap the optimizer class to make it lazy.
+    Since the model parameters are going to be sharded, it is not needed to materialize
+    the optimizer state prior to model parallelization: the wrapper makes sure that
+    it stays unmaterialized.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Checkpoint consolidation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Since Tensor Parallelism consists in sharding the model weights accross different
+    workers, only sharded checkpoints will be saved during training. It is necessary
+    to consolidate the sharded checkpoints to be able to share and use them outside
+    of the specific training configuration there were created under.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Optimum CLI provides a way of doing that very easily via the `optimum neuron
+    consolidate` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: All you need to do is specify the sharded checkpoints directory and the output
+    directory that will contain the consolidated checkpoints, and the command takes
+    care of the rest. It is also possible to specify the output format of the consolidated
+    checkpoints, by default it will export them to the `safetensors` format, which
+    is the recommend format to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Training with Tensor Parallelism just completed and the output dir is called
+    `my_training`. The directory looks like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It is possible to consolidate the sharded checkpoints in `my_training/tensor_parallel_shards`,
+    which correspond to the sharded checkpoints saved at the end of the training,
+    by running the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: The sharded checkpoints are saved under a directory called `tensor_parallel_shards`.
+    The `optimum-cli neuron consolidate` command accept as input both a directory
+    that contains a `tensor_parallel_shards` directory, or the `tensor_parallel_shards`
+    directory itself.
+  prefs: []
+  type: TYPE_NORMAL
