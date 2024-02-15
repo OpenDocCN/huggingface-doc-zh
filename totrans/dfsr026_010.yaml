@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 训练扩散模型
 - en: 'Original text: [https://huggingface.co/docs/diffusers/tutorials/basic_training](https://huggingface.co/docs/diffusers/tutorials/basic_training)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/tutorials/basic_training](https://huggingface.co/docs/diffusers/tutorials/basic_training)
 - en: null
   id: totrans-2
   prefs: []
@@ -20,18 +22,21 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 无条件图像生成是扩散模型的一种流行应用，它生成看起来像训练数据集中的图像的图像。通常，通过在特定数据集上微调预训练模型可以获得最佳结果。您可以在[Hub](https://huggingface.co/search/full-text?q=unconditional-image-generation&type=model)上找到许多这些检查点，但如果找不到合适的，您也可以自己训练！
 - en: This tutorial will teach you how to train a [UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel)
     from scratch on a subset of the [Smithsonian Butterflies](https://huggingface.co/datasets/huggan/smithsonian_butterflies_subset)
     dataset to generate your own 🦋 butterflies 🦋.
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程将教您如何从头开始在[Smithsonian Butterflies](https://huggingface.co/datasets/huggan/smithsonian_butterflies_subset)数据集的子集上训练一个[UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel)以生成您自己的🦋蝴蝶🦋。
 - en: 💡 This training tutorial is based on the [Training with 🧨 Diffusers](https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/training_example.ipynb)
     notebook. For additional details and context about diffusion models like how they
     work, check out the notebook!
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 这个训练教程基于[使用🧨扩散器进行训练](https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/training_example.ipynb)笔记本。有关扩散模型的更多细节和背景，比如它们的工作原理，请查看笔记本！
 - en: Before you begin, make sure you have 🤗 Datasets installed to load and preprocess
     image datasets, and 🤗 Accelerate, to simplify training on any number of GPUs.
     The following command will also install [TensorBoard](https://www.tensorflow.org/tensorboard)
@@ -40,6 +45,8 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装🤗 数据集以加载和预处理图像数据集，并安装🤗 Accelerate，以简化在任意数量的GPU上进行训练。以下命令还将安装[TensorBoard](https://www.tensorflow.org/tensorboard)以可视化训练指标（您也可以使用[Weights
+    & Biases](https://docs.wandb.ai/)来跟踪您的训练）。
 - en: '[PRE0]'
   id: totrans-7
   prefs: []
@@ -52,6 +59,7 @@
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们鼓励您与社区分享您的模型，为了做到这一点，您需要登录到您的Hugging Face帐户（如果您还没有帐户，请在[此处](https://hf.co/join)创建一个！）。您可以从笔记本登录，并在提示时输入您的令牌。确保您的令牌具有写入权限。
 - en: '[PRE1]'
   id: totrans-9
   prefs: []
@@ -61,6 +69,7 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者从终端登录：
 - en: '[PRE2]'
   id: totrans-11
   prefs: []
@@ -71,6 +80,7 @@
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于模型检查点非常大，安装[Git-LFS](https://git-lfs.com/)来对这些大文件进行版本控制：
 - en: '[PRE3]'
   id: totrans-13
   prefs: []
@@ -81,11 +91,13 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练配置
 - en: 'For convenience, create a `TrainingConfig` class containing the training hyperparameters
     (feel free to adjust them):'
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 为方便起见，创建一个包含训练超参数的`TrainingConfig`类（随时调整）：
 - en: '[PRE4]'
   id: totrans-16
   prefs: []
@@ -96,11 +108,13 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载数据集
 - en: 'You can easily load the [Smithsonian Butterflies](https://huggingface.co/datasets/huggan/smithsonian_butterflies_subset)
     dataset with the 🤗 Datasets library:'
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用🤗 数据集库轻松加载[Smithsonian Butterflies](https://huggingface.co/datasets/huggan/smithsonian_butterflies_subset)数据集：
 - en: '[PRE5]'
   id: totrans-19
   prefs: []
@@ -113,12 +127,14 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 您可以从[HugGan社区活动](https://huggingface.co/huggan)中找到其他数据集，或者通过创建本地[`ImageFolder`](https://huggingface.co/docs/datasets/image_dataset#imagefolder)来使用您自己的数据集。如果数据集来自HugGan社区活动，请将`config.dataset_name`设置为数据集的存储库ID，如果您使用自己的图像，则设置为`imagefolder`。
 - en: '🤗 Datasets uses the [Image](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
     feature to automatically decode the image data and load it as a [`PIL.Image`](https://pillow.readthedocs.io/en/stable/reference/Image.html)
     which we can visualize:'
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 数据集使用[Image](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)功能自动解码图像数据并将其加载为[`PIL.Image`](https://pillow.readthedocs.io/en/stable/reference/Image.html)，我们可以可视化：
 - en: '[PRE6]'
   id: totrans-22
   prefs: []
@@ -128,27 +144,32 @@
   id: totrans-23
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/a492ec80a6f208c57e9bd240df33193d.png)'
 - en: 'The images are all different sizes though, so you’ll need to preprocess them
     first:'
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管图像大小各不相同，但您需要首先对其进行预处理：
 - en: '`Resize` changes the image size to the one defined in `config.image_size`.'
   id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`Resize`将图像大小更改为`config.image_size`中定义的大小。'
 - en: '`RandomHorizontalFlip` augments the dataset by randomly mirroring the images.'
   id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`RandomHorizontalFlip`通过随机镜像图像来增强数据集。'
 - en: '`Normalize` is important to rescale the pixel values into a [-1, 1] range,
     which is what the model expects.'
   id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`Normalize`对于将像素值重新缩放为[-1, 1]范围非常重要，这是模型所期望的。'
 - en: '[PRE7]'
   id: totrans-28
   prefs: []
@@ -159,6 +180,7 @@
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用🤗 数据集的[set_transform](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)方法在训练过程中动态应用`preprocess`函数：
 - en: '[PRE8]'
   id: totrans-30
   prefs: []
@@ -170,6 +192,7 @@
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 随时再次可视化图像以确认它们已被调整大小。现在您已准备好将数据集包装在[DataLoader](https://pytorch.org/docs/stable/data#torch.utils.data.DataLoader)中进行训练！
 - en: '[PRE9]'
   id: totrans-32
   prefs: []
@@ -180,6 +203,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建一个UNet2DModel
 - en: 'Pretrained models in 🧨 Diffusers are easily created from their model class
     with the parameters you want. For example, to create a [UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel):'
   id: totrans-34
