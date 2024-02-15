@@ -1,48 +1,50 @@
 - en: All about metrics
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 关于指标的一切
 - en: 'Original text: [https://huggingface.co/docs/datasets/about_metrics](https://huggingface.co/docs/datasets/about_metrics)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/datasets/about_metrics](https://huggingface.co/docs/datasets/about_metrics)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Metrics is deprecated in 🤗 Datasets. To learn more about how to use metrics,
     take a look at the library 🤗 [Evaluate](https://huggingface.co/docs/evaluate/index)!
     In addition to metrics, you can find more tools for evaluating models and datasets.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在🤗数据集中，指标已被弃用。要了解如何使用指标，请查看库🤗[Evaluate](https://huggingface.co/docs/evaluate/index)！除了指标，您还可以找到更多用于评估模型和数据集的工具。
 - en: '🤗 Datasets provides access to a wide range of NLP metrics. You can load metrics
     associated with benchmark datasets like GLUE or SQuAD, and complex metrics like
     BLEURT or BERTScore, with a single command: [load_metric()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_metric).
     Once you’ve loaded a metric, easily compute and evaluate a model’s performance.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗数据集提供了广泛的自然语言处理指标。您可以加载与基准数据集（如GLUE或SQuAD）和复杂指标（如BLEURT或BERTScore）相关联的指标，只需一个命令：[load_metric()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_metric)。一旦加载了指标，就可以轻松计算和评估模型的性能。
 - en: 'ELI5: load_metric'
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ELI5：load_metric
 - en: Loading a dataset and loading a metric share many similarities. This was an
     intentional design choice because we wanted to create a simple and unified experience.
     When you call [load_metric()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_metric),
     the metric loading script is downloaded and imported from GitHub (if it hasn’t
     already been downloaded before). It contains information about the metric such
     as it’s citation, homepage, and description.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载数据集和加载指标有许多相似之处。这是一个有意设计的选择，因为我们希望创造一个简单和统一的体验。当您调用[load_metric()](/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_metric)时，将从GitHub下载并导入指标加载脚本（如果之前尚未下载）。它包含有关指标的信息，例如引用、主页和描述。
 - en: The metric loading script will instantiate and return a [Metric](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Metric)
     object. This stores the predictions and references, which you need to compute
     the metric values. The [Metric](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Metric)
@@ -50,12 +52,17 @@
     are stored directly on disk with memory-mapping. This enables 🤗 Datasets to do
     a lazy computation of the metric, and makes it easier to gather all the predictions
     in a distributed setting.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 指标加载脚本将实例化并返回一个[Metric](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Metric)对象。这将存储您需要计算指标值的预测和参考值。[Metric](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Metric)对象存储为Apache
+    Arrow表。因此，预测和参考值直接存储在具有内存映射的磁盘上。这使得🤗数据集能够对指标进行延迟计算，并且更容易在分布式环境中收集所有预测值。
 - en: Distributed evaluation
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 分布式评估
 - en: Computing metrics in a distributed environment can be tricky. Metric evaluation
     is executed in separate Python processes, or nodes, on different subsets of a
     dataset. Typically, when a metric score is additive (`f(AuB) = f(A) + f(B)`),
@@ -63,12 +70,17 @@
     of the dataset. But when a metric is non-additive (`f(AuB) ≠ f(A) + f(B)`), it’s
     not that simple. For example, you can’t take the sum of the [F1](https://huggingface.co/metrics/f1)
     scores of each data subset as your **final metric**.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在分布式环境中计算指标可能会很棘手。指标评估是在不同数据集子集上的单独Python进程或节点中执行的。通常，当指标得分是可加的（`f(AuB) = f(A)
+    + f(B)`）时，您可以使用分布式reduce操作来收集每个数据集子集的得分。但是当指标是不可加的（`f(AuB) ≠ f(A) + f(B)`）时，情况就不那么简单了。例如，您不能将每个数据子集的[F1](https://huggingface.co/metrics/f1)得分之和作为您的**最终指标**。
 - en: A common way to overcome this issue is to fallback on single process evaluation.
     The metrics are evaluated on a single GPU, which becomes inefficient.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 克服这个问题的常见方法是回退到单进程评估。指标在单个GPU上进行评估，这变得低效。
 - en: 🤗 Datasets solves this issue by only computing the final metric on the first
     node. The predictions and references are computed and provided to the metric separately
     for each node. These are temporarily stored in an Apache Arrow table, avoiding
@@ -77,11 +89,15 @@
     stored on all the other nodes. Once it has gathered all the predictions and references,
     [Metric.compute()](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Metric.compute)
     will perform the final metric evaluation.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗数据集通过仅在第一个节点上计算最终指标来解决这个问题。预测和参考值分别为每个节点计算并提供给指标。这些暂时存储在Apache Arrow表中，避免了GPU或CPU内存的混乱。当您准备好[指标计算（Metric.compute()）](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Metric.compute)最终指标时，第一个节点能够访问所有其他节点上存储的预测和参考值。一旦收集到所有预测和参考值，[指标计算（Metric.compute()）](/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Metric.compute)将执行最终指标评估。
 - en: This solution allows 🤗 Datasets to perform distributed predictions, which is
     important for evaluation speed in distributed settings. At the same time, you
     can also use complex non-additive metrics without wasting valuable GPU or CPU
     memory.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种解决方案允许🤗数据集执行分布式预测，这对于分布式环境中的评估速度至关重要。同时，您还可以使用复杂的非可加指标，而不会浪费宝贵的GPU或CPU内存。
