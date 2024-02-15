@@ -1,0 +1,372 @@
+- en: Using the evaluator
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/evaluate/base_evaluator](https://huggingface.co/docs/evaluate/base_evaluator)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/assets/pages/__layout.svelte-hf-doc-builder.css">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/start-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/vendor-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/paths-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/pages/__layout.svelte-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/pages/base_evaluator.mdx-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/Tip-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/IconCopyLink-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/CodeBlock-hf-doc-builder.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `Evaluator` classes allow to evaluate a triplet of model, dataset, and metric.
+    The models wrapped in a pipeline, responsible for handling all preprocessing and
+    post-processing and out-of-the-box, `Evaluator`s support transformers pipelines
+    for the supported tasks, but custom pipelines can be passed, as showcased in the
+    section [Using the `evaluator` with custom pipelines](custom_evaluator).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Currently supported tasks are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`"text-classification"`: will use the [TextClassificationEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.TextClassificationEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"token-classification"`: will use the [TokenClassificationEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.TokenClassificationEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"question-answering"`: will use the [QuestionAnsweringEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.QuestionAnsweringEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"image-classification"`: will use the [ImageClassificationEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.ImageClassificationEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"text-generation"`: will use the [TextGenerationEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.TextGenerationEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"text2text-generation"`: will use the [Text2TextGenerationEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.Text2TextGenerationEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"summarization"`: will use the [SummarizationEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.SummarizationEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"translation"`: will use the [TranslationEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.TranslationEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"automatic-speech-recognition"`: will use the [AutomaticSpeechRecognitionEvaluator](/docs/evaluate/v0.4.0/en/package_reference/evaluator_classes#evaluate.AutomaticSpeechRecognitionEvaluator).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To run an `Evaluator` with several tasks in a single call, use the [EvaluationSuite](evaluation_suite),
+    which runs evaluations on a collection of `SubTask`s.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each task has its own set of requirements for the dataset format and pipeline
+    output, make sure to check them out for your custom use case. Let’s have a look
+    at some of them and see how you can use the evaluator to evalute a single or multiple
+    of models, datasets, and metrics at the same time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text classification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The text classification evaluator can be used to evaluate text models on classification
+    datasets such as IMDb. Beside the model, data, and metric inputs it takes the
+    following optional inputs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input_column="text"`: with this argument the column with the data for the
+    pipeline can be specified.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_column="label"`: with this argument the column with the labels for the
+    evaluation can be specified.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_mapping=None`: the label mapping aligns the labels in the pipeline output
+    with the labels need for evaluation. E.g. the labels in `label_column` can be
+    integers (`0`/`1`) whereas the pipeline can produce label names such as `"positive"`/`"negative"`.
+    With that dictionary the pipeline outputs are mapped to the labels.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: By default the `"accuracy"` metric is computed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Evaluate models on the Hub
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There are several ways to pass a model to the evaluator: you can pass the name
+    of a model on the Hub, you can load a `transformers` model and pass it to the
+    evaluator or you can pass an initialized `transformers.Pipeline`. Alternatively
+    you can pass any callable function that behaves like a `pipeline` call for the
+    task in any framework.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So any of the following works:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Without specifying a device, the default for model inference will be the first
+    GPU on the machine if one is available, and else CPU. If you want to use a specific
+    device you can pass `device` to `compute` where -1 will use the GPU and a positive
+    integer (starting with 0) will use the associated CUDA device.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The results will look as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that evaluation results include both the requested metric, and information
+    about the time it took to obtain predictions through the pipeline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The time performances can give useful indication on model speed for inference
+    but should be taken with a grain of salt: they include all the processing that
+    goes on in the pipeline. This may include tokenizing, post-processing, that may
+    be different depending on the model. Furthermore, it depends a lot on the hardware
+    you are running the evaluation on and you may be able to improve the performance
+    by optimizing things like the batch size.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Evaluate multiple metrics
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'With the [combine()](/docs/evaluate/v0.4.0/en/package_reference/main_classes#evaluate.combine)
+    function one can bundle several metrics into an object that behaves like a single
+    metric. We can use this to evaluate several metrics at once with the evaluator:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The results will look as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next let’s have a look at token classification.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Token Classification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the token classification evaluator one can evaluate models for tasks such
+    as NER or POS tagging. It has the following specific arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input_column="text"`: with this argument the column with the data for the
+    pipeline can be specified.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_column="label"`: with this argument the column with the labels for the
+    evaluation can be specified.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_mapping=None`: the label mapping aligns the labels in the pipeline output
+    with the labels need for evaluation. E.g. the labels in `label_column` can be
+    integers (`0`/`1`) whereas the pipeline can produce label names such as `"positive"`/`"negative"`.
+    With that dictionary the pipeline outputs are mapped to the labels.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`join_by=" "`: While most datasets are already tokenized the pipeline expects
+    a string. Thus the tokens need to be joined before passing to the pipeline. By
+    default they are joined with a whitespace.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s have a look how we can use the evaluator to benchmark several models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Benchmarking several models
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Here is an example where several models can be compared thanks to the `evaluator`
+    in only a few lines of code, abstracting away the preprocessing, inference, postprocessing,
+    metric computation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The result is a table that looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| model | overall_f1 | overall_accuracy | total_time_in_seconds | samples_per_second
+    | latency_in_seconds |'
+  prefs: []
+  type: TYPE_TB
+- en: '| :-- | --: | --: | --: | --: | --: |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Jorgeutd/albert-base-v2-finetuned-ner | 0.941 | 0.989 | 4.515 | 221.468 |
+    0.005 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| dbmdz/bert-large-cased-finetuned-conll03-english | 0.962 | 0.881 | 11.648
+    | 85.850 | 0.012 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| dbmdz/electra-large-discriminator-finetuned-conll03-english | 0.965 | 0.881
+    | 11.456 | 87.292 | 0.011 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| elastic/distilbert-base-uncased-finetuned-conll03-english | 0.940 | 0.989
+    | 2.318 | 431.378 | 0.002 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| gunghio/distilbert-base-multilingual-cased-finetuned-conll2003-ner | 0.947
+    | 0.991 | 2.376 | 420.873 | 0.002 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| philschmid/distilroberta-base-ner-conll2003 | 0.961 | 0.994 | 2.436 | 410.579
+    | 0.002 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| xlm-roberta-large-finetuned-conll03-english | 0.969 | 0.882 | 11.996 | 83.359
+    | 0.012 |'
+  prefs: []
+  type: TYPE_TB
+- en: Visualizing results
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can feed in the `results` list above into the `plot_radar()` function to
+    visualize different aspects of their performance and choose the model that is
+    the best fit, depending on the metric(s) that are relevant to your use case:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](../Images/c3518aca067a8cd6a7da9de34fdc0dcb.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Don’t forget to specify `invert_range` for metrics for which smaller is better
+    (such as the case for latency in seconds).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to save the plot locally, you can use the `plot.savefig()` function
+    with the option `bbox_inches='tight'`, to make sure no part of the image gets
+    cut off.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Question Answering
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the question-answering evaluator one can evaluate models for QA without
+    needing to worry about the complicated pre- and post-processing that’s required
+    for these models. It has the following specific arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`question_column="question"`: the name of the column containing the question
+    in the dataset'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`context_column="context"`: the name of the column containing the context'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`id_column="id"`: the name of the column cointaing the identification field
+    of the question and answer pair'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_column="answers"`: the name of the column containing the answers'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`squad_v2_format=None`: whether the dataset follows the format of squad_v2
+    dataset where a question may have no answer in the context. If this parameter
+    is not provided, the format will be automatically inferred.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s have a look how we can evaluate QA models and compute confidence intervals
+    at the same time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Confidence intervals
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Every evaluator comes with the options to compute confidence intervals using
+    [bootstrapping](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html).
+    Simply pass `strategy="bootstrap"` and set the number of resanmples with `n_resamples`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Results include confidence intervals as well as error estimates as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Image classification
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the image classification evaluator we can evaluate any image classifier.
+    It uses the same keyword arguments at the text classifier:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`input_column="image"`: the name of the column containing the images as PIL
+    ImageFile'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_column="label"`: the name of the column containing the labels'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label_mapping=None`: We want to map class labels defined by the model in the
+    pipeline to values consistent with those defined in the `label_column`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s have a look at how can evaluate image classification models on large datasets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Handling large datasets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The evaluator can be used on large datasets! Below, an example shows how to
+    use it on ImageNet-1k for image classification. Beware that this example will
+    require to download ~150 GB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since we are using `datasets` to store data we make use of a technique called
+    memory mappings. This means that the dataset is never fully loaded into memory
+    which saves a lot of RAM. Running the above code only uses roughly 1.5 GB of RAM
+    while the validation split is more than 30 GB big.
+  prefs: []
+  type: TYPE_NORMAL

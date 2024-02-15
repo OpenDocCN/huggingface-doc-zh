@@ -1,0 +1,109 @@
+- en: Using the evaluator with custom pipelines
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/evaluate/custom_evaluator](https://huggingface.co/docs/evaluate/custom_evaluator)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/assets/pages/__layout.svelte-hf-doc-builder.css">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/start-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/vendor-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/paths-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/pages/__layout.svelte-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/pages/custom_evaluator.mdx-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/IconCopyLink-hf-doc-builder.js">
+    <link rel="modulepreload" href="/docs/evaluate/v0.4.0/en/_app/chunks/CodeBlock-hf-doc-builder.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: The evaluator is designed to work with `transformer` pipelines out-of-the-box.
+    However, in many cases you might have a model or pipeline that’s not part of the
+    `transformer` ecosystem. You can still use `evaluator` to easily compute metrics
+    for them. In this guide we show how to do this for a Scikit-Learn [pipeline](https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline)
+    and a Spacy [pipeline](https://spacy.io). Let’s start with the Scikit-Learn case.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scikit-Learn
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'First we need to train a model. We’ll train a simple text classifier on the
+    [IMDb dataset](https://huggingface.co/datasets/imdb), so let’s start by downloading
+    the dataset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then we can build a simple TF-IDF preprocessor and Naive Bayes classifier wrapped
+    in a `Pipeline`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Following the convention in the `TextClassificationPipeline` of `transformers`
+    our pipeline should be callable and return a list of dictionaries. In addition
+    we use the `task` attribute to check if the pipeline is compatible with the `evaluator`.
+    We can write a small wrapper class for that purpose:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can now pass this `pipeline` to the `evaluator`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Implementing that simple wrapper is all that’s needed to use any model from
+    any framework with the `evaluator`. In the `__call__` you can implement all logic
+    necessary for efficient forward passes through your model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Spacy
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We’ll use the `polarity` feature of the `spacytextblob` project to get a simple
+    sentiment analyzer. First you’ll need to install the project and download the
+    resources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then we can simply load the `nlp` pipeline and add the `spacytextblob` pipeline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This snippet shows how we can use the `polarity` feature added with `spacytextblob`
+    to get the sentiment of a text:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we can wrap it in a simple wrapper class like in the Scikit-Learn example
+    before. It just has to return a list of dictionaries with the predicted lables.
+    If the polarity is larger than 0 we’ll predict positive sentiment and negative
+    otherwise:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'That class is compatible with the `evaluator` and we can use the same instance
+    from the previous examlpe along with the IMDb test set:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will take a little longer than the Scikit-Learn example but after roughly
+    10-15min you will have the evaluation results!
+  prefs: []
+  type: TYPE_NORMAL
