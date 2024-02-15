@@ -1,184 +1,264 @@
 - en: Creating and sharing a new evaluation
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 创建和共享新的评估
 - en: 'Original text: [https://huggingface.co/docs/evaluate/creating_and_sharing](https://huggingface.co/docs/evaluate/creating_and_sharing)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/evaluate/creating_and_sharing](https://huggingface.co/docs/evaluate/creating_and_sharing)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Setup
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 设置
 - en: 'Before you can create a new metric make sure you have all the necessary dependencies
     installed:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在创建新度量之前，请确保已安装所有必要的依赖项：
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Also make sure your Hugging Face token is registered so you can connect to
     the Hugging Face Hub:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 还要确保您的Hugging Face令牌已注册，以便您可以连接到Hugging Face Hub：
 - en: '[PRE1]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Create
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建
 - en: 'All evaluation modules, be it metrics, comparisons, or measurements live on
     the 🤗 Hub in a [Space](https://huggingface.co/docs/hub/spaces) (see for example
     [Accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)). In principle,
     you could setup a new Space and add a new module following the same structure.
     However, we added a CLI that makes creating a new evaluation module much easier:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有评估模块，无论是度量、比较还是测量，都存储在🤗 Hub的[Space](https://huggingface.co/docs/hub/spaces)中（例如[Accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)）。原则上，您可以设置一个新的Space，并按照相同的结构添加一个新模块。但是，我们添加了一个CLI，使创建新评估模块变得更加容易：
 - en: '[PRE2]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: This will create a new Space on the 🤗 Hub, clone it locally, and populate it
     with a template. Instructions on how to fill the template will be displayed in
     the terminal, but are also explained here in more detail.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将在🤗 Hub上创建一个新的Space，将其克隆到本地，并用模板填充它。如何填写模板的说明将显示在终端中，但这里也有更详细的解释。
 - en: For more information about Spaces, see the [Spaces documentation](https://huggingface.co/docs/hub/spaces).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关Spaces的更多信息，请参阅[Spaces文档](https://huggingface.co/docs/hub/spaces)。
 - en: Module script
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模块脚本
 - en: The evaluation module script (the file with suffix `*.py`) is the core of the
     new module and includes all the code for computing the evaluation.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 评估模块脚本（带有后缀`*.py`的文件）是新模块的核心，包含了计算评估的所有代码。
 - en: Attributes
+  id: totrans-15
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 属性
 - en: 'Start by adding some information about your evalution module in `EvaluationModule._info()`.
     The most important attributes you should specify are:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，在`EvaluationModule._info()`中添加有关您的评估模块的一些信息。您应该指定的最重要的属性是：
 - en: '`EvaluationModuleInfo.description` provides a brief description about your
     evalution module.'
+  id: totrans-17
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`EvaluationModuleInfo.description`提供了有关您的评估模块的简要描述。'
 - en: '`EvaluationModuleInfo.citation` contains a BibTex citation for the evalution
     module.'
+  id: totrans-18
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`EvaluationModuleInfo.citation`包含评估模块的BibTex引用。'
 - en: '`EvaluationModuleInfo.inputs_description` describes the expected inputs and
     outputs. It may also provide an example usage of the evalution module.'
+  id: totrans-19
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`EvaluationModuleInfo.inputs_description`描述了预期的输入和输出。它还可能提供评估模块的示例用法。'
 - en: '`EvaluationModuleInfo.features` defines the name and type of the predictions
     and references. This has to be either a single `datasets.Features` object or a
     list of `datasets.Features` objects if multiple input types are allowed.'
+  id: totrans-20
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`EvaluationModuleInfo.features`定义了预测和参考的名称和类型。这必须是单个`datasets.Features`对象或`datasets.Features`对象列表，如果允许多种输入类型。'
 - en: Then, we can move on to prepare everything before the actual computation.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，我们可以继续准备实际计算之前的所有事项。
 - en: Download
+  id: totrans-22
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 下载
 - en: 'Some evaluation modules require some external data such as NLTK that requires
     resources or the BLEURT metric that requires checkpoints. You can implement these
     downloads in `EvaluationModule._download_and_prepare()`, which downloads and caches
     the resources via the `dlmanager`. A simplified example on how BLEURT downloads
     and loads a checkpoint:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些评估模块需要一些外部数据，例如需要资源的NLTK或需要检查点的BLEURT度量。您可以在`EvaluationModule._download_and_prepare()`中实现这些下载，该方法通过`dlmanager`下载和缓存资源。以下是BLEURT下载和加载检查点的简化示例：
 - en: '[PRE3]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Or if you need to download the NLTK `"punkt"` resources:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，如果您需要下载NLTK的`"punkt"`资源：
 - en: '[PRE4]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Next, we need to define how the computation of the evaluation module works.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们需要定义评估模块计算的方式。
 - en: Compute
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 计算
 - en: 'The computation is performed in the `EvaluationModule._compute()` method. It
     takes the same arguments as `EvaluationModuleInfo.features` and should then return
     the result as a dictionary. Here an example of an exact match metric:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 计算是在`EvaluationModule._compute()`方法中执行的。它接受与`EvaluationModuleInfo.features`相同的参数，然后应将结果作为字典返回。这里是一个精确匹配度量的示例：
 - en: '[PRE5]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: This method is used when you call `.compute()` later on.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您稍后调用`.compute()`时，将使用此方法。
 - en: Readme
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 自述
 - en: When you use the `evalute-cli` to setup the evaluation module the Readme structure
     and instructions are automatically created. It should include a general description
     of the metric, information about its input/output format, examples as well as
     information about its limiations or biases and references.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您使用`evalute-cli`设置评估模块时，自述结构和说明将自动生成。它应包括指标的一般描述，有关其输入/输出格式的信息，示例以及有关其限制或偏见的信息和参考资料。
 - en: Requirements
+  id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 要求
 - en: If your evaluation modules has additional dependencies (e.g. `sklearn` or `nltk`)
     the `requirements.txt` files is the place to put them. The file follows the `pip`
     format and you can list all dependencies there.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的评估模块有其他依赖项（例如`sklearn`或`nltk`），则`requirements.txt`文件是放置它们的地方。该文件遵循`pip`格式，您可以在那里列出所有依赖项。
 - en: App
+  id: totrans-36
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 应用
 - en: 'The `app.py` is where the Spaces widget lives. In general it looks like the
     following and does not require any changes:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '`app.py`是Spaces小部件所在的地方。通常看起来像以下内容，并且不需要任何更改：'
 - en: '[PRE6]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: If you want a custom widget you could add your gradio app here.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要一个自定义小部件，可以在这里添加您的gradio应用程序。
 - en: Push to Hub
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推送到Hub
 - en: 'Finally, when you are done with all the above changes it is time to push your
     evaluation module to the hub. To do so navigate to the folder of your module and
     git add/commit/push the changes to the hub:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，当您完成所有上述更改时，是时候将您的评估模块推送到hub了。要这样做，请导航到您的模块文件夹，并将更改添加/提交/推送到hub：
 - en: '[PRE7]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Tada 🎉! Your evaluation module is now on the 🤗 Hub and ready to be used by everybody!
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 塔达🎉！您的评估模块现在已经在🤗 Hub上，并且准备好供所有人使用！
