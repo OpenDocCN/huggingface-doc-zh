@@ -1,47 +1,47 @@
 - en: Quantization
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 量化
 - en: 'Original text: [https://huggingface.co/docs/peft/developer_guides/quantization](https://huggingface.co/docs/peft/developer_guides/quantization)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/peft/developer_guides/quantization](https://huggingface.co/docs/peft/developer_guides/quantization)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'Quantization represents data with fewer bits, making it a useful technique
     for reducing memory-usage and accelerating inference especially when it comes
     to large language models (LLMs). There are several ways to quantize a model including:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 量化使用更少的位表示数据，这是一种减少内存使用和加速推理的有用技术，特别是对于大型语言模型（LLMs）。有几种量化模型的方法，包括：
 - en: optimizing which model weights are quantized with the [AWQ](https://hf.co/papers/2306.00978)
     algorithm
+  id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用[AWQ](https://hf.co/papers/2306.00978)算法优化哪些模型权重被量化
 - en: independently quantizing each row of a weight matrix with the [GPTQ](https://hf.co/papers/2210.17323)
     algorithm
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用[GPTQ](https://hf.co/papers/2210.17323)算法独立量化每行权重矩阵
 - en: quantizing to 8-bit and 4-bit precision with the [bitsandbytes](https://github.com/TimDettmers/bitsandbytes)
     library
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用[bitsandbytes](https://github.com/TimDettmers/bitsandbytes)库将8位和4位精度独立量化每行权重矩阵
 - en: However, after a model is quantized it isn’t typically further trained for downstream
     tasks because training can be unstable due to the lower precision of the weights
     and activations. But since PEFT methods only add *extra* trainable parameters,
@@ -50,140 +50,210 @@
     on a single GPU. For example, [QLoRA](https://hf.co/papers/2305.14314) is a method
     that quantizes a model to 4-bits and then trains it with LoRA. This method allows
     you to finetune a 65B parameter model on a single 48GB GPU!
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，一旦模型被量化，通常不会进一步为下游任务进行训练，因为由于权重和激活的精度降低，训练可能不稳定。但由于PEFT方法只添加*额外*的可训练参数，这使您可以在顶部使用PEFT适配器训练一个量化模型！将量化与PEFT结合起来可以是在单个GPU上训练甚至最大模型的一个好策略。例如，[QLoRA](https://hf.co/papers/2305.14314)是一种将模型量化为4位，然后使用LoRA进行训练的方法。这种方法允许您在单个48GB
+    GPU上微调一个65B参数模型！
 - en: In this guide, you’ll see how to quantize a model to 4-bits and train it with
     LoRA.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，您将看到如何将模型量化为4位并使用LoRA进行训练。
 - en: Quantize a model
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 量化模型
 - en: '[bitsandbytes](https://github.com/TimDettmers/bitsandbytes) is a quantization
     library with a Transformers integration. With this integration, you can quantize
     a model to 8 or 4-bits and enable many other options by configuring the [BitsAndBytesConfig](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.BitsAndBytesConfig)
     class. For example, you can:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '[bitsandbytes](https://github.com/TimDettmers/bitsandbytes)是一个具有Transformers集成的量化库。通过此集成，您可以将模型量化为8位或4位，并通过配置[BitsAndBytesConfig](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/quantization#transformers.BitsAndBytesConfig)类启用许多其他选项。例如，您可以：'
 - en: set `load_in_4bit=True` to quantize the model to 4-bits when you load it
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 设置`load_in_4bit=True`在加载时将模型量化为4位
 - en: set `bnb_4bit_quant_type="nf4"` to use a special 4-bit data type for weights
     initialized from a normal distribution
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 设置`bnb_4bit_quant_type="nf4"`以使用从正态分布初始化的特殊4位数据类型的权重
 - en: set `bnb_4bit_use_double_quant=True` to use a nested quantization scheme to
     quantize the already quantized weights
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 设置`bnb_4bit_use_double_quant=True`以使用嵌套量化方案量化已经量化的权重
 - en: set `bnb_4bit_compute_dtype=torch.bfloat16` to use bfloat16 for faster computation
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 设置`bnb_4bit_compute_dtype=torch.bfloat16`以使用bfloat16进行更快的计算。
 - en: '[PRE0]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Pass the `config` to the [from_pretrained](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForCausalLM.from_pretrained)
     method.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 将`config`传递给[from_pretrained](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForCausalLM.from_pretrained)方法。
 - en: '[PRE1]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Next, you should call the [prepare_model_for_kbit_training()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.prepare_model_for_kbit_training)
     function to preprocess the quantized model for traininng.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您应该调用[prepare_model_for_kbit_training()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.prepare_model_for_kbit_training)函数对量化模型进行预处理以进行训练。
 - en: '[PRE2]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Now that the quantized model is ready, let’s set up a configuration.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在量化模型已经准备好了，让我们设置一个配置。
 - en: LoraConfig
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: LoraConfig
 - en: 'Create a [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
     with the following parameters (or choose your own):'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用以下参数创建[LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)（或选择您自己的参数）：
 - en: '[PRE3]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Then use the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
     function to create a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
     from the quantized model and configuration.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后使用[get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)函数从量化模型和配置创建[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)。
 - en: '[PRE4]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: You’re all set for training with whichever training method you prefer!
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 您已经准备好使用您喜欢的任何训练方法进行训练了！
 - en: LoftQ initialization
+  id: totrans-27
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: LoftQ初始化
 - en: '[LoftQ](https://hf.co/papers/2310.08659) initializes LoRA weights such that
     the quantization error is minimized, and it can improve performance when training
     quantized models. To get started, create a `LoftQConfig` and set `loftq_bits=4`
     for 4-bit quantization.'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: '[LoftQ](https://hf.co/papers/2310.08659)初始化LoRA权重，使量化误差最小化，并且在训练量化模型时可以提高性能。要开始，请创建一个`LoftQConfig`并设置`loftq_bits=4`以进行4位量化。'
 - en: LoftQ initialization does not require quantizing the base model with the `load_in_4bits`
     parameter in the [from_pretrained](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForCausalLM.from_pretrained)
     method! Learn more about LoftQ initialization in the [Initialization options](../developer_guides/lora#initialization)
     section.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: LoftQ初始化不需要在[from_pretrained](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoModelForCausalLM.from_pretrained)方法中使用`load_in_4bits`参数对基础模型进行量化！在[Initialization
+    options](../developer_guides/lora#initialization)部分了解更多关于LoftQ初始化的信息。
 - en: 'Note: You can only perform LoftQ initialization on a GPU.'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意：您只能在GPU上执行LoftQ初始化。
 - en: '[PRE5]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Now pass the `loftq_config` to the [LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)
     to enable LoftQ initialization, and create a [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
     for training.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在将`loftq_config`传递给[LoraConfig](/docs/peft/v0.8.2/en/package_reference/lora#peft.LoraConfig)以启用LoftQ初始化，并创建一个用于训练的[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)。
 - en: '[PRE6]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: QLoRA-style training
+  id: totrans-34
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: QLoRA风格的训练
 - en: 'QLoRA adds trainable weights to all the linear layers in the transformer architecture.
     Since the attribute names for these linear layers can vary across architectures,
     set `target_modules` to `"all-linear"` to add LoRA to all the linear layers:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: QLoRA在transformer架构的所有线性层中添加了可训练权重。由于这些线性层的属性名称在不同架构中可能会有所不同，将`target_modules`设置为`"all-linear"`以将LoRA添加到所有线性层中：
 - en: '[PRE7]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Next steps
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'If you’re interested in learning more about quantization, the following may
     be helpful:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您对学习更多关于量化感兴趣，以下内容可能会有所帮助：
 - en: Learn more about details about QLoRA and check out some benchmarks on its impact
     in the [Making LLMs even more accessible with bitsandbytes, 4-bit quantization
     and QLoRA](https://huggingface.co/blog/4bit-transformers-bitsandbytes) blog post.
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 了解更多关于QLoRA的细节，并查看其在[使用bitsandbytes、4位量化和QLoRA使LLMs更易访问](https://huggingface.co/blog/4bit-transformers-bitsandbytes)博客文章中的一些基准测试。
 - en: Read more about different quantization schemes in the Transformers [Quantization](https://hf.co/docs/transformers/main/quantization)
     guide.
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在Transformers的[量化](https://hf.co/docs/transformers/main/quantization)指南中阅读更多关于不同量化方案的内容。

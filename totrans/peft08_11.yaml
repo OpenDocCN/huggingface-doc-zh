@@ -1,25 +1,17 @@
 - en: IA3
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: IA3
 - en: 'Original text: [https://huggingface.co/docs/peft/task_guides/ia3](https://huggingface.co/docs/peft/task_guides/ia3)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/peft/task_guides/ia3](https://huggingface.co/docs/peft/task_guides/ia3)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[IA3](../conceptual_guides/ia3) multiplies the model’s activations (the keys
@@ -29,152 +21,227 @@
     than LoRA which introduces weight matrices instead of vectors. The original model’s
     parameters are kept frozen and only these vectors are updated. As a result, it
     is faster, cheaper and more efficient to finetune for a new downstream task.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[IA3](../conceptual_guides/ia3)将模型的激活（自注意力和编码器-解码器注意力块中的键和值，以及位置编码前馈网络的中间激活）乘以三个学习向量。这种PEFT方法引入的可训练参数数量比引入矩阵而不是向量的LoRA更少。原始模型的参数保持冻结，只更新这些向量。因此，对于新的下游任务进行微调更快、更便宜、更高效。'
 - en: This guide will show you how to train a sequence-to-sequence model with IA3
     to *generate a sentiment* given some financial news.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将向您展示如何使用IA3训练一个序列到序列模型，以*生成情感*，给定一些财经新闻。
 - en: Some familiarity with the general process of training a sequence-to-sequence
     would be really helpful and allow you to focus on how to apply IA3\. If you’re
     new, we recommend taking a look at the [Translation](https://huggingface.co/docs/transformers/tasks/translation)
     and [Summarization](https://huggingface.co/docs/transformers/tasks/summarization)
     guides first from the Transformers documentation. When you’re ready, come back
     and see how easy it is to drop PEFT in to your training!
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 对序列到序列训练的一般过程有一定了解将非常有帮助，让您能够专注于如何应用IA3。如果您是新手，我们建议先从Transformers文档中查看[翻译](https://huggingface.co/docs/transformers/tasks/translation)和[摘要](https://huggingface.co/docs/transformers/tasks/summarization)指南。当您准备好时，回来看看将PEFT应用到您的训练中是多么容易！
 - en: Dataset
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数据集
 - en: You’ll use the sentences_allagree subset of the [financial_phrasebank](https://huggingface.co/datasets/financial_phrasebank)
     dataset. This subset contains financial news with 100% annotator agreement on
     the sentiment label. Take a look at the [dataset viewer](https://huggingface.co/datasets/financial_phrasebank/viewer/sentences_allagree)
     for a better idea of the data and sentences you’ll be working with.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将使用[financial_phrasebank](https://huggingface.co/datasets/financial_phrasebank)数据集的sentences_allagree子集。该子集包含在情感标签上有100%注释者一致的财经新闻。查看[数据集查看器](https://huggingface.co/datasets/financial_phrasebank/viewer/sentences_allagree)以更好地了解您将要处理的数据和句子。
 - en: Load the dataset with the [load_dataset](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/loading_methods#datasets.load_dataset)
     function. This subset of the dataset only contains a train split, so use the `train_test_split`
     function to create a train and validation split. Create a new `text_label` column
     so it is easier to understand what the `label` values `0`, `1`, and `2` mean.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`load_dataset`函数加载数据集。数据集的子集仅包含训练集，因此使用`train_test_split`函数创建训练集和验证集。创建一个新的`text_label`列，以便更容易理解`label`值`0`、`1`和`2`的含义。
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Load a tokenizer and create a preprocessing function that:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载一个分词器并创建一个预处理函数，其中：
 - en: tokenizes the inputs, pads and truncates the sequence to the `max_length`
+  id: totrans-11
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 对输入进行分词，填充和截断序列至`max_length`
 - en: apply the same tokenizer to the labels but with a shorter `max_length` that
     corresponds to the label
+  id: totrans-12
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将相同的分词器应用于标签，但`max_length`较短，对应于标签的长度
 - en: mask the padding tokens
+  id: totrans-13
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 掩盖填充标记
 - en: '[PRE1]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Use the [map](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)
     function to apply the preprocessing function to the entire dataset.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[map](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.map)函数将预处理函数应用于整个数据集。
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Create a training and evaluation [`DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader),
     and set `pin_memory=True` to speed up data transfer to the GPU during training
     if your dataset samples are on a CPU.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个训练和评估[`DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader)，并设置`pin_memory=True`以加快数据传输到GPU的速度，如果您的数据集样本在CPU上。
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Model
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模型
 - en: Now you can load a pretrained model to use as the base model for IA3\. This
     guide uses the [bigscience/mt0-large](https://huggingface.co/bigscience/mt0-large)
     model, but you can use any sequence-to-sequence model you like.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以加载一个预训练模型作为IA3的基础模型。本指南使用[bigscience/mt0-large](https://huggingface.co/bigscience/mt0-large)模型，但您可以使用任何您喜欢的序列到序列模型。
 - en: '[PRE4]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: PEFT configuration and model
+  id: totrans-22
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: PEFT配置和模型
 - en: All PEFT methods need a configuration that contains and specifies all the parameters
     for how the PEFT method should be applied. Create an [IA3Config](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Config)
     with the task type and set the inference mode to `False`. You can find additional
     parameters for this configuration in the [API reference](../package_reference/ia3#ia3config).
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有PEFT方法都需要一个包含和指定PEFT方法应如何应用的所有参数的配置。创建一个包含任务类型并将推理模式设置为`False`的[IA3Config](/docs/peft/v0.8.2/en/package_reference/ia3#peft.IA3Config)。您可以在[API参考](../package_reference/ia3#ia3config)中找到此配置的其他参数。
 - en: Call the [print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)
     method to compare the number of trainable parameters of [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)
     versus the number of parameters in the base model!
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用[print_trainable_parameters()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel.print_trainable_parameters)方法，比较[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)的可训练参数数量与基础模型的参数数量！
 - en: Once the configuration is setup, pass it to the [get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)
     function along with the base model to create a trainable [PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel).
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦配置设置完成，请将其传递给[get_peft_model()](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.get_peft_model)函数，同时传递基础模型以创建可训练的[PeftModel](/docs/peft/v0.8.2/en/package_reference/peft_model#peft.PeftModel)。
 - en: '[PRE5]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Training
+  id: totrans-27
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 训练
 - en: Set up an optimizer and learning rate scheduler.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置优化器和学习率调度器。
 - en: '[PRE6]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Move the model to the GPU and create a training loop that reports the loss and
     perplexity for each epoch.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 将模型移至GPU，并创建一个训练循环，报告每个时期的损失和困惑度。
 - en: '[PRE7]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Share your model
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 分享您的模型
 - en: After training is complete, you can upload your model to the Hub with the [push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)
     method. You’ll need to login to your Hugging Face account first and enter your
     token when prompted.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，您可以使用[push_to_hub](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.push_to_hub)方法将模型上传到Hub。您需要先登录到您的Hugging
+    Face帐户，并在提示时输入您的令牌。
 - en: '[PRE8]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Inference
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 推理
 - en: To load the model for inference, use the [from_pretrained()](/docs/peft/v0.8.2/en/package_reference/auto_class#peft.AutoPeftModel.from_pretrained)
     method. Let’s also load a sentence of financial news from the dataset to generate
     a sentiment for.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 要加载用于推理的模型，请使用[from_pretrained()](/docs/peft/v0.8.2/en/package_reference/auto_class#peft.AutoPeftModel.from_pretrained)方法。还可以加载数据集中的一句金融新闻来生成情感。
 - en: '[PRE9]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Call the [generate](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
     method to generate the predicted sentiment label.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用[generate](https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)方法生成预测的情感标签。
 - en: '[PRE10]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
