@@ -1,31 +1,21 @@
 - en: Kandinsky 2.2
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/kandinsky](https://huggingface.co/docs/diffusers/training/kandinsky)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This script is experimental, and it’s easy to overfit and run into issues like
     catastrophic forgetting. Try exploring different hyperparameters to get the best
     results on your dataset.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: Kandinsky 2.2 is a multilingual text-to-image model capable of producing more
@@ -35,6 +25,7 @@
     Diffusers for Kandinsky 2.2, one for training the prior model and one for training
     the decoder model. You can train both models separately, but to get the best results,
     you should train both the prior and decoder models.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: Depending on your GPU, you may need to enable `gradient_checkpointing` (⚠️ not
@@ -44,64 +35,85 @@
     (version [v0.0.16](https://github.com/huggingface/diffusers/issues/2234#issuecomment-1416931212)
     fails for training on some GPUs so you may need to install a development version
     instead).
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: This guide explores the [train_text_to_image_prior.py](https://github.com/huggingface/diffusers/blob/main/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py)
     and the [train_text_to_image_decoder.py](https://github.com/huggingface/diffusers/blob/main/examples/kandinsky2_2/text_to_image/train_text_to_image_decoder.py)
     scripts to help you become more familiar with it, and how you can adapt it for
     your own use-case.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: 'Before running the scripts, make sure you install the library from source:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then navigate to the example folder containing the training script and install
     the required dependencies for the script you’re using:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 🤗 Accelerate is a library for helping you train on multiple GPUs/TPUs or with
     mixed-precision. It’ll automatically configure your training setup based on your
     hardware and environment. Take a look at the 🤗 Accelerate [Quick tour](https://huggingface.co/docs/accelerate/quicktour)
     to learn more.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: 'Initialize an 🤗 Accelerate environment:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To setup a default 🤗 Accelerate environment without choosing any configurations:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Or if your environment doesn’t support an interactive shell, like a notebook,
     you can use:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Lastly, if you want to train a model on your own dataset, take a look at the
     [Create a dataset for training](create_dataset) guide to learn how to create a
     dataset that works with the training script.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: The following sections highlight parts of the training scripts that are important
     for understanding how to modify it, but it doesn’t cover every aspect of the scripts
     in detail. If you’re interested in learning more, feel free to read through the
     scripts and let us know if you have any questions or concerns.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: Script parameters
+  id: totrans-20
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -110,21 +122,27 @@
     function. The training scripts provides default values for each parameter, such
     as the training batch size and learning rate, but you can also set your own values
     in the training command if you’d like.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: 'For example, to speedup training with mixed precision using the fp16 format,
     add the `--mixed_precision` parameter to the training command:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Most of the parameters are identical to the parameters in the [Text-to-image](text2image#script-parameters)
     training guide, so let’s get straight to a walkthrough of the Kandinsky training
     scripts!
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: Min-SNR weighting
+  id: totrans-25
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -133,15 +151,20 @@
     training script supports predicting `epsilon` (noise) or `v_prediction`, but Min-SNR
     is compatible with both prediction types. This weighting strategy is only supported
     by PyTorch and is unavailable in the Flax training script.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: 'Add the `--snr_gamma` parameter and set it to the recommended value of 5.0:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Training script
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -149,58 +172,76 @@
     training guide, but it’s been modified to support training the prior and decoder
     models. This guide focuses on the code that is unique to the Kandinsky 2.2 training
     scripts.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
 - en: prior modeldecoder model
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: The [`main()`](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L441)
     function contains the code for preparing the dataset and training the model.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
 - en: 'One of the main differences you’ll notice right away is that the training script
     also loads a [CLIPImageProcessor](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPImageProcessor)
     - in addition to a scheduler and tokenizer - for preprocessing images and a [CLIPVisionModelWithProjection](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPVisionModelWithProjection)
     model for encoding the images:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Kandinsky uses a [PriorTransformer](/docs/diffusers/v0.26.3/en/api/models/prior_transformer#diffusers.PriorTransformer)
     to generate the image embeddings, so you’ll want to setup the optimizer to learn
     the prior mode’s parameters.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Next, the input captions are tokenized, and images are [preprocessed](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L632)
     by the [CLIPImageProcessor](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPImageProcessor):'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Finally, the [training loop](https://github.com/huggingface/diffusers/blob/6e68c71503682c8693cb5b06a4da4911dfd655ee/examples/kandinsky2_2/text_to_image/train_text_to_image_prior.py#L718)
     converts the input images into latents, adds noise to the image embeddings, and
     makes a prediction:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: If you want to learn more about how the training loop works, check out the [Understanding
     pipelines, models and schedulers](../using-diffusers/write_own_pipeline) tutorial
     which breaks down the basic pattern of the denoising process.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: Launch the script
+  id: totrans-42
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Once you’ve made all your changes or you’re okay with the default configuration,
     you’re ready to launch the training script! 🚀
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
 - en: You’ll train on the [Pokémon BLIP captions](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)
@@ -209,54 +250,71 @@
     Set the environment variable `DATASET_NAME` to the name of the dataset on the
     Hub or if you’re training on your own files, set the environment variable `TRAIN_DIR`
     to a path to your dataset.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
 - en: If you’re training on more than one GPU, add the `--multi_gpu` parameter to
     the `accelerate launch` command.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
 - en: To monitor training progress with Weights & Biases, add the `--report_to=wandb`
     parameter to the training command. You’ll also need to add the `--validation_prompt`
     to the training command to keep track of results. This can be really useful for
     debugging the model and viewing intermediate results.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
 - en: prior modeldecoder model
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Once training is finished, you can use your newly trained model for inference!
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
 - en: prior modeldecoder model
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Feel free to replace `kandinsky-community/kandinsky-2-2-decoder` with your own
     trained decoder checkpoint!
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
 - en: Next steps
+  id: totrans-53
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Congratulations on training a Kandinsky 2.2 model! To learn more about how
     to use your new model, the following guides may be helpful:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
 - en: Read the [Kandinsky](../using-diffusers/kandinsky) guide to learn how to use
     it for a variety of different tasks (text-to-image, image-to-image, inpainting,
     interpolation), and how it can be combined with a ControlNet.
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 阅读[Kandinsky](../using-diffusers/kandinsky)指南，了解如何将其用于各种不同任务（文本到图像，图像到图像，修补，插值），以及如何与ControlNet结合使用。
 - en: Check out the [DreamBooth](dreambooth) and [LoRA](lora) training guides to learn
     how to train a personalized Kandinsky model with just a few example images. These
     two training techniques can even be combined!
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 查看[DreamBooth](dreambooth)和[LoRA](lora)培训指南，学习如何仅使用几个示例图像训练个性化的Kandinsky模型。甚至可以结合这两种训练技术！

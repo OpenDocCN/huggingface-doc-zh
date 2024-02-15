@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 稳定扩散XL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/training/sdxl](https://huggingface.co/docs/diffusers/training/sdxl)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/training/sdxl](https://huggingface.co/docs/diffusers/training/sdxl)
 - en: null
   id: totrans-2
   prefs: []
@@ -18,12 +20,14 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个脚本是实验性的，很容易过拟合并遇到像灾难性遗忘这样的问题。尝试探索不同的超参数以获得数据集上的最佳结果。
 - en: '[Stable Diffusion XL (SDXL)](https://hf.co/papers/2307.01952) is a larger and
     more powerful iteration of the Stable Diffusion model, capable of producing higher
     resolution images.'
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '[稳定扩散XL（SDXL）](https://hf.co/papers/2307.01952)是稳定扩散模型的一个更大更强大的迭代版本，能够生成更高分辨率的图像。'
 - en: SDXL’s UNet is 3x larger and the model adds a second text encoder to the architecture.
     Depending on the hardware available to you, this can be very computationally intensive
     and it may not run on a consumer GPU like a Tesla T4\. To help fit this larger
@@ -34,16 +38,20 @@
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: SDXL的UNet是3倍大，模型在架构中添加了第二个文本编码器。根据您可用的硬件，这可能非常计算密集，可能无法在像Tesla T4这样的消费者GPU上运行。为了将这个更大的模型适应内存并加快训练速度，请尝试启用`gradient_checkpointing`、`mixed_precision`和`gradient_accumulation_steps`。您还可以通过启用[xFormers](../optimization/xformers)的内存高效注意力和使用[bitsandbytes'](https://github.com/TimDettmers/bitsandbytes)
+    8位优化器来进一步减少内存使用。
 - en: This guide will explore the [train_text_to_image_sdxl.py](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_sdxl.py)
     training script to help you become more familiar with it, and how you can adapt
     it for your own use-case.
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南将探讨[train_text_to_image_sdxl.py](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_sdxl.py)训练脚本，以帮助您更熟悉它，以及如何为您自己的用例进行调整。
 - en: 'Before running the script, make sure you install the library from source:'
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在运行脚本之前，请确保从源代码安装库：
 - en: '[PRE0]'
   id: totrans-8
   prefs: []
@@ -54,6 +62,7 @@
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后转到包含训练脚本的示例文件夹，并为您正在使用的脚本安装所需的依赖项：
 - en: '[PRE1]'
   id: totrans-10
   prefs: []
@@ -66,10 +75,13 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate是一个帮助您在多个GPU/TPU上或使用混合精度进行训练的库。它将根据您的硬件和环境自动配置您的训练设置。查看🤗 Accelerate
+    [快速入门](https://huggingface.co/docs/accelerate/quicktour)以了解更多。
 - en: 'Initialize an 🤗 Accelerate environment:'
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 初始化一个🤗 Accelerate环境：
 - en: '[PRE2]'
   id: totrans-13
   prefs: []
@@ -79,6 +91,7 @@
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 要设置一个默认的🤗 Accelerate环境而不选择任何配置：
 - en: '[PRE3]'
   id: totrans-15
   prefs: []
@@ -89,6 +102,7 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，如果您的环境不支持交互式shell，如笔记本，您可以使用：
 - en: '[PRE4]'
   id: totrans-17
   prefs: []
@@ -100,11 +114,13 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，如果您想在自己的数据集上训练模型，请查看[创建用于训练的数据集](create_dataset)指南，了解如何创建适用于训练脚本的数据集。
 - en: Script parameters
   id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 脚本参数
 - en: The following sections highlight parts of the training script that are important
     for understanding how to modify it, but it doesn’t cover every aspect of the script
     in detail. If you’re interested in learning more, feel free to read through the
@@ -113,6 +129,7 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下各节突出了训练脚本的重要部分，以帮助您了解如何修改它，但并未详细涵盖脚本的每个方面。如果您有兴趣了解更多，请随时阅读[脚本](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_sdxl.py)，并告诉我们您是否有任何问题或疑虑。
 - en: The training script provides many parameters to help you customize your training
     run. All of the parameters and their descriptions are found in the [`parse_args()`](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L129)
     function. This function provides default values for each parameter, such as the
@@ -121,11 +138,13 @@
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本提供了许多参数，以帮助您自定义训练运行。所有参数及其描述都可以在[`parse_args()`](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L129)函数中找到。该函数为每个参数提供了默认值，如训练批量大小和学习率，但如果您愿意，也可以在训练命令中设置自己的值。
 - en: 'For example, to speedup training with mixed precision using the bf16 format,
     add the `--mixed_precision` parameter to the training command:'
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，为了使用bf16格式加快训练速度，将`--mixed_precision`参数添加到训练命令中：
 - en: '[PRE5]'
   id: totrans-23
   prefs: []
@@ -137,6 +156,7 @@
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数参数与[文本到图像](text2image#script-parameters)训练指南中的参数相同，因此您将专注于本指南中与训练SDXL相关的参数。
 - en: '`--pretrained_vae_model_name_or_path`: path to a pretrained VAE; the SDXL VAE
     is known to suffer from numerical instability, so this parameter allows you to
     specify a better [VAE](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix)'
@@ -144,43 +164,51 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--pretrained_vae_model_name_or_path`：预训练VAE的路径；SDXL VAE已知存在数值不稳定性问题，因此此参数允许您指定更好的[VAE](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix)'
 - en: '`--proportion_empty_prompts`: the proportion of image prompts to replace with
     empty strings'
   id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--proportion_empty_prompts`：要替换为空字符串的图像提示的比例'
 - en: '`--timestep_bias_strategy`: where (earlier vs. later) in the timestep to apply
     a bias, which can encourage the model to either learn low or high frequency details'
   id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--timestep_bias_strategy`：在时间步中应用偏差的位置（较早还是较晚），可以鼓励模型学习低频或高频细节'
 - en: '`--timestep_bias_multiplier`: the weight of the bias to apply to the timestep'
   id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--timestep_bias_multiplier`：应用于时间步的偏差权重'
 - en: '`--timestep_bias_begin`: the timestep to begin applying the bias'
   id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: -- timestep_bias_begin：开始应用偏差的时间步
 - en: '`--timestep_bias_end`: the timestep to end applying the bias'
   id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--timestep_bias_end`：结束应用偏差的时间步'
 - en: '`--timestep_bias_portion`: the proportion of timesteps to apply the bias to'
   id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`--timestep_bias_portion`：应用偏差的时间步比例'
 - en: Min-SNR weighting
   id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Min-SNR加权
 - en: The [Min-SNR](https://huggingface.co/papers/2303.09556) weighting strategy can
     help with training by rebalancing the loss to achieve faster convergence. The
     training script supports predicting either `epsilon` (noise) or `v_prediction`,
@@ -189,10 +217,12 @@
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Min-SNR](https://huggingface.co/papers/2303.09556)加权策略可以帮助训练，通过重新平衡损失来实现更快的收敛。训练脚本支持预测`epsilon`（噪声）或`v_prediction`，但Min-SNR与两种预测类型兼容。这种加权策略仅受PyTorch支持，在Flax训练脚本中不可用。'
 - en: 'Add the `--snr_gamma` parameter and set it to the recommended value of 5.0:'
   id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 添加`--snr_gamma`参数，并将其设置为推荐值5.0：
 - en: '[PRE6]'
   id: totrans-35
   prefs: []
@@ -203,12 +233,14 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练脚本
 - en: The training script is also similar to the [Text-to-image](text2image#training-script)
     training guide, but it’s been modified to support SDXL training. This guide will
     focus on the code that is unique to the SDXL training script.
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练脚本也类似于[文本到图像](text2image#training-script)训练指南，但已经修改为支持SDXL训练。本指南将重点放在SDXL训练脚本中独特的代码上。
 - en: It starts by creating functions to [tokenize the prompts](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L478)
     to calculate the prompt embeddings, and to compute the image embeddings with the
     [VAE](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L519).
@@ -217,12 +249,14 @@
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先创建函数来[对提示进行标记化](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L478)以计算提示嵌入，并使用[VAE](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L519)计算图像嵌入。接下来，您将创建一个函数来[生成时间步权重](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L531)，具体取决于时间步数和要应用的时间步偏差策略。
 - en: 'Within the [`main()`](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L572)
     function, in addition to loading a tokenizer, the script loads a second tokenizer
     and text encoder because the SDXL architecture uses two of each:'
   id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '在[`main()`](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L572)函数中，除了加载一个分词器外，脚本还加载了第二个分词器和文本编码器，因为SDXL架构使用了两个： '
 - en: '[PRE7]'
   id: totrans-40
   prefs: []
@@ -237,6 +271,7 @@
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先计算并保存[提示和图像嵌入](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L857)，这通常对于较小的数据集不是问题，但对于较大的数据集可能会导致内存问题。如果是这种情况，您应该将预先计算的嵌入单独保存到磁盘，并在训练过程中将其加载到内存中（请参阅此[PR](https://github.com/huggingface/diffusers/pull/4505)以获取有关此主题的更多讨论）。
 - en: '[PRE8]'
   id: totrans-42
   prefs: []
@@ -247,6 +282,7 @@
   id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 计算嵌入后，文本编码器、VAE和分词器将被删除以释放一些内存：
 - en: '[PRE9]'
   id: totrans-44
   prefs: []
@@ -258,6 +294,7 @@
   id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，[训练循环](https://github.com/huggingface/diffusers/blob/aab6de22c33cc01fb7bc81c0807d6109e2c998c9/examples/text_to_image/train_text_to_image_sdxl.py#L943)会处理剩下的事情。如果选择应用时间步偏差策略，您将看到时间步权重被计算并添加为噪声：
 - en: '[PRE10]'
   id: totrans-46
   prefs: []
@@ -269,16 +306,19 @@
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想了解训练循环的工作原理，请查看[理解管道、模型和调度器](../using-diffusers/write_own_pipeline)教程，该教程解析了去噪过程的基本模式。
 - en: Launch the script
   id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 启动脚本
 - en: Once you’ve made all your changes or you’re okay with the default configuration,
     you’re ready to launch the training script! 🚀
   id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您完成所有更改或对默认配置满意，您就可以启动训练脚本了！🚀
 - en: Let’s train on the [Pokémon BLIP captions](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)
     dataset to generate your own Pokémon. Set the environment variables `MODEL_NAME`
     and `DATASET_NAME` to the model and the dataset (either from the Hub or a local
@@ -287,6 +327,9 @@
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们在[Pokémon BLIP标题](https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions)数据集上训练，生成您自己的
+    Pokémon。将环境变量`MODEL_NAME`和`DATASET_NAME`设置为模型和数据集（可以来自Hub或本地路径）。您还应该指定一个除SDXL
+    VAE之外的VAE（可以来自Hub或本地路径），并使用`VAE_NAME`避免数值不稳定。
 - en: To monitor training progress with Weights & Biases, add the `--report_to=wandb`
     parameter to the training command. You’ll also need to add the `--validation_prompt`
     and `--validation_epochs` to the training command to keep track of results. This
