@@ -1,117 +1,151 @@
 - en: 🤗 Accelerate’s internal mechanisms
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate的内部机制
 - en: 'Original text: [https://huggingface.co/docs/accelerate/concept_guides/internal_mechanism](https://huggingface.co/docs/accelerate/concept_guides/internal_mechanism)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/accelerate/concept_guides/internal_mechanism](https://huggingface.co/docs/accelerate/concept_guides/internal_mechanism)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Internally, 🤗 Accelerate works by first analyzing the environment in which the
     script is launched to determine which kind of distributed setup is used, how many
     different processes there are and which one the current script is in. All that
     information is stored in the `~AcceleratorState`.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在内部，🤗 Accelerate首先分析启动脚本的环境，以确定使用了哪种类型的分布式设置，有多少个不同的进程以及当前脚本在哪个进程中。所有这些信息都存储在`~AcceleratorState`中。
 - en: This class is initialized the first time you instantiate an [~Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     as well as performing any specific initialization your distributed setup needs.
     Its state is then uniquely shared through all instances of [AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState).
     (The same can also be done with the [PartialState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.PartialState),
     a more barebones version it inherits)
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个类在您第一次实例化[~Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)时初始化，以及执行任何特定于您的分布式设置需要的初始化。然后，它的状态通过所有[AcceleratorState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.state.AcceleratorState)实例唯一共享。（也可以使用[PartialState](/docs/accelerate/v0.27.2/en/package_reference/state#accelerate.PartialState)来完成相同的操作，它是一个更简化的版本）
 - en: 'Then, when calling [prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare),
     the library:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，在调用[prepare()](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator.prepare)时，库：
 - en: wraps your model(s) in the container adapted for the distributed setup,
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将您的模型包装在适用于分布式设置的容器中，
 - en: wraps your optimizer(s) in an [AcceleratedOptimizer](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.optimizer.AcceleratedOptimizer),
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将您的优化器包装在[AcceleratedOptimizer](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.optimizer.AcceleratedOptimizer)中，
 - en: wraps your scheduler(s) in an [AcceleratedScheduler](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.scheduler.AcceleratedScheduler)
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将您的调度程序包装在[AcceleratedScheduler](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.scheduler.AcceleratedScheduler)中
 - en: creates a new version of your dataloader(s) in a [DataLoaderShard](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderShard)
     or [DataLoaderDispatcher](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderDispatcher)
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在[DataLoaderShard](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderShard)或[DataLoaderDispatcher](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderDispatcher)中创建您的数据加载器的新版本
 - en: While the model(s), optimizer(s), and scheduler(s) are just put in simple wrappers,
     the dataloader(s) are re-created. This is mostly because PyTorch does not let
     the user change the `batch_sampler` of a dataloader once it’s been created and
     the library handles the sharding of your data between processes by changing that
     `batch_sampler` to yield every other `num_processes` batches (if enabled).
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然模型、优化器和调度程序只是简单的包装器，但数据加载器是重新创建的。这主要是因为PyTorch不允许用户在创建后更改数据加载器的`batch_sampler`，而库通过将`batch_sampler`更改为每隔其他`num_processes`批次（如果启用）来处理数据在进程之间的分片。
 - en: 'The [DataLoaderShard](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderShard)
     subclasses `DataLoader` to add the following functionality:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DataLoaderShard](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderShard)子类`DataLoader`以添加以下功能：'
 - en: it synchronizes the appropriate random number generator of all processes at
     each new iteration, to ensure any randomization (like shuffling) is done the exact
     same way across processes.
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它在每次新迭代时同步所有进程的适当随机数生成器，以确保任何随机化（如洗牌）在所有进程中都以完全相同的方式进行。
 - en: it puts the batches on the proper device before yielding them (unless you have
     opted out of `device_placement=True`).
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在产生批次之前将批次放在正确的设备上（除非您选择了`device_placement=True`）。
 - en: The [DataLoaderDispatcher](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderDispatcher)
     subclasses differs from the [DataLoaderShard](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderShard)
     in that when iterating through the `DataLoader`, the data is all starting from
     process 0 and *then* split and sent off to each process rather than it happening
     at the dataset level.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DataLoaderDispatcher](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderDispatcher)子类与[DataLoaderShard](/docs/accelerate/v0.27.2/en/package_reference/torch_wrappers#accelerate.data_loader.DataLoaderShard)不同之处在于，当通过`DataLoader`迭代时，数据都是从进程0开始，然后再分割并发送到每个进程，而不是在数据集级别发生。'
 - en: 'The random number generator synchronization will by default synchronize:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，随机数生成器同步将同步：
 - en: the `generator` attribute of a given sampler (like the PyTorch `RandomSampler`)
     for PyTorch >= 1.6
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 给定采样器（如PyTorch的`RandomSampler`）的`generator`属性，适用于PyTorch >= 1.6
 - en: the main random number generator in PyTorch <=1.5.1
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: PyTorch <=1.5.1中的主随机数生成器
 - en: You can choose which random number generator(s) to synchronize with the `rng_types`
     argument of the main [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator).
     In PyTorch >= 1.6, it is recommended to rely on a local `generator` to avoid setting
     the same seed in the main random number generator in all processes.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过主[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)的`rng_types`参数选择要与之同步的随机数生成器。在PyTorch
+    >= 1.6中，建议依赖于本地`generator`，以避免在所有进程中设置相同的种子。
 - en: Synchronization of the main torch (or CUDA or XLA) random number generator will
     affect any other potential random artifacts you could have in your dataset (like
     random data augmentation) in the sense that all processes will get the same random
     numbers from the torch random modules (so will apply the same random data augmentation
     if it’s controlled by torch).
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 主要torch（或CUDA或XLA）随机数生成器的同步将影响数据集中可能存在的任何其他随机现象（如随机数据增强），因为所有进程将从torch随机模块中获得相同的随机数（因此如果由torch控制，则将应用相同的随机数据增强）。
 - en: The randomization part of your custom sampler, batch sampler or iterable dataset
     should be done using a local `torch.Generator` object (in PyTorch >= 1.6), see
     the traditional `RandomSampler`, as an example.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 您自定义采样器、批量采样器或可迭代数据集的随机化部分应该使用本地的`torch.Generator`对象来完成（在PyTorch >= 1.6中），可以参考传统的`RandomSampler`作为示例。
 - en: For more details about the internals, see the [Internals page](package_reference/torch_wrappers).
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关内部详细信息，请参阅[内部页面](package_reference/torch_wrappers)。
