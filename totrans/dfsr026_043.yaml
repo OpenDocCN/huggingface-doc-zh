@@ -1,206 +1,267 @@
 - en: DiffEdit
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/diffedit](https://huggingface.co/docs/diffusers/using-diffusers/diffedit)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'Image editing typically requires providing a mask of the area to be edited.
     DiffEdit automatically generates the mask for you based on a text query, making
     it easier overall to create a mask without image editing software. The DiffEdit
     algorithm works in three steps:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: the diffusion model denoises an image conditioned on some query text and reference
     text which produces different noise estimates for different areas of the image;
     the difference is used to infer a mask to identify which area of the image needs
     to be changed to match the query text
+  id: totrans-4
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: the input image is encoded into latent space with DDIM
+  id: totrans-5
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: the latents are decoded with the diffusion model conditioned on the text query,
     using the mask as a guide such that pixels outside the mask remain the same as
     in the input image
+  id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: This guide will show you how to use DiffEdit to edit images without manually
     creating a mask.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: 'Before you begin, make sure you have the following libraries installed:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'The [StableDiffusionDiffEditPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline)
     requires an image mask and a set of partially inverted latents. The image mask
     is generated from the [generate_mask()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.generate_mask)
     function, and includes two parameters, `source_prompt` and `target_prompt`. These
     parameters determine what to edit in the image. For example, if you want to change
     a bowl of *fruits* to a bowl of *pears*, then:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: The partially inverted latents are generated from the [invert()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.invert)
     function, and it is generally a good idea to include a `prompt` or *caption* describing
     the image to help guide the inverse latent sampling process. The caption can often
     be your `source_prompt`, but feel free to experiment with other text descriptions!
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: 'Let’s load the pipeline, scheduler, inverse scheduler, and enable some optimizations
     to reduce memory usage:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Load the image to edit:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Use the [generate_mask()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.generate_mask)
     function to generate the image mask. You’ll need to pass it the `source_prompt`
     and `target_prompt` to specify what to edit in the image:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Next, create the inverted latents and pass it a caption describing the image:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Finally, pass the image mask and inverted latents to the pipeline. The `target_prompt`
     becomes the `prompt` now, and the `source_prompt` is used as the `negative_prompt`:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '![](../Images/66e8c6b1baf21e3ade0ec71d71f6eff6.png)'
+  id: totrans-23
   prefs: []
   type: TYPE_IMG
 - en: original image
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '![](../Images/9cc02168a4ef69d9e1454293018a3a04.png)'
+  id: totrans-25
   prefs: []
   type: TYPE_IMG
 - en: edited image
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: Generate source and target embeddings
+  id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: The source and target embeddings can be automatically generated with the [Flan-T5](https://huggingface.co/docs/transformers/model_doc/flan-t5)
     model instead of creating them manually.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: 'Load the Flan-T5 model and tokenizer from the 🤗 Transformers library:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Provide some initial text to prompt the model to generate the source and target
     prompts.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Next, create a utility function to generate the prompts:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Check out the [generation strategy](https://huggingface.co/docs/transformers/main/en/generation_strategies)
     guide if you’re interested in learning more about strategies for generating different
     quality text.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: 'Load the text encoder model used by the [StableDiffusionDiffEditPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline)
     to encode the text. You’ll use the text encoder to compute the text embeddings:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Finally, pass the embeddings to the [generate_mask()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.generate_mask)
     and [invert()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.invert)
     functions, and pipeline to generate the image:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，将嵌入传递给[generate_mask()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.generate_mask)和[invert()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.invert)函数，以及管道来生成图像：
 - en: '[PRE11]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Generate a caption for inversion
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 生成反转的标题
 - en: While you can use the `source_prompt` as a caption to help generate the partially
     inverted latents, you can also use the [BLIP](https://huggingface.co/docs/transformers/model_doc/blip)
     model to automatically generate a caption.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您可以使用`source_prompt`作为标题来帮助生成部分反转的潜在内容时，您也可以使用[BLIP](https://huggingface.co/docs/transformers/model_doc/blip)模型自动生成标题。
 - en: 'Load the BLIP model and processor from the 🤗 Transformers library:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 从🤗 Transformers库中加载BLIP模型和处理器：
 - en: '[PRE12]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Create a utility function to generate a caption from the input image:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个实用函数来从输入图像生成标题：
 - en: '[PRE13]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Load an input image and generate a caption for it using the `generate_caption`
     function:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载输入图像并使用`generate_caption`函数为其生成标题：
 - en: '[PRE14]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '![](../Images/66e8c6b1baf21e3ade0ec71d71f6eff6.png)'
+  id: totrans-48
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/66e8c6b1baf21e3ade0ec71d71f6eff6.png)'
 - en: 'generated caption: "a photograph of a bowl of fruit on a table"'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成的标题："一张放在桌子上的水果碗的照片"
 - en: Now you can drop the caption into the [invert()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.invert)
     function to generate the partially inverted latents!
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以将标题放入[invert()](/docs/diffusers/v0.26.3/en/api/pipelines/diffedit#diffusers.StableDiffusionDiffEditPipeline.invert)函数中，以生成部分反转的潜在内容！
