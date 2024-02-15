@@ -242,15 +242,18 @@
   id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，您希望分词器返回实际馈送到模型的张量。
 - en: 'Set the `return_tensors` parameter to either `pt` for PyTorch, or `tf` for
     TensorFlow:'
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 将`return_tensors`参数设置为`pt`以供PyTorch使用，或设置为`tf`以供TensorFlow使用：
 - en: PytorchHide Pytorch content
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: Pytorch隐藏Pytorch内容
 - en: '[PRE7]'
   id: totrans-42
   prefs: []
@@ -260,6 +263,7 @@
   id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: TensorFlow隐藏TensorFlow内容
 - en: '[PRE8]'
   id: totrans-44
   prefs: []
@@ -273,17 +277,20 @@
   id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 不同的管道以不同的方式在其`__call__()`中支持分词器参数。`text-2-text-generation`管道仅支持（即传递）`truncation`。`text-generation`管道支持`max_length`、`truncation`、`padding`和`add_special_tokens`。在`fill-mask`管道中，分词器参数可以在`tokenizer_kwargs`参数（字典）中传递。
 - en: Audio
   id: totrans-46
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 音频
 - en: For audio tasks, you’ll need a [feature extractor](main_classes/feature_extractor)
     to prepare your dataset for the model. The feature extractor is designed to extract
     features from raw audio data, and convert them into tensors.
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于音频任务，您将需要一个[特征提取器](main_classes/feature_extractor)来准备您的数据集以供模型使用。特征提取器旨在从原始音频数据中提取特征，并将其转换为张量。
 - en: 'Load the [MInDS-14](https://huggingface.co/datasets/PolyAI/minds14) dataset
     (see the 🤗 [Datasets tutorial](https://huggingface.co/docs/datasets/load_hub)
     for more details on how to load a dataset) to see how you can use a feature extractor
@@ -291,6 +298,7 @@
   id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载[MInDS-14](https://huggingface.co/datasets/PolyAI/minds14)数据集（查看🤗[Datasets教程](https://huggingface.co/docs/datasets/load_hub)以获取有关如何加载数据集的更多详细信息）以查看如何在音频数据集中使用特征提取器：
 - en: '[PRE9]'
   id: totrans-49
   prefs: []
@@ -301,6 +309,7 @@
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 访问`audio`列的第一个元素以查看输入。调用`audio`列会自动加载和重新采样音频文件：
 - en: '[PRE10]'
   id: totrans-51
   prefs: []
@@ -310,22 +319,26 @@
   id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将返回三个项目：
 - en: '`array` is the speech signal loaded - and potentially resampled - as a 1D array.'
   id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`array`是加载的语音信号 - 可能已重新采样 - 作为1D数组。'
 - en: '`path` points to the location of the audio file.'
   id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`path`指向音频文件的位置。'
 - en: '`sampling_rate` refers to how many data points in the speech signal are measured
     per second.'
   id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sampling_rate`指的是每秒测量的语音信号中有多少数据点。'
 - en: For this tutorial, you’ll use the [Wav2Vec2](https://huggingface.co/facebook/wav2vec2-base)
     model. Take a look at the model card, and you’ll learn Wav2Vec2 is pretrained
     on 16kHz sampled speech audio. It is important your audio data’s sampling rate
@@ -334,12 +347,14 @@
   id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本教程中，您将使用[Wav2Vec2](https://huggingface.co/facebook/wav2vec2-base)模型。查看模型卡片，您将了解到Wav2Vec2是在16kHz采样的语音音频上进行预训练的。重要的是，您的音频数据的采样率要与用于预训练模型的数据集的采样率匹配。如果您的数据采样率不同，则需要对数据进行重新采样。
 - en: 'Use 🤗 Datasets’ [cast_column](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.cast_column)
     method to upsample the sampling rate to 16kHz:'
   id: totrans-57
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用🤗 Datasets的[cast_column](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset.cast_column)方法将采样率上采样至16kHz：
 - en: '[PRE11]'
   id: totrans-58
   prefs: []
@@ -350,6 +365,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 再次调用`audio`列以重新采样音频文件：
 - en: '[PRE12]'
   id: totrans-60
   prefs: []
@@ -361,10 +377,13 @@
   id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，加载一个特征提取器来对输入进行归一化和填充。在填充文本数据时，会为较短的序列添加`0`。相同的思想也适用于音频数据。特征提取器会向`array`中添加一个`0`
+    - 被解释为静音。
 - en: 'Load the feature extractor with [AutoFeatureExtractor.from_pretrained()](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoFeatureExtractor.from_pretrained):'
   id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[AutoFeatureExtractor.from_pretrained()](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoFeatureExtractor.from_pretrained)加载特征提取器：
 - en: '[PRE13]'
   id: totrans-63
   prefs: []
@@ -376,6 +395,7 @@
   id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 将音频`array`传递给特征提取器。我们还建议在特征提取器中添加`sampling_rate`参数，以更好地调试可能发生的任何静默错误。
 - en: '[PRE14]'
   id: totrans-65
   prefs: []
@@ -386,6 +406,7 @@
   id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 与分词器一样，您可以应用填充或截断来处理批处理中的可变序列。查看这两个音频样本的序列长度：
 - en: '[PRE15]'
   id: totrans-67
   prefs: []
@@ -397,6 +418,7 @@
   id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个函数来预处理数据集，使音频样本具有相同的长度。指定最大样本长度，特征提取器将填充或截断序列以匹配它：
 - en: '[PRE16]'
   id: totrans-69
   prefs: []
@@ -406,6 +428,7 @@
   id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 对数据集中的前几个示例应用`preprocess_function`：
 - en: '[PRE17]'
   id: totrans-71
   prefs: []
@@ -416,6 +439,7 @@
   id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在样本长度相同并与指定的最大长度匹配。现在可以将处理过的数据集传递给模型了！
 - en: '[PRE18]'
   id: totrans-73
   prefs: []
@@ -426,6 +450,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 计算机视觉
 - en: For computer vision tasks, you’ll need an [image processor](main_classes/image_processor)
     to prepare your dataset for the model. Image preprocessing consists of several
     steps that convert images into the input expected by the model. These steps include
@@ -434,12 +459,14 @@
   id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于计算机视觉任务，您将需要一个[图像处理器](main_classes/image_processor)来准备您的数据集以供模型使用。图像预处理包括几个步骤，将图像转换为模型期望的输入。这些步骤包括但不限于调整大小、归一化、颜色通道校正以及将图像转换为张量。
 - en: 'Image preprocessing often follows some form of image augmentation. Both image
     preprocessing and image augmentation transform image data, but they serve different
     purposes:'
   id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像预处理通常遵循某种形式的图像增强。图像预处理和图像增强都会转换图像数据，但它们有不同的目的：
 - en: Image augmentation alters images in a way that can help prevent overfitting
     and increase the robustness of the model. You can get creative in how you augment
     your data - adjust brightness and colors, crop, rotate, resize, zoom, etc. However,
