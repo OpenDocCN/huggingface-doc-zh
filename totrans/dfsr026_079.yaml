@@ -1,653 +1,1033 @@
 - en: PyTorch 2.0
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: PyTorch 2.0
 - en: 'Original text: [https://huggingface.co/docs/diffusers/optimization/torch2.0](https://huggingface.co/docs/diffusers/optimization/torch2.0)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/optimization/torch2.0](https://huggingface.co/docs/diffusers/optimization/torch2.0)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '🤗 Diffusers supports the latest optimizations from [PyTorch 2.0](https://pytorch.org/get-started/pytorch-2.0/)
     which include:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Diffusers支持来自[PyTorch 2.0](https://pytorch.org/get-started/pytorch-2.0/)的最新优化，其中包括：
 - en: A memory-efficient attention implementation, scaled dot product attention, without
     requiring any extra dependencies such as xFormers.
+  id: totrans-4
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 一种内存高效的注意力实现，无需任何额外的依赖项，如xFormers。
 - en: '[`torch.compile`](https://pytorch.org/tutorials/intermediate/torch_compile_tutorial.html),
     a just-in-time (JIT) compiler to provide an extra performance boost when individual
     models are compiled.'
+  id: totrans-5
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[`torch.compile`](https://pytorch.org/tutorials/intermediate/torch_compile_tutorial.html)，一种即时（JIT）编译器，用于在编译单个模型时提供额外的性能提升。'
 - en: Both of these optimizations require PyTorch 2.0 or later and 🤗 Diffusers > 0.13.0.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 这两种优化都需要PyTorch 2.0或更高版本以及🤗 Diffusers > 0.13.0。
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Scaled dot product attention
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 缩放点积注意力
 - en: '[`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention)
     (SDPA) is an optimized and memory-efficient attention (similar to xFormers) that
     automatically enables several other optimizations depending on the model inputs
     and GPU type. SDPA is enabled by default if you’re using PyTorch 2.0 and the latest
     version of 🤗 Diffusers, so you don’t need to add anything to your code.'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention)（SDPA）是一种经过优化且内存高效的注意力机制（类似于xFormers），根据模型输入和GPU类型自动启用几种其他优化。如果您正在使用PyTorch
+    2.0和最新版本的🤗 Diffusers，则默认情况下启用SDPA，因此您无需向代码中添加任何内容。'
 - en: 'However, if you want to explicitly enable it, you can set a [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
     to use [AttnProcessor2_0](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor2_0):'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '但是，如果您想要显式启用它，可以设置[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)以使用[AttnProcessor2_0](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor2_0)： '
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: SDPA should be as fast and memory efficient as `xFormers`; check the [benchmark](#benchmark)
     for more details.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: SDPA应该与`xFormers`一样快速和内存高效；有关更多详细信息，请查看[基准测试](#benchmark)。
 - en: 'In some cases - such as making the pipeline more deterministic or converting
     it to other formats - it may be helpful to use the vanilla attention processor,
     [AttnProcessor](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor).
     To revert to [AttnProcessor](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor),
     call the [set_default_attn_processor()](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.UNet2DConditionModel.set_default_attn_processor)
     function on the pipeline:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 在某些情况下 - 例如使管道更具确定性或将其转换为其他格式 - 使用原始注意力处理器[AttnProcessor](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor)可能会有所帮助。要恢复到[AttnProcessor](/docs/diffusers/v0.26.3/en/api/attnprocessor#diffusers.models.attention_processor.AttnProcessor)，请在管道上调用[set_default_attn_processor()](/docs/diffusers/v0.26.3/en/api/models/unet2d-cond#diffusers.UNet2DConditionModel.set_default_attn_processor)函数：
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: torch.compile
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: torch.compile
 - en: The `torch.compile` function can often provide an additional speed-up to your
     PyTorch code. In 🤗 Diffusers, it is usually best to wrap the UNet with `torch.compile`
     because it does most of the heavy lifting in the pipeline.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.compile`函数通常可以为您的PyTorch代码提供额外的加速。在🤗 Diffusers中，通常最好使用`torch.compile`包装UNet，因为它在管道中执行大部分繁重的工作。'
 - en: '[PRE3]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Depending on GPU type, `torch.compile` can provide an *additional speed-up*
     of **5-300x** on top of SDPA! If you’re using more recent GPU architectures such
     as Ampere (A100, 3090), Ada (4090), and Hopper (H100), `torch.compile` is able
     to squeeze even more performance out of these GPUs.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据GPU类型，`torch.compile`可以在SDPA的基础上提供**5-300倍**的*额外加速*！如果您使用的是更近期的GPU架构，如Ampere（A100，3090），Ada（4090）和Hopper（H100），`torch.compile`能够从这些GPU中挤出更多性能。
 - en: Compilation requires some time to complete, so it is best suited for situations
     where you prepare your pipeline once and then perform the same type of inference
     operations multiple times. For example, calling the compiled pipeline on a different
     image size triggers compilation again which can be expensive.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 编译需要一些时间才能完成，因此最适合您准备好管道后多次执行相同类型的推理操作的情况。例如，在不同的图像尺寸上调用编译后的管道会再次触发编译，这可能很昂贵。
 - en: For more information and different options about `torch.compile`, refer to the
     [`torch_compile`](https://pytorch.org/tutorials/intermediate/torch_compile_tutorial.html)
     tutorial.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关`torch.compile`的更多信息和不同选项，请参考[`torch_compile`](https://pytorch.org/tutorials/intermediate/torch_compile_tutorial.html)教程。
 - en: Benchmark
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 基准测试
 - en: We conducted a comprehensive benchmark with PyTorch 2.0’s efficient attention
     implementation and `torch.compile` across different GPUs and batch sizes for five
     of our most used pipelines. The code is benchmarked on 🤗 Diffusers v0.17.0.dev0
     to optimize `torch.compile` usage (see [here](https://github.com/huggingface/diffusers/pull/3313)
     for more details).
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们对PyTorch 2.0的高效注意力实现和`torch.compile`在不同GPU和批量大小上进行了全面的基准测试，针对我们最常用的五个管道。该代码在🤗
+    Diffusers v0.17.0.dev0上进行了基准测试，以优化`torch.compile`的使用（有关更多详细信息，请参见[此处](https://github.com/huggingface/diffusers/pull/3313)）。
 - en: 'Expand the dropdown below to find the code used to benchmark each pipeline:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 展开下面的下拉菜单以找到用于基准测试每个管道的代码：
 - en: <details>### Stable Diffusion text-to-image
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: <details>### 稳定的扩散文本到图像
 - en: '[PRE4]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Stable Diffusion image-to-image
+  id: totrans-26
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 稳定的扩散图像到图像
 - en: '[PRE5]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Stable Diffusion inpainting
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 稳定的扩散修复
 - en: '[PRE6]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: ControlNet
+  id: totrans-30
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: ControlNet
 - en: '[PRE7]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: DeepFloyd IF text-to-image + upscaling
+  id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: DeepFloyd IF文本到图像+放大
 - en: '[PRE8]</details>'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE8]</details>'
 - en: The graph below highlights the relative speed-ups for the [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)
     across five GPU families with PyTorch 2.0 and `torch.compile` enabled. The benchmarks
     for the following graphs are measured in *number of iterations/second*.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的图表突出显示了在五个GPU系列中，使用PyTorch 2.0和启用`torch.compile`的[StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)的相对加速情况。以下图表的基准是*每秒迭代次数*。
 - en: '![t2i_speedup](../Images/b9e5a83589de9942d685c07d4cf11ecd.png)'
+  id: totrans-35
   prefs: []
   type: TYPE_IMG
+  zh: '![t2i_speedup](../Images/b9e5a83589de9942d685c07d4cf11ecd.png)'
 - en: 'To give you an even better idea of how this speed-up holds for the other pipelines,
     consider the following graph for an A100 with PyTorch 2.0 and `torch.compile`:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了让您更好地了解这种加速对其他流水线的影响，考虑以下关于A100使用PyTorch 2.0和`torch.compile`的图表：
 - en: '![a100_numbers](../Images/f5f080ae9f99b4a72d2909f42bde4477.png)'
+  id: totrans-37
   prefs: []
   type: TYPE_IMG
+  zh: '![a100_numbers](../Images/f5f080ae9f99b4a72d2909f42bde4477.png)'
 - en: In the following tables, we report our findings in terms of the *number of iterations/second*.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 在以下表格中，我们报告了我们的发现，以*每秒迭代次数*表示。
 - en: 'A100 (batch size: 1)'
+  id: totrans-39
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: A100（批量大小：1）
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-40
   prefs: []
   type: TYPE_TB
+  zh: '| **流水线** | **torch 2.0 - 无编译** | **torch nightly - 无编译** | **torch 2.0 - 编译**
+    | **torch nightly - 编译** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-41
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 21.66 | 23.13 | 44.03 | 49.74 |'
+  id: totrans-42
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 文本到图像 | 21.66 | 23.13 | 44.03 | 49.74 |'
 - en: '| SD - img2img | 21.81 | 22.40 | 43.92 | 46.32 |'
+  id: totrans-43
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 图像到图像 | 21.81 | 22.40 | 43.92 | 46.32 |'
 - en: '| SD - inpaint | 22.24 | 23.23 | 43.76 | 49.25 |'
+  id: totrans-44
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 补全 | 22.24 | 23.23 | 43.76 | 49.25 |'
 - en: '| SD - controlnet | 15.02 | 15.82 | 32.13 | 36.08 |'
+  id: totrans-45
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 控制网络 | 15.02 | 15.82 | 32.13 | 36.08 |'
 - en: '| IF | 20.21 / 13.84 /'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '| IF | 20.21 / 13.84 /'
 - en: 24.00 | 20.12 / 13.70 /
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 24.00 | 20.12 / 13.70 /
 - en: 24.03 | ❌ | 97.34 / 27.23 /
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 24.03 | ❌ | 97.34 / 27.23 /
 - en: 111.66 |
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 111.66 |
 - en: '| SDXL - txt2img | 8.64 | 9.9 | - | - |'
+  id: totrans-50
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - 文本到图像 | 8.64 | 9.9 | - | - |'
 - en: 'A100 (batch size: 4)'
+  id: totrans-51
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: A100（批量大小：4）
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-52
   prefs: []
   type: TYPE_TB
+  zh: '| **流水线** | **torch 2.0 - 无编译** | **torch nightly - 无编译** | **torch 2.0 - 编译**
+    | **torch nightly - 编译** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-53
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 11.6 | 13.12 | 14.62 | 17.27 |'
+  id: totrans-54
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 文本到图像 | 11.6 | 13.12 | 14.62 | 17.27 |'
 - en: '| SD - img2img | 11.47 | 13.06 | 14.66 | 17.25 |'
+  id: totrans-55
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 图像到图像 | 11.47 | 13.06 | 14.66 | 17.25 |'
 - en: '| SD - inpaint | 11.67 | 13.31 | 14.88 | 17.48 |'
+  id: totrans-56
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 补全 | 11.67 | 13.31 | 14.88 | 17.48 |'
 - en: '| SD - controlnet | 8.28 | 9.38 | 10.51 | 12.41 |'
+  id: totrans-57
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 控制网络 | 8.28 | 9.38 | 10.51 | 12.41 |'
 - en: '| IF | 25.02 | 18.04 | ❌ | 48.47 |'
+  id: totrans-58
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 25.02 | 18.04 | ❌ | 48.47 |'
 - en: '| SDXL - txt2img | 2.44 | 2.74 | - | - |'
+  id: totrans-59
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - 文本到图像 | 2.44 | 2.74 | - | - |'
 - en: 'A100 (batch size: 16)'
+  id: totrans-60
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: A100（批量大小：16）
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-61
   prefs: []
   type: TYPE_TB
+  zh: '| **流水线** | **torch 2.0 - 无编译** | **torch nightly - 无编译** | **torch 2.0 - 编译**
+    | **torch nightly - 编译** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-62
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 3.04 | 3.6 | 3.83 | 4.68 |'
+  id: totrans-63
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 文本到图像 | 3.04 | 3.6 | 3.83 | 4.68 |'
 - en: '| SD - img2img | 2.98 | 3.58 | 3.83 | 4.67 |'
+  id: totrans-64
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 图像到图像 | 2.98 | 3.58 | 3.83 | 4.67 |'
 - en: '| SD - inpaint | 3.04 | 3.66 | 3.9 | 4.76 |'
+  id: totrans-65
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 补全 | 3.04 | 3.66 | 3.9 | 4.76 |'
 - en: '| SD - controlnet | 2.15 | 2.58 | 2.74 | 3.35 |'
+  id: totrans-66
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 控制网络 | 2.15 | 2.58 | 2.74 | 3.35 |'
 - en: '| IF | 8.78 | 9.82 | ❌ | 16.77 |'
+  id: totrans-67
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 8.78 | 9.82 | ❌ | 16.77 |'
 - en: '| SDXL - txt2img | 0.64 | 0.72 | - | - |'
+  id: totrans-68
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - 文本到图像 | 0.64 | 0.72 | - | - |'
 - en: 'V100 (batch size: 1)'
+  id: totrans-69
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: V100（批量大小：1）
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-70
   prefs: []
   type: TYPE_TB
+  zh: '| **流水线** | **torch 2.0 - 无编译** | **torch nightly - 无编译** | **torch 2.0 - 编译**
+    | **torch nightly - 编译** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-71
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 18.99 | 19.14 | 20.95 | 22.17 |'
+  id: totrans-72
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 文本到图像 | 18.99 | 19.14 | 20.95 | 22.17 |'
 - en: '| SD - img2img | 18.56 | 19.18 | 20.95 | 22.11 |'
+  id: totrans-73
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 图像到图像 | 18.56 | 19.18 | 20.95 | 22.11 |'
 - en: '| SD - inpaint | 19.14 | 19.06 | 21.08 | 22.20 |'
+  id: totrans-74
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 补全 | 19.14 | 19.06 | 21.08 | 22.20 |'
 - en: '| SD - controlnet | 13.48 | 13.93 | 15.18 | 15.88 |'
+  id: totrans-75
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 控制网络 | 13.48 | 13.93 | 15.18 | 15.88 |'
 - en: '| IF | 20.01 / 9.08 /'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: '| IF | 20.01 / 9.08 /'
 - en: 23.34 | 19.79 / 8.98 /
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 23.34 | 19.79 / 8.98 /
 - en: 24.10 | ❌ | 55.75 / 11.57 /
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 24.10 | ❌ | 55.75 / 11.57 /
 - en: 57.67 |
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 57.67 |
 - en: 'V100 (batch size: 4)'
+  id: totrans-80
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: V100（批量大小：4）
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-81
   prefs: []
   type: TYPE_TB
+  zh: '| **流水线** | **torch 2.0 - 无编译** | **torch nightly - 无编译** | **torch 2.0 - 编译**
+    | **torch nightly - 编译** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-82
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 5.96 | 5.89 | 6.83 | 6.86 |'
+  id: totrans-83
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 文本到图像 | 5.96 | 5.89 | 6.83 | 6.86 |'
 - en: '| SD - img2img | 5.90 | 5.91 | 6.81 | 6.82 |'
+  id: totrans-84
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 图像到图像 | 5.90 | 5.91 | 6.81 | 6.82 |'
 - en: '| SD - inpaint | 5.99 | 6.03 | 6.93 | 6.95 |'
+  id: totrans-85
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 补全 | 5.99 | 6.03 | 6.93 | 6.95 |'
 - en: '| SD - controlnet | 4.26 | 4.29 | 4.92 | 4.93 |'
+  id: totrans-86
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 控制网络 | 4.26 | 4.29 | 4.92 | 4.93 |'
 - en: '| IF | 15.41 | 14.76 | ❌ | 22.95 |'
+  id: totrans-87
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 15.41 | 14.76 | ❌ | 22.95 |'
 - en: 'V100 (batch size: 16)'
+  id: totrans-88
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: V100（批量大小：16）
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-89
   prefs: []
   type: TYPE_TB
+  zh: '| **流水线** | **torch 2.0 - 无编译** | **torch nightly - 无编译** | **torch 2.0 - 编译**
+    | **torch nightly - 编译** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-90
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 1.66 | 1.66 | 1.92 | 1.90 |'
+  id: totrans-91
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 文本到图像 | 1.66 | 1.66 | 1.92 | 1.90 |'
 - en: '| SD - img2img | 1.65 | 1.65 | 1.91 | 1.89 |'
+  id: totrans-92
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 图像到图像 | 1.65 | 1.65 | 1.91 | 1.89 |'
 - en: '| SD - inpaint | 1.69 | 1.69 | 1.95 | 1.93 |'
+  id: totrans-93
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 补全 | 1.69 | 1.69 | 1.95 | 1.93 |'
 - en: '| SD - controlnet | 1.19 | 1.19 | OOM after warmup | 1.36 |'
+  id: totrans-94
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 控制网络 | 1.19 | 1.19 | 热身后OOM | 1.36 |'
 - en: '| IF | 5.43 | 5.29 | ❌ | 7.06 |'
+  id: totrans-95
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 5.43 | 5.29 | ❌ | 7.06 |'
 - en: 'T4 (batch size: 1)'
+  id: totrans-96
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: T4（批量大小：1）
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-97
   prefs: []
   type: TYPE_TB
+  zh: '| **流水线** | **torch 2.0 - 无编译** | **torch nightly - 无编译** | **torch 2.0 - 编译**
+    | **torch nightly - 编译** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-98
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 6.9 | 6.95 | 7.3 | 7.56 |'
+  id: totrans-99
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 文本到图像 | 6.9 | 6.95 | 7.3 | 7.56 |'
 - en: '| SD - img2img | 6.84 | 6.99 | 7.04 | 7.55 |'
+  id: totrans-100
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 图像到图像 | 6.84 | 6.99 | 7.04 | 7.55 |'
 - en: '| SD - inpaint | 6.91 | 6.7 | 7.01 | 7.37 |'
+  id: totrans-101
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 补全 | 6.91 | 6.7 | 7.01 | 7.37 |'
 - en: '| SD - controlnet | 4.89 | 4.86 | 5.35 | 5.48 |'
+  id: totrans-102
   prefs: []
   type: TYPE_TB
+  zh: '| SD - 控制网络 | 4.89 | 4.86 | 5.35 | 5.48 |'
 - en: '| IF | 17.42 / 2.47 /'
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: '| IF | 17.42 / 2.47 /'
 - en: 18.52 | 16.96 / 2.45 /
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 18.52 | 16.96 / 2.45 /
 - en: 18.69 | ❌ | 24.63 / 2.47 /
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 18.69 | ❌ | 24.63 / 2.47 /
 - en: 23.39 |
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 23.39 |
 - en: '| SDXL - txt2img | 1.15 | 1.16 | - | - |'
+  id: totrans-107
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - 文本到图像 | 1.15 | 1.16 | - | - |'
 - en: 'T4 (batch size: 4)'
+  id: totrans-108
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: T4（批量大小：4）
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-109
   prefs: []
   type: TYPE_TB
+  zh: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-110
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 1.79 | 1.79 | 2.03 | 1.99 |'
+  id: totrans-111
   prefs: []
   type: TYPE_TB
+  zh: '| SD - txt2img | 1.79 | 1.79 | 2.03 | 1.99 |'
 - en: '| SD - img2img | 1.77 | 1.77 | 2.05 | 2.04 |'
+  id: totrans-112
   prefs: []
   type: TYPE_TB
+  zh: '| SD - img2img | 1.77 | 1.77 | 2.05 | 2.04 |'
 - en: '| SD - inpaint | 1.81 | 1.82 | 2.09 | 2.09 |'
+  id: totrans-113
   prefs: []
   type: TYPE_TB
+  zh: '| SD - inpaint | 1.81 | 1.82 | 2.09 | 2.09 |'
 - en: '| SD - controlnet | 1.34 | 1.27 | 1.47 | 1.46 |'
+  id: totrans-114
   prefs: []
   type: TYPE_TB
+  zh: '| SD - controlnet | 1.34 | 1.27 | 1.47 | 1.46 |'
 - en: '| IF | 5.79 | 5.61 | ❌ | 7.39 |'
+  id: totrans-115
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 5.79 | 5.61 | ❌ | 7.39 |'
 - en: '| SDXL - txt2img | 0.288 | 0.289 | - | - |'
+  id: totrans-116
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - txt2img | 0.288 | 0.289 | - | - |'
 - en: 'T4 (batch size: 16)'
+  id: totrans-117
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'T4 (batch size: 16)'
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-118
   prefs: []
   type: TYPE_TB
+  zh: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-119
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 2.34s | 2.30s | OOM after 2nd iteration | 1.99s |'
+  id: totrans-120
   prefs: []
   type: TYPE_TB
+  zh: '| SD - txt2img | 2.34s | 2.30s | OOM after 2nd iteration | 1.99s |'
 - en: '| SD - img2img | 2.35s | 2.31s | OOM after warmup | 2.00s |'
+  id: totrans-121
   prefs: []
   type: TYPE_TB
+  zh: '| SD - img2img | 2.35s | 2.31s | OOM after warmup | 2.00s |'
 - en: '| SD - inpaint | 2.30s | 2.26s | OOM after 2nd iteration | 1.95s |'
+  id: totrans-122
   prefs: []
   type: TYPE_TB
+  zh: '| SD - inpaint | 2.30s | 2.26s | OOM after 2nd iteration | 1.95s |'
 - en: '| SD - controlnet | OOM after 2nd iteration | OOM after 2nd iteration | OOM
     after warmup | OOM after warmup |'
+  id: totrans-123
   prefs: []
   type: TYPE_TB
+  zh: '| SD - controlnet | OOM after 2nd iteration | OOM after 2nd iteration | OOM
+    after warmup | OOM after warmup |'
 - en: '| IF * | 1.44 | 1.44 | ❌ | 1.94 |'
+  id: totrans-124
   prefs: []
   type: TYPE_TB
+  zh: '| IF * | 1.44 | 1.44 | ❌ | 1.94 |'
 - en: '| SDXL - txt2img | OOM | OOM | - | - |'
+  id: totrans-125
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - txt2img | OOM | OOM | - | - |'
 - en: 'RTX 3090 (batch size: 1)'
+  id: totrans-126
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'RTX 3090 (batch size: 1)'
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-127
   prefs: []
   type: TYPE_TB
+  zh: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-128
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 22.56 | 22.84 | 23.84 | 25.69 |'
+  id: totrans-129
   prefs: []
   type: TYPE_TB
+  zh: '| SD - txt2img | 22.56 | 22.84 | 23.84 | 25.69 |'
 - en: '| SD - img2img | 22.25 | 22.61 | 24.1 | 25.83 |'
+  id: totrans-130
   prefs: []
   type: TYPE_TB
+  zh: '| SD - img2img | 22.25 | 22.61 | 24.1 | 25.83 |'
 - en: '| SD - inpaint | 22.22 | 22.54 | 24.26 | 26.02 |'
+  id: totrans-131
   prefs: []
   type: TYPE_TB
+  zh: '| SD - inpaint | 22.22 | 22.54 | 24.26 | 26.02 |'
 - en: '| SD - controlnet | 16.03 | 16.33 | 17.38 | 18.56 |'
+  id: totrans-132
   prefs: []
   type: TYPE_TB
+  zh: '| SD - controlnet | 16.03 | 16.33 | 17.38 | 18.56 |'
 - en: '| IF | 27.08 / 9.07 /'
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: '| IF | 27.08 / 9.07 /'
 - en: 31.23 | 26.75 / 8.92 /
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 31.23 | 26.75 / 8.92 /
 - en: 31.47 | ❌ | 68.08 / 11.16 /
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 31.47 | ❌ | 68.08 / 11.16 /
 - en: 65.29 |
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 65.29 |
 - en: 'RTX 3090 (batch size: 4)'
+  id: totrans-137
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'RTX 3090 (batch size: 4)'
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-138
   prefs: []
   type: TYPE_TB
+  zh: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-139
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 6.46 | 6.35 | 7.29 | 7.3 |'
+  id: totrans-140
   prefs: []
   type: TYPE_TB
+  zh: '| SD - txt2img | 6.46 | 6.35 | 7.29 | 7.3 |'
 - en: '| SD - img2img | 6.33 | 6.27 | 7.31 | 7.26 |'
+  id: totrans-141
   prefs: []
   type: TYPE_TB
+  zh: '| SD - img2img | 6.33 | 6.27 | 7.31 | 7.26 |'
 - en: '| SD - inpaint | 6.47 | 6.4 | 7.44 | 7.39 |'
+  id: totrans-142
   prefs: []
   type: TYPE_TB
+  zh: '| SD - inpaint | 6.47 | 6.4 | 7.44 | 7.39 |'
 - en: '| SD - controlnet | 4.59 | 4.54 | 5.27 | 5.26 |'
+  id: totrans-143
   prefs: []
   type: TYPE_TB
+  zh: '| SD - controlnet | 4.59 | 4.54 | 5.27 | 5.26 |'
 - en: '| IF | 16.81 | 16.62 | ❌ | 21.57 |'
+  id: totrans-144
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 16.81 | 16.62 | ❌ | 21.57 |'
 - en: 'RTX 3090 (batch size: 16)'
+  id: totrans-145
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'RTX 3090 (batch size: 16)'
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-146
   prefs: []
   type: TYPE_TB
+  zh: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-147
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 1.7 | 1.69 | 1.93 | 1.91 |'
+  id: totrans-148
   prefs: []
   type: TYPE_TB
+  zh: '| SD - txt2img | 1.7 | 1.69 | 1.93 | 1.91 |'
 - en: '| SD - img2img | 1.68 | 1.67 | 1.93 | 1.9 |'
+  id: totrans-149
   prefs: []
   type: TYPE_TB
+  zh: '| SD - img2img | 1.68 | 1.67 | 1.93 | 1.9 |'
 - en: '| SD - inpaint | 1.72 | 1.71 | 1.97 | 1.94 |'
+  id: totrans-150
   prefs: []
   type: TYPE_TB
+  zh: '| SD - inpaint | 1.72 | 1.71 | 1.97 | 1.94 |'
 - en: '| SD - controlnet | 1.23 | 1.22 | 1.4 | 1.38 |'
+  id: totrans-151
   prefs: []
   type: TYPE_TB
+  zh: '| SD - controlnet | 1.23 | 1.22 | 1.4 | 1.38 |'
 - en: '| IF | 5.01 | 5.00 | ❌ | 6.33 |'
+  id: totrans-152
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 5.01 | 5.00 | ❌ | 6.33 |'
 - en: 'RTX 4090 (batch size: 1)'
+  id: totrans-153
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'RTX 4090 (batch size: 1)'
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-154
   prefs: []
   type: TYPE_TB
+  zh: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-155
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 40.5 | 41.89 | 44.65 | 49.81 |'
+  id: totrans-156
   prefs: []
   type: TYPE_TB
+  zh: '| SD - txt2img | 40.5 | 41.89 | 44.65 | 49.81 |'
 - en: '| SD - img2img | 40.39 | 41.95 | 44.46 | 49.8 |'
+  id: totrans-157
   prefs: []
   type: TYPE_TB
+  zh: '| SD - img2img | 40.39 | 41.95 | 44.46 | 49.8 |'
 - en: '| SD - inpaint | 40.51 | 41.88 | 44.58 | 49.72 |'
+  id: totrans-158
   prefs: []
   type: TYPE_TB
+  zh: '| SD - inpaint | 40.51 | 41.88 | 44.58 | 49.72 |'
 - en: '| SD - controlnet | 29.27 | 30.29 | 32.26 | 36.03 |'
+  id: totrans-159
   prefs: []
   type: TYPE_TB
+  zh: '| SD - controlnet | 29.27 | 30.29 | 32.26 | 36.03 |'
 - en: '| IF | 69.71 / 18.78 /'
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: '| IF | 69.71 / 18.78 /'
 - en: 85.49 | 69.13 / 18.80 /
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 85.49 | 69.13 / 18.80 /
 - en: 85.56 | ❌ | 124.60 / 26.37 /
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 85.56 | ❌ | 124.60 / 26.37 /
 - en: 138.79 |
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 138.79 |
 - en: '| SDXL - txt2img | 6.8 | 8.18 | - | - |'
+  id: totrans-164
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - txt2img | 6.8 | 8.18 | - | - |'
 - en: 'RTX 4090 (batch size: 4)'
+  id: totrans-165
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'RTX 4090 (batch size: 4)'
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-166
   prefs: []
   type: TYPE_TB
+  zh: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-167
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 12.62 | 12.84 | 15.32 | 15.59 |'
+  id: totrans-168
   prefs: []
   type: TYPE_TB
+  zh: '| SD - txt2img | 12.62 | 12.84 | 15.32 | 15.59 |'
 - en: '| SD - img2img | 12.61 | 12,.79 | 15.35 | 15.66 |'
+  id: totrans-169
   prefs: []
   type: TYPE_TB
+  zh: '| SD - img2img | 12.61 | 12,.79 | 15.35 | 15.66 |'
 - en: '| SD - inpaint | 12.65 | 12.81 | 15.3 | 15.58 |'
+  id: totrans-170
   prefs: []
   type: TYPE_TB
+  zh: '| SD - inpaint | 12.65 | 12.81 | 15.3 | 15.58 |'
 - en: '| SD - controlnet | 9.1 | 9.25 | 11.03 | 11.22 |'
+  id: totrans-171
   prefs: []
   type: TYPE_TB
+  zh: '| SD - controlnet | 9.1 | 9.25 | 11.03 | 11.22 |'
 - en: '| IF | 31.88 | 31.14 | ❌ | 43.92 |'
+  id: totrans-172
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 31.88 | 31.14 | ❌ | 43.92 |'
 - en: '| SDXL - txt2img | 2.19 | 2.35 | - | - |'
+  id: totrans-173
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - txt2img | 2.19 | 2.35 | - | - |'
 - en: 'RTX 4090 (batch size: 16)'
+  id: totrans-174
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 'RTX 4090 (batch size: 16)'
 - en: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
     | **torch 2.0 - compile** | **torch nightly - compile** |'
+  id: totrans-175
   prefs: []
   type: TYPE_TB
+  zh: '| **Pipeline** | **torch 2.0 - no compile** | **torch nightly - no compile**
+    | **torch 2.0 - compile** | **torch nightly - compile** |'
 - en: '| :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-176
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: |'
 - en: '| SD - txt2img | 3.17 | 3.2 | 3.84 | 3.85 |'
+  id: totrans-177
   prefs: []
   type: TYPE_TB
+  zh: '| SD - txt2img | 3.17 | 3.2 | 3.84 | 3.85 |'
 - en: '| SD - img2img | 3.16 | 3.2 | 3.84 | 3.85 |'
+  id: totrans-178
   prefs: []
   type: TYPE_TB
+  zh: '| SD - img2img | 3.16 | 3.2 | 3.84 | 3.85 |'
 - en: '| SD - inpaint | 3.17 | 3.2 | 3.85 | 3.85 |'
+  id: totrans-179
   prefs: []
   type: TYPE_TB
+  zh: '| SD - inpaint | 3.17 | 3.2 | 3.85 | 3.85 |'
 - en: '| SD - controlnet | 2.23 | 2.3 | 2.7 | 2.75 |'
+  id: totrans-180
   prefs: []
   type: TYPE_TB
+  zh: '| SD - controlnet | 2.23 | 2.3 | 2.7 | 2.75 |'
 - en: '| IF | 9.26 | 9.2 | ❌ | 13.31 |'
+  id: totrans-181
   prefs: []
   type: TYPE_TB
+  zh: '| IF | 9.26 | 9.2 | ❌ | 13.31 |'
 - en: '| SDXL - txt2img | 0.52 | 0.53 | - | - |'
+  id: totrans-182
   prefs: []
   type: TYPE_TB
+  zh: '| SDXL - txt2img | 0.52 | 0.53 | - | - |'
 - en: Notes
+  id: totrans-183
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Notes
 - en: Follow this [PR](https://github.com/huggingface/diffusers/pull/3313) for more
     details on the environment used for conducting the benchmarks.
+  id: totrans-184
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 关注此[PR](https://github.com/huggingface/diffusers/pull/3313)以获取有关进行基准测试所使用环境的更多详细信息。
 - en: For the DeepFloyd IF pipeline where batch sizes > 1, we only used a batch size
     of > 1 in the first IF pipeline for text-to-image generation and NOT for upscaling.
     That means the two upscaling pipelines received a batch size of 1.
+  id: totrans-185
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于DeepFloyd IF管道，其中批量大小> 1，我们仅在第一个IF管道中用于文本到图像生成的批量大小> 1，并且不用于放大。这意味着两个放大管道接收到批量大小为1。
 - en: '*Thanks to [Horace He](https://github.com/Chillee) from the PyTorch team for
     their support in improving our support of `torch.compile()` in Diffusers.*'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: '*感谢PyTorch团队的[Horace He](https://github.com/Chillee)在改进我们对Diffusers中`torch.compile()`支持方面的支持。*'
