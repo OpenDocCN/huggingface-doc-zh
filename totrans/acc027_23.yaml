@@ -1,22 +1,17 @@
 - en: Low Precision Training Methods
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 低精度训练方法
 - en: 'Original text: [https://huggingface.co/docs/accelerate/usage_guides/low_precision_training](https://huggingface.co/docs/accelerate/usage_guides/low_precision_training)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/usage_guides/low_precision_training](https://huggingface.co/docs/accelerate/usage_guides/low_precision_training)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 🤗 Accelerate provides integrations to train on lower precision methods using
@@ -24,131 +19,192 @@
     This documentation will help guide you through what hardware is supported, how
     to configure your [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)
     to leverage the low precision methods, and what you can expect when training.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate提供了集成，可以使用指定支持的硬件通过`TransformersEngine`和`MS-AMP`软件包进行低精度方法的训练。本文档将帮助您了解支持的硬件是什么，如何配置您的[加速器](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)以利用低精度方法，以及在训练时可以期望什么。
 - en: What training on FP8 means
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在FP8上进行训练意味着什么
 - en: To explore more of the nitty-gritty in training in FP8 with PyTorch and 🤗 Accelerate,
     check out the [concept_guide](../concept_guides/low_precision_training.md) on
     why this can be difficult. But essentially rather than training in BF16, some
     (or all) aspects of training a model can be performed using 8 bits instead of
     16\. The challenge is doing so without degrading final performance.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 要深入了解使用PyTorch和🤗 Accelerate在FP8中进行训练的细节，请查看[概念指南](../concept_guides/low_precision_training.md)，了解为什么这可能会很困难。但基本上，与在BF16中训练不同，训练模型的某些（或全部）方面可以使用8位而不是16位来执行。挑战在于在不降低最终性能的情况下这样做。
 - en: 'This is only enabled on specific NVIDIA hardware, namely:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 这仅在特定的NVIDIA硬件上启用，即：
 - en: Anything after the 3000 series consumer graphics cards (such as the 4090)
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 3000系列消费级显卡之后的任何硬件（例如4090）
 - en: Hopper-based GPU architectures (such as the `H100` and `H200`)
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基于Hopper的GPU架构（例如`H100`和`H200`）
 - en: What this will result in is some gain in the memory used (as we’ve cut the needed
     memory in half for some parts of training) and an increase in throughput *should*
     be seen as well for larger models that can replace certain layers with FP8-enabled
     ones.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将导致一些内存使用上的增益（因为我们已经将某些训练部分所需的内存减少了一半），并且对于可以用FP8启用的某些层替换的较大模型，也应该会看到吞吐量的增加。
 - en: Configuring the Accelerator
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 配置加速器
 - en: Currently two different backends for FP8 are supported (`TransformersEngine`
     and `MS-AMP`), each with different capabilities and configurations.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 目前支持两种不同的FP8后端（`TransformersEngine`和`MS-AMP`），每个都具有不同的功能和配置。
 - en: 'To use either, the same core API is used. Just pass `mixed_precision="fp8"`
     to either the [Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator),
     during `accelerate config` when prompted about mixed precision, or as part of
     your `config.yaml` file in the `mixed_precision` key:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用任何一个，都使用相同的核心API。只需将`mixed_precision="fp8"`传递给[Accelerator](/docs/accelerate/v0.27.2/en/package_reference/accelerator#accelerate.Accelerator)之一，在`accelerate
+    config`期间，当询问混合精度时，或作为`config.yaml`文件中的`mixed_precision`键的一部分：
 - en: '[PRE0]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'By default, if `MS-AMP` is available in your environment, 🤗 Accelerate will
     automatically utilize it as a backend. To specify it yourself (and customize other
     parts of the FP8 mixed precision setup), you can utilize the [utils.FP8RecipeKwargs](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.FP8RecipeKwargs):'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，如果您的环境中有`MS-AMP`，🤗 Accelerate将自动将其用作后端。要自行指定它（并自定义FP8混合精度设置的其他部分），您可以使用[utils.FP8RecipeKwargs](/docs/accelerate/v0.27.2/en/package_reference/utilities#accelerate.utils.FP8RecipeKwargs)：
 - en: '[PRE1]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Configuring MS-AMP
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 配置MS-AMP
 - en: 'Of the two, `MS-AMP` is traditionally the easier one to configure as there
     is only a single argument: the optimization level.'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这两者中，`MS-AMP`传统上更容易配置，因为只有一个参数：优化级别。
 - en: Currently two levels of optimization are supported in the 🤗 Accelerate integration,
     `"O1"` and `"O2"` (using the letter ‘o’, not zero).
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 目前🤗 Accelerate集成支持两个优化级别，`"O1"`和`"O2"`（使用字母‘o’，而不是零）。
 - en: '`"O1"` will cast the weight gradients and `all_reduce` communications to happen
     in 8-bit, while the rest are done in 16 bit. This reduces the general GPU memory
     usage and speeds up communication bandwidths.'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"O1"`将将权重梯度和`all_reduce`通信转换为8位，而其余部分将以16位完成。这减少了一般GPU内存使用量并加快了通信带宽。'
 - en: '`"O2"` will also cast first-order optimizer states into 8 bit, while the second
     order states are in FP16\. (Currently just the `Adam` optimizer is supported).
     This tries it’s best to minimize final accuracy degradation and will save the
     highest potential memory.'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"O2"`还将一阶优化器状态转换为8位，而二阶状态为FP16（目前仅支持`Adam`优化器）。这尽最大努力最小化最终准确性的降级，并将节省最高潜在内存。'
 - en: 'To specify an optimization level, pass it to the `FP8KwargsHandler` by setting
     the `optimization_level` argument:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 要指定优化级别，请将其传递给`FP8KwargsHandler`，设置`optimization_level`参数：
 - en: '[PRE2]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Configuring TransformersEngine
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 配置TransformersEngine
 - en: TransformersEngine has much more available for customizing how and what FP8
     calculations are performed. A full list of supported arguments and what they mean
     are available in [NVIDIA’s documentation](https://docs.nvidia.com/deeplearning/transformer-engine/user-guide/api/common.html),
     however they are restated as part of `FP8KwargsHandler`’s docstring for your convience.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: TransformersEngine有更多可用于自定义如何以及何时执行FP8计算的内容。支持的参数列表和它们的含义在[NVIDIA文档](https://docs.nvidia.com/deeplearning/transformer-engine/user-guide/api/common.html)中都有，但是它们也作为`FP8KwargsHandler`的docstring的一部分重申，以方便您查看。
 - en: 🤗 Accelerate tries to set sensible defaults, but exploring and tweaking the
     various parameters yourself can lead to better performance potentially.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Accelerate尝试设置合理的默认值，但是自己探索和调整各种参数可能会导致更好的性能。
 - en: 'To use it, specify `backend="te"` and modify any of the arguments you want
     as part of your kwarg handler:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用它，请指定`backend="te"`并修改您想要作为kwarg处理程序的任何参数：
 - en: '[PRE3]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Futher Reading
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 进一步阅读
 - en: 'To learn more about training in FP8 please check out the following resources:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解更多关于在FP8中训练的信息，请查看以下资源：
 - en: '[Our concept guide](../concept_guides/low_precision_training.md) detailing
     into more about both TransformersEngine and MS-AMP'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[我们的概念指南](../concept_guides/low_precision_training.md)详细介绍了TransformersEngine和MS-AMP。'
 - en: '[The `transformers-engine` documentation](https://docs.nvidia.com/deeplearning/transformer-engine/user-guide/api/common.html)'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[transformers-engine文档](https://docs.nvidia.com/deeplearning/transformer-engine/user-guide/api/common.html)'
 - en: '[The `MS-AMP` documentation](https://azure.github.io/MS-AMP/docs/)'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[MS-AMP文档](https://azure.github.io/MS-AMP/docs/)'
