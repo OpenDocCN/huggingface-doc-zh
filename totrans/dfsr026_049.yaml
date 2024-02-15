@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用LCM-LoRA进行推理
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm_lora](https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm_lora)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm_lora](https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm_lora)
 - en: null
   id: totrans-2
   prefs: []
@@ -17,10 +19,12 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 潜在一致性模型（LCM）使得在通常2-4步内生成高质量图像成为可能，从而可以在几乎实时的设置中使用扩散模型。
 - en: 'From the [official website](https://latent-consistency-models.github.io/):'
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 从[官方网站](https://latent-consistency-models.github.io/)：
 - en: LCMs can be distilled from any pre-trained Stable Diffusion (SD) in only 4,000
     training steps (~32 A100 GPU Hours) for generating high quality 768 x 768 resolution
     images in 2~4 steps or even one step, significantly accelerating text-to-image
@@ -30,10 +34,12 @@
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: LCMs可以从任何预训练的稳定扩散（SD）中提炼出来，仅需4,000个训练步骤（~32 A100 GPU小时）即可生成高质量的768 x 768分辨率图像，仅需2~4步甚至一步，显著加速文本到图像的生成。我们使用LCM来提炼Dreamshaper-V7版本的SD，仅需4,000个训练迭代。
 - en: For a more technical overview of LCMs, refer to [the paper](https://huggingface.co/papers/2310.04378).
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关LCMs的更多技术概述，请参阅[论文](https://huggingface.co/papers/2310.04378)。
 - en: However, each model needs to be distilled separately for latent consistency
     distillation. The core idea with LCM-LoRA is to train just a few adapter layers,
     the adapter being LoRA in this case. This way, we don’t have to train the full
@@ -45,6 +51,7 @@
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，每个模型需要单独进行潜在一致性提炼。LCM-LoRA的核心思想是仅训练几个适配器层，适配器在这种情况下是LoRA。这样，我们就不必训练完整的模型，并保持可管理的可训练参数数量。然后，生成的LoRAs可以应用于任何经过微调的模型版本，而无需单独提炼它们。此外，LoRAs可以应用于图像到图像、ControlNet/T2I-Adapter、修补、AnimateDiff等。LCM-LoRA还可以与其他LoRAs结合，以在很少的步骤（4-8）中生成样式化图像。
 - en: LCM-LoRAs are available for [stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5),
     [stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0),
     and the [SSD-1B](https://huggingface.co/segmind/SSD-1B) model. All the checkpoints
@@ -52,44 +59,53 @@
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: LCM-LoRAs可用于[stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5)、[stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)和[SSD-1B](https://huggingface.co/segmind/SSD-1B)模型。所有检查点都可以在此[集合](https://huggingface.co/collections/latent-consistency/latent-consistency-models-loras-654cdd24e111e16f0865fba6)中找到。
 - en: For more details about LCM-LoRA, refer to [the technical report](https://huggingface.co/papers/2311.05556).
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关LCM-LoRA的更多详细信息，请参阅[技术报告](https://huggingface.co/papers/2311.05556)。
 - en: This guide shows how to perform inference with LCM-LoRAs for
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南展示了如何使用LCM-LoRAs进行推理
 - en: text-to-image
   id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 文本到图像
 - en: image-to-image
   id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 图像到图像
 - en: combined with styled LoRAs
   id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 与样式LoRAs结合
 - en: ControlNet/T2I-Adapter
   id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: ControlNet/T2I-Adapter
 - en: inpainting
   id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 修补
 - en: AnimateDiff
   id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: AnimateDiff
 - en: Before going through this guide, we’ll take a look at the general workflow for
     performing inference with LCM-LoRAs. LCM-LoRAs are similar to other Stable Diffusion
     LoRAs so they can be used with any [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
@@ -97,41 +113,49 @@
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在阅读本指南之前，我们将看一下使用LCM-LoRAs进行推理的一般工作流程。LCM-LoRAs类似于其他稳定扩散LoRAs，因此它们可以与支持LoRAs的任何[DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)一起使用。
 - en: Load the task specific pipeline and model.
   id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 加载特定任务的流水线和模型。
 - en: Set the scheduler to [LCMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lcm#diffusers.LCMScheduler).
   id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将调度程序设置为[LCMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lcm#diffusers.LCMScheduler)。
 - en: Load the LCM-LoRA weights for the model.
   id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 加载模型的LCM-LoRA权重。
 - en: Reduce the `guidance_scale` between `[1.0, 2.0]` and set the `num_inference_steps`
     between [4, 8].
   id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将`guidance_scale`减小到`[1.0, 2.0]`之间，并将`num_inference_steps`设置在[4, 8]之间。
 - en: Perform inference with the pipeline with the usual parameters.
   id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用常规参数对流水线进行推理。
 - en: Let’s look at how we can perform inference with LCM-LoRAs for different tasks.
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看如何在不同任务中使用LCM-LoRAs进行推理。
 - en: First, make sure you have [peft](https://github.com/huggingface/peft) installed,
     for better LoRA support.
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，请确保您已安装[peft](https://github.com/huggingface/peft)，以获得更好的LoRA支持。
 - en: '[PRE0]'
   id: totrans-25
   prefs: []
@@ -142,6 +166,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文本到图像
 - en: 'You’ll use the [StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline)
     with the scheduler: [LCMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lcm#diffusers.LCMScheduler)
     and then load the LCM-LoRA. Together with the LCM-LoRA and the scheduler, the
@@ -150,6 +175,7 @@
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将使用[StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline)与调度程序：[LCMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lcm#diffusers.LCMScheduler)，然后加载LCM-LoRA。与LCM-LoRA和调度程序一起，该流水线实现了快速推理工作流，克服了扩散模型缓慢的迭代性质。
 - en: '[PRE1]'
   id: totrans-28
   prefs: []
@@ -159,11 +185,13 @@
   id: totrans-29
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/2ca06b97873717e791e8cb391d65c97e.png)'
 - en: Notice that we use only 4 steps for generation which is way less than what’s
     typically used for standard SDXL.
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，我们只使用4个生成步骤，这比标准SDXL通常使用的步骤要少得多。
 - en: You may have noticed that we set `guidance_scale=1.0`, which disables classifer-free-guidance.
     This is because the LCM-LoRA is trained with guidance, so the batch size does
     not have to be doubled in this case. This leads to a faster inference time, with

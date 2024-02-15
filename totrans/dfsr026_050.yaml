@@ -1,182 +1,249 @@
 - en: Latent Consistency Model
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 潜在一致性模型
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm](https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm](https://huggingface.co/docs/diffusers/using-diffusers/inference_with_lcm)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Latent Consistency Models (LCM) enable quality image generation in typically
     2-4 steps making it possible to use diffusion models in almost real-time settings.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 潜在一致性模型（LCM）使得在通常2-4步内生成高质量图像成为可能，从而可以在几乎实时的环境中使用扩散模型。
 - en: 'From the [official website](https://latent-consistency-models.github.io/):'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 从[官方网站](https://latent-consistency-models.github.io/)：
 - en: LCMs can be distilled from any pre-trained Stable Diffusion (SD) in only 4,000
     training steps (~32 A100 GPU Hours) for generating high quality 768 x 768 resolution
     images in 2~4 steps or even one step, significantly accelerating text-to-image
     generation. We employ LCM to distill the Dreamshaper-V7 version of SD in just
     4,000 training iterations.
+  id: totrans-5
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: LCMs可以从任何预训练的稳定扩散（SD）中精馏，在仅4,000个训练步骤（~32 A100 GPU小时）内生成高质量的768 x 768分辨率图像，只需2~4步甚至一步，显著加速文本到图像的生成。我们使用LCM来在仅4,000个训练迭代中精馏SD的Dreamshaper-V7版本。
 - en: For a more technical overview of LCMs, refer to [the paper](https://huggingface.co/papers/2310.04378).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关LCMs的更多技术概述，请参阅[论文](https://huggingface.co/papers/2310.04378)。
 - en: LCM distilled models are available for [stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5),
     [stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0),
     and the [SSD-1B](https://huggingface.co/segmind/SSD-1B) model. All the checkpoints
     can be found in this [collection](https://huggingface.co/collections/latent-consistency/latent-consistency-models-weights-654ce61a95edd6dffccef6a8).
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: LCM精馏模型可在[stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5)、[stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)和[SSD-1B](https://huggingface.co/segmind/SSD-1B)模型中找到。所有检查点都可以在这个[集合](https://huggingface.co/collections/latent-consistency/latent-consistency-models-weights-654ce61a95edd6dffccef6a8)中找到。
 - en: This guide shows how to perform inference with LCMs for
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南展示了如何对LCMs进行推理
 - en: text-to-image
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 文本到图像
 - en: image-to-image
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 图像到图像
 - en: combined with style LoRAs
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 结合风格LoRAs
 - en: ControlNet/T2I-Adapter
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: ControlNet/T2I-Adapter
 - en: Text-to-image
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文本到图像
 - en: You’ll use the [StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline)
     pipeline with the [LCMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lcm#diffusers.LCMScheduler)
     and then load the LCM-LoRA. Together with the LCM-LoRA and the scheduler, the
     pipeline enables a fast inference workflow, overcoming the slow iterative nature
     of diffusion models.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将使用[StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline)管道与[LCMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/lcm#diffusers.LCMScheduler)，然后加载LCM-LoRA。与LCM-LoRA和调度器一起，管道实现了快速推理工作流程，克服了扩散模型缓慢的迭代性质。
 - en: '[PRE0]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '![](../Images/2f5bfceba4374577d23ec1fd6d28cd1b.png)'
+  id: totrans-16
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/2f5bfceba4374577d23ec1fd6d28cd1b.png)'
 - en: Notice that we use only 4 steps for generation which is way less than what’s
     typically used for standard SDXL.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，我们仅使用4步生成，这远远少于通常用于标准SDXL的步骤。
 - en: 'Some details to keep in mind:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 需要记住的一些细节：
 - en: To perform classifier-free guidance, batch size is usually doubled inside the
     pipeline. LCM, however, applies guidance using guidance embeddings, so the batch
     size does not have to be doubled in this case. This leads to a faster inference
     time, with the drawback that negative prompts don’t have any effect on the denoising
     process.
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 为了进行无分类器指导，通常在管道内将批处理大小加倍。然而，LCM使用指导嵌入来应用指导，因此在这种情况下批处理大小不必加倍。这导致更快的推理时间，但负面提示对去噪过程没有任何影响。
 - en: The UNet was trained using the [3., 13.] guidance scale range. So, that is the
     ideal range for `guidance_scale`. However, disabling `guidance_scale` using a
     value of 1.0 is also effective in most cases.
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: UNet是使用[3., 13.]指导范围进行训练的。因此，这是`guidance_scale`的理想范围。然而，在大多数情况下，使用值为1.0禁用`guidance_scale`也是有效的。
 - en: Image-to-image
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 图像到图像
 - en: LCMs can be applied to image-to-image tasks too. For this example, we’ll use
     the [LCM_Dreamshaper_v7](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)
     model, but the same steps can be applied to other LCM models as well.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: LCMs也可以应用于图像到图像的任务。在本示例中，我们将使用[LCM_Dreamshaper_v7](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)模型，但相同的步骤也可以应用于其他LCM模型。
 - en: '[PRE1]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '![](../Images/f67c16e640d47cc0d1f4f9eea95aab20.png)'
+  id: totrans-24
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/f67c16e640d47cc0d1f4f9eea95aab20.png)'
 - en: You can get different results based on your prompt and the image you provide.
     To get the best results, we recommend trying different values for `num_inference_steps`,
     `strength`, and `guidance_scale` parameters and choose the best one.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据您的提示和提供的图像，您可以获得不同的结果。为了获得最佳结果，我们建议尝试不同的`num_inference_steps`、`strength`和`guidance_scale`参数值，并选择最佳值。
 - en: Combine with style LoRAs
+  id: totrans-26
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 结合风格LoRAs
 - en: LCMs can be used with other styled LoRAs to generate styled-images in very few
     steps (4-8). In the following example, we’ll use the [papercut LoRA](TheLastBen/Papercut_SDXL).
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: LCMs可以与其他风格化的LoRAs一起使用，以在很少的步骤（4-8）内生成风格化图像。在下面的示例中，我们将使用[papercut LoRA](TheLastBen/Papercut_SDXL)。
 - en: '[PRE2]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '![](../Images/5990d778b897e4cb4d8fc04103c7aeed.png)'
+  id: totrans-29
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/5990d778b897e4cb4d8fc04103c7aeed.png)'
 - en: ControlNet/T2I-Adapter
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ControlNet/T2I-Adapter
 - en: Let’s look at how we can perform inference with ControlNet/T2I-Adapter and a
     LCM.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看如何使用ControlNet/T2I-Adapter和LCM进行推理。
 - en: ControlNet
+  id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: ControlNet
 - en: For this example, we’ll use the [LCM_Dreamshaper_v7](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)
     model with canny ControlNet, but the same steps can be applied to other LCM models
     as well.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本示例中，我们将使用带有canny ControlNet的[LCM_Dreamshaper_v7](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)模型，但相同的步骤也可以应用于其他LCM模型。
 - en: '[PRE3]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '![](../Images/539bb3d9fdc5599b9dcff9248948bab5.png)'
+  id: totrans-35
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/539bb3d9fdc5599b9dcff9248948bab5.png)'
 - en: The inference parameters in this example might not work for all examples, so
     we recommend trying different values for the `num_inference_steps`, `guidance_scale`,
     `controlnet_conditioning_scale`, and `cross_attention_kwargs` parameters and choosing
     the best one.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中的推理参数可能不适用于所有例子，因此我们建议尝试不同的值来调整`num_inference_steps`、`guidance_scale`、`controlnet_conditioning_scale`和`cross_attention_kwargs`参数，并选择最佳值。
 - en: T2I-Adapter
+  id: totrans-37
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: T2I-适配器
 - en: This example shows how to use the `lcm-sdxl` with the [Canny T2I-Adapter](TencentARC/t2i-adapter-canny-sdxl-1.0).
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个例子展示了如何使用`lcm-sdxl`和[Canny T2I-适配器](TencentARC/t2i-adapter-canny-sdxl-1.0)。
 - en: '[PRE4]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '![](../Images/83307ba0aa59bcdfc3f0183be54a659b.png)'
+  id: totrans-40
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/83307ba0aa59bcdfc3f0183be54a659b.png)'
