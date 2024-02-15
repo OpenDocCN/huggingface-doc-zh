@@ -1,22 +1,17 @@
 - en: Megatron-LM
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Megatron-LM
 - en: 'Original text: [https://huggingface.co/docs/accelerate/usage_guides/megatron_lm](https://huggingface.co/docs/accelerate/usage_guides/megatron_lm)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/accelerate/usage_guides/megatron_lm](https://huggingface.co/docs/accelerate/usage_guides/megatron_lm)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[Megatron-LM](https://github.com/NVIDIA/Megatron-LM) enables training large
@@ -26,17 +21,23 @@
     (Encoder Only) and [T5](https://arxiv.org/abs/1910.10683) (Encoder-Decoder). For
     detailed information and how things work behind the scene please refer the github
     [repo](https://github.com/NVIDIA/Megatron-LM).'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Megatron-LM](https://github.com/NVIDIA/Megatron-LM)使得可以在规模上训练大型transformer语言模型。它为预训练基于transformer的语言模型（如[GPT](https://arxiv.org/abs/2005.14165)（仅解码器）、[BERT](https://arxiv.org/pdf/1810.04805.pdf)（仅编码器）和[T5](https://arxiv.org/abs/1910.10683)（编码器-解码器））提供了高效的张量、管道和基于序列的模型并行性。有关详细信息以及幕后工作原理，请参考github[repo](https://github.com/NVIDIA/Megatron-LM)。'
 - en: What is integrated?
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 什么是集成的？
 - en: 'Accelerate integrates following feature of Megatron-LM to enable large scale
     pre-training/finetuning of BERT (Encoder), GPT (Decoder) or T5 models (Encoder
     and Decoder):'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: Accelerate集成了Megatron-LM的以下功能，以实现BERT（编码器）、GPT（解码器）或T5模型（编码器和解码器）的大规模预训练/微调：
 - en: 'a. **Tensor Parallelism (TP)**: Reduces memory footprint without much additional
     communication on intra-node ranks. Each tensor is split into multiple chunks with
     each shard residing on separate GPU. At each step, the same mini-batch of data
@@ -46,8 +47,12 @@
     please refer research paper [Megatron-LM: Training Multi-Billion Parameter Language
     Models Using Model Parallelism](https://arxiv.org/pdf/1909.08053.pdf) and this
     section of 🤗 blogpost [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed#tensor-parallelism).'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 'a. **张量并行（TP）**：减少内部节点排名之间的通信，减少内存占用。每个张量被分割成多个块，每个块都驻留在不同的GPU上。在每一步中，相同的数据小批量由每个块独立并并行处理，然后通过所有GPU进行同步（`all-reduce`操作）。在简单的transformer层中，这导致前向路径中有2个`all-reduces`，后向路径中有2个`all-reduces`。有关更多详细信息，请参考研究论文[Megatron-LM:
+    Training Multi-Billion Parameter Language Models Using Model Parallelism](https://arxiv.org/pdf/1909.08053.pdf)和🤗博客文章[BLOOM
+    Training背后的技术](https://huggingface.co/blog/bloom-megatron-deepspeed#tensor-parallelism)的这一部分。'
 - en: 'b. **Pipeline Parallelism (PP)**: Reduces memory footprint and enables large
     scale training via inter-node parallelization. Reduces the bubble of naive PP
     via PipeDream-Flush schedule/1F1B schedule and Interleaved 1F1B schedule. Layers
@@ -57,8 +62,12 @@
     research paper [Efficient Large-Scale Language Model Training on GPU Clusters
     Using Megatron-LM](https://arxiv.org/pdf/2104.04473.pdf) and this section of 🤗
     blogpost [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed#pipeline-parallelism).'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: b. **管道并行（PP）**：通过节点间并行化减少内存占用并实现大规模训练。通过PipeDream-Flush调度/1F1B调度和交替1F1B调度减少了天真PP的气泡。层在PP阶段均匀分布。例如，如果一个模型有`24`层，我们有`4`个GPU用于管道并行，每个GPU将有`6`层（24/4）。有关减少PP空闲时间的调度的更多详细信息，请参考研究论文[Efficient
+    Large-Scale Language Model Training on GPU Clusters Using Megatron-LM](https://arxiv.org/pdf/2104.04473.pdf)和🤗博客文章[BLOOM
+    Training背后的技术](https://huggingface.co/blog/bloom-megatron-deepspeed#pipeline-parallelism)的这一部分。
 - en: 'c. **Sequence Parallelism (SP)**: Reduces memory footprint without any additional
     communication. Only applicable when using TP. It reduces activation memory required
     as it prevents the same copies to be on the tensor parallel ranks post `all-reduce`
@@ -70,8 +79,12 @@
     for each sample. This increases the batch size that can be supported for training.
     For more details, please refer to the research paper [Reducing Activation Recomputation
     in Large Transformer Models](https://arxiv.org/pdf/2205.05198.pdf).'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: c. **序列并行（SP）**：在不增加任何额外通信的情况下减少内存占用。仅在使用TP时适用。它减少了激活内存的需求，因为它通过在`all-reduce`后替换相同的副本到张量并行排名上来防止这种情况，通过`reduce-scatter`替换`no-op`操作，`all-reduce
+    = reduce-scatter + all-gather`，这样可以节省大量激活内存而不增加通信成本。简单来说，它沿着序列维度分片每个transformer层的输出，例如，如果序列长度为`1024`，TP大小为`4`，每个GPU将有`256`个标记（1024/4）用于每个样本。这增加了支持训练的批量大小。有关更多详细信息，请参考研究论文[Reducing
+    Activation Recomputation in Large Transformer Models](https://arxiv.org/pdf/2205.05198.pdf)。
 - en: 'd. **Data Parallelism (DP)** via Distributed Optimizer: Reduces the memory
     footprint by sharding optimizer states and gradients across DP ranks (versus the
     traditional method of replicating the optimizer state across data parallel ranks).
@@ -81,8 +94,14 @@
     details, please refer the research paper [ZeRO: Memory Optimizations Toward Training
     Trillion Parameter Models](https://arxiv.org/pdf/1910.02054.pdf) and following
     section of 🤗 blog [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed#zero-data-parallelism).'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 'd. **数据并行（DP）** 通过分布式优化器：通过在 DP 排名之间分片优化器状态和梯度来减少内存占用量（与传统方法在数据并行排名之间复制优化器状态相比）。例如，当使用混合精度训练的
+    Adam 优化器时，每个参数占用 12 字节的内存。这些内存均匀分布在 GPU 上，即如果有 4 个 GPU，则每个参数将占用 3 字节（12/4）。有关更多详细信息，请参阅研究论文
+    [ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/pdf/1910.02054.pdf)
+    和 🤗 博客 [BLOOM Training 背后的技术](https://huggingface.co/blog/bloom-megatron-deepspeed#zero-data-parallelism)
+    的以下部分。'
 - en: 'e. **Selective Activation Recomputation**: Reduces the memory footprint of
     activations significantly via smart activation checkpointing. It doesn’t store
     activations occupying large memory while being fast to recompute thereby achieving
@@ -91,232 +110,350 @@
     2.7% FLOPs overhead for recomputation of activations. For more details, please
     refer to the research paper [Reducing Activation Recomputation in Large Transformer
     Models](https://arxiv.org/pdf/2205.05198.pdf).'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: e. **选择性激活重计算**：通过智能激活检查点减少激活的内存占用。它不会存储占用大量内存的激活，同时重新计算速度快，从而在内存和重新计算之间取得很好的折衷。例如，对于
+    GPT-3，这导致激活所需内存减少了 70%，而仅以 2.7% 的 FLOPs 开销重新计算激活。有关更多详细信息，请参阅研究论文 [Reducing Activation
+    Recomputation in Large Transformer Models](https://arxiv.org/pdf/2205.05198.pdf)。
 - en: 'f. **Fused Kernels**: Fused Softmax, Mixed Precision Fused Layer Norm and Fused
     gradient accumulation to weight gradient computation of linear layer. PyTorch
     JIT compiled Fused GeLU and Fused Bias+Dropout+Residual addition.'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: f. **融合内核**：融合 Softmax、混合精度融合层归一化和融合梯度累积以权重梯度计算线性层。PyTorch JIT 编译的融合 GeLU 和融合
+    Bias+Dropout+Residual addition。
 - en: 'g. **Support for Indexed datasets**: Efficient binary format of datasets for
     large scale training. Support for the `mmap`, `cached` index file and the `lazy`
     loader format.'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: g. **支持索引数据集**：用于大规模训练的数据集的高效二进制格式。支持 `mmap`、`cached` 索引文件和 `lazy` 加载器格式。
 - en: 'h. **Checkpoint reshaping and interoperability**: Utility for reshaping Megatron-LM
     checkpoints of variable tensor and pipeline parallel sizes to the beloved 🤗 Transformers
     sharded checkpoints as it has great support with plethora of tools such as 🤗 Accelerate
     Big Model Inference, Megatron-DeepSpeed Inference etc. Support is also available
     for converting 🤗 Transformers sharded checkpoints to Megatron-LM checkpoint of
     variable tensor and pipeline parallel sizes for large scale training.'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: h. **检查点重塑和互操作性**：用于将变量张量和管道并行大小的 Megatron-LM 检查点重塑为备受喜爱的 🤗 Transformers 分片检查点的实用程序，因为它与众多工具（如
+    🤗 Accelerate Big Model Inference、Megatron-DeepSpeed Inference 等）具有良好的支持。还支持将 🤗
+    Transformers 分片检查点转换为变量张量和管道并行大小的 Megatron-LM 检查点，用于大规模训练。
 - en: Pre-Requisites
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 先决条件
 - en: You will need to install the latest pytorch, cuda, nccl, and NVIDIA [APEX](https://github.com/NVIDIA/apex#quick-start)
     releases and the nltk library. See [documentation](https://github.com/NVIDIA/Megatron-LM#setup)
     for more details. Another way to setup the environment is to pull an NVIDIA PyTorch
     Container that comes with all the required installations from NGC.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 您需要安装最新的 pytorch、cuda、nccl 和 NVIDIA [APEX](https://github.com/NVIDIA/apex#quick-start)
+    版本以及 nltk 库。有关更多详细信息，请参阅[文档](https://github.com/NVIDIA/Megatron-LM#setup)。另一种设置环境的方法是拉取一个包含所有所需安装的
+    NVIDIA PyTorch 容器。
 - en: 'Below is a step-by-step method to set up the conda environment:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是设置 conda 环境的逐步方法：
 - en: Create a virtual environment
+  id: totrans-17
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 创建虚拟环境
 - en: '[PRE0]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Assuming that the machine has CUDA 11.3 installed, installing the corresponding
     PyTorch GPU Version
+  id: totrans-19
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 假设机器已安装 CUDA 11.3，安装相应的 PyTorch GPU 版本
 - en: '[PRE1]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Install Nvidia APEX
+  id: totrans-21
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 安装 Nvidia APEX
 - en: '[PRE2]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Installing Megatron-LM
+  id: totrans-23
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 安装 Megatron-LM
 - en: '[PRE3]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Accelerate Megatron-LM Plugin
+  id: totrans-25
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加速 Megatron-LM 插件
 - en: 'Important features are directly supported via the `accelerate config` command.
     An example of the corresponding questions for using Megatron-LM features is shown
     below:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 重要功能通过 `accelerate config` 命令直接支持。下面显示了使用 Megatron-LM 功能的相应问题的示例：
 - en: '[PRE4]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'The resulting config is shown below:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 结果配置如下所示：
 - en: '[PRE5]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'We will take the example of GPT pre-training. The minimal changes required
     to the official `run_clm_no_trainer.py` to use Megatron-LM are as follows:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将以 GPT 预训练为例。要使用 Megatron-LM，对官方的 `run_clm_no_trainer.py` 进行的最小更改如下：
 - en: 'As Megatron-LM uses its own implementation of Optimizer, the corresponding
     scheduler compatible with it needs to be used. As such, support for only the Megatron-LM’s
     scheduler is present. User will need to create `accelerate.utils.MegatronLMDummyScheduler`.
     Example is given below:'
+  id: totrans-31
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 由于 Megatron-LM 使用自己的优化器实现，因此需要使用与之兼容的相应调度器。因此，仅支持 Megatron-LM 的调度器。用户需要创建 `accelerate.utils.MegatronLMDummyScheduler`。示例如下：
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Getting the details of the total batch size now needs to be cognization of
     tensor and pipeline parallel sizes. Example of getting the effective total batch
     size is shown below:'
+  id: totrans-33
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 现在需要了解总批量大小的细节，需要认知张量和管道并行大小。获取有效总批量大小的示例如下：
 - en: '[PRE7]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: When using Megatron-LM, the losses are already averaged across the data parallel
     group
+  id: totrans-35
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在使用 Megatron-LM 时，损失已经在数据并行组中进行了平均
 - en: '[PRE8]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: For Megatron-LM, we need to save the model using `accelerator.save_state`
+  id: totrans-37
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 对于 Megatron-LM，我们需要使用 `accelerator.save_state` 来保存模型
 - en: '[PRE9]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: That’s it! We are good to go 🚀. Please find the example script in the examples
     folder at the path `accelerate/examples/by_feature/megatron_lm_gpt_pretraining.py`.
     Let’s run it for `gpt-large` model architecture using 4 A100-80GB GPUs.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 就这样了！我们准备好出发了🚀。请在路径`accelerate/examples/by_feature/megatron_lm_gpt_pretraining.py`的示例脚本中找到示例。让我们使用4个A100-80GB
+    GPU来运行`gpt-large`模型架构。
 - en: '[PRE10]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Below are some important excerpts from the output logs:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是输出日志中的一些重要摘录：
 - en: '[PRE11]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: There are a large number of other options/features that one can set using `accelerate.utils.MegatronLMPlugin`.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有许多其他选项/功能可以使用`accelerate.utils.MegatronLMPlugin`设置。
 - en: Advanced features to leverage writing custom train step and Megatron-LM Indexed
     Datasets
+  id: totrans-44
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 利用编写自定义训练步骤和Megatron-LM索引数据集的高级功能
 - en: For leveraging more features, please go through below details.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 要利用更多功能，请查看以下详细信息。
 - en: Below is an example of changes required to customize the Train Step while using
     Megatron-LM. You will implement the `accelerate.utils.AbstractTrainStep` or inherit
     from their corresponding children `accelerate.utils.GPTTrainStep`, `accelerate.utils.BertTrainStep`
     or `accelerate.utils.T5TrainStep`.
+  id: totrans-46
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 以下是在使用Megatron-LM时自定义训练步骤所需的更改示例。您将实现`accelerate.utils.AbstractTrainStep`或继承自其相应的子类`accelerate.utils.GPTTrainStep`、`accelerate.utils.BertTrainStep`或`accelerate.utils.T5TrainStep`。
 - en: '[PRE12]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: For using the Megatron-LM datasets, a few more changes are required. Dataloaders
     for these datasets are available only on rank 0 of each tensor parallel group.
     As such, there are rank where dataloader won’t be available and this requires
     tweaks to the training loop. Being able to do all this shows how flexible and
     extensible 🤗 Accelerate is. The changes required are as follows.
+  id: totrans-48
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 要使用Megatron-LM数据集，需要进行一些更改。这些数据集的数据加载器仅在每个张量并行组的等级0上可用。因此，存在数据加载器不可用的等级，这需要对训练循环进行调整。能够做到这一点显示了🤗
+    Accelerate有多么灵活和可扩展。所需的更改如下。
 - en: a. For Megatron-LM indexed datasets, we need to use `MegatronLMDummyDataLoader`
     and pass the required dataset args to it such as `data_path`, `seq_length` etc.
     See [here](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/arguments.py#L804)
     for the list of available args.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: a. 对于Megatron-LM索引数据集，我们需要使用`MegatronLMDummyDataLoader`并将所需的数据集参数传递给它，例如`data_path`、`seq_length`等。请参阅[此处](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/arguments.py#L804)以获取可用参数的列表。
 - en: '[PRE13]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: b. `megatron_dataloader` is repeated 3 times to get training, validation and
     test dataloaders as per the `args.splits_string` proportions
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: b. `megatron_dataloader`重复3次，以根据`args.splits_string`比例获取训练、验证和测试数据加载器。
 - en: '[PRE14]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: c. Changes to training and evaluation loops as dataloader is only available
     on tensor parallel ranks 0 So, we need to iterate only if the dataloader isn’t
     `None` else provide empty dict As such, we loop using `while` loop and break when
     `completed_steps` is equal to `args.max_train_steps` This is similar to the Megatron-LM
     setup wherein user has to provide `max_train_steps` when using Megaton-LM indexed
     datasets. This displays how flexible and extensible 🤗 Accelerate is.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: c. 由于数据加载器仅在张量并行等级0上可用，因此需要对训练和评估循环进行更改，因此我们只需要在数据加载器不是`None`时迭代，否则提供空字典。因此，我们使用`while`循环进行循环，并在`completed_steps`等于`args.max_train_steps`时中断。这类似于Megatron-LM设置，用户在使用Megaton-LM索引数据集时必须提供`max_train_steps`。这显示了🤗
+    Accelerate有多么灵活和可扩展。
 - en: '[PRE15]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Utility for Checkpoint reshaping and interoperability
+  id: totrans-55
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 用于检查点重塑和互操作性的实用程序
 - en: The scripts for these are present in 🤗 Transformers library under respective
     models. Currently, it is available for GPT model [checkpoint_reshaping_and_interoperability.py](https://github.com/huggingface/transformers/blob/main/src/transformers/models/megatron_gpt2/checkpoint_reshaping_and_interoperability.py)
+  id: totrans-56
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 这些脚本位于🤗 Transformers库中的相应模型下。目前，它适用于GPT模型[checkpoint_reshaping_and_interoperability.py](https://github.com/huggingface/transformers/blob/main/src/transformers/models/megatron_gpt2/checkpoint_reshaping_and_interoperability.py)
 - en: Below is an example of conversion of checkpoint from Megatron-LM to universal
     🤗 Transformers sharded checkpoint.
+  id: totrans-57
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 以下是将检查点从Megatron-LM转换为通用🤗 Transformers分片检查点的示例。
 - en: '[PRE16]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Conversion of checkpoint from transformers to megatron with `tp_size=2`, `pp_size=2`
     and `dp_size=2`.
+  id: totrans-59
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将transformers的检查点转换为megatron，使用`tp_size=2`，`pp_size=2`和`dp_size=2`。
 - en: '[PRE17]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Megatron-LM GPT models support returning logits and megatron_generate function
     for text generation
+  id: totrans-61
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Megatron-LM GPT模型支持返回对数和用于文本生成的megatron_generate函数
 - en: Returning logits require setting `require_logits=True` in MegatronLMPlugin as
     shown below. These would be available on the in the last stage of pipeline.
+  id: totrans-62
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 返回对数需要在MegatronLMPlugin中设置`require_logits=True`，如下所示。这些将在管道的最后阶段可用。
 - en: '[PRE18]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: '`megatron_generate` method for Megatron-LM GPT model: This will use Tensor
     and Pipeline Parallelism to complete generations for a batch of inputs when using
     greedy with/without top_k/top_p sampling and for individual prompt inputs when
@@ -327,49 +464,76 @@
     checkpointing to be disabled. It also requires specifying path to tokenizer’s
     vocab file and merges file. Below example shows how to configure and use `megatron_generate`
     method for Megatron-LM GPT model.'
+  id: totrans-64
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: Megatron-LM GPT模型的`megatron_generate`方法：当使用贪婪采样或不带top_k/top_p采样时，将使用张量和管道并行性来完成一批输入的生成，以及当使用波束搜索解码时，用于单个提示输入的生成。仅支持transformers
+    generate的一部分功能。这将有助于通过张量和管道并行性使用大型模型进行生成（默认情况下已经进行了键值缓存并使用融合内核）。这需要将数据并行大小设置为1，禁用序列并行性和激活检查点。还需要指定分词器的词汇文件和合并文件的路径。下面的示例显示了如何配置和使用Megatron-LM
+    GPT模型的`megatron_generate`方法。
 - en: '[PRE19]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: An end-to-end example of using `megatron_generate` method for Megatron-LM GPT
     model is available at [megatron_gpt2_generation.py](https://github.com/pacman100/accelerate-megatron-test/blob/main/src/inference/megatron_gpt2_generation.py)
     with config file [megatron_lm_gpt_generate_config.yaml](https://github.com/pacman100/accelerate-megatron-test/blob/main/src/Configs/megatron_lm_gpt_generate_config.yaml).
     The bash script with accelerate launch command is available at [megatron_lm_gpt_generate.sh](https://github.com/pacman100/accelerate-megatron-test/blob/main/megatron_lm_gpt_generate.sh).
     The output logs of the script are available at [megatron_lm_gpt_generate.log](https://github.com/pacman100/accelerate-megatron-test/blob/main/output_logs/megatron_lm_gpt_generate.log).
+  id: totrans-66
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 有关在 Megatron-LM GPT 模型中使用 `megatron_generate` 方法的端到端示例，请参阅 [megatron_gpt2_generation.py](https://github.com/pacman100/accelerate-megatron-test/blob/main/src/inference/megatron_gpt2_generation.py)，配置文件为
+    [megatron_lm_gpt_generate_config.yaml](https://github.com/pacman100/accelerate-megatron-test/blob/main/src/Configs/megatron_lm_gpt_generate_config.yaml)。带有
+    accelerate launch 命令的 bash 脚本位于 [megatron_lm_gpt_generate.sh](https://github.com/pacman100/accelerate-megatron-test/blob/main/megatron_lm_gpt_generate.sh)。脚本的输出日志位于
+    [megatron_lm_gpt_generate.log](https://github.com/pacman100/accelerate-megatron-test/blob/main/output_logs/megatron_lm_gpt_generate.log)。
 - en: Support for ROPE and ALiBi Positional embeddings and Multi-Query Attention
+  id: totrans-67
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 支持 ROPE 和 ALiBi 位置嵌入以及 Multi-Query Attention
 - en: For ROPE/ALiBi attention, pass `position_embedding_type` with `("absolute" |
     "rotary" | "alibi")` to `MegatronLMPlugin` as shown below.
+  id: totrans-68
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 对于 ROPE/ALiBi 注意力，将 `position_embedding_type` 与 `("absolute" | "rotary" | "alibi")`
+    传递给 `MegatronLMPlugin`，如下所示。
 - en: '[PRE20]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: For Multi-Query Attention, pass `attention_head_type` with `("multihead" | "multiquery")`
     to `MegatronLMPlugin` as shown below.
+  id: totrans-70
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 对于 Multi-Query Attention，将 `attention_head_type` 与 `("multihead" | "multiquery")`
+    传递给 `MegatronLMPlugin`，如下所示。
 - en: '[PRE21]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Caveats
+  id: totrans-72
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 注意事项
 - en: Supports Transformers GPT2, Megatron-BERT and T5 models. This covers Decoder
     only, Encode only and Encoder-Decoder model classes.
+  id: totrans-73
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 支持 Transformers GPT2、Megatron-BERT 和 T5 模型。这涵盖了仅解码器、仅编码器和编码器-解码器模型类。
 - en: Only loss is returned from model forward pass as there is quite complex interplay
     of pipeline, tensor and data parallelsim behind the scenes. The `model(**batch_data)`
     call return loss(es) averaged across the data parallel ranks. This is fine for
@@ -379,52 +543,81 @@
     parallel ranks. Use `accelerator.utils.gather_across_data_parallel_groups` to
     gather logits across data parallel ranks. These logits along with labels can be
     used for computing various performance metrics.
+  id: totrans-74
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 由于管道、张量和数据并行背后存在相当复杂的相互作用，因此仅从模型前向传递中返回损失。`model(**batch_data)` 调用返回跨数据并行等级平均的损失。这对于大多数情况是可以的，其中使用
+    Megatron-LM 功能运行预训练作业，并且可以轻松使用损失计算 `perplexity`。对于 GPT 模型，除了损失之外还支持返回 logits。这些
+    logits 不会在数据并行等级之间收集。使用 `accelerator.utils.gather_across_data_parallel_groups`
+    来收集跨数据并行等级的 logits。这些 logits 以及标签可用于计算各种性能指标。
 - en: The main process is the last rank as the losses/logits are available in the
     last stage of pipeline. `accelerator.is_main_process` and `accelerator.is_local_main_process`
     return `True` for last rank when using Megatron-LM integration.
+  id: totrans-75
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 主进程是最后一个等级，因为损失/Logits 在管道的最后阶段可用。在使用 Megatron-LM 集成时，`accelerator.is_main_process`
+    和 `accelerator.is_local_main_process` 在最后一个等级返回 `True`。
 - en: In `accelerator.prepare` call, a Megatron-LM model corresponding to a given
     Transformers model is created with random weights. Please use `accelerator.load_state`
     to load the Megatron-LM checkpoint with matching TP, PP and DP partitions.
+  id: totrans-76
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在 `accelerator.prepare` 调用中，将为给定的 Transformers 模型创建一个具有随机权重的 Megatron-LM 模型。请使用
+    `accelerator.load_state` 加载具有匹配 TP、PP 和 DP 分区的 Megatron-LM 检查点。
 - en: Currently, checkpoint reshaping and interoperability support is only available
     for GPT. Soon it will be extended to BERT and T5.
+  id: totrans-77
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 目前，检查点重塑和互操作性支持仅适用于 GPT。很快将扩展到 BERT 和 T5。
 - en: '`gradient_accumulation_steps` needs to be 1\. When using Megatron-LM, micro
     batches in pipeline parallelism setting is synonymous with gradient accumulation.'
+  id: totrans-78
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`gradient_accumulation_steps` 需要为 1。在使用 Megatron-LM 时，管道并行设置中的微批次等同于梯度累积。'
 - en: When using Megatron-LM, use `accelerator.save_state` and `accelerator.load_state`
     for saving and loading checkpoints.
+  id: totrans-79
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在使用 Megatron-LM 时，请使用 `accelerator.save_state` 和 `accelerator.load_state` 来保存和加载检查点。
 - en: Below are the mapping from Megatron-LM model architectures to the the equivalent
     🤗 transformers model architectures. Only these 🤗 transformers model architectures
     are supported.
+  id: totrans-80
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 以下是从 Megatron-LM 模型架构到等效 🤗 transformers 模型架构的映射。仅支持这些 🤗 transformers 模型架构。
 - en: 'a. Megatron-LM [BertModel](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/bert_model.py)
     : 🤗 transformers models with `megatron-bert` in config’s model type, e.g., [MegatronBERT](https://huggingface.co/docs/transformers/model_doc/megatron-bert)'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: a. Megatron-LM [BertModel](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/bert_model.py)：🤗
+    transformers 模型中配置为 `megatron-bert` 的模型类型，例如 [MegatronBERT](https://huggingface.co/docs/transformers/model_doc/megatron-bert)
 - en: 'b. Megatron-LM [GPTModel](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/gpt_model.py)
     : 🤗 transformers models with `gpt2` in config’s model type, e.g., [OpenAI GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2)'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: b. Megatron-LM [GPTModel](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/gpt_model.py)：🤗
+    transformers 模型中配置为 `gpt2` 的模型类型，例如 [OpenAI GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2)
 - en: 'c. Megatron-LM [T5Model](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/t5_model.py)
     : 🤗 transformers models with `t5` in config’s model type, e.g., [T5](https://huggingface.co/docs/transformers/model_doc/t5)
     and [MT5](https://huggingface.co/docs/transformers/model_doc/mt5)'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: c. Megatron-LM [T5Model](https://github.com/NVIDIA/Megatron-LM/blob/main/megatron/model/t5_model.py)：🤗
+    transformers 模型中配置为 `t5` 的模型类型，例如 [T5](https://huggingface.co/docs/transformers/model_doc/t5)
+    和 [MT5](https://huggingface.co/docs/transformers/model_doc/mt5)
