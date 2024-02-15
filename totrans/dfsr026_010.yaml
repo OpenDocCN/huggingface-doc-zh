@@ -1,26 +1,15 @@
 - en: Train a diffusion model
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/diffusers/tutorials/basic_training](https://huggingface.co/docs/diffusers/tutorials/basic_training)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Unconditional image generation is a popular application of diffusion models
@@ -28,16 +17,19 @@
     the best results are obtained from finetuning a pretrained model on a specific
     dataset. You can find many of these checkpoints on the [Hub](https://huggingface.co/search/full-text?q=unconditional-image-generation&type=model),
     but if you can’t find one you like, you can always train your own!
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: This tutorial will teach you how to train a [UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel)
     from scratch on a subset of the [Smithsonian Butterflies](https://huggingface.co/datasets/huggan/smithsonian_butterflies_subset)
     dataset to generate your own 🦋 butterflies 🦋.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: 💡 This training tutorial is based on the [Training with 🧨 Diffusers](https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/training_example.ipynb)
     notebook. For additional details and context about diffusion models like how they
     work, check out the notebook!
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: Before you begin, make sure you have 🤗 Datasets installed to load and preprocess
@@ -45,242 +37,344 @@
     The following command will also install [TensorBoard](https://www.tensorflow.org/tensorboard)
     to visualize training metrics (you can also use [Weights & Biases](https://docs.wandb.ai/)
     to track your training).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: We encourage you to share your model with the community, and in order to do
     that, you’ll need to login to your Hugging Face account (create one [here](https://hf.co/join)
     if you don’t already have one!). You can login from a notebook and enter your
     token when prompted. Make sure your token has the write role.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Or login in from the terminal:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Since the model checkpoints are quite large, install [Git-LFS](https://git-lfs.com/)
     to version these large files:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Training configuration
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'For convenience, create a `TrainingConfig` class containing the training hyperparameters
     (feel free to adjust them):'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Load the dataset
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'You can easily load the [Smithsonian Butterflies](https://huggingface.co/datasets/huggan/smithsonian_butterflies_subset)
     dataset with the 🤗 Datasets library:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 💡 You can find additional datasets from the [HugGan Community Event](https://huggingface.co/huggan)
     or you can use your own dataset by creating a local [`ImageFolder`](https://huggingface.co/docs/datasets/image_dataset#imagefolder).
     Set `config.dataset_name` to the repository id of the dataset if it is from the
     HugGan Community Event, or `imagefolder` if you’re using your own images.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: '🤗 Datasets uses the [Image](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Image)
     feature to automatically decode the image data and load it as a [`PIL.Image`](https://pillow.readthedocs.io/en/stable/reference/Image.html)
     which we can visualize:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '![](../Images/a492ec80a6f208c57e9bd240df33193d.png)'
+  id: totrans-23
   prefs: []
   type: TYPE_IMG
 - en: 'The images are all different sizes though, so you’ll need to preprocess them
     first:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '`Resize` changes the image size to the one defined in `config.image_size`.'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`RandomHorizontalFlip` augments the dataset by randomly mirroring the images.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`Normalize` is important to rescale the pixel values into a [-1, 1] range,
     which is what the model expects.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Use 🤗 Datasets’ [set_transform](https://huggingface.co/docs/datasets/v2.17.0/en/package_reference/main_classes#datasets.Dataset.set_transform)
     method to apply the `preprocess` function on the fly during training:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Feel free to visualize the images again to confirm that they’ve been resized.
     Now you’re ready to wrap the dataset in a [DataLoader](https://pytorch.org/docs/stable/data#torch.utils.data.DataLoader)
     for training!
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Create a UNet2DModel
+  id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Pretrained models in 🧨 Diffusers are easily created from their model class
     with the parameters you want. For example, to create a [UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel):'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 🧨 Diffusers中的预训练模型可以根据您想要的参数轻松创建。例如，要创建一个[UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel)：
 - en: '[PRE10]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'It is often a good idea to quickly check the sample image shape matches the
     model output shape:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 快速检查样本图像形状是否与模型输出形状匹配通常是一个好主意：
 - en: '[PRE11]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Great! Next, you’ll need a scheduler to add some noise to the image.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 太棒了！接下来，您需要一个调度器来向图像添加一些噪声。
 - en: Create a scheduler
+  id: totrans-39
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建一个调度器
 - en: The scheduler behaves differently depending on whether you’re using the model
     for training or inference. During inference, the scheduler generates image from
     the noise. During training, the scheduler takes a model output - or a sample -
     from a specific point in the diffusion process and applies noise to the image
     according to a *noise schedule* and an *update rule*.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 调度器的行为取决于您是将模型用于训练还是推断。在推断期间，调度器从噪声中生成图像。在训练期间，调度器接受模型输出 - 或样本 - 从扩散过程中的特定点，并根据*噪声计划*和*更新规则*向图像应用噪声。
 - en: 'Let’s take a look at the [DDPMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler)
     and use the `add_noise` method to add some random noise to the `sample_image`
     from before:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看[DDPMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler)，并使用`add_noise`方法向之前的`sample_image`添加一些随机噪声：
 - en: '[PRE12]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '![](../Images/9c3cadba02429fff4abe5f63e4e8c1d9.png)'
+  id: totrans-43
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/9c3cadba02429fff4abe5f63e4e8c1d9.png)'
 - en: 'The training objective of the model is to predict the noise added to the image.
     The loss at this step can be calculated by:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 模型的训练目标是预测添加到图像中的噪声。在这一步的损失可以通过以下方式计算：
 - en: '[PRE13]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Train the model
+  id: totrans-46
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练模型
 - en: By now, you have most of the pieces to start training the model and all that’s
     left is putting everything together.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，您已经有了开始训练模型的大部分组件，现在剩下的就是将所有内容整合在一起。
 - en: 'First, you’ll need an optimizer and a learning rate scheduler:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，您需要一个优化器和一个学习率调度器：
 - en: '[PRE14]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Then, you’ll need a way to evaluate the model. For evaluation, you can use
     the [DDPMPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/ddpm#diffusers.DDPMPipeline)
     to generate a batch of sample images and save it as a grid:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，您需要一种评估模型的方法。对于评估，您可以使用[DDPMPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/ddpm#diffusers.DDPMPipeline)生成一批样本图像并将其保存为网格：
 - en: '[PRE15]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Now you can wrap all these components together in a training loop with 🤗 Accelerate
     for easy TensorBoard logging, gradient accumulation, and mixed precision training.
     To upload the model to the Hub, write a function to get your repository name and
     information and then push it to the Hub.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您可以使用🤗 Accelerate将所有这些组件包装在一个训练循环中，以便进行简单的TensorBoard日志记录、梯度累积和混合精度训练。要将模型上传到Hub，请编写一个函数来获取您的存储库名称和信息，然后将其推送到Hub。
 - en: 💡 The training loop below may look intimidating and long, but it’ll be worth
     it later when you launch your training in just one line of code! If you can’t
     wait and want to start generating images, feel free to copy and run the code below.
     You can always come back and examine the training loop more closely later, like
     when you’re waiting for your model to finish training. 🤗
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 💡 下面的训练循环可能看起来令人生畏且冗长，但当您只需一行代码启动训练时，这将是值得的！如果您等不及想要开始生成图像，请随时复制并运行下面的代码。您随时可以回来更仔细地检查训练循环，比如当您在等待模型完成训练时。🤗
 - en: '[PRE16]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'Phew, that was quite a bit of code! But you’re finally ready to launch the
     training with 🤗 Accelerate’s [notebook_launcher](https://huggingface.co/docs/accelerate/v0.27.0/en/package_reference/launchers#accelerate.notebook_launcher)
     function. Pass the function the training loop, all the training arguments, and
     the number of processes (you can change this value to the number of GPUs available
     to you) to use for training:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 哇，那是相当多的代码！但是您终于准备好使用🤗 Accelerate的[notebook_launcher](https://huggingface.co/docs/accelerate/v0.27.0/en/package_reference/launchers#accelerate.notebook_launcher)函数启动训练了。将训练循环、所有训练参数以及要用于训练的进程数（您可以将此值更改为您可用的GPU数量）传递给该函数：
 - en: '[PRE17]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Once training is complete, take a look at the final 🦋 images 🦋 generated by
     your diffusion model!
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练完成后，查看您的扩散模型生成的最终🦋图像🦋！
 - en: '[PRE18]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: '![](../Images/3c1b49414fd4ace41217daf06b50b326.png)'
+  id: totrans-59
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/3c1b49414fd4ace41217daf06b50b326.png)'
 - en: Next steps
+  id: totrans-60
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'Unconditional image generation is one example of a task that can be trained.
     You can explore other tasks and training techniques by visiting the [🧨 Diffusers
     Training Examples](../training/overview) page. Here are some examples of what
     you can learn:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 无条件图像生成是一个可以训练的任务示例。您可以通过访问[🧨 Diffusers Training Examples](../training/overview)页面来探索其他任务和训练技术。以下是您可以学到的一些示例：
 - en: '[Textual Inversion](../training/text_inversion), an algorithm that teaches
     a model a specific visual concept and integrates it into the generated image.'
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[文本反转](../training/text_inversion)，一种教导模型特定视觉概念并将其整合到生成的图像中的算法。'
 - en: '[DreamBooth](../training/dreambooth), a technique for generating personalized
     images of a subject given several input images of the subject.'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DreamBooth](../training/dreambooth)，一种根据主题的几张输入图像生成个性化图像的技术。'
 - en: '[Guide](../training/text2image) to finetuning a Stable Diffusion model on your
     own dataset.'
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[指南](../training/text2image)来在自己的数据集上微调稳定扩散模型。'
 - en: '[Guide](../training/lora) to using LoRA, a memory-efficient technique for finetuning
     really large models faster.'
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[指南](../training/lora)来使用LoRA，一种用于更快微调非常大模型的内存高效技术。'

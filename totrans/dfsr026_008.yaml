@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 理解管道、模型和调度器
 - en: 'Original text: [https://huggingface.co/docs/diffusers/using-diffusers/write_own_pipeline](https://huggingface.co/docs/diffusers/using-diffusers/write_own_pipeline)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/diffusers/using-diffusers/write_own_pipeline](https://huggingface.co/docs/diffusers/using-diffusers/write_own_pipeline)
 - en: null
   id: totrans-2
   prefs: []
@@ -20,22 +22,27 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 扩散器旨在成为一个用户友好和灵活的工具箱，用于构建适合您用例的扩散系统。工具箱的核心是模型和调度器。虽然 [DiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/overview#diffusers.DiffusionPipeline)
+    将这些组件捆绑在一起以方便使用，但您也可以解除管道并单独使用模型和调度器来创建新的扩散系统。
 - en: In this tutorial, you’ll learn how to use models and schedulers to assemble
     a diffusion system for inference, starting with a basic pipeline and then progressing
     to the Stable Diffusion pipeline.
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本教程中，您将学习如何使用模型和调度器来组装一个用于推断的扩散系统，从基本管道开始，然后逐步过渡到稳定扩散管道。
 - en: Deconstruct a basic pipeline
   id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 分解基本管道
 - en: 'A pipeline is a quick and easy way to run a model for inference, requiring
     no more than four lines of code to generate an image:'
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 管道是运行模型进行推断的一种快速简便的方法，只需不超过四行代码即可生成图像：
 - en: '[PRE0]'
   id: totrans-7
   prefs: []
@@ -45,11 +52,13 @@
   id: totrans-8
   prefs: []
   type: TYPE_IMG
+  zh: '![从DDPMPipeline创建的猫图像](../Images/14589ab570d5bde87da475dacae4b73e.png)'
 - en: That was super easy, but how did the pipeline do that? Let’s breakdown the pipeline
     and take a look at what’s happening under the hood.
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 这太容易了，但管道是如何做到的呢？让我们分解管道并看看底层发生了什么。
 - en: In the example above, the pipeline contains a [UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel)
     model and a [DDPMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler).
     The pipeline denoises an image by taking random noise the size of the desired
@@ -60,16 +69,21 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在上面的示例中，管道包含一个 [UNet2DModel](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel)
+    模型和一个 [DDPMScheduler](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler)。管道通过取与所需输出相同大小的随机噪声，并将其通过模型多次传递来去噪图像。在每个时间步中，模型预测
+    *噪声残差*，调度器使用它来预测一个更少嘈杂的图像。管道重复此过程，直到达到指定的推断步数的末尾。
 - en: To recreate the pipeline with the model and scheduler separately, let’s write
     our own denoising process.
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 要分别使用模型和调度器重新创建管道，请编写我们自己的去噪过程。
 - en: 'Load the model and scheduler:'
   id: totrans-12
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 加载模型和调度器：
 - en: '[PRE1]'
   id: totrans-13
   prefs: []
@@ -80,6 +94,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 设置运行去噪过程的时间步数：
 - en: '[PRE2]'
   id: totrans-15
   prefs: []
@@ -93,6 +108,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 设置调度器时间步数会创建一个张量，其中包含均匀间隔的元素，例如此示例中的 50 个。每个元素对应于模型去噪图像的时间步。稍后创建去噪循环时，您将遍历此张量以去噪图像：
 - en: '[PRE3]'
   id: totrans-17
   prefs: []
@@ -103,6 +119,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 创建与所需输出相同形状的一些随机噪声：
 - en: '[PRE4]'
   id: totrans-19
   prefs: []
@@ -118,6 +135,9 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 现在编写一个循环以遍历时间步。在每个时间步中，模型执行 [UNet2DModel.forward()](/docs/diffusers/v0.26.3/en/api/models/unet2d#diffusers.UNet2DModel.forward)
+    操作并返回嘈杂的残差。调度器的 [step()](/docs/diffusers/v0.26.3/en/api/schedulers/ddpm#diffusers.DDPMScheduler.step)
+    方法获取嘈杂的残差、时间步和输入，并预测前一个时间步的图像。此输出成为去噪循环中模型的下一个输入，并将重复，直到达到 `timesteps` 数组的末尾。
 - en: '[PRE5]'
   id: totrans-21
   prefs: []
@@ -128,11 +148,13 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是整个去噪过程，您可以使用相同的模式编写任何扩散系统。
 - en: 'The last step is to convert the denoised output into an image:'
   id: totrans-23
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 最后一步是将去噪输出转换为图像：
 - en: '[PRE6]'
   id: totrans-24
   prefs: []
@@ -149,15 +171,20 @@
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下一节中，您将将您的技能付诸实践，并分解更复杂的稳定扩散管道。步骤多少是相同的。您将初始化必要的组件，并设置时间步数以创建一个 `timestep`
+    数组。`timestep` 数组在去噪循环中使用，对于该数组中的每个元素，模型会预测一个更少嘈杂的图像。去噪循环会遍历 `timestep`，在每个时间步中，它会输出一个嘈杂的残差，调度器使用它来预测前一个时间步的更少嘈杂的图像。这个过程会重复，直到达到
+    `timestep` 数组的末尾。
 - en: Let’s try it out!
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们试一试！
 - en: Deconstruct the Stable Diffusion pipeline
   id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 分解稳定扩散管道
 - en: Stable Diffusion is a text-to-image *latent diffusion* model. It is called a
     latent diffusion model because it works with a lower-dimensional representation
     of the image instead of the actual pixel space, which makes it more memory efficient.
