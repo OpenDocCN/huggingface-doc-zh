@@ -1,0 +1,549 @@
+- en: Visual Question Answering
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: 视觉问答
+- en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/visual_question_answering](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/visual_question_answering)'
+  id: totrans-1
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/visual_question_answering](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/visual_question_answering)
+- en: null
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visual Question Answering (VQA) is the task of answering open-ended questions
+    based on an image. The input to models supporting this task is typically a combination
+    of an image and a question, and the output is an answer expressed in natural language.
+  id: totrans-3
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 视觉问答（VQA）是根据图像回答开放式问题的任务。支持此任务的模型的输入通常是图像和问题的组合，输出是用自然语言表达的答案。
+- en: 'Some noteworthy use case examples for VQA include:'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: VQA的一些值得注意的用例示例包括：
+- en: Accessibility applications for visually impaired individuals.
+  id: totrans-5
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 视障人士的辅助应用程序。
+- en: 'Education: posing questions about visual materials presented in lectures or
+    textbooks. VQA can also be utilized in interactive museum exhibits or historical
+    sites.'
+  id: totrans-6
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 教育：提出关于讲座或教科书中呈现的视觉材料的问题。VQA也可以用于互动博物馆展览或历史遗址。
+- en: 'Customer service and e-commerce: VQA can enhance user experience by letting
+    users ask questions about products.'
+  id: totrans-7
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 客户服务和电子商务：VQA可以通过让用户询问有关产品的问题来增强用户体验。
+- en: 'Image retrieval: VQA models can be used to retrieve images with specific characteristics.
+    For example, the user can ask “Is there a dog?” to find all images with dogs from
+    a set of images.'
+  id: totrans-8
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 图像检索：VQA模型可用于检索具有特定特征的图像。例如，用户可以询问“有狗吗？”以找到一组图像中所有带有狗的图像。
+- en: 'In this guide you’ll learn how to:'
+  id: totrans-9
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在本指南中，您将学习如何：
+- en: Fine-tune a classification VQA model, specifically [ViLT](../model_doc/vilt),
+    on the [`Graphcore/vqa` dataset](https://huggingface.co/datasets/Graphcore/vqa).
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在[`Graphcore/vqa`数据集](https://huggingface.co/datasets/Graphcore/vqa)上对分类VQA模型（特别是[ViLT](../model_doc/vilt)）进行微调。
+- en: Use your fine-tuned ViLT for inference.
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用您微调的ViLT进行推断。
+- en: Run zero-shot VQA inference with a generative model, like BLIP-2.
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 使用生成模型（如BLIP-2）进行零样本VQA推断。
+- en: Fine-tuning ViLT
+  id: totrans-13
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 微调ViLT
+- en: ViLT model incorporates text embeddings into a Vision Transformer (ViT), allowing
+    it to have a minimal design for Vision-and-Language Pre-training (VLP). This model
+    can be used for several downstream tasks. For the VQA task, a classifier head
+    is placed on top (a linear layer on top of the final hidden state of the `[CLS]`
+    token) and randomly initialized. Visual Question Answering is thus treated as
+    a **classification problem**.
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ViLT模型将文本嵌入集成到Vision Transformer（ViT）中，使其在视觉和语言预训练（VLP）方面具有最小的设计。该模型可用于多个下游任务。对于VQA任务，分类器头部放置在顶部（线性层放在`[CLS]`标记的最终隐藏状态之上）并随机初始化。因此，视觉问答被视为**分类问题**。
+- en: More recent models, such as BLIP, BLIP-2, and InstructBLIP, treat VQA as a generative
+    task. Later in this guide we illustrate how to use them for zero-shot VQA inference.
+  id: totrans-15
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 最近的模型，如BLIP、BLIP-2和InstructBLIP，将VQA视为生成任务。在本指南中，我们将说明如何将它们用于零样本VQA推断。
+- en: Before you begin, make sure you have all the necessary libraries installed.
+  id: totrans-16
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装所有必要的库。
+- en: '[PRE0]'
+  id: totrans-17
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: 'We encourage you to share your model with the community. Log in to your Hugging
+    Face account to upload it to the 🤗 Hub. When prompted, enter your token to log
+    in:'
+  id: totrans-18
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们鼓励您与社区分享您的模型。登录到您的Hugging Face帐户将其上传到🤗 Hub。在提示时，输入您的令牌以登录：
+- en: '[PRE1]'
+  id: totrans-19
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: Let’s define the model checkpoint as a global variable.
+  id: totrans-20
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们将模型检查点定义为全局变量。
+- en: '[PRE2]'
+  id: totrans-21
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: Load the data
+  id: totrans-22
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 加载数据
+- en: For illustration purposes, in this guide we use a very small sample of the annotated
+    visual question answering `Graphcore/vqa` dataset. You can find the full dataset
+    on [🤗 Hub](https://huggingface.co/datasets/Graphcore/vqa).
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 出于说明目的，在本指南中，我们使用了带注释的视觉问答`Graphcore/vqa`数据集的一个非常小的样本。您可以在[🤗 Hub](https://huggingface.co/datasets/Graphcore/vqa)上找到完整的数据集。
+- en: As an alternative to the [`Graphcore/vqa` dataset](https://huggingface.co/datasets/Graphcore/vqa),
+    you can download the same data manually from the official [VQA dataset page](https://visualqa.org/download.html).
+    If you prefer to follow the tutorial with your custom data, check out how to [Create
+    an image dataset](https://huggingface.co/docs/datasets/image_dataset#loading-script)
+    guide in the 🤗 Datasets documentation.
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为对[`Graphcore/vqa`数据集](https://huggingface.co/datasets/Graphcore/vqa)的替代，您可以从官方的[VQA数据集页面](https://visualqa.org/download.html)手动下载相同的数据。如果您希望使用自定义数据跟随教程，请查看🤗数据集文档中的[创建图像数据集](https://huggingface.co/docs/datasets/image_dataset#loading-script)指南。
+- en: 'Let’s load the first 200 examples from the validation split and explore the
+    dataset’s features:'
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们加载验证集中的前200个示例并探索数据集的特点：
+- en: '[PRE3]'
+  id: totrans-26
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: 'Let’s take a look at an example to understand the dataset’s features:'
+  id: totrans-27
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们看一个例子来了解数据集的特点：
+- en: '[PRE4]'
+  id: totrans-28
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: 'The features relevant to the task include:'
+  id: totrans-29
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 与任务相关的特征包括：
+- en: '`question`: the question to be answered from the image'
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`question`：要从图像回答的问题'
+- en: '`image_id`: the path to the image the question refers to'
+  id: totrans-31
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`image_id`：问题所指图像的路径'
+- en: '`label`: the annotations'
+  id: totrans-32
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`label`：注释'
+- en: 'We can remove the rest of the features as they won’t be necessary:'
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 我们可以删除其余的特征，因为它们不会是必要的：
+- en: '[PRE5]'
+  id: totrans-34
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: As you can see, the `label` feature contains several answers to the same question
+    (called `ids` here) collected by different human annotators. This is because the
+    answer to a question can be subjective. In this case, the question is “where is
+    he looking?“. Some people annotated this with “down”, others with “at table”,
+    another one with “skateboard”, etc.
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您所看到的，`label`特征包含了同一个问题的几个答案（这里称为`ids`），这些答案是由不同的人类注释者收集的。这是因为对问题的答案可能是主观的。在这种情况下，问题是“他在看哪里？”。有些人用“向下”注释，其他人用“看着桌子”，另一个人用“滑板”等等。
+- en: 'Take a look at the image and consider which answer would you give:'
+  id: totrans-36
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 看一看图像，考虑你会给出什么答案：
+- en: '[PRE6]'
+  id: totrans-37
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: '![VQA Image Example](../Images/236d4cd08347455e7e0a1b6648436b20.png)'
+  id: totrans-38
+  prefs: []
+  type: TYPE_IMG
+  zh: '![VQA图像示例](../Images/236d4cd08347455e7e0a1b6648436b20.png)'
+- en: Due to the questions’ and answers’ ambiguity, datasets like this are treated
+    as a multi-label classification problem (as multiple answers are possibly valid).
+    Moreover, rather than just creating a one-hot encoded vector, one creates a soft
+    encoding, based on the number of times a certain answer appeared in the annotations.
+  id: totrans-39
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 由于问题和答案的模糊性，像这样的数据集被视为多标签分类问题（因为可能有多个答案有效）。此外，与其只创建一个独热编码向量，不如创建一个软编码，基于某个答案在注释中出现的次数。
+- en: For instance, in the example above, because the answer “down” is selected way
+    more often than other answers, it has a score (called `weight` in the dataset)
+    of 1.0, and the rest of the answers have scores < 1.0.
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 例如，在上面的示例中，因为答案“down”被选中的次数远远超过其他答案，它的得分（数据集中称为`weight`）为1.0，而其余答案的得分<1.0。
+- en: 'To later instantiate the model with an appropriate classification head, let’s
+    create two dictionaries: one that maps the label name to an integer and vice versa:'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了以后用适当的分类头实例化模型，让我们创建两个字典：一个将标签名称映射到整数，另一个将整数映射回标签名称：
+- en: '[PRE7]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Now that we have the mappings, we can replace the string answers with their
+    ids, and flatten the dataset for a more convenient further preprocessing.
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们有了映射，我们可以用它们的id替换字符串答案，并将数据集扁平化，以便进行更方便的进一步预处理。
+- en: '[PRE8]'
+  id: totrans-44
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: Preprocessing data
+  id: totrans-45
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 数据预处理
+- en: 'The next step is to load a ViLT processor to prepare the image and text data
+    for the model. [ViltProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltProcessor)
+    wraps a BERT tokenizer and ViLT image processor into a convenient single processor:'
+  id: totrans-46
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 下一步是加载ViLT处理器，为模型准备图像和文本数据。[ViltProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltProcessor)将BERT标记器和ViLT图像处理器封装到一个方便的单处理器中：
+- en: '[PRE9]'
+  id: totrans-47
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: To preprocess the data we need to encode the images and questions using the
+    [ViltProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltProcessor).
+    The processor will use the [BertTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizerFast)
+    to tokenize the text and create `input_ids`, `attention_mask` and `token_type_ids`
+    for the text data. As for images, the processor will leverage [ViltImageProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltImageProcessor)
+    to resize and normalize the image, and create `pixel_values` and `pixel_mask`.
+  id: totrans-48
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 为了预处理数据，我们需要使用[ViltProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltProcessor)对图像和问题进行编码。处理器将使用[BertTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizerFast)对文本进行标记化，并为文本数据创建`input_ids`、`attention_mask`和`token_type_ids`。至于图像，处理器将利用[ViltImageProcessor](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltImageProcessor)来调整大小和规范化图像，并创建`pixel_values`和`pixel_mask`。
+- en: All these preprocessing steps are done under the hood, we only need to call
+    the `processor`. However, we still need to prepare the target labels. In this
+    representation, each element corresponds to a possible answer (label). For correct
+    answers, the element holds their respective score (weight), while the remaining
+    elements are set to zero.
+  id: totrans-49
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 所有这些预处理步骤都是在幕后完成的，我们只需要调用`processor`。但是，我们仍然需要准备目标标签。在这种表示中，每个元素对应一个可能的答案（标签）。对于正确答案，元素保存其相应的分数（权重），而其余元素设置为零。
+- en: 'The following function applies the `processor` to the images and questions
+    and formats the labels as described above:'
+  id: totrans-50
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 以下函数将`processor`应用于图像和问题，并按上述描述格式化标签：
+- en: '[PRE10]'
+  id: totrans-51
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: To apply the preprocessing function over the entire dataset, use 🤗 Datasets
+    `map` function. You can speed up `map` by setting `batched=True` to process multiple
+    elements of the dataset at once. At this point, feel free to remove the columns
+    you don’t need.
+  id: totrans-52
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要在整个数据集上应用预处理函数，使用🤗 Datasets的`map`函数。您可以通过设置`batched=True`来加速`map`，以一次处理数据集的多个元素。此时，可以随意删除不需要的列。
+- en: '[PRE11]'
+  id: totrans-53
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: 'As a final step, create a batch of examples using [DefaultDataCollator](/docs/transformers/v4.37.2/en/main_classes/data_collator#transformers.DefaultDataCollator):'
+  id: totrans-54
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 作为最后一步，使用[DefaultDataCollator](/docs/transformers/v4.37.2/en/main_classes/data_collator#transformers.DefaultDataCollator)创建一批示例：
+- en: '[PRE12]'
+  id: totrans-55
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Train the model
+  id: totrans-56
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 训练模型
+- en: 'You’re ready to start training your model now! Load ViLT with [ViltForQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltForQuestionAnswering).
+    Specify the number of labels along with the label mappings:'
+  id: totrans-57
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经准备好开始训练您的模型了！使用[ViltForQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/vilt#transformers.ViltForQuestionAnswering)加载ViLT。指定标签数量以及标签映射：
+- en: '[PRE13]'
+  id: totrans-58
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: 'At this point, only three steps remain:'
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此时，只剩下三个步骤：
+- en: 'Define your training hyperparameters in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments):'
+  id: totrans-60
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中定义您的训练超参数：
+- en: '[PRE14]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: Pass the training arguments to [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    along with the model, dataset, processor, and data collator.
+  id: totrans-62
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将训练参数传递给[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)，同时还需要传递模型、数据集、处理器和数据收集器。
+- en: '[PRE15]'
+  id: totrans-63
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Call [train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)
+    to finetune your model.
+  id: totrans-64
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 调用[train()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.train)来微调您的模型。
+- en: '[PRE16]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: 'Once training is completed, share your model to the Hub with the [push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)
+    method to share your final model on the 🤗 Hub:'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一旦训练完成，使用[push_to_hub()](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer.push_to_hub)方法将您的模型分享到🤗
+    Hub上：
+- en: '[PRE17]'
+  id: totrans-67
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: Inference
+  id: totrans-68
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 推理
+- en: Now that you have fine-tuned a ViLT model, and uploaded it to the 🤗 Hub, you
+    can use it for inference. The simplest way to try out your fine-tuned model for
+    inference is to use it in a [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline).
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在您已经对ViLT模型进行了微调，并将其上传到🤗 Hub，您可以用它进行推理。尝试使用[Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)中的微调模型进行推理的最简单方法。
+- en: '[PRE18]'
+  id: totrans-70
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: 'The model in this guide has only been trained on 200 examples, so don’t expect
+    a lot from it. Let’s see if it at least learned something from the data and take
+    the first example from the dataset to illustrate inference:'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 本指南中的模型仅在200个示例上进行了训练，因此不要对其抱有很大期望。让我们看看它是否至少从数据中学到了一些东西，并从数据集中取第一个示例来说明推理：
+- en: '[PRE19]'
+  id: totrans-72
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Even though not very confident, the model indeed has learned something. With
+    more examples and longer training, you’ll get far better results!
+  id: totrans-73
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管不是很自信，但模型确实学到了一些东西。有了更多的例子和更长的训练，你会得到更好的结果！
+- en: 'You can also manually replicate the results of the pipeline if you’d like:'
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 如果愿意，您也可以手动复制管道的结果：
+- en: Take an image and a question, prepare them for the model using the processor
+    from your model.
+  id: totrans-75
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 拿一张图片和一个问题，使用你模型的处理器为模型准备它们。
+- en: Forward the result or preprocessing through the model.
+  id: totrans-76
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 将结果或预处理通过模型传递。
+- en: From the logits, get the most likely answer’s id, and find the actual answer
+    in the `id2label`.
+  id: totrans-77
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+  zh: 从logits中获取最可能答案的id，并在`id2label`中找到实际答案。
+- en: '[PRE20]'
+  id: totrans-78
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: Zero-shot VQA
+  id: totrans-79
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 零样本VQA
+- en: The previous model treated VQA as a classification task. Some recent models,
+    such as BLIP, BLIP-2, and InstructBLIP approach VQA as a generative task. Let’s
+    take [BLIP-2](../model_doc/blip-2) as an example. It introduced a new visual-language
+    pre-training paradigm in which any combination of pre-trained vision encoder and
+    LLM can be used (learn more in the [BLIP-2 blog post](https://huggingface.co/blog/blip-2)).
+    This enables achieving state-of-the-art results on multiple visual-language tasks
+    including visual question answering.
+  id: totrans-80
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 先前的模型将VQA视为分类任务。一些最近的模型，如BLIP、BLIP-2和InstructBLIP，将VQA视为生成任务。让我们以[BLIP-2](../model_doc/blip-2)为例。它引入了一种新的视觉语言预训练范式，其中可以使用任何组合的预训练视觉编码器和LLM（在[BLIP-2博客文章](https://huggingface.co/blog/blip-2)中了解更多）。这使得在多个视觉语言任务中包括视觉问答上实现了最先进的结果。
+- en: 'Let’s illustrate how you can use this model for VQA. First, let’s load the
+    model. Here we’ll explicitly send the model to a GPU, if available, which we didn’t
+    need to do earlier when training, as [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
+    handles this automatically:'
+  id: totrans-81
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 让我们说明如何使用这个模型进行VQA。首先，让我们加载模型。在这里，如果可用，我们将明确将模型发送到GPU，这在训练时不需要做，因为[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)会自动处理：
+- en: '[PRE21]'
+  id: totrans-82
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: 'The model takes image and text as input, so let’s use the exact same image/question
+    pair from the first example in the VQA dataset:'
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 该模型将图像和文本作为输入，因此让我们使用VQA数据集中第一个示例中完全相同的图像/问题对：
+- en: '[PRE22]'
+  id: totrans-84
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE22]'
+- en: 'To use BLIP-2 for visual question answering task, the textual prompt has to
+    follow a specific format: `Question: {} Answer:`.'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 要将BLIP-2用于视觉问答任务，文本提示必须遵循特定格式：`问题：{} 答案：`。
+- en: '[PRE23]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE23]'
+- en: 'Now we need to preprocess the image/prompt with the model’s processor, pass
+    the processed input through the model, and decode the output:'
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 现在我们需要使用模型的处理器对图像/提示进行预处理，通过模型传递处理后的输入，并解码输出：
+- en: '[PRE24]'
+  id: totrans-88
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE24]'
+- en: As you can see, the model recognized the crowd, and the direction of the face
+    (looking down), however, it seems to miss the fact the crowd is behind the skater.
+    Still, in cases where acquiring human-annotated datasets is not feasible, this
+    approach can quickly produce useful results.
+  id: totrans-89
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 正如您所看到的，模型识别了人群和脸部的方向（向下看），但似乎忽略了人群在滑冰者后面的事实。然而，在无法获取人类注释数据集的情况下，这种方法可以快速产生有用的结果。
