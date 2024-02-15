@@ -1,0 +1,210 @@
+- en: Adding a Sign-In with HF button to your Space
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/hub/spaces-oauth](https://huggingface.co/docs/hub/spaces-oauth)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/hub/main/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/entry/start.e368d515.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/scheduler.d6170356.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/singletons.7c936848.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/paths.e886be64.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/entry/app.eaa965a0.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/index.fcd4cc08.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/nodes/0.98ea1774.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/nodes/112.13554574.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/Tip.b09c67cf.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/CodeBlock.7b16bdef.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/Heading.8660bd0e.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can enable a built-in sign-in flow in your Space by seamlessly creating
+    and associating an [OAuth/OpenID connect](https://developer.okta.com/blog/2019/10/21/illustrated-guide-to-oauth-and-oidc)
+    app so users can log in with their HF account.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This enables new use cases for your Space. For instance, when combined with
+    [Persistent Storage](https://huggingface.co/docs/hub/spaces-storage), a generative
+    AI Space could allow users to log in to access their previous generations, only
+    accessible to them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This guide will take you through the process of integrating a *Sign-In with
+    HF* button into any Space. If you’re seeking a fast and simple method to implement
+    this in a **Gradio** Space, take a look at its [built-in integration](https://www.gradio.app/guides/sharing-your-app#o-auth-login-via-hugging-face).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also use the HF OAuth flow to create a “Sign in with HF” flow in any
+    website or App, outside of Spaces. [Read our general OAuth page](./oauth).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create an OAuth app
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'All you need to do is add `hf_oauth: true` to your Space’s metadata inside
+    your `README.md` file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s an example of metadata for a Gradio Space:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can check out the [configuration reference docs](./spaces-config-reference)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This will add the following [environment variables](https://huggingface.co/docs/hub/spaces-overview#helper-environment-variables)
+    to your space:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`OAUTH_CLIENT_ID`: the client ID of your OAuth app (public)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`OAUTH_CLIENT_SECRET`: the client secret of your OAuth app'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`OAUTH_SCOPES`: scopes accessible by your OAuth app.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`OPENID_PROVIDER_URL`: The URL of the OpenID provider. The OpenID metadata
+    will be available at [`{OPENID_PROVIDER_URL}/.well-known/openid-configuration`](https://huggingface.co/.well-known/openid-configuration).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As for any other environment variable, you can use them in your code by using
+    `os.getenv("OAUTH_CLIENT_ID")`, for example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Redirect URLs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can use any redirect URL you want, as long as it targets your Space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that `SPACE_HOST` is [available](https://huggingface.co/docs/hub/spaces-overview#helper-environment-variables)
+    as an environment variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, you can use `https://{SPACE_HOST}/login/callback` as a redirect
+    URI.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scopes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The following scopes are always included for Spaces:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`openid`: Get the ID token in addition to the access token.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`profile`: Get the user’s profile information (username, avatar, etc.)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Those scopes are optional and can be added by setting `hf_oauth_scopes` in
+    your Space’s metadata:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`email`: Get the user’s email address.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`read-repos`: Get read access to the user’s personal repos.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`write-repos`: Get write access to the user’s personal repos. Does not grant
+    read access on its own, you need to include `read-repos` as well.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`manage-repos`: Get access to a repo’s settings. Also grants repo creation
+    and deletion.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`inference-api`: Get access to the [Inference API](https://huggingface.co/docs/api-inference/index),
+    you will be able to make inference requests on behalf of the user.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding the button to your Space
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You now have all the information to add a “Sign-in with HF” button to your Space.
+    Some libraries ([Python](https://github.com/lepture/authlib), [NodeJS](https://github.com/panva/node-openid-client))
+    can help you implement the OpenID/OAuth protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gradio and hugginface.js also provide **built-in support**, making implementing
+    the Sign-in with HF button a breeze; you can check out the associated guides with
+    [gradio](https://www.gradio.app/guides/sharing-your-app#o-auth-login-via-hugging-face)
+    and with [hugginface.js](https://huggingface.co/docs/huggingface.js/hub/README#oauth-login).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Basically, you need to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Redirect the user to `https://huggingface.co/oauth/authorize?redirect_uri={REDIRECT_URI}&scope=openid%20profile&client_id={CLIENT_ID}&state={STATE}`,
+    where `STATE` is a random string that you will need to verify later.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Handle the callback on `/auth/callback` or `/login/callback` (or your own custom
+    callback URL) and verify the `state` parameter.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Use the `code` query parameter to get an access token and id token from `https://huggingface.co/oauth/token`
+    (POST request with `client_id`, `code`, `grant_type=authorization_code` and `redirect_uri`
+    as form data, and with `Authorization: Basic {base64(client_id:client_secret)}`
+    as a header).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You should use `target=_blank` on the button to open the sign-in page in a new
+    tab, unless you run the space outside its `iframe`. Otherwise, you might encounter
+    issues with cookies on some browsers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Examples:'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Gradio test app](https://huggingface.co/spaces/Wauplin/gradio-oauth-test)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Hugging Chat (NodeJS/SvelteKit)](https://huggingface.co/spaces/huggingchat/chat-ui)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Inference Widgets (Auth.js/SvelteKit)](https://huggingface.co/spaces/huggingfacejs/inference-widgets),
+    uses the `inference-api` scope to make inference requests on behalf of the user.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Client-Side in a Static Space (huggingface.js)](https://huggingface.co/spaces/huggingfacejs/client-side-oauth)
+    - very simple JavaScript example.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'JS Code example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE

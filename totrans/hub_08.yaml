@@ -1,0 +1,269 @@
+- en: Webhooks
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/hub/webhooks](https://huggingface.co/docs/hub/webhooks)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/hub/main/en/_app/immutable/assets/0.e3b0c442.css" rel="modulepreload">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/entry/start.e368d515.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/scheduler.d6170356.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/singletons.7c936848.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/paths.e886be64.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/entry/app.eaa965a0.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/index.fcd4cc08.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/nodes/0.98ea1774.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/nodes/147.df971a00.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/Tip.b09c67cf.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/CodeBlock.7b16bdef.js">
+    <link rel="modulepreload" href="/docs/hub/main/en/_app/immutable/chunks/Heading.8660bd0e.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Webhooks are now publicly available!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Webhooks are a foundation for MLOps-related features. They allow you to listen
+    for new changes on specific repos or to all repos belonging to particular set
+    of users/organizations (not just your repos, but any repo).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can use them to auto-convert models, build community bots, or build CI/CD
+    for your models, datasets, and Spaces (and much more!).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The documentation for Webhooks is below – or you can also browse our **guides**
+    showcasing a few possible use cases of Webhooks:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Fine-tune a new model whenever a dataset gets updated (Python)](./webhooks-guide-auto-retrain)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Create a discussion bot on the Hub, using a LLM API (NodeJS)](./webhooks-guide-discussion-bot)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Create metadata quality reports (Python)](./webhooks-guide-metadata-review)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: and more to come…
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Create your Webhook
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can create new Webhooks and edit existing ones in your Webhooks [settings](https://huggingface.co/settings/webhooks):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Settings of an individual webhook](../Images/af3acc42f93a2feab8c5e348191439ad.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Webhooks can watch for repos updates, Pull Requests, discussions, and new comments.
+    It’s even possible to create a Space to react to your Webhooks!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Webhook Payloads
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: After registering a Webhook, you will be notified of new events via an `HTTP
+    POST` call on the specified target URL. The payload is encoded in JSON.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can view the history of payloads sent in the activity tab of the webhook
+    settings page, it’s also possible to replay past webhooks for easier debugging:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![image.png](../Images/98e757933f19477796ddf8aa93e44e75.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'As an example, here is the full payload when a Pull Request is opened:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Event
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The top-level properties `event` is always specified and used to determine the
+    nature of the event.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It has two sub-properties: `event.action` and `event.scope`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`event.scope` will be one of the following values:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`"repo"` - Global events on repos. Possible values for the associated `action`:
+    `"create"`, `"delete"`, `"update"`, `"move"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"repo.content"` - Events on the repo’s content, such as new commits or tags.
+    It triggers on new Pull Requests as well due to the newly created reference/commit.
+    The associated `action` is always `"update"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"repo.config"` - Events on the config: update Space secrets, update settings,
+    update DOIs, disabled or not, etc. The associated `action` is always `"update"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"discussion"` - Creating a discussion or Pull Request, updating the title
+    or status, and merging. Possible values for the associated `action`: `"create"`,
+    `"delete"`, `"update"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`"discussion.comment"` - Creating, updating, and hiding a comment. Possible
+    values for the associated `action`: `"create"`, `"update"`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: More scopes can be added in the future. To handle unknown events, your webhook
+    handler can consider any action on a narrowed scope to be an `"update"` action
+    on the broader scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, if the `"repo.config.dois"` scope is added in the future, any event
+    with that scope can be considered by your webhook handler as an `"update"` action
+    on the `"repo.config"` scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Repo
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In the current version of webhooks, the top-level property `repo` is always
+    specified, as events can always be associated with a repo. For example, consider
+    the following value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`repo.headSha` is the sha of the latest commit on the repo’s `main` branch.
+    It is only sent when `event.scope` starts with `"repo"`, not on community events
+    like discussions and comments.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussions and Pull Requests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The top-level property `discussion` is specified on community events (discussions
+    and Pull Requests). The `discussion.isPullRequest` property is a boolean indicating
+    if the discussion is also a Pull Request (on the Hub, a PR is a special type of
+    discussion). Here is an example value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Comment
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The top level property `comment` is specified when a comment is created (including
+    on discussion creation) or updated. Here is an example value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Webhook secret
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Setting a Webhook secret is useful to make sure payloads sent to your Webhook
+    handler URL are actually from Hugging Face.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you set a secret for your Webhook, it will be sent along as an `X-Webhook-Secret`
+    HTTP header on every request. Only ASCII characters are supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It''s also possible to add the secret directly in the handler URL. For example,
+    setting it as a query parameter: https://example.com/webhook?secret=XXX.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This can be helpful if accessing the HTTP headers of the request is complicated
+    for your Webhook handler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rate limiting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Each Webhook is limited to 1,000 triggers per 24 hours. You can view your usage
+    in the Webhook settings page in the “Activity” tab.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you need to increase the number of triggers for your Webhook, contact us
+    at [website@huggingface.co](mailto:website@huggingface.co).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Developing your Webhooks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you do not have an HTTPS endpoint/URL, you can try out public tools for webhook
+    testing. These tools act as catch-all (capture all requests) sent to them and
+    give 200 OK status code. [Beeceptor](https://beeceptor.com/) is one tool you can
+    use to create a temporary HTTP endpoint and review the incoming payload. Another
+    such tool is [Webhook.site](https://webhook.site/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, you can route a real Webhook payload to the code running locally
+    on your machine during development. This is a great way to test and debug for
+    faster integrations. You can do this by exposing your localhost port to the Internet.
+    To be able to go this path, you can use [ngrok](https://ngrok.com/) or [localtunnel](https://theboroer.github.io/localtunnel-www/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Debugging Webhooks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can easily find recently generated events for your webhooks. Open the activity
+    tab for your webhook. There you will see the list of recent events.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![image.png](../Images/b58cdf49e2538ba07a3d6be8b112089a.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Here you can review the HTTP status code and the payload of the generated events.
+    Additionally, you can replay these events by clicking on the `Replay` button!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note: When changing the target URL or secret of a Webhook, replaying an event
+    will send the payload to the updated URL.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: FAQ
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Can I define webhooks on my organization vs my user account?
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: No, this is not currently supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How can I subscribe to events on all repos (or across a whole repo type, like
+    on all models)?
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: This is not currently exposed to end users but we can toggle this for you if
+    you send an email to [website@huggingface.co](mailto:website@huggingface.co).
+  prefs: []
+  type: TYPE_NORMAL
