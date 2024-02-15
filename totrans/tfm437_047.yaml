@@ -1,26 +1,17 @@
 - en: Image tasks with IDEFICS
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用IDEFICS进行图像任务
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks/idefics](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/idefics)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks/idefics](https://huggingface.co/docs/transformers/v4.37.2/en/tasks/idefics)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: While individual tasks can be tackled by fine-tuning specialized models, an
@@ -30,8 +21,10 @@
     and more. This approach is no longer limited to a single modality, such as text,
     and in this guide, we will illustrate how you can solve image-text tasks with
     a large multimodal model called IDEFICS.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然可以通过微调专门的模型来解决单个任务，但最近出现并受到欢迎的另一种方法是使用大型模型处理各种任务而无需微调。例如，大型语言模型可以处理诸如摘要、翻译、分类等NLP任务。这种方法不再局限于单一模态，比如文本，在本指南中，我们将说明如何使用名为IDEFICS的大型多模态模型解决图像文本任务。
 - en: '[IDEFICS](../model_doc/idefics) is an open-access vision and language model
     based on [Flamingo](https://huggingface.co/papers/2204.14198), a state-of-the-art
     visual language model initially developed by DeepMind. The model accepts arbitrary
@@ -41,322 +34,482 @@
     and [9 billion parameters](https://huggingface.co/HuggingFaceM4/idefics-9b), both
     of which are available on the 🤗 Hub. For each variant, you can also find fine-tuned
     instructed versions of the model adapted for conversational use cases.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '[IDEFICS](../model_doc/idefics)是一个基于[Flamingo](https://huggingface.co/papers/2204.14198)的开放式视觉和语言模型，Flamingo是由DeepMind最初开发的最先进的视觉语言模型。该模型接受任意序列的图像和文本输入，并生成连贯的文本作为输出。它可以回答关于图像的问题，描述视觉内容，创建基于多个图像的故事等。IDEFICS有两个变体
+    - [80亿参数](https://huggingface.co/HuggingFaceM4/idefics-80b)和[90亿参数](https://huggingface.co/HuggingFaceM4/idefics-9b)，这两个变体都可以在🤗
+    Hub上找到。对于每个变体，您还可以找到为对话使用案例调整的模型的微调指导版本。'
 - en: This model is exceptionally versatile and can be used for a wide range of image
     and multimodal tasks. However, being a large model means it requires significant
     computational resources and infrastructure. It is up to you to decide whether
     this approach suits your use case better than fine-tuning specialized models for
     each individual task.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个模型非常灵活，可以用于各种图像和多模态任务。然而，作为一个大型模型意味着它需要大量的计算资源和基础设施。您需要决定这种方法是否比为每个单独任务微调专门的模型更适合您的用例。
 - en: 'In this guide, you’ll learn how to:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，您将学习如何：
 - en: '[Load IDEFICS](#loading-the-model) and [load the quantized version of the model](#loading-the-quantized-version-of-the-model)'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[加载IDEFICS](#加载模型)和[加载模型的量化版本](#加载模型的量化版本)'
 - en: 'Use IDEFICS for:'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用IDEFICS进行：
 - en: '[Image captioning](#image-captioning)'
+  id: totrans-9
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[图像加标题](#图像加标题)'
 - en: '[Prompted image captioning](#prompted-image-captioning)'
+  id: totrans-10
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[提示的图像加标题](#提示的图像加标题)'
 - en: '[Few-shot prompting](#few-shot-prompting)'
+  id: totrans-11
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[少样本提示](#少样本提示)'
 - en: '[Visual question answering](#visual-question-answering)'
+  id: totrans-12
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[视觉问答](#视觉问答)'
 - en: '[Image classificaiton](#image-classification)'
+  id: totrans-13
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[图像分类](#图像分类)'
 - en: '[Image-guided text generation](#image-guided-text-generation)'
+  id: totrans-14
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[图像引导文本生成](#图像引导文本生成)'
 - en: '[Run inference in batch mode](#running-inference-in-batch-mode)'
+  id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[批处理模式下运行推理](#在批处理模式下运行推理)'
 - en: '[Run IDEFICS instruct for conversational use](#idefics-instruct-for-conversational-use)'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[运行IDEFICS指导进行对话使用](#用于对话使用的IDEFICS指导)'
 - en: Before you begin, make sure you have all the necessary libraries installed.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装所有必要的库。
 - en: '[PRE0]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: To run the following examples with a non-quantized version of the model checkpoint
     you will need at least 20GB of GPU memory.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 要运行以下示例，您将需要至少20GB的GPU内存来使用模型检查点的非量化版本。
 - en: Loading the model
+  id: totrans-20
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 加载模型
 - en: 'Let’s start by loading the model’s 9 billion parameters checkpoint:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从加载模型的90亿参数检查点开始：
 - en: '[PRE1]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Just like for other Transformers models, you need to load a processor and the
     model itself from the checkpoint. The IDEFICS processor wraps a [LlamaTokenizer](/docs/transformers/v4.37.2/en/model_doc/llama2#transformers.LlamaTokenizer)
     and IDEFICS image processor into a single processor to take care of preparing
     text and image inputs for the model.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像其他Transformer模型一样，您需要从检查点加载处理器和模型本身。IDEFICS处理器将[LlamaTokenizer](/docs/transformers/v4.37.2/en/model_doc/llama2#transformers.LlamaTokenizer)和IDEFICS图像处理器包装成一个单一处理器，以负责为模型准备文本和图像输入。
 - en: '[PRE2]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Setting `device_map` to `"auto"` will automatically determine how to load and
     store the model weights in the most optimized manner given existing devices.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 将`device_map`设置为`"auto"`将自动确定如何以最优化的方式加载和存储模型权重，考虑到现有设备。
 - en: Quantized model
+  id: totrans-26
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 量化模型
 - en: If high-memory GPU availability is an issue, you can load the quantized version
     of the model. To load the model and the processor in 4bit precision, pass a `BitsAndBytesConfig`
     to the `from_pretrained` method and the model will be compressed on the fly while
     loading.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果高内存GPU可用性是一个问题，您可以加载模型的量化版本。要加载模型和处理器的4位精度版本，请将`BitsAndBytesConfig`传递给`from_pretrained`方法，模型将在加载时即时压缩。
 - en: '[PRE3]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Now that you have the model loaded in one of the suggested ways, let’s move
     on to exploring tasks that you can use IDEFICS for.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经以建议的方式之一加载了模型，让我们继续探索您可以使用IDEFICS的任务。
 - en: Image captioning
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 图像加标题
 - en: Image captioning is the task of predicting a caption for a given image. A common
     application is to aid visually impaired people navigate through different situations,
     for instance, explore image content online.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像加标题是预测给定图像的标题的任务。一个常见的应用是帮助视障人士在不同情况下导航，例如，在线探索图像内容。
 - en: 'To illustrate the task, get an image to be captioned, e.g.:'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了说明任务，获取一个需要加标题的图像，例如：
 - en: '![Image of a puppy in a flower bed](../Images/1ae9f6a999a65c594f8ffed6366c14b3.png)'
+  id: totrans-33
   prefs: []
   type: TYPE_IMG
+  zh: '![花园里的小狗的图片](../Images/1ae9f6a999a65c594f8ffed6366c14b3.png)'
 - en: Photo by [Hendo Wang](https://unsplash.com/@hendoo).
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 照片由[Hendo Wang](https://unsplash.com/@hendoo)拍摄。
 - en: IDEFICS accepts text and image prompts. However, to caption an image, you do
     not have to provide a text prompt to the model, only the preprocessed input image.
     Without a text prompt, the model will start generating text from the BOS (beginning-of-sequence)
     token thus creating a caption.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: IDEFICS接受文本和图像提示。但是，要为图像添加字幕，您不必向模型提供文本提示，只需提供预处理后的输入图像。没有文本提示，模型将从BOS（序列开始）标记开始生成文本，从而创建字幕。
 - en: As image input to the model, you can use either an image object (`PIL.Image`)
     or a url from which the image can be retrieved.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为模型的图像输入，您可以使用图像对象（`PIL.Image`）或可以从中检索图像的url。
 - en: '[PRE4]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'It is a good idea to include the `bad_words_ids` in the call to `generate`
     to avoid errors arising when increasing the `max_new_tokens`: the model will want
     to generate a new `<image>` or `<fake_token_around_image>` token when there is
     no image being generated by the model. You can set it on-the-fly as in this guide,
     or store in the `GenerationConfig` as described in the [Text generation strategies](../generation_strategies)
     guide.'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 在调用`generate`时，最好包含`bad_words_ids`，以避免在增加`max_new_tokens`时出现错误：当模型要生成一个新的`<image>`或`<fake_token_around_image>`标记时，而模型没有生成图像时，会出现错误。您可以像本指南中那样即时设置它，或者像[文本生成策略](../generation_strategies)指南中描述的那样存储在`GenerationConfig`中。
 - en: Prompted image captioning
+  id: totrans-39
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 提示的图像字幕
 - en: 'You can extend image captioning by providing a text prompt, which the model
     will continue given the image. Let’s take another image to illustrate:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过提供文本提示来扩展图像字幕，模型将继续给出图像。让我们拿另一张图片来说明：
 - en: '![Image of the Eiffel Tower at night](../Images/21827a2f63908e6e4dca537122fd4df7.png)'
+  id: totrans-41
   prefs: []
   type: TYPE_IMG
+  zh: '![夜晚的埃菲尔铁塔的图片](../Images/21827a2f63908e6e4dca537122fd4df7.png)'
 - en: Photo by [Denys Nevozhai](https://unsplash.com/@dnevozhai).
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 照片由[Denys Nevozhai](https://unsplash.com/@dnevozhai)拍摄。
 - en: Textual and image prompts can be passed to the model’s processor as a single
     list to create appropriate inputs.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 文本和图像提示可以作为单个列表传递给模型的处理器，以创建适当的输入。
 - en: '[PRE5]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Few-shot prompting
+  id: totrans-45
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 少量提示
 - en: While IDEFICS demonstrates great zero-shot results, your task may require a
     certain format of the caption, or come with other restrictions or requirements
     that increase task’s complexity. Few-shot prompting can be used to enable in-context
     learning. By providing examples in the prompt, you can steer the model to generate
     results that mimic the format of given examples.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然IDEFICS展示了出色的零-shot结果，但您的任务可能需要一定格式的字幕，或者伴随其他限制或要求，增加任务的复杂性。少量提示可用于启用上下文学习。通过在提示中提供示例，您可以引导模型生成类似于给定示例格式的结果。
 - en: 'Let’s use the previous image of the Eiffel Tower as an example for the model
     and build a prompt that demonstrates to the model that in addition to learning
     what the object in an image is, we would also like to get some interesting information
     about it. Then, let’s see, if we can get the same response format for an image
     of the Statue of Liberty:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们以埃菲尔铁塔的上一张图片作为模型的示例，并构建一个提示，向模型展示除了学习图像中的对象是什么之外，我们还希望获得一些有趣的信息。然后，让我们看看，如果我们可以为自由女神像的图片获得相同的响应格式：
 - en: '![Image of the Statue of Liberty](../Images/759caa1ce68c4cc710b290421bd9520d.png)'
+  id: totrans-48
   prefs: []
   type: TYPE_IMG
+  zh: '![自由女神像的图片](../Images/759caa1ce68c4cc710b290421bd9520d.png)'
 - en: Photo by [Juan Mayobre](https://unsplash.com/@jmayobres).
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 照片由[Juan Mayobre](https://unsplash.com/@jmayobres)拍摄。
 - en: '[PRE6]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Notice that just from a single example (i.e., 1-shot) the model has learned
     how to perform the task. For more complex tasks, feel free to experiment with
     a larger number of examples (e.g., 3-shot, 5-shot, etc.).
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，仅从单个示例（即1-shot）中，模型已经学会了如何执行任务。对于更复杂的任务，请随时尝试使用更多的示例（例如3-shot，5-shot等）。
 - en: Visual question answering
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 视觉问题回答
 - en: Visual Question Answering (VQA) is the task of answering open-ended questions
     based on an image. Similar to image captioning it can be used in accessibility
     applications, but also in education (reasoning about visual materials), customer
     service (questions about products based on images), and image retrieval.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 视觉问题回答（VQA）是根据图像回答开放式问题的任务。与图像字幕类似，它可以用于辅助功能应用程序，还可以用于教育（关于视觉材料的推理）、客户服务（基于图像的产品问题）和图像检索。
 - en: 'Let’s get a new image for this task:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们为这个任务获取一张新的图片：
 - en: '![Image of a couple having a picnic](../Images/d3e04f9a26ae586b92097eb4396b1db0.png)'
+  id: totrans-55
   prefs: []
   type: TYPE_IMG
+  zh: '![一对正在野餐的夫妇的图片](../Images/d3e04f9a26ae586b92097eb4396b1db0.png)'
 - en: Photo by [Jarritos Mexican Soda](https://unsplash.com/@jarritos).
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 照片由[Jarritos Mexican Soda](https://unsplash.com/@jarritos)拍摄。
 - en: 'You can steer the model from image captioning to visual question answering
     by prompting it with appropriate instructions:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过适当的指示将模型从图像字幕转向视觉问题回答：
 - en: '[PRE7]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Image classification
+  id: totrans-59
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 图像分类
 - en: IDEFICS is capable of classifying images into different categories without being
     explicitly trained on data containing labeled examples from those specific categories.
     Given a list of categories and using its image and text understanding capabilities,
     the model can infer which category the image likely belongs to.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: IDEFICS能够将图像分类为不同的类别，而无需明确在包含来自这些特定类别的标记示例的数据上进行训练。给定一组类别并利用其图像和文本理解能力，模型可以推断图像可能属于哪个类别。
 - en: 'Say, we have this image of a vegetable stand:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设我们有这样一个蔬菜摊的图片：
 - en: '![Image of a vegetable stand](../Images/0f1d778c8084e2f63cd81d21fdb55d1b.png)'
+  id: totrans-62
   prefs: []
   type: TYPE_IMG
+  zh: '![蔬菜摊的图片](../Images/0f1d778c8084e2f63cd81d21fdb55d1b.png)'
 - en: Photo by [Peter Wendt](https://unsplash.com/@peterwendt).
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 照片由[Peter Wendt](https://unsplash.com/@peterwendt)拍摄。
 - en: 'We can instruct the model to classify the image into one of the categories
     that we have:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以指示模型将图像分类为我们拥有的类别之一：
 - en: '[PRE8]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: In the example above we instruct the model to classify the image into a single
     category, however, you can also prompt the model to do rank classification.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 在上面的示例中，我们指示模型将图像分类为单个类别，但是，您也可以提示模型进行排名分类。
 - en: Image-guided text generation
+  id: totrans-67
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 图像引导的文本生成
 - en: For more creative applications, you can use image-guided text generation to
     generate text based on an image. This can be useful to create descriptions of
     products, ads, descriptions of a scene, etc.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于更有创意的应用，您可以使用基于图像的文本生成来根据图像生成文本。这可以用于创建产品描述、广告、场景描述等。
 - en: 'Let’s prompt IDEFICS to write a story based on a simple image of a red door:'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们提示IDEFICS根据一扇红门的简单图像撰写一个故事：
 - en: '![Image of a red door with a pumpkin on the steps](../Images/6e5de95de1888a89f56e9744b5af7215.png)'
+  id: totrans-70
   prefs: []
   type: TYPE_IMG
+  zh: '![一扇红门上有一个南瓜的图片](../Images/6e5de95de1888a89f56e9744b5af7215.png)'
 - en: Photo by [Craig Tidball](https://unsplash.com/@devonshiremedia).
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 照片由[Craig Tidball](https://unsplash.com/@devonshiremedia)提供。
 - en: '[PRE9]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Looks like IDEFICS noticed the pumpkin on the doorstep and went with a spooky
     Halloween story about a ghost.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 看起来IDEFICS注意到了门廊上的南瓜，并选择了一个关于鬼魂的恐怖万圣节故事。
 - en: For longer outputs like this, you will greatly benefit from tweaking the text
     generation strategy. This can help you significantly improve the quality of the
     generated output. Check out [Text generation strategies](../generation_strategies)
     to learn more.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于像这样的较长输出，您将受益于调整文本生成策略。这可以帮助您显着提高生成输出的质量。查看[文本生成策略](../generation_strategies)以了解更多信息。
 - en: Running inference in batch mode
+  id: totrans-75
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 批量模式下运行推理
 - en: 'All of the earlier sections illustrated IDEFICS for a single example. In a
     very similar fashion, you can run inference for a batch of examples by passing
     a list of prompts:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 之前的所有部分都展示了IDEFICS的一个示例。以非常相似的方式，您可以通过传递提示列表来为一批示例运行推理：
 - en: '[PRE10]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: IDEFICS instruct for conversational use
+  id: totrans-78
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 用于会话使用的IDEFICS指导
 - en: 'For conversational use cases, you can find fine-tuned instructed versions of
     the model on the 🤗 Hub: `HuggingFaceM4/idefics-80b-instruct` and `HuggingFaceM4/idefics-9b-instruct`.'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于会话使用情况，您可以在🤗 Hub上找到模型的经过微调的指导版本：`HuggingFaceM4/idefics-80b-instruct`和`HuggingFaceM4/idefics-9b-instruct`。
 - en: These checkpoints are the result of fine-tuning the respective base models on
     a mixture of supervised and instruction fine-tuning datasets, which boosts the
     downstream performance while making the models more usable in conversational settings.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些检查点是在混合监督和指导微调数据集上对各自基本模型进行微调的结果，这可以提高下游性能，同时使模型在会话设置中更易于使用。
 - en: 'The use and prompting for the conversational use is very similar to using the
     base models:'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 会话使用和提示与使用基本模型非常相似：
 - en: '[PRE11]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
