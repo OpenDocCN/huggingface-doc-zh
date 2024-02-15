@@ -1,1039 +1,1519 @@
 - en: Working with large models
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 处理大型模型
 - en: 'Original text: [https://huggingface.co/docs/accelerate/package_reference/big_modeling](https://huggingface.co/docs/accelerate/package_reference/big_modeling)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/accelerate/package_reference/big_modeling](https://huggingface.co/docs/accelerate/package_reference/big_modeling)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Dispatching and Offloading Models
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 调度和卸载模型
 - en: '#### `accelerate.init_empty_weights`'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.init_empty_weights`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L53)'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L53)'
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Parameters
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`include_buffers` (`bool`, *optional*) — Whether or not to also put all buffers
     on the meta device while initializing.'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`include_buffers` (`bool`, *可选*) — 是否在初始化时也将所有缓冲区放在元设备上。'
 - en: A context manager under which models are initialized with all parameters on
     the meta device, therefore creating an empty model. Useful when just initializing
     the model would blow the available RAM.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个上下文管理器，在其中模型使用元设备上的所有参数进行初始化，因此创建一个空模型。当仅初始化模型会消耗掉可用的RAM时很有用。
 - en: 'Example:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Any model created under this context manager has no weights. As such you can’t
     do something like `model.to(some_device)` with it. To load weights inside your
     empty model, see [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch).
     Make sure to overwrite the default device_map param for [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch),
     otherwise dispatch is not called.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 在此上下文管理器下创建的任何模型都没有权重。因此，您不能像`model.to(some_device)`这样使用它。要在空模型中加载权重，请参阅[load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch)。确保覆盖[load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch)的默认device_map参数，否则不会调用分发。
 - en: '#### `accelerate.cpu_offload`'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.cpu_offload`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L167)'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L167)'
 - en: '[PRE2]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Parameters
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` (`torch.nn.Module`) — The model to offload.'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model` (`torch.nn.Module`) — 要卸载的模型。'
 - en: '`execution_device` (`torch.device`, *optional*) — The device on which the forward
     pass of the model will be executed (should be a GPU). Will default to the model
     first parameter device.'
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`execution_device` (`torch.device`, *可选*) — 模型前向传播将在其上执行的设备（应为GPU）。将默认为模型的第一个参数设备。'
 - en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
     to offload the buffers with the model parameters.'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_buffers` (`bool`, *可选*, 默认为`False`) — 是否将缓冲区与模型参数一起卸载。'
 - en: '`state_dict` (`Dict[str, torch.Tensor]`, *optional*) — The state dict of the
     model that will be kept on CPU.'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`state_dict` (`Dict[str, torch.Tensor]`, *可选*) — 将保留在CPU上的模型的状态字典。'
 - en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
     instances should load all their weights (even in the submodules) at the beginning
     of the forward. This should only be used for classes that have submodules which
     are registered but not called directly during the forward, for instance if a `dense`
     linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
     used in some operations instead of calling `dense` directly.'
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`preload_module_classes` (`List[str]`, *可选*) — 一个类的列表，其实例应在前向传播的开始时加载所有权重（即使在子模块中）。这仅应用于具有已注册但在前向传播期间未直接调用的子模块的类，例如，如果注册了一个`dense`线性层，但在前向传播期间，一些操作中使用`dense.weight`和`dense.bias`而不是直接调用`dense`。'
 - en: Activates full CPU offload for a model. As a result, all parameters of the model
     will be offloaded and only one copy of the state dict of the model will be kept.
     During the forward pass, parameters will be extracted from that state dict and
     put on the execution device passed as they are needed, then offloaded again.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 激活模型的完全CPU卸载。因此，模型的所有参数将被卸载，并且模型的状态字典的副本将仅保留一份。在前向传播过程中，参数将从该状态字典中提取，并在需要时放在传递的执行设备上，然后再次卸载。
 - en: '#### `accelerate.cpu_offload_with_hook`'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.cpu_offload_with_hook`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L213)'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L213)'
 - en: '[PRE3]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Parameters
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` (`torch.nn.Module`) — The model to offload.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model` (`torch.nn.Module`) — 要卸载的模型。'
 - en: '`execution_device(str,` `int` or `torch.device`, *optional*) — The device on
     which the model should be executed. Will default to the MPS device if it’s available,
     then GPU 0 if there is a GPU, and finally to the CPU.'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`execution_device(str,` `int`或`torch.device`, *可选*) — 模型应在其上执行的设备。如果可用，将默认为MPS设备，然后是GPU
+    0，最后是CPU。'
 - en: '`prev_module_hook` (`UserCpuOffloadHook`, *optional*) — The hook sent back
     by this function for a previous model in the pipeline you are running. If passed,
     its offload method will be called just before the forward of the model to which
     this hook is attached.'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prev_module_hook` (`UserCpuOffloadHook`, *可选*) — 由此函数返回的用于您正在运行的管道中的先前模型的挂钩。如果传递，其卸载方法将在附加此挂钩的模型的前向传播之前调用。'
 - en: Offloads a model on the CPU and puts it back to an execution device when executed.
     The difference with [cpu_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload)
     is that the model stays on the execution device after the forward and is only
     offloaded again when the `offload` method of the returned `hook` is called. Useful
     for pipelines running a model in a loop.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 将模型卸载到CPU上，并在执行时将其放回执行设备。与[cpu_offload()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.cpu_offload)的区别在于，模型在前向传播后仍保留在执行设备上，并且仅在调用返回的`hook`的`offload`方法时再次卸载。适用于在循环中运行模型的管道。
 - en: 'Example:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE4]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '#### `accelerate.disk_offload`'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.disk_offload`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L257)'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L257)'
 - en: '[PRE5]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Parameters
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` (`torch.nn.Module`) — The model to offload.'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model` (`torch.nn.Module`) — 要卸载的模型。'
 - en: '`offload_dir` (`str` or `os.PathLike`) — The folder in which to offload the
     model weights (or where the model weights are already offloaded).'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_dir` (`str` 或 `os.PathLike`) — 要卸载模型权重的文件夹（或者模型权重已经被卸载的位置）。'
 - en: '`execution_device` (`torch.device`, *optional*) — The device on which the forward
     pass of the model will be executed (should be a GPU). Will default to the model’s
     first parameter device.'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`execution_device` (`torch.device`, *可选*) — 将执行模型前向传播的设备（应为GPU）。将默认为模型的第一个参数设备。'
 - en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
     to offload the buffers with the model parameters.'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_buffers` (`bool`, *可选*, 默认为`False`) — 是否卸载带有模型参数的缓冲区。'
 - en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
     instances should load all their weights (even in the submodules) at the beginning
     of the forward. This should only be used for classes that have submodules which
     are registered but not called directly during the forward, for instance if a `dense`
     linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
     used in some operations instead of calling `dense` directly.'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`preload_module_classes` (`List[str]`, *可选*) — 应该在前向传播开始时加载所有权重的类的列表（即使在子模块中）。这仅应用于具有已注册但在前向传播期间未直接调用的子模块的类，例如，如果注册了`dense`线性层，但在前向传播期间，某些操作中使用`dense.weight`和`dense.bias`而不是直接调用`dense`。'
 - en: Activates full disk offload for a model. As a result, all parameters of the
     model will be offloaded as memory-mapped array in a given folder. During the forward
     pass, parameters will be accessed from that folder and put on the execution device
     passed as they are needed, then offloaded again.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 激活模型的完整磁盘卸载。结果，模型的所有参数将作为内存映射数组在给定文件夹中卸载。在前向传播过程中，参数将从该文件夹访问，并根据需要放在传递的执行设备上，然后再次卸载。
 - en: '#### `accelerate.dispatch_model`'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.dispatch_model`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L303)'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L303)'
 - en: '[PRE6]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Parameters
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` (`torch.nn.Module`) — The model to dispatch.'
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model` (`torch.nn.Module`) — 要分发的模型。'
 - en: '`device_map` (`Dict[str, Union[str, int, torch.device]]`) — A dictionary mapping
     module names in the models `state_dict` to the device they should go to. Note
     that `"disk"` is accepted even if it’s not a proper value for `torch.device`.'
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`device_map` (`Dict[str, Union[str, int, torch.device]]`) — 将模型`state_dict`中的模块名称映射到它们应该去的设备的字典。请注意，即使`"disk"`不是`torch.device`的正确值，也会被接受。'
 - en: '`main_device` (`str`, `int` or `torch.device`, *optional*) — The main execution
     device. Will default to the first device in the `device_map` different from `"cpu"`
     or `"disk"`.'
+  id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`main_device` (`str`, `int` 或 `torch.device`, *可选*) — 主要执行设备。将默认为`device_map`中第一个不是`"cpu"`或`"disk"`的设备。'
 - en: '`state_dict` (`Dict[str, torch.Tensor]`, *optional*) — The state dict of the
     part of the model that will be kept on CPU.'
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`state_dict` (`Dict[str, torch.Tensor]`, *可选*) — 将保留在CPU上的模型部分的状态字典。'
 - en: '`offload_dir` (`str` or `os.PathLike`) — The folder in which to offload the
     model weights (or where the model weights are already offloaded).'
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_dir` (`str` 或 `os.PathLike`) — 要卸载模型权重的文件夹（或者模型权重已经被卸载的位置）。'
 - en: '`offload_index` (`Dict`, *optional*) — A dictionary from weight name to their
     information (`dtype`/ `shape` or safetensors filename). Will default to the index
     saved in `save_folder`.'
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_index` (`Dict`, *可选*) — 从权重名称到它们的信息（`dtype`/ `shape`或safetensors文件名）的字典。将默认为保存在`save_folder`中的索引。'
 - en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
     to offload the buffers with the model parameters.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_buffers` (`bool`, *可选*, 默认为`False`) — 是否卸载带有模型参数的缓冲区。'
 - en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
     moving inputs or outputs between devices.'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`skip_keys` (`str` 或 `List[str]`, *可选*) — 在移动输入或输出之间时要忽略的键的列表。'
 - en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
     instances should load all their weights (even in the submodules) at the beginning
     of the forward. This should only be used for classes that have submodules which
     are registered but not called directly during the forward, for instance if a `dense`
     linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
     used in some operations instead of calling `dense` directly.'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`preload_module_classes` (`List[str]`, *可选*) — 应该在前向传播开始时加载所有权重的类的列表（即使在子模块中）。这仅应用于具有已注册但在前向传播期间未直接调用的子模块的类，例如，如果注册了`dense`线性层，但在前向传播期间，某些操作中使用`dense.weight`和`dense.bias`而不是直接调用`dense`。'
 - en: '`force_hooks` (`bool`, *optional*, defaults to `False`) — Whether or not to
     force device hooks to be attached to the model even if all layers are dispatched
     to a single device.'
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`force_hooks` (`bool`, *可选*, 默认为`False`) — 是否强制将设备钩子附加到模型，即使所有层都被分发到单个设备。'
 - en: Dispatches a model according to a given device map. Layers of the model might
     be spread across GPUs, offloaded on the CPU or even the disk.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据给定的设备映射分发模型。模型的层可能分布在多个GPU上，在CPU上卸载，甚至在磁盘上。
 - en: '#### `accelerate.load_checkpoint_and_dispatch`'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.load_checkpoint_and_dispatch`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L478)'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/big_modeling.py#L478)'
 - en: '[PRE7]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Parameters
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` (`torch.nn.Module`) — The model in which we want to load a checkpoint.'
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model` (`torch.nn.Module`) — 我们想要加载检查点的模型。'
 - en: '`checkpoint` (`str` or `os.PathLike`) — The folder checkpoint to load. It can
     be:'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`checkpoint` (`str` 或 `os.PathLike`) — 要加载的文件夹检查点。可以是：'
 - en: a path to a file containing a whole model state dict
+  id: totrans-64
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含整个模型状态字典的文件路径
 - en: a path to a `.json` file containing the index to a sharded checkpoint
+  id: totrans-65
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含分片检查点索引的`.json`文件的路径
 - en: a path to a folder containing a unique `.index.json` file and the shards of
     a checkpoint.
+  id: totrans-66
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含唯一的`.index.json`文件和检查点分片的文件夹路径。
 - en: '`device_map` (`Dict[str, Union[int, str, torch.device]]`, *optional*) — A map
     that specifies where each submodule should go. It doesn’t need to be refined to
     each parameter/buffer name, once a given module name is inside, every submodule
     of it will be sent to the same device.'
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`device_map` (`Dict[str, Union[int, str, torch.device]]`，*可选*) — 一个指定每个子模块应该去哪里的映射。它不需要被细化到每个参数/缓冲器名称，一旦给定模块名称在内，它的每个子模块都将被发送到相同的设备。'
 - en: To have Accelerate compute the most optimized `device_map` automatically, set
     `device_map="auto"`. For more information about each option see [here](../concept_guides/big_model_inference#designing-a-device-map).
     Defaults to None, which means [dispatch_model()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.dispatch_model)
     will not be called.
+  id: totrans-68
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 要让 Accelerate 自动计算最优化的 `device_map`，请设置 `device_map="auto"`。有关每个选项的更多信息，请参见[这里](../concept_guides/big_model_inference#designing-a-device-map)。默认为
+    None，这意味着不会调用 [dispatch_model()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.dispatch_model)。
 - en: '`max_memory` (`Dict`, *optional*) — A dictionary device identifier to maximum
     memory. Will default to the maximum memory available for each GPU and the available
     CPU RAM if unset.'
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_memory` (`Dict`，*可选*) — 一个字典设备标识符到最大内存的映射。如果未设置，将默认为每个 GPU 和可用 CPU RAM
+    的最大内存。'
 - en: '`no_split_module_classes` (`List[str]`, *optional*) — A list of layer class
     names that should never be split across device (for instance any layer that has
     a residual connection).'
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`no_split_module_classes` (`List[str]`，*可选*) — 一个不应该跨设备分割的层类名称列表（例如，任何具有残差连接的层）。'
 - en: '`offload_folder` (`str` or `os.PathLike`, *optional*) — If the `device_map`
     contains any value `"disk"`, the folder where we will offload weights.'
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_folder` (`str` 或 `os.PathLike`，*可选*) — 如果 `device_map` 包含任何值 `"disk"`，则是我们将卸载权重的文件夹。'
 - en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — In the layers
     that are offloaded on the CPU or the hard drive, whether or not to offload the
     buffers as well as the parameters.'
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_buffers` (`bool`，*可选*，默认为 `False`) — 在被卸载到 CPU 或硬盘上的层中，是否同时卸载缓冲区和参数。'
 - en: '`dtype` (`str` or `torch.dtype`, *optional*) — If provided, the weights will
     be converted to that type when loaded.'
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dtype` (`str` 或 `torch.dtype`，*可选*) — 如果提供，加载时权重将转换为该类型。'
 - en: '`offload_state_dict` (`bool`, *optional*) — If `True`, will temporarily offload
     the CPU state dict on the hard drive to avoid getting out of CPU RAM if the weight
     of the CPU state dict + the biggest shard does not fit. Will default to `True`
     if the device map picked contains `"disk"` values.'
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_state_dict` (`bool`，*可选*) — 如果为 `True`，将临时将 CPU 状态字典卸载到硬盘上，以避免如果 CPU
+    状态字典的权重 + 最大分片的权重不适合 CPU RAM 时会超出 CPU RAM。如果选定的设备映射包含 `"disk"` 值，则默认为 `True`。'
 - en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
     moving inputs or outputs between devices.'
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`skip_keys` (`str` 或 `List[str]`，*可选*) — 在移动输入或输出之间时要忽略的键列表。'
 - en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
     instances should load all their weights (even in the submodules) at the beginning
     of the forward. This should only be used for classes that have submodules which
     are registered but not called directly during the forward, for instance if a `dense`
     linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
     used in some operations instead of calling `dense` directly.'
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`preload_module_classes` (`List[str]`，*可选*) — 一个类的列表，其实例应该在前向传播的开始时加载所有它们的权重（甚至在子模块中）。这应该仅用于具有子模块的类，这些子模块已注册但在前向传播期间没有直接调用，例如，如果一个
+    `dense` 线性层已注册，但在前向传播时，一些操作中使用 `dense.weight` 和 `dense.bias` 而不是直接调用 `dense`。'
 - en: '`force_hooks` (`bool`, *optional*, defaults to `False`) — Whether or not to
     force device hooks to be attached to the model even if all layers are dispatched
     to a single device.'
+  id: totrans-77
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`force_hooks` (`bool`，*可选*，默认为 `False`) — 是否强制将设备钩子附加到模型，即使所有层都分派到单个设备。'
 - en: Loads a (potentially sharded) checkpoint inside a model, potentially sending
     weights to a given device as they are loaded and adds the various hooks that will
     make this model run properly (even if split across devices).
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 在模型中加载（可能是分片的）检查点，可能在加载时将权重发送到给定设备，并添加各种钩子，使该模型能够正确运行（即使跨设备分割）。
 - en: 'Example:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE8]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '#### `accelerate.load_checkpoint_in_model`'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.load_checkpoint_in_model`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/utils/modeling.py#L1442)'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/utils/modeling.py#L1442)'
 - en: '[PRE9]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Parameters
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` (`torch.nn.Module`) — The model in which we want to load a checkpoint.'
+  id: totrans-85
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model` (`torch.nn.Module`) — 我们想要加载检查点的模型。'
 - en: '`checkpoint` (`str` or `os.PathLike`) — The folder checkpoint to load. It can
     be:'
+  id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`checkpoint` (`str` 或 `os.PathLike`) — 要加载的文件夹检查点。它可以是：'
 - en: a path to a file containing a whole model state dict
+  id: totrans-87
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含整个模型状态字典的文件的路径
 - en: a path to a `.json` file containing the index to a sharded checkpoint
+  id: totrans-88
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含分片检查点索引的 `.json` 文件的路径
 - en: a path to a folder containing a unique `.index.json` file and the shards of
     a checkpoint.
+  id: totrans-89
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含唯一的 `.index.json` 文件和检查点分片的文件夹路径。
 - en: a path to a folder containing a unique pytorch_model.bin or a model.safetensors
     file.
+  id: totrans-90
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含唯一的 pytorch_model.bin 或 model.safetensors 文件的文件夹路径。
 - en: '`device_map` (`Dict[str, Union[int, str, torch.device]]`, *optional*) — A map
     that specifies where each submodule should go. It doesn’t need to be refined to
     each parameter/buffer name, once a given module name is inside, every submodule
     of it will be sent to the same device.'
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`device_map` (`Dict[str, Union[int, str, torch.device]]`，*可选*) — 一个指定每个子模块应该去哪里的映射。它不需要被细化到每个参数/缓冲器名称，一旦给定模块名称在内，它的每个子模块都将被发送到相同的设备。'
 - en: '`offload_folder` (`str` or `os.PathLike`, *optional*) — If the `device_map`
     contains any value `"disk"`, the folder where we will offload weights.'
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_folder` (`str` 或 `os.PathLike`，*可选*) — 如果 `device_map` 包含任何值 `"disk"`，则是我们将卸载权重的文件夹。'
 - en: '`dtype` (`str` or `torch.dtype`, *optional*) — If provided, the weights will
     be converted to that type when loaded.'
+  id: totrans-93
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dtype` (`str` 或 `torch.dtype`，*可选*) — 如果提供，加载时权重将转换为该类型。'
 - en: '`offload_state_dict` (`bool`, *optional*, defaults to `False`) — If `True`,
     will temporarily offload the CPU state dict on the hard drive to avoid getting
     out of CPU RAM if the weight of the CPU state dict + the biggest shard does not
     fit.'
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_state_dict`（`bool`，*可选*，默认为`False`）— 如果为`True`，将临时将CPU状态字典卸载到硬盘上，以避免CPU
+    RAM不足，如果CPU状态字典的重量+最大碎片的重量不适合。'
 - en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
     to include the buffers in the weights offloaded to disk.'
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_buffers`（`bool`，*可选*，默认为`False`）— 是否在卸载到磁盘的权重中包含缓冲区。'
 - en: '`keep_in_fp32_modules(List[str],` *optional*) — A list of the modules that
     we keep in `torch.float32` dtype.'
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`keep_in_fp32_modules(List[str],` *可选*) — 我们保留在`torch.float32`数据类型中的模块列表。'
 - en: '`offload_8bit_bnb` (`bool`, *optional*) — Whether or not to enable offload
     of 8-bit modules on cpu/disk.'
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_8bit_bnb`（`bool`，*可选*）— 是否启用在cpu/disk上卸载8位模块。'
 - en: Loads a (potentially sharded) checkpoint inside a model, potentially sending
     weights to a given device as they are loaded.
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 在模型内加载（可能是分片的）检查点，可能在加载时将权重发送到给定设备。
 - en: Once loaded across devices, you still need to call [dispatch_model()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.dispatch_model)
     on your model to make it able to run. To group the checkpoint loading and dispatch
     in one single call, use [load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch).
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦跨设备加载，您仍然需要调用[dispatch_model()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.dispatch_model)来使模型能够运行。要在一个单一调用中组合检查点加载和分发，请使用[load_checkpoint_and_dispatch()](/docs/accelerate/v0.27.2/en/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch)。
 - en: '#### `accelerate.infer_auto_device_map`'
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.infer_auto_device_map`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/utils/modeling.py#L1022)'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/utils/modeling.py#L1022)'
 - en: '[PRE10]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Parameters
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` (`torch.nn.Module`) — The model to analyze.'
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model`（`torch.nn.Module`）— 要分析的模型。'
 - en: '`max_memory` (`Dict`, *optional*) — A dictionary device identifier to maximum
     memory. Will default to the maximum memory available if unset. Example: `max_memory={0:
     "1GB"}`.'
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_memory`（`Dict`，*可选*）— 设备标识符到最大内存的字典。如果未设置，将默认为可用的最大内存。示例：`max_memory={0:
+    "1GB"}`。'
 - en: '`no_split_module_classes` (`List[str]`, *optional*) — A list of layer class
     names that should never be split across device (for instance any layer that has
     a residual connection).'
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`no_split_module_classes`（`List[str]`，*可选*）— 不应跨设备分割的层类名称列表（例如，具有残差连接的任何层）。'
 - en: '`dtype` (`str` or `torch.dtype`, *optional*) — If provided, the weights will
     be converted to that type when loaded.'
+  id: totrans-107
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dtype`（`str`或`torch.dtype`，*可选*）— 如果提供，加载时权重将转换为该类型。'
 - en: '`special_dtypes` (`Dict[str, Union[str, torch.device]]`, *optional*) — If provided,
     special dtypes to consider for some specific weights (will override dtype used
     as default for all weights).'
+  id: totrans-108
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`special_dtypes`（`Dict[str, Union[str, torch.device]]`，*可选*）— 如果提供，特定权重的特殊数据类型（将覆盖用作所有权重默认值的数据类型）。'
 - en: '`verbose` (`bool`, *optional*, defaults to `False`) — Whether or not to provide
     debugging statements as the function builds the device_map.'
+  id: totrans-109
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`verbose`（`bool`，*可选*，默认为`False`）— 是否在函数构建设备映射时提供调试语句。'
 - en: '`clean_result` (`bool`, *optional*, defaults to `True`) — Clean the resulting
     device_map by grouping all submodules that go on the same device together.'
+  id: totrans-110
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`clean_result`（`bool`，*可选*，默认为`True`）— 通过将所有进入相同设备的子模块分组来清理结果设备映射。'
 - en: 'Compute a device map for a given model giving priority to GPUs, then offload
     on CPU and finally offload to disk, such that:'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 为给定模型计算设备映射，优先考虑GPU，然后在CPU上卸载，最后卸载到磁盘，使得：
 - en: we don’t exceed the memory available of any of the GPU.
+  id: totrans-112
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我们不会超出任何GPU的可用内存。
 - en: if offload to the CPU is needed, there is always room left on GPU 0 to put back
     the layer offloaded on CPU that has the largest size.
+  id: totrans-113
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果需要卸载到CPU，GPU 0上始终有空间可以放回卸载到CPU上的最大尺寸的层。
 - en: if offload to the CPU is needed,we don’t exceed the RAM available on the CPU.
+  id: totrans-114
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果需要卸载到CPU，我们不会超出CPU上可用的RAM。
 - en: if offload to the disk is needed, there is always room left on the CPU to put
     back the layer offloaded on disk that has the largest size.
+  id: totrans-115
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果需要卸载到磁盘，CPU上始终有空间可以放回卸载到磁盘上的最大尺寸的层。
 - en: All computation is done analyzing sizes and dtypes of the model parameters.
     As a result, the model can be on the meta device (as it would if initialized within
     the `init_empty_weights` context manager).
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有计算都是通过分析模型参数的大小和数据类型来完成的。因此，模型可以在元设备上（就像在`init_empty_weights`上下文管理器中初始化时一样）。
 - en: Model Hooks
+  id: totrans-117
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模型钩子
 - en: Hook Classes
+  id: totrans-118
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 钩子类
 - en: '### `class accelerate.hooks.ModelHook`'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.hooks.ModelHook`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L33)'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L33)'
 - en: '[PRE11]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: A hook that contains callbacks to be executed just before and after the forward
     method of a model. The difference with PyTorch existing hooks is that they get
     passed along the kwargs.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个包含回调的钩子，在模型的前向方法之前和之后执行。与PyTorch现有的钩子的区别在于它们会传递kwargs。
 - en: 'Class attribute:'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 类属性：
 - en: '`no_grad` (`bool`, *optional*, defaults to `False`) — Whether or not to execute
     the actual forward pass under the `torch.no_grad()` context manager.'
+  id: totrans-124
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`no_grad`（`bool`，*可选*，默认为`False`）— 是否在`torch.no_grad()`上下文管理器下执行实际的前向传递。'
 - en: '#### `detach_hook`'
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `detach_hook`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L81)'
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L81)'
 - en: '[PRE12]'
+  id: totrans-127
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Parameters
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module detached from this hook.'
+  id: totrans-129
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`模块`（`torch.nn.Module`）— 从此钩子中分离的模块。'
 - en: To be executed when the hook is detached from a module.
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 当钩子从模块中分离时执行。
 - en: '#### `init_hook`'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `init_hook`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L45)'
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L45)'
 - en: '[PRE13]'
+  id: totrans-133
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Parameters
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module attached to this hook.'
+  id: totrans-135
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`模块`（`torch.nn.Module`）— 附加到此钩子的模块。'
 - en: To be executed when the hook is attached to the module.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 当钩子附加到模块时执行。
 - en: '#### `post_forward`'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `post_forward`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L68)'
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L68)'
 - en: '[PRE14]'
+  id: totrans-139
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Parameters
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module whose forward pass been executed
     just before this event.'
+  id: totrans-141
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module`（`torch.nn.Module`）— 在此事件之前执行前向传递的模块。'
 - en: '`output` (`Any`) — The output of the module.'
+  id: totrans-142
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output`（`Any`）— 模块的输出。'
 - en: Returns
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`Any`'
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Any`'
 - en: The processed `output`.
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理过的`output`。
 - en: To be executed just after the forward method of the model.
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 在模型的前向方法之后执行。
 - en: '#### `pre_forward`'
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `pre_forward`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L54)'
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L54)'
 - en: '[PRE15]'
+  id: totrans-149
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Parameters
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module whose forward pass will be executed
     just after this event.'
+  id: totrans-151
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module`（`torch.nn.Module`）— 将在此事件之后执行其前向传递的模块。'
 - en: '`args` (`Tuple[Any]`) — The positional arguments passed to the module.'
+  id: totrans-152
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`args`（`Tuple[Any]`）— 传递给模块的位置参数。'
 - en: '`kwargs` (`Dict[Str, Any]`) — The keyword arguments passed to the module.'
+  id: totrans-153
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`kwargs`（`Dict[Str, Any]`）— 传递给模块的关键字参数。'
 - en: Returns
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`Tuple[Tuple[Any], Dict[Str, Any]]`'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Tuple[Tuple[Any], Dict[Str, Any]]`'
 - en: A tuple with the treated `args` and `kwargs`.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个包含处理过的`args`和`kwargs`的元组。
 - en: To be executed just before the forward method of the model.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 在模型的前向方法之前执行。
 - en: '### `class accelerate.hooks.AlignDevicesHook`'
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.hooks.AlignDevicesHook`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L212)'
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L212)'
 - en: '[PRE16]'
+  id: totrans-160
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Parameters
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`execution_device` (`torch.device`, *optional*) — The device on which inputs
     and model weights should be placed before the forward pass.'
+  id: totrans-162
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`execution_device`（`torch.device`，*可选*）— 在前向传递之前应该将输入和模型权重放置在的设备。'
 - en: '`offload` (`bool`, *optional*, defaults to `False`) — Whether or not the weights
     should be offloaded after the forward pass.'
+  id: totrans-163
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload`（`bool`，*可选*，默认为`False`）— 是否在前向传递后卸载权重。'
 - en: '`io_same_device` (`bool`, *optional*, defaults to `False`) — Whether or not
     the output should be placed on the same device as the input was.'
+  id: totrans-164
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`io_same_device`（`bool`，*可选*，默认为`False`）— 输出是否应该放置在与输入相同的设备上。'
 - en: '`weights_map` (`Mapping[str, torch.Tensor]`, *optional*) — When the model weights
     are offloaded, a (potentially lazy) map from param names to the tensor values.'
+  id: totrans-165
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`weights_map`（`Mapping[str, torch.Tensor]`，*可选*）— 当模型权重被卸载时，从参数名称到张量值的（可能是惰性的）映射。'
 - en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
     to include the associated module’s buffers when offloading.'
+  id: totrans-166
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_buffers`（`bool`，*可选*，默认为`False`）— 是否在卸载时包含关联模块的缓冲区。'
 - en: '`place_submodules` (`bool`, *optional*, defaults to `False`) — Whether to place
     the submodules on `execution_device` during the `init_hook` event.'
+  id: totrans-167
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`place_submodules`（`bool`，*可选*，默认为`False`）— 是否在`init_hook`事件期间将子模块放置在`execution_device`上。'
 - en: A generic `ModelHook` that ensures inputs and model weights are on the same
     device for the forward pass of the associated module, potentially offloading the
     weights after the forward pass.
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个通用的`ModelHook`，确保输入和模型权重在关联模块的前向传递中位于相同设备上，可能在前向传递后卸载权重。
 - en: '### `class accelerate.hooks.SequentialHook`'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class accelerate.hooks.SequentialHook`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L91)'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L91)'
 - en: '[PRE17]'
+  id: totrans-171
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: A hook that can contain several hooks and iterates through them at each event.
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个可以包含多个钩子并在每个事件中迭代它们的钩子。
 - en: Adding Hooks
+  id: totrans-173
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 添加钩子
 - en: '#### `accelerate.hooks.add_hook_to_module`'
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.hooks.add_hook_to_module`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L120)'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L120)'
 - en: '[PRE18]'
+  id: totrans-176
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Parameters
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module to attach a hook to.'
+  id: totrans-178
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module`（`torch.nn.Module`）— 要附加钩子的模块。'
 - en: '`hook` (`ModelHook`) — The hook to attach.'
+  id: totrans-179
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hook`（`ModelHook`）— 要附加的钩子。'
 - en: '`append` (`bool`, *optional*, defaults to `False`) — Whether the hook should
     be chained with an existing one (if module already contains a hook) or not.'
+  id: totrans-180
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`append`（`bool`，*可选*，默认为`False`）— 钩子是否应该与现有的钩子链接（如果模块已经包含一个钩子）或不链接。'
 - en: Returns
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`torch.nn.Module`'
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.nn.Module`'
 - en: The same module, with the hook attached (the module is modified in place, so
     the result can be discarded).
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 相同的模块，附加了钩子（模块会被就地修改，所以结果可以被丢弃）。
 - en: Adds a hook to a given module. This will rewrite the `forward` method of the
     module to include the hook, to remove this behavior and restore the original `forward`
     method, use `remove_hook_from_module`.
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 向给定模块添加一个钩子。这将重写模块的`forward`方法以包含钩子，要删除此行为并恢复原始的`forward`方法，请使用`remove_hook_from_module`。
 - en: If the module already contains a hook, this will replace it with the new hook
     passed by default. To chain two hooks together, pass `append=True`, so it chains
     the current and new hook into an instance of the `SequentialHook` class.
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果模块已经包含一个钩子，这将用默认传递的新钩子替换它。要将两个钩子链接在一起，传递`append=True`，这样它会将当前钩子和新钩子链接成`SequentialHook`类的一个实例。
 - en: '#### `accelerate.hooks.attach_execution_device_hook`'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.hooks.attach_execution_device_hook`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L392)'
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L392)'
 - en: '[PRE19]'
+  id: totrans-188
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Parameters
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module where we want to attach the hooks.'
+  id: totrans-190
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module`（`torch.nn.Module`）— 我们想要附加钩子的模块。'
 - en: '`execution_device` (`int`, `str` or `torch.device`) — The device on which inputs
     and model weights should be placed before the forward pass.'
+  id: totrans-191
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`execution_device`（`int`，`str`或`torch.device`）— 在前向传递之前应该将输入和模型权重放置在的设备。'
 - en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
     moving inputs or outputs between devices.'
+  id: totrans-192
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`skip_keys`（`str`或`List[str]`，*可选*）— 在设备之间移动输入或输出时要忽略的键列表。'
 - en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
     instances should load all their weights (even in the submodules) at the beginning
     of the forward. This should only be used for classes that have submodules which
     are registered but not called directly during the forward, for instance if a `dense`
     linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
     used in some operations instead of calling `dense` directly.'
+  id: totrans-193
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`preload_module_classes` (`List[str]`, *可选*) — 应在前向传递开始时加载所有权重的类实例列表（即使在子模块中）。这仅应用于具有已注册但在前向传递期间未直接调用的子模块的类，例如，如果注册了
+    `dense` 线性层，但在前向传递中，某些操作中使用 `dense.weight` 和 `dense.bias` 而不是直接调用 `dense`。'
 - en: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *optional*,
     defaults to `None`) — A map of data pointers to dictionaries of devices to already
     dispatched tied weights. For a given execution device, this parameter is useful
     to reuse the first available pointer of a shared weight for all others, instead
     of duplicating memory.'
+  id: totrans-194
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *可选*,
+    默认为 `None`) — 数据指针到已分派的绑定权重的设备字典的映射。对于给定的执行设备，此参数对于重用共享权重的第一个可用指针以供所有其他指针使用而不是复制内存是有用的。'
 - en: Recursively attaches `AlignDevicesHook` to all submodules of a given model to
     make sure they have the right execution device
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 递归地将 `AlignDevicesHook` 附加到给定模型的所有子模块，以确保它们具有正确的执行设备
 - en: '#### `accelerate.hooks.attach_align_device_hook`'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.hooks.attach_align_device_hook`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L434)'
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L434)'
 - en: '[PRE20]'
+  id: totrans-198
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Parameters
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module where we want to attach the hooks.'
+  id: totrans-200
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module` (`torch.nn.Module`) — 我们要附加钩子的模块。'
 - en: '`execution_device` (`torch.device`, *optional*) — The device on which inputs
     and model weights should be placed before the forward pass.'
+  id: totrans-201
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`execution_device` (`torch.device`, *可选*) — 在前向传递之前应将输入和模型权重放置在的设备上。'
 - en: '`offload` (`bool`, *optional*, defaults to `False`) — Whether or not the weights
     should be offloaded after the forward pass.'
+  id: totrans-202
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload` (`bool`, *可选*, 默认为 `False`) — 是否在前向传递后卸载权重。'
 - en: '`weights_map` (`Mapping[str, torch.Tensor]`, *optional*) — When the model weights
     are offloaded, a (potentially lazy) map from param names to the tensor values.'
+  id: totrans-203
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`weights_map` (`Mapping[str, torch.Tensor]`, *可选*) — 当模型权重被卸载时，从参数名称到张量值的（潜在惰性）映射。'
 - en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
     to include the associated module’s buffers when offloading.'
+  id: totrans-204
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_buffers` (`bool`, *可选*, 默认为 `False`) — 是否在卸载时包括相关模块的缓冲区。'
 - en: '`module_name` (`str`, *optional*, defaults to `""`) — The name of the module.'
+  id: totrans-205
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module_name` (`str`, *可选*, 默认为 `""`) — 模块的名称。'
 - en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
     moving inputs or outputs between devices.'
+  id: totrans-206
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`skip_keys` (`str` 或 `List[str]`, *可选*) — 在设备之间移动输入或输出时要忽略的键列表。'
 - en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
     instances should load all their weights (even in the submodules) at the beginning
     of the forward. This should only be used for classes that have submodules which
     are registered but not called directly during the forward, for instance if a `dense`
     linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
     used in some operations instead of calling `dense` directly.'
+  id: totrans-207
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`preload_module_classes` (`List[str]`, *可选*) — 应在前向传递开始时加载所有权重的类实例列表（即使在子模块中）。这仅应用于具有已注册但在前向传递期间未直接调用的子模块的类，例如，如果注册了
+    `dense` 线性层，但在前向传递中，某些操作中使用 `dense.weight` 和 `dense.bias` 而不是直接调用 `dense`。'
 - en: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *optional*,
     defaults to `None`) — A map of data pointers to dictionaries of devices to already
     dispatched tied weights. For a given execution device, this parameter is useful
     to reuse the first available pointer of a shared weight for all others, instead
     of duplicating memory.'
+  id: totrans-208
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *可选*,
+    默认为 `None`) — 数据指针到已分派的绑定权重的设备字典的映射。对于给定的执行设备，此参数对于重用共享权重的第一个可用指针以供所有其他指针使用而不是复制内存是有用的。'
 - en: Recursively attaches `AlignDevicesHook` to all submodules of a given model that
     have direct parameters and/or buffers.
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 递归地将 `AlignDevicesHook` 附加到给定模型的所有具有直接参数和/或缓冲区的子模块。
 - en: '#### `accelerate.hooks.attach_align_device_hook_on_blocks`'
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.hooks.attach_align_device_hook_on_blocks`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L529)'
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L529)'
 - en: '[PRE21]'
+  id: totrans-212
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Parameters
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module where we want to attach the hooks.'
+  id: totrans-214
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module` (`torch.nn.Module`) — 我们要附加钩子的模块。'
 - en: '`execution_device` (`torch.device` or `Dict[str, torch.device]`, *optional*)
     — The device on which inputs and model weights should be placed before the forward
     pass. It can be one device for the whole module, or a dictionary mapping module
     name to device.'
+  id: totrans-215
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`execution_device` (`torch.device` 或 `Dict[str, torch.device]`, *可选*) — 在前向传递之前应将输入和模型权重放置在的设备上。可以是整个模块的一个设备，也可以是将模块名称映射到设备的字典。'
 - en: '`offload` (`bool`, *optional*, defaults to `False`) — Whether or not the weights
     should be offloaded after the forward pass. It can be one boolean for the whole
     module, or a dictionary mapping module name to boolean.'
+  id: totrans-216
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload` (`bool`, *可选*, 默认为 `False`) — 是否在前向传递后卸载权重。可以是整个模块的一个布尔值，也可以是将模块名称映射到布尔值的字典。'
 - en: '`weights_map` (`Mapping[str, torch.Tensor]`, *optional*) — When the model weights
     are offloaded, a (potentially lazy) map from param names to the tensor values.'
+  id: totrans-217
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`weights_map` (`Mapping[str, torch.Tensor]`, *可选*) — 当模型权重被卸载时，从参数名称到张量值的（潜在惰性）映射。'
 - en: '`offload_buffers` (`bool`, *optional*, defaults to `False`) — Whether or not
     to include the associated module’s buffers when offloading.'
+  id: totrans-218
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`offload_buffers` (`bool`, *可选*, 默认为 `False`) — 是否在卸载时包括相关模块的缓冲区。'
 - en: '`module_name` (`str`, *optional*, defaults to `""`) — The name of the module.'
+  id: totrans-219
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module_name` (`str`, *可选*, 默认为 `""`) — 模块的名称。'
 - en: '`skip_keys` (`str` or `List[str]`, *optional*) — A list of keys to ignore when
     moving inputs or outputs between devices.'
+  id: totrans-220
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`skip_keys` (`str` 或 `List[str]`, *可选*) — 在设备之间移动输入或输出时要忽略的键列表。'
 - en: '`preload_module_classes` (`List[str]`, *optional*) — A list of classes whose
     instances should load all their weights (even in the submodules) at the beginning
     of the forward. This should only be used for classes that have submodules which
     are registered but not called directly during the forward, for instance if a `dense`
     linear layer is registered, but at forward, `dense.weight` and `dense.bias` are
     used in some operations instead of calling `dense` directly.'
+  id: totrans-221
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`preload_module_classes` (`List[str]`, *可选*) — 一个类的列表，其实例应在前向传播的开始时加载所有权重（甚至在子模块中）。这仅应用于具有已注册但在前向传播期间未直接调用的子模块的类，例如，如果注册了`dense`线性层，但在前向传播时，一些操作中使用`dense.weight`和`dense.bias`而不是直接调用`dense`。'
 - en: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *optional*,
     defaults to `None`) — A map of data pointers to dictionaries of devices to already
     dispatched tied weights. For a given execution device, this parameter is useful
     to reuse the first available pointer of a shared weight for all others, instead
     of duplicating memory.'
+  id: totrans-222
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`tied_params_map` (Optional[Dict[int, Dict[torch.device, torch.Tensor]]], *可选*,
+    默认为`None`) — 数据指针到已分派的绑定权重设备字典的映射。对于给定的执行设备，此参数对于重用共享权重的第一个可用指针以供所有其他设备使用而不是复制内存非常有用。'
 - en: Attaches `AlignDevicesHook` to all blocks of a given model as needed.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据需要将`AlignDevicesHook`附加到给定模型的所有块。
 - en: Removing Hooks
+  id: totrans-224
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 移除钩子
 - en: '#### `accelerate.hooks.remove_hook_from_module`'
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.hooks.remove_hook_from_module`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L179)'
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L179)'
 - en: '[PRE22]'
+  id: totrans-227
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Parameters
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module to attach a hook to.'
+  id: totrans-229
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module` (`torch.nn.Module`) — 要附加钩子的模块。'
 - en: '`recurse` (`bool`, **optional**) — Whether to remove the hooks recursively'
+  id: totrans-230
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`recurse` (`bool`, **可选**) — 是否递归地删除钩子'
 - en: Returns
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回值
 - en: '`torch.nn.Module`'
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.nn.Module`'
 - en: The same module, with the hook detached (the module is modified in place, so
     the result can be discarded).
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 相同的模块，已分离的钩子（模块会就地修改，因此结果可以丢弃）。
 - en: Removes any hook attached to a module via `add_hook_to_module`.
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过`add_hook_to_module`删除附加到模块的任何钩子。
 - en: '#### `accelerate.hooks.remove_hook_from_submodules`'
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `accelerate.hooks.remove_hook_from_submodules`'
 - en: '[< source >](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L517)'
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/accelerate/blob/v0.27.2/src/accelerate/hooks.py#L517)'
 - en: '[PRE23]'
+  id: totrans-237
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: Parameters
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`module` (`torch.nn.Module`) — The module on which to remove all hooks.'
+  id: totrans-239
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`module` (`torch.nn.Module`) — 要删除所有钩子的模块。'
 - en: Recursively removes all hooks attached on the submodules of a given model.
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: 递归地删除给定模型的子模块上附加的所有钩子。
