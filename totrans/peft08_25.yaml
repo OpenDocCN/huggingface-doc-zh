@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 软提示
 - en: 'Original text: [https://huggingface.co/docs/peft/conceptual_guides/prompting](https://huggingface.co/docs/peft/conceptual_guides/prompting)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/peft/conceptual_guides/prompting](https://huggingface.co/docs/peft/conceptual_guides/prompting)
 - en: null
   id: totrans-2
   prefs: []
@@ -24,16 +26,19 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练大型预训练语言模型非常耗时和计算密集。随着它们不断增大，人们对更高效的训练方法（如*提示*）越来越感兴趣。提示通过包含描述任务或甚至演示任务示例的文本提示来为特定下游任务准备一个冻结的预训练模型。通过提示，您可以避免为每个下游任务完全训练一个单独的模型，而是使用相同的冻结的预训练模型。这样做更容易，因为您可以为多个不同任务使用相同的模型，并且训练和存储一小组提示参数要比训练所有模型参数要高效得多。
 - en: 'There are two categories of prompting methods:'
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示方法有两类：
 - en: hard prompts are manually handcrafted text prompts with discrete input tokens;
     the downside is that it requires a lot of effort to create a good prompt
   id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 硬提示是手工制作的具有离散输入标记的文本提示；缺点是需要大量努力来创建一个好的提示
 - en: soft prompts are learnable tensors concatenated with the input embeddings that
     can be optimized to a dataset; the downside is that they aren’t human readable
     because you aren’t matching these “virtual tokens” to the embeddings of a real
@@ -42,22 +47,26 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 软提示是可学习的张量，与输入嵌入连接在一起，可以优化到数据集；缺点是它们不易阅读，因为你没有将这些“虚拟标记”与真实单词的嵌入匹配起来
 - en: 'This conceptual guide provides a brief overview of the soft prompt methods
     included in 🤗 PEFT: prompt tuning, prefix tuning, P-tuning, and multitask prompt
     tuning.'
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个概念指南提供了包含在🤗 PEFT中的软提示方法的简要概述：提示调整，前缀调整，P调整和多任务提示调整。
 - en: Prompt tuning
   id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 提示调整
 - en: '![](../Images/4f75fee4ac42ef5989e25fc4ad53c98b.png)Only train and store a significantly
     smaller set of task-specific prompt parameters [(image source)](https://hf.co/papers/2104.08691).'
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: '![](../Images/4f75fee4ac42ef5989e25fc4ad53c98b.png)只训练和存储一组显著较小的任务特定提示参数[(图片来源)](https://hf.co/papers/2104.08691)。'
 - en: '[Prompt tuning](https://hf.co/papers/2104.08691) was developed for text classification
     tasks on T5 models, and all downstream tasks are cast as a text generation task.
     For example, sequence classification usually assigns a single class label to a
@@ -68,6 +77,7 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '[提示调整](https://hf.co/papers/2104.08691)是为T5模型上的文本分类任务开发的，所有下游任务都被视为文本生成任务。例如，序列分类通常将单个类标签分配给一系列文本。通过将其视为文本生成任务，构成类标签的标记被*生成*。提示被添加到输入中作为一系列标记。通常，模型参数是固定的，这意味着提示标记也由模型参数固定。'
 - en: The key idea behind prompt tuning is that prompt tokens have their own parameters
     that are updated independently. This means you can keep the pretrained model’s
     parameters frozen, and only update the gradients of the prompt token embeddings.
@@ -76,21 +86,25 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示调整的关键思想是提示标记有自己的参数，这些参数是独立更新的。这意味着您可以保持预训练模型的参数冻结，只更新提示标记嵌入的梯度。结果与传统的训练整个模型的方法相当，提示调整的性能随着模型大小的增加而提高。
 - en: Take a look at [Prompt tuning for causal language modeling](../task_guides/clm-prompt-tuning)
     for a step-by-step guide on how to train a model with prompt tuning.
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看[因果语言建模的提示调整](../task_guides/clm-prompt-tuning)以了解如何使用提示调整训练模型的逐步指南。
 - en: Prefix tuning
   id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 前缀调整
 - en: '![](../Images/2b0d1a4a20587ca6c948a2771a6d0cf5.png)Optimize the prefix parameters
     for each task [(image source)](https://hf.co/papers/2101.00190).'
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '![](../Images/2b0d1a4a20587ca6c948a2771a6d0cf5.png)为每个任务优化前缀参数[(图片来源)](https://hf.co/papers/2101.00190)。'
 - en: '[Prefix tuning](https://hf.co/papers/2101.00190) was designed for natural language
     generation (NLG) tasks on GPT models. It is very similar to prompt tuning; prefix
     tuning also prepends a sequence of task-specific vectors to the input that can
@@ -99,6 +113,7 @@
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '[前缀调整](https://hf.co/papers/2101.00190)是为GPT模型上的自然语言生成（NLG）任务设计的。它与提示调整非常相似；前缀调整还在输入之前添加了一系列任务特定向量，可以在保持其余预训练模型参数冻结的同时进行训练和更新。'
 - en: The main difference is that the prefix parameters are inserted in **all** of
     the model layers, whereas prompt tuning only adds the prompt parameters to the
     model input embeddings. The prefix parameters are also optimized by a separate
@@ -108,12 +123,14 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 主要区别在于前缀参数插入在**所有**模型层中，而提示调整仅将提示参数添加到模型输入嵌入中。前缀参数也通过单独的前馈网络（FFN）进行优化，而不是直接在软提示上进行训练，因为这会导致不稳定性并影响性能。在更新软提示后，FFN被丢弃。
 - en: As a result, the authors found that prefix tuning demonstrates comparable performance
     to fully finetuning a model, despite having 1000x fewer parameters, and it performs
     even better in low-data settings.
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，作者发现前缀调整表现与完全微调模型相当，尽管参数少了1000倍，而且在低数据情况下表现得更好。
 - en: Take a look at [Prefix tuning for conditional generation](../task_guides/seq2seq-prefix-tuning)
     for a step-by-step guide on how to train a model with prefix tuning.
   id: totrans-18
