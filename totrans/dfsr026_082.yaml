@@ -1,43 +1,49 @@
 - en: DeepCache
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: DeepCache
 - en: 'Original text: [https://huggingface.co/docs/diffusers/optimization/deepcache](https://huggingface.co/docs/diffusers/optimization/deepcache)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/diffusers/optimization/deepcache](https://huggingface.co/docs/diffusers/optimization/deepcache)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[DeepCache](https://huggingface.co/papers/2312.00858) accelerates [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)
     and [StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline)
     by strategically caching and reusing high-level features while efficiently updating
     low-level features by taking advantage of the U-Net architecture.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DeepCache](https://huggingface.co/papers/2312.00858) 通过策略性地缓存和重复使用高级特征，同时利用
+    U-Net 架构有效更新低级特征，加速 [StableDiffusionPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline)
+    和 [StableDiffusionXLPipeline](/docs/diffusers/v0.26.3/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLPipeline)。'
 - en: 'Start by installing [DeepCache](https://github.com/horseee/DeepCache):'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '首先安装 [DeepCache](https://github.com/horseee/DeepCache):'
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then load and enable the [`DeepCacheSDHelper`](https://github.com/horseee/DeepCache#usage):'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '然后加载并启用 [`DeepCacheSDHelper`](https://github.com/horseee/DeepCache#usage):'
 - en: '[PRE1]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'The `set_params` method accepts two arguments: `cache_interval` and `cache_branch_id`.
     `cache_interval` means the frequency of feature caching, specified as the number
     of steps between each cache operation. `cache_branch_id` identifies which branch
@@ -47,57 +53,96 @@
     image quality (ablation experiments of these two hyperparameters can be found
     in the [paper](https://arxiv.org/abs/2312.00858)). Once those arguments are set,
     use the `enable` or `disable` methods to activate or deactivate the `DeepCacheSDHelper`.'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '`set_params` 方法接受两个参数：`cache_interval` 和 `cache_branch_id`。`cache_interval`
+    表示特征缓存的频率，指定每次缓存操作之间的步数。`cache_branch_id` 标识网络的哪个分支（从最浅到最深的层次）负责执行缓存过程。选择较低的 `cache_branch_id`
+    或较大的 `cache_interval` 可以在牺牲图像质量的情况下提高推理速度（这两个超参数的消融实验可以在[论文](https://arxiv.org/abs/2312.00858)中找到）。设置这些参数后，使用
+    `enable` 或 `disable` 方法来激活或停用 `DeepCacheSDHelper`。'
 - en: '![](../Images/b495a1c6bfeff2934c305353d9026580.png)'
+  id: totrans-9
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/b495a1c6bfeff2934c305353d9026580.png)'
 - en: You can find more generated samples (original pipeline vs DeepCache) and the
     corresponding inference latency in the [WandB report](https://wandb.ai/horseee/DeepCache/runs/jwlsqqgt?workspace=user-horseee).
     The prompts are randomly selected from the [MS-COCO 2017](https://cocodataset.org/#home)
     dataset.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在 [WandB 报告](https://wandb.ai/horseee/DeepCache/runs/jwlsqqgt?workspace=user-horseee)
+    中找到更多生成的样本（原始管道 vs DeepCache）以及相应的推理延迟。提示是从 [MS-COCO 2017](https://cocodataset.org/#home)
+    数据集中随机选择的。
 - en: Benchmark
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 基准测试
 - en: We tested how much faster DeepCache accelerates [Stable Diffusion v2.1](https://huggingface.co/stabilityai/stable-diffusion-2-1)
     with 50 inference steps on an NVIDIA RTX A5000, using different configurations
     for resolution, batch size, cache interval (I), and cache branch (B).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们测试了 DeepCache 在 NVIDIA RTX A5000 上加速 [Stable Diffusion v2.1](https://huggingface.co/stabilityai/stable-diffusion-2-1)
+    在 50 个推理步骤中的速度，使用不同的配置来设置分辨率、批量大小、缓存间隔（I）和缓存分支（B）。
 - en: '| **Resolution** | **Batch size** | **Original** | **DeepCache(I=3, B=0)**
     | **DeepCache(I=5, B=0)** | **DeepCache(I=5, B=1)** |'
+  id: totrans-13
   prefs: []
   type: TYPE_TB
+  zh: '| **分辨率** | **批量大小** | **原始** | **DeepCache(I=3, B=0)** | **DeepCache(I=5,
+    B=0)** | **DeepCache(I=5, B=1)** |'
 - en: '| --- | --- | --- | --- | --- | --- |'
+  id: totrans-14
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- |'
 - en: '| 512 | 8 | 15.96 | 6.88(2.32x) | 5.03(3.18x) | 7.27(2.20x) |'
+  id: totrans-15
   prefs: []
   type: TYPE_TB
+  zh: '| 512 | 8 | 15.96 | 6.88(2.32x) | 5.03(3.18x) | 7.27(2.20x) |'
 - en: '|  | 4 | 8.39 | 3.60(2.33x) | 2.62(3.21x) | 3.75(2.24x) |'
+  id: totrans-16
   prefs: []
   type: TYPE_TB
+  zh: '|  | 4 | 8.39 | 3.60(2.33x) | 2.62(3.21x) | 3.75(2.24x) |'
 - en: '|  | 1 | 2.61 | 1.12(2.33x) | 0.81(3.24x) | 1.11(2.35x) |'
+  id: totrans-17
   prefs: []
   type: TYPE_TB
+  zh: '|  | 1 | 2.61 | 1.12(2.33x) | 0.81(3.24x) | 1.11(2.35x) |'
 - en: '| 768 | 8 | 43.58 | 18.99(2.29x) | 13.96(3.12x) | 21.27(2.05x) |'
+  id: totrans-18
   prefs: []
   type: TYPE_TB
+  zh: '| 768 | 8 | 43.58 | 18.99(2.29x) | 13.96(3.12x) | 21.27(2.05x) |'
 - en: '|  | 4 | 22.24 | 9.67(2.30x) | 7.10(3.13x) | 10.74(2.07x) |'
+  id: totrans-19
   prefs: []
   type: TYPE_TB
+  zh: '|  | 4 | 22.24 | 9.67(2.30x) | 7.10(3.13x) | 10.74(2.07x) |'
 - en: '|  | 1 | 6.33 | 2.72(2.33x) | 1.97(3.21x) | 2.98(2.12x) |'
+  id: totrans-20
   prefs: []
   type: TYPE_TB
+  zh: '|  | 1 | 6.33 | 2.72(2.33x) | 1.97(3.21x) | 2.98(2.12x) |'
 - en: '| 1024 | 8 | 101.95 | 45.57(2.24x) | 33.72(3.02x) | 53.00(1.92x) |'
+  id: totrans-21
   prefs: []
   type: TYPE_TB
+  zh: '| 1024 | 8 | 101.95 | 45.57(2.24x) | 33.72(3.02x) | 53.00(1.92x) |'
 - en: '|  | 4 | 49.25 | 21.86(2.25x) | 16.19(3.04x) | 25.78(1.91x) |'
+  id: totrans-22
   prefs: []
   type: TYPE_TB
+  zh: '|  | 4 | 49.25 | 21.86(2.25x) | 16.19(3.04x) | 25.78(1.91x) |'
 - en: '|  | 1 | 13.83 | 6.07(2.28x) | 4.43(3.12x) | 7.15(1.93x) |'
+  id: totrans-23
   prefs: []
   type: TYPE_TB
+  zh: '|  | 1 | 13.83 | 6.07(2.28x) | 4.43(3.12x) | 7.15(1.93x) |'
