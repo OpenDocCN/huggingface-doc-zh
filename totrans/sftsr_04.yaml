@@ -1,0 +1,121 @@
+- en: Torch shared tensors
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/safetensors/torch_shared_tensors](https://huggingface.co/docs/safetensors/torch_shared_tensors)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/safetensors/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/entry/start.1dff7fe5.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/chunks/scheduler.9f522b10.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/chunks/singletons.c609a45a.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/chunks/index.eb046c14.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/chunks/paths.077e46fe.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/entry/app.93ba10f9.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/chunks/index.4a68349c.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/nodes/0.b1eccf7f.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/chunks/each.e59479a4.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/nodes/11.c2e3236f.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/chunks/CodeBlock.f4f47d4b.js">
+    <link rel="modulepreload" href="/docs/safetensors/main/en/_app/immutable/chunks/Heading.5311d788.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: TL;DR
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Using specific functions, which should work in most cases for you. This is not
+    without side effects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: What are shared tensors ?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Pytorch uses shared tensors for some computation. This is extremely interesting
+    to reduce memory usage in general.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One very classic use case is in transformers the `embeddings` are shared with
+    `lm_head`. By using the same matrix, the model uses less parameters, and gradients
+    flow much better to the `embeddings` (which is the start of the model, so they
+    don’t flow easily there, whereas `lm_head` is at the tail of the model, so gradients
+    are extremely good over there, since they are the same tensors, they both benefit)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Why are shared tensors not saved in safetensors ?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Multiple reasons for that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Not all frameworks support them* for instance `tensorflow` does not. So if
+    someone saves shared tensors in torch, there is no way to load them in a similar
+    fashion so we could not keep the same `Dict[str, Tensor]` API.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*It makes lazy loading very quickly.* Lazy loading is the ability to load only
+    some tensors, or part of tensors for a given file. This is trivial to do without
+    sharing tensors but with tensor sharing'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: Now it’s impossible with this given code to “reshare” buffers after the fact.
+    Once we give the `a` tensor we have no way to give back the same memory when you
+    ask for `b`. (In this particular example we could keep track of given buffers
+    but this is not the case in general, since you could do arbitrary work with `a`
+    like sending it to another device before asking for `b`)
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '*It can lead to much larger file than necessary*. If you are saving a shared
+    tensor which is only a fraction of a larger tensor, then saving it with pytorch
+    leads to saving the entire buffer instead of saving just what is needed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: Now with all those reasons being mentioned, nothing is set in stone in there.
+    Shared tensors do not cause unsafety, or denial of service potential, so this
+    decision could be revisited if current workarounds are not satisfactory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How does it work ?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The design is rather simple. We’re going to look for all shared tensors, then
+    looking for all tensors covering the entire buffer (there can be multiple such
+    tensors). That gives us multiple names which can be saved, we simply choose the
+    first one
+  prefs: []
+  type: TYPE_NORMAL
+- en: During `load_model`, we are loading a bit like `load_state_dict` does, except
+    we’re looking into the model itself, to check for shared buffers, and ignoring
+    the “missed keys” which were actually covered by virtue of buffer sharing (they
+    were properly loaded since there was a buffer that loaded under the hood). Every
+    other error is raised as-is
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Caveat**: This means we’re dropping some keys within the file. meaning if
+    you’re checking for the keys saved on disk, you will see some “missing tensors”
+    or if you’re using `load_state_dict`. Unless we start supporting shared tensors
+    directly in the format there’s no real way around it.'
+  prefs: []
+  type: TYPE_NORMAL
