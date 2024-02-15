@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 神经元模型缓存
 - en: 'Original text: [https://huggingface.co/docs/optimum-neuron/guides/cache_system](https://huggingface.co/docs/optimum-neuron/guides/cache_system)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文：[https://huggingface.co/docs/optimum-neuron/guides/cache_system](https://huggingface.co/docs/optimum-neuron/guides/cache_system)
 - en: null
   id: totrans-2
   prefs: []
@@ -19,38 +21,45 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 神经元模型缓存是`neff`格式编译的神经元模型的远程缓存。它集成到`NeuronTrainer`和`NeuronModelForCausalLM`类中，以便从缓存中加载预训练模型，而不是在本地编译它们。
 - en: '**Note: it is not available for models exported using any other NeuronModelXX
     classes, that use a different export mechanism.**'
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '**注意：对于使用其他NeuronModelXX类导出的模型，该类使用不同的导出机制，因此不可用。**'
 - en: The Neuron Model Cache is hosted on the [Hugging Face Hub](https://huggingface.co/aws-neuron/optimum-neuron-cache)
     and includes compiled files for all popular and supported `optimum-neuron` pre-trained
     models.
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 神经元模型缓存托管在[Hugging Face Hub](https://huggingface.co/aws-neuron/optimum-neuron-cache)，包括所有流行和支持的`optimum-neuron`预训练模型的编译文件。
 - en: Before training a Transformers or Diffusion model or loading a NeuronModelForCausalLM
     on Neuron platforms, it needs to be exported to neuron format with [`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx).
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在在Neuron平台上训练Transformers或Diffusion模型或加载NeuronModelForCausalLM之前，需要使用[`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)将其导出为神经元格式。
 - en: 'When exporting a model, [`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)
     will:'
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在导出模型时，[`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)将：
 - en: convert it to a set of [XLA](https://github.com/pytorch/xla/) subgraphs,
   id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将其转换为一组[XLA](https://github.com/pytorch/xla/)子图，
 - en: compile each subgraph with the neuronx compiler into a Neuron Executable File
     Format (NEFF) binary file.
   id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用neuronx编译器将每个子图编译成神经元可执行文件格式（NEFF）二进制文件。
 - en: The first step is relatively fast, but the compilation takes a lot of time.
     To avoid recompiling all NEFF files every time a model is loaded on a NeuronX
     host, [`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)
@@ -58,148 +67,178 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一步相对较快，但编译需要很长时间。为了避免每次在NeuronX主机上加载模型时重新编译所有NEFF文件，[`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)将NEFF文件存储在本地目录中，通常是`/var/tmp/neuron-compile-cache`。
 - en: However, this local cache is not shared between platforms, which means that
     every time you train or export a model on a new host, you need to recompile it.
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，这个本地缓存在平台之间不共享，这意味着每次在新主机上训练或导出模型时，都需要重新编译。
 - en: We created the Neuron Model Cache to solve this limitation by providing a public
     repository of precompiled model graphs.
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们创建了神经元模型缓存来解决这个限制，通过提供一个预编译模型图的公共存储库。
 - en: 'Note: we also support the creation of private, secured, remote model cache.'
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意：我们还支持创建私有、安全的远程模型缓存。
 - en: How to use the Neuron model cache
   id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 如何使用神经元模型缓存
 - en: The public model cache will be used when you use the `NeuronTrainer` or `NeuronModelForCausalLM`
     classes. There are no additional changes needed.
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您使用`NeuronTrainer`或`NeuronModelForCausalLM`类时，将使用公共模型缓存。不需要额外的更改。
 - en: When exporting a model to neuron format, `optimum-neuron` will simply look for
     cached NEFF files in the hub repository during the compilation of the model subgraphs.
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 在将模型导出为神经元格式时，`optimum-neuron`将在编译模型子图期间在hub存储库中查找缓存的NEFF文件。
 - en: If the NEFF files are cached, they will be fetched from the hub and directly
     loaded instead of being recompiled.
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果NEFF文件被缓存，它们将从hub中获取并直接加载，而不是重新编译。
 - en: How caching works
   id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 缓存是如何工作的
 - en: The Optimum Neuron Cache is built on top of the [NeuronX compiler cache](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-features/neuron-caching.html).
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 最佳神经元缓存建立在[NeuronX编译器缓存](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-features/neuron-caching.html)之上。
 - en: It is important to understand that the cache operates on NEFF binaries, and
     not on the model itself.
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 重要的是要理解缓存操作的是NEFF二进制文件，而不是模型本身。
 - en: As explained previously, each model exported to Neuron using the `NeuronTrainer`
     or `NeuronModelForCausalLM` is composed of [XLA](https://github.com/pytorch/xla/)
     subgraphs.
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如之前解释的，使用`NeuronTrainer`或`NeuronModelForCausalLM`导出到Neuron的每个模型都由[XLA](https://github.com/pytorch/xla/)子图组成。
 - en: 'Each subgraph is unique, and results from the combination of:'
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个子图都是独一无二的，是由以下组合而成的：
 - en: the `transformers` or `transformers_neuronx` python modeling code,
   id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`transformers`或`transformers_neuronx` python建模代码，'
 - en: the `transformers` model config,
   id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`transformers`模型配置，'
 - en: the `input_shapes` selected during the export,
   id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在导出期间选择的`input_shapes`，
 - en: The precision of the model, full-precision, fp16 or bf16.
   id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 模型的精度，全精度、fp16或bf16。
 - en: 'When compiling a subgraph to a NEFF file, other parameters influence the result:'
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 在将子图编译为NEFF文件时，其他参数会影响结果：
 - en: The version of the Neuron X compiler,
   id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 神经元X编译器的版本，
 - en: The number of Neuron cores used,
   id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用的神经元核心数量，
 - en: The compilation parameters (such as the optimization level).
   id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 编译参数（如优化级别）。
 - en: All these parameters are combined together to create a unique hash that identifies
     a NEFF file.
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有这些参数结合在一起，创建一个唯一的哈希，用于标识一个NEFF文件。
 - en: 'This has two very important consequences:'
   id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 这有两个非常重要的后果：
 - en: it is only when actually exporting a model that the associated NEFF files can
     be identified,
   id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 只有在实际导出模型时，才能识别相关的NEFF文件，
 - en: even a small change in the model configuration will lead to a different set
     of NEFF files.
   id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 即使模型配置发生微小变化，也会导致不同的NEFF文件集。
 - en: It is therefore very difficult to know in advance if the NEFFs associated to
     a specific model configuration are cached.
   id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此很难事先知道与特定模型配置相关联的NEFF是否被缓存。
 - en: Neuron model cache lookup (inferentia only)
   id: totrans-36
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 神经元模型缓存查找（仅限inferentia）
 - en: The neuron cache lookup is a feature allowing users to look for compatible cached
     model configurations before exporting a model for inference.
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 神经元缓存查找是一个功能，允许用户在导出模型进行推理之前查找兼容的缓存模型配置。
 - en: It is based on a dedicated registry composed of stored cached configurations.
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 它基于一个由存储的缓存配置组成的专用注册表。
 - en: 'Cached model configurations are stored as entries under a specific subfolder
     in the Neuron Model Cache:'
   id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 缓存的模型配置存储为神经元模型缓存中特定子文件夹下的条目：
 - en: '[PRE0]'
   id: totrans-40
   prefs: []
@@ -211,11 +250,13 @@
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个条目对应于模型配置及其导出参数的组合：这是我们能够唯一标识导出模型的最接近方式。
 - en: You can use the `optimum-cli` to lookup for compatible cached entries by passing
     it a hub model_id or the path to a file containing a model `config.json`.
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用 `optimum-cli` 通过传递一个 hub model_id 或包含模型 `config.json` 的文件路径来查找兼容的缓存条目。
 - en: '[PRE1]'
   id: totrans-43
   prefs: []
@@ -227,62 +268,74 @@
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '**请注意，即使存在兼容的缓存条目，这并不总是保证在导出时模型不会重新编译，如果您修改了编译参数或更新了 neuronx 包。**'
 - en: Advanced usage (trainium only)
   id: totrans-45
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 高级用法（仅限 trainium）
 - en: How to use a private Neuron model cache (trainium only)
   id: totrans-46
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 如何使用私有神经元模型缓存（仅限 trainium）
 - en: 'The repository for the public cache is `aws-neuron/optimum-neuron-cache`. This
     repository includes all precompiled files for commonly used models so that it
     is publicly available and free to use for everyone. But there are two limitations:'
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 公共缓存的存储库是 `aws-neuron/optimum-neuron-cache`。该存储库包含所有常用模型的预编译文件，因此它是公开可用且免费供所有人使用。但有两个限制：
 - en: You will not be able to push your own compiled files on this repo
   id: totrans-48
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 您将无法将自己编译的文件推送到此存储库
 - en: It is public and you might want to use a private repo for private models
   id: totrans-49
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 它是公开的，您可能希望为私有模型使用私有存储库
 - en: To alleviate that you can create your own private cache repository using the
     `optimum-cli` or set the environment variable `CUSTOM_CACHE_REPO`.
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了缓解这一点，您可以使用 `optimum-cli` 创建自己的私有缓存存储库，或设置环境变量 `CUSTOM_CACHE_REPO`。
 - en: Using the Optimum CLI
   id: totrans-51
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 使用 Optimum CLI
 - en: 'The Optimum CLI offers 2 subcommands for cache creation and setting:'
   id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: Optimum CLI 提供了用于缓存创建和设置的 2 个子命令：
 - en: '`create`: To create a new cache repository that you can use as a private Neuron
     Model cache.'
   id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`create`：创建一个新的缓存存储库，您可以将其用作私有神经元模型缓存。'
 - en: '`set`: To set the name of the Neuron cache repository locally, the repository
     needs to exists and will be used by default by `optimum-neuron`.'
   id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`set`：要在本地设置神经元缓存存储库的名称，存储库需要存在，并且将默认由 `optimum-neuron` 使用。'
 - en: 'Create a new Neuron cache repository:'
   id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个新的神经元缓存存储库：
 - en: '[PRE2]'
   id: totrans-56
   prefs: []
@@ -295,10 +348,12 @@
   id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '`-n` / `--name` 选项允许您为神经元缓存存储库指定一个名称，如果未设置，则将使用默认名称。`--public` 标志允许您将您的神经元缓存设为公共，因为默认情况下它将被创建为私有存储库。'
 - en: 'Example:'
   id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE3]'
   id: totrans-59
   prefs: []
@@ -308,6 +363,7 @@
   id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置不同的 Trainiun 缓存存储库：
 - en: '[PRE4]'
   id: totrans-61
   prefs: []
@@ -317,6 +373,7 @@
   id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE5]'
   id: totrans-63
   prefs: []
@@ -327,21 +384,25 @@
   id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 在新实例上使用 `optimum-cli neuron cache set` 命令很有用，以使用您自己的缓存。
 - en: Using the environment variable CUSTOM_CACHE_REPO
   id: totrans-65
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 使用环境变量 CUSTOM_CACHE_REPO
 - en: Using the CLI is not always feasible, and not very practical for small testing.
     In this case, you can simply set the environment variable `CUSTOM_CACHE_REPO`.
   id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 CLI 并不总是可行的，对于小型测试也不太实用。在这种情况下，您可以简单地设置环境变量 `CUSTOM_CACHE_REPO`。
 - en: 'For example, if your cache repo is called `michaelbenayoun/my_custom_cache_repo`,
     you just need to do:'
   id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，如果您的缓存存储库名为 `michaelbenayoun/my_custom_cache_repo`，您只需执行：
 - en: '[PRE6]'
   id: totrans-68
   prefs: []
@@ -351,6 +412,7 @@
   id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 或：
 - en: '[PRE7]'
   id: totrans-70
   prefs: []
@@ -361,19 +423,23 @@
   id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 您必须[登录到 Hugging Face Hub](https://huggingface.co/docs/huggingface_hub/quick-start#login)才能从您的私有缓存存储库推送和拉取文件。
 - en: Cache system flow
   id: totrans-72
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 缓存系统流程
 - en: '![Cache system flow](../Images/f18b7021150569c164d86f67298a14e8.png)'
   id: totrans-73
   prefs: []
   type: TYPE_IMG
+  zh: '![缓存系统流程](../Images/f18b7021150569c164d86f67298a14e8.png)'
 - en: '*Cache system flow*'
   id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: '*缓存系统流程*'
 - en: At each the beginning of each training step, the [NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)
     computes a `NeuronHash` and checks the cache repo(s) (official and custom) on
     the Hugging Face Hub to see if there are compiled files associated to this hash.
@@ -382,6 +448,8 @@
   id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 在每个训练步骤开始时，[NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)
+    计算一个 `NeuronHash` 并检查 Hugging Face Hub 上的缓存存储库（官方和自定义）是否有与此哈希相关联的编译文件。如果是这样，文件将直接下载到本地缓存目录，无需进行编译。否则将执行编译。
 - en: Just as for downloading compiled files, the [NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)
     will keep track of the newly created compilation files at each training step,
     and upload them to the Hugging Face Hub at save time or when training ends. This
@@ -390,16 +458,20 @@
   id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 与下载编译文件一样，[NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer)
+    将在每个训练步骤中跟踪新创建的编译文件，并在保存时或训练结束时将它们上传到 Hugging Face Hub。这假定您对缓存存储库具有写入访问权限，否则将不会推送任何内容。
 - en: Optimum CLI
   id: totrans-77
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Optimum CLI
 - en: 'The Optimum CLI can be used to perform various cache-related tasks, as described
     by the `optimum-cli neuron cache` command usage message:'
   id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: Optimum CLI 可用于执行各种与缓存相关的任务，如 `optimum-cli neuron cache` 命令使用消息所述：
 - en: '[PRE8]'
   id: totrans-79
   prefs: []
@@ -410,6 +482,7 @@
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 将模型添加到缓存（仅限 trainium）
 - en: 'It is possible to add a model compilation files to a cache repo via the `optimum-cli
     neuron cache add` command:'
   id: totrans-81
