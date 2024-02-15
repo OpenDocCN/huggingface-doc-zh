@@ -1,0 +1,99 @@
+- en: Autoscaling
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 原文：[https://huggingface.co/docs/inference-endpoints/autoscaling](https://huggingface.co/docs/inference-endpoints/autoscaling)
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: <link href="/docs/inference-endpoints/main/en/_app/immutable/assets/0.e3b0c442.css"
+    rel="modulepreload"> <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/entry/start.efd013a9.js">
+    <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/chunks/scheduler.389d799c.js">
+    <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/chunks/singletons.eafbeb3b.js">
+    <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/chunks/paths.b3517460.js">
+    <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/entry/app.53dcf7ee.js">
+    <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/chunks/index.8f81d18f.js">
+    <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/nodes/0.474ae6bf.js">
+    <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/nodes/3.396b3896.js">
+    <link rel="modulepreload" href="/docs/inference-endpoints/main/en/_app/immutable/chunks/Heading.41733039.js">
+  prefs: []
+  type: TYPE_NORMAL
+- en: Autoscaling allows you to dynamically adjust the number of endpoint replicas
+    running your models based on traffic and accelerator utilization. By leveraging
+    autoscaling, you can seamlessly handle varying workloads while optimizing costs
+    and ensuring high availability.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scaling Criteria
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The autoscaling process is triggered based on the accelerator’s utilization
+    metrics. The criteria for scaling differ depending on the type of accelerator
+    being used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**CPU Accelerators**: A new replica is added when the average CPU utilization
+    of all replicas reaches 80%.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**GPU Accelerators**: A new replica is added when the average GPU utilization
+    of all replicas over a 2-minute window reaches 80%.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It’s important to note that the scaling up process takes place every minute,
+    while the scaling down process takes 2 minutes. This frequency ensures a balance
+    between responsiveness and stability of the autoscaling system, with a stabilization
+    of 300 seconds once scaled up or down.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Considerations for Effective Autoscaling
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'While autoscaling offers convenient resource management, certain considerations
+    should be kept in mind to ensure its effectiveness:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Model Initialization Time**: During the initialization of a new replica,
+    the model is downloaded and loaded into memory. If your replicas have a long initialization
+    time, autoscaling may not be as effective. This is because the average GPU utilization
+    might fall below the threshold during that time, triggering the automatic scaling
+    down of your endpoint.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Enterprise Plan Control**: If you have an [enterprise plan](https://huggingface.co/inference-endpoints/enterprise),
+    you have full control over the autoscaling definitions. This allows you to customize
+    the scaling thresholds, behavior and criteria based on your specific requirements.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Scaling to 0
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Inference Endpoints also supports autoscaling to 0, which means reducing the
+    number of replicas to 0 when there is no incoming traffic. This feature is based
+    on request patterns rather than accelerator utilization. When an endpoint remains
+    idle without receiving any requests for over 15 minutes, the system automatically
+    scales down the endpoint to 0 replicas. To enable the feature, go to the Settings
+    page and you’ll find a section called “Automatic Scale-to-Zero”.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scaling to 0 replicas helps optimize cost savings by minimizing resource usage
+    during periods of inactivity. However, it’s important to be aware that scaling
+    to 0 implies a cold start period when the endpoint receives a new request. Additionally,
+    the HTTP server will respond with a status code `502 Bad Gateway` while the new
+    replica is initializing. Please note that there is currently no queueing system
+    in place for incoming requests. Therefore, we recommend developing your own request
+    queue client-side with proper error handling to optimize throughput and latency.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The duration of the cold start period varies depending on your model’s size.
+    It is recommended to consider the potential latency impact when enabling scaling
+    to 0 and managing user expectations.
+  prefs: []
+  type: TYPE_NORMAL
