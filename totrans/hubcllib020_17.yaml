@@ -1,145 +1,195 @@
 - en: Manage huggingface_hub cache-system
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 管理huggingface_hub缓存系统
 - en: 'Original text: [https://huggingface.co/docs/huggingface_hub/guides/manage-cache](https://huggingface.co/docs/huggingface_hub/guides/manage-cache)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/huggingface_hub/guides/manage-cache](https://huggingface.co/docs/huggingface_hub/guides/manage-cache)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Understand caching
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 理解缓存
 - en: The Hugging Face Hub cache-system is designed to be the central cache shared
     across libraries that depend on the Hub. It has been updated in v0.8.0 to prevent
     re-downloading same files between revisions.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: Hugging Face Hub缓存系统旨在成为依赖于Hub的库之间共享的中央缓存。在v0.8.0中已更新，以防止在不同版本之间重新下载相同的文件。
 - en: 'The caching system is designed as follows:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 缓存系统设计如下：
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: The `<CACHE_DIR>` is usually your user’s home directory. However, it is customizable
     with the `cache_dir` argument on all methods, or by specifying either `HF_HOME`
     or `HF_HUB_CACHE` environment variable.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '`<CACHE_DIR>`通常是您的用户主目录。但是，可以通过所有方法的`cache_dir`参数进行自定义，或者通过指定`HF_HOME`或`HF_HUB_CACHE`环境变量来进行自定义。'
 - en: 'Models, datasets and spaces share a common root. Each of these repositories
     contains the repository type, the namespace (organization or username) if it exists
     and the repository name:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 模型、数据集和空间共享一个共同的根。每个这些存储库包含存储库类型、命名空间（组织或用户名）（如果存在）和存储库名称：
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: It is within these folders that all files will now be downloaded from the Hub.
     Caching ensures that a file isn’t downloaded twice if it already exists and wasn’t
     updated; but if it was updated, and you’re asking for the latest file, then it
     will download the latest file (while keeping the previous file intact in case
     you need it again).
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在所有文件将从Hub中下载到这些文件夹中。缓存确保如果文件已经存在且未更新，则不会下载两次；但如果文件已更新，并且您要求最新文件，则它将下载最新文件（同时保留以防您再次需要的先前文件）。
 - en: 'In order to achieve this, all folders contain the same skeleton:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了实现这一点，所有文件夹都包含相同的骨架：
 - en: '[PRE2]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Each folder is designed to contain the following:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个文件夹设计为包含以下内容：
 - en: Refs
+  id: totrans-14
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 引用
 - en: The `refs` folder contains files which indicates the latest revision of the
     given reference. For example, if we have previously fetched a file from the `main`
     branch of a repository, the `refs` folder will contain a file named `main`, which
     will itself contain the commit identifier of the current head.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '`refs`文件夹包含指示给定引用的最新修订版本的文件。例如，如果我们之前从存储库的`main`分支中获取了一个文件，`refs`文件夹将包含一个名为`main`的文件，其中将包含当前头部的提交标识符。'
 - en: If the latest commit of `main` has `aaaaaa` as identifier, then it will contain
     `aaaaaa`.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果`main`的最新提交具有`aaaaaa`作为标识符，则它将包含`aaaaaa`。
 - en: If that same branch gets updated with a new commit, that has `bbbbbb` as an
     identifier, then re-downloading a file from that reference will update the `refs/main`
     file to contain `bbbbbb`.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果同一分支更新为具有`bbbbbb`作为标识符的新提交，则重新从该引用下载文件将更新`refs/main`文件以包含`bbbbbb`。
 - en: Blobs
+  id: totrans-18
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 块
 - en: The `blobs` folder contains the actual files that we have downloaded. The name
     of each file is their hash.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`blobs`文件夹包含我们下载的实际文件。每个文件的名称是它们的哈希值。'
 - en: Snapshots
+  id: totrans-20
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 快照
 - en: 'The `snapshots` folder contains symlinks to the blobs mentioned above. It is
     itself made up of several folders: one per known revision!'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '`snapshots`文件夹包含对上述块的符号链接。它本身由几个文件夹组成：每个已知修订版本一个文件夹！'
 - en: 'In the explanation above, we had initially fetched a file from the `aaaaaa`
     revision, before fetching a file from the `bbbbbb` revision. In this situation,
     we would now have two folders in the `snapshots` folder: `aaaaaa` and `bbbbbb`.'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 在上面的解释中，我们最初从`aaaaaa`修订版本中获取了一个文件，然后从`bbbbbb`修订版本中获取了一个文件。在这种情况下，`snapshots`文件夹中现在会有两个文件夹：`aaaaaa`和`bbbbbb`。
 - en: 'In each of these folders, live symlinks that have the names of the files that
     we have downloaded. For example, if we had downloaded the `README.md` file at
     revision `aaaaaa`, we would have the following path:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这些文件夹中，存在着我们已下载文件的名称的符号链接。例如，如果我们在修订版本`aaaaaa`中下载了`README.md`文件，我们将有以下路径：
 - en: '[PRE3]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: That `README.md` file is actually a symlink linking to the blob that has the
     hash of the file.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 那个`README.md`文件实际上是一个符号链接，链接到具有文件哈希值的块。
 - en: 'By creating the skeleton this way we open the mechanism to file sharing: if
     the same file was fetched in revision `bbbbbb`, it would have the same hash and
     the file would not need to be re-downloaded.'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过以这种方式创建骨架，我们打开了文件共享的机制：如果在修订版本`bbbbbb`中获取了相同的文件，它将具有相同的哈希值，文件就不需要重新下载。
 - en: .no_exist (advanced)
+  id: totrans-27
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: .no_exist（高级）
 - en: 'In addition to the `blobs`, `refs` and `snapshots` folders, you might also
     find a `.no_exist` folder in your cache. This folder keeps track of files that
     you’ve tried to download once but don’t exist on the Hub. Its structure is the
     same as the `snapshots` folder with 1 subfolder per known revision:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了`blobs`、`refs`和`snapshots`文件夹外，您还可能在缓存中找到一个`.no_exist`文件夹。这个文件夹用于跟踪您尝试下载但在Hub上不存在的文件。它的结构与`snapshots`文件夹相同，每个已知修订版本一个子文件夹：
 - en: '[PRE4]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Unlike the `snapshots` folder, files are simple empty files (no symlinks). In
     this example, the file `"config_that_does_not_exist.json"` does not exist on the
     Hub for the revision `"aaaaaa"`. As it only stores empty files, this folder is
     neglectable is term of disk usage.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 与`snapshots`文件夹不同，文件是简单的空文件（没有符号链接）。在这个例子中，文件`"config_that_does_not_exist.json"`在修订版本`"aaaaaa"`上不存在于Hub上。由于它只存储空文件，这个文件夹在磁盘使用方面可以忽略不计。
 - en: So now you might wonder, why is this information even relevant? In some cases,
     a framework tries to load optional files for a model. Saving the non-existence
     of optional files makes it faster to load a model as it saves 1 HTTP call per
@@ -147,28 +197,37 @@
     tokenizer can support additional files. The first time you load the tokenizer
     on your machine, it will cache which optional files exists (and which doesn’t)
     to make the loading time faster for the next initializations.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: To test if a file is cached locally (without making any HTTP request), you can
     use the [try_to_load_from_cache()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.try_to_load_from_cache)
     helper. It will either return the filepath (if exists and cached), the object
     `_CACHED_NO_EXIST` (if non-existence is cached) or `None` (if we don’t know).
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: In practice
+  id: totrans-34
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'In practice, your cache should look like the following tree:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Limitations
+  id: totrans-37
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -180,20 +239,24 @@
     exactly the same way. Tools to inspect and delete the cache (see below) are also
     supported. However, the cache-system is less efficient as a single file might
     be downloaded several times if multiple revisions of the same repo is downloaded.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
 - en: If you want to benefit from the symlink-based cache-system on a Windows machine,
     you either need to [activate Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
     or to run Python as an administrator.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: When symlinks are not supported, a warning message is displayed to the user
     to alert them they are using a degraded version of the cache-system. This warning
     can be disabled by setting the `HF_HUB_DISABLE_SYMLINKS_WARNING` environment variable
     to true.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
 - en: Caching assets
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -207,27 +270,36 @@
     way (e.g. no rule on the structure) as long as it stays in the right assets folder.
     Those libraries can then leverage tools from `huggingface_hub` to manage the cache,
     in particular scanning and deleting parts of the assets from a CLI command.'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '[cached_assets_path()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.cached_assets_path)
     is the recommended way to store assets but is not mandatory. If your library already
     uses its own cache, feel free to use it!'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
 - en: Assets in practice
+  id: totrans-45
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'In practice, your assets cache should look like the following tree:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Scan your cache
+  id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -237,247 +309,365 @@
     know which repos and revisions are taking the most disk space. `huggingface_hub`
     provides an helper to do so that can be used via `huggingface-cli` or in a python
     script.'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
 - en: Scan cache from the terminal
+  id: totrans-50
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: The easiest way to scan your HF cache-system is to use the `scan-cache` command
     from `huggingface-cli` tool. This command scans the cache and prints a report
     with information like repo id, repo type, disk usage, refs and full local path.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 扫描您的HF缓存系统的最简单方法是使用`huggingface-cli`工具中的`scan-cache`命令。此命令扫描缓存并打印一个报告，其中包含有关存储库id、存储库类型、磁盘使用情况、引用和完整本地路径的信息。
 - en: The snippet below shows a scan report in a folder in which 4 models and 2 datasets
     are cached.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的片段显示了一个文件夹中的扫描报告，其中缓存了4个模型和2个数据集。
 - en: '[PRE9]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: To get a more detailed report, use the `--verbose` option. For each repo, you
     get a list of all revisions that have been downloaded. As explained above, the
     files that don’t change between 2 revisions are shared thanks to the symlinks.
     This means that the size of the repo on disk is expected to be less than the sum
     of the size of each of its revisions. For example, here `bert-base-cased` has
     2 revisions of 1.4G and 1.5G but the total disk usage is only 1.9G.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 要获得更详细的报告，请使用`--verbose`选项。对于每个存储库，您将获得已下载的所有修订的列表。如上所述，不在2个修订之间更改的文件通过符号链接共享。这意味着磁盘上的存储库大小预计会小于每个修订的大小之和。例如，这里`bert-base-cased`有1.4G和1.5G的2个修订，但总磁盘使用量仅为1.9G。
 - en: '[PRE10]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Grep example
+  id: totrans-56
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: Grep示例
 - en: Since the output is in tabular format, you can combine it with any `grep`-like
     tools to filter the entries. Here is an example to filter only revisions from
     the “t5-small” model on a Unix-based machine.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于输出是表格格式，您可以将其与任何类似`grep`的工具结合使用来过滤条目。以下是在基于Unix的机器上仅过滤“t5-small”模型的修订的示例。
 - en: '[PRE11]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Scan cache from Python
+  id: totrans-59
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 从Python扫描缓存
 - en: For a more advanced usage, use [scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir)
     which is the python utility called by the CLI tool.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于更高级的用法，请使用[scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir)，这是CLI工具调用的Python实用程序。
 - en: 'You can use it to get a detailed report structured around 4 dataclasses:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用它来获取一个围绕4个数据类结构化的详细报告：
 - en: '[HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo):
     complete report returned by [scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir)'
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo)：由[scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir)返回的完整报告'
 - en: '[CachedRepoInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRepoInfo):
     information about a cached repo'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[CachedRepoInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRepoInfo)：有关缓存存储库的信息'
 - en: '[CachedRevisionInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRevisionInfo):
     information about a cached revision (e.g. “snapshot”) inside a repo'
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[CachedRevisionInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRevisionInfo)：有关存储库内缓存修订（例如“快照”）的信息'
 - en: '[CachedFileInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedFileInfo):
     information about a cached file in a snapshot'
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[CachedFileInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedFileInfo)：有关快照中缓存文件的信息'
 - en: Here is a simple usage example. See reference for details.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里是一个简单的用法示例。有关详细信息，请参阅参考资料。
 - en: '[PRE12]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Clean your cache
+  id: totrans-68
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 清理您的缓存
 - en: Scanning your cache is interesting but what you really want to do next is usually
     to delete some portions to free up some space on your drive. This is possible
     using the `delete-cache` CLI command. One can also programmatically use the [delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions)
     helper from [HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo)
     object returned when scanning the cache.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 扫描您的缓存是有趣的，但您真正想要做的下一步通常是删除一些部分以释放驱动器上的一些空间。使用`delete-cache` CLI命令可以实现这一点。也可以在扫描缓存时使用返回的[HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo)对象中的[delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions)助手进行编程。
 - en: Delete strategy
+  id: totrans-70
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 删除策略
 - en: To delete some cache, you need to pass a list of revisions to delete. The tool
     will define a strategy to free up the space based on this list. It returns a [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)
     object that describes which files and folders will be deleted. The [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)
     allows give you how much space is expected to be freed. Once you agree with the
     deletion, you must execute it to make the deletion effective. In order to avoid
     discrepancies, you cannot edit a strategy object manually.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 要删除某些缓存，您需要传递一个要删除的修订列表。工具将根据此列表定义释放空间的策略。它返回一个描述将要删除哪些文件和文件夹的[DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)对象。[DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)允许您知道预计将释放多少空间。一旦您同意删除，必须执行它以使删除生效。为避免不一致，您不能手动编辑策略对象。
 - en: 'The strategy to delete revisions is the following:'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 删除修订的策略如下：
 - en: the `snapshot` folder containing the revision symlinks is deleted.
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含修订符号链接的`snapshot`文件夹将被删除。
 - en: blobs files that are targeted only by revisions to be deleted are deleted as
     well.
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 仅被要删除的修订目标的blob文件也将被删除。
 - en: if a revision is linked to 1 or more `refs`, references are deleted.
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果一个修订与1个或多个`refs`相关联，则引用将被删除。
 - en: if all revisions from a repo are deleted, the entire cached repository is deleted.
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果一个存储库的所有修订都被删除，整个缓存的存储库也将被删除。
 - en: Revision hashes are unique across all repositories. This means you don’t need
     to provide any `repo_id` or `repo_type` when removing revisions.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 修订哈希在所有存储库中是唯一的。这意味着在删除修订时，您无需提供任何`repo_id`或`repo_type`。
 - en: If a revision is not found in the cache, it will be silently ignored. Besides,
     if a file or folder cannot be found while trying to delete it, a warning will
     be logged but no error is thrown. The deletion continues for other paths contained
     in the [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)
     object.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果在缓存中找不到修订版本，它将被静默忽略。此外，如果在尝试删除文件或文件夹时找不到它，将记录警告但不会抛出错误。删除将继续进行其他包含在 [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)
+    对象中的路径。
 - en: Clean cache from the terminal
+  id: totrans-79
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 从终端清除缓存
 - en: The easiest way to delete some revisions from your HF cache-system is to use
     the `delete-cache` command from `huggingface-cli` tool. The command has two modes.
     By default, a TUI (Terminal User Interface) is displayed to the user to select
     which revisions to delete. This TUI is currently in beta as it has not been tested
     on all platforms. If the TUI doesn’t work on your machine, you can disable it
     using the `--disable-tui` flag.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 从HF缓存系统中删除一些修订版本的最简单方法是使用 `huggingface-cli` 工具中的 `delete-cache` 命令。该命令有两种模式。默认情况下，会显示一个
+    TUI（终端用户界面）供用户选择要删除的修订版本。此 TUI 目前处于测试阶段，尚未在所有平台上进行测试。如果 TUI 在您的计算机上无法工作，您可以使用
+    `--disable-tui` 标志禁用它。
 - en: Using the TUI
+  id: totrans-81
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 使用TUI
 - en: 'This is the default mode. To use it, you first need to install extra dependencies
     by running the following command:'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是默认模式。要使用它，您首先需要通过运行以下命令安装额外的依赖项：
 - en: '[PRE13]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Then run the command:'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后运行命令：
 - en: '[PRE14]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'You should now see a list of revisions that you can select/deselect:'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您应该看到一个修订版本列表，您可以选择/取消选择：
 - en: '![](../Images/aafc157d3819eea90ace56496a84b8e6.png)'
+  id: totrans-87
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/aafc157d3819eea90ace56496a84b8e6.png)'
 - en: 'Instructions:'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 说明：
 - en: Press keyboard arrow keys `<up>` and `<down>` to move the cursor.
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 按键盘箭头键 `<上>` 和 `<下>` 移动光标。
 - en: Press `<space>` to toggle (select/unselect) an item.
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 按下 `<空格>` 键切换（选择/取消选择）项目。
 - en: When a revision is selected, the first line is updated to show you how much
     space will be freed.
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 选择修订版本后，第一行将更新以显示将释放多少空间。
 - en: Press `<enter>` to confirm your selection.
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 按 `<回车>` 键确认您的选择。
 - en: If you want to cancel the operation and quit, you can select the first item
     (“None of the following”). If this item is selected, the delete process will be
     cancelled, no matter what other items are selected. Otherwise you can also press
     `<ctrl+c>` to quit the TUI.
+  id: totrans-93
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果要取消操作并退出，可以选择第一个项目（“以下无任何内容”）。如果选择了此项目，无论选择了其他项目，删除过程都将被取消。否则，您也可以按 `<ctrl+c>`
+    退出 TUI。
 - en: Once you’ve selected the revisions you want to delete and pressed `<enter>`,
     a last confirmation message will be prompted. Press `<enter>` again and the deletion
     will be effective. If you want to cancel, enter `n`.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 选择要删除的修订版本并按 `<回车>` 键后，将提示最后的确认消息。再次按 `<回车>` 键，删除将生效。如果要取消，请输入 `n`。
 - en: '[PRE15]'
+  id: totrans-95
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Without TUI
+  id: totrans-96
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 无TUI
 - en: As mentioned above, the TUI mode is currently in beta and is optional. It may
     be the case that it doesn’t work on your machine or that you don’t find it convenient.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 如上所述，TUI 模式目前处于测试阶段，是可选的。可能是它在您的计算机上无法工作，或者您认为它不方便。
 - en: Another approach is to use the `--disable-tui` flag. The process is very similar
     as you will be asked to manually review the list of revisions to delete. However,
     this manual step will not take place in the terminal directly but in a temporary
     file generated on the fly and that you can manually edit.
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种方法是使用 `--disable-tui` 标志。该过程与您被要求手动审核要删除的修订版本列表非常相似。但是，这个手动步骤不会直接在终端中进行，而是在临时生成的文件中进行，您可以手动编辑。
 - en: This file has all the instructions you need in the header. Open it in your favorite
     text editor. To select/deselect a revision, simply comment/uncomment it with a
     `#`. Once the manual review is done and the file is edited, you can save it. Go
     back to your terminal and press `<enter>`. By default it will compute how much
     space would be freed with the updated list of revisions. You can continue to edit
     the file or confirm with `"y"`.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 此文件的标题中包含您需要的所有说明。在您喜爱的文本编辑器中打开它。要选择/取消选择修订版本，只需使用 `#` 进行注释/取消注释。完成手动审核并编辑文件后，您可以保存它。返回到终端并按
+    `<回车>` 键。默认情况下，它将计算更新的修订版本列表将释放多少空间。您可以继续编辑文件或使用 `"y"` 确认。
 - en: '[PRE16]'
+  id: totrans-100
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'Example of command file:'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 命令文件示例：
 - en: '[PRE17]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Clean cache from Python
+  id: totrans-103
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 从Python清除缓存
 - en: For more flexibility, you can also use the [delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions)
     method programmatically. Here is a simple example. See reference for details.
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了更灵活，您还可以以编程方式使用 [delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions)
+    方法。这里是一个简单的示例。有关详细信息，请参阅参考资料。
 - en: '[PRE18]'
+  id: totrans-105
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
