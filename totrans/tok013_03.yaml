@@ -1,94 +1,124 @@
 - en: Quicktour
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 快速入门
 - en: 'Original text: [https://huggingface.co/docs/tokenizers/quicktour](https://huggingface.co/docs/tokenizers/quicktour)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/tokenizers/quicktour](https://huggingface.co/docs/tokenizers/quicktour)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Let’s have a quick look at the 🤗 Tokenizers library features. The library provides
     an implementation of today’s most used tokenizers that is both easy to use and
     blazing fast.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们快速看一下🤗 Tokenizers库的特点。该库提供了今天最常用的标记器的实现，既易于使用又速度快。
 - en: Build a tokenizer from scratch
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 从头开始构建一个标记器
 - en: 'To illustrate how fast the 🤗 Tokenizers library is, let’s train a new tokenizer
     on [wikitext-103](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/)
     (516M of text) in just a few seconds. First things first, you will need to download
     this dataset and unzip it with:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了说明🤗 Tokenizers库有多快，让我们在几秒钟内在[wikitext-103](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/)（516M文本）上训练一个新的标记器。首先，您需要下载这个数据集并解压缩：
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Training the tokenizer
+  id: totrans-7
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 训练标记器
 - en: 'In this tour, we will build and train a Byte-Pair Encoding (BPE) tokenizer.
     For more information about the different type of tokenizers, check out this [guide](https://huggingface.co/transformers/tokenizer_summary.html)
     in the 🤗 Transformers documentation. Here, training the tokenizer means it will
     learn merge rules by:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本次快速入门中，我们将构建和训练一个字节对编码（BPE）标记器。有关不同类型的标记器的更多信息，请查看🤗 Transformers文档中的[指南](https://huggingface.co/transformers/tokenizer_summary.html)。在这里，训练标记器意味着它将通过以下方式学习合并规则：
 - en: Start with all the characters present in the training corpus as tokens.
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 从训练语料库中的所有字符开始作为标记。
 - en: Identify the most common pair of tokens and merge it into one token.
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 识别最常见的一对标记并将其合并为一个标记。
 - en: Repeat until the vocabulary (e.g., the number of tokens) has reached the size
     we want.
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 重复直到词汇表（例如，标记数）达到我们想要的大小。
 - en: 'The main API of the library is the `class` `Tokenizer`, here is how we instantiate
     one with a BPE model:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 该库的主要API是`class` `Tokenizer`，以下是如何使用BPE模型实例化一个：
 - en: PythonRustNode
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE1]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: To train our tokenizer on the wikitext files, we will need to instantiate a
     [trainer]{.title-ref}, in this case a `BpeTrainer`
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在wikitext文件上训练我们的标记器，我们将需要实例化一个[trainer]{.title-ref}，在这种情况下是一个`BpeTrainer`
 - en: PythonRustNode
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE2]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: We can set the training arguments like `vocab_size` or `min_frequency` (here
     left at their default values of 30,000 and 0) but the most important part is to
     give the `special_tokens` we plan to use later on (they are not used at all during
     training) so that they get inserted in the vocabulary.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以设置训练参数，如`vocab_size`或`min_frequency`（这里保持默认值为30,000和0），但最重要的部分是提供我们以后打算使用的`special_tokens`（在训练过程中根本不使用），以便它们被插入到词汇表中。
 - en: 'The order in which you write the special tokens list matters: here `"[UNK]"`
     will get the ID 0, `"[CLS]"` will get the ID 1 and so forth.'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 编写特殊标记列表的顺序很重要：这里`"[UNK]"`将获得ID 0，`"[CLS]"`将获得ID 1，依此类推。
 - en: 'We could train our tokenizer right now, but it wouldn’t be optimal. Without
     a pre-tokenizer that will split our inputs into words, we might get tokens that
     overlap several words: for instance we could get an `"it is"` token since those
@@ -96,284 +126,439 @@
     token is bigger than a word returned by the pre-tokenizer. Here we want to train
     a subword BPE tokenizer, and we will use the easiest pre-tokenizer possible by
     splitting on whitespace.'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们现在可以训练我们的标记器，但这并不是最佳选择。没有一个预标记器将我们的输入拆分为单词，我们可能会得到重叠几个单词的标记：例如，我们可能会得到一个`"it
+    is"`标记，因为这两个单词经常相邻出现。使用预标记器将确保没有一个标记比预标记器返回的单词更大。在这里，我们想训练一个子词BPE标记器，并且我们将使用最简单的预标记器，即按空格拆分。
 - en: PythonRustNode
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE3]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Now, we can just call the `Tokenizer.train` method with any list of files we
     want to use:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，我们只需调用`Tokenizer.train`方法，并使用任何我们想要使用的文件列表：
 - en: PythonRustNode
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE4]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'This should only take a few seconds to train our tokenizer on the full wikitext
     dataset! To save the tokenizer in one file that contains all its configuration
     and vocabulary, just use the `Tokenizer.save` method:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 在完整的维基文本数据集上训练我们的标记器应该只需要几秒钟！要将标记器保存在包含所有配置和词汇表的文件中，只需使用`Tokenizer.save`方法：
 - en: PythonRustNode
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE5]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'and you can reload your tokenizer from that file with the `Tokenizer.from_file`
     `classmethod`:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用`Tokenizer.from_file`的`classmethod`从该文件重新加载您的标记器：
 - en: PythonRustNode
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE6]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Using the tokenizer
+  id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用标记器
 - en: 'Now that we have trained a tokenizer, we can use it on any text we want with
     the `Tokenizer.encode` method:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们已经训练了一个标记器，我们可以使用`Tokenizer.encode`方法对任何文本进行标记：
 - en: PythonRustNode
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE7]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: This applied the full pipeline of the tokenizer on the text, returning an `Encoding`
     object. To learn more about this pipeline, and how to apply (or customize) parts
     of it, check out [this page](pipeline).
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '这将在文本上应用标记器的完整流程，返回一个`Encoding`对象。要了解有关此流程的更多信息，以及如何应用（或自定义）其中的部分，请查看[此页面](pipeline)。 '
 - en: 'This `Encoding` object then has all the attributes you need for your deep learning
     model (or other). The `tokens` attribute contains the segmentation of your text
     in tokens:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个`Encoding`对象具有您深度学习模型（或其他模型）所需的所有属性。`tokens`属性包含了文本在标记中的分割：
 - en: PythonRustNode
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE8]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Similarly, the `ids` attribute will contain the index of each of those tokens
     in the tokenizer’s vocabulary:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，`ids`属性将包含这些标记在标记器词汇表中的索引：
 - en: PythonRustNode
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE9]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'An important feature of the 🤗 Tokenizers library is that it comes with full
     alignment tracking, meaning you can always get the part of your original sentence
     that corresponds to a given token. Those are stored in the `offsets` attribute
     of our `Encoding` object. For instance, let’s assume we would want to find back
     what caused the `"[UNK]"` token to appear, which is the token at index 9 in the
     list, we can just ask for the offset at the index:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Tokenizers库的一个重要特性是它具有完整的对齐跟踪，这意味着您始终可以获得原始句子中与给定标记对应的部分。这些存储在我们的`Encoding`对象的`offsets`属性中。例如，假设我们想找回导致`"[UNK]"`标记出现的原因，该标记在列表中的索引为9，我们只需请求该索引处的偏移量：
 - en: PythonRustNode
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE10]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'and those are the indices that correspond to the emoji in the original sentence:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些是原始句子中对应表情符号的索引：
 - en: PythonRustNode
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE11]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Post-processing
+  id: totrans-49
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 后处理
 - en: We might want our tokenizer to automatically add special tokens, like `"[CLS]"`
     or `"[SEP]"`. To do this, we use a post-processor. `TemplateProcessing` is the
     most commonly used, you just have to specify a template for the processing of
     single sentences and pairs of sentences, along with the special tokens and their
     IDs.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可能希望我们的分词器自动添加特殊标记，如`"[CLS]"`或`"[SEP]"`。为此，我们使用后处理器。`TemplateProcessing`是最常用的，您只需为单个句子和句子对的处理指定一个模板，以及特殊标记及其ID。
 - en: 'When we built our tokenizer, we set `"[CLS]"` and `"[SEP]"` in positions 1
     and 2 of our list of special tokens, so this should be their IDs. To double-check,
     we can use the `Tokenizer.token_to_id` method:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 当构建分词器时，我们将`"[CLS]"`和`"[SEP]"`设置为特殊标记列表中的位置1和2，因此这应该是它们的ID。为了双重检查，我们可以使用`Tokenizer.token_to_id`方法：
 - en: PythonRustNode
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE12]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Here is how we can set the post-processing to give us the traditional BERT
     inputs:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是我们如何设置后处理以获得传统的BERT输入：
 - en: PythonRustNode
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE13]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Let’s go over this snippet of code in more details. First we specify the template
     for single sentences: those should have the form `"[CLS] $A [SEP]"` where `$A`
     represents our sentence.'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们更详细地查看这段代码。首先，我们指定了单个句子的模板：这些应该是`"[CLS] $A [SEP]"`的形式，其中`$A`代表我们的句子。
 - en: 'Then, we specify the template for sentence pairs, which should have the form
     `"[CLS] $A [SEP] $B [SEP]"` where `$A` represents the first sentence and `$B`
     the second one. The `:1` added in the template represent the `type IDs` we want
     for each part of our input: it defaults to 0 for everything (which is why we don’t
     have `$A:0`) and here we set it to 1 for the tokens of the second sentence and
     the last `"[SEP]"` token.'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，我们指定了句子对的模板，应该是`"[CLS] $A [SEP] $B [SEP]"`的形式，其中`$A`代表第一个句子，`$B`代表第二个句子。模板中添加的`:1`代表我们希望为输入的每个部分设置的`类型ID`：默认为0（这就是为什么我们没有`$A:0`），这里我们将其设置为1，用于第二个句子的标记和最后的`"[SEP]"`标记。
 - en: Lastly, we specify the special tokens we used and their IDs in our tokenizer’s
     vocabulary.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，我们在分词器的词汇表中指定了我们使用的特殊标记及其ID。
 - en: 'To check out this worked properly, let’s try to encode the same sentence as
     before:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了检查这是否正常工作，让我们尝试对之前的相同句子进行编码：
 - en: PythonRustNode
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE14]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'To check the results on a pair of sentences, we just pass the two sentences
     to `Tokenizer.encode`:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 要检查一对句子的结果，我们只需将这两个句子传递给`Tokenizer.encode`：
 - en: PythonRustNode
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE15]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: You can then check the type IDs attributed to each token is correct with
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后您可以使用以下方法检查每个标记分配的类型ID是否正确
 - en: PythonRustNode
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE16]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: If you save your tokenizer with `Tokenizer.save`, the post-processor will be
     saved along.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您使用`Tokenizer.save`保存了您的分词器，后处理器也会被保存。
 - en: Encoding multiple sentences in a batch
+  id: totrans-70
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 在批量中编码多个句子
 - en: 'To get the full speed of the 🤗 Tokenizers library, it’s best to process your
     texts by batches by using the `Tokenizer.encode_batch` method:'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了获得🤗 Tokenizers库的完整速度，最好通过使用`Tokenizer.encode_batch`方法批量处理文本：
 - en: PythonRustNode
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE17]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: The output is then a list of `Encoding` objects like the ones we saw before.
     You can process together as many texts as you like, as long as it fits in memory.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后输出是一个`Encoding`对象的列表，就像我们之前看到的那样。只要内存足够，您可以一起处理尽可能多的文本。
 - en: 'To process a batch of sentences pairs, pass two lists to the `Tokenizer.encode_batch`
     method: the list of sentences A and the list of sentences B:'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 要处理一批句子对，将两个列表传递给`Tokenizer.encode_batch`方法：句子A的列表和句子B的列表：
 - en: PythonRustNode
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE18]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'When encoding multiple sentences, you can automatically pad the outputs to
     the longest sentence present by using `Tokenizer.enable_padding`, with the `pad_token`
     and its ID (which we can double-check the id for the padding token with `Tokenizer.token_to_id`
     like before):'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 在编码多个句子时，您可以通过使用`Tokenizer.enable_padding`自动将输出填充到存在的最长句子，使用`pad_token`及其ID（我们可以像之前一样使用`Tokenizer.token_to_id`来双重检查填充标记的ID）：
 - en: PythonRustNode
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE19]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: We can set the `direction` of the padding (defaults to the right) or a given
     `length` if we want to pad every sample to that specific number (here we leave
     it unset to pad to the size of the longest text).
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以设置填充的`方向`（默认为右侧）或给定的`长度`，如果我们想要将每个样本填充到特定数量（这里我们将其保持未设置，以便填充到最长文本的大小）。
 - en: PythonRustNode
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE20]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'In this case, the `attention mask` generated by the tokenizer takes the padding
     into account:'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，分词器生成的`注意力掩码`考虑了填充：
 - en: PythonRustNode
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE21]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Pretrained
+  id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 预训练
 - en: PythonRustNode
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: Using a pretrained tokenizer
+  id: totrans-89
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用预训练的分词器
 - en: You can load any tokenizer from the Hugging Face Hub as long as a `tokenizer.json`
     file is available in the repository.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 只要存储库中有一个`tokenizer.json`文件可用，您就可以从Hugging Face Hub加载任何分词器。
 - en: '[PRE22]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Importing a pretrained tokenizer from legacy vocabulary files
+  id: totrans-92
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 从传统词汇文件导入预训练的分词器
 - en: 'You can also import a pretrained tokenizer directly in, as long as you have
     its vocabulary file. For instance, here is how to import the classic pretrained
     BERT tokenizer:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 只要您有其词汇文件，您也可以直接导入一个预训练的分词器。例如，这是如何导入经典的预训练BERT分词器的方法：
 - en: '[PRE23]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: as long as you have downloaded the file `bert-base-uncased-vocab.txt` with
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 只要您已经下载了文件`bert-base-uncased-vocab.txt`，就可以使用预训练的分词器
 - en: '[PRE24]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
