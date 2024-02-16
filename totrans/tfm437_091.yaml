@@ -1,300 +1,419 @@
 - en: Checks on a Pull Request
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 拉取请求上的检查
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/pr_checks](https://huggingface.co/docs/transformers/v4.37.2/en/pr_checks)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/pr_checks](https://huggingface.co/docs/transformers/v4.37.2/en/pr_checks)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'When you open a pull request on 🤗 Transformers, a fair number of checks will
     be run to make sure the patch you are adding is not breaking anything existing.
     Those checks are of four types:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您在🤗 Transformers上打开拉取请求时，将运行相当多的检查，以确保您添加的补丁不会破坏任何现有内容。这些检查有四种类型：
 - en: regular tests
+  id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 常规测试
 - en: documentation build
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 文档构建
 - en: code and documentation style
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 代码和文档样式
 - en: general repository consistency
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一般存储库一致性
 - en: In this document, we will take a stab at explaining what those various checks
     are and the reason behind them, as well as how to debug them locally if one of
     them fails on your PR.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这份文档中，我们将尝试解释这些各种检查是什么，以及背后的原因，以及如果其中一个在您的PR上失败时如何在本地调试它们。
 - en: 'Note that, ideally, they require you to have a dev install:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，理想情况下，它们要求您进行开发安装：
 - en: '[PRE0]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'or for an editable install:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者进行可编辑安装：
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: inside the Transformers repo. Since the number of optional dependencies of Transformers
     has grown a lot, it’s possible you don’t manage to get all of them. If the dev
     install fails, make sure to install the Deep Learning framework you are working
     with (PyTorch, TensorFlow and/or Flax) then do
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Transformers存储库内。由于Transformers的可选依赖项数量大大增加，您可能无法获得所有依赖项。如果开发安装失败，请确保安装您正在使用的深度学习框架（PyTorch、TensorFlow和/或Flax），然后执行以下操作：
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'or for an editable install:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者进行可编辑安装：
 - en: '[PRE3]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Tests
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 测试
 - en: 'All the jobs that begin with `ci/circleci: run_tests_` run parts of the Transformers
     testing suite. Each of those jobs focuses on a part of the library in a certain
     environment: for instance `ci/circleci: run_tests_pipelines_tf` runs the pipelines
     test in an environment where TensorFlow only is installed.'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '所有以`ci/circleci: run_tests_`开头的作业都运行Transformers测试套件的部分。这些作业中的每一个都专注于库的某个部分在特定环境中运行：例如，`ci/circleci:
+    run_tests_pipelines_tf`在仅安装TensorFlow的环境中运行pipelines测试。'
 - en: 'Note that to avoid running tests when there is no real change in the modules
     they are testing, only part of the test suite is run each time: a utility is run
     to determine the differences in the library between before and after the PR (what
     GitHub shows you in the “Files changes” tab) and picks the tests impacted by that
     diff. That utility can be run locally with:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，为了避免在测试的模块中没有真正更改时运行测试，每次只运行测试套件的一部分：运行一个实用程序来确定库中的差异在PR之前和之后（GitHub在“文件更改”选项卡中显示给您的内容），并选择受该差异影响的测试。该实用程序可以在本地运行：
 - en: '[PRE4]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'from the root of the Transformers repo. It will:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 从Transformers存储库的根目录开始。它将：
 - en: Check for each file in the diff if the changes are in the code or only in comments
     or docstrings. Only the files with real code changes are kept.
+  id: totrans-22
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检查差异中的每个文件，看看更改是在代码中还是仅在注释或文档字符串中。只保留具有真实代码更改的文件。
 - en: Build an internal map that gives for each file of the source code of the library
     all the files it recursively impacts. Module A is said to impact module B if module
     B imports module A. For the recursive impact, we need a chain of modules going
     from module A to module B in which each module imports the previous one.
+  id: totrans-23
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 构建一个内部映射，为库源代码的每个文件提供递归影响的所有文件列表。如果模块B导入模块A，则模块A被认为影响模块B。对于递归影响，我们需要一个从模块A到模块B的模块链，其中每个模块导入前一个模块。
 - en: Apply this map on the files gathered in step 1, which gives us the list of model
     files impacted by the PR.
+  id: totrans-24
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将此映射应用于第1步中收集的文件，这给出了PR影响的模型文件列表。
 - en: Map each of those files to their corresponding test file(s) and get the list
     of tests to run.
+  id: totrans-25
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将这些文件映射到它们对应的测试文件，并获取要运行的测试列表。
 - en: 'When executing the script locally, you should get the results of step 1, 3
     and 4 printed and thus know which tests are run. The script will also create a
     file named `test_list.txt` which contains the list of tests to run, and you can
     run them locally with the following command:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本地执行脚本时，您应该得到步骤1、3和4的结果打印出来，从而知道运行哪些测试。该脚本还将创建一个名为`test_list.txt`的文件，其中包含要运行的测试列表，您可以使用以下命令在本地运行它们：
 - en: '[PRE5]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Just in case anything slipped through the cracks, the full test suite is also
     run daily.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 以防有任何遗漏，完整的测试套件也会每天运行。
 - en: Documentation build
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文档构建
 - en: The `build_pr_documentation` job builds and generates a preview of the documentation
     to make sure everything looks okay once your PR is merged. A bot will add a link
     to preview the documentation in your PR. Any changes you make to the PR are automatically
     updated in the preview. If the documentation fails to build, click on **Details**
     next to the failed job to see where things went wrong. Often, the error is as
     simple as a missing file in the `toctree`.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '`build_pr_documentation`作业构建并生成文档预览，以确保一切在合并您的PR后看起来都没问题。机器人将在您的PR中添加一个预览文档的链接。您对PR所做的任何更改都会自动更新到预览中。如果文档构建失败，请点击失败作业旁边的**详细信息**，查看出了什么问题。通常，错误可能只是`toctree`中缺少文件。'
 - en: If you’re interested in building or previewing the documentation locally, take
     a look at the [`README.md`](https://github.com/huggingface/transformers/tree/main/docs)
     in the docs folder.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您有兴趣在本地构建或预览文档，请查看文档文件夹中的[`README.md`](https://github.com/huggingface/transformers/tree/main/docs)。
 - en: Code and documentation style
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 代码和文档样式
 - en: Code formatting is applied to all the source files, the examples and the tests
     using `black` and `ruff`. We also have a custom tool taking care of the formatting
     of docstrings and `rst` files (`utils/style_doc.py`), as well as the order of
     the lazy imports performed in the Transformers `__init__.py` files (`utils/custom_init_isort.py`).
     All of this can be launched by executing
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 对所有源文件、示例和测试应用代码格式化，使用`black`和`ruff`。我们还有一个自定义工具负责格式化文档字符串和`rst`文件（`utils/style_doc.py`），以及Transformers
+    `__init__.py`文件中执行的延迟导入顺序（`utils/custom_init_isort.py`）。所有这些都可以通过执行来启动
 - en: '[PRE6]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'The CI checks those have been applied inside the `ci/circleci: check_code_quality`
     check. It also runs `ruff`, that will have a basic look at your code and will
     complain if it finds an undefined variable, or one that is not used. To run that
     check locally, use'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 'CI检查这些已应用于`ci/circleci: check_code_quality`检查中。它还运行`ruff`，它将基本查看您的代码，并在找到未定义的变量或未使用的变量时发出投诉。要在本地运行该检查，请使用'
 - en: '[PRE7]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: This can take a lot of time, so to run the same thing on only the files you
     modified in the current branch, run
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 这可能需要很长时间，因此要仅对当前分支中修改的文件运行相同的操作，请运行
 - en: '[PRE8]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: This last command will also run all the additional checks for the repository
     consistency. Let’s have a look at them.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个最后的命令也将运行所有额外的检查，以确保存储库的一致性。让我们来看看它们。
 - en: Repository consistency
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 存储库的一致性
 - en: 'This regroups all the tests to make sure your PR leaves the repository in a
     good state, and is performed by the `ci/circleci: check_repository_consistency`
     check. You can locally run that check by executing the following:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: '这将汇总所有测试，以确保您的PR使存储库保持良好状态，并由`ci/circleci: check_repository_consistency`检查执行。您可以通过执行以下操作在本地运行该检查：'
 - en: '[PRE9]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'This checks that:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些检查包括：
 - en: All objects added to the init are documented (performed by `utils/check_repo.py`)
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有添加到init中的对象都有文档记录（由`utils/check_repo.py`执行）
 - en: All `__init__.py` files have the same content in their two sections (performed
     by `utils/check_inits.py`)
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有`__init__.py`文件在其两个部分中具有相同的内容（由`utils/check_inits.py`执行）
 - en: All code identified as a copy from another module is consistent with the original
     (performed by `utils/check_copies.py`)
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有被识别为从另一个模块复制的代码与原始代码一致（由`utils/check_copies.py`执行）
 - en: All configuration classes have at least one valid checkpoint mentioned in their
     docstrings (performed by `utils/check_config_docstrings.py`)
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有配置类在其docstrings中至少提到一个有效的检查点（由`utils/check_config_docstrings.py`执行）
 - en: All configuration classes only contain attributes that are used in corresponding
     modeling files (performed by `utils/check_config_attributes.py`)
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有配置类只包含在相应建模文件中使用的属性（由`utils/check_config_attributes.py`执行）
 - en: The translations of the READMEs and the index of the doc have the same model
     list as the main README (performed by `utils/check_copies.py`)
+  id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: README和文档索引的翻译与主README中的模型列表相同（由`utils/check_copies.py`执行）
 - en: The auto-generated tables in the documentation are up to date (performed by
     `utils/check_table.py`)
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 文档中的自动生成表是最新的（由`utils/check_table.py`执行）
 - en: The library has all objects available even if not all optional dependencies
     are installed (performed by `utils/check_dummies.py`)
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 即使没有安装所有可选依赖项，库中仍有所有对象可用（由`utils/check_dummies.py`执行）
 - en: All docstrings properly document the arguments in the signature of the object
     (performed by `utils/check_docstrings.py`)
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有docstrings都正确记录了对象签名中的参数（由`utils/check_docstrings.py`执行）
 - en: Should this check fail, the first two items require manual fixing, the last
     four can be fixed automatically for you by running the command
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果此检查失败，前两项需要手动修复，最后四项可以通过运行以下命令自动修复
 - en: '[PRE10]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Additional checks concern PRs that add new models, mainly that:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 额外的检查涉及添加新模型的PR，主要是：
 - en: All models added are in an Auto-mapping (performed by `utils/check_repo.py`)
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有添加的模型都在Auto-mapping中（由`utils/check_repo.py`执行）
 - en: All models are properly tested (performed by `utils/check_repo.py`)
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有模型都经过适当的测试（由`utils/check_repo.py`执行）
 - en: Check copies
+  id: totrans-58
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 检查副本
 - en: Since the Transformers library is very opinionated with respect to model code,
     and each model should fully be implemented in a single file without relying on
     other models, we have added a mechanism that checks whether a copy of the code
     of a layer of a given model stays consistent with the original. This way, when
     there is a bug fix, we can see all other impacted models and choose to trickle
     down the modification or break the copy.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于Transformers库在模型代码方面非常有主见，每个模型应该完全在单个文件中实现，而不依赖于其他模型，因此我们添加了一个机制，检查给定模型的层的代码副本是否与原始代码保持一致。这样，当有bug修复时，我们可以看到所有其他受影响的模型，并选择将修改传递下去或打破副本。
 - en: If a file is a full copy of another file, you should register it in the constant
     `FULL_COPIES` of `utils/check_copies.py`.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果一个文件是另一个文件的完全副本，您应该在`utils/check_copies.py`的常量`FULL_COPIES`中注册它。
 - en: 'This mechanism relies on comments of the form `# Copied from xxx`. The `xxx`
     should contain the whole path to the class of function which is being copied below.
     For instance, `RobertaSelfOutput` is a direct copy of the `BertSelfOutput` class,
     so you can see [here](https://github.com/huggingface/transformers/blob/2bd7a27a671fd1d98059124024f580f8f5c0f3b5/src/transformers/models/roberta/modeling_roberta.py#L289)
     it has a comment:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个机制依赖于形式为`# Copied from xxx`的注释。`xxx`应包含被复制的类或函数的完整路径，该类或函数被复制在下面。例如，`RobertaSelfOutput`是`BertSelfOutput`类的直接副本，因此您可以在[这里](https://github.com/huggingface/transformers/blob/2bd7a27a671fd1d98059124024f580f8f5c0f3b5/src/transformers/models/roberta/modeling_roberta.py#L289)看到它有一个注释：
 - en: '[PRE11]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Note that instead of applying this to a whole class, you can apply it to the
     relevant methods that are copied from. For instance [here](https://github.com/huggingface/transformers/blob/2bd7a27a671fd1d98059124024f580f8f5c0f3b5/src/transformers/models/roberta/modeling_roberta.py#L598)
     you can see how `RobertaPreTrainedModel._init_weights` is copied from the same
     method in `BertPreTrainedModel` with the comment:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，您可以将此应用于整个类，也可以将其应用于从中复制的相关方法。例如，在[这里](https://github.com/huggingface/transformers/blob/2bd7a27a671fd1d98059124024f580f8f5c0f3b5/src/transformers/models/roberta/modeling_roberta.py#L598)中，您可以看到`RobertaPreTrainedModel._init_weights`是从`BertPreTrainedModel`中的相同方法复制的，并带有注释：
 - en: '[PRE12]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Sometimes the copy is exactly the same except for names: for instance in `RobertaAttention`,
     we use `RobertaSelfAttention` insted of `BertSelfAttention` but other than that,
     the code is exactly the same. This is why `# Copied from` supports simple string
@@ -302,53 +421,80 @@
     means the code is copied with all instances of `foo` being replaced by `bar`.
     You can see how it used [here](https://github.com/huggingface/transformers/blob/2bd7a27a671fd1d98059124024f580f8f5c0f3b5/src/transformers/models/roberta/modeling_roberta.py#L304C1-L304C86)
     in `RobertaAttention` with the comment:'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时副本完全相同，除了名称：例如，在`RobertaAttention`中，我们使用`RobertaSelfAttention`而不是`BertSelfAttention`，但除此之外，代码完全相同。这就是为什么`#
+    Copied from`支持简单的字符串替换，语法如下：`Copied from xxx with foo->bar`。这意味着代码被复制，所有`foo`的实例都被替换为`bar`。您可以在`RobertaAttention`中看到它是如何使用的[这里](https://github.com/huggingface/transformers/blob/2bd7a27a671fd1d98059124024f580f8f5c0f3b5/src/transformers/models/roberta/modeling_roberta.py#L304C1-L304C86)。
 - en: '[PRE13]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Note that there shouldn’t be any spaces around the arrow (unless that space
     is part of the pattern to replace of course).
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意箭头周围不应该有任何空格（除非该空格是要替换的模式的一部分）。
 - en: 'You can add several patterns separated by a comma. For instance here `CamemberForMaskedLM`
     is a direct copy of `RobertaForMaskedLM` with two replacements: `Roberta` to `Camembert`
     and `ROBERTA` to `CAMEMBERT`. You can see [here](https://github.com/huggingface/transformers/blob/15082a9dc6950ecae63a0d3e5060b2fc7f15050a/src/transformers/models/camembert/modeling_camembert.py#L929)
     this is done with the comment:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以添加几个用逗号分隔的模式。例如，在这里`CamemberForMaskedLM`是`RobertaForMaskedLM`的直接副本，有两个替换：`Roberta`替换为`Camembert`和`ROBERTA`替换为`CAMEMBERT`。您可以在[这里](https://github.com/huggingface/transformers/blob/15082a9dc6950ecae63a0d3e5060b2fc7f15050a/src/transformers/models/camembert/modeling_camembert.py#L929)看到这是如何完成的，带有注释：
 - en: '[PRE14]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: If the order matters (because one of the replacements might conflict with a
     previous one), the replacements are executed from left to right.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果顺序很重要（因为其中一个替换可能与先前的替换冲突），则替换从左到右执行。
 - en: If the replacements change the formatting (if you replace a short name by a
     very long name for instance), the copy is checked after applying the auto-formatter.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果替换改变了格式（例如，如果您用一个非常长的名称替换一个短名称），则在应用自动格式化程序后会检查副本。
 - en: 'Another way when the patterns are just different casings of the same replacement
     (with an uppercased and a lowercased variants) is just to add the option `all-casing`.
     [Here](https://github.com/huggingface/transformers/blob/15082a9dc6950ecae63a0d3e5060b2fc7f15050a/src/transformers/models/mobilebert/modeling_mobilebert.py#L1237)
     is an example in `MobileBertForSequenceClassification` with the comment:'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 当模式只是相同替换的不同大小写形式（具有大写和小写变体）时，另一种方法就是添加选项`all-casing`。[这里](https://github.com/huggingface/transformers/blob/15082a9dc6950ecae63a0d3e5060b2fc7f15050a/src/transformers/models/mobilebert/modeling_mobilebert.py#L1237)是`MobileBertForSequenceClassification`中的一个示例，带有注释：
 - en: '[PRE15]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'In this case, the code is copied from `BertForSequenceClassification` by replacing:'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，代码是通过替换`BertForSequenceClassification`复制的：
 - en: '`Bert` by `MobileBert` (for instance when using `MobileBertModel` in the init)'
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`Bert`替换为`MobileBert`（例如，在init中使用`MobileBertModel`时）'
 - en: '`bert` by `mobilebert` (for instance when defining `self.mobilebert`)'
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`bert`替换为`mobilebert`（例如在定义`self.mobilebert`时）'
 - en: '`BERT` by `MOBILEBERT` (in the constant `MOBILEBERT_INPUTS_DOCSTRING`)'
+  id: totrans-77
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`BERT`替换为`MOBILEBERT`（在常量`MOBILEBERT_INPUTS_DOCSTRING`中）'
