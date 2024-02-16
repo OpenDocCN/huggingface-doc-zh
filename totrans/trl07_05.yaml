@@ -1,39 +1,39 @@
 - en: Training FAQ
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 训练常见问题
 - en: 'Original text: [https://huggingface.co/docs/trl/how_to_train](https://huggingface.co/docs/trl/how_to_train)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/trl/how_to_train](https://huggingface.co/docs/trl/how_to_train)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: What Metrics Should I Look at?
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 我应该关注哪些指标？
 - en: When performing classical supervised fine-tuning of language models, the loss
     (especially the validation loss) serves as a good indicator of the training progress.
     However, in Reinforcement Learning (RL), the loss becomes less informative about
     the model’s performance, and its value may fluctuate while the actual performance
     improves.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在执行传统的监督微调语言模型时，损失（尤其是验证损失）可以作为训练进展的良好指标。然而，在强化学习（RL）中，损失对模型性能的信息变得不太明确，其值可能会波动，而实际性能却在提高。
 - en: 'To address this, we recommend focusing on two key metrics first:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了解决这个问题，我们建议首先关注两个关键指标：
 - en: '**Mean Reward**: The primary goal is to maximize the reward achieved by the
     model during RL training. **Objective KL Divergence**: KL divergence (Kullback-Leibler
     divergence) measures the dissimilarity between two probability distributions.
@@ -41,97 +41,135 @@
     current model and a reference model. Ideally, we want to keep the KL divergence
     between 0 and 10 to ensure the model’s generated text remains close to what the
     reference model produces.'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '**平均奖励**：主要目标是在RL训练期间最大化模型获得的奖励。**目标KL散度**：KL散度（Kullback-Leibler散度）衡量两个概率分布之间的不相似性。在RL训练的背景下，我们使用它来量化当前模型和参考模型之间的差异。理想情况下，我们希望将KL散度保持在0到10之间，以确保模型生成的文本保持接近参考模型生成的内容。'
 - en: However, there are more metrics that can be useful for debugging, checkout the
     [logging section](logging).
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，还有更多的指标可以用于调试，请查看[日志记录部分](logging)。
 - en: Why Do We Use a Reference Model, and What’s the Purpose of KL Divergence?
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 为什么我们使用参考模型，KL散度的目的是什么？
 - en: When training RL models, optimizing solely for reward may lead to unexpected
     behaviors, where the model exploits the environment in ways that don’t align with
     good language generation. In the case of RLHF, we use a reward model trained to
     predict whether a generated text is highly ranked by humans.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在训练RL模型时，仅优化奖励可能导致意外行为，模型以不符合良好语言生成的方式利用环境。在RLHF的情况下，我们使用一个训练有素的奖励模型来预测生成文本是否被人类高度评价。
 - en: However, the RL model being optimized against the reward model may learn patterns
     that yield high reward but do not represent good language. This can result in
     extreme cases where the model generates texts with excessive exclamation marks
     or emojis to maximize the reward. In some worst-case scenarios, the model may
     generate patterns completely unrelated to natural language yet receive high rewards,
     similar to adversarial attacks.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，针对奖励模型进行优化的RL模型可能会学习到产生高奖励的模式，但这些模式并不代表良好的语言。这可能导致极端情况，即模型生成带有过多感叹号或表情符号的文本，以最大化奖励。在一些最坏的情况下，模型可能生成与自然语言完全无关的模式，但却获得高奖励，类似于对抗性攻击。
 - en: '![](../Images/1f9d0c78b6bd70ca9e768b8d3302bb7f.png)'
+  id: totrans-11
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/1f9d0c78b6bd70ca9e768b8d3302bb7f.png)'
 - en: '**Figure:** Samples without a KL penalty from [https://arxiv.org/pdf/1909.08593.pdf](https://arxiv.org/pdf/1909.08593.pdf).'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '**图表：** 没有KL惩罚的样本来自[https://arxiv.org/pdf/1909.08593.pdf](https://arxiv.org/pdf/1909.08593.pdf)。'
 - en: To address this issue, we add a penalty to the reward function based on the
     KL divergence between the current model and the reference model. By doing this,
     we encourage the model to stay close to what the reference model generates.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了解决这个问题，我们根据当前模型和参考模型之间的KL散度向奖励函数添加了一个惩罚。通过这样做，我们鼓励模型保持接近参考模型生成的内容。
 - en: What Is the Concern with Negative KL Divergence?
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 负KL散度的问题是什么？
 - en: 'If you generate text by purely sampling from the model distribution things
     work fine in general. But when you use the `generate` method there are a few caveats
     because it does not always purely sample depending on the settings which can cause
     KL-divergence to go negative. Essentially when the active model achieves `log_p_token_active
     < log_p_token_ref` we get negative KL-div. This can happen in a several cases:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您纯粹从模型分布中进行抽样生成文本，通常情况下效果良好。但是当您使用`generate`方法时，由于设置不同，可能会出现一些注意事项，这可能导致KL散度变为负值。基本上，当活动模型实现`log_p_token_active
+    < log_p_token_ref`时，我们会得到负KL散度。这可能发生在几种情况下：
 - en: '**top-k sampling**: the model can smooth out the probability distribution causing
     the top-k tokens having a smaller probability than those of the reference model
     but they still are selected'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**top-k抽样**：模型可以平滑概率分布，导致前k个标记的概率小于参考模型的概率，但它们仍然被选中。'
 - en: '**min_length**: this ignores the EOS token until `min_length` is reached. thus
     the model can assign a very low log prob to the EOS token and very high probs
     to all others until min_length is reached'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**min_length**：这会忽略EOS标记，直到达到`min_length`。因此，模型可以将EOS标记的对数概率设为非常低，并将所有其他标记的概率设为非常高，直到达到min_length。'
 - en: These are just a few examples. Why is negative KL an issue? The total reward
     `R` is computed `R = r - beta * KL` so if the model can learn how to drive KL-divergence
     negative it effectively gets a positive reward. In many cases it can be much easier
     to exploit such a bug in the generation than actually learning the reward function.
     In addition the KL can become arbitrarily small thus the actual reward can be
     very small compared to it.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 这只是一些例子。为什么负KL是一个问题？总奖励`R`计算为`R = r - beta * KL`，因此如果模型能够学习如何使KL散度为负值，它实际上会获得正奖励。在许多情况下，利用这种生成中的错误比实际学习奖励函数要容易得多。此外，KL可以变得任意小，因此实际奖励与之相比可能非常小。
 - en: So how should you generate text for PPO training? Let’s have a look!
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么，您应该如何为PPO训练生成文本呢？让我们来看看！
 - en: How to generate text for training?
+  id: totrans-20
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 如何为训练生成文本？
 - en: 'In order to avoid the KL issues described above we recommend to use the following
     settings:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了避免上述KL问题，我们建议使用以下设置：
 - en: '[PRE0]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: With these settings we usually don’t encounter any issues. You can also experiments
     with other settings but if you encounter issues with negative KL-divergence try
     to go back to these and see if they persist.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: How can debug your own use-case?
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Debugging the RL pipeline can be challenging due to its complexity. Here are
     some tips and suggestions to make the process easier:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: '**Start from a working example**: Begin with a working example from the trl
@@ -140,6 +178,7 @@
     example, you can start by replacing the model in the example and once you figure
     out the best hyperparameters try to switch to your dataset and reward model. If
     you change everything at once you won’t know where a potential problem comes from.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -148,6 +187,7 @@
     a convenient timescale so try to use small model variants during the development
     phase and scale up once that works. That being said you sometimes have to be careful
     as small models might not have the capacity to solve a complicated task either.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -155,6 +195,7 @@
     from there. Your use-case might require for example a complicated reward function
     consisting of many different rewards - try to use one signal first and see if
     you can optimize that and then add more complexity after that.'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -162,6 +203,7 @@
     is generating. Maybe there is a big in your post-processing or your prompt. Due
     to bad settings you might cut-off generations too soon. These things are very
     hard to see on the metrics but very obvious if you look at the generations.'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -172,10 +214,12 @@
     of your dataset. Finally, maybe the reward is dominated by the query which the
     model can’t affect so you might need to normalize this (e.g. reward of query+response
     minus reward of the query).'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: These are just a few tips that we find helpful - if you have more useful tricks
     feel free to open a PR to add them as well!
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
