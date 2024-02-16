@@ -1,24 +1,15 @@
 - en: Methods and tools for efficient training on a single GPU
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_one](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_one)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This guide demonstrates practical techniques that you can use to increase the
@@ -26,21 +17,26 @@
     up the training, or both. If you’d like to understand how GPU is utilized during
     training, please refer to the [Model training anatomy](model_memory_anatomy) conceptual
     guide first. This guide focuses on practical techniques.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: If you have access to a machine with multiple GPUs, these approaches are still
     valid, plus you can leverage additional methods outlined in the [multi-GPU section](perf_train_gpu_many).
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: 'When training large models, there are two aspects that should be considered
     at the same time:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: Data throughput/training time
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Model performance
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -49,6 +45,7 @@
     GPU memory to its limit. If the desired batch size exceeds the limits of the GPU
     memory, the memory optimization techniques, such as gradient accumulation, can
     help.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: However, if the preferred batch size fits into memory, there’s no reason to
@@ -56,70 +53,89 @@
     because one can use a large batch size, does not necessarily mean they should.
     As part of hyperparameter tuning, you should determine which batch size yields
     the best results and then optimize resources accordingly.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: 'The methods and tools covered in this guide can be classified based on the
     effect they have on the training process:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: '| Method/tool | Improves training speed | Optimizes memory utilization |'
+  id: totrans-11
   prefs: []
   type: TYPE_TB
 - en: '| :-- | :-- | :-- |'
+  id: totrans-12
   prefs: []
   type: TYPE_TB
 - en: '| [Batch size choice](#batch-size-choice) | Yes | Yes |'
+  id: totrans-13
   prefs: []
   type: TYPE_TB
 - en: '| [Gradient accumulation](#gradient-accumulation) | No | Yes |'
+  id: totrans-14
   prefs: []
   type: TYPE_TB
 - en: '| [Gradient checkpointing](#gradient-checkpointing) | No | Yes |'
+  id: totrans-15
   prefs: []
   type: TYPE_TB
 - en: '| [Mixed precision training](#mixed-precision-training) | Yes | (No) |'
+  id: totrans-16
   prefs: []
   type: TYPE_TB
 - en: '| [Optimizer choice](#optimizer-choice) | Yes | Yes |'
+  id: totrans-17
   prefs: []
   type: TYPE_TB
 - en: '| [Data preloading](#data-preloading) | Yes | No |'
+  id: totrans-18
   prefs: []
   type: TYPE_TB
 - en: '| [DeepSpeed Zero](#deepspeed-zero) | No | Yes |'
+  id: totrans-19
   prefs: []
   type: TYPE_TB
 - en: '| [torch.compile](#using-torchcompile) | Yes | No |'
+  id: totrans-20
   prefs: []
   type: TYPE_TB
 - en: '| [Parameter-Efficient Fine Tuning (PEFT)](#peft) | No | Yes |'
+  id: totrans-21
   prefs: []
   type: TYPE_TB
 - en: 'Note: when using mixed precision with a small model and a large batch size,
     there will be some memory savings but with a large model and a small batch size,
     the memory use will be larger.'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: You can combine the above methods to get a cumulative effect. These techniques
     are available to you whether you are training your model with [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     or writing a pure PyTorch loop, in which case you can [configure these optimizations
     with 🤗 Accelerate](#using-accelerate).
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: 'If these methods do not result in sufficient gains, you can explore the following
     options:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '[Look into building your own custom Docker container with efficient softare
     prebuilds](#efficient-software-prebuilds)'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[Consider a model that uses Mixture of Experts (MoE)](#mixture-of-experts)'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[Convert your model to BetterTransformer to leverage PyTorch native attention](#using-pytorch-native-attention)'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -127,9 +143,11 @@
     server-grade GPU like A100, consider moving to a multi-GPU setup. All these approaches
     are still valid in a multi-GPU setup, plus you can leverage additional parallelism
     techniques outlined in the [multi-GPU section](perf_train_gpu_many).
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: Batch size choice
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -137,27 +155,37 @@
     It is recommended to use batch sizes and input/output neuron counts that are of
     size 2^N. Often it’s a multiple of 8, but it can be higher depending on the hardware
     being used and the model’s dtype.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
 - en: For reference, check out NVIDIA’s recommendation for [input/output neuron counts](https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#input-features)
     and [batch size](https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#batch-size)
     for fully connected layers (which are involved in GEMMs (General Matrix Multiplications)).
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关参考，请查看NVIDIA关于全连接层（涉及GEMMs（通用矩阵乘法））的[输入/输出神经元计数](https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#input-features)和[批次大小](https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#batch-size)的建议。
 - en: '[Tensor Core Requirements](https://docs.nvidia.com/deeplearning/performance/dl-performance-matrix-multiplication/index.html#requirements-tc)
     define the multiplier based on the dtype and the hardware. For instance, for fp16
     data type a multiple of 8 is recommended, unless it’s an A100 GPU, in which case
     use multiples of 64.'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Tensor Core要求](https://docs.nvidia.com/deeplearning/performance/dl-performance-matrix-multiplication/index.html#requirements-tc)根据数据类型和硬件定义乘数。例如，对于fp16数据类型，推荐使用8的倍数，除非是A100
+    GPU，此时使用64的倍数。'
 - en: For parameters that are small, consider also [Dimension Quantization Effects](https://docs.nvidia.com/deeplearning/performance/dl-performance-matrix-multiplication/index.html#dim-quantization).
     This is where tiling happens and the right multiplier can have a significant speedup.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于较小的参数，还要考虑[维度量化效应](https://docs.nvidia.com/deeplearning/performance/dl-performance-matrix-multiplication/index.html#dim-quantization)。这是瓦片化发生的地方，正确的乘数可以显著加快速度。
 - en: Gradient Accumulation
+  id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 梯度累积
 - en: The **gradient accumulation** method aims to calculate gradients in smaller
     increments instead of computing them for the entire batch at once. This approach
     involves iteratively calculating gradients in smaller batches by performing forward
@@ -168,22 +196,32 @@
     by the GPU’s memory capacity. However, it is important to note that the additional
     forward and backward passes introduced by gradient accumulation can slow down
     the training process.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: '**梯度累积**方法旨在以较小的增量计算梯度，而不是一次为整个批次计算梯度。这种方法涉及通过模型执行前向和反向传递，并在过程中累积梯度来迭代计算较小批次的梯度。一旦积累了足够数量的梯度，就会执行模型的优化步骤。通过使用梯度累积，可以将**有效批次大小**增加到GPU内存容量所施加的限制之外。然而，需要注意的是，梯度累积引入的额外前向和反向传递可能会减慢训练过程。'
 - en: 'You can enable gradient accumulation by adding the `gradient_accumulation_steps`
     argument to [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments):'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过向[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)添加`gradient_accumulation_steps`参数来启用梯度累积：
 - en: '[PRE0]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: In the above example, your effective batch size becomes 4.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 在上述示例中，您的有效批次大小变为4。
 - en: Alternatively, use 🤗 Accelerate to gain full control over the training loop.
     Find the 🤗 Accelerate example [further down in this guide](#using-accelerate).
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，使用🤗 Accelerate来完全控制训练循环。在本指南的[后面](#using-accelerate)找到🤗 Accelerate示例。
 - en: While it is advised to max out GPU usage as much as possible, a high number
     of gradient accumulation steps can result in a more pronounced training slowdown.
     Consider the following example. Let’s say, the `per_device_train_batch_size=4`
@@ -192,54 +230,76 @@
     `gradient_accumulation_steps` to 64\. Instead, keep `per_device_train_batch_size=4`
     and set `gradient_accumulation_steps=16`. This results in the same effective batch
     size while making better use of the available GPU resources.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽可能地最大化GPU使用率是建议的，但是高数量的梯度累积步骤可能会导致训练减速更加明显。考虑以下示例。假设`per_device_train_batch_size=4`，没有梯度累积达到了GPU的极限。如果您想要使用大小为64的批次进行训练，请不要将`per_device_train_batch_size`设置为1，并将`gradient_accumulation_steps`设置为64。相反，保持`per_device_train_batch_size=4`，并设置`gradient_accumulation_steps=16`。这样可以实现相同的有效批次大小，同时更好地利用可用的GPU资源。
 - en: For additional information, please refer to batch size and gradient accumulation
     benchmarks for [RTX-3090](https://github.com/huggingface/transformers/issues/14608#issuecomment-1004392537)
     and [A100](https://github.com/huggingface/transformers/issues/15026#issuecomment-1005033957).
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关更多信息，请参考[RTX-3090](https://github.com/huggingface/transformers/issues/14608#issuecomment-1004392537)和[A100](https://github.com/huggingface/transformers/issues/15026#issuecomment-1005033957)的批次大小和梯度累积基准。
 - en: Gradient Checkpointing
+  id: totrans-42
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 梯度检查点
 - en: Some large models may still face memory issues even when the batch size is set
     to 1 and gradient accumulation is used. This is because there are other components
     that also require memory storage.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 即使将批次大小设置为1并使用梯度累积，一些大型模型仍可能面临内存问题。这是因为还有其他组件也需要内存存储。
 - en: Saving all activations from the forward pass in order to compute the gradients
     during the backward pass can result in significant memory overhead. The alternative
     approach of discarding the activations and recalculating them when needed during
     the backward pass, would introduce a considerable computational overhead and slow
     down the training process.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 保存前向传递中的所有激活以便在反向传递期间计算梯度可能会导致显着的内存开销。另一种方法是在反向传递期间丢弃激活并在需要时重新计算它们，这将引入相当大的计算开销并减慢训练过程。
 - en: '**Gradient checkpointing** offers a compromise between these two approaches
     and saves strategically selected activations throughout the computational graph
     so only a fraction of the activations need to be re-computed for the gradients.
     For an in-depth explanation of gradient checkpointing, refer to [this great article](https://medium.com/tensorflow/fitting-larger-networks-into-memory-583e3c758ff9).'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '**梯度检查点**提供了这两种方法之间的折衷方案，并在计算图中保存了策略性选择的激活，因此只需重新计算一小部分激活以获得梯度。有关梯度检查点的深入解释，请参阅[这篇很棒的文章](https://medium.com/tensorflow/fitting-larger-networks-into-memory-583e3c758ff9)。'
 - en: 'To enable gradient checkpointing in the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
     pass the corresponding a flag to [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments):'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)中启用梯度检查点，请将相应的标志传递给[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)：
 - en: '[PRE1]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Alternatively, use 🤗 Accelerate - find the 🤗 Accelerate example [further in
     this guide](#using-accelerate).
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，使用🤗 Accelerate-在本指南中找到🤗 Accelerate示例[（#使用加速）](#using-accelerate)。
 - en: While gradient checkpointing may improve memory efficiency, it slows training
     by approximately 20%.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然梯度检查点可能提高内存效率，但会使训练速度减慢约20%。
 - en: Mixed precision training
+  id: totrans-50
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 混合精度训练
 - en: '**Mixed precision training** is a technique that aims to optimize the computational
     efficiency of training models by utilizing lower-precision numerical formats for
     certain variables. Traditionally, most models use 32-bit floating point precision
@@ -249,18 +309,24 @@
     point (fp16 or float16), we can speed up the computations. Because in this approach
     some computations are performed in half-precision, while some are still in full
     precision, the approach is called mixed precision training.'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '**混合精度训练**是一种旨在通过利用较低精度数值格式来处理某些变量来优化训练模型的计算效率的技术。传统上，大多数模型使用32位浮点精度（fp32或float32）来表示和处理变量。然而，并非所有变量都需要这种高精度级别才能获得准确的结果。通过将某些变量的精度降低到较低的数值格式，如16位浮点（fp16或float16），我们可以加快计算速度。因为在这种方法中，一些计算是以半精度进行的，而一些仍然是以全精度进行的，所以这种方法被称为混合精度训练。'
 - en: Most commonly mixed precision training is achieved by using fp16 (float16) data
     types, however, some GPU architectures (such as the Ampere architecture) offer
     bf16 and tf32 (CUDA internal data type) data types. Check out the [NVIDIA Blog](https://developer.nvidia.com/blog/accelerating-ai-training-with-tf32-tensor-cores/)
     to learn more about the differences between these data types.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 最常见的混合精度训练是通过使用fp16（float16）数据类型来实现的，但是一些GPU架构（例如Ampere架构）提供了bf16和tf32（CUDA内部数据类型）数据类型。查看[NVIDIA博客](https://developer.nvidia.com/blog/accelerating-ai-training-with-tf32-tensor-cores/)以了解这些数据类型之间的区别。
 - en: fp16
+  id: totrans-53
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: fp16
 - en: The main advantage of mixed precision training comes from saving the activations
     in half precision (fp16). Although the gradients are also computed in half precision
     they are converted back to full precision for the optimization step so no memory
@@ -268,89 +334,130 @@
     it can also lead to more GPU memory being utilized, especially for small batch
     sizes. This is because the model is now present on the GPU in both 16-bit and
     32-bit precision (1.5x the original model on the GPU).
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 混合精度训练的主要优势来自于将激活保存在半精度（fp16）中。尽管梯度也是以半精度计算的，但它们在优化步骤中被转换回全精度，因此在这里没有节省内存。虽然混合精度训练可以加快计算速度，但也可能导致更多的GPU内存被利用，特别是对于小批量大小。这是因为模型现在以16位和32位精度（GPU上原始模型的1.5倍）存在于GPU上。
 - en: 'To enable mixed precision training, set the `fp16` flag to `True`:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 要启用混合精度训练，请将`fp16`标志设置为`True`：
 - en: '[PRE2]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: If you prefer to use 🤗 Accelerate, find the 🤗 Accelerate example [further in
     this guide](#using-accelerate).
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您更喜欢使用🤗 Accelerate，请在本指南中找到🤗 Accelerate示例[（#使用加速）](#using-accelerate)。
 - en: BF16
+  id: totrans-58
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: BF16
 - en: If you have access to an Ampere or newer hardware you can use bf16 for mixed
     precision training and evaluation. While bf16 has a worse precision than fp16,
     it has a much bigger dynamic range. In fp16 the biggest number you can have is
     `65535` and any number above that will result in an overflow. A bf16 number can
     be as large as `3.39e+38` (!) which is about the same as fp32 - because both have
     8-bits used for the numerical range.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您可以访问Ampere或更新的硬件，您可以使用bf16进行混合精度训练和评估。虽然bf16的精度比fp16差，但它具有更大的动态范围。在fp16中，您可以拥有的最大数字是`65535`，任何超过这个数字的数字都会导致溢出。bf16的数字可以达到`3.39e+38`（！），这大约与fp32相同-因为两者都使用了8位用于数值范围。
 - en: 'You can enable BF16 in the 🤗 Trainer with:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在🤗 Trainer中启用BF16：
 - en: '[PRE3]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: TF32
+  id: totrans-62
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: TF32
 - en: 'The Ampere hardware uses a magical data type called tf32\. It has the same
     numerical range as fp32 (8-bits), but instead of 23 bits precision it has only
     10 bits (same as fp16) and uses only 19 bits in total. It’s “magical” in the sense
     that you can use the normal fp32 training and/or inference code and by enabling
     tf32 support you can get up to 3x throughput improvement. All you need to do is
     to add the following to your code:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: Ampere硬件使用一种名为tf32的神奇数据类型。它具有与fp32相同的数值范围（8位），但是精度只有10位（与fp16相同），总共只使用了19位。它在这种意义上是“神奇的”，即您可以使用正常的fp32训练和/或推理代码，并通过启用tf32支持，您可以获得高达3倍的吞吐量改进。您只需要将以下内容添加到您的代码中：
 - en: '[PRE4]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: CUDA will automatically switch to using tf32 instead of fp32 where possible,
     assuming that the used GPU is from the Ampere series.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: CUDA将在可能的情况下自动切换到使用tf32而不是fp32，假设所使用的GPU来自Ampere系列。
 - en: According to [NVIDIA research](https://developer.nvidia.com/blog/accelerating-ai-training-with-tf32-tensor-cores/),
     the majority of machine learning training workloads show the same perplexity and
     convergence with tf32 training as with fp32. If you’re already using fp16 or bf16
     mixed precision it may help with the throughput as well.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据[NVIDIA研究](https://developer.nvidia.com/blog/accelerating-ai-training-with-tf32-tensor-cores/)，大多数机器学习训练工作负载显示出与fp32相同的困惑度和收敛性。如果您已经在使用fp16或bf16混合精度，这也可能有助于提高吞吐量。
 - en: 'You can enable this mode in the 🤗 Trainer:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在🤗 Trainer中启用此模式：
 - en: '[PRE5]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: tf32 can’t be accessed directly via `tensor.to(dtype=torch.tf32)` because it
     is an internal CUDA data type. You need `torch>=1.7` to use tf32 data types.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: tf32无法通过`tensor.to(dtype=torch.tf32)`直接访问，因为它是内部CUDA数据类型。您需要`torch>=1.7`才能使用tf32数据类型。
 - en: 'For additional information on tf32 vs other precisions, please refer to the
     following benchmarks: [RTX-3090](https://github.com/huggingface/transformers/issues/14608#issuecomment-1004390803)
     and [A100](https://github.com/huggingface/transformers/issues/15026#issuecomment-1004543189).'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关tf32与其他精度的更多信息，请参考以下基准测试：[RTX-3090](https://github.com/huggingface/transformers/issues/14608#issuecomment-1004390803)和[A100](https://github.com/huggingface/transformers/issues/15026#issuecomment-1004543189)。
 - en: Flash Attention 2
+  id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Flash Attention 2
 - en: You can speedup the training throughput by using Flash Attention 2 integration
     in transformers. Check out the appropriate section in the [single GPU section](./perf_infer_gpu_one#Flash-Attention-2)
     to learn more about how to load a model with Flash Attention 2 modules.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过在transformers中使用Flash Attention 2集成来加快训练吞吐量。查看[单GPU部分](./perf_infer_gpu_one#Flash-Attention-2)中的适当部分，了解如何加载带有Flash
+    Attention 2模块的模型的更多信息。
 - en: Optimizer choice
+  id: totrans-73
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 优化器选择
 - en: The most common optimizer used to train transformer models is Adam or AdamW
     (Adam with weight decay). Adam achieves good convergence by storing the rolling
     average of the previous gradients; however, it adds an additional memory footprint
@@ -359,348 +466,505 @@
     installed for NVIDIA GPUs, or [ROCmSoftwarePlatform/apex](https://github.com/ROCmSoftwarePlatform/apex)
     for AMD GPUs, `adamw_apex_fused` will give you the fastest training experience
     among all supported AdamW optimizers.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于训练变压器模型的最常用优化器是Adam或AdamW（带有权重衰减的Adam）。Adam通过存储先前梯度的滚动平均值实现良好的收敛；然而，它会增加与模型参数数量相同数量级的额外内存占用。为了解决这个问题，您可以使用另一种优化器。例如，如果您在NVIDIA
+    GPU上安装了[NVIDIA/apex](https://github.com/NVIDIA/apex)，或者在AMD GPU上安装了[ROCmSoftwarePlatform/apex](https://github.com/ROCmSoftwarePlatform/apex)，`adamw_apex_fused`将为您提供所有支持的AdamW优化器中最快的训练体验。
 - en: '[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     integrates a variety of optimizers that can be used out of box: `adamw_hf`, `adamw_torch`,
     `adamw_torch_fused`, `adamw_apex_fused`, `adamw_anyprecision`, `adafactor`, or
     `adamw_bnb_8bit`. More optimizers can be plugged in via a third-party implementation.'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)集成了各种可立即使用的优化器：`adamw_hf`、`adamw_torch`、`adamw_torch_fused`、`adamw_apex_fused`、`adamw_anyprecision`、`adafactor`或`adamw_bnb_8bit`。更多优化器可以通过第三方实现插入。'
 - en: 'Let’s take a closer look at two alternatives to AdamW optimizer:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们更仔细地看看两种替代AdamW优化器：
 - en: '`adafactor` which is available in [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)'
+  id: totrans-77
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`adafactor`可在[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)中使用'
 - en: '`adamw_bnb_8bit` is also available in Trainer, but a third-party integration
     is provided below for demonstration.'
+  id: totrans-78
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`adamw_bnb_8bit`也可在Trainer中使用，但以下提供了第三方集成以供演示。'
 - en: 'For comparison, for a 3B-parameter model, like “t5-3b”:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 以3B参数模型“t5-3b”为例进行比较：
 - en: A standard AdamW optimizer will need 24GB of GPU memory because it uses 8 bytes
     for each parameter (8*3 => 24GB)
+  id: totrans-80
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 标准的AdamW优化器将需要24GB的GPU内存，因为它为每个参数使用8字节（8*3 => 24GB）
 - en: Adafactor optimizer will need more than 12GB. It uses slightly more than 4 bytes
     for each parameter, so 4*3 and then some extra.
+  id: totrans-81
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Adafactor优化器将需要超过12GB。它为每个参数使用略多于4字节，因此4*3，然后再加一些。
 - en: 8bit BNB quantized optimizer will use only (2*3) 6GB if all optimizer states
     are quantized.
+  id: totrans-82
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 8位BNB量化优化器将仅使用（2*3）6GB，如果所有优化器状态都被量化。
 - en: Adafactor
+  id: totrans-83
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Adafactor
 - en: Adafactor doesn’t store rolling averages for each element in weight matrices.
     Instead, it keeps aggregated information (sums of rolling averages row- and column-wise),
     significantly reducing its footprint. However, compared to Adam, Adafactor may
     have slower convergence in certain cases.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: Adafactor不会为权重矩阵中的每个元素存储滚动平均值。相反，它保留聚合信息（按行和列的滚动平均和），显著减少了内存占用。然而，与Adam相比，Adafactor在某些情况下可能收敛较慢。
 - en: 'You can switch to Adafactor by setting `optim="adafactor"` in [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments):'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中设置`optim="adafactor"`来切换到Adafactor：
 - en: '[PRE6]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Combined with other approaches (gradient accumulation, gradient checkpointing,
     and mixed precision training) you can notice up to 3x improvement while maintaining
     the throughput! However, as mentioned before, the convergence of Adafactor can
     be worse than Adam.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 结合其他方法（梯度累积、梯度检查点和混合精度训练），您可以在保持吞吐量的同时实现高达3倍的改进！然而，如前所述，Adafactor的收敛性可能比Adam更差。
 - en: 8-bit Adam
+  id: totrans-88
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 8位Adam
 - en: Instead of aggregating optimizer states like Adafactor, 8-bit Adam keeps the
     full state and quantizes it. Quantization means that it stores the state with
     lower precision and dequantizes it only for the optimization. This is similar
     to the idea behind mixed precision training.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 与Adafactor等聚合优化器状态不同，8位Adam保留完整状态并对其进行量化。量化意味着以较低精度存储状态，并仅在优化时对其进行反量化。这类似于混合精度训练的思想。
 - en: 'To use `adamw_bnb_8bit`, you simply need to set `optim="adamw_bnb_8bit"` in
     [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments):'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用`adamw_bnb_8bit`，您只需在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中设置`optim="adamw_bnb_8bit"`：
 - en: '[PRE7]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: However, we can also use a third-party implementation of the 8-bit optimizer
     for demonstration purposes to see how that can be integrated.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，我们也可以使用第三方实现的8位优化器进行演示，以了解如何集成。
 - en: First, follow the installation guide in the GitHub [repo](https://github.com/TimDettmers/bitsandbytes)
     to install the `bitsandbytes` library that implements the 8-bit Adam optimizer.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，按照GitHub [repo](https://github.com/TimDettmers/bitsandbytes)中的安装指南安装实现8位Adam优化器的`bitsandbytes`库。
 - en: 'Next you need to initialize the optimizer. This involves two steps:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来需要初始化优化器。这涉及两个步骤：
 - en: First, group the model’s parameters into two groups - one where weight decay
     should be applied, and the other one where it should not. Usually, biases and
     layer norm parameters are not weight decayed.
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 首先，将模型的参数分为两组 - 一组应用权重衰减，另一组不应用。通常，偏置和层归一化参数不会被权重衰减。
 - en: Then do some argument housekeeping to use the same parameters as the previously
     used AdamW optimizer.
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 然后进行一些参数整理，以使用与先前使用的AdamW优化器相同的参数。
 - en: '[PRE8]'
+  id: totrans-97
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Finally, pass the custom optimizer as an argument to the `Trainer`:'
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，将自定义优化器作为参数传递给`Trainer`：
 - en: '[PRE9]'
+  id: totrans-99
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Combined with other approaches (gradient accumulation, gradient checkpointing,
     and mixed precision training), you can expect to get about a 3x memory improvement
     and even slightly higher throughput as using Adafactor.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 结合其他方法（梯度累积、梯度检查点和混合精度训练），您可以期望获得大约3倍的内存改进，甚至比使用Adafactor时的吞吐量稍高。
 - en: multi_tensor
+  id: totrans-101
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: multi_tensor
 - en: pytorch-nightly introduced `torch.optim._multi_tensor` which should significantly
     speed up the optimizers for situations with lots of small feature tensors. It
     should eventually become the default, but if you want to experiment with it sooner,
     take a look at this GitHub [issue](https://github.com/huggingface/transformers/issues/9965).
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: pytorch-nightly引入了`torch.optim._multi_tensor`，应该显着加快具有大量小特征张量的优化器的速度。最终应该成为默认设置，但如果您想更早尝试它，请查看这个GitHub
+    [问题](https://github.com/huggingface/transformers/issues/9965)。
 - en: Data preloading
+  id: totrans-103
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数据预加载
 - en: 'One of the important requirements to reach great training speed is the ability
     to feed the GPU at the maximum speed it can handle. By default, everything happens
     in the main process, and it might not be able to read the data from disk fast
     enough, and thus create a bottleneck, leading to GPU under-utilization. Configure
     the following arguments to reduce the bottleneck:'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 达到良好训练速度的一个重要要求是能够以GPU能够处理的最大速度提供数据。默认情况下，所有操作都在主进程中进行，可能无法快速从磁盘读取数据，从而导致瓶颈，导致GPU利用率不足。配置以下参数以减少瓶颈：
 - en: '`DataLoader(pin_memory=True, ...)` - ensures the data gets preloaded into the
     pinned memory on CPU and typically leads to much faster transfers from CPU to
     GPU memory.'
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`DataLoader(pin_memory=True, ...)` - 确保数据预加载到CPU上的固定内存中，通常会导致从CPU到GPU内存的传输速度更快。'
 - en: '`DataLoader(num_workers=4, ...)` - spawn several workers to preload data faster.
     During training, watch the GPU utilization stats; if it’s far from 100%, experiment
     with increasing the number of workers. Of course, the problem could be elsewhere,
     so many workers won’t necessarily lead to better performance.'
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`DataLoader(num_workers=4, ...)` - 生成几个工作进程以更快地预加载数据。在训练过程中，观察GPU利用率统计数据；如果远离100％，尝试增加工作进程的数量。当然，问题可能出在其他地方，因此许多工作进程不一定会导致更好的性能。'
 - en: 'When using [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
     the corresponding [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
     are: `dataloader_pin_memory` (`True` by default), and `dataloader_num_workers`
     (defaults to `0`).'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)时，相应的[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)是：`dataloader_pin_memory`（默认为`True`），和`dataloader_num_workers`（默认为`0`）。
 - en: DeepSpeed ZeRO
+  id: totrans-108
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DeepSpeed ZeRO
 - en: DeepSpeed is an open-source deep learning optimization library that is integrated
     with 🤗 Transformers and 🤗 Accelerate. It provides a wide range of features and
     optimizations designed to improve the efficiency and scalability of large-scale
     deep learning training.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: DeepSpeed是一个开源的深度学习优化库，与🤗 Transformers和🤗 Accelerate集成。它提供了各种功能和优化，旨在提高大规模深度学习训练的效率和可扩展性。
 - en: 'If your model fits onto a single GPU and you have enough space to fit a small
     batch size, you don’t need to use DeepSpeed as it’ll only slow things down. However,
     if the model doesn’t fit onto a single GPU or you can’t fit a small batch, you
     can leverage DeepSpeed ZeRO + CPU Offload, or NVMe Offload for much larger models.
     In this case, you need to separately [install the library](main_classes/deepspeed#installation),
     then follow one of the guides to create a configuration file and launch DeepSpeed:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的模型适合单个GPU并且有足够的空间来容纳小批量大小，则不需要使用DeepSpeed，因为它只会减慢速度。但是，如果模型无法适应单个GPU或无法容纳小批量，则可以利用DeepSpeed
+    ZeRO + CPU Offload，或NVMe Offload来处理更大的模型。在这种情况下，您需要单独[安装该库](main_classes/deepspeed#installation)，然后按照指南之一创建配置文件并启动DeepSpeed：
 - en: For an in-depth guide on DeepSpeed integration with [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
     review [the corresponding documentation](main_classes/deepspeed), specifically
     the [section for a single GPU](main_classes/deepspeed#deployment-with-one-gpu).
     Some adjustments are required to use DeepSpeed in a notebook; please take a look
     at the [corresponding guide](main_classes/deepspeed#deployment-in-notebooks).
+  id: totrans-111
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 有关DeepSpeed与[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)集成的详细指南，请查看[相应文档](main_classes/deepspeed)，特别是[单个GPU部署](main_classes/deepspeed#deployment-with-one-gpu)部分。在笔记本中使用DeepSpeed需要进行一些调整；请查看[相应指南](main_classes/deepspeed#deployment-in-notebooks)。
 - en: If you prefer to use 🤗 Accelerate, refer to [🤗 Accelerate DeepSpeed guide](https://huggingface.co/docs/accelerate/en/usage_guides/deepspeed).
+  id: totrans-112
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果您更喜欢使用🤗 Accelerate，请参考[🤗 Accelerate DeepSpeed指南](https://huggingface.co/docs/accelerate/en/usage_guides/deepspeed)。
 - en: Using torch.compile
+  id: totrans-113
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用torch.compile
 - en: 'PyTorch 2.0 introduced a new compile function that doesn’t require any modification
     to existing PyTorch code but can optimize your code by adding a single line of
     code: `model = torch.compile(model)`.'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch 2.0引入了一个新的编译函数，不需要对现有的PyTorch代码进行任何修改，只需添加一行代码即可优化您的代码：`model = torch.compile(model)`。
 - en: 'If using [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
     you only need `to` pass the `torch_compile` option in the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments):'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果使用[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)，您只需要在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中传递`torch_compile`选项：
 - en: '[PRE10]'
+  id: totrans-116
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '`torch.compile` uses Python’s frame evaluation API to automatically create
     a graph from existing PyTorch programs. After capturing the graph, different backends
     can be deployed to lower the graph to an optimized engine. You can find more details
     and benchmarks in [PyTorch documentation](https://pytorch.org/get-started/pytorch-2.0/).'
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.compile`使用Python的帧评估API自动从现有的PyTorch程序创建图。在捕获图之后，可以部署不同的后端以将图降低到优化引擎。您可以在[PyTorch文档](https://pytorch.org/get-started/pytorch-2.0/)中找到更多详细信息和基准测试。'
 - en: '`torch.compile` has a growing list of backends, which can be found in by calling
     `torchdynamo.list_backends()`, each of which with its optional dependencies.'
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torch.compile`有一个不断增长的后端列表，可以通过调用`torchdynamo.list_backends()`找到，每个后端都有其可选依赖项。'
 - en: 'Choose which backend to use by specifying it via `torch_compile_backend` in
     the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments).
     Some of the most commonly used backends are:'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过在[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中指定`torch_compile_backend`来选择要使用的后端。一些最常用的后端包括：
 - en: '**Debugging backends**:'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: '**调试后端**：'
 - en: '`dynamo.optimize("eager")` - Uses PyTorch to run the extracted GraphModule.
     This is quite useful in debugging TorchDynamo issues.'
+  id: totrans-121
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("eager")` - 使用PyTorch运行提取的GraphModule。这在调试TorchDynamo问题时非常有用。'
 - en: '`dynamo.optimize("aot_eager")` - Uses AotAutograd with no compiler, i.e, just
     using PyTorch eager for the AotAutograd’s extracted forward and backward graphs.
     This is useful for debugging, and unlikely to give speedups.'
+  id: totrans-122
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("aot_eager")` - 使用AotAutograd而不使用编译器，即仅使用PyTorch eager进行AotAutograd的提取前向和反向图。这对调试很有用，但不太可能提供加速。'
 - en: '**Training & inference backends**:'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: '**训练和推理后端**：'
 - en: '`dynamo.optimize("inductor")` - Uses TorchInductor backend with AotAutograd
     and cudagraphs by leveraging codegened Triton kernels [Read more](https://dev-discuss.pytorch.org/t/torchinductor-a-pytorch-native-compiler-with-define-by-run-ir-and-symbolic-shapes/747)'
+  id: totrans-124
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("inductor")` - 使用TorchInductor后端，通过利用codegened Triton内核实现AotAutograd和cudagraphs。[阅读更多](https://dev-discuss.pytorch.org/t/torchinductor-a-pytorch-native-compiler-with-define-by-run-ir-and-symbolic-shapes/747)'
 - en: '`dynamo.optimize("nvfuser")` - nvFuser with TorchScript. [Read more](https://dev-discuss.pytorch.org/t/tracing-with-primitives-update-1-nvfuser-and-its-primitives/593)'
+  id: totrans-125
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("nvfuser")` - nvFuser与TorchScript。[阅读更多](https://dev-discuss.pytorch.org/t/tracing-with-primitives-update-1-nvfuser-and-its-primitives/593)'
 - en: '`dynamo.optimize("aot_nvfuser")` - nvFuser with AotAutograd. [Read more](https://dev-discuss.pytorch.org/t/tracing-with-primitives-update-1-nvfuser-and-its-primitives/593)'
+  id: totrans-126
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("aot_nvfuser")` - nvFuser与AotAutograd。[阅读更多](https://dev-discuss.pytorch.org/t/tracing-with-primitives-update-1-nvfuser-and-its-primitives/593)'
 - en: '`dynamo.optimize("aot_cudagraphs")` - cudagraphs with AotAutograd. [Read more](https://github.com/pytorch/torchdynamo/pull/757)'
+  id: totrans-127
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("aot_cudagraphs")` - 使用AotAutograd的cudagraphs。[阅读更多](https://github.com/pytorch/torchdynamo/pull/757)'
 - en: '**Inference-only backend**s:'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: '**仅推理后端**：'
 - en: '`dynamo.optimize("ofi")` - Uses Torchscript optimize_for_inference. [Read more](https://pytorch.org/docs/stable/generated/torch.jit.optimize_for_inference.html)'
+  id: totrans-129
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("ofi")` - 使用Torchscript的optimize_for_inference。[阅读更多](https://pytorch.org/docs/stable/generated/torch.jit.optimize_for_inference.html)'
 - en: '`dynamo.optimize("fx2trt")` - Uses NVIDIA TensorRT for inference optimizations.
     [Read more](https://pytorch.org/TensorRT/tutorials/getting_started_with_fx_path.html)'
+  id: totrans-130
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("fx2trt")` - 使用NVIDIA TensorRT进行推理优化。[阅读更多](https://pytorch.org/TensorRT/tutorials/getting_started_with_fx_path.html)'
 - en: '`dynamo.optimize("onnxrt")` - Uses ONNXRT for inference on CPU/GPU. [Read more](https://onnxruntime.ai/)'
+  id: totrans-131
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("onnxrt")` - 使用ONNXRT进行CPU/GPU推理。[阅读更多](https://onnxruntime.ai/)'
 - en: '`dynamo.optimize("ipex")` - Uses IPEX for inference on CPU. [Read more](https://github.com/intel/intel-extension-for-pytorch)'
+  id: totrans-132
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dynamo.optimize("ipex")` - 使用IPEX进行CPU推理。[阅读更多](https://github.com/intel/intel-extension-for-pytorch)'
 - en: For an example of using `torch.compile` with 🤗 Transformers, check out this
     [blog post on fine-tuning a BERT model for Text Classification using the newest
     PyTorch 2.0 features](https://www.philschmid.de/getting-started-pytorch-2-0-transformers)
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`torch.compile`与🤗 Transformers的示例，请查看这篇[博文，介绍如何使用最新的PyTorch 2.0功能微调BERT模型进行文本分类](https://www.philschmid.de/getting-started-pytorch-2-0-transformers)
 - en: Using 🤗 PEFT
+  id: totrans-134
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用🤗 PEFT
 - en: '[Parameter-Efficient Fine Tuning (PEFT)](https://huggingface.co/blog/peft)
     methods freeze the pretrained model parameters during fine-tuning and add a small
     number of trainable parameters (the adapters) on top of it.'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: '[参数高效微调（PEFT）](https://huggingface.co/blog/peft)方法在微调期间冻结预训练模型参数，并在其上添加少量可训练参数（适配器）。'
 - en: As a result the [memory associated to the optimizer states and gradients](https://huggingface.co/docs/transformers/model_memory_anatomy#anatomy-of-models-memory)
     are greatly reduced.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，[与优化器状态和梯度相关的内存](https://huggingface.co/docs/transformers/model_memory_anatomy#anatomy-of-models-memory)大大减少。
 - en: 'For example with a vanilla AdamW, the memory requirement for the optimizer
     state would be:'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，对于普通的AdamW，优化器状态的内存需求将是：
 - en: 'fp32 copy of parameters: 4 bytes/param'
+  id: totrans-138
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: fp32参数的副本：4字节/参数
 - en: 'Momentum: 4 bytes/param'
+  id: totrans-139
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 动量：4字节/参数
 - en: 'Variance: 4 bytes/param'
+  id: totrans-140
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 方差：4字节/参数
 - en: Suppose a model with 7B parameters and 200 millions parameters injected with
     [Low Rank Adapters](https://huggingface.co/docs/peft/conceptual_guides/lora).
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设一个具有70亿参数和2亿参数注入[低秩适配器](https://huggingface.co/docs/peft/conceptual_guides/lora)的模型。
 - en: The memory requirement for the optimizer state of the plain model would be 12
     * 7 = 84 GB (assuming 7B trainable parameters).
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 普通模型的优化器状态的内存需求将为12 * 7 = 84 GB（假设有7B可训练参数）。
 - en: Adding Lora increases slightly the memory associated to the model weights and
     substantially decreases memory requirement for the optimizer state to 12 * 0.2
     = 2.4GB.
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 添加Lora会略微增加与模型权重相关的内存，并大幅减少优化器状态的内存需求至12 * 0.2 = 2.4GB。
 - en: Read more about PEFT and its detailed usage in [the PEFT documentation](https://huggingface.co/docs/peft/)
     or [PEFT repository](https://github.com/huggingface/peft).
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[PEFT文档](https://huggingface.co/docs/peft/)或[PEFT存储库](https://github.com/huggingface/peft)中详细了解PEFT及其详细用法。
 - en: Using 🤗 Accelerate
+  id: totrans-145
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用🤗 Accelerate
 - en: With [🤗 Accelerate](https://huggingface.co/docs/accelerate/index) you can use
     the above methods while gaining full control over the training loop and can essentially
     write the loop in pure PyTorch with some minor modifications.
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[🤗 Accelerate](https://huggingface.co/docs/accelerate/index)可以在完全控制训练循环的同时使用上述方法，并且基本上可以使用纯PyTorch编写循环并进行一些微小修改。
 - en: 'Suppose you have combined the methods in the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
     like so:'
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您已将[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)中的方法组合如下：
 - en: '[PRE11]'
+  id: totrans-148
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'The full example training loop with 🤗 Accelerate is only a handful of lines
     of code long:'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用🤗 Accelerate的完整示例训练循环只有几行代码：
 - en: '[PRE12]'
+  id: totrans-150
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: First we wrap the dataset in a [`DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader).
     Then we can enable gradient checkpointing by calling the model’s [gradient_checkpointing_enable()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.gradient_checkpointing_enable)
     method. When we initialize the [`Accelerator`](https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator)
@@ -708,37 +972,50 @@
     of it for us in the `prepare` call. During the [`prepare`](https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator.prepare)
     call the dataloader will also be distributed across workers should we use multiple
     GPUs. We use the same [8-bit optimizer](#8-bit-adam) from the earlier example.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，我们将数据集包装在[`DataLoader`](https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader)中。然后，我们可以通过调用模型的[gradient_checkpointing_enable()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.gradient_checkpointing_enable)方法启用梯度检查点。当我们初始化[`Accelerator`](https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator)时，我们可以指定是否要使用混合精度训练，并且它将在`prepare`调用中为我们处理。在[`prepare`](https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator.prepare)调用期间，如果我们使用多个GPU，数据加载器也将分布在工作进程之间。我们使用与之前示例相同的[8位优化器](#8-bit-adam)。
 - en: 'Finally, we can add the main training loop. Note that the `backward` call is
     handled by 🤗 Accelerate. We can also see how gradient accumulation works: we normalize
     the loss, so we get the average at the end of accumulation and once we have enough
     steps we run the optimization.'
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，我们可以添加主要的训练循环。请注意，`backward`调用由🤗 Accelerate处理。我们还可以看到梯度累积的工作原理：我们规范化损失，因此在累积结束时获得平均值，一旦我们有足够的步骤，我们就运行优化。
 - en: Implementing these optimization techniques with 🤗 Accelerate only takes a handful
     of lines of code and comes with the benefit of more flexibility in the training
     loop. For a full documentation of all features have a look at the [Accelerate
     documentation](https://huggingface.co/docs/accelerate/index).
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用🤗 Accelerate实现这些优化技术只需要几行代码，并且在训练循环中具有更大的灵活性。要查看所有功能的完整文档，请查看[Accelerate文档](https://huggingface.co/docs/accelerate/index)。
 - en: Efficient Software Prebuilds
+  id: totrans-154
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 高效的软件预构建
 - en: PyTorch’s [pip and conda builds](https://pytorch.org/get-started/locally/#start-locally)
     come prebuilt with the cuda toolkit which is enough to run PyTorch, but it is
     insufficient if you need to build cuda extensions.
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch的[pip和conda构建](https://pytorch.org/get-started/locally/#start-locally)预先构建了cuda工具包，足以运行PyTorch，但如果需要构建cuda扩展，则不足。
 - en: At times, additional efforts may be required to pre-build some components. For
     instance, if you’re using libraries like `apex` that don’t come pre-compiled.
     In other situations figuring out how to install the right cuda toolkit system-wide
     can be complicated. To address these scenarios PyTorch and NVIDIA released a new
     version of NGC docker container which already comes with everything prebuilt.
     You just need to install your programs on it, and it will run out of the box.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时，可能需要额外的努力来预构建一些组件。例如，如果您使用的是未经预编译的库，如`apex`。在其他情况下，弄清楚如何在系统范围内安装正确的cuda工具包可能会很复杂。为了解决这些情况，PyTorch和NVIDIA发布了一个新版本的NGC
+    docker容器，其中已经预先构建了一切。您只需在其中安装您的程序，它就可以立即运行。
 - en: This approach is also useful if you want to tweak the pytorch source and/or
     make a new customized build. To find the docker image version you want start [with
     PyTorch release notes](https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/),
@@ -747,67 +1024,99 @@
     (including NVIDIA Driver requirements!) and then at the very top of that document
     go to the corresponding NGC page. If for some reason you get lost, here is [the
     index of all PyTorch NGC images](https://ngc.nvidia.com/catalog/containers/nvidia:pytorch).
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种方法在您想要调整pytorch源代码和/或制作新的定制构建时也很有用。要找到您想要的docker镜像版本，请从[PyTorch发布说明](https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/)开始，选择最新的一个月发布之一。进入所需发布的发布说明，检查环境的组件是否符合您的需求（包括NVIDIA驱动程序要求！），然后在该文档的顶部转到相应的NGC页面。如果由于某种原因您迷失了方向，这里是[所有PyTorch
+    NGC镜像的索引](https://ngc.nvidia.com/catalog/containers/nvidia:pytorch)。
 - en: Next follow the instructions to download and deploy the docker image.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来按照说明下载和部署docker镜像。
 - en: Mixture of Experts
+  id: totrans-159
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 专家混合
 - en: Some recent papers reported a 4-5x training speedup and a faster inference by
     integrating Mixture of Experts (MoE) into the Transformer models.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些最近的论文报告了4-5倍的训练加速和将Mixture of Experts（MoE）集成到Transformer模型中以实现更快的推理。
 - en: Since it has been discovered that more parameters lead to better performance,
     this technique allows to increase the number of parameters by an order of magnitude
     without increasing training costs.
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于发现更多的参数会导致更好的性能，这种技术允许将参数数量增加一个数量级，而不增加训练成本。
 - en: In this approach every other FFN layer is replaced with a MoE Layer which consists
     of many experts, with a gated function that trains each expert in a balanced way
     depending on the input token’s position in a sequence.
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种方法中，每个其他的FFN层都被一个MoE层替换，该层由许多专家组成，具有一个门控函数，根据输入令牌在序列中的位置平衡地训练每个专家。
 - en: '![MoE Transformer 2x block](../Images/582afa9e1fb35b75b07f45d236dc9d35.png)'
+  id: totrans-163
   prefs: []
   type: TYPE_IMG
+  zh: '![MoE Transformer 2x block](../Images/582afa9e1fb35b75b07f45d236dc9d35.png)'
 - en: '(source: [GLAM](https://ai.googleblog.com/2021/12/more-efficient-in-context-learning-with.html))'
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: (来源：[GLAM](https://ai.googleblog.com/2021/12/more-efficient-in-context-learning-with.html))
 - en: You can find exhaustive details and comparison tables in the papers listed at
     the end of this section.
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在本节末尾列出的论文中找到详尽的细节和比较表。
 - en: The main drawback of this approach is that it requires staggering amounts of
     GPU memory - almost an order of magnitude larger than its dense equivalent. Various
     distillation and approaches are proposed to how to overcome the much higher memory
     requirements.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种方法的主要缺点是它需要大量的GPU内存 - 几乎比其密集等价物大一个数量级。提出了各种蒸馏和方法，以克服更高的内存需求。
 - en: There is direct trade-off though, you can use just a few experts with a 2-3x
     smaller base model instead of dozens or hundreds experts leading to a 5x smaller
     model and thus increase the training speed moderately while increasing the memory
     requirements moderately as well.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，存在直接的权衡，您可以使用少量专家和2-3倍较小的基础模型，而不是数十或数百个专家，从而导致5倍较小的模型，因此适度增加训练速度，同时适度增加内存需求。
 - en: 'Most related papers and implementations are built around Tensorflow/TPUs:'
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数相关论文和实现都是围绕Tensorflow/TPUs构建的：
 - en: '[GShard: Scaling Giant Models with Conditional Computation and Automatic Sharding](https://arxiv.org/abs/2006.16668)'
+  id: totrans-169
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[GShard: 使用条件计算和自动分片扩展巨型模型](https://arxiv.org/abs/2006.16668)'
 - en: '[Switch Transformers: Scaling to Trillion Parameter Models with Simple and
     Efficient Sparsity](https://arxiv.org/abs/2101.03961)'
+  id: totrans-170
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Switch Transformers: Scaling to Trillion Parameter Models with Simple and
+    Efficient Sparsity](https://arxiv.org/abs/2101.03961)'
 - en: '[GLaM: Generalist Language Model (GLaM)](https://ai.googleblog.com/2021/12/more-efficient-in-context-learning-with.html)'
+  id: totrans-171
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[GLaM: Generalist Language Model (GLaM)](https://ai.googleblog.com/2021/12/more-efficient-in-context-learning-with.html)'
 - en: 'And for Pytorch DeepSpeed has built one as well: [DeepSpeed-MoE: Advancing
     Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale](https://arxiv.org/abs/2201.05596),
     [Mixture of Experts](https://www.deepspeed.ai/tutorials/mixture-of-experts/) -
@@ -816,40 +1125,60 @@
     and specific deployment with large transformer-based natural language generation
     models: [blog post](https://www.deepspeed.ai/2021/12/09/deepspeed-moe-nlg.html),
     [Megatron-Deepspeed branch](https://github.com/microsoft/Megatron-DeepSpeed/tree/moe-training).'
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: '对于Pytorch，DeepSpeed也构建了一个：[DeepSpeed-MoE: 推进混合专家推理和训练以支持下一代AI规模](https://arxiv.org/abs/2201.05596)，[Mixture
+    of Experts](https://www.deepspeed.ai/tutorials/mixture-of-experts/) - 博文：[1](https://www.microsoft.com/en-us/research/blog/deepspeed-powers-8x-larger-moe-model-training-with-high-performance/)，[2](https://www.microsoft.com/en-us/research/publication/scalable-and-efficient-moe-training-for-multitask-multilingual-models/)以及大型基于Transformer的自然语言生成模型的特定部署：[博文](https://www.deepspeed.ai/2021/12/09/deepspeed-moe-nlg.html)，[Megatron-Deepspeed分支](https://github.com/microsoft/Megatron-DeepSpeed/tree/moe-training)。'
 - en: Using PyTorch native attention and Flash Attention
+  id: totrans-173
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用PyTorch原生注意力和Flash Attention
 - en: PyTorch 2.0 released a native [`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention.html)
     (SDPA), that allows using fused GPU kernels such as [memory-efficient attention](https://arxiv.org/abs/2112.05682)
     and [flash attention](https://arxiv.org/abs/2205.14135).
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch 2.0发布了一个原生的[`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention.html)（SDPA），允许使用融合的GPU内核，如[内存高效注意力](https://arxiv.org/abs/2112.05682)和[闪存注意力](https://arxiv.org/abs/2205.14135)。
 - en: 'After installing the [`optimum`](https://github.com/huggingface/optimum) package,
     the relevant internal modules can be replaced to use PyTorch’s native attention
     with:'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装[`optimum`](https://github.com/huggingface/optimum)包后，可以替换相关的内部模块以使用PyTorch的原生注意力，方法如下：
 - en: '[PRE13]'
+  id: totrans-176
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Once converted, train the model as usual.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 转换后，像往常一样训练模型。
 - en: The PyTorch-native `scaled_dot_product_attention` operator can only dispatch
     to Flash Attention if no `attention_mask` is provided.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch原生的`scaled_dot_product_attention`操作符只有在没有提供`attention_mask`时才能分派到Flash
+    Attention。
 - en: By default, in training mode, the BetterTransformer integration **drops the
     mask support and can only be used for training that does not require a padding
     mask for batched training**. This is the case, for example, during masked language
     modeling or causal language modeling. BetterTransformer is not suited for fine-tuning
     models on tasks that require a padding mask.
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，在训练模式下，BetterTransformer集成**取消了掩码支持，只能用于不需要填充掩码的批量训练**。例如，在掩码语言建模或因果语言建模期间。BetterTransformer不适用于需要填充掩码的任务的微调模型。
 - en: Check out this [blogpost](https://pytorch.org/blog/out-of-the-box-acceleration/)
     to learn more about acceleration and memory-savings with SDPA.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看这篇[博文](https://pytorch.org/blog/out-of-the-box-acceleration/)，了解有关SDPA加速和节省内存的更多信息。
