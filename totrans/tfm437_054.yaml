@@ -395,6 +395,7 @@
   id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，只需设置`tokenizer.chat_template`属性。下次使用[apply_chat_template()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.apply_chat_template)，它将使用您的新模板！此属性将保存在`tokenizer_config.json`文件中，因此您可以使用[push_to_hub()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.push_to_hub)将您的新模板上传到Hub，并确保每个人都在使用正确的模板来使用您的模型！
 - en: '[PRE18]'
   id: totrans-61
   prefs: []
@@ -407,11 +408,13 @@
   id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用您的聊天模板的方法[apply_chat_template()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.apply_chat_template)由[ConversationalPipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.ConversationalPipeline)类调用，因此一旦您设置了正确的聊天模板，您的模型将自动与[ConversationalPipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.ConversationalPipeline)兼容。
 - en: What are “default” templates?
   id: totrans-63
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: “默认”模板是什么？
 - en: Before the introduction of chat templates, chat handling was hardcoded at the
     model class level. For backwards compatibility, we have retained this class-specific
     handling as default templates, also set at the class level. If a model does not
@@ -422,6 +425,7 @@
   id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 在引入聊天模板之前，聊天处理是在模型类级别上硬编码的。为了向后兼容，我们保留了这种特定类处理作为默认模板，也在类级别上设置了。如果一个模型没有设置聊天模板，但是它的模型类有一个默认模板，`ConversationalPipeline`类和`apply_chat_template`等方法将使用类模板。您可以通过检查`tokenizer.default_chat_template`属性来查找您的分词器的默认模板。
 - en: This is something we do purely for backward compatibility reasons, to avoid
     breaking any existing workflows. Even when the class template is appropriate for
     your model, we strongly recommend overriding the default template by setting the
@@ -431,11 +435,13 @@
   id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是我们纯粹为了向后兼容性的原因而做的事情，以避免破坏任何现有的工作流程。即使类模板适用于您的模型，我们强烈建议通过将`chat_template`属性显式设置来覆盖默认模板，以便向用户明确表明您的模型已正确配置为聊天，并为将来防范默认模板被修改或弃用的情况做好准备。
 - en: What template should I use?
   id: totrans-66
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 我应该使用哪个模板？
 - en: When setting the template for a model that’s already been trained for chat,
     you should ensure that the template exactly matches the message formatting that
     the model saw during training, or else you will probably experience performance
@@ -446,6 +452,8 @@
   id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 当为已经训练过的聊天模型设置模板时，您应该确保模板与模型在训练过程中看到的消息格式完全匹配，否则您可能会遇到性能下降。即使您继续训练模型，也是如此 -
+    如果保持聊天标记不变，您可能会获得最佳性能。这与标记化非常类似 - 在推理或微调时，当您精确匹配训练过程中使用的标记化时，通常会获得最佳性能。
 - en: 'If you’re training a model from scratch, or fine-tuning a base language model
     for chat, on the other hand, you have a lot of freedom to choose an appropriate
     template! LLMs are smart enough to learn to handle lots of different input formats.
@@ -455,6 +463,8 @@
   id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您从头开始训练模型，或者在另一方面微调基础语言模型以用于聊天，您有很大的自由选择适当的模板！LLMs 足够聪明，可以学会处理许多不同的输入格式。我们为没有特定类别模板的模型提供的默认模板遵循
+    [ChatML 格式](https://github.com/openai/openai-python/blob/main/chatml.md)，对于许多用例来说，这是一个很好的、灵活的选择。它看起来像这样：
 - en: '[PRE19]'
   id: totrans-69
   prefs: []
@@ -470,6 +480,8 @@
   id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您喜欢这个，这里有一个一行代码形式的版本，可以直接复制到您的代码中。这个一行代码还包括对[生成提示](#什么是生成提示)的方便支持，但请注意它不会添加BOS或EOS标记！如果您的模型需要这些标记，`apply_chat_template`不会自动添加它们
+    - 换句话说，文本将被使用`add_special_tokens=False`进行标记化。这是为了避免模板和`add_special_tokens`逻辑之间的潜在冲突。如果您的模型需要特殊标记，请确保将它们添加到模板中！
 - en: '[PRE20]'
   id: totrans-71
   prefs: []
