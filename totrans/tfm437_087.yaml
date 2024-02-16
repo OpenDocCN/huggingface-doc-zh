@@ -1,24 +1,17 @@
 - en: How to add a model to 🤗 Transformers?
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 如何将模型添加到🤗 Transformers？
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/add_new_model](https://huggingface.co/docs/transformers/v4.37.2/en/add_new_model)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/add_new_model](https://huggingface.co/docs/transformers/v4.37.2/en/add_new_model)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The 🤗 Transformers library is often able to offer new models thanks to community
@@ -27,105 +20,153 @@
     trying to empower more of the community to actively add models and we’ve put together
     this guide to walk you through the process of adding a PyTorch model (make sure
     you have [PyTorch installed](https://pytorch.org/get-started/locally/)).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Transformers库通常能够通过社区贡献者提供新模型。但这可能是一个具有挑战性的项目，需要深入了解🤗 Transformers库和要实现的模型。在Hugging
+    Face，我们正在努力赋予更多社区成员积极添加模型的能力，并为您提供这个指南，以指导您添加一个PyTorch模型（确保您已经[安装了PyTorch](https://pytorch.org/get-started/locally/)）。
 - en: If you’re interested in implementing a TensorFlow model, take a look at the
     [How to convert a 🤗 Transformers model to TensorFlow](add_tensorflow_model) guide!
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您有兴趣实现一个TensorFlow模型，请查看[如何将🤗 Transformers模型转换为TensorFlow](add_tensorflow_model)指南！
 - en: 'Along the way, you’ll:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 沿途，您将：
 - en: get insights into open-source best practices
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 了解开源最佳实践
 - en: understand the design principles behind one of the most popular deep learning
     libraries
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 了解最受欢迎的深度学习库背后的设计原则
 - en: learn how to efficiently test large models
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 学习如何有效地测试大型模型
 - en: learn how to integrate Python utilities like `black`, `ruff`, and `make fix-copies`
     to ensure clean and readable code
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 学习如何集成Python实用程序，如`black`、`ruff`和`make fix-copies`，以确保代码整洁可读
 - en: A Hugging Face team member will be available to help you along the way so you’ll
     never be alone. 🤗 ❤️
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: Hugging Face团队成员将随时为您提供帮助，因此您永远不会孤单。🤗 ❤️
 - en: To get started, open a [New model addition](https://github.com/huggingface/transformers/issues/new?assignees=&labels=New+model&template=new-model-addition.yml)
     issue for the model you want to see in 🤗 Transformers. If you’re not especially
     picky about contributing a specific model, you can filter by the [New model label](https://github.com/huggingface/transformers/labels/New%20model)
     to see if there are any unclaimed model requests and work on it.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 要开始，请为您想在🤗 Transformers中看到的模型打开一个[新模型添加](https://github.com/huggingface/transformers/issues/new?assignees=&labels=New+model&template=new-model-addition.yml)问题。如果您对贡献特定模型不是特别挑剔，您可以按[New
+    model label](https://github.com/huggingface/transformers/labels/New%20model)进行筛选，看看是否有任何未认领的模型请求并开始处理。
 - en: Once you’ve opened a new model request, the first step is to get familiar with
     🤗 Transformers if you aren’t already!
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您打开了一个新模型请求，如果您还不熟悉🤗 Transformers，第一步是熟悉它！
 - en: General overview of 🤗 Transformers
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 🤗 Transformers的概述
 - en: First, you should get a general overview of 🤗 Transformers. 🤗 Transformers is
     a very opinionated library, so there is a chance that you don’t agree with some
     of the library’s philosophies or design choices. From our experience, however,
     we found that the fundamental design choices and philosophies of the library are
     crucial to efficiently scale 🤗 Transformers while keeping maintenance costs at
     a reasonable level.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，您应该对🤗 Transformers有一个总体了解。🤗 Transformers是一个非常主观的库，因此您可能不同意一些库的理念或设计选择。然而，根据我们的经验，我们发现库的基本设计选择和理念对于有效扩展🤗
+    Transformers并保持维护成本在合理水平上至关重要。
 - en: 'A good first starting point to better understand the library is to read the
     [documentation of our philosophy](philosophy). As a result of our way of working,
     there are some choices that we try to apply to all models:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 更好地了解库的一个很好的起点是阅读[我们哲学的文档](philosophy)。由于我们的工作方式，有一些选择我们试图应用于所有模型：
 - en: Composition is generally favored over-abstraction
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通常更喜欢组合而不是抽象
 - en: Duplicating code is not always bad if it strongly improves the readability or
     accessibility of a model
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 复制代码并不总是坏事，如果它极大地提高了模型的可读性或可访问性
 - en: Model files are as self-contained as possible so that when you read the code
     of a specific model, you ideally only have to look into the respective `modeling_....py`
     file.
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 模型文件尽可能自包含，这样当您阅读特定模型的代码时，理想情况下只需查看相应的 `modeling_....py` 文件。
 - en: In our opinion, the library’s code is not just a means to provide a product,
     *e.g.* the ability to use BERT for inference, but also as the very product that
     we want to improve. Hence, when adding a model, the user is not only the person
     who will use your model, but also everybody who will read, try to understand,
     and possibly tweak your code.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们看来，库的代码不仅仅是提供产品的手段，*例如*使用BERT进行推断的能力，而且也是我们想要改进的产品本身。因此，当添加一个模型时，用户不仅是将使用您的模型的人，还有所有将阅读、尝试理解和可能调整您的代码的人。
 - en: With this in mind, let’s go a bit deeper into the general library design.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这个想法，让我们更深入地了解一下一般的库设计。
 - en: Overview of models
+  id: totrans-21
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 模型概述
 - en: To successfully add a model, it is important to understand the interaction between
     your model and its config, [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel),
     and [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig).
     For exemplary purposes, we will call the model to be added to 🤗 Transformers `BrandNewBert`.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 要成功添加一个模型，重要的是要理解您的模型与其配置、[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)和[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)之间的交互。为了举例说明，我们将要添加到🤗
+    Transformers的模型称为`BrandNewBert`。
 - en: 'Let’s take a look:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一看：
 - en: '![](../Images/ea4f05530b7bf13a323b2cf6fd4f78ca.png)'
+  id: totrans-24
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/ea4f05530b7bf13a323b2cf6fd4f78ca.png)'
 - en: 'As you can see, we do make use of inheritance in 🤗 Transformers, but we keep
     the level of abstraction to an absolute minimum. There are never more than two
     levels of abstraction for any model in the library. `BrandNewBertModel` inherits
@@ -145,11 +186,15 @@
     is always stored as an attribute in [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel),
     and thus can be accessed via the `config` attribute for all classes inheriting
     from `BrandNewBertPreTrainedModel`:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，我们在🤗 Transformers中确实使用了继承，但我们将抽象级别保持到绝对最低限度。库中任何模型的抽象级别永远不会超过两个。`BrandNewBertModel`继承自`BrandNewBertPreTrainedModel`，后者又继承自[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)，就是这样。一般规则是，我们希望确保新模型仅依赖于[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)。自动提供给每个新模型的重要功能是[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)和[save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)，用于序列化和反序列化。所有其他重要功能，如`BrandNewBertModel.forward`，应完全在新的`modeling_brand_new_bert.py`脚本中定义。接下来，我们要确保具有特定头层的模型，如`BrandNewBertForMaskedLM`，不继承自`BrandNewBertModel`，而是使用`BrandNewBertModel`作为可以在其前向传递中调用的组件，以保持抽象级别低。每个新模型都需要一个配置类，称为`BrandNewBertConfig`。此配置始终存储为[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)中的属性，因此可以通过`config`属性访问所有继承自`BrandNewBertPreTrainedModel`的类：
 - en: '[PRE0]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Similar to the model, the configuration inherits basic serialization and deserialization
     functionalities from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig).
     Note that the configuration and the model are always serialized into two different
@@ -157,77 +202,109 @@
     file. Calling [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)
     will automatically call [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig.save_pretrained),
     so that both model and configuration are saved.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 与模型类似，配置从[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)继承基本的序列化和反序列化功能。请注意，配置和模型始终以两种不同的格式进行序列化
+    - 模型保存为*pytorch_model.bin*文件，配置保存为*config.json*文件。调用[save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained)将自动调用[save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig.save_pretrained)，以便同时保存模型和配置。
 - en: Code style
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 代码风格
 - en: When coding your new model, keep in mind that Transformers is an opinionated
     library and we have a few quirks of our own regarding how code should be written
     :-)
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 在编写新模型时，请记住Transformers是一个持有意见的库，关于代码应该如何编写，我们有自己的一些怪癖 :-)
 - en: The forward pass of your model should be fully written in the modeling file
     while being fully independent of other models in the library. If you want to reuse
     a block from another model, copy the code and paste it with a `# Copied from`
     comment on top (see [here](https://github.com/huggingface/transformers/blob/v4.17.0/src/transformers/models/roberta/modeling_roberta.py#L160)
     for a good example and [there](pr_checks#check-copies) for more documentation
     on Copied from).
+  id: totrans-30
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 您的模型的前向传递应完全在建模文件中编写，同时完全独立于库中的其他模型。如果要重用另一个模型中的块，请复制代码并在顶部添加`# Copied from`注释（请参见[此处](https://github.com/huggingface/transformers/blob/v4.17.0/src/transformers/models/roberta/modeling_roberta.py#L160)以获取一个很好的示例，以及[此处](pr_checks#check-copies)以获取有关复制的更多文档）。
 - en: The code should be fully understandable, even by a non-native English speaker.
     This means you should pick descriptive variable names and avoid abbreviations.
     As an example, `activation` is preferred to `act`. One-letter variable names are
     strongly discouraged unless it’s an index in a for loop.
+  id: totrans-31
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 代码应该是完全可理解的，即使对于非母语英语的人也是如此。这意味着您应该选择描述性的变量名称并避免缩写。例如，`activation`比`act`更受欢迎。除非是循环中的索引，否则强烈不建议使用一个字母的变量名。
 - en: More generally we prefer longer explicit code to short magical one.
+  id: totrans-32
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 总的来说，我们更喜欢长而明确的代码，而不是短而神奇的代码。
 - en: Avoid subclassing `nn.Sequential` in PyTorch but subclass `nn.Module` and write
     the forward pass, so that anyone using your code can quickly debug it by adding
     print statements or breaking points.
+  id: totrans-33
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在PyTorch中避免对`nn.Sequential`进行子类化，而是对`nn.Module`进行子类化并编写前向传递，以便使用您的代码的任何人都可以通过添加打印语句或断点来快速调试它。
 - en: Your function signature should be type-annotated. For the rest, good variable
     names are way more readable and understandable than type annotations.
+  id: totrans-34
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 您的函数签名应该有类型注释。对于其余部分，良好的变量名称比类型注释更可读和可理解。
 - en: Overview of tokenizers
+  id: totrans-35
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 分词器概述
 - en: Not quite ready yet :-( This section will be added soon!
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 还不太准备好 :-( 此部分将很快添加！
 - en: Step-by-step recipe to add a model to 🤗 Transformers
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将模型添加到🤗 Transformers的逐步配方
 - en: 'Everyone has different preferences of how to port a model so it can be very
     helpful for you to take a look at summaries of how other contributors ported models
     to Hugging Face. Here is a list of community blog posts on how to port a model:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个人对如何移植模型都有不同的偏好，因此查看其他贡献者如何将模型移植到Hugging Face可能会对您非常有帮助。以下是关于如何移植模型的社区博客文章列表：
 - en: '[Porting GPT2 Model](https://medium.com/huggingface/from-tensorflow-to-pytorch-265f40ef2a28)
     by [Thomas](https://huggingface.co/thomwolf)'
+  id: totrans-39
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[移植GPT2模型](https://medium.com/huggingface/from-tensorflow-to-pytorch-265f40ef2a28)
+    by [Thomas](https://huggingface.co/thomwolf)'
 - en: '[Porting WMT19 MT Model](https://huggingface.co/blog/porting-fsmt) by [Stas](https://huggingface.co/stas)'
+  id: totrans-40
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '[移植WMT19 MT模型](https://huggingface.co/blog/porting-fsmt) by [Stas](https://huggingface.co/stas)'
 - en: 'From experience, we can tell you that the most important things to keep in
     mind when adding a model are:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据经验，我们可以告诉您在添加模型时要牢记的最重要的事情是：
 - en: Don’t reinvent the wheel! Most parts of the code you will add for the new 🤗
     Transformers model already exist somewhere in 🤗 Transformers. Take some time to
     find similar, already existing models and tokenizers you can copy from. [grep](https://www.gnu.org/software/grep/)
@@ -235,85 +312,127 @@
     might very well happen that your model’s tokenizer is based on one model implementation,
     and your model’s modeling code on another one. *E.g.* FSMT’s modeling code is
     based on BART, while FSMT’s tokenizer code is based on XLM.
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不要重复造轮子！您将为新的🤗 Transformers模型添加的大部分代码已经存在于🤗 Transformers的某个地方。花些时间找到类似的、已经存在的模型和分词器，您可以从中复制。[grep](https://www.gnu.org/software/grep/)和[rg](https://github.com/BurntSushi/ripgrep)是您的朋友。请注意，您的模型的分词器可能基于一个模型实现，而您的模型的建模代码可能基于另一个模型实现。*例如*，FSMT的建模代码基于BART，而FSMT的分词器代码基于XLM。
 - en: It’s more of an engineering challenge than a scientific challenge. You should
     spend more time creating an efficient debugging environment rather than trying
     to understand all theoretical aspects of the model in the paper.
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 这更多是一个工程挑战而不是一个科学挑战。您应该花更多时间创建一个高效的调试环境，而不是试图理解论文中模型的所有理论方面。
 - en: Ask for help, when you’re stuck! Models are the core component of 🤗 Transformers
     so we at Hugging Face are more than happy to help you at every step to add your
     model. Don’t hesitate to ask if you notice you are not making progress.
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当您遇到困难时，请寻求帮助！模型是🤗 Transformers的核心组件，因此我们在Hugging Face非常乐意在每个步骤帮助您添加您的模型。如果您发现自己没有取得进展，请不要犹豫询问。
 - en: In the following, we try to give you a general recipe that we found most useful
     when porting a model to 🤗 Transformers.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们尝试为您提供一个我们在将模型移植到🤗 Transformers时发现最有用的一般步骤。
 - en: 'The following list is a summary of everything that has to be done to add a
     model and can be used by you as a To-Do List:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下列表总结了添加模型时必须完成的所有工作，并可以作为待办事项清单使用：
 - en: ☐ (Optional) Understood the model’s theoretical aspects
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: □ （可选）理解模型的理论方面
 - en: ☐ Prepared 🤗 Transformers dev environment
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 准备🤗 Transformers开发环境
 - en: ☐ Set up debugging environment of the original repository
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 设置原始存储库的调试环境
 - en: ☐ Created script that successfully runs the `forward()` pass using the original
     repository and checkpoint
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 创建脚本，成功使用原始存储库和检查点运行`forward()`传递
 - en: ☐ Successfully added the model skeleton to 🤗 Transformers
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 成功将模型骨架添加到🤗 Transformers
 - en: ☐ Successfully converted original checkpoint to 🤗 Transformers checkpoint
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 成功将原始检查点转换为🤗 Transformers检查点
 - en: ☐ Successfully ran `forward()` pass in 🤗 Transformers that gives identical output
     to original checkpoint
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 在🤗 Transformers中成功运行`forward()`传递，输出与原始检查点相同
 - en: ☐ Finished model tests in 🤗 Transformers
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 在🤗 Transformers中完成模型测试
 - en: ☐ Successfully added tokenizer in 🤗 Transformers
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 在🤗 Transformers中成功添加了分词器
 - en: ☐ Run end-to-end integration tests
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 运行端到端集成测试
 - en: ☐ Finished docs
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 完成文档
 - en: ☐ Uploaded model weights to the Hub
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 将模型权重上传到Hub
 - en: ☐ Submitted the pull request
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: □ 提交拉取请求
 - en: ☐ (Optional) Added a demo notebook
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: □ （可选）添加演示笔记本
 - en: To begin with, we usually recommend starting by getting a good theoretical understanding
     of `BrandNewBert`. However, if you prefer to understand the theoretical aspects
     of the model *on-the-job*, then it is totally fine to directly dive into the `BrandNewBert`’s
     code-base. This option might suit you better if your engineering skills are better
     than your theoretical skill, if you have trouble understanding `BrandNewBert`’s
     paper, or if you just enjoy programming much more than reading scientific papers.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常建议首先对`BrandNewBert`有一个良好的理论理解。但是，如果您更喜欢在工作中理解模型的理论方面，那么直接深入`BrandNewBert`的代码库也是完全可以的。如果您的工程技能比理论技能更强，如果您难以理解`BrandNewBert`的论文，或者如果您更喜欢编程而不是阅读科学论文，那么这个选项可能更适合您。
 - en: 1\. (Optional) Theoretical aspects of BrandNewBert
+  id: totrans-62
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 1\. （可选）BrandNewBert的理论方面
 - en: 'You should take some time to read *BrandNewBert’s* paper, if such descriptive
     work exists. There might be large sections of the paper that are difficult to
     understand. If this is the case, this is fine - don’t worry! The goal is not to
@@ -321,104 +440,151 @@
     information required to effectively re-implement the model in 🤗 Transformers.
     That being said, you don’t have to spend too much time on the theoretical aspects,
     but rather focus on the practical ones, namely:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应该花些时间阅读*BrandNewBert*的论文，如果存在这样的描述性工作。论文中可能有一些难以理解的大段内容。如果是这种情况，没关系 - 不要担心！目标不是深入理解论文，而是提取在🤗
+    Transformers中有效重新实现模型所需的必要信息。也就是说，您不必花太多时间在理论方面，而是要专注于实践方面，即：
 - en: What type of model is *brand_new_bert*? BERT-like encoder-only model? GPT2-like
     decoder-only model? BART-like encoder-decoder model? Look at the [model_summary](model_summary)
     if you’re not familiar with the differences between those.
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*brand_new_bert*是什么类型的模型？类似BERT的仅编码器模型？类似GPT2的仅解码器模型？类似BART的编码器-解码器模型？如果您对这些之间的区别不熟悉，请查看[model_summary]。'
 - en: What are the applications of *brand_new_bert*? Text classification? Text generation?
     Seq2Seq tasks, *e.g.,* summarization?
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*brand_new_bert*的应用是什么？文本分类？文本生成？Seq2Seq任务，例如，摘要？'
 - en: What is the novel feature of the model that makes it different from BERT/GPT-2/BART?
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 该模型的新特性是什么，使其与BERT/GPT-2/BART不同？
 - en: Which of the already existing [🤗 Transformers models](https://huggingface.co/transformers/#contents)
     is most similar to *brand_new_bert*?
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 已经存在的[🤗 Transformers模型](https://huggingface.co/transformers/#contents)中哪一个与*brand_new_bert*最相似？
 - en: What type of tokenizer is used? A sentencepiece tokenizer? Word piece tokenizer?
     Is it the same tokenizer as used for BERT or BART?
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用了什么类型的分词器？是句子片段分词器？词片段分词器？它是否与BERT或BART使用的相同的分词器？
 - en: After you feel like you have gotten a good overview of the architecture of the
     model, you might want to write to the Hugging Face team with any questions you
     might have. This might include questions regarding the model’s architecture, its
     attention layer, etc. We will be more than happy to help you.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您感觉对模型的架构有了很好的概述后，您可能希望向Hugging Face团队发送任何可能有的问题。这可能包括有关模型架构、注意力层等的问题。我们将非常乐意帮助您。
 - en: 2\. Next prepare your environment
+  id: totrans-70
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 2. 接下来准备您的环境
 - en: Fork the [repository](https://github.com/huggingface/transformers) by clicking
     on the ‘Fork’ button on the repository’s page. This creates a copy of the code
     under your GitHub user account.
+  id: totrans-71
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 点击存储库页面上的“Fork”按钮来fork这个[存储库](https://github.com/huggingface/transformers)。这将在您的GitHub用户账户下创建代码的副本。
 - en: 'Clone your `transformers` fork to your local disk, and add the base repository
     as a remote:'
+  id: totrans-72
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将您的`transformers` fork克隆到本地磁盘，并将基本存储库添加为远程：
 - en: '[PRE1]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Set up a development environment, for instance by running the following command:'
+  id: totrans-74
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 设置一个开发环境，例如通过运行以下命令：
 - en: '[PRE2]'
+  id: totrans-75
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Depending on your OS, and since the number of optional dependencies of Transformers
     is growing, you might get a failure with this command. If that’s the case make
     sure to install the Deep Learning framework you are working with (PyTorch, TensorFlow
     and/or Flax) then do:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据您的操作系统，由于Transformers的可选依赖项数量正在增加，您可能会在此命令中遇到失败。如果是这种情况，请确保安装您正在使用的深度学习框架（PyTorch、TensorFlow和/或Flax），然后执行：
 - en: '[PRE3]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: which should be enough for most use cases. You can then return to the parent
     directory
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 这对于大多数用例应该足够了。然后您可以返回到父目录
 - en: '[PRE4]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: We recommend adding the PyTorch version of *brand_new_bert* to Transformers.
     To install PyTorch, please follow the instructions on [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/).
+  id: totrans-80
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 我们建议将PyTorch版本的*brand_new_bert*添加到Transformers中。要安装PyTorch，请按照[https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)上的说明操作。
 - en: '**Note:** You don’t need to have CUDA installed. Making the new model work
     on CPU is sufficient.'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: '**注意：** 您不需要安装CUDA。使新模型在CPU上运行就足够了。'
 - en: 'To port *brand_new_bert*, you will also need access to its original repository:'
+  id: totrans-82
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 要移植*brand_new_bert*，您还需要访问其原始存储库：
 - en: '[PRE5]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Now you have set up a development environment to port *brand_new_bert* to 🤗
     Transformers.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经设置好了一个开发环境，可以将*brand_new_bert*移植到🤗 Transformers。
 - en: 3.-4\. Run a pretrained checkpoint using the original repository
+  id: totrans-85
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 3.-4. 在原始存储库中运行预训练检查点
 - en: At first, you will work on the original *brand_new_bert* repository. Often,
     the original implementation is very “researchy”. Meaning that documentation might
     be lacking and the code can be difficult to understand. But this should be exactly
@@ -428,54 +594,76 @@
     user-friendly, and beautiful** as possible. This is the number-one motivation
     to re-implement models into 🤗 Transformers - trying to make complex new NLP technology
     accessible to **everybody**.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，您将在原始*brand_new_bert*存储库上工作。通常，原始实现非常“研究性”。这意味着文档可能缺失，代码可能难以理解。但这应该正是您重新实现*brand_new_bert*的动力所在。在Hugging
+    Face，我们的主要目标之一是让人们“站在巨人的肩膀上”，这在这里非常好地体现为拿一个可用的模型并重写它，使其尽可能**易于访问、用户友好和美观**。这是重新实现模型到🤗
+    Transformers的首要动机 - 尝试使复杂的新NLP技术对**每个人**都可访问。
 - en: You should start thereby by diving into the original repository.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，您应该首先深入研究原始存储库。
 - en: 'Successfully running the official pretrained model in the original repository
     is often **the most difficult** step. From our experience, it is very important
     to spend some time getting familiar with the original code-base. You need to figure
     out the following:'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 在原始存储库中成功运行官方预训练模型通常是**最困难**的一步。根据我们的经验，花一些时间熟悉原始代码库非常重要。您需要弄清楚以下内容：
 - en: Where to find the pretrained weights?
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在哪里找到预训练权重？
 - en: How to load the pretrained weights into the corresponding model?
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如何将预训练权重加载到相应的模型中？
 - en: How to run the tokenizer independently from the model?
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如何独立于模型运行分词器？
 - en: Trace one forward pass so that you know which classes and functions are required
     for a simple forward pass. Usually, you only have to reimplement those functions.
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 跟踪一次前向传递，以便了解哪些类和函数需要进行简单的前向传递。通常，您只需要重新实现这些函数。
 - en: 'Be able to locate the important components of the model: Where is the model’s
     class? Are there model sub-classes, *e.g.* EncoderModel, DecoderModel? Where is
     the self-attention layer? Are there multiple different attention layers, *e.g.*
     *self-attention*, *cross-attention*…?'
+  id: totrans-93
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 能够找到模型的重要组件：模型的类在哪里？是否有模型子类，例如EncoderModel，DecoderModel？自注意力层在哪里？是否有多个不同的注意力层，例如self-attention，cross-attention...？
 - en: How can you debug the model in the original environment of the repo? Do you
     have to add *print* statements, can you work with an interactive debugger like
     *ipdb*, or should you use an efficient IDE to debug the model, like PyCharm?
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如何在存储库的原始环境中调试模型？您是否需要添加*print*语句，是否可以使用交互式调试器如*ipdb*，或者是否应该使用高效的IDE来调试模型，如PyCharm？
 - en: It is very important that before you start the porting process, you can **efficiently**
     debug code in the original repository! Also, remember that you are working with
     an open-source library, so do not hesitate to open an issue, or even a pull request
     in the original repository. The maintainers of this repository are most likely
     very happy about someone looking into their code!
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始移植过程之前，非常重要的是您可以**有效地**调试原始存储库中的代码！还要记住，您正在使用一个开源库，因此不要犹豫在原始存储库中打开问题，甚至提交拉取请求。这个存储库的维护者很可能会对有人查看他们的代码感到非常高兴！
 - en: At this point, it is really up to you which debugging environment and strategy
     you prefer to use to debug the original model. We strongly advise against setting
     up a costly GPU environment, but simply work on a CPU both when starting to dive
@@ -483,94 +671,133 @@
     implementation of the model. Only at the very end, when the model has already
     been successfully ported to 🤗 Transformers, one should verify that the model also
     works as expected on GPU.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这一点上，真的取决于您更喜欢使用哪种调试环境和策略来调试原始模型。我们强烈建议不要设置昂贵的GPU环境，而是在开始深入研究原始存储库和开始编写🤗 Transformers模型实现时都使用CPU。只有在模型已经成功移植到🤗
+    Transformers后，才应验证模型在GPU上是否按预期工作。
 - en: In general, there are two possible debugging environments for running the original
     model
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 一般来说，有两种可能的调试环境可用于运行原始模型
 - en: '[Jupyter notebooks](https://jupyter.org/) / [google colab](https://colab.research.google.com/notebooks/intro.ipynb)'
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Jupyter笔记本](https://jupyter.org/) / [google colab](https://colab.research.google.com/notebooks/intro.ipynb)'
 - en: Local python scripts.
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 本地python脚本。
 - en: Jupyter notebooks have the advantage that they allow for cell-by-cell execution
     which can be helpful to better split logical components from one another and to
     have faster debugging cycles as intermediate results can be stored. Also, notebooks
     are often easier to share with other contributors, which might be very helpful
     if you want to ask the Hugging Face team for help. If you are familiar with Jupyter
     notebooks, we strongly recommend you work with them.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: Jupyter笔记本的优势在于它们允许逐个单元格执行，这有助于更好地将逻辑组件彼此分离，并且具有更快的调试周期，因为中间结果可以被存储。此外，笔记本通常更容易与其他贡献者共享，如果您想要向Hugging
+    Face团队寻求帮助，这可能非常有帮助。如果您熟悉Jupyter笔记本，我们强烈建议您使用它们。
 - en: The obvious disadvantage of Jupyter notebooks is that if you are not used to
     working with them you will have to spend some time adjusting to the new programming
     environment and you might not be able to use your known debugging tools anymore,
     like `ipdb`.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: Jupyter笔记本的明显缺点是，如果您不习惯使用它们，您将不得不花费一些时间适应新的编程环境，可能无法再使用您已知的调试工具，如`ipdb`。
 - en: 'For each code-base, a good first step is always to load a **small** pretrained
     checkpoint and to be able to reproduce a single forward pass using a dummy integer
     vector of input IDs as an input. Such a script could look like this (in pseudocode):'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于每个代码库，一个很好的第一步总是加载一个**小**的预训练检查点，并能够使用一个虚拟整数向量的输入ID进行单个前向传递。这样的脚本可能如下所示（伪代码）：
 - en: '[PRE6]'
+  id: totrans-103
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Next, regarding the debugging strategy, there are generally a few from which
     to choose from:'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，关于调试策略，通常有几种选择：
 - en: Decompose the original model into many small testable components and run a forward
     pass on each of those for verification
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将原始模型分解为许多小的可测试组件，并在每个组件上运行前向传递以进行验证
 - en: Decompose the original model only into the original *tokenizer* and the original
     *model*, run a forward pass on those, and use intermediate print statements or
     breakpoints for verification
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将原始模型仅分解为原始*tokenizer*和原始*model*，在这些上运行前向传递，并使用中间打印语句或断点进行验证
 - en: Again, it is up to you which strategy to choose. Often, one or the other is
     advantageous depending on the original code base.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 再次，选择哪种策略取决于你。通常，根据原始代码库的情况，一种或另一种策略都有优势。
 - en: 'If the original code-base allows you to decompose the model into smaller sub-components,
     *e.g.* if the original code-base can easily be run in eager mode, it is usually
     worth the effort to do so. There are some important advantages to taking the more
     difficult road in the beginning:'
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果原始代码库允许您将模型分解为较小的子组件，*例如*，如果原始代码库可以轻松在急切模式下运行，那么通常值得这样做。在一开始采取更困难的道路有一些重要的优势：
 - en: at a later stage when comparing the original model to the Hugging Face implementation,
     you can verify automatically for each component individually that the corresponding
     component of the 🤗 Transformers implementation matches instead of relying on visual
     comparison via print statements
+  id: totrans-109
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在稍后阶段，当将原始模型与Hugging Face实现进行比较时，您可以自动验证每个组件是否与🤗 Transformers实现的相应组件匹配，而不是依赖通过打印语句进行视觉比较
 - en: it can give you some rope to decompose the big problem of porting a model into
     smaller problems of just porting individual components and thus structure your
     work better
+  id: totrans-110
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它可以让您将将模型移植为较小问题的大问题分解为仅将单个组件移植为结构化工作的更好的方法。
 - en: separating the model into logical meaningful components will help you to get
     a better overview of the model’s design and thus to better understand the model
+  id: totrans-111
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将模型分解为逻辑有意义的组件将有助于更好地了解模型的设计，从而更好地理解模型
 - en: at a later stage those component-by-component tests help you to ensure that
     no regression occurs as you continue changing your code
+  id: totrans-112
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在稍后阶段，这些逐个组件的测试有助于确保在继续更改代码时不会发生退化
 - en: '[Lysandre’s](https://gist.github.com/LysandreJik/db4c948f6b4483960de5cbac598ad4ed)
     integration checks for ELECTRA gives a nice example of how this can be done.'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Lysandre的](https://gist.github.com/LysandreJik/db4c948f6b4483960de5cbac598ad4ed)
+    ELECTRA集成检查为如何执行此操作提供了一个很好的示例。'
 - en: However, if the original code-base is very complex or only allows intermediate
     components to be run in a compiled mode, it might be too time-consuming or even
     impossible to separate the model into smaller testable sub-components. A good
@@ -578,52 +805,76 @@
     library which is very complex and does not offer a simple way to decompose the
     model into its sub-components. For such libraries, one often relies on verifying
     print statements.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，如果原始代码库非常复杂，或者只允许以编译模式运行中间组件，那么将模型分解为可测试的较小子组件可能会耗费太多时间，甚至是不可能的。一个很好的例子是[T5的MeshTensorFlow](https://github.com/tensorflow/mesh/tree/master/mesh_tensorflow)库，它非常复杂，没有提供将模型分解为子组件的简单方法。对于这种库，人们通常依赖于验证打印语句。
 - en: No matter which strategy you choose, the recommended procedure is often the
     same that you should start to debug the starting layers first and the ending layers
     last.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论您选择哪种策略，推荐的程序通常是相同的，即应该从调试起始图层开始，最后调试结束图层。
 - en: 'It is recommended that you retrieve the output, either by print statements
     or sub-component functions, of the following layers in the following order:'
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 建议按照以下顺序检索以下图层的输出，可以通过打印语句或子组件函数来实现：
 - en: Retrieve the input IDs passed to the model
+  id: totrans-117
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检索传递给模型的输入ID
 - en: Retrieve the word embeddings
+  id: totrans-118
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检索单词嵌入
 - en: Retrieve the input of the first Transformer layer
+  id: totrans-119
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检索第一个Transformer层的输入
 - en: Retrieve the output of the first Transformer layer
+  id: totrans-120
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检索第一个Transformer层的输出
 - en: Retrieve the output of the following n - 1 Transformer layers
+  id: totrans-121
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检索以下n-1个Transformer层的输出
 - en: Retrieve the output of the whole BrandNewBert Model
+  id: totrans-122
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检索整个BrandNewBert模型的输出
 - en: Input IDs should thereby consists of an array of integers, *e.g.* `input_ids
     = [0, 4, 4, 3, 2, 4, 1, 7, 19]`
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 输入ID应该由整数数组组成，例如 `input_ids = [0, 4, 4, 3, 2, 4, 1, 7, 19]`
 - en: 'The outputs of the following layers often consist of multi-dimensional float
     arrays and can look like this:'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下图层的输出通常由多维浮点数组组成，可能如下所示：
 - en: '[PRE7]'
+  id: totrans-125
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: We expect that every model added to 🤗 Transformers passes a couple of integration
     tests, meaning that the original model and the reimplemented version in 🤗 Transformers
     have to give the exact same output up to a precision of 0.001! Since it is normal
@@ -635,8 +886,11 @@
     outputs of the original implementation of *brand_new_bert* in which case an **efficient**
     debugging environment of the original repository is absolutely important. Here
     is some advice to make your debugging environment as efficient as possible.
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们期望每个添加到🤗 Transformers的模型都经过几个集成测试，这意味着原始模型和🤗 Transformers中重新实现的版本必须在精度为0.001的情况下给出完全相同的输出！由于相同模型在不同库中编写可能会根据库框架给出略有不同的输出，我们接受1e-3（0.001）的误差容限。如果模型给出的输出几乎相同是不够的，它们必须几乎完全相同。因此，您肯定会多次将🤗
+    Transformers版本的中间输出与*brand_new_bert*的原始实现的中间输出进行比较，在这种情况下，原始存储库的**高效**调试环境绝对重要。以下是一些建议，以使您的调试环境尽可能高效。
 - en: Find the best way of debugging intermediate results. Is the original repository
     written in PyTorch? Then you should probably take the time to write a longer script
     that decomposes the original model into smaller sub-components to retrieve intermediate
@@ -645,170 +899,246 @@
     to output intermediate values. Is the original repository written in Jax? Then
     make sure that the model is **not jitted** when running the forward pass, *e.g.*
     check-out [this link](https://github.com/google/jax/issues/196).
+  id: totrans-127
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 找到调试中间结果的最佳方法。原始存储库是用PyTorch编写的吗？那么您可能需要花时间编写一个更长的脚本，将原始模型分解为较小的子组件以检索中间值。原始存储库是用Tensorflow
+    1编写的吗？那么您可能需要依赖TensorFlow的打印操作，如 [tf.print](https://www.tensorflow.org/api_docs/python/tf/print)
+    来输出中间值。原始存储库是用Jax编写的吗？那么请确保在运行前向传递时模型**未被jit编译**，例如查看 [此链接](https://github.com/google/jax/issues/196)。
 - en: Use the smallest pretrained checkpoint you can find. The smaller the checkpoint,
     the faster your debug cycle becomes. It is not efficient if your pretrained model
     is so big that your forward pass takes more than 10 seconds. In case only very
     large checkpoints are available, it might make more sense to create a dummy model
     in the new environment with randomly initialized weights and save those weights
     for comparison with the 🤗 Transformers version of your model
+  id: totrans-128
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用您能找到的最小的预训练检查点。检查点越小，您的调试周期就越快。如果您的预训练模型太大，导致前向传递超过10秒，那就不高效了。如果只有非常大的检查点可用，可能更有意义的是在新环境中创建一个带有随机初始化权重的虚拟模型，并保存这些权重以便与您模型的🤗
+    Transformers版本进行比较。
 - en: Make sure you are using the easiest way of calling a forward pass in the original
     repository. Ideally, you want to find the function in the original repository
     that **only** calls a single forward pass, *i.e.* that is often called `predict`,
     `evaluate`, `forward` or `__call__`. You don’t want to debug a function that calls
     `forward` multiple times, *e.g.* to generate text, like `autoregressive_sample`,
     `generate`.
+  id: totrans-129
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 确保您正在使用原始存储库中调用前向传递的最简单方法。理想情况下，您希望找到原始存储库中**仅**调用单个前向传递的函数，即通常称为 `predict`、`evaluate`、`forward`
+    或 `__call__`。您不希望调试多次调用 `forward` 的函数，例如生成文本的 `autoregressive_sample`、`generate`。
 - en: Try to separate the tokenization from the model’s *forward* pass. If the original
     repository shows examples where you have to input a string, then try to find out
     where in the forward call the string input is changed to input ids and start from
     this point. This might mean that you have to possibly write a small script yourself
     or change the original code so that you can directly input the ids instead of
     an input string.
+  id: totrans-130
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尝试将标记化与模型的*forward*传递分开。如果原始存储库显示示例，您必须输入一个字符串，则尝试找出在前向调用中字符串输入何时更改为输入id，并从此点开始。这可能意味着您可能需要自己编写一个小脚本或更改原始代码，以便您可以直接输入id而不是输入字符串。
 - en: Make sure that the model in your debugging setup is **not** in training mode,
     which often causes the model to yield random outputs due to multiple dropout layers
     in the model. Make sure that the forward pass in your debugging environment is
     **deterministic** so that the dropout layers are not used. Or use *transformers.utils.set_seed*
     if the old and new implementations are in the same framework.
+  id: totrans-131
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 确保您调试设置中的模型**不**处于训练模式，这通常会导致模型由于模型中的多个dropout层而产生随机输出。确保您调试环境中的前向传递是**确定性**的，以便不使用dropout层。或者如果旧实现和新实现在同一框架中，则使用*transformers.utils.set_seed*。
 - en: The following section gives you more specific details/tips on how you can do
     this for *brand_new_bert*.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 下一节将为您提供有关如何为*brand_new_bert*执行此操作的更具体详细信息/提示。
 - en: 5.-14\. Port BrandNewBert to 🤗 Transformers
+  id: totrans-133
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 5.-14\. 将BrandNewBert移植到🤗 Transformers
 - en: 'Next, you can finally start adding new code to 🤗 Transformers. Go into the
     clone of your 🤗 Transformers’ fork:'
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您可以开始向🤗 Transformers添加新代码。进入您🤗 Transformers分支的克隆：
 - en: '[PRE8]'
+  id: totrans-135
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: In the special case that you are adding a model whose architecture exactly matches
     the model architecture of an existing model you only have to add a conversion
     script as described in [this section](#write-a-conversion-script). In this case,
     you can just re-use the whole model architecture of the already existing model.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 在特殊情况下，如果您要添加的模型的架构与现有模型的模型架构完全匹配，则只需添加一个转换脚本，如[此部分](#write-a-conversion-script)所述。在这种情况下，您可以直接重用已存在模型的整个模型架构。
 - en: 'Otherwise, let’s start generating a new model. You have two choices here:'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 否则，让我们开始生成一个新模型。您在这里有两个选择：
 - en: '`transformers-cli add-new-model-like` to add a new model like an existing one'
+  id: totrans-138
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`transformers-cli add-new-model-like`以添加一个类似于现有模型的新模型'
 - en: '`transformers-cli add-new-model` to add a new model from our template (will
     look like BERT or Bart depending on the type of model you select)'
+  id: totrans-139
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`transformers-cli add-new-model`以从我们的模板中添加一个新模型（将看起来像BERT或Bart，具体取决于您选择的模型类型）'
 - en: In both cases, you will be prompted with a questionnaire to fill in the basic
     information of your model. The second command requires to install `cookiecutter`,
     you can find more information on it [here](https://github.com/huggingface/transformers/tree/main/templates/adding_a_new_model).
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这两种情况下，您将被提示填写有关您的模型的基本信息的问卷。第二个命令需要安装`cookiecutter`，您可以在[这里](https://github.com/huggingface/transformers/tree/main/templates/adding_a_new_model)找到更多信息。
 - en: '**Open a Pull Request on the main huggingface/transformers repo**'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: '**在主huggingface/transformers仓库上打开一个拉取请求**'
 - en: Before starting to adapt the automatically generated code, now is the time to
     open a “Work in progress (WIP)” pull request, *e.g.* “[WIP] Add *brand_new_bert*”,
     in 🤗 Transformers so that you and the Hugging Face team can work side-by-side
     on integrating the model into 🤗 Transformers.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始调整自动生成的代码之前，现在是时候在🤗 Transformers中打开一个“进行中的工作（WIP）”拉取请求，例如“[WIP]添加*brand_new_bert*”，以便您和Hugging
+    Face团队可以并肩合作将模型集成到🤗 Transformers中。
 - en: 'You should do the following:'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应该执行以下操作：
 - en: Create a branch with a descriptive name from your main branch
+  id: totrans-144
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 从主分支创建一个具有描述性名称的分支
 - en: '[PRE9]'
+  id: totrans-145
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Commit the automatically generated code:'
+  id: totrans-146
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 提交自动生成的代码：
 - en: '[PRE10]'
+  id: totrans-147
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Fetch and rebase to current main
+  id: totrans-148
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 获取并rebase到当前主分支
 - en: '[PRE11]'
+  id: totrans-149
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Push the changes to your account using:'
+  id: totrans-150
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用以下命令将更改推送到您的帐户：
 - en: '[PRE12]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Once you are satisfied, go to the webpage of your fork on GitHub. Click on “Pull
     request”. Make sure to add the GitHub handle of some members of the Hugging Face
     team as reviewers, so that the Hugging Face team gets notified for future changes.
+  id: totrans-152
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 一旦您满意，转到GitHub上您的分支的网页。点击“拉取请求”。确保将Hugging Face团队的一些成员的GitHub句柄添加为审阅者，以便Hugging
+    Face团队在将来的更改中收到通知。
 - en: Change the PR into a draft by clicking on “Convert to draft” on the right of
     the GitHub pull request web page.
+  id: totrans-153
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 点击GitHub拉取请求网页右侧的“转换为草稿”将PR转换为草稿。
 - en: 'In the following, whenever you have made some progress, don’t forget to commit
     your work and push it to your account so that it shows in the pull request. Additionally,
     you should make sure to update your work with the current main from time to time
     by doing:'
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 在接下来的过程中，每当您取得一些进展时，不要忘记提交您的工作并将其推送到您的帐户，以便在拉取请求中显示。此外，您应该确保不时使用以下方法更新您的工作与当前主分支：
 - en: '[PRE13]'
+  id: totrans-155
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: In general, all questions you might have regarding the model or your implementation
     should be asked in your PR and discussed/solved in the PR. This way, the Hugging
     Face team will always be notified when you are committing new code or if you have
     a question. It is often very helpful to point the Hugging Face team to your added
     code so that the Hugging Face team can efficiently understand your problem or
     question.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 总的来说，您可能对模型或您的实现有任何问题都应该在您的PR中提出，并在PR中讨论/解决。这样，当您提交新代码或有问题时，Hugging Face团队将始终收到通知。将Hugging
+    Face团队指向您添加的代码通常非常有帮助，以便Hugging Face团队可以高效地理解您的问题或疑问。
 - en: To do so, you can go to the “Files changed” tab where you see all of your changes,
     go to a line regarding which you want to ask a question, and click on the “+”
     symbol to add a comment. Whenever a question or problem has been solved, you can
     click on the “Resolve” button of the created comment.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 为此，您可以转到“更改的文件”选项卡，在那里您可以看到所有更改，转到您想要提问的行，并单击“+”符号添加评论。每当问题或问题得到解决时，您可以单击已创建评论的“解决”按钮。
 - en: In the same way, the Hugging Face team will open comments when reviewing your
     code. We recommend asking most questions on GitHub on your PR. For some very general
     questions that are not very useful for the public, feel free to ping the Hugging
     Face team by Slack or email.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，Hugging Face团队在审查您的代码时会开放评论。我们建议在GitHub上的PR上提出大多数问题。对于一些对公众不太有用的非常一般性的问题，可以通过Slack或电子邮件联系Hugging
+    Face团队。
 - en: '**5\. Adapt the generated models code for brand_new_bert**'
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: '**5\. 为brand_new_bert调整生成的模型代码**'
 - en: At first, we will focus only on the model itself and not care about the tokenizer.
     All the relevant code should be found in the generated files `src/transformers/models/brand_new_bert/modeling_brand_new_bert.py`
     and `src/transformers/models/brand_new_bert/configuration_brand_new_bert.py`.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，我们将只关注模型本身，不关心分词器。所有相关代码应该在生成的文件`src/transformers/models/brand_new_bert/modeling_brand_new_bert.py`和`src/transformers/models/brand_new_bert/configuration_brand_new_bert.py`中找到。
 - en: 'Now you can finally start coding :). The generated code in `src/transformers/models/brand_new_bert/modeling_brand_new_bert.py`
     will either have the same architecture as BERT if it’s an encoder-only model or
     BART if it’s an encoder-decoder model. At this point, you should remind yourself
@@ -818,8 +1148,10 @@
     layer, etc… Again, it is often useful to look at the similar architecture of already
     existing models in Transformers to get a better feeling of how your model should
     be implemented.'
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以开始编码了 :). 生成的代码在`src/transformers/models/brand_new_bert/modeling_brand_new_bert.py`中将具有与BERT相同的架构（如果是仅编码器模型）或与BART相同的架构（如果是编码器-解码器模型）。此时，您应该回想起您在开始时学到的关于模型理论方面的知识：“该模型与BERT或BART有何不同？”实现这些变化通常意味着更改*self-attention*层，规范化层的顺序等等...再次强调，查看Transformers中已经存在的类似模型的架构通常是有用的，以更好地了解如何实现您的模型。
 - en: '**Note** that at this point, you don’t have to be very sure that your code
     is fully correct or clean. Rather, it is advised to add a first *unclean*, copy-pasted
     version of the original code to `src/transformers/models/brand_new_bert/modeling_brand_new_bert.py`
@@ -829,43 +1161,64 @@
     The only thing that has to work at this point is that you can instantiate the
     🤗 Transformers implementation of *brand_new_bert*, *i.e.* the following command
     should work:'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: '**注意**，在这一点上，您不必非常确定您的代码是否完全正确或干净。相反，建议将原始代码的第一个*不干净*、复制粘贴版本添加到`src/transformers/models/brand_new_bert/modeling_brand_new_bert.py`，直到您觉得所有必要的代码都已添加。根据我们的经验，快速添加所需代码的第一个版本，并使用下一节中描述的转换脚本迭代地改进/纠正代码效率更高。在这一点上，唯一需要工作的是您可以实例化🤗
+    Transformers实现的*brand_new_bert*，即以下命令应该可以工作：'
 - en: '[PRE14]'
+  id: totrans-163
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: The above command will create a model according to the default parameters as
     defined in `BrandNewBertConfig()` with random weights, thus making sure that the
     `init()` methods of all components works.
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述命令将根据`BrandNewBertConfig()`中定义的默认参数创建一个模型，具有随机权重，从而确保所有组件的`init()`方法正常工作。
 - en: 'Note that all random initialization should happen in the `_init_weights` method
     of your `BrandnewBertPreTrainedModel` class. It should initialize all leaf modules
     depending on the variables of the config. Here is an example with the BERT `_init_weights`
     method:'
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，所有随机初始化应该在您的`BrandnewBertPreTrainedModel`类的`_init_weights`方法中进行。它应该根据配置的变量初始化所有叶子模块。这里有一个使用BERT
+    `_init_weights`方法的示例：
 - en: '[PRE15]'
+  id: totrans-166
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'You can have some more custom schemes if you need a special initialization
     for some modules. For instance, in `Wav2Vec2ForPreTraining`, the last two linear
     layers need to have the initialization of the regular PyTorch `nn.Linear` but
     all the other ones should use an initialization as above. This is coded like this:'
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果需要某些模块的特殊初始化，您可以使用一些自定义方案。例如，在`Wav2Vec2ForPreTraining`中，最后两个线性层需要使用常规PyTorch
+    `nn.Linear`的初始化，但所有其他层应该使用上述初始化。这样编码：
 - en: '[PRE16]'
+  id: totrans-168
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: The `_is_hf_initialized` flag is internally used to make sure we only initialize
     a submodule once. By setting it to `True` for `module.project_q` and `module.project_hid`,
     we make sure the custom initialization we did is not overridden later on, the
     `_init_weights` function won’t be applied to them.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: '`_is_hf_initialized`标志在内部用于确保我们只初始化一个子模块一次。通过将其设置为`True`，我们确保自定义初始化不会被后来覆盖，`_init_weights`函数不会应用于它们。'
 - en: '**6\. Write a conversion script**'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: '**6\. 编写转换脚本**'
 - en: Next, you should write a conversion script that lets you convert the checkpoint
     you used to debug *brand_new_bert* in the original repository to a checkpoint
     compatible with your just created 🤗 Transformers implementation of *brand_new_bert*.
@@ -876,88 +1229,132 @@
     script and slightly adapt it for your use case. Don’t hesitate to ask the Hugging
     Face team to point you to a similar already existing conversion script for your
     model.
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您应该编写一个转换脚本，让您可以将您在原始存储库中用于调试*brand_new_bert*的检查点转换为与您刚刚创建的🤗 Transformers实现*brand_new_bert*兼容的检查点。不建议从头开始编写转换脚本，而是查看🤗
+    Transformers中已经存在的转换脚本，找到一个已经用于转换与*brand_new_bert*相同框架编写的类似模型的脚本。通常，复制一个已经存在的转换脚本并稍微调整以适应您的用例就足够了。不要犹豫向Hugging
+    Face团队询问是否有类似的已经存在的转换脚本适用于您的模型。
 - en: If you are porting a model from TensorFlow to PyTorch, a good starting point
     might be BERT’s conversion script [here](https://github.com/huggingface/transformers/blob/7acfa95afb8194f8f9c1f4d2c6028224dbed35a2/src/transformers/models/bert/modeling_bert.py#L91)
+  id: totrans-172
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果您正在将模型从TensorFlow转换到PyTorch，一个很好的起点可能是BERT的转换脚本[此处](https://github.com/huggingface/transformers/blob/7acfa95afb8194f8f9c1f4d2c6028224dbed35a2/src/transformers/models/bert/modeling_bert.py#L91)
 - en: If you are porting a model from PyTorch to PyTorch, a good starting point might
     be BART’s conversion script [here](https://github.com/huggingface/transformers/blob/main/src/transformers/models/bart/convert_bart_original_pytorch_checkpoint_to_pytorch.py)
+  id: totrans-173
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果您正在将模型从PyTorch转换到PyTorch，一个很好的起点可能是BART的转换脚本[此处](https://github.com/huggingface/transformers/blob/main/src/transformers/models/bart/convert_bart_original_pytorch_checkpoint_to_pytorch.py)
 - en: 'In the following, we’ll quickly explain how PyTorch models store layer weights
     and define layer names. In PyTorch, the name of a layer is defined by the name
     of the class attribute you give the layer. Let’s define a dummy model in PyTorch,
     called `SimpleModel` as follows:'
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们将快速解释PyTorch模型如何存储层权重并定义层名称。在PyTorch中，层的名称由您给予该层的类属性的名称定义。让我们在PyTorch中定义一个名为`SimpleModel`的虚拟模型，如下所示：
 - en: '[PRE17]'
+  id: totrans-175
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'Now we can create an instance of this model definition which will fill all
     weights: `dense`, `intermediate`, `layer_norm` with random weights. We can print
     the model to see its architecture'
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们可以创建此模型定义的实例，该实例将填充所有权重：`dense`、`intermediate`、`layer_norm`，使用随机权重。我们可以打印模型以查看其架构
 - en: '[PRE18]'
+  id: totrans-177
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'This will print out the following:'
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将打印如下内容：
 - en: '[PRE19]'
+  id: totrans-179
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'We can see that the layer names are defined by the name of the class attribute
     in PyTorch. You can print out the weight values of a specific layer:'
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以看到层的名称由PyTorch中类属性的名称定义。您可以打印特定层的权重值：
 - en: '[PRE20]'
+  id: totrans-181
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: to see that the weights were randomly initialized
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看权重是否已随机初始化
 - en: '[PRE21]'
+  id: totrans-183
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: In the conversion script, you should fill those randomly initialized weights
     with the exact weights of the corresponding layer in the checkpoint. *E.g.*
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 在转换脚本中，您应该使用相应层中的确切权重填充这些随机初始化的权重。*例如*
 - en: '[PRE22]'
+  id: totrans-185
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: 'While doing so, you must verify that each randomly initialized weight of your
     PyTorch model and its corresponding pretrained checkpoint weight exactly match
     in both **shape and name**. To do so, it is **necessary** to add assert statements
     for the shape and print out the names of the checkpoints weights. E.g. you should
     add statements like:'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 在执行此操作时，您必须验证您的PyTorch模型的每个随机初始化权重及其对应的预训练检查点权重在**形状和名称**上完全匹配。为此，**必须**添加形状的assert语句并打印出检查点权重的名称。例如，您应该添加类似以下语句：
 - en: '[PRE23]'
+  id: totrans-187
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: Besides, you should also print out the names of both weights to make sure they
     match, *e.g.*
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，您还应该打印出两个权重的名称，以确保它们匹配，*例如*
 - en: '[PRE24]'
+  id: totrans-189
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: If either the shape or the name doesn’t match, you probably assigned the wrong
     checkpoint weight to a randomly initialized layer of the 🤗 Transformers implementation.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果形状或名称不匹配，则您可能将错误的检查点权重分配给了🤗 Transformers实现的随机初始化层。
 - en: An incorrect shape is most likely due to an incorrect setting of the config
     parameters in `BrandNewBertConfig()` that do not exactly match those that were
     used for the checkpoint you want to convert. However, it could also be that PyTorch’s
     implementation of a layer requires the weight to be transposed beforehand.
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 不正确的形状很可能是由于在`BrandNewBertConfig()`中不正确设置配置参数，这些参数与您要转换的检查点使用的参数不完全匹配。但是，也可能是PyTorch的层实现要求在之前对权重进行转置。
 - en: Finally, you should also check that **all** required weights are initialized
     and print out all checkpoint weights that were not used for initialization to
     make sure the model is correctly converted. It is completely normal, that the
@@ -966,32 +1363,46 @@
     have a wrong architecture in the 🤗 Transformers implementation, you have a bug
     in the `init()` functions of one of the components of the 🤗 Transformers implementation
     or you need to transpose one of the checkpoint weights.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，您还应该检查**所有**必需的权重是否已初始化，并打印出所有未用于初始化的检查点权重，以确保模型已正确转换。完全正常的是，转换尝试可能会因为错误的形状语句或错误的名称分配而失败。这很可能是因为您在`BrandNewBertConfig()`中使用了不正确的参数，在🤗
+    Transformers实现中有错误的架构，您在🤗 Transformers实现的一个组件的`init()`函数中有错误，或者您需要转置一个检查点权重。
 - en: 'This step should be iterated with the previous step until all weights of the
     checkpoint are correctly loaded in the Transformers model. Having correctly loaded
     the checkpoint into the 🤗 Transformers implementation, you can then save the model
     under a folder of your choice `/path/to/converted/checkpoint/folder` that should
     then contain both a `pytorch_model.bin` file and a `config.json` file:'
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 应该通过前面的步骤迭代此步骤，直到正确加载所有检查点的权重到Transformers模型中。正确加载检查点到🤗 Transformers实现后，您可以将模型保存在您选择的文件夹中`/path/to/converted/checkpoint/folder`，该文件夹应包含一个`pytorch_model.bin`文件和一个`config.json`文件：
 - en: '[PRE25]'
+  id: totrans-194
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: '**7\. Implement the forward pass**'
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: '**7. 实现正向传递**'
 - en: 'Having managed to correctly load the pretrained weights into the 🤗 Transformers
     implementation, you should now make sure that the forward pass is correctly implemented.
     In [Get familiar with the original repository](#34-run-a-pretrained-checkpoint-using-the-original-repository),
     you have already created a script that runs a forward pass of the model using
     the original repository. Now you should write an analogous script using the 🤗
     Transformers implementation instead of the original one. It should look as follows:'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 成功将预训练权重正确加载到🤗 Transformers实现中后，现在应确保正向传递已正确实现。在[熟悉原始存储库](#34-run-a-pretrained-checkpoint-using-the-original-repository)中，您已经创建了一个脚本，该脚本使用原始存储库运行模型的正向传递。现在，您应该编写一个类似的脚本，使用🤗
+    Transformers实现而不是原始实现。它应该如下所示：
 - en: '[PRE26]'
+  id: totrans-197
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: It is very likely that the 🤗 Transformers implementation and the original model
     implementation don’t give the exact same output the very first time or that the
     forward pass throws an error. Don’t be disappointed - it’s expected! First, you
@@ -1000,6 +1411,7 @@
     or that the wrong data type object is used, *e.g.* `torch.long` instead of `torch.float32`.
     Don’t hesitate to ask the Hugging Face team for help, if you don’t manage to solve
     certain errors.
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
 - en: 'The final part to make sure the 🤗 Transformers implementation works correctly
@@ -1009,25 +1421,30 @@
     and the original implementation. Next, you should make sure that the output values
     are identical as well. This one of the most difficult parts of adding a new model.
     Common mistakes why the outputs are not identical are:'
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
 - en: Some layers were not added, *i.e.* an *activation* layer was not added, or the
     residual connection was forgotten
+  id: totrans-200
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The word embedding matrix was not tied
+  id: totrans-201
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The wrong positional embeddings are used because the original implementation
     uses on offset
+  id: totrans-202
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Dropout is applied during the forward pass. To fix this make sure *model.training
     is False* and that no dropout layer is falsely activated during the forward pass,
     *i.e.* pass *self.training* to [PyTorch’s functional dropout](https://pytorch.org/docs/stable/nn.functional.html?highlight=dropout#torch.nn.functional.dropout)
+  id: totrans-203
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1046,15 +1463,18 @@
     Transformers implementation, at the same positions in the network respectively,
     and to successively remove print statements showing the same values for intermediate
     presentations.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
 - en: When you’re confident that both implementations yield the same output, verify
     the outputs with `torch.allclose(original_output, output, atol=1e-3)`, you’re
     done with the most difficult part! Congratulations - the work left to be done
     should be a cakewalk 😊.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
 - en: '**8\. Adding all necessary model tests**'
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
 - en: 'At this point, you have successfully added a new model. However, it is very
@@ -1063,22 +1483,28 @@
     common tests should pass. The Cookiecutter should have automatically added a test
     file for your model, probably under the same `tests/models/brand_new_bert/test_modeling_brand_new_bert.py`.
     Run this test file to verify that all common tests pass:'
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE27]'
+  id: totrans-208
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: Having fixed all common tests, it is now crucial to ensure that all the nice
     work you have done is well tested, so that
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
 - en: a) The community can easily understand your work by looking at specific tests
     of *brand_new_bert*
+  id: totrans-210
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: b) Future changes to your model will not break any important feature of the
     model.
+  id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1087,70 +1513,103 @@
     🤗 Transformers. A template of those model tests has already added by the Cookiecutter,
     called `BrandNewBertModelIntegrationTests` and only has to be filled out by you.
     To ensure that those tests are passing, run
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，应添加集成测试。这些集成测试基本上与您早期用于将模型实现到🤗 Transformers的调试脚本相同。Cookiecutter已经添加了这些模型测试的模板，称为`BrandNewBertModelIntegrationTests`，您只需填写即可。为确保这些测试通过，请运行
 - en: '[PRE28]'
+  id: totrans-213
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: In case you are using Windows, you should replace `RUN_SLOW=1` with `SET RUN_SLOW=1`
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您使用Windows，应将`RUN_SLOW=1`替换为`SET RUN_SLOW=1`。
 - en: 'Second, all features that are special to *brand_new_bert* should be tested
     additionally in a separate test under `BrandNewBertModelTester`/``BrandNewBertModelTest`.
     This part is often forgotten but is extremely useful in two ways:'
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 其次，*brand_new_bert*特有的所有功能还应在`BrandNewBertModelTester`/`BrandNewBertModelTest`下的单独测试中进行额外测试。这部分经常被遗忘，但在两个方面非常有用：
 - en: It helps to transfer the knowledge you have acquired during the model addition
     to the community by showing how the special features of *brand_new_bert* should
     work.
+  id: totrans-216
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过展示*brand_new_bert*的特殊功能应该如何工作，将您在模型添加过程中获得的知识传递给社区是有帮助的。
 - en: Future contributors can quickly test changes to the model by running those special
     tests.
+  id: totrans-217
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 未来的贡献者可以通过运行这些特殊测试快速测试模型的更改。
 - en: '**9\. Implement the tokenizer**'
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: '**9. 实现分词器**'
 - en: Next, we should add the tokenizer of *brand_new_bert*. Usually, the tokenizer
     is equivalent to or very similar to an already existing tokenizer of 🤗 Transformers.
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们应该添加*brand_new_bert*的分词器。通常，分词器等同于或非常类似于🤗 Transformers的已有分词器。
 - en: It is very important to find/extract the original tokenizer file and to manage
     to load this file into the 🤗 Transformers’ implementation of the tokenizer.
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 找到/提取原始的分词器文件并成功加载到🤗 Transformers的分词器实现中非常重要。
 - en: 'To ensure that the tokenizer works correctly, it is recommended to first create
     a script in the original repository that inputs a string and returns the `input_ids“.
     It could look similar to this (in pseudo-code):'
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了确保分词器正常工作，建议首先在原始存储库中创建一个脚本，输入一个字符串并返回`input_ids`。它可能看起来类似于这样（伪代码）：
 - en: '[PRE29]'
+  id: totrans-222
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: 'You might have to take a deeper look again into the original repository to
     find the correct tokenizer function or you might even have to do changes to your
     clone of the original repository to only output the `input_ids`. Having written
     a functional tokenization script that uses the original repository, an analogous
     script for 🤗 Transformers should be created. It should look similar to this:'
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能需要再次深入研究原始存储库，找到正确的分词器函数，或者甚至可能需要对原始存储库的克隆进行更改，以仅输出`input_ids`。编写了一个使用原始存储库的功能性分词脚本后，应创建一个类似于🤗
+    Transformers的脚本。它应该看起来类似于这样：
 - en: '[PRE30]'
+  id: totrans-224
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: When both `input_ids` yield the same values, as a final step a tokenizer test
     file should also be added.
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 当`input_ids`产生相同的值时，最后一步应该添加一个分词器测试文件。
 - en: Analogous to the modeling test files of *brand_new_bert*, the tokenization test
     files of *brand_new_bert* should contain a couple of hard-coded integration tests.
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似于*brand_new_bert*的建模测试文件，*brand_new_bert*的分词测试文件应包含一些硬编码的集成测试。
 - en: '**10\. Run End-to-end integration tests**'
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: '**10. 运行端到端集成测试**'
 - en: Having added the tokenizer, you should also add a couple of end-to-end integration
     tests using both the model and the tokenizer to `tests/models/brand_new_bert/test_modeling_brand_new_bert.py`
     in 🤗 Transformers. Such a test should show on a meaningful text-to-text sample
@@ -1163,11 +1622,17 @@
     statements to internal tensors of the model, which in such a test would show in
     an error. In case you have no access to a GPU, the Hugging Face team can take
     care of running those tests for you.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 添加了分词器后，还应在🤗 Transformers的`tests/models/brand_new_bert/test_modeling_brand_new_bert.py`中添加一些端到端集成测试，使用模型和分词器。这样的测试应该在一个有意义的文本对文本示例上展示🤗
+    Transformers的实现是否符合预期。有意义的文本对文本示例可以包括*例如*源到目标翻译对、文章到摘要对、问题到答案对等。如果没有任何迁移检查点在下游任务上进行了微调，仅依赖于模型测试就足够了。为了确保模型完全功能正常，建议您还在GPU上运行所有测试。有时您可能会忘记向模型的内部张量添加一些`.to(self.device)`语句，在这样的测试中会显示错误。如果您无法访问GPU，Hugging
+    Face团队可以负责为您运行这些测试。
 - en: '**11\. Add Docstring**'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: '**11. 添加文档字符串**'
 - en: Now, all the necessary functionality for *brand_new_bert* is added - you’re
     almost done! The only thing left to add is a nice docstring and a doc page. The
     Cookiecutter should have added a template file called `docs/source/model_doc/brand_new_bert.md`
@@ -1176,49 +1641,74 @@
     and concise. It is very useful for the community to add some *Tips* to show how
     the model should be used. Don’t hesitate to ping the Hugging Face team regarding
     the docstrings.
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，*brand_new_bert*所需的所有功能都已添加 - 您几乎完成了！唯一剩下的是添加一个良好的文档字符串和文档页面。Cookiecutter应该已经添加了一个名为`docs/source/model_doc/brand_new_bert.md`的模板文件，您应该填写该文件。您的模型用户通常会在使用您的模型之前首先查看此页面。因此，文档必须易于理解和简洁。向社区添加一些*提示*以显示模型应如何使用是非常有用的。不要犹豫与Hugging
+    Face团队联系有关文档字符串。
 - en: Next, make sure that the docstring added to `src/transformers/models/brand_new_bert/modeling_brand_new_bert.py`
     is correct and included all necessary inputs and outputs. We have a detailed guide
     about writing documentation and our docstring format [here](writing-documentation).
     It is always to good to remind oneself that documentation should be treated at
     least as carefully as the code in 🤗 Transformers since the documentation is usually
     the first contact point of the community with the model.
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，确保添加到`src/transformers/models/brand_new_bert/modeling_brand_new_bert.py`的文档字符串是正确的，并包含所有必要的输入和输出。我们有关于编写文档和我们的文档字符串格式的详细指南[在这里](writing-documentation)。值得提醒自己的是，文档应该至少像🤗
+    Transformers中的代码一样小心对待，因为文档通常是社区与模型的第一个接触点。
 - en: '**Code refactor**'
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: '**代码重构**'
 - en: 'Great, now you have added all the necessary code for *brand_new_bert*. At this
     point, you should correct some potential incorrect code style by running:'
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 很好，现在你已经为*brand_new_bert*添加了所有必要的代码。在这一点上，你应该通过运行以下代码来纠正一些潜在的不正确的代码风格：
 - en: '[PRE31]'
+  id: totrans-234
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: 'and verify that your coding style passes the quality check:'
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 并验证你的编码风格是否通过了质量检查：
 - en: '[PRE32]'
+  id: totrans-236
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: There are a couple of other very strict design tests in 🤗 Transformers that
     might still be failing, which shows up in the tests of your pull request. This
     is often because of some missing information in the docstring or some incorrect
     naming. The Hugging Face team will surely help you if you’re stuck here.
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 在🤗 Transformers中还有一些其他非常严格的设计测试可能仍然失败，这会在你的拉取请求的测试中显示出来。这往往是因为文档字符串中缺少一些信息或一些名称不正确。如果你遇到困难，Hugging
+    Face团队肯定会帮助你。
 - en: Lastly, it is always a good idea to refactor one’s code after having ensured
     that the code works correctly. With all tests passing, now it’s a good time to
     go over the added code again and do some refactoring.
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，经过确保代码正确运行后，重新设计代码总是一个好主意。现在所有的测试都通过了，现在是一个好时机再次检查添加的代码并进行一些重构。
 - en: You have now finished the coding part, congratulation! 🎉 You are Awesome! 😎
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 恭喜！你现在已经完成了编码部分，太棒了！🎉 你真棒！😎
 - en: '**12\. Upload the models to the model hub**'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: '**12\. 将模型上传到模型中心**'
 - en: 'In this final part, you should convert and upload all checkpoints to the model
     hub and add a model card for each uploaded model checkpoint. You can get familiar
     with the hub functionalities by reading our [Model sharing and uploading Page](model_sharing).
@@ -1227,48 +1717,69 @@
     the model under the author’s organization of *brand_new_bert*. The `push_to_hub`
     method, present in all models in `transformers`, is a quick and efficient way
     to push your checkpoint to the hub. A little snippet is pasted below:'
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这最后一部分，你应该将所有检查点转换并上传到模型中心，并为每个上传的模型检查点添加一个模型卡片。你可以通过阅读我们的[模型分享和上传页面](model_sharing)来熟悉中心的功能。在这里，你应该与Hugging
+    Face团队一起工作，决定为每个检查点选择一个合适的名称，并获得所需的访问权限，以便能够将模型上传到作者组织*brand_new_bert*下。`transformers`中的所有模型中都有`push_to_hub`方法，这是将你的检查点快速有效地推送到中心的方法。下面是一个小片段：
 - en: '[PRE33]'
+  id: totrans-242
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: It is worth spending some time to create fitting model cards for each checkpoint.
     The model cards should highlight the specific characteristics of this particular
     checkpoint, *e.g.* On which dataset was the checkpoint pretrained/fine-tuned on?
     On what down-stream task should the model be used? And also include some code
     on how to correctly use the model.
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 值得花一些时间为每个检查点创建合适的模型卡片。模型卡片应该突出显示这个特定检查点的特定特征，*例如*这个检查点是在哪个数据集上进行预训练/微调的？这个模型应该用于哪个下游任务？还应该包括一些关于如何正确使用模型的代码。
 - en: '**13\. (Optional) Add notebook**'
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: '**13\. （可选）添加笔记本**'
 - en: It is very helpful to add a notebook that showcases in-detail how *brand_new_bert*
     can be used for inference and/or fine-tuned on a downstream task. This is not
     mandatory to merge your PR, but very useful for the community.
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 添加一个展示*brand_new_bert*如何用于推理和/或在下游任务上进行微调的详细笔记本非常有帮助。这不是合并你的PR所必需的，但对社区非常有用。
 - en: '**14\. Submit your finished PR**'
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: '**14\. 提交你完成的PR**'
 - en: You’re done programming now and can move to the last step, which is getting
     your PR merged into main. Usually, the Hugging Face team should have helped you
     already at this point, but it is worth taking some time to give your finished
     PR a nice description and eventually add comments to your code, if you want to
     point out certain design choices to your reviewer.
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: 你现在已经完成了编程工作，可以进入最后一步，即将你的PR合并到主分支。通常情况下，Hugging Face团队在这一点上应该已经帮助过你了，但值得花一些时间为你的完成的PR添加一个好的描述，并最终为你的代码添加注释，如果你想指出某些设计选择给你的审阅者。
 - en: Share your work!!
+  id: totrans-248
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 分享你的工作！
 - en: Now, it’s time to get some credit from the community for your work! Having completed
     a model addition is a major contribution to Transformers and the whole NLP community.
     Your code and the ported pre-trained models will certainly be used by hundreds
     and possibly even thousands of developers and researchers. You should be proud
     of your work and share your achievements with the community.
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，是时候从社区中获得一些对你工作的认可了！完成模型添加是对Transformers和整个NLP社区的重大贡献。你的代码和移植的预训练模型肯定会被数百甚至数千名开发人员和研究人员使用。你应该为自己的工作感到自豪，并与社区分享你的成就。
 - en: '**You have made another model that is super easy to access for everyone in
     the community! 🤯**'
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: '**你又制作了一个对社区中每个人都很容易访问的模型！🤯**'
