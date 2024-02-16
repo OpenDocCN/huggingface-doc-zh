@@ -1,40 +1,37 @@
 - en: Perceiver
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Perceiver
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/perceiver](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/perceiver)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/perceiver](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/perceiver)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Overview
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 概述
 - en: 'The Perceiver IO model was proposed in [Perceiver IO: A General Architecture
     for Structured Inputs & Outputs](https://arxiv.org/abs/2107.14795) by Andrew Jaegle,
     Sebastian Borgeaud, Jean-Baptiste Alayrac, Carl Doersch, Catalin Ionescu, David
     Ding, Skanda Koppula, Daniel Zoran, Andrew Brock, Evan Shelhamer, Olivier Hénaff,
     Matthew M. Botvinick, Andrew Zisserman, Oriol Vinyals, João Carreira.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 'Perceiver IO模型由Andrew Jaegle、Sebastian Borgeaud、Jean-Baptiste Alayrac、Carl
+    Doersch、Catalin Ionescu、David Ding、Skanda Koppula、Daniel Zoran、Andrew Brock、Evan
+    Shelhamer、Olivier Hénaff、Matthew M. Botvinick、Andrew Zisserman、Oriol Vinyals、João
+    Carreira在《Perceiver IO: A General Architecture for Structured Inputs & Outputs》中提出。'
 - en: Perceiver IO is a generalization of [Perceiver](https://arxiv.org/abs/2103.03206)
     to handle arbitrary outputs in addition to arbitrary inputs. The original Perceiver
     only produced a single classification label. In addition to classification labels,
@@ -45,11 +42,17 @@
     us to process inputs and outputs that are much larger than can be handled by standard
     Transformers. This means, for example, Perceiver IO can do BERT-style masked language
     modeling directly using bytes instead of tokenized inputs.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: Perceiver IO是对Perceiver的泛化，可以处理任意输出以及任意输入。原始的Perceiver只产生单个分类标签。除了分类标签，Perceiver
+    IO还可以生成（例如）语言、光流和带有音频的多模态视频。这是使用与原始Perceiver相同的构建模块完成的。Perceiver IO的计算复杂度与输入和输出大小呈线性关系，大部分处理发生在潜在空间中，使我们能够处理比标准Transformer处理能力更大的输入和输出。这意味着，例如，Perceiver
+    IO可以直接使用字节执行类似BERT的掩码语言建模，而不是使用标记化的输入。
 - en: 'The abstract from the paper is the following:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 论文的摘要如下：
 - en: '*The recently-proposed Perceiver model obtains good results on several domains
     (images, audio, multimodal, point clouds) while scaling linearly in compute and
     memory with the input size. While the Perceiver supports many kinds of inputs,
@@ -64,11 +67,17 @@
     a Transformer-based BERT baseline on the GLUE language benchmark without the need
     for input tokenization and achieves state-of-the-art performance on Sintel optical
     flow estimation.*'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 最近提出的Perceiver模型在多个领域（图像、音频、多模态、点云）上取得了良好的结果，同时在计算和内存方面与输入大小呈线性关系。虽然Perceiver支持多种类型的输入，但它只能产生非常简单的输出，如类别分数。Perceiver
+    IO通过学习灵活地查询模型的潜在空间来产生任意大小和语义的输出，克服了这一限制，同时保留了原始模型的吸引人特性。Perceiver IO仍然将模型深度与数据大小分离，并且仍然与数据大小呈线性关系，但现在是相对于输入和输出大小。完整的Perceiver
+    IO模型在具有高度结构化输出空间的任务上取得了强大的结果，例如自然语言和视觉理解、星际争霸II以及多任务和多模态领域。作为亮点，Perceiver IO在GLUE语言基准测试中与基于Transformer的BERT基线相匹配，无需输入标记化，并在Sintel光流估计中实现了最先进的性能。
 - en: 'Here’s a TLDR explaining how Perceiver works:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是Perceiver工作原理的TLDR：
 - en: The main problem with the self-attention mechanism of the Transformer is that
     the time and memory requirements scale quadratically with the sequence length.
     Hence, models like BERT and RoBERTa are limited to a max sequence length of 512
@@ -78,8 +87,10 @@
     on the length of the inputs anymore, as one uses a fixed amount of latent variables,
     like 256 or 512\. These are randomly initialized, after which they are trained
     end-to-end using backpropagation.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: Transformer的自注意机制的主要问题是随着序列长度的增加，时间和内存需求呈二次方增长。因此，像BERT和RoBERTa这样的模型受限于最大512个标记的序列长度。Perceiver旨在通过在一组潜在变量上执行自注意，而不是在输入上执行自注意，从而解决这个问题，并且仅使用输入进行交叉注意力。这样，时间和内存需求不再取决于输入的长度，因为使用固定数量的潜在变量，如256或512。这些变量是随机初始化的，之后通过反向传播进行端到端训练。
 - en: Internally, [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
     will create the latents, which is a tensor of shape `(batch_size, num_latents,
     d_latents)`. One must provide `inputs` (which could be text, images, audio, you
@@ -88,16 +99,20 @@
     can then, similar to BERT, convert the last hidden states of the latents to classification
     logits by averaging along the sequence dimension, and placing a linear layer on
     top of that to project the `d_latents` to `num_labels`.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在内部，PerceiverModel将创建潜在变量，其形状为`(batch_size, num_latents, d_latents)`的张量。必须向模型提供输入（可以是文本、图像、音频等），模型将使用这些输入与潜在变量进行交叉注意力。Perceiver编码器的输出是相同形状的张量。然后可以类似于BERT，通过沿序列维度取平均值将潜在变量的最后隐藏状态转换为分类logits，并在其上放置一个线性层，将`d_latents`投影到`num_labels`。
 - en: 'This was the idea of the original Perceiver paper. However, it could only output
     classification logits. In a follow-up work, PerceiverIO, they generalized it to
     let the model also produce outputs of arbitrary size. How, you might ask? The
     idea is actually relatively simple: one defines outputs of an arbitrary size,
     and then applies cross-attention with the last hidden states of the latents, using
     the outputs as queries, and the latents as keys and values.'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是原始Perceiver论文的想法。但是，它只能输出分类logits。在后续工作PerceiverIO中，他们将其泛化，使模型还可以产生任意大小的输出。你可能会问，如何实现？其实想法相对简单：定义任意大小的输出，然后使用潜在变量的最后隐藏状态执行交叉注意力，使用输出作为查询，潜在变量作为键和值。
 - en: 'So let’s say one wants to perform masked language modeling (BERT-style) with
     the Perceiver. As the Perceiver’s input length will not have an impact on the
     computation time of the self-attention layers, one can provide raw bytes, providing
@@ -109,119 +124,170 @@
     head on top, to project the last dimension to the vocabulary size of the model,
     i.e. creating logits of shape `(batch_size, 2048, 262)` (as Perceiver uses a vocabulary
     size of 262 byte IDs).'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么假设有人想要使用Perceiver执行掩码语言建模（类似BERT）。由于Perceiver的输入长度不会影响自注意力层的计算时间，可以提供原始字节，将`inputs`的长度提供给模型为2048。如果现在屏蔽掉这2048个标记中的某些标记，可以将`outputs`定义为形状为：`(batch_size,
+    2048, 768)`。接下来，使用潜在变量的最终隐藏状态执行交叉注意力以更新`outputs`张量。经过交叉注意力后，仍然有形状为`(batch_size,
+    2048, 768)`的张量。然后可以在顶部放置一个常规的语言建模头部，将最后一个维度投影到模型的词汇量大小，即创建形状为`(batch_size, 2048,
+    262)`的logits（因为Perceiver使用262个字节ID的词汇量大小）。
 - en: '![drawing](../Images/acb47bab9c3f6167f99d55d174c267c0.png) Perceiver IO architecture.
     Taken from the [original paper](https://arxiv.org/abs/2105.15203)'
+  id: totrans-13
   prefs: []
   type: TYPE_IMG
+  zh: '![图示](../Images/acb47bab9c3f6167f99d55d174c267c0.png) Perceiver IO架构。取自[原始论文](https://arxiv.org/abs/2105.15203)'
 - en: This model was contributed by [nielsr](https://huggingface.co/nielsr). The original
     code can be found [here](https://github.com/deepmind/deepmind-research/tree/master/perceiver).
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型由[nielsr](https://huggingface.co/nielsr)贡献。原始代码可以在[此处](https://github.com/deepmind/deepmind-research/tree/master/perceiver)找到。
 - en: 'Perceiver does **not** work with `torch.nn.DataParallel` due to a bug in PyTorch,
     see [issue #36035](https://github.com/pytorch/pytorch/issues/36035)'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: Perceiver **不** 与`torch.nn.DataParallel`一起使用，因为PyTorch中存在错误，请参阅[问题＃36035](https://github.com/pytorch/pytorch/issues/36035)
 - en: Resources
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 资源
 - en: The quickest way to get started with the Perceiver is by checking the [tutorial
     notebooks](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/Perceiver).
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 开始使用Perceiver的最快方法是查看[教程笔记本](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/Perceiver)。
 - en: Refer to the [blog post](https://huggingface.co/blog/perceiver) if you want
     to fully understand how the model works and is implemented in the library. Note
     that the models available in the library only showcase some examples of what you
     can do with the Perceiver. There are many more use cases, including question answering,
     named-entity recognition, object detection, audio classification, video classification,
     etc.
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果您想要完全了解模型如何工作并在库中实现，请参考[博客文章](https://huggingface.co/blog/perceiver)。请注意，库中提供的模型仅展示了您可以使用Perceiver做什么的一些示例。还有许多其他用例，包括问答，命名实体识别，目标检测，音频分类，视频分类等。
 - en: '[Text classification task guide](../tasks/sequence_classification)'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[文本分类任务指南](../tasks/sequence_classification)'
 - en: '[Masked language modeling task guide](../tasks/masked_language_modeling)'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[掩码语言建模任务指南](../tasks/masked_language_modeling)'
 - en: '[Image classification task guide](../tasks/image_classification)'
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[图像分类任务指南](../tasks/image_classification)'
 - en: Perceiver specific outputs
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Perceiver特定的输出
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput`'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L60)'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L60)'
 - en: '[PRE0]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Parameters
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, num_labels)`) — Classification
     (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logits`（形状为`(batch_size, num_labels)`的`torch.FloatTensor`）—分类（如果`config.num_labels==1`则为回归）得分（SoftMax之前）。'
 - en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`) — Sequence of hidden-states at the output of the last layer of
     the model.'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`last_hidden_state`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`）—模型最后一层的隐藏状态序列。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或当`config.output_hidden_states=True`时返回）—形状为`(batch_size,
+    sequence_length, hidden_size)`的`torch.FloatTensor`元组（一个用于嵌入的输出+一个用于每个层的输出）。模型在每一层的输出的隐藏状态加上初始嵌入输出。'
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或当`config.output_attentions=True`时返回）—形状为`(batch_size,
+    num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每个层一个）。注意力softmax后的注意力权重，用于计算自注意力头中的加权平均值。'
 - en: '`cross_attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Base class for Perceiver base model’s outputs, with potential hidden states,
     attentions and cross-attentions.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverDecoderOutput`'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L91)'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Parameters
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, num_labels)`) — Output
     of the basic decoder.'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -230,32 +296,41 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Base class for Perceiver decoder outputs, with potential cross-attentions.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput`'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L109)'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Parameters
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Masked language modeling (MLM) loss.'
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
     — Prediction scores of the language modeling head (scores for each vocabulary
     token before SoftMax).'
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -264,6 +339,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -272,6 +348,7 @@
     (one for each layer) of shape `(batch_size, num_heads, num_latents, num_latents)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -280,31 +357,40 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Base class for Perceiver’s masked language model outputs.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput`'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L140)'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Parameters
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -313,753 +399,1055 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(torch.FloatTensor)`, *可选*, 当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回)
+    — 形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组。模型在每一层输出的隐藏状态加上初始嵌入输出。'
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions` (`tuple(torch.FloatTensor)`, *可选*, 当传递`output_attentions=True`或`config.output_attentions=True`时返回)
+    — 形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。在注意力softmax之后的注意力权重，用于计算自注意力头中的加权平均值。'
 - en: '`cross_attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`cross_attentions` (`tuple(torch.FloatTensor)`, *可选*, 当传递`output_attentions=True`或`config.output_attentions=True`时返回)
+    — 形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。解码器的交叉注意力层的注意力权重，在注意力softmax之后，用于计算交叉注意力头中的加权平均值。'
 - en: Base class for Perceiver’s outputs of sequence/image classification models,
     optical flow and multimodal autoencoding.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: Perceiver的序列/图像分类模型、光流和多模态自编码的输出的基类。
 - en: PerceiverConfig
+  id: totrans-60
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: PerceiverConfig
 - en: '### `class transformers.PerceiverConfig`'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.PerceiverConfig`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/configuration_perceiver.py#L36)'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/configuration_perceiver.py#L36)'
 - en: '[PRE4]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Parameters
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`num_latents` (`int`, *optional*, defaults to 256) — The number of latents.'
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_latents` (`int`, *可选*, 默认为256) — 潜在嵌入的数量。'
 - en: '`d_latents` (`int`, *optional*, defaults to 1280) — Dimension of the latent
     embeddings.'
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`d_latents` (`int`, *可选*, 默认为1280) — 潜在嵌入的维度。'
 - en: '`d_model` (`int`, *optional*, defaults to 768) — Dimension of the inputs. Should
     only be provided in case [*PerceiverTextPreprocessor*] is used or no preprocessor
     is provided.'
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`d_model` (`int`, *可选*, 默认为768) — 输入的维度。仅在使用[*PerceiverTextPreprocessor*]或未提供预处理器时提供。'
 - en: '`num_blocks` (`int`, *optional*, defaults to 1) — Number of blocks in the Transformer
     encoder.'
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_blocks` (`int`, *可选*, 默认为1) — Transformer编码器中的块数。'
 - en: '`num_self_attends_per_block` (`int`, *optional*, defaults to 26) — The number
     of self-attention layers per block.'
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_self_attends_per_block` (`int`, *可选*, 默认为26) — 每个块中的自注意力层的数量。'
 - en: '`num_self_attention_heads` (`int`, *optional*, defaults to 8) — Number of attention
     heads for each self-attention layer in the Transformer encoder.'
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_self_attention_heads` (`int`, *可选*, 默认为8) — Transformer编码器中每个自注意力层的注意力头数。'
 - en: '`num_cross_attention_heads` (`int`, *optional*, defaults to 8) — Number of
     attention heads for each cross-attention layer in the Transformer encoder.'
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_cross_attention_heads` (`int`, *可选*, 默认为8) — Transformer编码器中每个交叉注意力层的注意力头数。'
 - en: '`qk_channels` (`int`, *optional*) — Dimension to project the queries + keys
     before applying attention in the cross-attention and self-attention layers of
     the encoder. Will default to preserving the dimension of the queries if not specified.'
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`qk_channels` (`int`, *可选*) — 在编码器的交叉注意力和自注意力层中应用注意力之前投影查询+键的维度。如果未指定，将默认保留查询的维度。'
 - en: '`v_channels` (`int`, *optional*) — Dimension to project the values before applying
     attention in the cross-attention and self-attention layers of the encoder. Will
     default to preserving the dimension of the queries if not specified.'
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`v_channels` (`int`, *可选*) — 在编码器的交叉注意力和自注意力层中应用注意力之前投影值的维度。如果未指定，将默认保留查询的维度。'
 - en: '`cross_attention_shape_for_attention` (`str`, *optional*, defaults to `"kv"`)
     — Dimension to use when downsampling the queries and keys in the cross-attention
     layer of the encoder.'
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`cross_attention_shape_for_attention` (`str`, *可选*, 默认为`"kv"`) — 在编码器的交叉注意力层中降采样查询和键时使用的维度。'
 - en: '`self_attention_widening_factor` (`int`, *optional*, defaults to 1) — Dimension
     of the feed-forward layer in the cross-attention layer of the Transformer encoder.'
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`self_attention_widening_factor` (`int`, *可选*, 默认为1) — Transformer编码器中交叉注意力层中前馈层的维度。'
 - en: '`cross_attention_widening_factor` (`int`, *optional*, defaults to 1) — Dimension
     of the feed-forward layer in the self-attention layers of the Transformer encoder.'
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`cross_attention_widening_factor` (`int`, *可选*, 默认为1) — Transformer编码器中自注意力层中前馈层的维度。'
 - en: '`hidden_act` (`str` or `function`, *optional*, defaults to `"gelu"`) — The
     non-linear activation function (function or string) in the encoder and pooler.
     If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  id: totrans-77
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_act` (`str`或`function`, *可选*, 默认为`"gelu"`) — 编码器和池化器中的非线性激活函数（函数或字符串）。如果是字符串，支持`"gelu"`、`"relu"`、`"selu"`和`"gelu_new"`。'
 - en: '`attention_probs_dropout_prob` (`float`, *optional*, defaults to 0.1) — The
     dropout ratio for the attention probabilities.'
+  id: totrans-78
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_probs_dropout_prob` (`float`, *可选*, 默认为0.1) — 注意力概率的丢弃比率。'
 - en: '`initializer_range` (`float`, *optional*, defaults to 0.02) — The standard
     deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  id: totrans-79
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`initializer_range` (`float`, *可选*, 默认为0.02) — 用于初始化所有权重矩阵的截断正态初始化器的标准差。'
 - en: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-12) — The epsilon used
     by the layer normalization layers.'
+  id: totrans-80
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`layer_norm_eps` (`float`, *可选*, 默认为1e-12) — 层归一化层使用的epsilon。'
 - en: '`use_query_residual` (`float`, *optional*, defaults to `True`) — Whether to
     add a query residual in the cross-attention layer of the encoder.'
+  id: totrans-81
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`use_query_residual` (`float`, *optional*, defaults to `True`) — 是否在编码器的交叉注意力层中添加查询残差。'
 - en: '`vocab_size` (`int`, *optional*, defaults to 262) — Vocabulary size for the
     masked language modeling model.'
+  id: totrans-82
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`vocab_size` (`int`, *optional*, defaults to 262) — 用于掩码语言建模模型的词汇量。'
 - en: '`max_position_embeddings` (`int`, *optional*, defaults to 2048) — The maximum
     sequence length that the masked language modeling model might ever be used with.
     Typically set this to something large just in case (e.g., 512 or 1024 or 2048).'
+  id: totrans-83
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_position_embeddings` (`int`, *optional*, defaults to 2048) — 掩码语言建模模型可能使用的最大序列长度。通常将其设置为较大的值以防万一（例如，512、1024或2048）。'
 - en: '`image_size` (`int`, *optional*, defaults to 56) — Size of the images after
     preprocessing, for [PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned).'
+  id: totrans-84
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_size` (`int`, *optional*, defaults to 56) — 预处理后的图像大小，用于 [PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)。'
 - en: '`train_size` (`List[int]`, *optional*, defaults to `[368, 496]`) — Training
     size of the images for the optical flow model.'
+  id: totrans-85
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`train_size` (`List[int]`, *optional*, defaults to `[368, 496]`) — 光流模型图像的训练大小。'
 - en: '`num_frames` (`int`, *optional*, defaults to 16) — Number of video frames used
     for the multimodal autoencoding model.'
+  id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_frames` (`int`, *optional*, defaults to 16) — 多模态自编码模型中使用的视频帧数。'
 - en: '`audio_samples_per_frame` (`int`, *optional*, defaults to 1920) — Number of
     audio samples per frame for the multimodal autoencoding model.'
+  id: totrans-87
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`audio_samples_per_frame` (`int`, *optional*, defaults to 1920) — 多模态自编码模型中每帧的音频样本数。'
 - en: '`samples_per_patch` (`int`, *optional*, defaults to 16) — Number of audio samples
     per patch when preprocessing the audio for the multimodal autoencoding model.'
+  id: totrans-88
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`samples_per_patch` (`int`, *optional*, defaults to 16) — 在预处理音频时，每个补丁的音频样本数，用于多模态自编码模型。'
 - en: '`output_shape` (`List[int]`, *optional*, defaults to `[1, 16, 224, 224]`) —
     Shape of the output (batch_size, num_frames, height, width) for the video decoder
     queries of the multimodal autoencoding model. This excludes the channel dimension.'
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_shape` (`List[int]`, *optional*, defaults to `[1, 16, 224, 224]`) —
+    多模态自编码模型视频解码器查询的输出形状（批量大小、帧数、高度、宽度）。这不包括通道维度。'
 - en: '`output_num_channels` (`int`, *optional*, defaults to 512) — Number of output
     channels for each modalitiy decoder.'
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_num_channels` (`int`, *optional*, defaults to 512) — 每个模态解码器的输出通道数。'
 - en: This is the configuration class to store the configuration of a [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel).
     It is used to instantiate an Perceiver model according to the specified arguments,
     defining the model architecture. Instantiating a configuration with the defaults
     will yield a similar configuration to that of the Perceiver [deepmind/language-perceiver](https://huggingface.co/deepmind/language-perceiver)
     architecture.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是用于存储 [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
+    配置的配置类。它用于根据指定的参数实例化 Perceiver 模型，定义模型架构。使用默认值实例化配置将产生类似于 Perceiver [deepmind/language-perceiver](https://huggingface.co/deepmind/language-perceiver)
+    架构的配置。
 - en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     for more information.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置对象继承自 [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)，可用于控制模型输出。阅读来自
+    [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    的文档以获取更多信息。
 - en: 'Example:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE5]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: PerceiverTokenizer
+  id: totrans-95
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: PerceiverTokenizer
 - en: '### `class transformers.PerceiverTokenizer`'
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.PerceiverTokenizer`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/tokenization_perceiver.py#L27)'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/tokenization_perceiver.py#L27)'
 - en: '[PRE6]'
+  id: totrans-98
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Parameters
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`pad_token` (`str`, *optional*, defaults to `"[PAD]"`) — The token used for
     padding, for example when batching sequences of different lengths.'
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pad_token` (`str`, *optional*, defaults to `"[PAD]"`) — 用于填充的标记，例如在批处理不同长度的序列时使用。'
 - en: '`bos_token` (`str`, *optional*, defaults to `"[BOS]"`) — The BOS token (reserved
     in the vocab, but not actually used).'
+  id: totrans-101
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`bos_token` (`str`, *optional*, defaults to `"[BOS]"`) — BOS 标记（在词汇表中保留，但实际上未使用）。'
 - en: '`eos_token` (`str`, *optional*, defaults to `"[EOS]"`) — The end of sequence
     token (reserved in the vocab, but not actually used).'
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`eos_token` (`str`, *optional*, defaults to `"[EOS]"`) — 序列结束标记（在词汇表中保留，但实际上未使用）。'
 - en: When building a sequence using special tokens, this is not the token that is
     used for the end of sequence. The token used is the `sep_token`.
+  id: totrans-103
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在使用特殊标记构建序列时，这不是用于序列结尾的标记。实际使用的标记是 `sep_token`。
 - en: '`mask_token` (`str`, *optional*, defaults to `"[MASK]"`) — The MASK token,
     useful for masked language modeling.'
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`mask_token` (`str`, *optional*, defaults to `"[MASK]"`) — MASK 标记，用于掩码语言建模。'
 - en: '`cls_token` (`str`, *optional*, defaults to `"[CLS]"`) — The CLS token (reserved
     in the vocab, but not actually used).'
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`cls_token` (`str`, *optional*, defaults to `"[CLS]"`) — CLS 标记（在词汇表中保留，但实际上未使用）。'
 - en: '`sep_token` (`str`, *optional*, defaults to `"[SEP]"`) — The separator token,
     which is used when building a sequence from two sequences.'
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`sep_token` (`str`, *optional*, defaults to `"[SEP]"`) — 用于从两个序列构建序列时使用的分隔符标记。'
 - en: Construct a Perceiver tokenizer. The Perceiver simply uses raw bytes utf-8 encoding.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建一个 Perceiver 标记器。Perceiver 简单地使用原始字节 utf-8 编码。
 - en: This tokenizer inherits from [PreTrainedTokenizer](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizer)
     which contains most of the main methods. Users should refer to this superclass
     for more information regarding those methods.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 此标记器继承自 [PreTrainedTokenizer](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizer)，其中包含大多数主要方法。用户应参考此超类以获取有关这些方法的更多信息。
 - en: '#### `__call__`'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `__call__`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/tokenization_utils_base.py#L2729)'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/tokenization_utils_base.py#L2729)'
 - en: '[PRE7]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Parameters
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`text` (`str`, `List[str]`, `List[List[str]]`, *optional*) — The sequence or
     batch of sequences to be encoded. Each sequence can be a string or a list of strings
     (pretokenized string). If the sequences are provided as list of strings (pretokenized),
     you must set `is_split_into_words=True` (to lift the ambiguity with a batch of
     sequences).'
+  id: totrans-113
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`text` (`str`, `List[str]`, `List[List[str]]`, *可选*) — 要编码的序列或序列批次。每个序列可以是字符串或字符串列表（预分词字符串）。如果序列以字符串列表（预分词）的形式提供，则必须设置
+    `is_split_into_words=True`（以消除与序列批次的歧义）。'
 - en: '`text_pair` (`str`, `List[str]`, `List[List[str]]`, *optional*) — The sequence
     or batch of sequences to be encoded. Each sequence can be a string or a list of
     strings (pretokenized string). If the sequences are provided as list of strings
     (pretokenized), you must set `is_split_into_words=True` (to lift the ambiguity
     with a batch of sequences).'
+  id: totrans-114
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`text_pair` (`str`, `List[str]`, `List[List[str]]`, *可选*) — 要编码的序列或序列批次。每个序列可以是字符串或字符串列表（预分词字符串）。如果序列以字符串列表（预分词）的形式提供，则必须设置
+    `is_split_into_words=True`（以消除与序列批次的歧义）。'
 - en: '`text_target` (`str`, `List[str]`, `List[List[str]]`, *optional*) — The sequence
     or batch of sequences to be encoded as target texts. Each sequence can be a string
     or a list of strings (pretokenized string). If the sequences are provided as list
     of strings (pretokenized), you must set `is_split_into_words=True` (to lift the
     ambiguity with a batch of sequences).'
+  id: totrans-115
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`text_target` (`str`, `List[str]`, `List[List[str]]`, *可选*) — 要编码为目标文本的序列或序列批次。每个序列可以是字符串或字符串列表（预分词字符串）。如果序列以字符串列表（预分词）的形式提供，则必须设置
+    `is_split_into_words=True`（以消除与序列批次的歧义）。'
 - en: '`text_pair_target` (`str`, `List[str]`, `List[List[str]]`, *optional*) — The
     sequence or batch of sequences to be encoded as target texts. Each sequence can
     be a string or a list of strings (pretokenized string). If the sequences are provided
     as list of strings (pretokenized), you must set `is_split_into_words=True` (to
     lift the ambiguity with a batch of sequences).'
+  id: totrans-116
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`text_pair_target` (`str`, `List[str]`, `List[List[str]]`, *可选*) — 要编码为目标文本的序列或序列批次。每个序列可以是字符串或字符串列表（预分词字符串）。如果序列以字符串列表（预分词）的形式提供，则必须设置
+    `is_split_into_words=True`（以消除与序列批次的歧义）。'
 - en: '`add_special_tokens` (`bool`, *optional*, defaults to `True`) — Whether or
     not to add special tokens when encoding the sequences. This will use the underlying
     `PretrainedTokenizerBase.build_inputs_with_special_tokens` function, which defines
     which tokens are automatically added to the input ids. This is usefull if you
     want to add `bos` or `eos` tokens automatically.'
+  id: totrans-117
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`add_special_tokens` (`bool`, *可选*, 默认为 `True`) — 在编码序列时是否添加特殊标记。这将使用底层的 `PretrainedTokenizerBase.build_inputs_with_special_tokens`
+    函数，该函数定义了自动添加到输入 id 的标记。如果要自动添加 `bos` 或 `eos` 标记，则这很有用。'
 - en: '`padding` (`bool`, `str` or [PaddingStrategy](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.utils.PaddingStrategy),
     *optional*, defaults to `False`) — Activates and controls padding. Accepts the
     following values:'
+  id: totrans-118
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`padding` (`bool`, `str` 或 [PaddingStrategy](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.utils.PaddingStrategy),
+    *可选*, 默认为 `False`) — 激活和控制填充。接受以下值：'
 - en: '`True` or `''longest''`: Pad to the longest sequence in the batch (or no padding
     if only a single sequence if provided).'
+  id: totrans-119
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`True` 或 `''longest''`: 填充到批次中最长的序列（如果只提供单个序列，则不进行填充）。'
 - en: '`''max_length''`: Pad to a maximum length specified with the argument `max_length`
     or to the maximum acceptable input length for the model if that argument is not
     provided.'
+  id: totrans-120
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''max_length''`: 填充到指定的最大长度（使用参数 `max_length`）或模型的最大可接受输入长度（如果未提供该参数）。'
 - en: '`False` or `''do_not_pad''` (default): No padding (i.e., can output a batch
     with sequences of different lengths).'
+  id: totrans-121
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`False` 或 `''do_not_pad''`（默认）: 不进行填充（即可以输出长度不同的序列批次）。'
 - en: '`truncation` (`bool`, `str` or [TruncationStrategy](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.tokenization_utils_base.TruncationStrategy),
     *optional*, defaults to `False`) — Activates and controls truncation. Accepts
     the following values:'
+  id: totrans-122
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`truncation` (`bool`, `str` 或 [TruncationStrategy](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.tokenization_utils_base.TruncationStrategy),
+    *可选*, 默认为 `False`) — 激活和控制截断。接受以下值：'
 - en: '`True` or `''longest_first''`: Truncate to a maximum length specified with
     the argument `max_length` or to the maximum acceptable input length for the model
     if that argument is not provided. This will truncate token by token, removing
     a token from the longest sequence in the pair if a pair of sequences (or a batch
     of pairs) is provided.'
+  id: totrans-123
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`True` 或 `''longest_first''`: 截断到指定的最大长度（使用参数 `max_length`）或模型的最大可接受输入长度（如果未提供该参数）。如果提供了一对序列（或一批对序列），则将逐标记截断，从一对序列中最长的序列中删除一个标记。'
 - en: '`''only_first''`: Truncate to a maximum length specified with the argument
     `max_length` or to the maximum acceptable input length for the model if that argument
     is not provided. This will only truncate the first sequence of a pair if a pair
     of sequences (or a batch of pairs) is provided.'
+  id: totrans-124
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''only_first''`: 截断到指定的最大长度（使用参数 `max_length`）或模型的最大可接受输入长度（如果未提供该参数）。如果提供了一对序列（或一批对序列），则只会截断第一个序列。'
 - en: '`''only_second''`: Truncate to a maximum length specified with the argument
     `max_length` or to the maximum acceptable input length for the model if that argument
     is not provided. This will only truncate the second sequence of a pair if a pair
     of sequences (or a batch of pairs) is provided.'
+  id: totrans-125
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''only_second''`: 截断到指定的最大长度（使用参数 `max_length`）或模型的最大可接受输入长度（如果未提供该参数）。如果提供了一对序列（或一批对序列），则只会截断第二个序列。'
 - en: '`False` or `''do_not_truncate''` (default): No truncation (i.e., can output
     batch with sequence lengths greater than the model maximum admissible input size).'
+  id: totrans-126
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`False` 或 `''do_not_truncate''`（默认）: 不截断（即可以输出长度大于模型最大可接受输入大小的批次）。'
 - en: '`max_length` (`int`, *optional*) — Controls the maximum length to use by one
     of the truncation/padding parameters.'
+  id: totrans-127
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_length` (`int`, *optional*) — 控制截断/填充参数之一使用的最大长度。'
 - en: If left unset or set to `None`, this will use the predefined model maximum length
     if a maximum length is required by one of the truncation/padding parameters. If
     the model has no specific maximum input length (like XLNet) truncation/padding
     to a maximum length will be deactivated.
+  id: totrans-128
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 如果未设置或设置为`None`，则如果截断/填充参数之一需要最大长度，则将使用预定义的模型最大长度。如果模型没有特定的最大输入长度（如XLNet），则将禁用截断/填充到最大长度。
 - en: '`stride` (`int`, *optional*, defaults to 0) — If set to a number along with
     `max_length`, the overflowing tokens returned when `return_overflowing_tokens=True`
     will contain some tokens from the end of the truncated sequence returned to provide
     some overlap between truncated and overflowing sequences. The value of this argument
     defines the number of overlapping tokens.'
+  id: totrans-129
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`stride` (`int`, *optional*, 默认为0) — 如果与`max_length`一起设置为一个数字，则当`return_overflowing_tokens=True`时返回的溢出标记将包含截断序列末尾的一些标记，以提供截断和溢出序列之间的一些重叠。此参数的值定义重叠标记的数量。'
 - en: '`is_split_into_words` (`bool`, *optional*, defaults to `False`) — Whether or
     not the input is already pre-tokenized (e.g., split into words). If set to `True`,
     the tokenizer assumes the input is already split into words (for instance, by
     splitting it on whitespace) which it will tokenize. This is useful for NER or
     token classification.'
+  id: totrans-130
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`is_split_into_words` (`bool`, *optional*, 默认为`False`) — 输入是否已经预先标记化（例如，已分割为单词）。如果设置为`True`，分词器会假定输入已经分割为单词（例如，通过在空格上分割），然后对其进行标记化。这对于NER或标记分类很有用。'
 - en: '`pad_to_multiple_of` (`int`, *optional*) — If set will pad the sequence to
     a multiple of the provided value. Requires `padding` to be activated. This is
     especially useful to enable the use of Tensor Cores on NVIDIA hardware with compute
     capability `>= 7.5` (Volta).'
+  id: totrans-131
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pad_to_multiple_of` (`int`, *optional*) — 如果设置，将填充序列到提供的值的倍数。需要激活`padding`。这对于在具有计算能力`>=
+    7.5`（Volta）的NVIDIA硬件上启用Tensor Cores特别有用。'
 - en: '`return_tensors` (`str` or [TensorType](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.TensorType),
     *optional*) — If set, will return tensors instead of list of python integers.
     Acceptable values are:'
+  id: totrans-132
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_tensors` (`str`或[TensorType](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.TensorType),
+    *optional*) — 如果设置，将返回张量而不是Python整数列表。可接受的值为：'
 - en: '`''tf''`: Return TensorFlow `tf.constant` objects.'
+  id: totrans-133
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''tf''`：返回TensorFlow `tf.constant`对象。'
 - en: '`''pt''`: Return PyTorch `torch.Tensor` objects.'
+  id: totrans-134
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''pt''`：返回PyTorch `torch.Tensor`对象。'
 - en: '`''np''`: Return Numpy `np.ndarray` objects.'
+  id: totrans-135
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''np''`：返回Numpy `np.ndarray`对象。'
 - en: '`return_token_type_ids` (`bool`, *optional*) — Whether to return token type
     IDs. If left to the default, will return the token type IDs according to the specific
     tokenizer’s default, defined by the `return_outputs` attribute.'
+  id: totrans-136
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_token_type_ids` (`bool`, *optional*) — 是否返回标记类型ID。如果保持默认设置，将根据特定分词器的默认值返回标记类型ID，由`return_outputs`属性定义。'
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
+  id: totrans-137
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是标记类型ID？](../glossary#token-type-ids)'
 - en: '`return_attention_mask` (`bool`, *optional*) — Whether to return the attention
     mask. If left to the default, will return the attention mask according to the
     specific tokenizer’s default, defined by the `return_outputs` attribute.'
+  id: totrans-138
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_attention_mask` (`bool`, *optional*) — 是否返回注意力掩码。如果保持默认设置，将根据特定分词器的默认值返回注意力掩码，由`return_outputs`属性定义。'
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-139
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是注意力掩码？](../glossary#attention-mask)'
 - en: '`return_overflowing_tokens` (`bool`, *optional*, defaults to `False`) — Whether
     or not to return overflowing token sequences. If a pair of sequences of input
     ids (or a batch of pairs) is provided with `truncation_strategy = longest_first`
     or `True`, an error is raised instead of returning overflowing tokens.'
+  id: totrans-140
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_overflowing_tokens` (`bool`, *optional*, 默认为`False`) — 是否返回溢出的标记序列。如果提供了一对输入id序列（或一批对），并且`truncation_strategy
+    = longest_first`或`True`，则会引发错误，而不是返回溢出标记。'
 - en: '`return_special_tokens_mask` (`bool`, *optional*, defaults to `False`) — Whether
     or not to return special tokens mask information.'
+  id: totrans-141
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_special_tokens_mask` (`bool`, *optional*, 默认为`False`) — 是否返回特殊标记掩码信息。'
 - en: '`return_offsets_mapping` (`bool`, *optional*, defaults to `False`) — Whether
     or not to return `(char_start, char_end)` for each token.'
+  id: totrans-142
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_offsets_mapping` (`bool`, *optional*, 默认为`False`) — 是否返回每个标记的`(char_start,
+    char_end)`。'
 - en: This is only available on fast tokenizers inheriting from [PreTrainedTokenizerFast](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizerFast),
     if using Python’s tokenizer, this method will raise `NotImplementedError`.
+  id: totrans-143
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 这仅适用于继承自[PreTrainedTokenizerFast](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.PreTrainedTokenizerFast)的快速分词器，如果使用Python的分词器，此方法将引发`NotImplementedError`。
 - en: '`return_length` (`bool`, *optional*, defaults to `False`) — Whether or not
     to return the lengths of the encoded inputs.'
+  id: totrans-144
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_length` (`bool`, *optional*, 默认为`False`) — 是否返回编码输入的长度。'
 - en: '`verbose` (`bool`, *optional*, defaults to `True`) — Whether or not to print
     more information and warnings. **kwargs — passed to the `self.tokenize()` method'
+  id: totrans-145
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`verbose` (`bool`, *optional*, 默认为`True`) — 是否打印更多信息和警告。**kwargs — 传递给`self.tokenize()`方法'
 - en: Returns
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)'
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: '[BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)'
 - en: 'A [BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)
     with the following fields:'
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 具有以下字段的[BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)：
 - en: '`input_ids` — List of token ids to be fed to a model.'
+  id: totrans-149
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids` — 要馈送到模型的标记id列表。'
 - en: '[What are input IDs?](../glossary#input-ids)'
+  id: totrans-150
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是输入ID？](../glossary#input-ids)'
 - en: '`token_type_ids` — List of token type ids to be fed to a model (when `return_token_type_ids=True`
     or if *“token_type_ids”* is in `self.model_input_names`).'
+  id: totrans-151
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids` — 要馈送到模型的标记类型id列表（当`return_token_type_ids=True`或`self.model_input_names`中包含*“token_type_ids”*时）。'
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
+  id: totrans-152
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是标记类型ID？](../glossary#token-type-ids)'
 - en: '`attention_mask` — List of indices specifying which tokens should be attended
     to by the model (when `return_attention_mask=True` or if *“attention_mask”* is
     in `self.model_input_names`).'
+  id: totrans-153
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask` — 指定哪些令牌应该被模型关注的索引列表（当`return_attention_mask=True`或`self.model_input_names`中包含*“attention_mask”*时）。'
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-154
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是注意力掩码？](../glossary#attention-mask)'
 - en: '`overflowing_tokens` — List of overflowing tokens sequences (when a `max_length`
     is specified and `return_overflowing_tokens=True`).'
+  id: totrans-155
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`overflowing_tokens` — 溢出的令牌序列列表（当指定`max_length`并且`return_overflowing_tokens=True`时）。'
 - en: '`num_truncated_tokens` — Number of tokens truncated (when a `max_length` is
     specified and `return_overflowing_tokens=True`).'
+  id: totrans-156
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_truncated_tokens` — 截断的令牌数（当指定`max_length`并且`return_overflowing_tokens=True`时）。'
 - en: '`special_tokens_mask` — List of 0s and 1s, with 1 specifying added special
     tokens and 0 specifying regular sequence tokens (when `add_special_tokens=True`
     and `return_special_tokens_mask=True`).'
+  id: totrans-157
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`special_tokens_mask` — 由0和1组成的列表，其中1指定添加的特殊令牌，0指定常规序列令牌（当`add_special_tokens=True`和`return_special_tokens_mask=True`时）。'
 - en: '`length` — The length of the inputs (when `return_length=True`)'
+  id: totrans-158
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`length` — 输入的长度（当`return_length=True`时）'
 - en: Main method to tokenize and prepare for the model one or several sequence(s)
     or one or several pair(s) of sequences.
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于对一个或多个序列或一个或多个序列对进行标记和准备模型的主要方法。
 - en: PerceiverFeatureExtractor
+  id: totrans-160
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 感知器特征提取器
 - en: '### `class transformers.PerceiverFeatureExtractor`'
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.PerceiverFeatureExtractor`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/feature_extraction_perceiver.py#L26)'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/feature_extraction_perceiver.py#L26)'
 - en: '[PRE8]'
+  id: totrans-163
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '#### `__call__`'
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `__call__`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
 - en: '[PRE9]'
+  id: totrans-166
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Preprocess an image or a batch of images.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 预处理图像或一批图像。
 - en: PerceiverImageProcessor
+  id: totrans-168
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 感知器图像处理器
 - en: '### `class transformers.PerceiverImageProcessor`'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.PerceiverImageProcessor`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/image_processing_perceiver.py#L46)'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/image_processing_perceiver.py#L46)'
 - en: '[PRE10]'
+  id: totrans-171
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Parameters
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`do_center_crop` (`bool`, `optional`, defaults to `True`) — Whether or not
     to center crop the image. If the input size if smaller than `crop_size` along
     any edge, the image will be padded with zeros and then center cropped. Can be
     overridden by the `do_center_crop` parameter in the `preprocess` method.'
+  id: totrans-173
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_center_crop` (`bool`，`可选`，默认为`True`) — 是否对图像进行中心裁剪。如果输入尺寸小于任何边的`crop_size`，则图像将填充零，然后进行中心裁剪。可以被`preprocess`方法中的`do_center_crop`参数覆盖。'
 - en: '`crop_size` (`Dict[str, int]`, *optional*, defaults to `{"height" -- 256, "width":
     256}`): Desired output size when applying center-cropping. Can be overridden by
     the `crop_size` parameter in the `preprocess` method.'
+  id: totrans-174
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`crop_size` (`Dict[str, int]`，*可选*，默认为`{"height" -- 256, "width": 256}`): 应用中心裁剪时的期望输出大小。可以被`preprocess`方法中的`crop_size`参数覆盖。'
 - en: '`do_resize` (`bool`, *optional*, defaults to `True`) — Whether to resize the
     image to `(size["height"], size["width"])`. Can be overridden by the `do_resize`
     parameter in the `preprocess` method.'
+  id: totrans-175
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_resize` (`bool`，*可选*，默认为`True`) — 是否将图像调整大小为`(size["height"], size["width"])`。可以被`preprocess`方法中的`do_resize`参数覆盖。'
 - en: '`size` (`Dict[str, int]` *optional*, defaults to `{"height" -- 224, "width":
     224}`): Size of the image after resizing. Can be overridden by the `size` parameter
     in the `preprocess` method.'
+  id: totrans-176
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`size` (`Dict[str, int]` *可选*，默认为`{"height" -- 224, "width": 224}`): 调整大小后的图像尺寸。可以被`preprocess`方法中的`size`参数覆盖。'
 - en: '`resample` (`PILImageResampling`, *optional*, defaults to `PILImageResampling.BICUBIC`)
     — Defines the resampling filter to use if resizing the image. Can be overridden
     by the `resample` parameter in the `preprocess` method.'
+  id: totrans-177
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`resample` (`PILImageResampling`，*可选*，默认为`PILImageResampling.BICUBIC`) — 定义在调整图像大小时要使用的重采样滤波器。可以被`preprocess`方法中的`resample`参数覆盖。'
 - en: '`do_rescale` (`bool`, *optional*, defaults to `True`) — Whether to rescale
     the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
     parameter in the `preprocess` method.'
+  id: totrans-178
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_rescale` (`bool`，*可选*，默认为`True`) — 是否按指定比例`rescale_factor`重新缩放图像。可以被`preprocess`方法中的`do_rescale`参数覆盖。'
 - en: '`rescale_factor` (`int` or `float`, *optional*, defaults to `1/255`) — Defines
     the scale factor to use if rescaling the image. Can be overridden by the `rescale_factor`
     parameter in the `preprocess` method. do_normalize — Whether to normalize the
     image. Can be overridden by the `do_normalize` parameter in the `preprocess` method.'
+  id: totrans-179
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`rescale_factor` (`int`或`float`，*可选*，默认为`1/255`) — 定义重新缩放图像时要使用的比例因子。可以被`preprocess`方法中的`rescale_factor`参数覆盖。do_normalize
+    — 是否对图像进行归一化。可以被`preprocess`方法中的`do_normalize`参数覆盖。'
 - en: '`image_mean` (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_MEAN`)
     — Mean to use if normalizing the image. This is a float or list of floats the
     length of the number of channels in the image. Can be overridden by the `image_mean`
     parameter in the `preprocess` method.'
+  id: totrans-180
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_mean` (`float`或`List[float]`，*可选*，默认为`IMAGENET_STANDARD_MEAN`) — 如果对图像进行归一化，则使用的均值。这是一个浮点数或与图像通道数相同长度的浮点数列表。可以被`preprocess`方法中的`image_mean`参数覆盖。'
 - en: '`image_std` (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_STD`)
     — Standard deviation to use if normalizing the image. This is a float or list
     of floats the length of the number of channels in the image. Can be overridden
     by the `image_std` parameter in the `preprocess` method.'
+  id: totrans-181
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_std` (`float`或`List[float]`，*可选*，默认为`IMAGENET_STANDARD_STD`) — 如果对图像进行归一化，则使用的标准差。这是一个浮点数或与图像通道数相同长度的浮点数列表。可以被`preprocess`方法中的`image_std`参数覆盖。'
 - en: Constructs a Perceiver image processor.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建感知器图像处理器。
 - en: '#### `preprocess`'
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `preprocess`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/image_processing_perceiver.py#L209)'
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/image_processing_perceiver.py#L209)'
 - en: '[PRE11]'
+  id: totrans-185
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Parameters
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`images` (`ImageInput`) — Image to preprocess. Expects a single or batch of
     images with pixel values ranging from 0 to 255\. If passing in images with pixel
     values between 0 and 1, set `do_rescale=False`.'
+  id: totrans-187
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`do_center_crop` (`bool`, *optional*, defaults to `self.do_center_crop`) —
     Whether to center crop the image to `crop_size`.'
+  id: totrans-188
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`crop_size` (`Dict[str, int]`, *optional*, defaults to `self.crop_size`) —
     Desired output size after applying the center crop.'
+  id: totrans-189
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`do_resize` (`bool`, *optional*, defaults to `self.do_resize`) — Whether to
     resize the image.'
+  id: totrans-190
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`size` (`Dict[str, int]`, *optional*, defaults to `self.size`) — Size of the
     image after resizing.'
+  id: totrans-191
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`resample` (`int`, *optional*, defaults to `self.resample`) — Resampling filter
     to use if resizing the image. This can be one of the enum `PILImageResampling`,
     Only has an effect if `do_resize` is set to `True`.'
+  id: totrans-192
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`do_rescale` (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
     to rescale the image.'
+  id: totrans-193
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`rescale_factor` (`float`, *optional*, defaults to `self.rescale_factor`) —
     Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  id: totrans-194
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`do_normalize` (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
     to normalize the image.'
+  id: totrans-195
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`image_mean` (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
     — Image mean.'
+  id: totrans-196
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`image_std` (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
     — Image standard deviation.'
+  id: totrans-197
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_tensors` (`str` or `TensorType`, *optional*) — The type of tensors
     to return. Can be one of:'
+  id: totrans-198
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Unset: Return a list of `np.ndarray`.'
+  id: totrans-199
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  id: totrans-200
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  id: totrans-201
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  id: totrans-202
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  id: totrans-203
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`data_format` (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
     — The channel dimension format for the output image. Can be one of:'
+  id: totrans-204
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`ChannelDimension.FIRST`: image in (num_channels, height, width) format.'
+  id: totrans-205
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`ChannelDimension.LAST`: image in (height, width, num_channels) format.'
+  id: totrans-206
   prefs:
   - PREF_IND
   - PREF_UL
@@ -1067,401 +1455,506 @@
 - en: '`input_data_format` (`ChannelDimension` or `str`, *optional*) — The channel
     dimension format for the input image. If unset, the channel dimension format is
     inferred from the input image. Can be one of:'
+  id: totrans-207
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
     width) format.'
+  id: totrans-208
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
     format.'
+  id: totrans-209
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  id: totrans-210
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: Preprocess an image or batch of images.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverTextPreprocessor
+  id: totrans-212
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverTextPreprocessor`'
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2846)'
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-215
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Parameters
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     — Model configuration.'
+  id: totrans-217
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Text preprocessing for Perceiver Encoder. Can be used to embed `inputs` and
     add positional encodings.
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
 - en: The dimensionality of the embeddings is determined by the `d_model` attribute
     of the configuration.
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverImagePreprocessor
+  id: totrans-220
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverImagePreprocessor`'
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L3003)'
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE13]'
+  id: totrans-223
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Parameters
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([*PerceiverConfig*]) — Model configuration.'
+  id: totrans-225
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`prep_type` (`str`, *optional*, defaults to `"conv"`) — Preprocessing type.
     Can be “conv1x1”, “conv”, “patches”, “pixels”.'
+  id: totrans-226
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`spatial_downsample` (`int`, *optional*, defaults to 4) — Spatial downsampling
     factor.'
+  id: totrans-227
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`temporal_downsample` (`int`, *optional*, defaults to 1) — Temporal downsampling
     factor (only relevant in case a time dimension is present).'
+  id: totrans-228
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`position_encoding_type` (`str`, *optional*, defaults to `"fourier"`) — Position
     encoding type. Can be “fourier” or “trainable”.'
+  id: totrans-229
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`in_channels` (`int`, *optional*, defaults to 3) — Number of channels in the
     input.'
+  id: totrans-230
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`out_channels` (`int`, *optional*, defaults to 64) — Number of channels in
     the output.'
+  id: totrans-231
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`conv_after_patching` (`bool`, *optional*, defaults to `False`) — Whether to
     apply a convolutional layer after patching.'
+  id: totrans-232
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`conv_after_patching_in_channels` (`int`, *optional*, defaults to 54) — Number
     of channels in the input of the convolutional layer after patching.'
+  id: totrans-233
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`conv2d_use_batchnorm` (`bool`, *optional*, defaults to `True`) — Whether to
     use batch normalization in the convolutional layer.'
+  id: totrans-234
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`concat_or_add_pos` (`str`, *optional*, defaults to `"concat"`) — How to concatenate
     the position encoding to the input. Can be “concat” or “add”.'
+  id: totrans-235
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`project_pos_dim` (`int`, *optional*, defaults to -1) — Dimension of the position
     encoding to project to. If -1, no projection is applied.'
+  id: totrans-236
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '*`*position_encoding_kwargs` (`Dict`, *optional*) — Keyword arguments for the
     position encoding.'
+  id: totrans-237
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Image preprocessing for Perceiver Encoder.
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
 - en: 'Note: the *out_channels* argument refers to the output channels of a convolutional
     layer, if *prep_type* is set to “conv1x1” or “conv”. If one adds absolute position
     embeddings, one must make sure the *num_channels* of the position encoding kwargs
     are set equal to the *out_channels*.'
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverOneHotPreprocessor
+  id: totrans-240
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverOneHotPreprocessor`'
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L3232)'
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE14]'
+  id: totrans-243
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Parameters
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     — Model configuration.'
+  id: totrans-245
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: One-hot preprocessor for Perceiver Encoder. Can be used to add a dummy index
     dimension to the input.
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverAudioPreprocessor
+  id: totrans-247
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverAudioPreprocessor`'
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L3258)'
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE15]'
+  id: totrans-250
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Parameters
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([*PerceiverConfig*]) — Model configuration.'
+  id: totrans-252
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`prep_type` (`str`, *optional*, defaults to `"patches"`) — Preprocessor type
     to use. Only “patches” is supported.'
+  id: totrans-253
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`samples_per_patch` (`int`, *optional*, defaults to 96) — Number of samples
     per patch.'
+  id: totrans-254
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`position_encoding_type` (`str`, *optional*, defaults to `"fourier"`) — Type
     of position encoding to use. Can be “trainable” or “fourier”.'
+  id: totrans-255
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`concat_or_add_pos` (`str`, *optional*, defaults to `"concat"`) — How to concatenate
     the position encoding to the input. Can be “concat” or “add”.'
+  id: totrans-256
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`out_channels` (`int`, *optional*, defaults to 64) — Number of channels in
     the output.'
+  id: totrans-257
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`project_pos_dim` (`int`, *optional*, defaults to -1) — Dimension of the position
     encoding to project to. If -1, no projection is applied.'
+  id: totrans-258
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '*`*position_encoding_kwargs` (`Dict`, *optional*) — Keyword arguments for the
     position encoding.'
+  id: totrans-259
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Audio preprocessing for Perceiver Encoder.
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverMultimodalPreprocessor
+  id: totrans-261
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPreprocessor`'
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L3355)'
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE16]'
+  id: totrans-264
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Parameters
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
 - en: '`modalities` (`Mapping[str, PreprocessorType]`) — Dict mapping modality name
     to preprocessor.'
+  id: totrans-266
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`mask_probs` (`Dict[str, float]`) — Dict mapping modality name to masking probability
     of that modality.'
+  id: totrans-267
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`min_padding_size` (`int`, *optional*, defaults to 2) — The minimum padding
     size for all modalities. The final output will have num_channels equal to the
     maximum channels across all modalities plus min_padding_size.'
+  id: totrans-268
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Multimodal preprocessing for Perceiver Encoder.
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
 - en: Inputs for each modality are preprocessed, then padded with trainable position
     embeddings to have the same number of channels.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverProjectionDecoder
+  id: totrans-271
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverProjectionDecoder`'
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2051)'
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE17]'
+  id: totrans-274
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Parameters
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     — Model configuration.'
+  id: totrans-276
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Baseline projection decoder (no cross-attention).
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverBasicDecoder
+  id: totrans-278
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverBasicDecoder`'
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2077)'
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE18]'
+  id: totrans-281
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Parameters
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([*PerceiverConfig*]) — Model configuration.'
+  id: totrans-283
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_num_channels` (`int`, *optional*) — The number of channels in the output.
     Will only be used in case *final_project* is set to `True`.'
+  id: totrans-284
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`position_encoding_type` (`str`, *optional*, defaults to “trainable”) — The
     type of position encoding to use. Can be either “trainable”, “fourier”, or “none”.'
+  id: totrans-285
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_index_dims` (`int`, *optional*) — The number of dimensions of the output
     queries. Ignored if ‘position_encoding_type’ == ‘none’.'
+  id: totrans-286
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`num_channels` (`int`, *optional*, defaults to 128) — The number of channels
     of the decoder queries. Ignored if ‘position_encoding_type’ == ‘none’.'
+  id: totrans-287
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`qk_channels` (`int`, *optional*) — The number of channels of the queries and
     keys in the cross-attention layer.'
+  id: totrans-288
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`v_channels` (`int`, *optional*) — The number of channels of the values in
     the cross-attention layer.'
+  id: totrans-289
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`num_heads` (`int`, *optional*, defaults to 1) — The number of attention heads
     in the cross-attention layer.'
+  id: totrans-290
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`widening_factor` (`int`, *optional*, defaults to 1) — The widening factor
     of the cross-attention layer.'
+  id: totrans-291
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`use_query_residual` (`bool`, *optional*, defaults to `False`) — Whether to
     use a residual connection between the query and the output of the cross-attention
     layer.'
+  id: totrans-292
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`concat_preprocessed_input` (`bool`, *optional*, defaults to `False`) — Whether
     to concatenate the preprocessed input to the query.'
+  id: totrans-293
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`final_project` (`bool`, *optional*, defaults to `True`) — Whether to project
     the output of the cross-attention layer to a target dimension.'
+  id: totrans-294
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`position_encoding_only` (`bool`, *optional*, defaults to `False`) — Whether
     to only use this class to define output queries.'
+  id: totrans-295
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Cross-attention-based decoder. This class can be used to decode the final hidden
     states of the latents using a cross-attention operation, in which the latents
     produce keys and values.
+  id: totrans-296
   prefs: []
   type: TYPE_NORMAL
 - en: The shape of the output of this class depends on how one defines the output
     queries (also called decoder queries).
+  id: totrans-297
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverClassificationDecoder
+  id: totrans-298
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder`'
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2263)'
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE19]'
+  id: totrans-301
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Parameters
+  id: totrans-302
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     — Model configuration.'
+  id: totrans-303
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1469,100 +1962,129 @@
     for logit output. Will turn the output of the Perceiver encoder which is of shape
     (batch_size, num_latents, d_latents) to a tensor of shape (batch_size, num_labels).
     The queries are of shape (batch_size, 1, num_labels).
+  id: totrans-304
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverOpticalFlowDecoder
+  id: totrans-305
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverOpticalFlowDecoder`'
+  id: totrans-306
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2309)'
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE20]'
+  id: totrans-308
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Cross-attention based optical flow decoder.
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverBasicVideoAutoencodingDecoder
+  id: totrans-310
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverBasicVideoAutoencodingDecoder`'
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2344)'
+  id: totrans-312
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE21]'
+  id: totrans-313
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Parameters
+  id: totrans-314
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([*PerceiverConfig*]) — Model configuration.'
+  id: totrans-315
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_shape` (`List[int]`) — Shape of the output as (batch_size, num_frames,
     height, width), excluding the channel dimension.'
+  id: totrans-316
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`position_encoding_type` (`str`) — The type of position encoding to use. Can
     be either “trainable”, “fourier”, or “none”.'
+  id: totrans-317
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Cross-attention based video-autoencoding decoder. Light-weight wrapper of [*PerceiverBasicDecoder*]
     with video reshaping logic.
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverMultimodalDecoder
+  id: totrans-319
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalDecoder`'
+  id: totrans-320
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2421)'
+  id: totrans-321
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE22]'
+  id: totrans-322
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Parameters
+  id: totrans-323
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([*PerceiverConfig*]) — Model configuration.'
+  id: totrans-324
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`modalities` (`Dict[str, PerceiverAbstractDecoder]`) — Dictionary mapping modality
     name to the decoder of that modality.'
+  id: totrans-325
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`num_outputs` (`int`) — The number of outputs of the decoder.'
+  id: totrans-326
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_num_channels` (`int`) — The number of channels in the output.'
+  id: totrans-327
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`min_padding_size` (`int`, *optional*, defaults to 2) — The minimum padding
     size for all modalities. The final output will have num_channels equal to the
     maximum channels across all modalities plus min_padding_size.'
+  id: totrans-328
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`subsampled_index_dims` (`Dict[str, PerceiverAbstractDecoder]`, *optional*)
     — Dictionary mapping modality name to the subsampled index dimensions to use for
     the decoder query of that modality.'
+  id: totrans-329
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1571,145 +2093,190 @@
     modality. That decoder will be used to construct queries for that modality. Modality-specific
     queries are padded with trainable modality-specific parameters, after which they
     are concatenated along the time dimension.
+  id: totrans-330
   prefs: []
   type: TYPE_NORMAL
 - en: Next, there is a shared cross attention operation across all modalities.
+  id: totrans-331
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverProjectionPostprocessor
+  id: totrans-332
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverProjectionPostprocessor`'
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2982)'
+  id: totrans-334
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE23]'
+  id: totrans-335
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: Parameters
+  id: totrans-336
   prefs: []
   type: TYPE_NORMAL
 - en: '`in_channels` (`int`) — Number of channels in the input.'
+  id: totrans-337
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`out_channels` (`int`) — Number of channels in the output.'
+  id: totrans-338
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Projection postprocessing for Perceiver. Can be used to project the channels
     of the decoder output to a lower dimension.
+  id: totrans-339
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverAudioPostprocessor
+  id: totrans-340
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverAudioPostprocessor`'
+  id: totrans-341
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2955)'
+  id: totrans-342
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE24]'
+  id: totrans-343
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: Parameters
+  id: totrans-344
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([*PerceiverConfig*]) — Model configuration.'
+  id: totrans-345
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`in_channels` (`int`) — Number of channels in the input.'
+  id: totrans-346
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`postproc_type` (`str`, *optional*, defaults to `"patches"`) — Postprocessor
     type to use. Currently, only “patches” is supported.'
+  id: totrans-347
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Audio postprocessing for Perceiver. Can be used to convert the decoder output
     to audio features.
+  id: totrans-348
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverClassificationPostprocessor
+  id: totrans-349
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverClassificationPostprocessor`'
+  id: totrans-350
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2935)'
+  id: totrans-351
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE25]'
+  id: totrans-352
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: Parameters
+  id: totrans-353
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([*PerceiverConfig*]) — Model configuration.'
+  id: totrans-354
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`in_channels` (`int`) — Number of channels in the input.'
+  id: totrans-355
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Classification postprocessing for Perceiver. Can be used to convert the decoder
     output to classification logits.
+  id: totrans-356
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverMultimodalPostprocessor
+  id: totrans-357
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPostprocessor`'
+  id: totrans-358
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L2901)'
+  id: totrans-359
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE26]'
+  id: totrans-360
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Parameters
+  id: totrans-361
   prefs: []
   type: TYPE_NORMAL
 - en: '`modalities` (`Mapping[str, PostprocessorType]`) — Dictionary mapping modality
     name to postprocessor class for that modality.'
+  id: totrans-362
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`input_is_dict` (`bool`, *optional*, defaults to `False`) — If True, input
     is assumed to be dictionary structured, and outputs keep the same dictionary shape.
     If False, input is a tensor which is sliced up during postprocessing by *modality_sizes*.'
+  id: totrans-363
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Multimodal postprocessing for Perceiver. Can be used to combine modality-specific
     postprocessors into a single postprocessor.
+  id: totrans-364
   prefs: []
   type: TYPE_NORMAL
 - en: PerceiverModel
+  id: totrans-365
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.PerceiverModel`'
+  id: totrans-366
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L712)'
+  id: totrans-367
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE27]'
+  id: totrans-368
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: Parameters
+  id: totrans-369
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
@@ -1717,6 +2284,7 @@
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-370
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1724,6 +2292,7 @@
     latent representation of the encoder. Examples include *transformers.models.perceiver.modeling_perceiver.PerceiverBasicDecoder*,
     *transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder*,
     *transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalDecoder*.'
+  id: totrans-371
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1732,6 +2301,7 @@
     *transformers.models.perceiver.modeling_perceiver.PerceiverAudioPreprocessor*,
     *transformers.models.perceiver.modeling_perceiver.PerceiverTextPreprocessor*,
     *transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPreprocessor*.'
+  id: totrans-372
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1741,11 +2311,13 @@
     *transformers.models.perceiver.modeling_perceiver.PerceiverClassificationPostprocessor*,
     *transformers.models.perceiver.modeling_perceiver.PerceiverProjectionPostprocessor*,
     *transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalPostprocessor*.'
+  id: totrans-373
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`Note` that you can define your own decoders, preprocessors and/or postprocessors
     to fit your use-case. —'
+  id: totrans-374
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1753,57 +2325,71 @@
     PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.'
+  id: totrans-375
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-376
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L752)'
+  id: totrans-377
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE28]'
+  id: totrans-378
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: Parameters
+  id: totrans-379
   prefs: []
   type: TYPE_NORMAL
 - en: '`inputs` (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
     images, text, audio, video, etc.'
+  id: totrans-380
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-381
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-382
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`.
+  id: totrans-383
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-384
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-385
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 indicates the head is `not masked`,
+  id: totrans-386
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 indicates the head is `masked`.
+  id: totrans-387
   prefs:
   - PREF_IND
   - PREF_UL
@@ -1811,41 +2397,49 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-388
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-389
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-390
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-391
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-392
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverModelOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     and inputs.
+  id: totrans-393
   prefs: []
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, num_labels)`) — Classification
     (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-394
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`) — Sequence of hidden-states at the output of the last layer of
     the model.'
+  id: totrans-395
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1854,6 +2448,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-396
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1862,6 +2457,7 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-397
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1870,39 +2466,51 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-398
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
     forward method, overrides the `__call__` special method.
+  id: totrans-399
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-400
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-401
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE29]'
+  id: totrans-402
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: PerceiverForMaskedLM
+  id: totrans-403
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.PerceiverForMaskedLM`'
+  id: totrans-404
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L953)'
+  id: totrans-405
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE30]'
+  id: totrans-406
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: Parameters
+  id: totrans-407
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
@@ -1910,6 +2518,7 @@
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-408
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1917,57 +2526,71 @@
     [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module) sub-class.
     Use it as a regular PyTorch Module and refer to the PyTorch documentation for
     all matter related to general usage and behavior.
+  id: totrans-409
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-410
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L986)'
+  id: totrans-411
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE31]'
+  id: totrans-412
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: Parameters
+  id: totrans-413
   prefs: []
   type: TYPE_NORMAL
 - en: '`inputs` (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
     images, text, audio, video, etc.'
+  id: totrans-414
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.FloatTensor` of shape `batch_size, sequence_length`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-415
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-416
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`.
+  id: totrans-417
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-418
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-419
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 indicates the head is `not masked`,
+  id: totrans-420
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 indicates the head is `masked`.
+  id: totrans-421
   prefs:
   - PREF_IND
   - PREF_UL
@@ -1975,17 +2598,20 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-422
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-423
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-424
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1994,30 +2620,36 @@
     `[-100, 0, ..., config.vocab_size]` (see `input_ids` docstring) Tokens with indices
     set to `-100` are ignored (masked), the loss is only computed for the tokens with
     labels in `[0, ..., config.vocab_size]`'
+  id: totrans-425
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-426
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-427
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMaskedLMOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     and inputs.
+  id: totrans-428
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Masked language modeling (MLM) loss.'
+  id: totrans-429
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
     — Prediction scores of the language modeling head (scores for each vocabulary
     token before SoftMax).'
+  id: totrans-430
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2026,6 +2658,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-431
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2034,6 +2667,7 @@
     (one for each layer) of shape `(batch_size, num_heads, num_latents, num_latents)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-432
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2042,39 +2676,51 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-433
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [PerceiverForMaskedLM](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForMaskedLM)
     forward method, overrides the `__call__` special method.
+  id: totrans-434
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-435
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-436
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE32]'
+  id: totrans-437
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: PerceiverForSequenceClassification
+  id: totrans-438
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.PerceiverForSequenceClassification`'
+  id: totrans-439
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1088)'
+  id: totrans-440
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE33]'
+  id: totrans-441
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: Parameters
+  id: totrans-442
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
@@ -2082,63 +2728,78 @@
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-443
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Example use of Perceiver for text classification. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-444
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-445
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1110)'
+  id: totrans-446
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE34]'
+  id: totrans-447
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: Parameters
+  id: totrans-448
   prefs: []
   type: TYPE_NORMAL
 - en: '`inputs` (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
     images, text, audio, video, etc.'
+  id: totrans-449
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.FloatTensor` of shape `batch_size, sequence_length`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-450
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-451
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`.
+  id: totrans-452
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-453
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-454
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 indicates the head is `not masked`,
+  id: totrans-455
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 indicates the head is `masked`.
+  id: totrans-456
   prefs:
   - PREF_IND
   - PREF_UL
@@ -2146,17 +2807,20 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-457
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-458
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-459
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2165,29 +2829,35 @@
     config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is computed
     (Mean-Square loss), If `config.num_labels > 1` a classification loss is computed
     (Cross-Entropy).'
+  id: totrans-460
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-461
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-462
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     and inputs.
+  id: totrans-463
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-464
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-465
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2196,6 +2866,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-466
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2204,6 +2875,7 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-467
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2212,39 +2884,51 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-468
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [PerceiverForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForSequenceClassification)
     forward method, overrides the `__call__` special method.
+  id: totrans-469
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-470
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-471
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE35]'
+  id: totrans-472
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: PerceiverForImageClassificationLearned
+  id: totrans-473
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.PerceiverForImageClassificationLearned`'
+  id: totrans-474
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1200)'
+  id: totrans-475
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE36]'
+  id: totrans-476
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: Parameters
+  id: totrans-477
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
@@ -2252,15 +2936,18 @@
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-478
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Example use of Perceiver for image classification, for tasks such as ImageNet.
+  id: totrans-479
   prefs: []
   type: TYPE_NORMAL
 - en: This model uses learned position embeddings. In other words, this model is not
     given any privileged information about the structure of images. As shown in the
     paper, this model can achieve a top-1 accuracy of 72.7 on ImageNet.
+  id: totrans-480
   prefs: []
   type: TYPE_NORMAL
 - en: '[PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)
@@ -2268,62 +2955,77 @@
     (with `prep_type="conv1x1"`) to preprocess the input images, and [PerceiverClassificationDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder)
     to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
     into classification logits.'
+  id: totrans-481
   prefs: []
   type: TYPE_NORMAL
 - en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-482
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-483
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1245)'
+  id: totrans-484
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE37]'
+  id: totrans-485
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Parameters
+  id: totrans-486
   prefs: []
   type: TYPE_NORMAL
 - en: '`inputs` (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
     images, text, audio, video, etc.'
+  id: totrans-487
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.FloatTensor` of shape `batch_size, sequence_length`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-488
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-489
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`.
+  id: totrans-490
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-491
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-492
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 indicates the head is `not masked`,
+  id: totrans-493
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 indicates the head is `masked`.
+  id: totrans-494
   prefs:
   - PREF_IND
   - PREF_UL
@@ -2331,17 +3033,20 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-495
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-496
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-497
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2350,29 +3055,35 @@
     ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
     computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
     is computed (Cross-Entropy).'
+  id: totrans-498
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-499
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-500
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     and inputs.
+  id: totrans-501
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-502
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-503
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2381,6 +3092,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-504
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2389,6 +3101,7 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-505
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2397,39 +3110,51 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-506
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)
     forward method, overrides the `__call__` special method.
+  id: totrans-507
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-508
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-509
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE38]'
+  id: totrans-510
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: PerceiverForImageClassificationFourier
+  id: totrans-511
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.PerceiverForImageClassificationFourier`'
+  id: totrans-512
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1343)'
+  id: totrans-513
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE39]'
+  id: totrans-514
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: Parameters
+  id: totrans-515
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
@@ -2437,15 +3162,18 @@
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-516
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Example use of Perceiver for image classification, for tasks such as ImageNet.
+  id: totrans-517
   prefs: []
   type: TYPE_NORMAL
 - en: This model uses fixed 2D Fourier position embeddings. As shown in the paper,
     this model can achieve a top-1 accuracy of 79.0 on ImageNet, and 84.5 when pre-trained
     on a large-scale dataset (i.e. JFT).
+  id: totrans-518
   prefs: []
   type: TYPE_NORMAL
 - en: '[PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)
@@ -2453,62 +3181,77 @@
     (with `prep_type="pixels"`) to preprocess the input images, and [PerceiverClassificationDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder)
     to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
     into classification logits.'
+  id: totrans-519
   prefs: []
   type: TYPE_NORMAL
 - en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-520
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-521
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1389)'
+  id: totrans-522
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE40]'
+  id: totrans-523
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: Parameters
+  id: totrans-524
   prefs: []
   type: TYPE_NORMAL
 - en: '`inputs` (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
     images, text, audio, video, etc.'
+  id: totrans-525
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.FloatTensor` of shape `batch_size, sequence_length`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-526
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-527
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`.
+  id: totrans-528
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-529
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-530
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 indicates the head is `not masked`,
+  id: totrans-531
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 indicates the head is `masked`.
+  id: totrans-532
   prefs:
   - PREF_IND
   - PREF_UL
@@ -2516,17 +3259,20 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-533
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-534
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-535
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2535,29 +3281,35 @@
     ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
     computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
     is computed (Cross-Entropy).'
+  id: totrans-536
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-537
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-538
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     and inputs.
+  id: totrans-539
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-540
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-541
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2566,6 +3318,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-542
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2574,6 +3327,7 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-543
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2582,39 +3336,51 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-544
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [PerceiverForImageClassificationFourier](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationFourier)
     forward method, overrides the `__call__` special method.
+  id: totrans-545
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-546
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-547
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE41]'
+  id: totrans-548
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: PerceiverForImageClassificationConvProcessing
+  id: totrans-549
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.PerceiverForImageClassificationConvProcessing`'
+  id: totrans-550
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1486)'
+  id: totrans-551
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE42]'
+  id: totrans-552
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: Parameters
+  id: totrans-553
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
@@ -2622,14 +3388,17 @@
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-554
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Example use of Perceiver for image classification, for tasks such as ImageNet.
+  id: totrans-555
   prefs: []
   type: TYPE_NORMAL
 - en: This model uses a 2D conv+maxpool preprocessing network. As shown in the paper,
     this model can achieve a top-1 accuracy of 82.1 on ImageNet.
+  id: totrans-556
   prefs: []
   type: TYPE_NORMAL
 - en: '[PerceiverForImageClassificationLearned](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationLearned)
@@ -2637,62 +3406,77 @@
     (with `prep_type="conv"`) to preprocess the input images, and [PerceiverClassificationDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassificationDecoder)
     to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel)
     into classification logits.'
+  id: totrans-557
   prefs: []
   type: TYPE_NORMAL
 - en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-558
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-559
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1533)'
+  id: totrans-560
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE43]'
+  id: totrans-561
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: Parameters
+  id: totrans-562
   prefs: []
   type: TYPE_NORMAL
 - en: '`inputs` (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
     images, text, audio, video, etc.'
+  id: totrans-563
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.FloatTensor` of shape `batch_size, sequence_length`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-564
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-565
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`.
+  id: totrans-566
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-567
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-568
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 indicates the head is `not masked`,
+  id: totrans-569
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 indicates the head is `masked`.
+  id: totrans-570
   prefs:
   - PREF_IND
   - PREF_UL
@@ -2700,17 +3484,20 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-571
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-572
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-573
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2719,29 +3506,35 @@
     ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
     computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
     is computed (Cross-Entropy).'
+  id: totrans-574
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-575
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-576
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     and inputs.
+  id: totrans-577
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-578
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-579
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2750,6 +3543,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-580
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2758,6 +3552,7 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-581
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2766,39 +3561,51 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-582
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [PerceiverForImageClassificationConvProcessing](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForImageClassificationConvProcessing)
     forward method, overrides the `__call__` special method.
+  id: totrans-583
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-584
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-585
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE44]'
+  id: totrans-586
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: PerceiverForOpticalFlow
+  id: totrans-587
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.PerceiverForOpticalFlow`'
+  id: totrans-588
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1630)'
+  id: totrans-589
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE45]'
+  id: totrans-590
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: Parameters
+  id: totrans-591
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
@@ -2806,6 +3613,7 @@
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-592
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2814,6 +3622,7 @@
     uses [PerceiverImagePreprocessor](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverImagePreprocessor)
     (with *prep_type=“patches”*) to preprocess the input images, and [PerceiverOpticalFlowDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverOpticalFlowDecoder)
     to decode the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel).
+  id: totrans-593
   prefs: []
   type: TYPE_NORMAL
 - en: As input, one concatenates 2 subsequent frames along the channel dimension and
@@ -2821,62 +3630,77 @@
     for each pixel). Fixed Fourier position encodings are used to encode the position
     of each pixel in the patch. Next, one applies the Perceiver encoder. To decode,
     one queries the latent representation using the same encoding used for the input.
+  id: totrans-594
   prefs: []
   type: TYPE_NORMAL
 - en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-595
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-596
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1694)'
+  id: totrans-597
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE46]'
+  id: totrans-598
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: Parameters
+  id: totrans-599
   prefs: []
   type: TYPE_NORMAL
 - en: '`inputs` (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
     images, text, audio, video, etc.'
+  id: totrans-600
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.FloatTensor` of shape `batch_size, sequence_length`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-601
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-602
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`.
+  id: totrans-603
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-604
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-605
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 indicates the head is `not masked`,
+  id: totrans-606
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 indicates the head is `masked`.
+  id: totrans-607
   prefs:
   - PREF_IND
   - PREF_UL
@@ -2884,46 +3708,55 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-608
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-609
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-610
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`labels` (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
     for computing the optical flow loss. Indices should be in `[0, ..., config.num_labels
     - 1]`.'
+  id: totrans-611
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-612
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-613
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     and inputs.
+  id: totrans-614
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-615
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-616
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2932,6 +3765,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-617
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2940,6 +3774,7 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-618
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -2948,39 +3783,51 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-619
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [PerceiverForOpticalFlow](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForOpticalFlow)
     forward method, overrides the `__call__` special method.
+  id: totrans-620
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-621
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-622
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE47]'
+  id: totrans-623
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: PerceiverForMultimodalAutoencoding
+  id: totrans-624
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.PerceiverForMultimodalAutoencoding`'
+  id: totrans-625
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1759)'
+  id: totrans-626
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE48]'
+  id: totrans-627
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: Parameters
+  id: totrans-628
   prefs: []
   type: TYPE_NORMAL
 - en: '`config` ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
@@ -2988,11 +3835,13 @@
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-629
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Example use of Perceiver for multimodal (video) autoencoding, for tasks such
     as Kinetics-700.
+  id: totrans-630
   prefs: []
   type: TYPE_NORMAL
 - en: '[PerceiverForMultimodalAutoencoding](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForMultimodalAutoencoding)
@@ -3002,6 +3851,7 @@
     after which they are concatenated. Trainable position embeddings are used to pad
     each modality to the same number of channels to make concatenation along the time
     dimension possible. Next, one applies the Perceiver encoder.'
+  id: totrans-631
   prefs: []
   type: TYPE_NORMAL
 - en: '[PerceiverMultimodalDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalDecoder)
@@ -3012,79 +3862,97 @@
     one only uses parts of the decoder queries to do cross-attention with the latent
     representation. This is determined by the subsampled indices for each modality,
     which can be provided as additional input to the forward pass of [PerceiverForMultimodalAutoencoding](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForMultimodalAutoencoding).'
+  id: totrans-632
   prefs: []
   type: TYPE_NORMAL
 - en: '[PerceiverMultimodalDecoder](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverMultimodalDecoder)
     also pads the decoder queries of the different modalities to the same number of
     channels, in order to concatenate them along the time dimension. Next, cross-attention
     is performed with the latent representation of [PerceiverModel](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverModel).'
+  id: totrans-633
   prefs: []
   type: TYPE_NORMAL
 - en: Finally, `~models.perceiver.modeling_perceiver.PerceiverMultiModalPostprocessor`
     is used to turn this tensor into an actual video. It first splits up the output
     into the different modalities, and then applies the respective postprocessor for
     each modality.
+  id: totrans-634
   prefs: []
   type: TYPE_NORMAL
 - en: Note that, by masking the classification label during evaluation (i.e. simply
     providing a tensor of zeros for the “label” modality), this auto-encoding model
     becomes a Kinetics 700 video classifier.
+  id: totrans-635
   prefs: []
   type: TYPE_NORMAL
 - en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-636
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-637
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/perceiver/modeling_perceiver.py#L1905)'
+  id: totrans-638
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE49]'
+  id: totrans-639
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: Parameters
+  id: totrans-640
   prefs: []
   type: TYPE_NORMAL
 - en: '`inputs` (`torch.FloatTensor`) — Inputs to the perceiver. Can be anything:
     images, text, audio, video, etc.'
+  id: totrans-641
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.FloatTensor` of shape `batch_size, sequence_length`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-642
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-643
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`.
+  id: totrans-644
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '[What are attention masks?](../glossary#attention-mask)'
+  id: totrans-645
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-646
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 indicates the head is `not masked`,
+  id: totrans-647
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 indicates the head is `masked`.
+  id: totrans-648
   prefs:
   - PREF_IND
   - PREF_UL
@@ -3092,17 +3960,20 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-649
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-650
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-651
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -3111,29 +3982,35 @@
     ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
     computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
     is computed (Cross-Entropy).'
+  id: totrans-652
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-653
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-654
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.models.perceiver.modeling_perceiver.PerceiverClassifierOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([PerceiverConfig](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverConfig))
     and inputs.
+  id: totrans-655
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-656
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-657
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -3142,6 +4019,7 @@
     (one for the output of the embeddings + one for the output of each layer) of shape
     `(batch_size, sequence_length, hidden_size)`. Hidden-states of the model at the
     output of each layer plus the initial embedding outputs.'
+  id: totrans-658
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -3150,6 +4028,7 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights after the attention softmax, used to compute the weighted average
     in the self-attention heads.'
+  id: totrans-659
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -3158,22 +4037,28 @@
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.
     Attentions weights of the decoder’s cross-attention layer, after the attention
     softmax, used to compute the weighted average in the cross-attention heads.'
+  id: totrans-660
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [PerceiverForMultimodalAutoencoding](/docs/transformers/v4.37.2/en/model_doc/perceiver#transformers.PerceiverForMultimodalAutoencoding)
     forward method, overrides the `__call__` special method.
+  id: totrans-661
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-662
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-663
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE50]'
+  id: totrans-664
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
