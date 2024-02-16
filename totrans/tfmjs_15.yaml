@@ -1,22 +1,17 @@
 - en: Server-side Audio Processing in Node.js
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在Node.js中进行服务器端音频处理
 - en: 'Original text: [https://huggingface.co/docs/transformers.js/guides/node-audio-processing](https://huggingface.co/docs/transformers.js/guides/node-audio-processing)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers.js/guides/node-audio-processing](https://huggingface.co/docs/transformers.js/guides/node-audio-processing)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: A major benefit of writing code for the web is that you can access the multitude
@@ -25,109 +20,165 @@
     tutorial, we will design a simple Node.js application that uses Transformers.js
     for speech recognition with [Whisper](https://huggingface.co/Xenova/whisper-tiny.en),
     and in the process, learn how to process audio on the server.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Web上编写代码的一个主要好处是您可以访问现代浏览器中提供的众多API。不幸的是，在编写服务器端代码时，我们无法享受到这样的便利，因此我们必须找到另一种方法。在本教程中，我们将设计一个简单的Node.js应用程序，该应用程序使用Transformers.js进行语音识别，同时学习如何在服务器上处理音频。
 - en: The main problem we need to solve is that the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
     is not available in Node.js, meaning we can’t use the [`AudioContext`](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext)
     class to process audio. So, we will need to install third-party libraries to obtain
     the raw audio data. For this example, we will only consider `.wav` files, but
     the same principles apply to other audio formats.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们需要解决的主要问题是[Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)在Node.js中不可用，这意味着我们无法使用[`AudioContext`](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext)类来处理音频。因此，我们需要安装第三方库来获取原始音频数据。在本例中，我们只考虑`.wav`文件，但相同的原则也适用于其他音频格式。
 - en: This tutorial will be written as an ES module, but you can easily adapt it to
     use CommonJS instead. For more information, see the [node tutorial](https://huggingface.co/docs/transformers.js/tutorials/node).
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本教程将以ES模块的形式编写，但您可以轻松地将其改为使用CommonJS。更多信息，请参阅[node教程](https://huggingface.co/docs/transformers.js/tutorials/node)。
 - en: '**Useful links:**'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '**有用链接：**'
 - en: '[Source code](https://github.com/xenova/transformers.js/tree/main/examples/node-audio-processing)'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[源代码](https://github.com/xenova/transformers.js/tree/main/examples/node-audio-processing)'
 - en: '[Documentation](https://huggingface.co/docs/transformers.js)'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[文档](https://huggingface.co/docs/transformers.js)'
 - en: Prerequisites
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 先决条件
 - en: '[Node.js](https://nodejs.org/en/) version 18+'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Node.js](https://nodejs.org/en/) 版本 18+'
 - en: '[npm](https://www.npmjs.com/) version 9+'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[npm](https://www.npmjs.com/) 版本 9+'
 - en: Getting started
+  id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 入门
 - en: 'Let’s start by creating a new Node.js project and installing Transformers.js
     via [NPM](https://www.npmjs.com/package/@xenova/transformers):'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从创建一个新的Node.js项目并通过[NPM](https://www.npmjs.com/package/@xenova/transformers)安装Transformers.js开始：
 - en: '[PRE0]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Remember to add `"type": "module"` to your `package.json` to indicate that
     your project uses ECMAScript modules.'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '记得在你的`package.json`中添加`"type": "module"`，以指示你的项目使用ECMAScript模块。'
 - en: 'Next, let’s install the [`wavefile`](https://www.npmjs.com/package/wavefile)
     package, which we will use for loading `.wav` files:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们安装[`wavefile`](https://www.npmjs.com/package/wavefile)包，我们将用它来加载`.wav`文件：
 - en: '[PRE1]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Creating the application
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建应用程序
 - en: 'Start by creating a new file called `index.js`, which will be the entry point
     for our application. Let’s also import the necessary modules:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先创建一个名为`index.js`的新文件，这将是我们应用程序的入口点。让我们还导入必要的模块：
 - en: '[PRE2]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'For this tutorial, we will use the `Xenova/whisper-tiny.en` model, but feel
     free to choose one of the other whisper models from the [Hugging Face Hub](https://huggingface.co/models?library=transformers.js&search=whisper).
     Let’s create our pipeline with:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本教程中，我们将使用`Xenova/whisper-tiny.en`模型，但请随意从[Hugging Face Hub](https://huggingface.co/models?library=transformers.js&search=whisper)中选择其他whisper模型。让我们创建我们的管道：
 - en: '[PRE3]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Next, let’s load an audio file and convert it to the format required by Transformers.js:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们加载一个音频文件并将其转换为Transformers.js所需的格式：
 - en: '[PRE4]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Finally, let’s run the model and measure execution duration.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，让我们运行模型并测量执行持续时间。
 - en: '[PRE5]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: You can now run the application with `node index.js`. Note that when running
     the script for the first time, it may take a while to download and cache the model.
     Subsequent requests will use the cached model, and model loading will be much
     faster.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 您现在可以使用`node index.js`运行应用程序。请注意，当首次运行脚本时，可能需要一段时间来下载和缓存模型。后续请求将使用缓存的模型，模型加载速度将更快。
 - en: 'You should see output similar to:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应该看到类似以下的输出：
 - en: '[PRE6]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: That’s it! You’ve successfully created a Node.js application that uses Transformers.js
     for speech recognition with Whisper. You can now use this as a starting point
     for your own applications.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 就是这样！您已成功创建了一个使用Transformers.js进行语音识别的Node.js应用程序。您现在可以将其用作自己应用程序的起点。
