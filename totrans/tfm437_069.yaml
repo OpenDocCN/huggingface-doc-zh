@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在单个GPU上进行高效训练的方法和工具
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_one](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_one)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_one](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_one)
 - en: null
   id: totrans-2
   prefs: []
@@ -20,26 +22,31 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南演示了您可以使用的实用技术，通过优化内存利用率、加快训练速度或两者兼而有之来提高模型训练的效率。如果您想了解GPU在训练过程中的使用情况，请先参考[模型训练解剖](model_memory_anatomy)概念指南。本指南侧重于实用技术。
 - en: If you have access to a machine with multiple GPUs, these approaches are still
     valid, plus you can leverage additional methods outlined in the [multi-GPU section](perf_train_gpu_many).
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您可以访问具有多个GPU的计算机，这些方法仍然有效，此外，您还可以利用[多GPU部分](perf_train_gpu_many)中概述的其他方法。
 - en: 'When training large models, there are two aspects that should be considered
     at the same time:'
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 在训练大型模型时，应同时考虑两个方面：
 - en: Data throughput/training time
   id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 数据吞吐量/训练时间
 - en: Model performance
   id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 模型性能
 - en: Maximizing the throughput (samples/second) leads to lower training cost. This
     is generally achieved by utilizing the GPU as much as possible and thus filling
     GPU memory to its limit. If the desired batch size exceeds the limits of the GPU
@@ -48,6 +55,7 @@
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 最大化吞吐量（样本/秒）可以降低训练成本。通常通过尽可能充分利用GPU并将GPU内存填满来实现这一目标。如果所需的批处理大小超出了GPU内存的限制，可以使用内存优化技术，如梯度累积，来帮助。
 - en: However, if the preferred batch size fits into memory, there’s no reason to
     apply memory-optimizing techniques because they can slow down the training. Just
     because one can use a large batch size, does not necessarily mean they should.
@@ -56,61 +64,75 @@
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，如果首选的批处理大小适合内存，就没有理由应用内存优化技术，因为它们可能会减慢训练速度。仅仅因为可以使用大批处理大小，并不一定意味着应该这样做。作为超参数调整的一部分，您应该确定哪种批处理大小产生最佳结果，然后相应地优化资源。
 - en: 'The methods and tools covered in this guide can be classified based on the
     effect they have on the training process:'
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南涵盖的方法和工具可以根据它们对训练过程的影响进行分类：
 - en: '| Method/tool | Improves training speed | Optimizes memory utilization |'
   id: totrans-11
   prefs: []
   type: TYPE_TB
+  zh: '| 方法/工具 | 提高训练速度 | 优化内存利用率 |'
 - en: '| :-- | :-- | :-- |'
   id: totrans-12
   prefs: []
   type: TYPE_TB
+  zh: '| :-- | :-- | :-- |'
 - en: '| [Batch size choice](#batch-size-choice) | Yes | Yes |'
   id: totrans-13
   prefs: []
   type: TYPE_TB
+  zh: '| [批处理大小选择](#批处理大小选择) | 是 | 是 |'
 - en: '| [Gradient accumulation](#gradient-accumulation) | No | Yes |'
   id: totrans-14
   prefs: []
   type: TYPE_TB
+  zh: '| [梯度累积](#梯度累积) | 否 | 是 |'
 - en: '| [Gradient checkpointing](#gradient-checkpointing) | No | Yes |'
   id: totrans-15
   prefs: []
   type: TYPE_TB
+  zh: '| [梯度检查点](#梯度检查点) | 否 | 是 |'
 - en: '| [Mixed precision training](#mixed-precision-training) | Yes | (No) |'
   id: totrans-16
   prefs: []
   type: TYPE_TB
+  zh: '| [混合精度训练](#混合精度训练) | 是 | (否) |'
 - en: '| [Optimizer choice](#optimizer-choice) | Yes | Yes |'
   id: totrans-17
   prefs: []
   type: TYPE_TB
+  zh: '| [优化器选择](#优化器选择) | 是 | 是 |'
 - en: '| [Data preloading](#data-preloading) | Yes | No |'
   id: totrans-18
   prefs: []
   type: TYPE_TB
+  zh: '| [数据预加载](#数据预加载) | 是 | 否 |'
 - en: '| [DeepSpeed Zero](#deepspeed-zero) | No | Yes |'
   id: totrans-19
   prefs: []
   type: TYPE_TB
+  zh: '| [DeepSpeed Zero](#deepspeed-zero) | 否 | 是 |'
 - en: '| [torch.compile](#using-torchcompile) | Yes | No |'
   id: totrans-20
   prefs: []
   type: TYPE_TB
+  zh: '| [torch.compile](#使用torchcompile) | 是 | 否 |'
 - en: '| [Parameter-Efficient Fine Tuning (PEFT)](#peft) | No | Yes |'
   id: totrans-21
   prefs: []
   type: TYPE_TB
+  zh: '| [参数高效微调（PEFT）](#peft) | 否 | 是 |'
 - en: 'Note: when using mixed precision with a small model and a large batch size,
     there will be some memory savings but with a large model and a small batch size,
     the memory use will be larger.'
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意：当使用混合精度与小模型和大批处理大小时，会有一些内存节省，但对于大模型和小批处理大小，内存使用量会更大。
 - en: You can combine the above methods to get a cumulative effect. These techniques
     are available to you whether you are training your model with [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     or writing a pure PyTorch loop, in which case you can [configure these optimizations
@@ -118,27 +140,33 @@
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以结合上述方法以获得累积效果。这些技术对您都是可用的，无论您是使用[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)训练模型，还是编写纯PyTorch循环，在这种情况下，您可以通过[使用🤗
+    Accelerate配置这些优化](#使用加速)。
 - en: 'If these methods do not result in sufficient gains, you can explore the following
     options:'
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果这些方法没有带来足够的收益，您可以探索以下选项：
 - en: '[Look into building your own custom Docker container with efficient softare
     prebuilds](#efficient-software-prebuilds)'
   id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[考虑构建自己的自定义Docker容器，其中包含高效的软件预构建](#高效软件预构建)'
 - en: '[Consider a model that uses Mixture of Experts (MoE)](#mixture-of-experts)'
   id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[考虑使用专家混合（MoE）的模型](#专家混合)'
 - en: '[Convert your model to BetterTransformer to leverage PyTorch native attention](#using-pytorch-native-attention)'
   id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[将您的模型转换为BetterTransformer以利用PyTorch原生注意力](#使用pytorch原生注意力)'
 - en: Finally, if all of the above is still not enough, even after switching to a
     server-grade GPU like A100, consider moving to a multi-GPU setup. All these approaches
     are still valid in a multi-GPU setup, plus you can leverage additional parallelism
@@ -146,11 +174,13 @@
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，如果即使切换到像A100这样的服务器级GPU后仍然不够，考虑切换到多GPU设置。所有这些方法在多GPU设置中仍然有效，此外，您还可以利用[多GPU部分](perf_train_gpu_many)中概述的其他并行技术。
 - en: Batch size choice
   id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 批处理大小选择
 - en: To achieve optimal performance, start by identifying the appropriate batch size.
     It is recommended to use batch sizes and input/output neuron counts that are of
     size 2^N. Often it’s a multiple of 8, but it can be higher depending on the hardware
@@ -158,6 +188,7 @@
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了实现最佳性能，首先要确定适当的批处理大小。建议使用大小为2^N的批处理大小和输入/输出神经元计数。通常是8的倍数，但可以更高，具体取决于所使用的硬件和模型的数据类型。
 - en: For reference, check out NVIDIA’s recommendation for [input/output neuron counts](https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#input-features)
     and [batch size](https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#batch-size)
     for fully connected layers (which are involved in GEMMs (General Matrix Multiplications)).
