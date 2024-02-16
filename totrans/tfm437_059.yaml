@@ -1,24 +1,17 @@
 - en: Export to TorchScript
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 导出到TorchScript
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/torchscript](https://huggingface.co/docs/transformers/v4.37.2/en/torchscript)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/torchscript](https://huggingface.co/docs/transformers/v4.37.2/en/torchscript)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: This is the very beginning of our experiments with TorchScript and we are still
@@ -26,135 +19,197 @@
     to us and we will deepen our analysis in upcoming releases, with more code examples,
     a more flexible implementation, and benchmarks comparing Python-based codes with
     compiled TorchScript.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是我们使用TorchScript的实验的开始，我们仍在探索其对于可变输入大小模型的能力。这是我们感兴趣的焦点，我们将在即将发布的版本中深入分析，提供更多代码示例，更灵活的实现以及将Python代码与编译后的TorchScript进行比较的基准测试。
 - en: 'According to the [TorchScript documentation](https://pytorch.org/docs/stable/jit.html):'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据[TorchScript文档](https://pytorch.org/docs/stable/jit.html)：
 - en: TorchScript is a way to create serializable and optimizable models from PyTorch
     code.
+  id: totrans-5
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: TorchScript是一种从PyTorch代码创建可序列化和可优化模型的方法。
 - en: There are two PyTorch modules, [JIT and TRACE](https://pytorch.org/docs/stable/jit.html),
     that allow developers to export their models to be reused in other programs like
     efficiency-oriented C++ programs.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两个PyTorch模块[JIT和TRACE](https://pytorch.org/docs/stable/jit.html)，允许开发人员将他们的模型导出以便在其他程序中重复使用，比如面向效率的C++程序。
 - en: We provide an interface that allows you to export 🤗 Transformers models to TorchScript
     so they can be reused in a different environment than PyTorch-based Python programs.
     Here, we explain how to export and use our models using TorchScript.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们提供了一个接口，允许您将🤗 Transformers模型导出到TorchScript，以便在与基于PyTorch的Python程序不同的环境中重复使用。在这里，我们解释了如何使用TorchScript导出和使用我们的模型。
 - en: 'Exporting a model requires two things:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 导出模型需要两件事：
 - en: model instantiation with the `torchscript` flag
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用`torchscript`标志实例化模型
 - en: a forward pass with dummy inputs
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用虚拟输入进行前向传递
 - en: These necessities imply several things developers should be careful about as
     detailed below.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些必需品意味着开发人员应该注意以下几点。
 - en: TorchScript flag and tied weights
+  id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TorchScript标志和绑定权重
 - en: The `torchscript` flag is necessary because most of the 🤗 Transformers language
     models have tied weights between their `Embedding` layer and their `Decoding`
     layer. TorchScript does not allow you to export models that have tied weights,
     so it is necessary to untie and clone the weights beforehand.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '`torchscript`标志是必需的，因为大多数🤗 Transformers语言模型的`Embedding`层和`Decoding`层之间有绑定权重。TorchScript不允许您导出具有绑定权重的模型，因此需要在此之前解开并克隆权重。'
 - en: Models instantiated with the `torchscript` flag have their `Embedding` layer
     and `Decoding` layer separated, which means that they should not be trained down
     the line. Training would desynchronize the two layers, leading to unexpected results.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`torchscript`标志实例化的模型将它们的`Embedding`层和`Decoding`层分开，这意味着它们不应该在训练过程中进行训练。训练会使这两层不同步，导致意外结果。
 - en: This is not the case for models that do not have a language model head, as those
     do not have tied weights. These models can be safely exported without the `torchscript`
     flag.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于没有语言模型头的模型，情况并非如此，因为这些模型没有绑定权重。这些模型可以安全地导出而不使用`torchscript`标志。
 - en: Dummy inputs and standard lengths
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 虚拟输入和标准长度
 - en: The dummy inputs are used for a models forward pass. While the inputs’ values
     are propagated through the layers, PyTorch keeps track of the different operations
     executed on each tensor. These recorded operations are then used to create the
     *trace* of the model.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 虚拟输入用于模型的前向传递。当输入的值通过层传播时，PyTorch会跟踪每个张量上执行的不同操作。然后使用这些记录的操作来创建模型的*trace*。
 - en: 'The trace is created relative to the inputs’ dimensions. It is therefore constrained
     by the dimensions of the dummy input, and will not work for any other sequence
     length or batch size. When trying with a different size, the following error is
     raised:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 跟踪是相对于输入维度创建的。因此，它受虚拟输入维度的限制，并且对于任何其他序列长度或批量大小都不起作用。当尝试使用不同大小时，会引发以下错误：
 - en: '[PRE0]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: We recommended you trace the model with a dummy input size at least as large
     as the largest input that will be fed to the model during inference. Padding can
     help fill the missing values. However, since the model is traced with a larger
     input size, the dimensions of the matrix will also be large, resulting in more
     calculations.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们建议您使用至少与推理过程中将馈送到模型的最大输入一样大的虚拟输入大小来跟踪模型。填充可以帮助填补缺失的值。然而，由于模型是使用较大的输入大小跟踪的，矩阵的维度也会很大，导致更多的计算。
 - en: Be careful of the total number of operations done on each input and follow the
     performance closely when exporting varying sequence-length models.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 要注意每个输入上执行的总操作数，并在导出不同序列长度模型时密切关注性能。
 - en: Using TorchScript in Python
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在Python中使用TorchScript
 - en: This section demonstrates how to save and load models as well as how to use
     the trace for inference.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 本节演示了如何保存和加载模型以及如何使用跟踪进行推理。
 - en: Saving a model
+  id: totrans-24
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 保存模型
 - en: 'To export a `BertModel` with TorchScript, instantiate `BertModel` from the
     `BertConfig` class and then save it to disk under the filename `traced_bert.pt`:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 要导出带有TorchScript的`BertModel`，请从`BertConfig`类实例化`BertModel`，然后将其保存到磁盘上的文件名为`traced_bert.pt`：
 - en: '[PRE1]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Loading a model
+  id: totrans-27
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 加载模型
 - en: 'Now you can load the previously saved `BertModel`, `traced_bert.pt`, from disk
     and use it on the previously initialised `dummy_input`:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您可以加载先前保存的`BertModel`，`traced_bert.pt`，从磁盘上并在先前初始化的`dummy_input`上使用它：
 - en: '[PRE2]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Using a traced model for inference
+  id: totrans-30
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用跟踪模型进行推理
 - en: 'Use the traced model for inference by using its `__call__` dunder method:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过使用其`__call__` dunder方法对推理使用跟踪模型：
 - en: '[PRE3]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Deploy Hugging Face TorchScript models to AWS with the Neuron SDK
+  id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用Neuron SDK将Hugging Face TorchScript模型部署到AWS
 - en: 'AWS introduced the [Amazon EC2 Inf1](https://aws.amazon.com/ec2/instance-types/inf1/)
     instance family for low cost, high performance machine learning inference in the
     cloud. The Inf1 instances are powered by the AWS Inferentia chip, a custom-built
@@ -162,26 +217,39 @@
     Neuron](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/#) is the SDK
     for Inferentia that supports tracing and optimizing transformers models for deployment
     on Inf1\. The Neuron SDK provides:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: AWS推出了[Amazon EC2 Inf1](https://aws.amazon.com/ec2/instance-types/inf1/)实例系列，用于在云中进行低成本、高性能的机器学习推理。Inf1实例由AWS
+    Inferentia芯片提供动力，这是一种专门用于深度学习推理工作负载的定制硬件加速器。[AWS Neuron](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/#)是用于Inferentia的SDK，支持跟踪和优化transformers模型，以便在Inf1上部署。Neuron
+    SDK提供：
 - en: Easy-to-use API with one line of code change to trace and optimize a TorchScript
     model for inference in the cloud.
+  id: totrans-35
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 易于使用的API，只需更改一行代码即可跟踪和优化TorchScript模型，以便在云中进行推理。
 - en: Out of the box performance optimizations for [improved cost-performance](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/benchmark/%3E).
+  id: totrans-36
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 针对[改进的成本性能](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/benchmark/%3E)进行即插即用的性能优化。
 - en: Support for Hugging Face transformers models built with either [PyTorch](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/src/examples/pytorch/bert_tutorial/tutorial_pretrained_bert.html)
     or [TensorFlow](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/src/examples/tensorflow/huggingface_bert/huggingface_bert.html).
+  id: totrans-37
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 支持使用[PyTorch](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/src/examples/pytorch/bert_tutorial/tutorial_pretrained_bert.html)或[TensorFlow](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/src/examples/tensorflow/huggingface_bert/huggingface_bert.html)构建的Hugging
+    Face transformers模型。
 - en: Implications
+  id: totrans-38
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 影响
 - en: Transformers models based on the [BERT (Bidirectional Encoder Representations
     from Transformers)](https://huggingface.co/docs/transformers/main/model_doc/bert)
     architecture, or its variants such as [distilBERT](https://huggingface.co/docs/transformers/main/model_doc/distilbert)
@@ -192,39 +260,61 @@
     More information about models that can be converted out of the box on Inferentia
     can be found in the [Model Architecture Fit](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/models/models-inferentia.html#models-inferentia)
     section of the Neuron documentation.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 基于[BERT（来自Transformers的双向编码器表示）](https://huggingface.co/docs/transformers/main/model_doc/bert)架构的transformers模型，或其变体，如[distilBERT](https://huggingface.co/docs/transformers/main/model_doc/distilbert)和[roBERTa](https://huggingface.co/docs/transformers/main/model_doc/roberta)在非生成任务（如提取式问答、序列分类和标记分类）上在Inf1上运行效果最佳。然而，文本生成任务仍可以根据此[AWS
+    Neuron MarianMT教程](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/src/examples/pytorch/transformers-marianmt.html)进行适应以在Inf1上运行。有关可以直接在Inferentia上转换的模型的更多信息，请参阅Neuron文档的[模型架构适配](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/models/models-inferentia.html#models-inferentia)部分。
 - en: Dependencies
+  id: totrans-40
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 依赖
 - en: Using AWS Neuron to convert models requires a [Neuron SDK environment](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/neuron-frameworks/pytorch-neuron/index.html#installation-guide)
     which comes preconfigured on [AWS Deep Learning AMI](https://docs.aws.amazon.com/dlami/latest/devguide/tutorial-inferentia-launching.html).
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用AWS Neuron转换模型需要一个[Neuron SDK环境](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/neuron-guide/neuron-frameworks/pytorch-neuron/index.html#installation-guide)，该环境预先配置在[AWS深度学习AMI](https://docs.aws.amazon.com/dlami/latest/devguide/tutorial-inferentia-launching.html)上。
 - en: Converting a model for AWS Neuron
+  id: totrans-42
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 将模型转换为AWS Neuron
 - en: 'Convert a model for AWS NEURON using the same code from [Using TorchScript
     in Python](torchscript#using-torchscript-in-python) to trace a `BertModel`. Import
     the `torch.neuron` framework extension to access the components of the Neuron
     SDK through a Python API:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用与[在Python中使用TorchScript](torchscript#using-torchscript-in-python)相同的代码来为AWS
+    NEURON转换模型，以跟踪`BertModel`。导入`torch.neuron`框架扩展以通过Python API访问Neuron SDK的组件：
 - en: '[PRE4]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'You only need to modify the following line:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 您只需要修改以下行：
 - en: '[PRE5]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: This enables the Neuron SDK to trace the model and optimize it for Inf1 instances.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 这使得Neuron SDK能够跟踪模型并为Inf1实例进行优化。
 - en: To learn more about AWS Neuron SDK features, tools, example tutorials and latest
     updates, please see the [AWS NeuronSDK documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html).
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解有关AWS Neuron SDK功能、工具、示例教程和最新更新的更多信息，请参阅[AWS NeuronSDK文档](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)。
