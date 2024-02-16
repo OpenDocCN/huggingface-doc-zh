@@ -3,21 +3,26 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Funnel Transformer
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/funnel](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/funnel)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/funnel](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/funnel)
 - en: '[![Models](../Images/2f91f9c007b533d3670618712d115f09.png)](https://huggingface.co/models?filter=funnel)
     [![Spaces](../Images/61b85edcfdd50048184e2646e3f80d91.png)](https://huggingface.co/spaces/docs-demos/funnel-transformer-small)'
   id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![Models](../Images/2f91f9c007b533d3670618712d115f09.png)](https://huggingface.co/models?filter=funnel)
+    [![Spaces](../Images/61b85edcfdd50048184e2646e3f80d91.png)](https://huggingface.co/spaces/docs-demos/funnel-transformer-small)'
 - en: Overview
   id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 概述
 - en: 'The Funnel Transformer model was proposed in the paper [Funnel-Transformer:
     Filtering out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236).
     It is a bidirectional transformer model, like BERT, but with a pooling operation
@@ -26,10 +31,13 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 'Funnel Transformer模型是在论文[Funnel-Transformer: Filtering out Sequential Redundancy
+    for Efficient Language Processing](https://arxiv.org/abs/2006.03236)中提出的。它是一个双向变压器模型，类似于BERT，但在每个层块之后进行池化操作，有点像传统卷积神经网络（CNN）在计算机视觉中的操作。'
 - en: 'The abstract from the paper is the following:'
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 该论文的摘要如下：
 - en: '*With the success of language pretraining, it is highly desirable to develop
     more efficient architectures of good scalability that can exploit the abundant
     unlabeled data at a lower cost. To improve the efficiency, we examine the much-overlooked
@@ -48,16 +56,19 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '*随着语言预训练的成功，开发更高效且具有良好可扩展性的架构以更低成本利用丰富的未标记数据变得非常可取。为了提高效率，我们研究了在维护完整长度的令牌级表示中常被忽视的冗余，特别是对于只需要序列的单向量表示的任务。基于这种直觉，我们提出了漏斗变压器（Funnel-Transformer），逐渐压缩隐藏状态序列至更短的序列，从而降低计算成本。更重要的是，通过将长度减少所节省的FLOPs重新投资于构建更深或更宽的模型，我们进一步提高了模型容量。此外，为了执行常见预训练目标所需的令牌级预测，Funnel-Transformer能够通过解码器从减少的隐藏序列中恢复每个令牌的深度表示。经验上，使用可比较或更少的FLOPs，Funnel-Transformer在各种序列级预测任务上优于标准变压器，包括文本分类、语言理解和阅读理解。*'
 - en: This model was contributed by [sgugger](https://huggingface.co/sgugger). The
     original code can be found [here](https://github.com/laiguokun/Funnel-Transformer).
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型由[sgugger](https://huggingface.co/sgugger)贡献。原始代码可以在[这里](https://github.com/laiguokun/Funnel-Transformer)找到。
 - en: Usage tips
   id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用提示
 - en: Since Funnel Transformer uses pooling, the sequence length of the hidden states
     changes after each block of layers. This way, their length is divided by 2, which
     speeds up the computation of the next hidden states. The base model therefore
@@ -70,6 +81,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于Funnel Transformer使用了池化，隐藏状态的序列长度在每个层块之后发生变化。这样，它们的长度被除以2，加快了下一个隐藏状态的计算。因此，基础模型最终的序列长度是原始长度的四分之一。该模型可以直接用于只需要句子摘要的任务（如序列分类或多项选择）。对于其他任务，使用完整模型；这个完整模型具有一个解码器，将最终的隐藏状态上采样到与输入相同的序列长度。
 - en: For tasks such as classification, this is not a problem, but for tasks like
     masked language modeling or token classification, we need a hidden state with
     the same sequence length as the original input. In those cases, the final hidden
@@ -81,6 +93,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于分类等任务，这不是问题，但对于像掩码语言建模或令牌分类这样的任务，我们需要一个与原始输入具有相同序列长度的隐藏状态。在这些情况下，最终的隐藏状态被上采样到输入序列长度，并经过两个额外的层。这就是为什么每个检查点有两个版本的原因。带有“-base”后缀的版本仅包含三个块，而没有该后缀的版本包含三个块和上采样头以及其额外的层。
 - en: The Funnel Transformer checkpoints are all available with a full version and
     a base version. The first ones should be used for [FunnelModel](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelModel),
     [FunnelForPreTraining](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForPreTraining),
@@ -1202,6 +1215,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`）- 词汇表中输入序列标记的索引。'
 - en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
@@ -1210,11 +1224,13 @@
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)来获取索引。有关详细信息，请参阅[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)和[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)。
 - en: '[What are input IDs?](../glossary#input-ids)'
   id: totrans-189
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是输入ID？](../glossary#input-ids)'
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
@@ -1222,23 +1238,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask`（形状为`(batch_size, sequence_length)`的`torch.FloatTensor`，*可选*）-
+    避免在填充标记索引上执行注意力的掩码。掩码值在`[0, 1]`中选择：'
 - en: 1 for tokens that are `not masked`,
   id: totrans-191
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1表示`未被掩盖`的标记，
 - en: 0 for tokens that are `masked`.
   id: totrans-192
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0表示`被掩盖`的标记。
 - en: '[What are attention masks?](../glossary#attention-mask)'
   id: totrans-193
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是注意力掩码？](../glossary#attention-mask)'
 - en: '`token_type_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Segment token indices to indicate first and second portions of the
     inputs. Indices are selected in `[0, 1]`:'
@@ -1246,23 +1267,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`，*可选*）-
+    段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：'
 - en: 0 corresponds to a *sentence A* token,
   id: totrans-195
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0对应于*句子A*的标记，
 - en: 1 corresponds to a *sentence B* token.
   id: totrans-196
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1对应于*句子B*的标记。
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
   id: totrans-197
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是标记类型ID？](../glossary#token-type-ids)'
 - en: '`inputs_embeds` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
     choose to directly pass an embedded representation. This is useful if you want
@@ -1272,6 +1298,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs_embeds`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`，*可选*）-
+    可选地，您可以选择直接传递嵌入表示，而不是传递`input_ids`。如果您想要更多控制如何将`input_ids`索引转换为关联向量，而不是使用模型的内部嵌入查找矩阵，这将非常有用。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
@@ -1279,6 +1307,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*）- 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量中的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
@@ -1286,21 +1315,25 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*）- 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量中的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
   id: totrans-201
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）- 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
 - en: Returns
   id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
     or `tuple(torch.FloatTensor)`'
   id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)或`tuple(torch.FloatTensor)`'
 - en: A [transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -1308,6 +1341,7 @@
   id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个[transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)或一个`torch.FloatTensor`元组（如果传递`return_dict=False`或`config.return_dict=False`时）包括根据配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入的不同元素。
 - en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`) — Sequence of hidden-states at the output of the last layer of
     the model.'
@@ -1315,6 +1349,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`last_hidden_state`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`）-
+    模型最后一层的隐藏状态序列。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
@@ -1323,12 +1359,15 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）-
+    形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（如果模型有嵌入层，则为嵌入的输出+每一层的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
   id: totrans-207
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层的输出隐藏状态加上可选的初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -1336,17 +1375,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）-
+    形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-209
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在自注意力头中用于计算加权平均值的注意力softmax之后的注意力权重。
 - en: The [FunnelBaseModel](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelBaseModel)
     forward method, overrides the `__call__` special method.
   id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FunnelBaseModel](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelBaseModel)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -1565,15 +1608,20 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）- 是否返回 [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    而不是普通元组。'
 - en: Returns
   id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
     or `tuple(torch.FloatTensor)`'
   id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
+    或 `tuple(torch.FloatTensor)`'
 - en: A [transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -1581,6 +1629,8 @@
   id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个 [transformers.modeling_outputs.BaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutput)
+    或 `torch.FloatTensor` 元组（如果传递 `return_dict=False` 或 `config.return_dict=False`）包含根据配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入的不同元素。
 - en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`) — Sequence of hidden-states at the output of the last layer of
     the model.'
@@ -1588,6 +1638,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`last_hidden_state`（形状为 `(batch_size, sequence_length, hidden_size)` 的 `torch.FloatTensor`）-
+    模型最后一层的隐藏状态序列。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
@@ -1596,12 +1648,16 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递 `output_hidden_states=True`
+    或 `config.output_hidden_states=True` 时返回）- 形状为 `(batch_size, sequence_length,
+    hidden_size)` 的 `torch.FloatTensor` 元组（一个用于嵌入的输出，如果模型有嵌入层，+ 一个用于每个层的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
   id: totrans-248
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态以及可选的初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -1609,17 +1665,23 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递 `output_attentions=True` 或
+    `config.output_attentions=True` 时返回）- 形状为 `(batch_size, num_heads, sequence_length,
+    sequence_length)` 的 `torch.FloatTensor` 元组（每层一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-250
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 注意力 softmax 后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: The [FunnelModel](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelModel)
     forward method, overrides the `__call__` special method.
   id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FunnelModel](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelModel)
+    的前向方法，覆盖了 `__call__` 特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -1627,10 +1689,12 @@
   id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前向传递的方法需要在此函数内定义，但应该在此之后调用 `Module` 实例，而不是这个，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
 - en: 'Example:'
   id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE18]'
   id: totrans-254
   prefs: []
@@ -1641,14 +1705,17 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FunnelModelForPreTraining
 - en: '### `class transformers.FunnelForPreTraining`'
   id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.FunnelForPreTraining`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1111)'
   id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1111)'
 - en: '[PRE19]'
   id: totrans-258
   prefs: []
@@ -1658,10 +1725,12 @@
   id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1120)'
   id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1120)'
 - en: '[PRE20]'
   id: totrans-261
   prefs: []
@@ -1671,12 +1740,14 @@
   id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
     Indices of input sequence tokens in the vocabulary.'
   id: totrans-263
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids`（形状为 `(batch_size, sequence_length)` 的 `torch.LongTensor`）- 词汇表中输入序列标记的索引。'
 - en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
@@ -1685,11 +1756,15 @@
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 可以使用 [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)
+    获取索引。有关详细信息，请参阅 [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
+    和 [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)。
 - en: '[What are input IDs?](../glossary#input-ids)'
   id: totrans-265
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 输入 ID 是什么？
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
@@ -1697,23 +1772,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask`（形状为 `(batch_size, sequence_length)` 的 `torch.FloatTensor`，*可选*）-
+    避免在填充标记索引上执行注意力的蒙版。蒙版值在 `[0, 1]` 中选择：'
 - en: 1 for tokens that are `not masked`,
   id: totrans-267
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 用于未被 `masked` 的标记，
 - en: 0 for tokens that are `masked`.
   id: totrans-268
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 用于被 `masked` 的标记。
 - en: '[What are attention masks?](../glossary#attention-mask)'
   id: totrans-269
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 注意力蒙版是什么？
 - en: '`token_type_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Segment token indices to indicate first and second portions of the
     inputs. Indices are selected in `[0, 1]`:'
@@ -1721,23 +1801,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids`（形状为 `(batch_size, sequence_length)` 的 `torch.LongTensor`，*可选*）-
+    段标记索引，指示输入的第一部分和第二部分。索引在 `[0, 1]` 中选择：'
 - en: 0 corresponds to a *sentence A* token,
   id: totrans-271
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 对应于 *句子 A* 标记，
 - en: 1 corresponds to a *sentence B* token.
   id: totrans-272
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 对应于 *句子 B* 标记。
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
   id: totrans-273
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 令牌类型 ID 是什么？
 - en: '`inputs_embeds` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
     choose to directly pass an embedded representation. This is useful if you want
@@ -1747,6 +1832,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs_embeds`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`，*可选*）—
+    可选地，您可以选择直接传递嵌入表示，而不是传递`input_ids`。如果您想要更多控制权，以便将`input_ids`索引转换为相关向量，而不是模型的内部嵌入查找矩阵，则这很有用。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
@@ -1754,6 +1841,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*）— 是否返回所有注意力层的注意力张量。有关更多详细信息，请参见返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
@@ -1761,12 +1849,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*）— 是否返回所有层的隐藏状态。有关更多详细信息，请参见返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
   id: totrans-277
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）— 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
 - en: '`labels` (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*)
     — Labels for computing the ELECTRA-style loss. Input should be a sequence of tokens
     (see `input_ids` docstring) Indices should be in `[0, 1]`:'
@@ -1774,27 +1864,33 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`labels`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`，*可选*）— 用于计算ELECTRA风格损失的标签。输入应为一系列标记（参见`input_ids`文档字符串）。索引应在`[0,
+    1]`之间：'
 - en: 0 indicates the token is an original token,
   id: totrans-279
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0表示标记是原始标记，
 - en: 1 indicates the token was replaced.
   id: totrans-280
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1表示标记已被替换。
 - en: Returns
   id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.models.funnel.modeling_funnel.FunnelForPreTrainingOutput](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.models.funnel.modeling_funnel.FunnelForPreTrainingOutput)
     or `tuple(torch.FloatTensor)`'
   id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.models.funnel.modeling_funnel.FunnelForPreTrainingOutput](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.models.funnel.modeling_funnel.FunnelForPreTrainingOutput)或`tuple(torch.FloatTensor)`'
 - en: A [transformers.models.funnel.modeling_funnel.FunnelForPreTrainingOutput](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.models.funnel.modeling_funnel.FunnelForPreTrainingOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -1802,18 +1898,21 @@
   id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.models.funnel.modeling_funnel.FunnelForPreTrainingOutput](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.models.funnel.modeling_funnel.FunnelForPreTrainingOutput)或一个`torch.FloatTensor`元组（如果传递`return_dict=False`或`config.return_dict=False`时）包括根据配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入的不同元素。'
 - en: '`loss` (*optional*, returned when `labels` is provided, `torch.FloatTensor`
     of shape `(1,)`) — Total loss of the ELECTRA-style objective.'
   id: totrans-284
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`loss`（*可选*，当提供`labels`时返回，形状为`(1,)`的`torch.FloatTensor`）— ELECTRA风格目标的总损失。'
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`) — Prediction
     scores of the head (scores for each token before SoftMax).'
   id: totrans-285
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logits`（形状为`(batch_size, sequence_length)`的`torch.FloatTensor`）— 头部的预测分数（SoftMax之前每个标记的分数）。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings + one for the output of each layer) of shape
@@ -1822,12 +1921,16 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）—
+    形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（一个用于嵌入的输出
+    + 一个用于每个层的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the initial embedding
     outputs.
   id: totrans-287
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每个层的输出的隐藏状态加上初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -1835,17 +1938,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）—
+    形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-289
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 注意力softmax后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: The [FunnelForPreTraining](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForPreTraining)
     forward method, overrides the `__call__` special method.
   id: totrans-290
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FunnelForPreTraining](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForPreTraining)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -1853,10 +1960,12 @@
   id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此处调用，因为前者负责运行预处理和后处理步骤，而后者会默默地忽略它们。
 - en: 'Examples:'
   id: totrans-292
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE21]'
   id: totrans-293
   prefs: []
@@ -1867,14 +1976,17 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FunnelForMaskedLM
 - en: '### `class transformers.FunnelForMaskedLM`'
   id: totrans-295
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.FunnelForMaskedLM`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1193)'
   id: totrans-296
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1193)'
 - en: '[PRE22]'
   id: totrans-297
   prefs: []
@@ -1884,6 +1996,7 @@
   id: totrans-298
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
@@ -1893,16 +2006,22 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config`（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）—
+    具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: Funnel Transformer Model with a `language modeling` head on top.
   id: totrans-300
   prefs: []
   type: TYPE_NORMAL
+  zh: 在顶部带有 `语言建模` 头的 Funnel Transformer 模型。
 - en: 'The Funnel Transformer model was proposed in [Funnel-Transformer: Filtering
     out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
     by Zihang Dai, Guokun Lai, Yiming Yang, Quoc V. Le.'
   id: totrans-301
   prefs: []
   type: TYPE_NORMAL
+  zh: 'Funnel Transformer 模型是由 Zihang Dai、Guokun Lai、Yiming Yang、Quoc V. Le 在 [Funnel-Transformer:
+    Filtering out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
+    中提出的。'
 - en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
     Check the superclass documentation for the generic methods the library implements
     for all its model (such as downloading or saving, resizing the input embeddings,
@@ -1910,20 +2029,25 @@
   id: totrans-302
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型继承自[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)。检查超类文档以获取库为所有模型实现的通用方法（例如下载或保存、调整输入嵌入、修剪头等）。
 - en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
   id: totrans-303
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型也是 PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    的子类。将其用作常规 PyTorch 模块，并参考 PyTorch 文档以获取有关一般用法和行为的所有相关信息。
 - en: '#### `forward`'
   id: totrans-304
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1212)'
   id: totrans-305
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1212)'
 - en: '[PRE23]'
   id: totrans-306
   prefs: []
@@ -1933,12 +2057,14 @@
   id: totrans-307
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
     Indices of input sequence tokens in the vocabulary.'
   id: totrans-308
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`）— 词汇表中输入序列标记的索引。'
 - en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
@@ -1947,11 +2073,13 @@
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)获取索引。有关详细信息，请参阅[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)和[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)。
 - en: '[What are input IDs?](../glossary#input-ids)'
   id: totrans-310
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是输入 ID？](../glossary#input-ids)'
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
@@ -1959,23 +2087,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask`（形状为`(batch_size, sequence_length)`的`torch.FloatTensor`，*可选*）—
+    避免在填充标记索引上执行注意力的掩码。选择的掩码值在`[0, 1]`中：'
 - en: 1 for tokens that are `not masked`,
   id: totrans-312
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于`未屏蔽`的标记，
 - en: 0 for tokens that are `masked`.
   id: totrans-313
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 对于`被屏蔽`的标记。
 - en: '[What are attention masks?](../glossary#attention-mask)'
   id: totrans-314
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是注意力掩码？](../glossary#attention-mask)'
 - en: '`token_type_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Segment token indices to indicate first and second portions of the
     inputs. Indices are selected in `[0, 1]`:'
@@ -1983,23 +2116,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`，*可选*）—
+    段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：'
 - en: 0 corresponds to a *sentence A* token,
   id: totrans-316
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 对应于 *句子 A* 标记，
 - en: 1 corresponds to a *sentence B* token.
   id: totrans-317
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 对应于 *句子 B* 标记。
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
   id: totrans-318
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是标记类型 ID？](../glossary#token-type-ids)'
 - en: '`inputs_embeds` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
     choose to directly pass an embedded representation. This is useful if you want
@@ -2009,6 +2147,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs_embeds`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`，*可选*）—
+    可选地，您可以选择直接传递嵌入表示，而不是传递`input_ids`。如果您想要更多控制如何将`input_ids`索引转换为关联向量，这将非常有用，而不是使用模型的内部嵌入查找矩阵。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
@@ -2016,6 +2156,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*）— 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
@@ -2023,12 +2164,15 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*）— 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
   id: totrans-322
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）— 是否返回 [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    而不是普通元组。'
 - en: '`labels` (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*)
     — Labels for computing the masked language modeling loss. Indices should be in
     `[-100, 0, ..., config.vocab_size]` (see `input_ids` docstring) Tokens with indices
@@ -2038,15 +2182,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`labels`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`，*可选*）— 用于计算被屏蔽语言建模损失的标签。索引应在`[-100,
+    0, ..., config.vocab_size]`中（参见`input_ids`文档字符串）。索引设置为`-100`的标记将被忽略（被屏蔽），损失仅计算具有标签在`[0,
+    ..., config.vocab_size]`中的标记。'
 - en: Returns
   id: totrans-324
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
     or `tuple(torch.FloatTensor)`'
   id: totrans-325
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
+    或 `tuple(torch.FloatTensor)`'
 - en: A [transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -2054,12 +2204,14 @@
   id: totrans-326
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个[transformers.modeling_outputs.MaskedLMOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MaskedLMOutput)或一个`torch.FloatTensor`元组（如果传递`return_dict=False`或`config.return_dict=False`）包含根据配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入的各种元素。
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Masked language modeling (MLM) loss.'
   id: totrans-327
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`损失` (`torch.FloatTensor`，形状为`(1,)`，*可选*，当提供`labels`时返回) — 掩码语言建模（MLM）损失。'
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.vocab_size)`)
     — Prediction scores of the language modeling head (scores for each vocabulary
     token before SoftMax).'
@@ -2067,6 +2219,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logits` (`torch.FloatTensor`，形状为`(batch_size, sequence_length, config.vocab_size)`)
+    — 语言建模头的预测分数（SoftMax之前每个词汇标记的分数）。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
@@ -2075,12 +2229,15 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）
+    — 形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（如果模型有嵌入层，则为嵌入的输出+每层的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
   id: totrans-330
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出处的隐藏状态以及可选的初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -2088,17 +2245,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions` (`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）
+    — 形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-332
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在注意力 softmax 之后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: The [FunnelForMaskedLM](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForMaskedLM)
     forward method, overrides the `__call__` special method.
   id: totrans-333
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FunnelForMaskedLM](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForMaskedLM)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -2106,10 +2267,12 @@
   id: totrans-334
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前向传递的方法需要在此函数内定义，但应该在此之后调用`Module`实例，而不是这个，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
 - en: 'Example:'
   id: totrans-335
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE24]'
   id: totrans-336
   prefs: []
@@ -2120,14 +2283,17 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FunnelForSequenceClassification
 - en: '### `class transformers.FunnelForSequenceClassification`'
   id: totrans-338
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.FunnelForSequenceClassification`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1268)'
   id: totrans-339
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1268)'
 - en: '[PRE25]'
   id: totrans-340
   prefs: []
@@ -2137,6 +2303,7 @@
   id: totrans-341
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
@@ -2146,18 +2313,25 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config`（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）
+    — 包含模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只会加载配置。查看 [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    方法以加载模型权重。'
 - en: Funnel Transformer Model with a sequence classification/regression head on top
     (two linear layer on top of the first timestep of the last hidden state) e.g.
     for GLUE tasks.
   id: totrans-343
   prefs: []
   type: TYPE_NORMAL
+  zh: Funnel Transformer 模型，顶部带有一个序列分类/回归头（在最后隐藏状态的第一个时间步之上有两个线性层），例如用于 GLUE 任务。
 - en: 'The Funnel Transformer model was proposed in [Funnel-Transformer: Filtering
     out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
     by Zihang Dai, Guokun Lai, Yiming Yang, Quoc V. Le.'
   id: totrans-344
   prefs: []
   type: TYPE_NORMAL
+  zh: 'Funnel Transformer 模型由 Zihang Dai、Guokun Lai、Yiming Yang、Quoc V. Le 在 [Funnel-Transformer:
+    Filtering out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
+    中提出。'
 - en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
     Check the superclass documentation for the generic methods the library implements
     for all its model (such as downloading or saving, resizing the input embeddings,
@@ -2165,20 +2339,25 @@
   id: totrans-345
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型继承自[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)。查看超类文档以了解库为所有模型实现的通用方法（如下载或保存、调整输入嵌入、修剪头等）。
 - en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
   id: totrans-346
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型也是一个 PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    子类。将其用作常规 PyTorch 模块，并参考 PyTorch 文档以获取有关一般用法和行为的所有信息。
 - en: '#### `forward`'
   id: totrans-347
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1286)'
   id: totrans-348
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1286)'
 - en: '[PRE26]'
   id: totrans-349
   prefs: []
@@ -2188,12 +2367,15 @@
   id: totrans-350
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
     Indices of input sequence tokens in the vocabulary.'
   id: totrans-351
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
+    词汇表中输入序列标记的索引。'
 - en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
@@ -2202,11 +2384,13 @@
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)获取索引。有关详细信息，请参见[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)和[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)。
 - en: '[What are input IDs?](../glossary#input-ids)'
   id: totrans-353
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是输入ID？](../glossary#input-ids)'
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
@@ -2214,23 +2398,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — 用于避免在填充标记索引上执行注意力的掩码。掩码值在`[0, 1]`中选择：'
 - en: 1 for tokens that are `not masked`,
   id: totrans-355
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 用于`未被掩码`的标记，
 - en: 0 for tokens that are `masked`.
   id: totrans-356
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 用于`被掩码`的标记。
 - en: '[What are attention masks?](../glossary#attention-mask)'
   id: totrans-357
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是注意力掩码？](../glossary#attention-mask)'
 - en: '`token_type_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Segment token indices to indicate first and second portions of the
     inputs. Indices are selected in `[0, 1]`:'
@@ -2238,23 +2427,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
+    *optional*) — 段标记索引，用于指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：'
 - en: 0 corresponds to a *sentence A* token,
   id: totrans-359
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 对应于*句子A*的标记，
 - en: 1 corresponds to a *sentence B* token.
   id: totrans-360
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 对应于*句子B*的标记。
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
   id: totrans-361
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是标记类型ID？](../glossary#token-type-ids)'
 - en: '`inputs_embeds` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
     choose to directly pass an embedded representation. This is useful if you want
@@ -2264,6 +2458,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs_embeds` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`, *optional*) — 可选地，您可以选择直接传递嵌入表示，而不是传递`input_ids`。如果您想要更多控制如何将`input_ids`索引转换为相关向量，这将非常有用，而不是使用模型的内部嵌入查找矩阵。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
@@ -2271,6 +2467,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions` (`bool`, *optional*) — 是否返回所有注意力层的注意力张量。有关更多详细信息，请参见返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
@@ -2278,12 +2475,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states` (`bool`, *optional*) — 是否返回所有层的隐藏状态。有关更多详细信息，请参见返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
   id: totrans-365
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *optional*) — 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
 - en: '`labels` (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
     for computing the sequence classification/regression loss. Indices should be in
     `[0, ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss
@@ -2293,15 +2492,20 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`labels` (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — 用于计算序列分类/回归损失的标签。索引应在`[0,
+    ..., config.num_labels - 1]`中。如果`config.num_labels == 1`，则计算回归损失（均方损失），如果`config.num_labels
+    > 1`，则计算分类损失（交叉熵）。'
 - en: Returns
   id: totrans-367
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
     or `tuple(torch.FloatTensor)`'
   id: totrans-368
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)或`tuple(torch.FloatTensor)`'
 - en: A [transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -2309,18 +2513,23 @@
   id: totrans-369
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个[transformers.modeling_outputs.SequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.SequenceClassifierOutput)或一个`torch.FloatTensor`元组（如果传递`return_dict=False`或`config.return_dict=False`）包含各种元素，具体取决于配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入。
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
   id: totrans-370
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, 当提供`labels`时返回) —
+    分类（如果config.num_labels==1则为回归）损失。'
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
   id: totrans-371
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
+    分类（如果config.num_labels==1则为回归）分数（SoftMax之前）。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
@@ -2329,12 +2538,15 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, 当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回)
+    — 形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（如果模型具有嵌入层，则为嵌入的输出加上每一层的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
   id: totrans-373
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态以及可选的初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -2342,17 +2554,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或当`config.output_attentions=True`时返回）—
+    形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-375
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在注意力softmax之后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: The [FunnelForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForSequenceClassification)
     forward method, overrides the `__call__` special method.
   id: totrans-376
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FunnelForSequenceClassification](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForSequenceClassification)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -2360,10 +2576,12 @@
   id: totrans-377
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此处调用，因为前者负责运行前后处理步骤，而后者会默默地忽略它们。
 - en: 'Example of single-label classification:'
   id: totrans-378
   prefs: []
   type: TYPE_NORMAL
+  zh: 单标签分类示例：
 - en: '[PRE27]'
   id: totrans-379
   prefs: []
@@ -2373,6 +2591,7 @@
   id: totrans-380
   prefs: []
   type: TYPE_NORMAL
+  zh: 多标签分类示例：
 - en: '[PRE28]'
   id: totrans-381
   prefs: []
@@ -2383,14 +2602,17 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FunnelForMultipleChoice
 - en: '### `class transformers.FunnelForMultipleChoice`'
   id: totrans-383
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.FunnelForMultipleChoice`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1360)'
   id: totrans-384
   prefs: []
   type: TYPE_NORMAL
+  zh: '[来源](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1360)'
 - en: '[PRE29]'
   id: totrans-385
   prefs: []
@@ -2400,6 +2622,7 @@
   id: totrans-386
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
@@ -2409,18 +2632,23 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config`（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）—
+    模型配置类，包含模型的所有参数。使用配置文件初始化不会加载与模型相关的权重，只加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: Funnel Transformer Model with a multiple choice classification head on top (two
     linear layer on top of the first timestep of the last hidden state, and a softmax)
     e.g. for RocStories/SWAG tasks.
   id: totrans-388
   prefs: []
   type: TYPE_NORMAL
+  zh: Funnel Transformer模型，顶部带有多选分类头（在最后隐藏状态的第一个时间步之上有两个线性层，以及一个softmax），例如用于RocStories/SWAG任务。
 - en: 'The Funnel Transformer model was proposed in [Funnel-Transformer: Filtering
     out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
     by Zihang Dai, Guokun Lai, Yiming Yang, Quoc V. Le.'
   id: totrans-389
   prefs: []
   type: TYPE_NORMAL
+  zh: 'Funnel Transformer模型由Zihang Dai、Guokun Lai、Yiming Yang、Quoc V. Le在[Funnel-Transformer:
+    Filtering out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)中提出。'
 - en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
     Check the superclass documentation for the generic methods the library implements
     for all its model (such as downloading or saving, resizing the input embeddings,
@@ -2428,20 +2656,24 @@
   id: totrans-390
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型继承自[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)。查看超类文档以获取库为所有模型实现的通用方法（例如下载或保存、调整输入嵌入、修剪头等）。
 - en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
   id: totrans-391
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型还是PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)子类。将其用作常规PyTorch模块，并参考PyTorch文档以获取与一般用法和行为相关的所有事项。
 - en: '#### `forward`'
   id: totrans-392
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1376)'
   id: totrans-393
   prefs: []
   type: TYPE_NORMAL
+  zh: '[来源](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1376)'
 - en: '[PRE30]'
   id: totrans-394
   prefs: []
@@ -2451,12 +2683,15 @@
   id: totrans-395
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, num_choices, sequence_length)`)
     — Indices of input sequence tokens in the vocabulary.'
   id: totrans-396
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids`（形状为`(batch_size, num_choices, sequence_length)`的`torch.LongTensor`）—
+    词汇表中输入序列标记的索引。'
 - en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
@@ -2465,11 +2700,13 @@
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)获取索引。查看[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)和[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)获取详细信息。
 - en: '[What are input IDs?](../glossary#input-ids)'
   id: totrans-398
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 什么是输入ID？
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, num_choices, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
@@ -2477,23 +2714,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask`（形状为`(batch_size, num_choices, sequence_length)`的`torch.FloatTensor`，*可选*）—
+    避免在填充标记索引上执行注意力的掩码。掩码值在`[0, 1]`中选择：'
 - en: 1 for tokens that are `not masked`,
   id: totrans-400
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于“未屏蔽”的标记为1，
 - en: 0 for tokens that are `masked`.
   id: totrans-401
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于“屏蔽”的标记为0。
 - en: '[What are attention masks?](../glossary#attention-mask)'
   id: totrans-402
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 什么是注意力掩码？
 - en: '`token_type_ids` (`torch.LongTensor` of shape `(batch_size, num_choices, sequence_length)`,
     *optional*) — Segment token indices to indicate first and second portions of the
     inputs. Indices are selected in `[0, 1]`:'
@@ -2501,23 +2743,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids`（形状为`(batch_size, num_choices, sequence_length)`的`torch.LongTensor`，*可选*）—
+    分段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：'
 - en: 0 corresponds to a *sentence A* token,
   id: totrans-404
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0对应于*句子A*标记，
 - en: 1 corresponds to a *sentence B* token.
   id: totrans-405
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1对应于*句子B*标记。
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
   id: totrans-406
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 什么是标记类型ID？
 - en: '`inputs_embeds` (`torch.FloatTensor` of shape `(batch_size, num_choices, sequence_length,
     hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
     choose to directly pass an embedded representation. This is useful if you want
@@ -2527,6 +2774,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs_embeds`（形状为`(batch_size, num_choices, sequence_length, hidden_size)`的`torch.FloatTensor`，*可选*）-
+    可选地，您可以选择直接传递嵌入表示，而不是传递`input_ids`。如果您想要更多控制权来将`input_ids`索引转换为相关向量，而不是使用模型的内部嵌入查找矩阵，这将非常有用。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
@@ -2534,6 +2783,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（*可选*，`bool`）- 是否返回所有注意力层的注意力张量。有关更多详细信息，请参见返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
@@ -2541,12 +2791,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（*可选*，`bool`）- 是否返回所有层的隐藏状态。有关更多详细信息，请参见返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
   id: totrans-410
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（*可选*，`bool`）- 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
 - en: '`labels` (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
     for computing the multiple choice classification loss. Indices should be in `[0,
     ..., num_choices-1]` where `num_choices` is the size of the second dimension of
@@ -2555,15 +2807,19 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`labels`（形状为`(batch_size,)`的`torch.LongTensor`，*可选*）- 用于计算多项选择分类损失的标签。索引应在`[0,
+    ..., num_choices-1]`范围内，其中`num_choices`是输入张量的第二维度的大小。（参见上面的`input_ids`）'
 - en: Returns
   id: totrans-412
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)
     or `tuple(torch.FloatTensor)`'
   id: totrans-413
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)或`tuple(torch.FloatTensor)`'
 - en: A [transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -2571,23 +2827,27 @@
   id: totrans-414
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个[transformers.modeling_outputs.MultipleChoiceModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.MultipleChoiceModelOutput)或一个`torch.FloatTensor`元组（如果传递`return_dict=False`或当`config.return_dict=False`时）包含各种元素，具体取决于配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入。
 - en: '`loss` (`torch.FloatTensor` of shape *(1,)*, *optional*, returned when `labels`
     is provided) — Classification loss.'
   id: totrans-415
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`loss`（形状为*(1,)*的`torch.FloatTensor`，*可选*，当提供`labels`时返回）- 分类损失。'
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, num_choices)`) — *num_choices*
     is the second dimension of the input tensors. (see *input_ids* above).'
   id: totrans-416
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logits`（形状为`(batch_size, num_choices)`的`torch.FloatTensor`）- *num_choices*是输入张量的第二维度。（参见上面的*input_ids*）。'
 - en: Classification scores (before SoftMax).
   id: totrans-417
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: SoftMax之前的分类分数。
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
@@ -2596,12 +2856,15 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（*可选*，`tuple(torch.FloatTensor)`，当传递`output_hidden_states=True`或当`config.output_hidden_states=True`时返回）-
+    形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（如果模型有嵌入层，则为嵌入的输出+每层的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
   id: totrans-419
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态加上可选的初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -2609,17 +2872,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（*可选*，`tuple(torch.FloatTensor)`，当传递`output_attentions=True`或当`config.output_attentions=True`时返回）-
+    形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-421
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在注意力softmax之后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: The [FunnelForMultipleChoice](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForMultipleChoice)
     forward method, overrides the `__call__` special method.
   id: totrans-422
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FunnelForMultipleChoice](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForMultipleChoice)的前向方法，覆盖`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -2627,10 +2894,12 @@
   id: totrans-423
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管前向传递的配方需要在此函数内定义，但应该在此之后调用`Module`实例，而不是这个，因为前者负责运行预处理和后处理步骤，而后者则默默地忽略它们。
 - en: 'Example:'
   id: totrans-424
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE31]'
   id: totrans-425
   prefs: []
@@ -2641,14 +2910,17 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FunnelForTokenClassification
 - en: '### `class transformers.FunnelForTokenClassification`'
   id: totrans-427
   prefs: []
   type: TYPE_NORMAL
+  zh: '`transformers.FunnelForTokenClassification`类'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1443)'
   id: totrans-428
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1443)'
 - en: '[PRE32]'
   id: totrans-429
   prefs: []
@@ -2658,6 +2930,7 @@
   id: totrans-430
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
@@ -2667,17 +2940,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config`（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）—
+    模型配置类，包含模型的所有参数。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: Funnel Transformer Model with a token classification head on top (a linear layer
     on top of the hidden-states output) e.g. for Named-Entity-Recognition (NER) tasks.
   id: totrans-432
   prefs: []
   type: TYPE_NORMAL
+  zh: 在顶部带有令牌分类头的Funnel Transformer模型（在隐藏状态输出的顶部有一个线性层），例如用于命名实体识别（NER）任务。
 - en: 'The Funnel Transformer model was proposed in [Funnel-Transformer: Filtering
     out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
     by Zihang Dai, Guokun Lai, Yiming Yang, Quoc V. Le.'
   id: totrans-433
   prefs: []
   type: TYPE_NORMAL
+  zh: Funnel Transformer模型由戴子航、赖国坤、杨一鸣、雷鸥等人在[漏斗变压器：过滤顺序冗余以实现高效语言处理](https://arxiv.org/abs/2006.03236)中提出。
 - en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
     Check the superclass documentation for the generic methods the library implements
     for all its model (such as downloading or saving, resizing the input embeddings,
@@ -2685,20 +2962,24 @@
   id: totrans-434
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型继承自[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)。检查超类文档，了解库为其所有模型实现的通用方法（例如下载或保存、调整输入嵌入、修剪头等）。
 - en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
   id: totrans-435
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型还是PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)子类。将其用作常规PyTorch模块，并参考PyTorch文档以获取有关一般用法和行为的所有相关信息。
 - en: '#### `forward`'
   id: totrans-436
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1462)'
   id: totrans-437
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1462)'
 - en: '[PRE33]'
   id: totrans-438
   prefs: []
@@ -2708,12 +2989,14 @@
   id: totrans-439
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
     Indices of input sequence tokens in the vocabulary.'
   id: totrans-440
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`）— 词汇中输入序列令牌的索引。'
 - en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
@@ -2722,11 +3005,13 @@
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)获取索引。有关详细信息，请参阅[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)和[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)。
 - en: '[What are input IDs?](../glossary#input-ids)'
   id: totrans-442
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 输入ID是什么？
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
@@ -2734,23 +3019,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask`（形状为`(batch_size, sequence_length)`的`torch.FloatTensor`，*可选*）—
+    用于避免在填充令牌索引上执行注意力的掩码。选择的掩码值为`[0, 1]`：'
 - en: 1 for tokens that are `not masked`,
   id: totrans-444
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1表示`未被掩盖`的令牌，
 - en: 0 for tokens that are `masked`.
   id: totrans-445
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0表示`被掩盖`的令牌。
 - en: '[What are attention masks?](../glossary#attention-mask)'
   id: totrans-446
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 注意掩码是什么？
 - en: '`token_type_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Segment token indices to indicate first and second portions of the
     inputs. Indices are selected in `[0, 1]`:'
@@ -2758,23 +3048,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`，*可选*）—
+    段令牌索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：'
 - en: 0 corresponds to a *sentence A* token,
   id: totrans-448
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0对应于*句子A*的令牌，
 - en: 1 corresponds to a *sentence B* token.
   id: totrans-449
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1对应于*句子B*的令牌。
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
   id: totrans-450
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 令牌类型ID是什么？
 - en: '`inputs_embeds` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
     choose to directly pass an embedded representation. This is useful if you want
@@ -2784,6 +3079,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs_embeds`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`，*可选*）—
+    可选地，您可以选择直接传递嵌入表示而不是传递`input_ids`。如果您想要更多控制如何将`input_ids`索引转换为关联向量，而不是使用模型的内部嵌入查找矩阵，则这很有用。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
@@ -2791,6 +3088,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*）— 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
@@ -2798,12 +3096,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*）— 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
   id: totrans-454
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）— 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
 - en: '`labels` (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*)
     — Labels for computing the token classification loss. Indices should be in `[0,
     ..., config.num_labels - 1]`.'
@@ -2811,15 +3111,20 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`labels`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`，*可选*）— 用于计算令牌分类损失的标签。索引应在`[0,
+    ..., config.num_labels - 1]`范围内。'
 - en: Returns
   id: totrans-456
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.modeling_outputs.TokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.TokenClassifierOutput)
     or `tuple(torch.FloatTensor)`'
   id: totrans-457
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.TokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.TokenClassifierOutput)
+    或 `tuple(torch.FloatTensor)`'
 - en: A [transformers.modeling_outputs.TokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.TokenClassifierOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -2827,18 +3132,24 @@
   id: totrans-458
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个 [transformers.modeling_outputs.TokenClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.TokenClassifierOutput)
+    或一个 `torch.FloatTensor` 元组（如果传递 `return_dict=False` 或 `config.return_dict=False`）包含根据配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入的不同元素。
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification loss.'
   id: totrans-459
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — 分类损失。'
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.num_labels)`)
     — Classification scores (before SoftMax).'
   id: totrans-460
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logits` (`torch.FloatTensor` of shape `(batch_size, sequence_length, config.num_labels)`)
+    — 分类分数（SoftMax 之前）。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
@@ -2847,12 +3158,16 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, 当传递 `output_hidden_states=True`
+    或 `config.output_hidden_states=True` 时返回) — 形状为 `(batch_size, sequence_length,
+    hidden_size)` 的 `torch.FloatTensor` 元组。'
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
   id: totrans-462
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态以及可选的初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -2860,17 +3175,23 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, 当传递 `output_attentions=True`
+    或 `config.output_attentions=True` 时返回) — 形状为 `(batch_size, num_heads, sequence_length,
+    sequence_length)` 的 `torch.FloatTensor` 元组。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-464
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在注意力 softmax 之后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: The [FunnelForTokenClassification](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForTokenClassification)
     forward method, overrides the `__call__` special method.
   id: totrans-465
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FunnelForTokenClassification](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForTokenClassification)
+    的前向方法覆盖了 `__call__` 特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -2878,10 +3199,12 @@
   id: totrans-466
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用 `Module` 实例，而不是在此处调用，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
 - en: 'Example:'
   id: totrans-467
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE34]'
   id: totrans-468
   prefs: []
@@ -2892,14 +3215,17 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FunnelForQuestionAnswering
 - en: '### `class transformers.FunnelForQuestionAnswering`'
   id: totrans-470
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.FunnelForQuestionAnswering`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1516)'
   id: totrans-471
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1516)'
 - en: '[PRE35]'
   id: totrans-472
   prefs: []
@@ -2909,6 +3235,7 @@
   id: totrans-473
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
@@ -2918,18 +3245,26 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config` ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
+    — 包含模型所有参数的配置类。使用配置文件初始化不会加载与模型相关的权重，只会加载配置。查看 [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    方法以加载模型权重。'
 - en: Funnel Transformer Model with a span classification head on top for extractive
     question-answering tasks like SQuAD (a linear layer on top of the hidden-states
     output to compute `span start logits` and `span end logits`).
   id: totrans-475
   prefs: []
   type: TYPE_NORMAL
+  zh: 在顶部带有跨度分类头的 Funnel Transformer 模型，用于提取式问答任务，如 SQuAD（在隐藏状态输出的顶部有一个线性层，用于计算 `span
+    start logits` 和 `span end logits`）。
 - en: 'The Funnel Transformer model was proposed in [Funnel-Transformer: Filtering
     out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
     by Zihang Dai, Guokun Lai, Yiming Yang, Quoc V. Le.'
   id: totrans-476
   prefs: []
   type: TYPE_NORMAL
+  zh: 'Funnel Transformer 模型是由 Zihang Dai、Guokun Lai、Yiming Yang、Quoc V. Le 在 [Funnel-Transformer:
+    Filtering out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
+    中提出的。'
 - en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
     Check the superclass documentation for the generic methods the library implements
     for all its model (such as downloading or saving, resizing the input embeddings,
@@ -2937,20 +3272,25 @@
   id: totrans-477
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型继承自 [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)。查看超类文档以获取库为所有模型实现的通用方法（如下载或保存、调整输入嵌入、修剪头等）。
 - en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
   id: totrans-478
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型也是 PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    的子类。将其用作常规 PyTorch 模块，并参考 PyTorch 文档以获取有关一般用法和行为的所有相关信息。
 - en: '#### `forward`'
   id: totrans-479
   prefs: []
   type: TYPE_NORMAL
+  zh: '`forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1534)'
   id: totrans-480
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_funnel.py#L1534)'
 - en: '[PRE36]'
   id: totrans-481
   prefs: []
@@ -2960,12 +3300,14 @@
   id: totrans-482
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
     Indices of input sequence tokens in the vocabulary.'
   id: totrans-483
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`）— 词汇表中输入序列标记的索引。'
 - en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
@@ -2974,11 +3316,13 @@
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)获取索引。有关详细信息，请参见[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)和[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)。
 - en: '[What are input IDs?](../glossary#input-ids)'
   id: totrans-485
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是输入ID？](../glossary#input-ids)'
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
@@ -2986,23 +3330,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask`（形状为`(batch_size, sequence_length)`的`torch.FloatTensor`，*可选*）—
+    用于避免在填充标记索引上执行注意力的蒙版。蒙版值在`[0, 1]`中选择：'
 - en: 1 for tokens that are `not masked`,
   id: totrans-487
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 对于那些`未被掩盖`的标记，
 - en: 0 for tokens that are `masked`.
   id: totrans-488
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 对于那些`被掩盖`的标记。
 - en: '[What are attention masks?](../glossary#attention-mask)'
   id: totrans-489
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是注意力蒙版？](../glossary#attention-mask)'
 - en: '`token_type_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Segment token indices to indicate first and second portions of the
     inputs. Indices are selected in `[0, 1]`:'
@@ -3010,23 +3359,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`，*可选*）—
+    段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：'
 - en: 0 corresponds to a *sentence A* token,
   id: totrans-491
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 对应于一个 *句子 A* 的标记，
 - en: 1 corresponds to a *sentence B* token.
   id: totrans-492
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 对应于一个 *句子 B* 的标记。
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
   id: totrans-493
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是标记类型ID？](../glossary#token-type-ids)'
 - en: '`inputs_embeds` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`, *optional*) — Optionally, instead of passing `input_ids` you can
     choose to directly pass an embedded representation. This is useful if you want
@@ -3036,6 +3390,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs_embeds`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`，*可选*）—
+    可选地，您可以选择直接传递嵌入表示，而不是传递`input_ids`。如果您想要更多控制如何将`input_ids`索引转换为相关向量，而不是模型的内部嵌入查找矩阵，则这是有用的。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
@@ -3043,6 +3399,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*）— 是否返回所有注意力层的注意力张量。有关更多详细信息，请参见返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
@@ -3050,12 +3407,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*）— 是否返回所有层的隐藏状态。有关更多详细信息，请参见返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
   id: totrans-497
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）— 是否返回一个[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是一个普通元组。'
 - en: '`start_positions` (`torch.LongTensor` of shape `(batch_size,)`, *optional*)
     — Labels for position (index) of the start of the labelled span for computing
     the token classification loss. Positions are clamped to the length of the sequence
@@ -3065,6 +3424,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`start_positions`（形状为`(batch_size,)`的`torch.LongTensor`，*可选*）— 用于计算标记分类损失的标记范围开始位置的位置（索引）的标签。位置被夹紧到序列的长度（`sequence_length`）。超出序列范围的位置不会被考虑在内以计算损失。'
 - en: '`end_positions` (`torch.LongTensor` of shape `(batch_size,)`, *optional*) —
     Labels for position (index) of the end of the labelled span for computing the
     token classification loss. Positions are clamped to the length of the sequence
@@ -3074,15 +3434,18 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`end_positions`（形状为`(batch_size,)`的`torch.LongTensor`，*可选*）— 用于计算标记范围结束位置的位置（索引）的标签，以计算标记分类损失。位置被夹紧到序列的长度（`sequence_length`）。超出序列范围的位置不会被考虑在内以计算损失。'
 - en: Returns
   id: totrans-500
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回值
 - en: '[transformers.modeling_outputs.QuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.QuestionAnsweringModelOutput)
     or `tuple(torch.FloatTensor)`'
   id: totrans-501
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.QuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.QuestionAnsweringModelOutput)或`tuple(torch.FloatTensor)`'
 - en: A [transformers.modeling_outputs.QuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.QuestionAnsweringModelOutput)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -3090,6 +3453,7 @@
   id: totrans-502
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个[transformers.modeling_outputs.QuestionAnsweringModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.QuestionAnsweringModelOutput)或一个`torch.FloatTensor`元组（如果传递了`return_dict=False`或当`config.return_dict=False`时）包含根据配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入的各种元素。
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Total span extraction loss is the sum of a Cross-Entropy for the
     start and end positions.'
@@ -3097,18 +3461,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`loss`（形状为`(1,)`的`torch.FloatTensor`，*可选*，当提供`labels`时返回）— 总跨度提取损失是开始和结束位置的交叉熵之和。'
 - en: '`start_logits` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`)
     — Span-start scores (before SoftMax).'
   id: totrans-504
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`start_logits`（形状为`(batch_size, sequence_length)`的`torch.FloatTensor`）— 跨度开始分数（SoftMax之前）。'
 - en: '`end_logits` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`)
     — Span-end scores (before SoftMax).'
   id: totrans-505
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`end_logits`（形状为`(batch_size, sequence_length)`的`torch.FloatTensor`）— 跨度结束分数（SoftMax之前）。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
@@ -3117,12 +3484,15 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(torch.FloatTensor)`, *可选*, 当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回)
+    — 形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（如果模型有嵌入层，则为嵌入的输出+每层的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
   id: totrans-507
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态以及可选的初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -3130,17 +3500,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions` (`tuple(torch.FloatTensor)`, *可选*, 当传递`output_attentions=True`或`config.output_attentions=True`时返回)
+    — 形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-509
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在注意力softmax之后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: The [FunnelForQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForQuestionAnswering)
     forward method, overrides the `__call__` special method.
   id: totrans-510
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FunnelForQuestionAnswering](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelForQuestionAnswering)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -3148,10 +3522,12 @@
   id: totrans-511
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前向传递的方法需要在此函数内定义，但应该在此之后调用`Module`实例，而不是调用此函数，因为前者会处理运行前后处理步骤，而后者会默默地忽略它们。
 - en: 'Example:'
   id: totrans-512
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE37]'
   id: totrans-513
   prefs: []
@@ -3161,19 +3537,23 @@
   id: totrans-514
   prefs: []
   type: TYPE_NORMAL
+  zh: TensorFlow隐藏TensorFlow内容
 - en: TFFunnelBaseModel
   id: totrans-515
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TFFunnelBaseModel
 - en: '### `class transformers.TFFunnelBaseModel`'
   id: totrans-516
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.TFFunnelBaseModel`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_tf_funnel.py#L1216)'
   id: totrans-517
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_tf_funnel.py#L1216)'
 - en: '[PRE38]'
   id: totrans-518
   prefs: []
@@ -3183,6 +3563,7 @@
   id: totrans-519
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` (`XxxConfig`) — Model configuration class with all the parameters
     of the model. Initializing with a config file does not load the weights associated
     with the model, only the configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
@@ -3191,17 +3572,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config` (`XxxConfig`) — 具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只会加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: The base Funnel Transformer Model transformer outputting raw hidden-states without
     upsampling head (also called decoder) or any task-specific head on top.
   id: totrans-521
   prefs: []
   type: TYPE_NORMAL
+  zh: 基础Funnel Transformer模型，输出原始隐藏状态，没有上采样头（也称为解码器）或任何特定任务头。
 - en: 'The Funnel Transformer model was proposed in [Funnel-Transformer: Filtering
     out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
     by Zihang Dai, Guokun Lai, Yiming Yang, Quoc V. Le.'
   id: totrans-522
   prefs: []
   type: TYPE_NORMAL
+  zh: 'Funnel Transformer模型是由Zihang Dai, Guokun Lai, Yiming Yang, Quoc V. Le在[Funnel-Transformer:
+    Filtering out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)中提出的。'
 - en: This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
     Check the superclass documentation for the generic methods the library implements
     for all its model (such as downloading or saving, resizing the input embeddings,
@@ -3209,26 +3594,32 @@
   id: totrans-523
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型继承自[TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel)。查看超类文档以了解库为所有模型实现的通用方法（如下载或保存、调整输入嵌入、修剪头等）。
 - en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
     subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
     for all matter related to general usage and behavior.
   id: totrans-524
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型也是[tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)的子类。将其用作常规的TF
+    2.0 Keras模型，并参考TF 2.0文档以获取有关一般用法和行为的所有相关信息。
 - en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
   id: totrans-525
   prefs: []
   type: TYPE_NORMAL
+  zh: '`transformers`中的TensorFlow模型和层接受两种格式的输入：'
 - en: having all inputs as keyword arguments (like PyTorch models), or
   id: totrans-526
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将所有输入作为关键字参数（类似于PyTorch模型），或
 - en: having all inputs as a list, tuple or dict in the first positional argument.
   id: totrans-527
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将所有输入作为列表、元组或字典的第一个位置参数。
 - en: 'The reason the second format is supported is that Keras methods prefer this
     format when passing inputs to models and layers. Because of this support, when
     using methods like `model.fit()` things should “just work” for you - just pass
@@ -3240,11 +3631,13 @@
   id: totrans-528
   prefs: []
   type: TYPE_NORMAL
+  zh: 支持第二种格式的原因是，Keras方法在将输入传递给模型和层时更喜欢这种格式。由于这种支持，当使用`model.fit()`等方法时，应该“只需传递”输入和标签，`model.fit()`支持的任何格式都可以正常工作！但是，如果要在Keras方法之外使用第二种格式，例如在使用Keras`Functional`API创建自己的层或模型时，有三种可能性可用于收集第一个位置参数中的所有输入张量：
 - en: 'a single Tensor with `input_ids` only and nothing else: `model(input_ids)`'
   id: totrans-529
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 只有`input_ids`的单个张量，没有其他内容：`model(input_ids)`
 - en: 'a list of varying length with one or several input Tensors IN THE ORDER given
     in the docstring: `model([input_ids, attention_mask])` or `model([input_ids, attention_mask,
     token_type_ids])`'
@@ -3252,26 +3645,33 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个长度可变的列表，其中包含按照文档字符串中给定的顺序的一个或多个输入张量：`model([input_ids, attention_mask])`或`model([input_ids,
+    attention_mask, token_type_ids])`
 - en: 'a dictionary with one or several input Tensors associated to the input names
     given in the docstring: `model({"input_ids": input_ids, "token_type_ids": token_type_ids})`'
   id: totrans-531
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '一个字典，其中包含与文档字符串中给定的输入名称相关联的一个或多个输入张量：`model({"input_ids": input_ids, "token_type_ids":
+    token_type_ids})`'
 - en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
     then you don’t need to worry about any of this, as you can just pass inputs like
     you would to any other Python function!
   id: totrans-532
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，当使用[子类化](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)创建模型和层时，您无需担心这些问题，因为您可以像对待任何其他Python函数一样传递输入！
 - en: '#### `call`'
   id: totrans-533
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `call`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_tf_funnel.py#L1228)'
   id: totrans-534
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_tf_funnel.py#L1228)'
 - en: '[PRE39]'
   id: totrans-535
   prefs: []
@@ -3281,12 +3681,14 @@
   id: totrans-536
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`Numpy array` or `tf.Tensor` of shape `(batch_size, sequence_length)`)
     — Indices of input sequence tokens in the vocabulary.'
   id: totrans-537
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids`（形状为`(batch_size, sequence_length)`的`Numpy`数组或`tf.Tensor`）— 词汇表中输入序列标记的索引。'
 - en: Indices can be obtained using [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
     and [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
@@ -3295,11 +3697,13 @@
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)获取索引。有关详细信息，请参阅[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)和[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)。
 - en: '[What are input IDs?](../glossary#input-ids)'
   id: totrans-539
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是输入ID？](../glossary#input-ids)'
 - en: '`attention_mask` (`Numpy array` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
@@ -3307,23 +3711,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask`（形状为`(batch_size, sequence_length)`的`Numpy`数组或`tf.Tensor`，*可选*）—
+    用于避免在填充标记索引上执行注意力的掩码。掩码值在`[0, 1]`中选择：'
 - en: 1 for tokens that are `not masked`,
   id: totrans-541
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 对应于未被“masked”掉的标记，
 - en: 0 for tokens that are `masked`.
   id: totrans-542
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于被“masked”掉的标记。
 - en: '[What are attention masks?](../glossary#attention-mask)'
   id: totrans-543
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是注意力掩码？](../glossary#attention-mask)'
 - en: '`token_type_ids` (`Numpy array` or `tf.Tensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Segment token indices to indicate first and second portions of the
     inputs. Indices are selected in `[0, 1]`:'
@@ -3331,23 +3740,28 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`token_type_ids`（形状为`(batch_size, sequence_length)`的`Numpy`数组或`tf.Tensor`，*可选*）—
+    段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：'
 - en: 0 corresponds to a *sentence A* token,
   id: totrans-545
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0 对应于 *句子 A* 标记，
 - en: 1 corresponds to a *sentence B* token.
   id: totrans-546
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1 对应于 *句子 B* 标记。
 - en: '[What are token type IDs?](../glossary#token-type-ids)'
   id: totrans-547
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '[什么是标记类型ID？](../glossary#token-type-ids)'
 - en: '`inputs_embeds` (`tf.Tensor` of shape `(batch_size, sequence_length, hidden_size)`,
     *optional*) — Optionally, instead of passing `input_ids` you can choose to directly
     pass an embedded representation. This is useful if you want more control over
@@ -3357,6 +3771,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs_embeds`（形状为`(batch_size, sequence_length, hidden_size)`的`tf.Tensor`，*可选*）—
+    可选地，您可以选择直接传递嵌入表示，而不是传递`input_ids`。如果您想要更多控制如何将`input_ids`索引转换为相关向量，而不是模型内部的嵌入查找矩阵，则这很有用。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail. This argument can be used only in eager mode, in graph mode the value
@@ -3365,6 +3781,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*）— 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量下的`attentions`。此参数仅可在急切模式下使用，在图模式下将使用配置中的值。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail. This argument can be used only in eager mode, in graph mode the value
@@ -3373,6 +3790,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*）— 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量下的`hidden_states`。此参数仅可在急切模式下使用，在图模式下将使用配置中的值。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple. This argument can be used in eager mode, in graph mode
     the value will always be set to True.'
@@ -3380,6 +3798,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）— 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。此参数可在急切模式下使用，在图模式下该值将始终设置为True。'
 - en: '`training` (`bool`, *optional*, defaults to `False`) — Whether or not to use
     the model in training mode (some modules like dropout modules have different behaviors
     between training and evaluation).'
@@ -3387,15 +3806,18 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`training`（`bool`，*可选*，默认为`False`）— 是否在训练模式下使用模型（一些模块如dropout模块在训练和评估之间有不同的行为）。'
 - en: Returns
   id: totrans-553
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)
     or `tuple(tf.Tensor)`'
   id: totrans-554
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)或`tuple(tf.Tensor)`'
 - en: A [transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)
     or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig))
@@ -3403,12 +3825,15 @@
   id: totrans-555
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_tf_outputs.TFBaseModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutput)或一个`tf.Tensor`元组（如果传递了`return_dict=False`或`config.return_dict=False`时）包含根据配置（[FunnelConfig](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.FunnelConfig)）和输入的各种元素。'
 - en: '`last_hidden_state` (`tf.Tensor` of shape `(batch_size, sequence_length, hidden_size)`)
     — Sequence of hidden-states at the output of the last layer of the model.'
   id: totrans-556
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`last_hidden_state`（形状为`(batch_size, sequence_length, hidden_size)`的`tf.Tensor`）—
+    模型最后一层的隐藏状态序列。'
 - en: '`hidden_states` (`tuple(tf.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
     for the output of the embeddings + one for the output of each layer) of shape
@@ -3713,12 +4138,15 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(tf.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）
+    — 形状为`(batch_size, sequence_length, hidden_size)`的`tf.Tensor`元组（一个用于嵌入的输出 + 一个用于每层的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the initial embedding
     outputs.
   id: totrans-608
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 每层模型的隐藏状态以及初始嵌入输出。
 - en: '`attentions` (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
     for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
@@ -3726,17 +4154,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(tf.Tensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）
+    — 形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`tf.Tensor`元组（每层一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
   id: totrans-610
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在注意力softmax之后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: The [TFFunnelModel](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.TFFunnelModel)
     forward method, overrides the `__call__` special method.
   id: totrans-611
   prefs: []
   type: TYPE_NORMAL
+  zh: '[TFFunnelModel](/docs/transformers/v4.37.2/en/model_doc/funnel#transformers.TFFunnelModel)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
@@ -3744,10 +4176,12 @@
   id: totrans-612
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管前向传递的配方需要在此函数中定义，但应该在此之后调用`Module`实例，而不是在此之后调用，因为前者负责运行预处理和后处理步骤，而后者则默默地忽略它们。
 - en: 'Example:'
   id: totrans-613
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE43]'
   id: totrans-614
   prefs: []
@@ -3758,14 +4192,17 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TFFunnelModelForPreTraining
 - en: '### `class transformers.TFFunnelForPreTraining`'
   id: totrans-616
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.TFFunnelForPreTraining`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_tf_funnel.py#L1331)'
   id: totrans-617
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/funnel/modeling_tf_funnel.py#L1331)'
 - en: '[PRE44]'
   id: totrans-618
   prefs: []
@@ -3775,6 +4212,7 @@
   id: totrans-619
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` (`XxxConfig`) — Model configuration class with all the parameters
     of the model. Initializing with a config file does not load the weights associated
     with the model, only the configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
@@ -3783,17 +4221,20 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config`（`XxxConfig`） — 包含模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只会加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: Funnel model with a binary classification head on top as used during pretraining
     for identifying generated tokens.
   id: totrans-621
   prefs: []
   type: TYPE_NORMAL
+  zh: 在顶部带有二元分类头的漏斗模型，用于在预训练期间识别生成的标记。
 - en: 'The Funnel Transformer model was proposed in [Funnel-Transformer: Filtering
     out Sequential Redundancy for Efficient Language Processing](https://arxiv.org/abs/2006.03236)
     by Zihang Dai, Guokun Lai, Yiming Yang, Quoc V. Le.'
   id: totrans-622
   prefs: []
   type: TYPE_NORMAL
+  zh: 漏斗变压器模型是由Zihang Dai、Guokun Lai、Yiming Yang、Quoc V. Le在[漏斗变压器：过滤顺序冗余以实现高效语言处理](https://arxiv.org/abs/2006.03236)中提出的。
 - en: This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
     Check the superclass documentation for the generic methods the library implements
     for all its model (such as downloading or saving, resizing the input embeddings,
@@ -3801,26 +4242,32 @@
   id: totrans-623
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型继承自[TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel)。查看超类文档，了解库为其所有模型实现的通用方法（例如下载或保存、调整输入嵌入、修剪头等）。
 - en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
     subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
     for all matter related to general usage and behavior.
   id: totrans-624
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型还是[tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)的子类。将其用作常规的TF
+    2.0 Keras模型，并参考TF 2.0文档，了解与一般用法和行为相关的所有事项。
 - en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
   id: totrans-625
   prefs: []
   type: TYPE_NORMAL
+  zh: '`transformers`中的TensorFlow模型和层接受两种格式的输入：'
 - en: having all inputs as keyword arguments (like PyTorch models), or
   id: totrans-626
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将所有输入作为关键字参数（类似于PyTorch模型），或者
 - en: having all inputs as a list, tuple or dict in the first positional argument.
   id: totrans-627
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将所有输入作为列表、元组或字典放在第一个位置参数中。
 - en: 'The reason the second format is supported is that Keras methods prefer this
     format when passing inputs to models and layers. Because of this support, when
     using methods like `model.fit()` things should “just work” for you - just pass
@@ -3832,11 +4279,14 @@
   id: totrans-628
   prefs: []
   type: TYPE_NORMAL
+  zh: 支持第二种格式的原因是Keras方法在将输入传递给模型和层时更喜欢这种格式。由于有此支持，当使用`model.fit()`等方法时，应该可以“正常工作”
+    - 只需以`model.fit()`支持的任何格式传递输入和标签！但是，如果您想在Keras方法之外使用第二种格式，例如在使用Keras`Functional`API创建自己的层或模型时，有三种可能性可用于收集第一个位置参数中的所有输入张量：
 - en: 'a single Tensor with `input_ids` only and nothing else: `model(input_ids)`'
   id: totrans-629
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 仅使用`input_ids`作为输入并且没有其他内容：`model(input_ids)`
 - en: 'a list of varying length with one or several input Tensors IN THE ORDER given
     in the docstring: `model([input_ids, attention_mask])` or `model([input_ids, attention_mask,
     token_type_ids])`'
@@ -3844,12 +4294,16 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 按照文档字符串中给定的顺序，使用长度可变的列表，其中包含一个或多个输入张量：`model([input_ids, attention_mask])`或`model([input_ids,
+    attention_mask, token_type_ids])`
 - en: 'a dictionary with one or several input Tensors associated to the input names
     given in the docstring: `model({"input_ids": input_ids, "token_type_ids": token_type_ids})`'
   id: totrans-631
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '一个与文档字符串中给定的输入名称相关联的包含一个或多个输入张量的字典：`model({"input_ids": input_ids, "token_type_ids":
+    token_type_ids})`'
 - en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
     then you don’t need to worry about any of this, as you can just pass inputs like
     you would to any other Python function!
