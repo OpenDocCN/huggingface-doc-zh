@@ -1,51 +1,62 @@
 - en: Denoising Diffusion Policy Optimization
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 去噪扩散策略优化
 - en: 'Original text: [https://huggingface.co/docs/trl/ddpo_trainer](https://huggingface.co/docs/trl/ddpo_trainer)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/trl/ddpo_trainer](https://huggingface.co/docs/trl/ddpo_trainer)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The why
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 为什么
 - en: '| Before | After DDPO finetuning |'
+  id: totrans-4
   prefs: []
   type: TYPE_TB
+  zh: '| 之前 | DDPO微调后 |'
 - en: '| --- | --- |'
+  id: totrans-5
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| ![](../Images/525575530cb9dca21650d9a9d0230bb5.png) | ![](../Images/5aaa7a517c219593f5db799d22e1f5c5.png)
     |'
+  id: totrans-6
   prefs: []
   type: TYPE_TB
+  zh: '| ![](../Images/525575530cb9dca21650d9a9d0230bb5.png) | ![](../Images/5aaa7a517c219593f5db799d22e1f5c5.png)
+    |'
 - en: '| ![](../Images/3a67f4b5f0d4d18ec14b68d5170d49c1.png) | ![](../Images/fdea8c20cd6ed6160a69e7f1d333f603.png)
     |'
+  id: totrans-7
   prefs: []
   type: TYPE_TB
+  zh: '| ![](../Images/3a67f4b5f0d4d18ec14b68d5170d49c1.png) | ![](../Images/fdea8c20cd6ed6160a69e7f1d333f603.png)
+    |'
 - en: '| ![](../Images/6358a27aa434a34fc1023c8c109cf857.png) | ![](../Images/b70dd11c1c6d0db89f6a9a786d7044d4.png)
     |'
+  id: totrans-8
   prefs: []
   type: TYPE_TB
+  zh: '| ![](../Images/6358a27aa434a34fc1023c8c109cf857.png) | ![](../Images/b70dd11c1c6d0db89f6a9a786d7044d4.png)
+    |'
 - en: Getting started with Stable Diffusion finetuning with reinforcement learning
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 开始使用稳定扩散微调与强化学习
 - en: The machinery for finetuning of Stable Diffusion models with reinforcement learning
     makes heavy use of HuggingFace’s `diffusers` library. A reason for stating this
     is that getting started requires a bit of familiarity with the `diffusers` library
@@ -53,8 +64,10 @@
     (`diffusers` library), there isn’t a `Pipeline` nor a `Scheduler` instance that
     is suitable for finetuning with reinforcement learning. Some adjustments need
     to made.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用强化学习对稳定扩散模型进行微调的机制大量使用了HuggingFace的`diffusers`库。提出这一点的原因是，入门需要对`diffusers`库的概念有一定的了解，主要是两个概念-流水线和调度器。直接使用（`diffusers`库），没有适用于强化学习微调的`Pipeline`或`Scheduler`实例。需要进行一些调整。
 - en: 'There is a pipeline interface that is provided by this library that is required
     to be implemented to be used with the `DDPOTrainer`, which is the main machinery
     for fine-tuning Stable Diffusion with reinforcement learning. **Note: Only the
@@ -62,8 +75,10 @@
     implementation of this interface that you can use out of the box. Assuming the
     default implementation is sufficient and/or to get things moving, refer to the
     training example alongside this guide.'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 此库提供了一个流水线接口，必须实现该接口才能与`DDPOTrainer`一起使用，后者是用于使用强化学习微调稳定扩散的主要机制。**注意：目前仅支持StableDiffusion架构。**有一个默认实现的接口，您可以直接使用。假设默认实现足够好和/或为了让事情顺利进行，请参考本指南旁边的训练示例。
 - en: The point of the interface is to fuse the pipeline and the scheduler into one
     object which allows for minimalness in terms of having the constraints all in
     one place. The interface was designed in hopes of catering to pipelines and schedulers
@@ -72,143 +87,207 @@
     redundant given that the raw scheduler is accessible via the interface but this
     is the only way to constrain the scheduler step output to an output type befitting
     of the algorithm at hand (DDPO).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 接口的目的是将流水线和调度器融合为一个对象，从而在一个地方实现最小化约束。该接口的设计是希望能够满足此存储库中以及其他地方的流水线和调度器的需求。此外，调度器步骤是此流水线接口的一种方法，鉴于原始调度器可通过接口访问，这可能看起来有些多余，但这是约束调度器步骤输出为适合手头算法（DDPO）的输出类型的唯一方法。
 - en: For a more detailed look into the interface and the associated default implementation,
     go [here](https://github.com/lvwerra/trl/tree/main/trl/models/modeling_sd_base.py)
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关接口和相关默认实现的更详细信息，请访问[此处](https://github.com/lvwerra/trl/tree/main/trl/models/modeling_sd_base.py)
 - en: Note that the default implementation has a LoRA implementation path and a non-LoRA
     based implementation path. The LoRA flag enabled by default and this can be turned
     off by passing in the flag to do so. LORA based training is faster and the LORA
     associated model hyperparameters responsible for model convergence aren’t as finicky
     as non-LORA based training.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，默认实现具有基于LoRA的实现路径和非LoRA的实现路径。默认情况下启用LoRA标志，可以通过传递标志来关闭。基于LORA的训练速度更快，负责模型收敛的LORA相关模型超参数不像非LORA的训练那样挑剔。
 - en: Also in addition, there is the expectation of providing a reward function and
     a prompt function. The reward function is used to evaluate the generated images
     and the prompt function is used to generate the prompts that are used to generate
     the images.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，还期望提供奖励函数和提示函数。奖励函数用于评估生成的图像，提示函数用于生成用于生成图像的提示。
 - en: Getting started with examples/scripts/ddpo.py
+  id: totrans-16
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 开始使用示例/脚本/ddpo.py
 - en: The `ddpo.py` script is a working example of using the `DDPO` trainer to finetune
     a Stable Diffusion model. This example explicitly configures a small subset of
     the overall parameters associated with the config object (`DDPOConfig`).
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ddpo.py`脚本是使用`DDPO`训练器对稳定扩散模型进行微调的工作示例。此示例明确配置了与配置对象（`DDPOConfig`）相关的整体参数的一个小子集。'
 - en: '**Note:** one A100 GPU is recommended to get this running. Anything below a
     A100 will not be able to run this example script and even if it does via relatively
     smaller sized parameters, the results will most likely be poor.'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意：建议使用一个A100 GPU来运行此程序。任何低于A100的GPU都无法运行此示例脚本，即使通过相对较小的参数运行，结果很可能会很差。
 - en: Almost every configuration parameter has a default. There is only one commandline
     flag argument that is required of the user to get things up and running. The user
     is expected to have a [huggingface user access token](https://huggingface.co/docs/hub/security-tokens)
     that will be used to upload the model post finetuning to HuggingFace hub. The
     following bash command is to be entered to get things running
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 几乎每个配置参数都有一个默认值。用户只需要一个命令行标志参数即可使事情运转起来。用户需要拥有一个[huggingface用户访问令牌](https://huggingface.co/docs/hub/security-tokens)，该令牌将用于在微调后将模型上传到HuggingFace
+    hub。需要输入以下bash命令来使事情运转起来
 - en: '[PRE0]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: To obtain the documentation of `stable_diffusion_tuning.py`, please run `python
     stable_diffusion_tuning.py --help`
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 要获取`stable_diffusion_tuning.py`的文档，请运行`python stable_diffusion_tuning.py --help`
 - en: The following are things to keep in mind (The code checks this for you as well)
     in general while configuring the trainer (beyond the use case of using the example
     script)
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是在配置训练器时要记住的事项（代码也会为您检查），除了使用示例脚本的用例之外
 - en: The configurable sample batch size (`--ddpo_config.sample_batch_size=6`) should
     be greater than or equal to the configurable training batch size (`--ddpo_config.train_batch_size=3`)
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可配置的样本批量大小（`--ddpo_config.sample_batch_size=6`）应大于或等于可配置的训练批量大小（`--ddpo_config.train_batch_size=3`）
 - en: The configurable sample batch size (`--ddpo_config.sample_batch_size=6`) must
     be divisible by the configurable train batch size (`--ddpo_config.train_batch_size=3`)
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可配置的样本批量大小（`--ddpo_config.sample_batch_size=6`）必须能被可配置的训练批量大小（`--ddpo_config.train_batch_size=3`）整除
 - en: The configurable sample batch size (`--ddpo_config.sample_batch_size=6`) must
     be divisible by both the configurable gradient accumulation steps (`--ddpo_config.train_gradient_accumulation_steps=1`)
     and the configurable accelerator processes count
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可配置的样本批量大小（`--ddpo_config.sample_batch_size=6`）必须能被可配置的梯度累积步数（`--ddpo_config.train_gradient_accumulation_steps=1`）和可配置的加速器进程计数整除
 - en: Setting up the image logging hook function
+  id: totrans-26
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 设置图像记录挂钩函数
 - en: Expect the function to be given a list of lists of the form
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 期望函数接收一个形式为列表的列表
 - en: '[PRE1]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: and `image`, `prompt`, `prompt_metadata`, `rewards`, `reward_metadata` are batched.
     The last list in the lists of lists represents the last sample batch. You are
     likely to want to log this one While you are free to log however you want the
     use of `wandb` or `tensorboard` is recommended.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 和`image`、`prompt`、`prompt_metadata`、`rewards`、`reward_metadata`是批量处理的。列表中的最后一个列表代表最后的样本批次。您可能想要记录这个。虽然您可以自由记录，但建议使用`wandb`或`tensorboard`。
 - en: Key terms
+  id: totrans-30
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 关键术语
 - en: '`rewards` : The rewards/score is a numerical associated with the generated
     image and is key to steering the RL process'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`rewards`：奖励/分数是与生成的图像相关联的数字，是引导RL过程的关键'
 - en: '`reward_metadata` : The reward metadata is the metadata associated with the
     reward. Think of this as extra information payload delivered alongside the reward'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`reward_metadata`：奖励元数据是与奖励相关联的元数据。将其视为随着奖励一起传递的额外信息负载'
 - en: '`prompt` : The prompt is the text that is used to generate the image'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prompt`：提示是用于生成图像的文本'
 - en: '`prompt_metadata` : The prompt metadata is the metadata associated with the
     prompt. A situation where this will not be empty is when the reward model comprises
     of a [`FLAVA`](https://huggingface.co/docs/transformers/model_doc/flava) setup
     where questions and ground answers (linked to the generated image) are expected
     with the generated image (See here: [https://github.com/kvablack/ddpo-pytorch/blob/main/ddpo_pytorch/rewards.py#L45](https://github.com/kvablack/ddpo-pytorch/blob/main/ddpo_pytorch/rewards.py#L45))'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`prompt_metadata`：提示元数据是与提示相关联的元数据。当奖励模型包含一个[`FLAVA`](https://huggingface.co/docs/transformers/model_doc/flava)设置时，预期的问题和地面答案（与生成的图像相关联）将与生成的图像一起出现（请参阅这里：[https://github.com/kvablack/ddpo-pytorch/blob/main/ddpo_pytorch/rewards.py#L45](https://github.com/kvablack/ddpo-pytorch/blob/main/ddpo_pytorch/rewards.py#L45)）'
 - en: '`image` : The image generated by the Stable Diffusion model'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image`：由稳定扩散模型生成的图像'
 - en: Example code for logging sampled images with `wandb` is given below.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是使用`wandb`记录采样图像的示例代码。
 - en: '[PRE2]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Using the finetuned model
+  id: totrans-38
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用微调模型
 - en: Assuming you’ve done with all the epochs and have pushed up your model to the
     hub, you can use the finetuned model as follows
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您已经完成了所有的时代，并且已经将您的模型推送到了hub，您可以按如下方式使用微调模型
 - en: '[PRE3]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Credits
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 积分
 - en: This work is heavily influenced by the repo [here](https://github.com/kvablack/ddpo-pytorch)
     and the associated paper [Training Diffusion Models with Reinforcement Learning
     by Kevin Black, Michael Janner, Yilan Du, Ilya Kostrikov, Sergey Levine](https://arxiv.org/abs/2305.13301).
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 这项工作受到了仓库[这里](https://github.com/kvablack/ddpo-pytorch)和相关论文[使用强化学习训练扩散模型，作者为Kevin
+    Black, Michael Janner, Yilan Du, Ilya Kostrikov, Sergey Levine](https://arxiv.org/abs/2305.13301)的重大影响。
