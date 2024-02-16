@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 自定义工具和提示
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/custom_tools](https://huggingface.co/docs/transformers/v4.37.2/en/custom_tools)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/custom_tools](https://huggingface.co/docs/transformers/v4.37.2/en/custom_tools)
 - en: null
   id: totrans-2
   prefs: []
@@ -17,37 +19,44 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您不了解 transformers 上下文中的工具和代理是什么，我们建议您先阅读[Transformers Agents](transformers_agents)页面。
 - en: Transformers Agents is an experimental API that is subject to change at any
     time. Results returned by the agents can vary as the APIs or underlying models
     are prone to change.
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: Transformers Agents 是一个实验性 API，随时可能发生变化。代理返回的结果可能会有所不同，因为 API 或底层模型可能会发生变化。
 - en: 'Creating and using custom tools and prompts is paramount to empowering the
     agent and having it perform new tasks. In this guide we’ll take a look at:'
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建和使用自定义工具和提示对于赋予代理能力并使其执行新任务至关重要。在本指南中，我们将看一下：
 - en: How to customize the prompt
   id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如何自定义提示
 - en: How to use custom tools
   id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如何使用自定义工具
 - en: How to create custom tools
   id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如何创建自定义工具
 - en: Customizing the prompt
   id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 自定义提示
 - en: As explained in [Transformers Agents](transformers_agents) agents can run in
     [run()](/docs/transformers/v4.37.2/en/main_classes/agent#transformers.Agent.run)
     and [chat()](/docs/transformers/v4.37.2/en/main_classes/agent#transformers.Agent.chat)
@@ -60,22 +69,28 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 如[Transformers Agents](transformers_agents)中所解释的，代理可以在[run()](/docs/transformers/v4.37.2/en/main_classes/agent#transformers.Agent.run)和[chat()](/docs/transformers/v4.37.2/en/main_classes/agent#transformers.Agent.chat)模式下运行。`run`
+    和 `chat` 模式都基于相同的逻辑。驱动代理的语言模型是基于一个长提示进行条件化，并通过生成下一个标记来完成提示，直到达到停止标记。两种模式之间唯一的区别是，在
+    `chat` 模式期间，提示会扩展为先前用户输入和模型生成。这使得代理可以访问过去的交互，似乎给代理一定的记忆。
 - en: Structure of the prompt
   id: totrans-11
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 提示的结构
 - en: Let’s take a closer look at how the prompt is structured to understand how it
     can be best customized. The prompt is structured broadly into four parts.
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们更仔细地看一下提示的结构，以了解如何最好地定制它。提示大体上分为四个部分。
 - en: 'Introduction: how the agent should behave, explanation of the concept of tools.'
   id: totrans-13
   prefs:
   - PREF_UL
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 介绍：代理应该如何行为，工具概念的解释。
 - en: Description of all the tools. This is defined by a `<<all_tools>>` token that
     is dynamically replaced at runtime with the tools defined/chosen by the user.
   id: totrans-14
@@ -83,59 +98,72 @@
   - PREF_UL
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 所有工具的描述。这由一个 `<<all_tools>>` 标记定义，它在运行时动态替换为用户定义/选择的工具。
 - en: A set of examples of tasks and their solution
   id: totrans-15
   prefs:
   - PREF_UL
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 一组任务及其解决方案的示例
 - en: Current example, and request for solution.
   id: totrans-16
   prefs:
   - PREF_UL
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 当前示例和解决方案请求。
 - en: 'To better understand each part, let’s look at a shortened version of how the
     `run` prompt can look like:'
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了更好地理解每个部分，让我们看一下 `run` 提示的缩短版本可能是什么样子：
 - en: '[PRE0]py'
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE0]py'
 - en: translated_question = translator(question=question, src_lang="French", tgt_lang="English")
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: translated_question = translator(question=question, src_lang="French", tgt_lang="English")
 - en: print(f"The translated question is {translated_question}.")
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: print(f"翻译后的问题是 {translated_question}。")
 - en: answer = image_qa(image=image, question=translated_question)
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: answer = image_qa(image=image, question=translated_question)
 - en: print(f"The answer is {answer}")
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: print(f"答案是 {answer}")
 - en: '[PRE1]py'
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE1]py'
 - en: answer = document_qa(document, question="What is the oldest person?")
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: answer = document_qa(document, question="最年长的人是谁？")
 - en: print(f"The answer is {answer}.")
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: print(f"答案是 {answer}。")
 - en: image = image_generator("A banner showing " + answer)
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: image = image_generator("显示 " + answer + " 的横幅")
 - en: '[PRE2]'
   id: totrans-27
   prefs: []
@@ -147,6 +175,7 @@
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 介绍（“工具：”之前的文本）精确解释了模型应该如何行为以及它应该做什么。这部分很可能不需要定制，因为代理应该始终以相同的方式行为。
 - en: 'The second part (the bullet points below *“Tools”*) is dynamically added upon
     calling `run` or `chat`. There are exactly as many bullet points as there are
     tools in `agent.toolbox` and each bullet point consists of the name and description
@@ -154,6 +183,7 @@
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二部分（“工具”下面的项目符号）在调用 `run` 或 `chat` 时动态添加。`agent.toolbox` 中有多少工具，就有多少项目符号，每个项目符号包括工具的名称和描述：
 - en: '[PRE3]'
   id: totrans-30
   prefs: []
@@ -164,6 +194,7 @@
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们通过加载 document_qa 工具并打印出名称和描述来快速验证这一点。
 - en: '[PRE4]'
   id: totrans-32
   prefs: []
@@ -173,6 +204,7 @@
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 这给出了：
 - en: '[PRE5]'
   id: totrans-34
   prefs: []
@@ -184,6 +216,7 @@
   id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以看到工具名称简短而准确。描述包括两部分，第一部分解释工具的功能，第二部分说明预期的输入参数和返回值。
 - en: A good tool name and tool description are very important for the agent to correctly
     use it. Note that the only information the agent has about the tool is its name
     and description, so one should make sure that both are precisely written and match
@@ -193,12 +226,14 @@
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个好的工具名称和工具描述对于代理正确使用它非常重要。请注意，代理对于工具的唯一信息是其名称和描述，因此应确保两者都写得准确，并与工具箱中现有工具的风格匹配。特别要确保描述中提到所有预期的参数名称，以代码样式列出，以及预期的类型和它们的描述。
 - en: Check the naming and description of the curated Transformers tools to better
     understand what name and description a tool is expected to have. You can see all
     tools with the `Agent.toolbox` property.
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 检查精心策划的 Transformers 工具的命名和描述，以更好地了解工具应该具有的名称和描述。您可以通过 `Agent.toolbox` 属性查看所有工具。
 - en: The third part includes a set of curated examples that show the agent exactly
     what code it should produce for what kind of user request. The large language
     models empowering the agent are extremely good at recognizing patterns in a prompt
@@ -208,26 +243,32 @@
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三部分包括一组精心策划的示例，向代理展示它应该为何种用户请求生成什么样的代码。赋予代理力量的大型语言模型非常擅长识别提示中的模式，并使用新数据重复该模式。因此，非常重要的是示例以最大化代理生成正确可执行代码的可能性的方式编写。
 - en: 'Let’s have a look at one example:'
   id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一个例子：
 - en: '[PRE6]py'
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE6]py'
 - en: answer = document_qa(document, question="What is the oldest person?")
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: answer = document_qa(document, question="What is the oldest person?")
 - en: print(f"The answer is {answer}.")
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: print(f"答案是 {answer}。")
 - en: image = image_generator("A banner showing " + answer)
   id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: image = image_generator("显示" + answer + "的横幅")
 - en: '[PRE7]'
   id: totrans-44
   prefs: []
@@ -240,6 +281,7 @@
   id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '模型被提示重复的模式有三部分：任务陈述，代理解释其打算做什么，最后是生成的代码。提示中的每个示例都具有这个确切的模式，从而确保代理在生成新标记时会重现完全相同的模式。 '
 - en: The prompt examples are curated by the Transformers team and rigorously evaluated
     on a set of [problem statements](https://github.com/huggingface/transformers/blob/main/src/transformers/tools/evaluate_agent.py)
     to ensure that the agent’s prompt is as good as possible to solve real use cases
@@ -247,10 +289,12 @@
   id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示示例由Transformers团队精心策划，并在一组[问题陈述](https://github.com/huggingface/transformers/blob/main/src/transformers/tools/evaluate_agent.py)上进行严格评估，以确保代理的提示尽可能好地解决代理的真实用例。
 - en: 'The final part of the prompt corresponds to:'
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示的最后部分对应于：
 - en: '[PRE8]'
   id: totrans-48
   prefs: []
@@ -262,6 +306,7 @@
   id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 是代理被要求完成的最终未完成示例。未完成的示例是根据实际用户输入动态创建的。对于上面的示例，用户运行了：
 - en: '[PRE9]'
   id: totrans-50
   prefs: []
@@ -275,43 +320,53 @@
   id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 用户输入 - *即*任务：“给我画一幅河流和湖泊的图片”被转换为提示模板：“任务：<task> \n\n 我将使用以下内容”。这句话构成了代理所依赖的提示的最后几行，因此强烈影响代理完成示例的方式与之前的示例完全相同。
 - en: 'Without going into too much detail, the chat template has the same prompt structure
     with the examples having a slightly different style, *e.g.*:'
   id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 不要深入细节，聊天模板具有相同的提示结构，示例具有稍微不同的风格，*例如*：
 - en: '[PRE10]py'
   id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE10]py'
 - en: answer = image_qa(text=question, image=image)
   id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: answer = image_qa(text=question, image=image)
 - en: print(f"The answer is {answer}")
   id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 打印(f"答案是 {answer}")
 - en: '[PRE11]py'
   id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE11]py'
 - en: translated_question = translator(question=question, src_lang="French", tgt_lang="English")
   id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: translated_question = translator(question=question, src_lang="French", tgt_lang="English")
 - en: print(f"The translated question is {translated_question}.")
   id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 打印(f"翻译后的问题是 {translated_question}。")
 - en: answer = image_qa(text=translated_question, image=image)
   id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: answer = image_qa(text=translated_question, image=image)
 - en: print(f"The answer is {answer}")
   id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 打印(f"答案是 {answer}")
 - en: '[PRE12]'
   id: totrans-61
   prefs: []
@@ -328,11 +383,13 @@
   id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 与`run`提示的示例相反，每个`chat`提示示例都有一个或多个*人类*和*助手*之间的交流。每个交流的结构与`run`提示的示例类似。用户的输入附加在*人类:*后面，代理被提示首先生成需要完成的内容，然后再生成代码。一个交流可以基于先前的交流，因此允许用户参考先前的交流，就像用户上面的输入“我尝试**这**段代码”引用了代理先前生成的代码一样。
 - en: 'Upon running `.chat`, the user’s input or *task* is cast into an unfinished
     example of the form:'
   id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 运行`.chat`后，用户的输入或*任务*被转换为一个未完成的示例，形式如下：
 - en: '[PRE13]'
   id: totrans-64
   prefs: []
@@ -344,22 +401,26 @@
   id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 代理完成。与`run`命令相反，`chat`命令会将已完成的示例附加到提示中，从而为下一个`chat`轮提供更多上下文。
 - en: Great now that we know how the prompt is structured, let’s see how we can customize
     it!
   id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们知道了提示的结构，让我们看看如何自定义它！
 - en: Writing good user inputs
   id: totrans-67
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 编写良好的用户输入
 - en: While large language models are getting better and better at understanding users’
     intentions, it helps enormously to be as precise as possible to help the agent
     pick the correct task. What does it mean to be as precise as possible?
   id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然大型语言模型在理解用户意图方面变得越来越好，但尽可能准确地帮助代理选择正确的任务会极大地有所帮助。什么是尽可能准确？
 - en: The agent sees a list of tool names and their description in its prompt. The
     more tools are added the more difficult it becomes for the agent to choose the
     correct tool and it’s even more difficult to choose the correct sequences of tools
@@ -368,6 +429,7 @@
   id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 代理在其提示中看到一系列工具名称及其描述。添加的工具越多，代理选择正确工具的难度就越大，选择正确的工具运行的顺序也变得更加困难。让我们看一个常见的失败案例，这里我们只返回分析代码。
 - en: '[PRE14]'
   id: totrans-70
   prefs: []
@@ -377,6 +439,7 @@
   id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 给出：
 - en: '[PRE15]'
   id: totrans-72
   prefs: []
@@ -389,6 +452,7 @@
   id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 这可能不是我们想要的。相反，更有可能的是我们希望生成一棵树的图像。为了更多地引导代理程序使用特定工具，因此使用工具名称和描述中存在的重要关键词可能非常有帮助。让我们看一看。
 - en: '[PRE16]'
   id: totrans-74
   prefs: []
@@ -405,6 +469,7 @@
   id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 名称和描述使用了关键词“图像”、“提示”、“创建”和“生成”。在这里使用这些词可能会更有效。让我们稍微完善一下我们的提示。
 - en: '[PRE18]'
   id: totrans-77
   prefs: []
@@ -414,6 +479,7 @@
   id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 给出：
 - en: '[PRE19]'
   id: totrans-79
   prefs: []
@@ -426,11 +492,13 @@
   id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 好多了！这看起来更像我们想要的。简而言之，当您注意到代理程序在正确将您的任务映射到正确的工具时遇到困难时，请尝试查找工具名称和描述的最相关关键词，并尝试用它来完善您的任务请求。
 - en: Customizing the tool descriptions
   id: totrans-81
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 自定义工具描述
 - en: As we’ve seen before the agent has access to each of the tools’ names and descriptions.
     The base tools should have very precise names and descriptions, however, you might
     find that it could help to change the the description or name of a tool for your
@@ -440,11 +508,13 @@
   id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们之前所看到的，代理程序可以访问每个工具的名称和描述。基本工具应该具有非常精确的名称和描述，但是，您可能会发现，为了您的特定用例，更改工具的描述或名称可能会有所帮助。当您添加了多个非常相似的工具或者只想将代理程序用于特定领域时，这可能变得尤为重要，例如图像生成和转换。
 - en: A common problem is that the agent confuses image generation with image transformation/modification
     when used a lot for image generation tasks, *e.g.*
   id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个常见问题是，当代理程序在图像生成任务中经常混淆图像生成和图像转换/修改时，*例如*
 - en: '[PRE20]'
   id: totrans-84
   prefs: []
@@ -454,6 +524,7 @@
   id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[PRE21]'
   id: totrans-86
   prefs: []
@@ -465,11 +536,13 @@
   id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 这可能不是我们想要的。看起来代理程序很难理解`image_generator`和`image_transformer`之间的区别，并经常同时使用这两者。
 - en: 'We can help the agent here by changing the tool name and description of `image_transformer`.
     Let’s instead call it `modifier` to disassociate it a bit from “image” and “prompt”:'
   id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以通过更改`image_transformer`的工具名称和描述来帮助代理程序。我们可以将其称为`modifier`，以使其与“图像”和“提示”有些脱离关系：
 - en: '[PRE22]'
   id: totrans-89
   prefs: []
@@ -480,6 +553,7 @@
   id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，“修改”是一个强烈的提示，可以使用新的图像处理器来帮助完成上述提示。让我们再次运行它。
 - en: '[PRE23]'
   id: totrans-91
   prefs: []
@@ -489,6 +563,7 @@
   id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们得到了：
 - en: '[PRE24]'
   id: totrans-93
   prefs: []
@@ -500,6 +575,7 @@
   id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 这绝对更接近我们的想法！但是，我们希望在同一张图片中同时有房子和汽车。将任务更多地转向单张图片生成应该会有所帮助：
 - en: '[PRE25]'
   id: totrans-95
   prefs: []
@@ -517,11 +593,13 @@
   id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于许多用例，代理程序仍然很脆弱，特别是在生成多个对象的图像等稍微复杂的用例中。代理程序本身和基础提示将在未来几个月进一步改进，以确保代理程序对各种用户输入更加稳健。
 - en: Customizing the whole prompt
   id: totrans-98
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 自定义整个提示
 - en: 'To give the user maximum flexibility, the whole prompt template as explained
     in [above](#structure-of-the-prompt) can be overwritten by the user. In this case
     make sure that your custom prompt includes an introduction section, a tool section,
@@ -530,6 +608,7 @@
   id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了给用户最大的灵活性，整个提示模板如上所述可以被用户覆盖。在这种情况下，请确保您的自定义提示包括一个介绍部分、一个工具部分、一个示例部分和一个未完成示例部分。如果您想覆盖`run`提示模板，可以按照以下步骤操作：
 - en: '[PRE27]'
   id: totrans-100
   prefs: []
@@ -541,11 +620,13 @@
   id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 请确保在`template`中的某处定义`<<all_tools>>`字符串和`<<prompt>>`，以便代理程序可以了解可用的工具，并正确插入用户的提示。
 - en: 'Similarly, one can overwrite the `chat` prompt template. Note that the `chat`
     mode always uses the following format for the exchanges:'
   id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，用户可以覆盖`chat`提示模板。请注意，`chat`模式始终使用以下格式进行交流：
 - en: '[PRE28]'
   id: totrans-103
   prefs: []
@@ -557,6 +638,7 @@
   id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，重要的是自定义`chat`提示模板的示例也要使用这种格式。您可以在实例化时覆盖`chat`模板，如下所示。
 - en: '[PRE29]'
   id: totrans-105
   prefs: []
@@ -567,6 +649,7 @@
   id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 请确保在`template`中的某处定义`<<all_tools>>`字符串，以便代理程序可以了解可用的工具。
 - en: In both cases, you can pass a repo ID instead of the prompt template if you
     would like to use a template hosted by someone in the community. The default prompts
     live in [this repo](https://huggingface.co/datasets/huggingface-tools/default-prompts)
@@ -574,36 +657,43 @@
   id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这两种情况下，如果您想使用社区中某人托管的模板，可以传递一个存储库ID而不是提示模板。默认提示位于[此存储库](https://huggingface.co/datasets/huggingface-tools/default-prompts)中作为示例。
 - en: 'To upload your custom prompt on a repo on the Hub and share it with the community
     just make sure:'
   id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在Hub上上传您的自定义提示并与社区共享，请确保：
 - en: to use a dataset repository
   id: totrans-109
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用数据集存储库
 - en: to put the prompt template for the `run` command in a file named `run_prompt_template.txt`
   id: totrans-110
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将`run`命令的提示模板放在名为`run_prompt_template.txt`的文件中
 - en: to put the prompt template for the `chat` command in a file named `chat_prompt_template.txt`
   id: totrans-111
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将`chat`命令的提示模板放在名为`chat_prompt_template.txt`的文件中
 - en: Using custom tools
   id: totrans-112
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用自定义工具
 - en: 'In this section, we’ll be leveraging two existing custom tools that are specific
     to image generation:'
   id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本节中，我们将利用两个现有的特定于图像生成的自定义工具：
 - en: We replace [huggingface-tools/image-transformation](https://huggingface.co/spaces/huggingface-tools/image-transformation),
     with [diffusers/controlnet-canny-tool](https://huggingface.co/spaces/diffusers/controlnet-canny-tool)
     to allow for more image modifications.
@@ -611,17 +701,20 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我们用[diffusers/controlnet-canny-tool](https://huggingface.co/spaces/diffusers/controlnet-canny-tool)替换[huggingface-tools/image-transformation](https://huggingface.co/spaces/huggingface-tools/image-transformation)，以允许进行更多图像修改。
 - en: 'We add a new tool for image upscaling to the default toolbox: [diffusers/latent-upscaler-tool](https://huggingface.co/spaces/diffusers/latent-upscaler-tool)
     replace the existing image-transformation tool.'
   id: totrans-115
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我们向默认工具箱添加一个新的图像升频工具：[diffusers/latent-upscaler-tool](https://huggingface.co/spaces/diffusers/latent-upscaler-tool)替换现有的图像转换工具。
 - en: 'We’ll start by loading the custom tools with the convenient [load_tool()](/docs/transformers/v4.37.2/en/main_classes/agent#transformers.load_tool)
     function:'
   id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将通过方便的[load_tool()](/docs/transformers/v4.37.2/en/main_classes/agent#transformers.load_tool)函数加载自定义工具：
 - en: '[PRE30]'
   id: totrans-117
   prefs: []
@@ -634,6 +727,7 @@
   id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 在向代理添加自定义工具时，工具的描述和名称会自动包含在代理的提示中。因此，自定义工具必须有一个写得很好的描述和名称，以便代理了解如何使用它们。让我们看一下`controlnet_transformer`的描述和名称：
 - en: '[PRE31]'
   id: totrans-119
   prefs: []
@@ -643,6 +737,7 @@
   id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 给出
 - en: '[PRE32]'
   id: totrans-121
   prefs: []
@@ -654,6 +749,7 @@
   id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 名称和描述准确，并符合[精心策划的工具集](./transformers_agents#a-curated-set-of-tools)的风格。接下来，让我们用`controlnet_transformer`和`upscaler`实例化一个代理：
 - en: '[PRE33]'
   id: totrans-123
   prefs: []
@@ -663,6 +759,7 @@
   id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 此命令应该给您以下信息：
 - en: '[PRE34]'
   id: totrans-125
   prefs: []
@@ -673,6 +770,7 @@
   id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 精心策划的工具集已经有一个`image_transformer`工具，现在用我们的自定义工具替换。
 - en: Overwriting existing tools can be beneficial if we want to use a custom tool
     exactly for the same task as an existing tool because the agent is well-versed
     in using the specific task. Beware that the custom tool should follow the exact
@@ -681,6 +779,7 @@
   id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 覆盖现有工具可以是有益的，如果我们想要为与现有工具完全相同的任务使用自定义工具，因为代理擅长使用特定任务。请注意，自定义工具在这种情况下应遵循与被覆盖工具完全相同的API，或者您应该调整提示模板以确保使用该工具的所有示例都已更新。
 - en: 'The upscaler tool was given the name `image_upscaler` which is not yet present
     in the default toolbox and is therefore simply added to the list of tools. You
     can always have a look at the toolbox that is currently available to the agent
@@ -688,6 +787,7 @@
   id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 升频工具被命名为`image_upscaler`，该工具尚未出现在默认工具箱中，因此只需将其添加到工具列表中。您可以随时查看代理当前可用的工具箱，通过`agent.toolbox`属性：
 - en: '[PRE35]'
   id: totrans-129
   prefs: []
@@ -702,11 +802,13 @@
   id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，`image_upscaler`现在是代理工具箱的一部分。
 - en: Let’s now try out the new tools! We will re-use the image we generated in [Transformers
     Agents Quickstart](./transformers_agents#single-execution-run).
   id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们尝试一下新工具！我们将重复使用我们在[Transformers Agents Quickstart](./transformers_agents#single-execution-run)中生成的图像。
 - en: '[PRE37]'
   id: totrans-133
   prefs: []
@@ -716,10 +818,12 @@
   id: totrans-134
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/eabd440c942fd7c70ec75212a9603e8a.png)'
 - en: 'Let’s transform the image into a beautiful winter landscape:'
   id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们将图像转换为美丽的冬季风景：
 - en: '[PRE38]'
   id: totrans-136
   prefs: []
@@ -734,12 +838,14 @@
   id: totrans-138
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/67c48ebec156a5115cefc1b4d4e6751c.png)'
 - en: The new image processing tool is based on ControlNet which can make very strong
     modifications to the image. By default the image processing tool returns an image
     of size 512x512 pixels. Let’s see if we can upscale it.
   id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 新的图像处理工具基于ControlNet，可以对图像进行非常强烈的修改。默认情况下，图像处理工具返回大小为512x512像素的图像。让我们看看是否可以将其升频。
 - en: '[PRE40]'
   id: totrans-140
   prefs: []
@@ -754,40 +860,48 @@
   id: totrans-142
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/1e4809693bd6c47f57ad6cc02d12f4b9.png)'
 - en: The agent automatically mapped our prompt “Upscale the image” to the just added
     upscaler tool purely based on the description and name of the upscaler tool and
     was able to correctly run it.
   id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 代理根据升频工具的描述和名称自动将我们的提示“将图像升频”映射到刚刚添加的升频工具，并能够正确运行它。
 - en: Next, let’s have a look at how you can create a new custom tool.
   id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们看看如何创建一个新的自定义工具。
 - en: Adding new tools
   id: totrans-145
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 添加新工具
 - en: In this section, we show how to create a new tool that can be added to the agent.
   id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本节中，我们将展示如何创建一个可以添加到代理的新工具。
 - en: Creating a new tool
   id: totrans-147
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 创建一个新工具
 - en: We’ll first start by creating a tool. We’ll add the not-so-useful yet fun task
     of fetching the model on the Hugging Face Hub with the most downloads for a given
     task.
   id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们首先将通过创建一个工具来开始。我们将添加一个不太有用但有趣的任务，即获取Hugging Face Hub上针对给定任务下载量最高的模型。
 - en: 'We can do that with the following code:'
   id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以使用以下代码来实现：
 - en: '[PRE42]'
   id: totrans-150
   prefs: []
@@ -798,12 +912,14 @@
   id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于任务`text-classification`，返回`'facebook/bart-large-mnli'`，对于`translation`，返回`'t5-base'。
 - en: 'How do we convert this to a tool that the agent can leverage? All tools depend
     on the superclass `Tool` that holds the main attributes necessary. We’ll create
     a class that inherits from it:'
   id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们如何将其转换为代理可以利用的工具？所有工具都依赖于保存主要属性的超类`Tool`。我们将创建一个继承自它的类：
 - en: '[PRE43]'
   id: totrans-153
   prefs: []
@@ -813,18 +929,21 @@
   id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个类有一些需求：
 - en: An attribute `name`, which corresponds to the name of the tool itself. To be
     in tune with other tools which have a performative name, we’ll name it `model_download_counter`.
   id: totrans-155
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个 `name` 属性，对应于工具本身的名称。为了与具有表现性名称的其他工具保持一致，我们将其命名为 `model_download_counter`。
 - en: An attribute `description`, which will be used to populate the prompt of the
     agent.
   id: totrans-156
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个 `description` 属性，将用于填充代理的提示。
 - en: '`inputs` and `outputs` attributes. Defining this will help the python interpreter
     make educated choices about types, and will allow for a gradio-demo to be spawned
     when we push our tool to the Hub. They’re both a list of expected values, which
@@ -833,16 +952,20 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`inputs` 和 `outputs` 属性。定义这些属性将帮助 Python 解释器做出明智的选择，并允许在将工具推送到 Hub 时生成一个 gradio-demo。它们都是预期值的列表，可以是
+    `text`、`image` 或 `audio`。'
 - en: A `__call__` method which contains the inference code. This is the code we’ve
     played with above!
   id: totrans-158
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 包含推理代码的 `__call__` 方法。这就是我们上面玩耍的代码！
 - en: 'Here’s what our class looks like now:'
   id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们的类是这样的：
 - en: '[PRE44]'
   id: totrans-160
   prefs: []
@@ -854,6 +977,7 @@
   id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们有了我们的工具。将其保存在一个文件中，并从您的主脚本中导入它。让我们将这个文件命名为 `model_downloads.py`，这样生成的导入代码看起来像这样：
 - en: '[PRE45]'
   id: totrans-162
   prefs: []
@@ -865,6 +989,7 @@
   id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了让其他人从中受益，并为了更简单的初始化，我们建议将其推送到 Hub 在您的命名空间下。要这样做，只需在 `tool` 变量上调用 `push_to_hub`：
 - en: '[PRE46]'
   id: totrans-164
   prefs: []
@@ -875,16 +1000,19 @@
   id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您的代码已经在 Hub 上了！让我们看看最后一步，即让代理使用它。
 - en: Having the agent use the tool
   id: totrans-166
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 让代理使用工具
 - en: 'We now have our tool that lives on the Hub which can be instantiated as such
     (change the user name for your tool):'
   id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们有了我们的工具，它存放在 Hub 上，可以这样实例化（将用户名更改为您的工具）：
 - en: '[PRE47]'
   id: totrans-168
   prefs: []
@@ -895,6 +1023,7 @@
   id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了在代理中使用它，只需将其传递给代理初始化方法的 `additional_tools` 参数：
 - en: '[PRE48]'
   id: totrans-170
   prefs: []
@@ -904,6 +1033,7 @@
   id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 输出如下：
 - en: '[PRE49]'
   id: totrans-172
   prefs: []
@@ -913,42 +1043,51 @@
   id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: 并生成以下音频。
 - en: '| **Audio** |'
   id: totrans-174
   prefs: []
   type: TYPE_TB
+  zh: '| **音频** |'
 - en: '| --- |'
   id: totrans-175
   prefs: []
   type: TYPE_TB
+  zh: '| --- |'
 - en: '|'
   id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: '|'
 - en: <https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/damo.wav>
   id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: <https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/damo.wav>
 - en: '|'
   id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: '|'
 - en: Depending on the LLM, some are quite brittle and require very exact prompts
     in order to work well. Having a well-defined name and description of the tool
     is paramount to having it be leveraged by the agent.
   id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据 LLM 的不同，有些可能非常脆弱，需要非常精确的提示才能很好地工作。拥有工具的明确定义的名称和描述对于代理能够利用它至关重要。
 - en: Replacing existing tools
   id: totrans-180
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 替换现有工具
 - en: 'Replacing existing tools can be done simply by assigning a new item to the
     agent’s toolbox. Here’s how one would do so:'
   id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过将新项目分配给代理的工具箱，可以简单地替换现有工具。以下是如何操作的方法：
 - en: '[PRE50]'
   id: totrans-182
   prefs: []
@@ -961,17 +1100,21 @@
   id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 替换工具时要小心！这也会调整代理的提示。如果您有一个更适合任务的更好提示，这可能是好事，但也可能导致您的工具被选中的次数远远超过其他工具，或者选择其他工具而不是您定义的工具。
 - en: Leveraging gradio-tools
   id: totrans-184
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 利用 gradio-tools
 - en: '[gradio-tools](https://github.com/freddyaboulton/gradio-tools) is a powerful
     library that allows using Hugging Face Spaces as tools. It supports many existing
     Spaces as well as custom Spaces to be designed with it.'
   id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: '[gradio-tools](https://github.com/freddyaboulton/gradio-tools) 是一个强大的库，允许使用
+    Hugging Face Spaces 作为工具。它支持许多现有的 Spaces，以及可以使用它设计自定义 Spaces。'
 - en: We offer support for `gradio_tools` by using the `Tool.from_gradio` method.
     For example, we want to take advantage of the `StableDiffusionPromptGeneratorTool`
     tool offered in the `gradio-tools` toolkit so as to improve our prompts and generate
@@ -979,10 +1122,13 @@
   id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们通过使用 `Tool.from_gradio` 方法为 `gradio_tools` 提供支持。例如，我们想利用 `gradio-tools` 工具包中提供的
+    `StableDiffusionPromptGeneratorTool` 工具来改进我们的提示并生成更好的图像。
 - en: 'We first import the tool from `gradio_tools` and instantiate it:'
   id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们首先从 `gradio_tools` 导入工具并实例化它：
 - en: '[PRE51]'
   id: totrans-188
   prefs: []
@@ -992,6 +1138,7 @@
   id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将该实例传递给 `Tool.from_gradio` 方法：
 - en: '[PRE52]'
   id: totrans-190
   prefs: []
@@ -1002,6 +1149,7 @@
   id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们可以像处理通常的自定义工具一样管理它。我们利用它来改进我们的提示 `一只穿着太空服的兔子`：
 - en: '[PRE53]'
   id: totrans-192
   prefs: []
@@ -1011,6 +1159,7 @@
   id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 模型充分利用了该工具：
 - en: '[PRE54]'
   id: totrans-194
   prefs: []
@@ -1020,10 +1169,12 @@
   id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后生成图像之前：
 - en: '![](../Images/562727afc88cc5866a6269fc324460aa.png)'
   id: totrans-196
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/562727afc88cc5866a6269fc324460aa.png)'
 - en: gradio-tools requires *textual* inputs and outputs, even when working with different
     modalities. This implementation works with image and audio objects. The two are
     currently incompatible, but will rapidly become compatible as we work to improve
@@ -1031,11 +1182,13 @@
   id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: gradio-tools 需要*文本*输入和输出，即使在处理不同的模态时也是如此。这个实现可以处理图像和音频对象。目前这两者是不兼容的，但随着我们努力改进支持，它们将迅速变得兼容。
 - en: Future compatibility with Langchain
   id: totrans-198
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 未来与 Langchain 的兼容性
 - en: We love Langchain and think it has a very compelling suite of tools. In order
     to handle these tools, Langchain requires *textual* inputs and outputs, even when
     working with different modalities. This is often the serialized version (i.e.,
@@ -1043,12 +1196,15 @@
   id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们喜欢 Langchain，并认为它拥有一个非常引人注目的工具套件。为了处理这些工具，Langchain 需要*文本*输入和输出，即使在处理不同的模态时也是如此。这通常是对象的序列化版本（即保存到磁盘）。
 - en: This difference means that multi-modality isn’t handled between transformers-agents
     and langchain. We aim for this limitation to be resolved in future versions, and
     welcome any help from avid langchain users to help us achieve this compatibility.
   id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种差异意味着 transformers-agents 和 langchain 之间不能处理多模态。我们希望在未来版本中解决这个限制，并欢迎热衷于 langchain
+    的用户帮助我们实现这种兼容性。
 - en: We would love to have better support. If you would like to help, please [open
     an issue](https://github.com/huggingface/transformers/issues/new) and share what
     you have in mind.
