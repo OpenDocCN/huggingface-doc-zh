@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 🤗 Transformers 如何解决任务
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tasks_explained](https://huggingface.co/docs/transformers/v4.37.2/en/tasks_explained)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/tasks_explained](https://huggingface.co/docs/transformers/v4.37.2/en/tasks_explained)
 - en: null
   id: totrans-2
   prefs: []
@@ -25,55 +27,66 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[🤗 Transformers 能做什么](task_summary)中，您了解了自然语言处理（NLP）、语音和音频、计算机视觉任务以及它们的一些重要应用。本页将仔细研究模型如何解决这些任务，并解释发生在幕后的情况。解决给定任务的方法有很多种，一些模型可能会实现特定的技术，甚至从新的角度来处理任务，但对于Transformer模型来说，总体思路是相同的。由于其灵活的架构，大多数模型都是编码器、解码器或编码器-解码器结构的变体。除了Transformer模型，我们的库还有几个卷积神经网络（CNNs），这些网络在今天仍然用于计算机视觉任务。我们还将解释现代CNN的工作原理。
 - en: To explain how tasks are solved, we’ll walk through what goes on inside the
     model to output useful predictions.
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了解释任务是如何解决的，我们将详细介绍模型内部的运作方式，以输出有用的预测。
 - en: '[Wav2Vec2](model_doc/wav2vec2) for audio classification and automatic speech
     recognition (ASR)'
   id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Wav2Vec2](model_doc/wav2vec2) 用于音频分类和自动语音识别（ASR）'
 - en: '[Vision Transformer (ViT)](model_doc/vit) and [ConvNeXT](model_doc/convnext)
     for image classification'
   id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Vision Transformer (ViT)](model_doc/vit) 和 [ConvNeXT](model_doc/convnext)
+    用于图像分类'
 - en: '[DETR](model_doc/detr) for object detection'
   id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DETR](model_doc/detr) 用于目标检测'
 - en: '[Mask2Former](model_doc/mask2former) for image segmentation'
   id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Mask2Former](model_doc/mask2former) 用于图像分割'
 - en: '[GLPN](model_doc/glpn) for depth estimation'
   id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[GLPN](model_doc/glpn) 用于深度估计'
 - en: '[BERT](model_doc/bert) for NLP tasks like text classification, token classification
     and question answering that use an encoder'
   id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[BERT](model_doc/bert) 用于像文本分类、标记分类和问答这样使用编码器的NLP任务'
 - en: '[GPT2](model_doc/gpt2) for NLP tasks like text generation that use a decoder'
   id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[GPT2](model_doc/gpt2) 用于像文本生成这样使用解码器的NLP任务'
 - en: '[BART](model_doc/bart) for NLP tasks like summarization and translation that
     use an encoder-decoder'
   id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[BART](model_doc/bart) 用于像总结和翻译这样使用编码器-解码器的NLP任务'
 - en: Before you go further, it is good to have some basic knowledge of the original
     Transformer architecture. Knowing how encoders, decoders, and attention work will
     aid you in understanding how different Transformer models work. If you’re just
@@ -82,25 +95,30 @@
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 在继续之前，最好对原始Transformer架构有一些基本了解。了解编码器、解码器和注意力的工作原理将有助于您理解不同的Transformer模型是如何工作的。如果您刚开始或需要温习，请查看我们的[课程](https://huggingface.co/course/chapter1/4?fw=pt)获取更多信息！
 - en: Speech and audio
   id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 语音和音频
 - en: '[Wav2Vec2](model_doc/wav2vec2) is a self-supervised model pretrained on unlabeled
     speech data and finetuned on labeled data for audio classification and automatic
     speech recognition.'
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Wav2Vec2](model_doc/wav2vec2) 是一个自监督模型，它在未标记的语音数据上进行了预训练，并在标记数据上进行了微调，用于音频分类和自动语音识别。'
 - en: '![](../Images/e11e728e2c074a2fde6bbf1aa6c0959b.png)'
   id: totrans-16
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/e11e728e2c074a2fde6bbf1aa6c0959b.png)'
 - en: 'This model has four main components:'
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个模型有四个主要组件：
 - en: A *feature encoder* takes the raw audio waveform, normalizes it to zero mean
     and unit variance, and converts it into a sequence of feature vectors that are
     each 20ms long.
@@ -108,6 +126,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 一个*特征编码器*接收原始音频波形，将其归一化为零均值和单位方差，并将其转换为每个长度为20ms的特征向量序列。
 - en: Waveforms are continuous by nature, so they can’t be divided into separate units
     like a sequence of text can be split into words. That’s why the feature vectors
     are passed to a *quantization module*, which aims to learn discrete speech units.
@@ -119,6 +138,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 波形本质上是连续的，因此无法像文本序列那样分割成单独的单元。这就是为什么特征向量会传递给一个*量化模块*，该模块旨在学习离散的语音单元。语音单元是从一个称为*码书*的编码词集合中选择的（您可以将其视为词汇表）。从码书中选择最能代表连续音频输入的向量或语音单元，并将其传递到模型中。
 - en: About half of the feature vectors are randomly masked, and the masked feature
     vector is fed to a *context network*, which is a Transformer encoder that also
     adds relative positional embeddings.
@@ -126,6 +146,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 大约一半的特征向量是随机屏蔽的，并且被屏蔽的特征向量被馈送到一个*上下文网络*，这是一个Transformer编码器，还添加了相对位置嵌入。
 - en: The pretraining objective of the context network is a *contrastive task*. The
     model has to predict the true quantized speech representation of the masked prediction
     from a set of false ones, encouraging the model to find the most similar context
@@ -134,16 +155,19 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 上下文网络的预训练目标是一个*对比任务*。模型必须从一组错误的预测中预测出被屏蔽的真实量化语音表示，从而鼓励模型找到最相似的上下文向量和量化语音单元（目标标签）。
 - en: Now that wav2vec2 is pretrained, you can finetune it on your data for audio
     classification or automatic speech recognition!
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在wav2vec2已经预训练完成，您可以在您的数据上对其进行微调，用于音频分类或自动语音识别！
 - en: Audio classification
   id: totrans-23
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 音频分类
 - en: To use the pretrained model for audio classification, add a sequence classification
     head on top of the base Wav2Vec2 model. The classification head is a linear layer
     that accepts the encoder’s hidden states. The hidden states represent the learned
@@ -154,17 +178,20 @@
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将预训练模型用于音频分类，在基础Wav2Vec2模型顶部添加一个序列分类头。分类头是一个线性层，接受编码器的隐藏状态。隐藏状态代表每个音频帧的学习特征，可以具有不同的长度。为了创建一个固定长度的向量，首先对隐藏状态进行汇总，然后将其转换为类标签上的logits。在logits和目标之间计算交叉熵损失，以找到最可能的类别。
 - en: Ready to try your hand at audio classification? Check out our complete [audio
     classification guide](tasks/audio_classification) to learn how to finetune Wav2Vec2
     and use it for inference!
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 准备好尝试音频分类了吗？查看我们完整的[音频分类指南](tasks/audio_classification)，了解如何微调Wav2Vec2并将其用于推断！
 - en: Automatic speech recognition
   id: totrans-26
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 自动语音识别
 - en: To use the pretrained model for automatic speech recognition, add a language
     modeling head on top of the base Wav2Vec2 model for [connectionist temporal classification
     (CTC)](glossary#connectionist-temporal-classification-ctc). The language modeling
@@ -175,39 +202,46 @@
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将预训练模型用于自动语音识别，在基础Wav2Vec2模型顶部添加一个语言建模头，用于[连接主义时间分类（CTC）](glossary#connectionist-temporal-classification-ctc)。语言建模头是一个线性层，接受编码器的隐藏状态并将其转换为logits。每个logit代表一个标记类别（标记数量来自任务词汇表）。在logits和目标之间计算CTC损失，以找到最可能的标记序列，然后将其解码为转录。
 - en: Ready to try your hand at automatic speech recognition? Check out our complete
     [automatic speech recognition guide](tasks/asr) to learn how to finetune Wav2Vec2
     and use it for inference!
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 准备好尝试自动语音识别了吗？查看我们完整的[自动语音识别指南](tasks/asr)，了解如何微调Wav2Vec2并将其用于推断！
 - en: Computer vision
   id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 计算机视觉
 - en: 'There are two ways to approach computer vision tasks:'
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两种方法可以处理计算机视觉任务：
 - en: Split an image into a sequence of patches and process them in parallel with
     a Transformer.
   id: totrans-31
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将图像分割成一系列补丁，并使用Transformer并行处理它们。
 - en: Use a modern CNN, like [ConvNeXT](model_doc/convnext), which relies on convolutional
     layers but adopts modern network designs.
   id: totrans-32
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用现代CNN，比如[ConvNeXT](model_doc/convnext)，它依赖卷积层但采用现代网络设计。
 - en: A third approach mixes Transformers with convolutions (for example, [Convolutional
     Vision Transformer](model_doc/cvt) or [LeViT](model_doc/levit)). We won’t discuss
     those because they just combine the two approaches we examine here.
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三种方法将Transformer与卷积结合（例如[卷积视觉Transformer](model_doc/cvt)或[LeViT](model_doc/levit)）。我们不会讨论这些，因为它们只是将我们在这里研究的两种方法结合起来。
 - en: ViT and ConvNeXT are commonly used for image classification, but for other vision
     tasks like object detection, segmentation, and depth estimation, we’ll look at
     DETR, Mask2Former and GLPN, respectively; these models are better suited for those
@@ -215,35 +249,42 @@
   id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: ViT和ConvNeXT通常用于图像分类，但对于其他视觉任务，如目标检测、分割和深度估计，我们将分别查看DETR、Mask2Former和GLPN；这些模型更适合这些任务。
 - en: Image classification
   id: totrans-35
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 图像分类
 - en: ViT and ConvNeXT can both be used for image classification; the main difference
     is that ViT uses an attention mechanism while ConvNeXT uses convolutions.
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: ViT和ConvNeXT都可以用于图像分类；主要区别在于ViT使用注意机制，而ConvNeXT使用卷积。
 - en: Transformer
   id: totrans-37
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: Transformer
 - en: '[ViT](model_doc/vit) replaces convolutions entirely with a pure Transformer
     architecture. If you’re familiar with the original Transformer, then you’re already
     most of the way toward understanding ViT.'
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '[ViT](model_doc/vit)完全用纯Transformer架构替换了卷积。如果你熟悉原始Transformer，那么你已经基本理解了ViT。'
 - en: '![](../Images/603d60786d4fe02e975af3e3e9553816.png)'
   id: totrans-39
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/603d60786d4fe02e975af3e3e9553816.png)'
 - en: 'The main change ViT introduced was in how images are fed to a Transformer:'
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: ViT引入的主要变化是如何将图像馈送到Transformer中：
 - en: An image is split into square non-overlapping patches, each of which gets turned
     into a vector or *patch embedding*. The patch embeddings are generated from a
     convolutional 2D layer which creates the proper input dimensions (which for a
@@ -254,6 +295,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 图像被分割成方形不重叠的补丁，每个补丁都被转换为一个向量或*补丁嵌入*。补丁嵌入是从一个卷积2D层生成的，该层创建了适当的输入维度（对于基础Transformer来说，每个补丁嵌入有768个值）。如果你有一个224x224像素的图像，你可以将其分割成196个16x16的图像补丁。就像文本被标记为单词一样，图像被“标记”为一系列补丁。
 - en: A *learnable embedding* - a special `[CLS]` token - is added to the beginning
     of the patch embeddings just like BERT. The final hidden state of the `[CLS]`
     token is used as the input to the attached classification head; other outputs
@@ -263,6 +305,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 一个*可学习的嵌入* - 一个特殊的`[CLS]`标记 - 被添加到补丁嵌入的开头，就像BERT一样。`[CLS]`标记的最终隐藏状态被用作附加分类头的输入；其他输出被忽略。这个标记帮助模型学习如何编码图像的表示。
 - en: The last thing to add to the patch and learnable embeddings are the *position
     embeddings* because the model doesn’t know how the image patches are ordered.
     The position embeddings are also learnable and have the same size as the patch
@@ -271,6 +314,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将补丁和可学习嵌入的最后一件事是添加*位置嵌入*，因为模型不知道图像补丁的顺序。位置嵌入也是可学习的，并且与补丁嵌入具有相同的大小。最后，所有嵌入都传递给Transformer编码器。
 - en: The output, specifically only the output with the `[CLS]` token, is passed to
     a multilayer perceptron head (MLP). ViT’s pretraining objective is simply classification.
     Like other classification heads, the MLP head converts the output into logits
