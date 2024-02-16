@@ -1,34 +1,29 @@
 - en: Summary of the tokenizers
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 分词器总结
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tokenizer_summary](https://huggingface.co/docs/transformers/v4.37.2/en/tokenizer_summary)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/tokenizer_summary](https://huggingface.co/docs/transformers/v4.37.2/en/tokenizer_summary)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: On this page, we will have a closer look at tokenization.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个页面上，我们将更仔细地看一下分词。
 - en: '[https://www.youtube-nocookie.com/embed/VFp38yj8h3A](https://www.youtube-nocookie.com/embed/VFp38yj8h3A)'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://www.youtube-nocookie.com/embed/VFp38yj8h3A](https://www.youtube-nocookie.com/embed/VFp38yj8h3A)'
 - en: 'As we saw in [the preprocessing tutorial](preprocessing), tokenizing a text
     is splitting it into words or subwords, which then are converted to ids through
     a look-up table. Converting words or subwords to ids is straightforward, so in
@@ -37,33 +32,49 @@
     used in 🤗 Transformers: [Byte-Pair Encoding (BPE)](#byte-pair-encoding), [WordPiece](#wordpiece),
     and [SentencePiece](#sentencepiece), and show examples of which tokenizer type
     is used by which model.'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们在[预处理教程](preprocessing)中看到的，将文本分词是将其分割成单词或子词，然后通过查找表将其转换为id。将单词或子词转换为id是直接的，因此在本摘要中，我们将专注于将文本分割成单词或子词（即文本分词）。更具体地说，我们将看一下🤗
+    Transformers中使用的三种主要分词器类型：[Byte-Pair Encoding (BPE)](#byte-pair-encoding)、[WordPiece](#wordpiece)和[SentencePiece](#sentencepiece)，并展示哪种模型使用了哪种分词器类型的示例。
 - en: Note that on each model page, you can look at the documentation of the associated
     tokenizer to know which tokenizer type was used by the pretrained model. For instance,
     if we look at [BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer),
     we can see that the model uses [WordPiece](#wordpiece).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，在每个模型页面上，您可以查看相关分词器的文档，以了解预训练模型使用了哪种分词器类型。例如，如果我们查看[BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer)，我们可以看到该模型使用了[WordPiece](#wordpiece)。
 - en: Introduction
+  id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 介绍
 - en: Splitting a text into smaller chunks is a task that is harder than it looks,
     and there are multiple ways of doing so. For instance, let’s look at the sentence
     `"Don't you love 🤗 Transformers? We sure do."`
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 将文本分割成较小的块是一项看起来比较困难的任务，有多种方法可以实现。例如，让我们看一下句子`"Don't you love 🤗 Transformers?
+    We sure do."`
 - en: '[https://www.youtube-nocookie.com/embed/nhJxYji1aho](https://www.youtube-nocookie.com/embed/nhJxYji1aho)'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://www.youtube-nocookie.com/embed/nhJxYji1aho](https://www.youtube-nocookie.com/embed/nhJxYji1aho)'
 - en: 'A simple way of tokenizing this text is to split it by spaces, which would
     give:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 将这段文本简单地按空格分割，会得到：
 - en: '[PRE0]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'This is a sensible first step, but if we look at the tokens `"Transformers?"`
     and `"do."`, we notice that the punctuation is attached to the words `"Transformer"`
     and `"do"`, which is suboptimal. We should take the punctuation into account so
@@ -71,11 +82,15 @@
     possible punctuation symbol that could follow it, which would explode the number
     of representations the model has to learn. Taking punctuation into account, tokenizing
     our exemplary text would give:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个明智的第一步，但是如果我们看一下标记`"Transformers?"`和`"do."`，我们会注意到标点符号附加在单词`"Transformer"`和`"do"`上，这是不够理想的。我们应该考虑标点符号，这样模型就不必学习一个单词的不同表示以及可能跟随它的每个可能的标点符号，这将导致模型需要学习的表示数量激增。考虑标点符号，对我们的示例文本进行分词会得到：
 - en: '[PRE1]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Better. However, it is disadvantageous, how the tokenization dealt with the
     word `"Don't"`. `"Don't"` stands for `"do not"`, so it would be better tokenized
     as `["Do", "n't"]`. This is where things start getting complicated, and part of
@@ -83,16 +98,22 @@
     for tokenizing a text, a different tokenized output is generated for the same
     text. A pretrained model only performs properly if you feed it an input that was
     tokenized with the same rules that were used to tokenize its training data.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 更好。然而，分词处理单词`"Don't"`的方式是不利的。`"Don't"`代表`"do not"`，所以最好将其分词为`["Do", "n't"]`。这就是事情开始变得复杂的地方，也是每个模型都有自己的分词器类型的原因之一。根据我们应用于文本分词的规则，相同文本会生成不同的分词输出。预训练模型只有在输入与训练数据分词时使用的规则相同的情况下才能正常运行。
 - en: '[spaCy](https://spacy.io/) and [Moses](http://www.statmt.org/moses/?n=Development.GetStarted)
     are two popular rule-based tokenizers. Applying them on our example, *spaCy* and
     *Moses* would output something like:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '[spaCy](https://spacy.io/)和[Moses](http://www.statmt.org/moses/?n=Development.GetStarted)是两种流行的基于规则的分词器。在我们的示例上应用它们，*spaCy*和*Moses*可能会输出类似以下内容：'
 - en: '[PRE2]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: As can be seen space and punctuation tokenization, as well as rule-based tokenization,
     is used here. Space and punctuation tokenization and rule-based tokenization are
     both examples of word tokenization, which is loosely defined as splitting sentences
@@ -101,21 +122,30 @@
     case, space and punctuation tokenization usually generates a very big vocabulary
     (the set of all unique words and tokens used). *E.g.*, [Transformer XL](model_doc/transformerxl)
     uses space and punctuation tokenization, resulting in a vocabulary size of 267,735!
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以看到，这里使用了空格和标点分词，以及基于规则的分词。空格和标点分词以及基于规则的分词都是单词分词的示例，它们被宽泛地定义为将句子分割成单词。虽然这是将文本分割成较小块的最直观的方法，但这种分词方法可能会导致大规模文本语料库出现问题。在这种情况下，空格和标点分词通常会生成一个非常庞大的词汇表（所有使用的唯一单词和标记的集合）。*例如*，[Transformer
+    XL](model_doc/transformerxl)使用空格和标点分词，导致词汇量为267,735！
 - en: Such a big vocabulary size forces the model to have an enormous embedding matrix
     as the input and output layer, which causes both an increased memory and time
     complexity. In general, transformers models rarely have a vocabulary size greater
     than 50,000, especially if they are pretrained only on a single language.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 如此庞大的词汇量迫使模型具有巨大的嵌入矩阵作为输入和输出层，这会导致内存和时间复杂度增加。一般来说，transformers模型很少有词汇量超过50,000的情况，尤其是如果它们只在单一语言上进行了预训练。
 - en: So if simple space and punctuation tokenization is unsatisfactory, why not simply
     tokenize on characters?
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，如果简单的空格和标点符号分词不尽如人意，为什么不简单地在字符上进行分词呢？
 - en: '[https://www.youtube-nocookie.com/embed/ssLq_EK2jLE](https://www.youtube-nocookie.com/embed/ssLq_EK2jLE)'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://www.youtube-nocookie.com/embed/ssLq_EK2jLE](https://www.youtube-nocookie.com/embed/ssLq_EK2jLE)'
 - en: While character tokenization is very simple and would greatly reduce memory
     and time complexity it makes it much harder for the model to learn meaningful
     input representations. *E.g.* learning a meaningful context-independent representation
@@ -124,15 +154,21 @@
     by a loss of performance. So to get the best of both worlds, transformers models
     use a hybrid between word-level and character-level tokenization called **subword**
     tokenization.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然字符分词非常简单且可以大大减少内存和时间复杂度，但这使得模型更难学习有意义的输入表示。例如，学习字母`"t"`的有意义的上下文无关表示要比学习单词`"today"`的上下文无关表示困难得多。因此，字符分词通常伴随着性能损失。因此，为了兼顾两者的优势，transformers模型使用了介于单词级和字符级分词之间的混合称为**子词**分词的方法。
 - en: Subword tokenization
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 子词分词
 - en: '[https://www.youtube-nocookie.com/embed/zHvTiHr506c](https://www.youtube-nocookie.com/embed/zHvTiHr506c)'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://www.youtube-nocookie.com/embed/zHvTiHr506c](https://www.youtube-nocookie.com/embed/zHvTiHr506c)'
 - en: Subword tokenization algorithms rely on the principle that frequently used words
     should not be split into smaller subwords, but rare words should be decomposed
     into meaningful subwords. For instance `"annoyingly"` might be considered a rare
@@ -142,47 +178,67 @@
     and `"ly"`. This is especially useful in agglutinative languages such as Turkish,
     where you can form (almost) arbitrarily long complex words by stringing together
     subwords.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 子词分词算法依赖于这样一个原则，即经常使用的单词不应该被分割为更小的子词，但罕见的单词应该被分解为有意义的子词。例如，`"annoyingly"`可能被认为是一个罕见单词，可以被分解为`"annoying"`和`"ly"`。`"annoying"`和`"ly"`作为独立的子词会更频繁地出现，同时`"annoyingly"`的含义由`"annoying"`和`"ly"`的组合含义保留。这在像土耳其这样的聚合语言中特别有用，您可以通过串联子词形成（几乎）任意长的复杂单词。
 - en: 'Subword tokenization allows the model to have a reasonable vocabulary size
     while being able to learn meaningful context-independent representations. In addition,
     subword tokenization enables the model to process words it has never seen before,
     by decomposing them into known subwords. For instance, the [BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer)
     tokenizes `"I have a new GPU!"` as follows:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 子词分词使模型能够拥有合理的词汇量，同时能够学习有意义的上下文无关表示。此外，子词分词使模型能够处理它以前从未见过的单词，通过将它们分解为已知的子词。例如，[BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer)将`"I
+    have a new GPU!"`分词如下：
 - en: '[PRE3]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Because we are considering the uncased model, the sentence was lowercased first.
     We can see that the words `["i", "have", "a", "new"]` are present in the tokenizer’s
     vocabulary, but the word `"gpu"` is not. Consequently, the tokenizer splits `"gpu"`
     into known subwords: `["gp" and "##u"]`. `"##"` means that the rest of the token
     should be attached to the previous one, without space (for decoding or reversal
     of the tokenization).'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为我们考虑的是不区分大小写的模型，所以首先将句子转换为小写。我们可以看到单词`["i", "have", "a", "new"]`存在于分词器的词汇表中，但单词`"gpu"`不在其中。因此，分词器将`"gpu"`分割为已知的子词：`["gp"
+    和 "##u"]`。`"##"`表示剩余的标记应该附加到前一个标记上，没有空格（用于解码或反向分词）。
 - en: 'As another example, [XLNetTokenizer](/docs/transformers/v4.37.2/en/model_doc/xlnet#transformers.XLNetTokenizer)
     tokenizes our previously exemplary text as follows:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为另一个例子，[XLNetTokenizer](/docs/transformers/v4.37.2/en/model_doc/xlnet#transformers.XLNetTokenizer)将我们之前的示例文本分词如下：
 - en: '[PRE4]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: We’ll get back to the meaning of those `"▁"` when we look at [SentencePiece](#sentencepiece).
     As one can see, the rare word `"Transformers"` has been split into the more frequent
     subwords `"Transform"` and `"ers"`.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 当我们查看[SentencePiece](#sentencepiece)时，我们将回到那些`"▁"`的含义。正如大家所看到的，罕见单词`"Transformers"`已被分割为更常见的子词`"Transform"`和`"ers"`。
 - en: Let’s now look at how the different subword tokenization algorithms work. Note
     that all of those tokenization algorithms rely on some form of training which
     is usually done on the corpus the corresponding model will be trained on.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们看看不同的子词分词算法是如何工作的。请注意，所有这些分词算法都依赖于某种形式的训练，通常是在相应模型将被训练的语料库上进行的。
 - en: Byte-Pair Encoding (BPE)
+  id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 字节对编码（BPE）
 - en: Byte-Pair Encoding (BPE) was introduced in [Neural Machine Translation of Rare
     Words with Subword Units (Sennrich et al., 2015)](https://arxiv.org/abs/1508.07909).
     BPE relies on a pre-tokenizer that splits the training data into words. Pretokenization
@@ -191,8 +247,11 @@
     [FlauBERT](model_doc/flaubert) which uses Moses for most languages, or [GPT](model_doc/gpt)
     which uses Spacy and ftfy, to count the frequency of each word in the training
     corpus.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 字节对编码（BPE）是在[Neural Machine Translation of Rare Words with Subword Units (Sennrich
+    et al., 2015)](https://arxiv.org/abs/1508.07909)中引入的。BPE依赖于一个预分词器，将训练数据分割成单词。预分词可以简单到空格分词，例如[GPT-2](model_doc/gpt2)，[RoBERTa](model_doc/roberta)。更高级的预分词包括基于规则的分词，例如[XLM](model_doc/xlm)，[FlauBERT](model_doc/flaubert)使用Moses用于大多数语言，或者[GPT](model_doc/gpt)使用Spacy和ftfy，来计算训练语料库中每个单词的频率。
 - en: After pre-tokenization, a set of unique words has been created and the frequency
     with which each word occurred in the training data has been determined. Next,
     BPE creates a base vocabulary consisting of all symbols that occur in the set
@@ -200,22 +259,32 @@
     the base vocabulary. It does so until the vocabulary has attained the desired
     vocabulary size. Note that the desired vocabulary size is a hyperparameter to
     define before training the tokenizer.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 在预分词之后，已创建了一组唯一的单词，并确定了每个单词在训练数据中出现的频率。接下来，BPE创建一个基本词汇，其中包含所有出现在唯一单词集合中的符号，并学习合并规则，以从基本词汇的两个符号形成一个新符号。它会一直这样做，直到词汇表达到所需的词汇量。请注意，所需的词汇量是在训练分词器之前定义的一个超参数。
 - en: 'As an example, let’s assume that after pre-tokenization, the following set
     of words including their frequency has been determined:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 举个例子，假设在预分词之后，已确定了以下包含频率的单词集合：
 - en: '[PRE5]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Consequently, the base vocabulary is `["b", "g", "h", "n", "p", "s", "u"]`.
     Splitting all words into symbols of the base vocabulary, we obtain:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，基本词汇是`["b", "g", "h", "n", "p", "s", "u"]`。将所有单词分割为基本词汇的符号，我们得到：
 - en: '[PRE6]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: BPE then counts the frequency of each possible symbol pair and picks the symbol
     pair that occurs most frequently. In the example above `"h"` followed by `"u"`
     is present *10 + 5 = 15* times (10 times in the 10 occurrences of `"hug"`, 5 times
@@ -224,24 +293,35 @@
     merge rule the tokenizer learns is to group all `"u"` symbols followed by a `"g"`
     symbol together. Next, `"ug"` is added to the vocabulary. The set of words then
     becomes
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: BPE然后计算每对可能符号的频率，并选择出现最频繁的符号对。在上面的例子中，`"h"`后跟`"u"`出现了*10 + 5 = 15*次（在10次`"hug"`出现中的10次，以及在5次`"hugs"`出现中的5次）。然而，最频繁的符号对是`"u"`后跟`"g"`，总共出现了*10
+    + 5 + 5 = 20*次。因此，分词器学习的第一个合并规则是将所有跟在`"u"`符号后面的`"g"`符号组合在一起。接下来，`"ug"`被添加到词汇表中。然后单词集合变为
 - en: '[PRE7]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: BPE then identifies the next most common symbol pair. It’s `"u"` followed by
     `"n"`, which occurs 16 times. `"u"`, `"n"` is merged to `"un"` and added to the
     vocabulary. The next most frequent symbol pair is `"h"` followed by `"ug"`, occurring
     15 times. Again the pair is merged and `"hug"` can be added to the vocabulary.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: BPE然后识别下一个最常见的符号对。它是`"u"`后跟`"n"`，出现了16次。`"u"`、`"n"`被合并为`"un"`并添加到词汇表中。下一个最频繁的符号对是`"h"`后跟`"ug"`，出现了15次。再次合并这对，并且`"hug"`可以被添加到词汇表中。
 - en: At this stage, the vocabulary is `["b", "g", "h", "n", "p", "s", "u", "ug",
     "un", "hug"]` and our set of unique words is represented as
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个阶段，词汇表是`["b", "g", "h", "n", "p", "s", "u", "ug", "un", "hug"]`，我们的唯一单词集合表示为
 - en: '[PRE8]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Assuming, that the Byte-Pair Encoding training would stop at this point, the
     learned merge rules would then be applied to new words (as long as those new words
     do not include symbols that were not in the base vocabulary). For instance, the
@@ -250,18 +330,25 @@
     general, single letters such as `"m"` are not replaced by the `"<unk>"` symbol
     because the training data usually includes at least one occurrence of each letter,
     but it is likely to happen for very special characters like emojis.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设字节对编码训练在这一点停止，那么学习到的合并规则将被应用于新单词（只要这些新单词不包含基本词汇中没有的符号）。例如，单词`"bug"`将被分词为`["b",
+    "ug"]`，但`"mug"`将被分词为`["<unk>", "ug"]`，因为符号`"m"`不在基本词汇中。通常情况下，像`"m"`这样的单个字母不会被`"<unk>"`符号替换，因为训练数据通常至少包含每个字母的一个出现，但对于非常特殊的字符，比如表情符号，可能会发生这种情况。
 - en: As mentioned earlier, the vocabulary size, *i.e.* the base vocabulary size +
     the number of merges, is a hyperparameter to choose. For instance [GPT](model_doc/gpt)
     has a vocabulary size of 40,478 since they have 478 base characters and chose
     to stop training after 40,000 merges.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，词汇量，即基本词汇量+合并次数，是一个需要选择的超参数。例如[GPT](model_doc/gpt)的词汇量为40,478，因为它们有478个基本字符，并选择在40,000次合并后停止训练。
 - en: Byte-level BPE
+  id: totrans-46
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 字节级BPE
 - en: A base vocabulary that includes all possible base characters can be quite large
     if *e.g.* all unicode characters are considered as base characters. To have a
     better base vocabulary, [GPT-2](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf)
@@ -271,12 +358,18 @@
     can tokenize every text without the need for the <unk> symbol. [GPT-2](model_doc/gpt)
     has a vocabulary size of 50,257, which corresponds to the 256 bytes base tokens,
     a special end-of-text token and the symbols learned with 50,000 merges.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果将所有Unicode字符视为基本字符，那么包含所有可能基本字符的基本词汇可能会非常庞大。为了获得更好的基本词汇，[GPT-2](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf)
+    使用字节作为基本词汇，这是一个巧妙的技巧，可以强制基本词汇的大小为256，同时确保每个基本字符都包含在词汇中。通过一些额外的规则来处理标点符号，GPT2的分词器可以对每个文本进行分词，而无需使用<unk>符号。[GPT-2](model_doc/gpt)
+    的词汇量为50,257，对应于256个字节基本标记、一个特殊的文本结束标记和通过50,000次合并学习的符号。
 - en: WordPiece
+  id: totrans-48
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: WordPiece
 - en: WordPiece is the subword tokenization algorithm used for [BERT](model_doc/bert),
     [DistilBERT](model_doc/distilbert), and [Electra](model_doc/electra). The algorithm
     was outlined in [Japanese and Korean Voice Search (Schuster et al., 2012)](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/37842.pdf)
@@ -285,8 +378,11 @@
     number of merge rules. In contrast to BPE, WordPiece does not choose the most
     frequent symbol pair, but the one that maximizes the likelihood of the training
     data once added to the vocabulary.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: WordPiece是用于[BERT](model_doc/bert)、[DistilBERT](model_doc/distilbert)和[Electra](model_doc/electra)的子词分词算法。该算法在[Japanese
+    and Korean Voice Search (Schuster et al., 2012)](https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/37842.pdf)中概述，与BPE非常相似。WordPiece首先将词汇表初始化为包含训练数据中的每个字符，并逐渐学习一定数量的合并规则。与BPE不同，WordPiece不选择最频繁的符号对，而是选择一旦添加到词汇表中就最大化训练数据的可能性的符号对。
 - en: So what does this mean exactly? Referring to the previous example, maximizing
     the likelihood of the training data is equivalent to finding the symbol pair,
     whose probability divided by the probabilities of its first symbol followed by
@@ -295,12 +391,16 @@
     `"g"` would have been greater than for any other symbol pair. Intuitively, WordPiece
     is slightly different to BPE in that it evaluates what it *loses* by merging two
     symbols to ensure it’s *worth it*.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么这到底意味着什么呢？参考前面的例子，最大化训练数据的可能性等同于找到符号对，其概率除以其第一个符号后跟第二个符号的概率在所有符号对中最大。例如，`"u"`后跟`"g"`只有在`"ug"`的概率除以`"u"`、`"g"`的概率大于任何其他符号对时才会被合并。直觉上，WordPiece与BPE略有不同，因为它评估合并两个符号会损失什么，以确保值得。
 - en: Unigram
+  id: totrans-51
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Unigram
 - en: 'Unigram is a subword tokenization algorithm introduced in [Subword Regularization:
     Improving Neural Network Translation Models with Multiple Subword Candidates (Kudo,
     2018)](https://arxiv.org/pdf/1804.10959.pdf). In contrast to BPE or WordPiece,
@@ -309,8 +409,10 @@
     for instance correspond to all pre-tokenized words and the most common substrings.
     Unigram is not used directly for any of the models in the transformers, but it’s
     used in conjunction with [SentencePiece](#sentencepiece).'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: Unigram是一种子词分词算法，由[Kudo, 2018](https://arxiv.org/pdf/1804.10959.pdf)引入。与BPE或WordPiece相比，Unigram将其基本词汇初始化为大量符号，并逐渐修剪每个符号以获得较小的词汇表。基本词汇表可以对应于所有预分词的单词和最常见的子字符串。Unigram不直接用于transformers中的任何模型，但与[SentencePiece](#sentencepiece)一起使用。
 - en: At each training step, the Unigram algorithm defines a loss (often defined as
     the log-likelihood) over the training data given the current vocabulary and a
     unigram language model. Then, for each symbol in the vocabulary, the algorithm
@@ -320,24 +422,32 @@
     that least affect the overall loss over the training data. This process is repeated
     until the vocabulary has reached the desired size. The Unigram algorithm always
     keeps the base characters so that any word can be tokenized.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 在每个训练步骤中，Unigram算法根据当前词汇表和unigram语言模型定义了一个损失（通常定义为对数似然）。然后，对于词汇表中的每个符号，该算法计算如果将该符号从词汇表中移除会导致整体损失增加多少。Unigram然后删除损失增加最低的p（通常为10%或20%）百分比的符号，即那些对训练数据整体损失影响最小的符号。这个过程重复进行，直到词汇表达到所需大小。Unigram算法始终保留基本字符，以便任何单词都可以被分词。
 - en: 'Because Unigram is not based on merge rules (in contrast to BPE and WordPiece),
     the algorithm has several ways of tokenizing new text after training. As an example,
     if a trained Unigram tokenizer exhibits the vocabulary:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于Unigram不基于合并规则（与BPE和WordPiece相反），该算法在训练后有几种分词新文本的方式。例如，如果经过训练的Unigram分词器展示以下词汇表：
 - en: '[PRE9]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '`"hugs"` could be tokenized both as `["hug", "s"]`, `["h", "ug", "s"]` or `["h",
     "u", "g", "s"]`. So which one to choose? Unigram saves the probability of each
     token in the training corpus on top of saving the vocabulary so that the probability
     of each possible tokenization can be computed after training. The algorithm simply
     picks the most likely tokenization in practice, but also offers the possibility
     to sample a possible tokenization according to their probabilities.'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: '`"hugs"`可以被分词为`["hug", "s"]`、`["h", "ug", "s"]`或`["h", "u", "g", "s"]`。那么应该选择哪一个？Unigram在保存词汇的同时还保存了训练语料库中每个标记的概率，以便在训练后计算每种可能的分词的概率。该算法实际上只选择最有可能的分词，但也提供了根据它们的概率对可能的分词进行抽样的可能性。'
 - en: Those probabilities are defined by the loss the tokenizer is trained on. Assuming
     that the training data consists of the words<math><semantics><mrow><msub><mi>x</mi><mn>1</mn></msub><mo
     separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>x</mi><mi>N</mi></msub></mrow><annotation
@@ -352,12 +462,17 @@
     stretchy="false">)</mo></mrow></munder><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo
     stretchy="false">)</mo><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{L}
     = -\sum_{i=1}^{N} \log \left ( \sum_{x \in S(x_{i})} p(x) \right )</annotation></semantics></math>L=−i=1∑N​log​x∈S(xi​)∑​p(x)​
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些概率由标记器训练时定义的损失来确定。假设训练数据由单词 x1​,…,xN​ 组成，并且对于单词 xi​ 的所有可能标记化集合定义为 S(xi​)，则总损失定义为
+    L=−i=1∑N​log​x∈S(xi​)∑​p(x)​。
 - en: SentencePiece
+  id: totrans-58
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: SentencePiece
 - en: 'All tokenization algorithms described so far have the same problem: It is assumed
     that the input text uses spaces to separate words. However, not all languages
     use spaces to separate words. One possible solution is to use language specific
@@ -368,16 +483,29 @@
     the input as a raw input stream, thus including the space in the set of characters
     to use. It then uses the BPE or unigram algorithm to construct the appropriate
     vocabulary.'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '到目前为止，所有描述的标记化算法都有同样的问题：假设输入文本使用空格来分隔单词。然而，并非所有语言都使用空格来分隔单词。一个可能的解决方案是使用特定语言的预分词器，例如
+    [XLM](model_doc/xlm) 使用特定的中文、日文和泰文预分词器。为了更普遍地解决这个问题，[SentencePiece: A simple and
+    language independent subword tokenizer and detokenizer for Neural Text Processing
+    (Kudo et al., 2018)](https://arxiv.org/pdf/1808.06226.pdf) 将输入视为原始输入流，因此包括空格在要使用的字符集中。然后使用
+    BPE 或 unigram 算法构建适当的词汇表。'
 - en: The [XLNetTokenizer](/docs/transformers/v4.37.2/en/model_doc/xlnet#transformers.XLNetTokenizer)
     uses SentencePiece for example, which is also why in the example earlier the `"▁"`
     character was included in the vocabulary. Decoding with SentencePiece is very
     easy since all tokens can just be concatenated and `"▁"` is replaced by a space.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '[XLNetTokenizer](/docs/transformers/v4.37.2/en/model_doc/xlnet#transformers.XLNetTokenizer)
+    例如使用了 SentencePiece，这也是为什么在前面的例子中包含了 `"▁"` 字符在词汇表中。使用 SentencePiece 进行解码非常容易，因为所有标记只需连接在一起，而
+    `"▁"` 被替换为一个空格。'
 - en: All transformers models in the library that use SentencePiece use it in combination
     with unigram. Examples of models using SentencePiece are [ALBERT](model_doc/albert),
     [XLNet](model_doc/xlnet), [Marian](model_doc/marian), and [T5](model_doc/t5).
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 库中所有使用 SentencePiece 的变压器模型都与 unigram 结合使用。使用 SentencePiece 的模型示例包括 [ALBERT](model_doc/albert),
+    [XLNet](model_doc/xlnet), [Marian](model_doc/marian) 和 [T5](model_doc/t5)。
