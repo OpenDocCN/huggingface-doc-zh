@@ -1,45 +1,42 @@
 - en: Dilated Neighborhood Attention Transformer
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 扩张邻域注意力变换器
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/dinat](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/dinat)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/dinat](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/dinat)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Overview
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 概述
 - en: DiNAT was proposed in [Dilated Neighborhood Attention Transformer](https://arxiv.org/abs/2209.15001)
     by Ali Hassani and Humphrey Shi.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: DiNAT是由Ali Hassani和Humphrey Shi在[扩张邻域注意力变换器](https://arxiv.org/abs/2209.15001)中提出的。
 - en: It extends [NAT](nat) by adding a Dilated Neighborhood Attention pattern to
     capture global context, and shows significant performance improvements over it.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 它通过添加扩张邻域注意力模式来扩展[NAT](nat)，以捕获全局上下文，并显示出明显的性能改进。
 - en: 'The abstract from the paper is the following:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 论文摘要如下：
 - en: '*Transformers are quickly becoming one of the most heavily applied deep learning
     architectures across modalities, domains, and tasks. In vision, on top of ongoing
     efforts into plain transformers, hierarchical transformers have also gained significant
@@ -63,485 +60,728 @@
     AP) (no extra data). It also matches the state of the art specialized semantic
     segmentation models on ADE20K (58.2 mIoU), and ranks second on Cityscapes (84.5
     mIoU) (no extra data).*'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '*变换器正在迅速成为跨模态、领域和任务中最广泛应用的深度学习架构之一。在视觉领域，除了对普通变换器的持续努力外，分层变换器也引起了极大关注，这要归功于它们的性能和易于集成到现有框架中。这些模型通常采用局部化注意机制，例如滑动窗口邻域注意力（NA）或Swin
+    Transformer的移位窗口自注意力。虽然有效地减少了自注意力的二次复杂度，但局部注意力削弱了自注意力的两个最理想的特性：长距离相互依赖建模和全局感受野。在本文中，我们介绍了扩张邻域注意力（DiNA），这是对NA的一种自然、灵活和高效的扩展，可以在不增加额外成本的情况下捕获更多的全局上下文并指数级扩展感受野。NA的局部注意力和DiNA的稀疏全局注意力互补，因此我们引入了扩张邻域注意力变换器（DiNAT），这是一个基于两者构建的新的分层视觉变换器。DiNAT的变体在强基线模型（如NAT、Swin和ConvNeXt）上取得了显著的改进。我们的大型模型在COCO目标检测中比其Swin对应物快1.5%的box
+    AP，在COCO实例分割中比其快1.3%的mask AP，在ADE20K语义分割中比其快1.1%的mIoU。与新框架配对，我们的大型变体是COCO（58.2
+    PQ）和ADE20K（48.5 PQ）的新一代全景分割模型，以及Cityscapes（44.5 AP）和ADE20K（35.4 AP）的实例分割模型（无额外数据）。它还与ADE20K（58.2
+    mIoU）上的最先进专门的语义分割模型相匹配，并在Cityscapes（84.5 mIoU）上排名第二（无额外数据）。*'
 - en: '![drawing](../Images/01b57d1cfb697d4055cf9fec6e5ca8f1.png) Neighborhood Attention
     with different dilation values. Taken from the [original paper](https://arxiv.org/abs/2209.15001).'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '![drawing](../Images/01b57d1cfb697d4055cf9fec6e5ca8f1.png) 具有不同扩张值的邻域注意力。摘自[原始论文](https://arxiv.org/abs/2209.15001)。'
 - en: This model was contributed by [Ali Hassani](https://huggingface.co/alihassanijr).
     The original code can be found [here](https://github.com/SHI-Labs/Neighborhood-Attention-Transformer).
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型由[Ali Hassani](https://huggingface.co/alihassanijr)贡献。原始代码可以在[这里](https://github.com/SHI-Labs/Neighborhood-Attention-Transformer)找到。
 - en: Usage tips
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用提示
 - en: DiNAT can be used as a *backbone*. When `output_hidden_states = True`, it will
     output both `hidden_states` and `reshaped_hidden_states`. The `reshaped_hidden_states`
     have a shape of `(batch, num_channels, height, width)` rather than `(batch_size,
     height, width, num_channels)`.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: DiNAT可以用作*骨干*。当`output_hidden_states = True`时，它将输出`hidden_states`和`reshaped_hidden_states`。`reshaped_hidden_states`的形状为`(batch,
+    num_channels, height, width)`，而不是`(batch_size, height, width, num_channels)`。
 - en: 'Notes:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意：
 - en: DiNAT depends on [NATTEN](https://github.com/SHI-Labs/NATTEN/)’s implementation
     of Neighborhood Attention and Dilated Neighborhood Attention. You can install
     it with pre-built wheels for Linux by referring to [shi-labs.com/natten](https://shi-labs.com/natten),
     or build on your system by running `pip install natten`. Note that the latter
     will likely take time to compile. NATTEN does not support Windows devices yet.
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: DiNAT依赖于[NATTEN](https://github.com/SHI-Labs/NATTEN/)对邻域注意力和扩张邻域注意力的实现。您可以通过参考[shi-labs.com/natten](https://shi-labs.com/natten)来安装Linux的预构建轮子，或者通过运行`pip
+    install natten`在您的系统上构建。请注意，后者可能需要一些时间来编译。NATTEN目前不支持Windows设备。
 - en: Patch size of 4 is only supported at the moment.
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 目前仅支持4的补丁大小。
 - en: Resources
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 资源
 - en: A list of official Hugging Face and community (indicated by 🌎) resources to
     help you get started with DiNAT.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些官方Hugging Face和社区（由🌎表示）资源的列表，可帮助您开始使用DiNAT。
 - en: Image Classification
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像分类
 - en: '[DinatForImageClassification](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatForImageClassification)
     is supported by this [example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-classification)
     and [notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/image_classification.ipynb).'
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DinatForImageClassification](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatForImageClassification)由这个[示例脚本](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-classification)和[笔记本](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/image_classification.ipynb)支持。'
 - en: 'See also: [Image classification task guide](../tasks/image_classification)'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 另请参阅：[图像分类任务指南](../tasks/image_classification)
 - en: If you’re interested in submitting a resource to be included here, please feel
     free to open a Pull Request and we’ll review it! The resource should ideally demonstrate
     something new instead of duplicating an existing resource.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您有兴趣提交资源以包含在此处，请随时打开一个Pull Request，我们将对其进行审查！资源应该展示一些新内容，而不是重复现有资源。
 - en: DinatConfig
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DinatConfig
 - en: '### `class transformers.DinatConfig`'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.DinatConfig`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/configuration_dinat.py#L30)'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/configuration_dinat.py#L30)'
 - en: '[PRE0]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Parameters
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`patch_size` (`int`, *optional*, defaults to 4) — The size (resolution) of
     each patch. NOTE: Only patch size of 4 is supported at the moment.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`patch_size` (`int`, *可选*, 默认为4) — 每个补丁的大小（分辨率）。注意：目前仅支持补丁大小为4。'
 - en: '`num_channels` (`int`, *optional*, defaults to 3) — The number of input channels.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_channels` (`int`, *可选*, 默认为3) — 输入通道数。'
 - en: '`embed_dim` (`int`, *optional*, defaults to 64) — Dimensionality of patch embedding.'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`embed_dim` (`int`, *可选*, 默认为64) — 补丁嵌入的维度。'
 - en: '`depths` (`List[int]`, *optional*, defaults to `[3, 4, 6, 5]`) — Number of
     layers in each level of the encoder.'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`depths` (`List[int]`, *可选*, 默认为`[3, 4, 6, 5]`) — 编码器每个级别的层数。'
 - en: '`num_heads` (`List[int]`, *optional*, defaults to `[2, 4, 8, 16]`) — Number
     of attention heads in each layer of the Transformer encoder.'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_heads` (`List[int]`, *可选*, 默认为`[2, 4, 8, 16]`) — Transformer编码器每层中的注意力头数。'
 - en: '`kernel_size` (`int`, *optional*, defaults to 7) — Neighborhood Attention kernel
     size.'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`kernel_size` (`int`, *可选*, 默认为7) — 邻域注意力核大小。'
 - en: '`dilations` (`List[List[int]]`, *optional*, defaults to `[[1, 8, 1], [1, 4,
     1, 4], [1, 2, 1, 2, 1, 2], [1, 1, 1, 1, 1]]`) — Dilation value of each NA layer
     in the Transformer encoder.'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`dilations` (`List[List[int]]`, *可选*, 默认为`[[1, 8, 1], [1, 4, 1, 4], [1, 2,
+    1, 2, 1, 2], [1, 1, 1, 1, 1]]`) — Transformer编码器中每个NA层的扩张值。'
 - en: '`mlp_ratio` (`float`, *optional*, defaults to 3.0) — Ratio of MLP hidden dimensionality
     to embedding dimensionality.'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`mlp_ratio` (`float`, *可选*, 默认为3.0) — MLP隐藏维度与嵌入维度的比率。'
 - en: '`qkv_bias` (`bool`, *optional*, defaults to `True`) — Whether or not a learnable
     bias should be added to the queries, keys and values.'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`qkv_bias` (`bool`, *可选*, 默认为`True`) — 是否应向查询、键和值添加可学习偏置。'
 - en: '`hidden_dropout_prob` (`float`, *optional*, defaults to 0.0) — The dropout
     probability for all fully connected layers in the embeddings and encoder.'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_dropout_prob` (`float`, *可选*, 默认为0.0) — 嵌入和编码器中所有全连接层的丢失概率。'
 - en: '`attention_probs_dropout_prob` (`float`, *optional*, defaults to 0.0) — The
     dropout ratio for the attention probabilities.'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_probs_dropout_prob` (`float`, *可选*, 默认为0.0) — 注意力概率的丢失比率。'
 - en: '`drop_path_rate` (`float`, *optional*, defaults to 0.1) — Stochastic depth
     rate.'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`drop_path_rate` (`float`, *可选*, 默认为0.1) — 随机深度率。'
 - en: '`hidden_act` (`str` or `function`, *optional*, defaults to `"gelu"`) — The
     non-linear activation function (function or string) in the encoder. If string,
     `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_act` (`str`或`function`, *可选*, 默认为`"gelu"`) — 编码器中的非线性激活函数（函数或字符串）。如果是字符串，支持`"gelu"`、`"relu"`、`"selu"`和`"gelu_new"`。'
 - en: '`initializer_range` (`float`, *optional*, defaults to 0.02) — The standard
     deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`initializer_range` (`float`, *可选*, 默认为0.02) — 用于初始化所有权重矩阵的截断正态初始化器的标准差。'
 - en: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-05) — The epsilon used
     by the layer normalization layers.'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`layer_norm_eps` (`float`, *可选*, 默认为1e-05) — 层归一化层使用的epsilon。'
 - en: '`layer_scale_init_value` (`float`, *optional*, defaults to 0.0) — The initial
     value for the layer scale. Disabled if <=0.'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`layer_scale_init_value` (`float`, *可选*, 默认为0.0) — 层缩放的初始值。如果<=0，则禁用。'
 - en: '`out_features` (`List[str]`, *optional*) — If used as backbone, list of features
     to output. Can be any of `"stem"`, `"stage1"`, `"stage2"`, etc. (depending on
     how many stages the model has). If unset and `out_indices` is set, will default
     to the corresponding stages. If unset and `out_indices` is unset, will default
     to the last stage. Must be in the same order as defined in the `stage_names` attribute.'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`out_features` (`List[str]`, *可选*) — 如果用作骨干，要输出的特征列表。可以是`"stem"`、`"stage1"`、`"stage2"`等（取决于模型有多少阶段）。如果未设置且设置了`out_indices`，将默认为相应的阶段。如果未设置且`out_indices`未设置，将默认为最后一个阶段。必须按照`stage_names`属性中定义的顺序。'
 - en: '`out_indices` (`List[int]`, *optional*) — If used as backbone, list of indices
     of features to output. Can be any of 0, 1, 2, etc. (depending on how many stages
     the model has). If unset and `out_features` is set, will default to the corresponding
     stages. If unset and `out_features` is unset, will default to the last stage.
     Must be in the same order as defined in the `stage_names` attribute.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`out_indices` (`List[int]`, *可选*) — 如果用作骨干，要输出的特征的索引列表。可以是0、1、2等（取决于模型有多少阶段）。如果未设置且设置了`out_features`，将默认为相应的阶段。如果未设置且`out_features`未设置，将默认为最后一个阶段。必须按照`stage_names`属性中定义的顺序。'
 - en: This is the configuration class to store the configuration of a [DinatModel](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatModel).
     It is used to instantiate a Dinat model according to the specified arguments,
     defining the model architecture. Instantiating a configuration with the defaults
     will yield a similar configuration to that of the Dinat [shi-labs/dinat-mini-in1k-224](https://huggingface.co/shi-labs/dinat-mini-in1k-224)
     architecture.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是用于存储 [DinatModel](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatModel)
+    配置的配置类。用于根据指定参数实例化 Dinat 模型，定义模型架构。使用默认值实例化配置将产生类似于 Dinat [shi-labs/dinat-mini-in1k-224](https://huggingface.co/shi-labs/dinat-mini-in1k-224)
+    架构的配置。
 - en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     for more information.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置对象继承自 [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)，可用于控制模型输出。阅读
+    [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    的文档以获取更多信息。
 - en: 'Example:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE1]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: DinatModel
+  id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DinatModel
 - en: '### `class transformers.DinatModel`'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.DinatModel`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/modeling_dinat.py#L692)'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/modeling_dinat.py#L692)'
 - en: '[PRE2]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Parameters
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([DinatConfig](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config` ([DinatConfig](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatConfig))
+    — 包含模型所有参数的模型配置类。使用配置文件初始化不会加载与模型相关的权重，只会加载配置。查看 [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    方法以加载模型权重。'
 - en: The bare Dinat Model transformer outputting raw hidden-states without any specific
     head on top. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 裸 Dinat 模型变压器输出原始隐藏状态，没有特定的头部。这个模型是 PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    子类。将其用作常规 PyTorch 模块，并参考 PyTorch 文档以获取有关一般用法和行为的所有信息。
 - en: '#### `forward`'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/modeling_dinat.py#L727)'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/modeling_dinat.py#L727)'
 - en: '[PRE3]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Parameters
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
     width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
     See [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
     for details.'
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
+    width)`) — 像素值。可以使用 [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)
+    获取像素值。详细信息请参阅 [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions` (`bool`, *optional*) — 是否返回所有注意力层的注意力张量。有关更多详细信息，请查看返回张量下的
+    `attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states` (`bool`, *optional*) — 是否返回所有层的隐藏状态。有关更多详细信息，请查看返回张量下的
+    `hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *optional*) — 是否返回 [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    而不是普通元组。'
 - en: Returns
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`transformers.models.dinat.modeling_dinat.DinatModelOutput` or `tuple(torch.FloatTensor)`'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: '`transformers.models.dinat.modeling_dinat.DinatModelOutput` 或 `tuple(torch.FloatTensor)`'
 - en: A `transformers.models.dinat.modeling_dinat.DinatModelOutput` or a tuple of
     `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([DinatConfig](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatConfig))
     and inputs.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个 `transformers.models.dinat.modeling_dinat.DinatModelOutput` 或一个 `torch.FloatTensor`
+    元组（如果传递了 `return_dict=False` 或当 `config.return_dict=False` 时），包括根据配置（[DinatConfig](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatConfig)）和输入的不同元素。
 - en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`) — Sequence of hidden-states at the output of the last layer of
     the model.'
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — 模型最后一层的隐藏状态输出序列。'
 - en: '`pooler_output` (`torch.FloatTensor` of shape `(batch_size, hidden_size)`,
     *optional*, returned when `add_pooling_layer=True` is passed) — Average pooling
     of the last layer hidden-state.'
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pooler_output` (`torch.FloatTensor` of shape `(batch_size, hidden_size)`,
+    *optional*, returned when `add_pooling_layer=True` is passed) — 最后一层隐藏状态的平均池化。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings + one for the output of each stage) of shape
     `(batch_size, sequence_length, hidden_size)`.'
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings + one for the output of each stage) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
 - en: Hidden-states of the model at the output of each layer plus the initial embedding
     outputs.
+  id: totrans-69
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态以及初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each stage) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）—
+    形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每个阶段一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
+  id: totrans-71
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 自注意力头中用于计算加权平均值的注意力softmax后的注意力权重。
 - en: '`reshaped_hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned
     when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
     — Tuple of `torch.FloatTensor` (one for the output of the embeddings + one for
     the output of each stage) of shape `(batch_size, hidden_size, height, width)`.'
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`reshaped_hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）—
+    形状为`(batch_size, hidden_size, height, width)`的`torch.FloatTensor`元组（一个用于嵌入的输出
+    + 一个用于每个阶段的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the initial embedding
     outputs reshaped to include the spatial dimensions.
+  id: totrans-73
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每个层的输出处的隐藏状态以及包括空间维度的初始嵌入输出的重塑。
 - en: The [DinatModel](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatModel)
     forward method, overrides the `__call__` special method.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DinatModel](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatModel)的前向方法，覆盖`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前向传递的配方需要在此函数内定义，但应该在此之后调用`Module`实例，而不是这个，因为前者负责运行前处理和后处理步骤，而后者则默默地忽略它们。
 - en: 'Example:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE4]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: DinatForImageClassification
+  id: totrans-78
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DinatForImageClassification
 - en: '### `class transformers.DinatForImageClassification`'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.DinatForImageClassification`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/modeling_dinat.py#L782)'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/modeling_dinat.py#L782)'
 - en: '[PRE5]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Parameters
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([DinatConfig](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-83
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config`（[DinatConfig](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatConfig)）—
+    具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: Dinat Model transformer with an image classification head on top (a linear layer
     on top of the final hidden state of the [CLS] token) e.g. for ImageNet.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: Dinat模型变压器，顶部带有图像分类头（在[CLS]标记的最终隐藏状态顶部的线性层），例如用于ImageNet。
 - en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     sub-class. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型是PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)子类。将其用作常规PyTorch模块，并参考PyTorch文档以获取与一般用法和行为相关的所有事项。
 - en: '#### `forward`'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/modeling_dinat.py#L806)'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/dinat/modeling_dinat.py#L806)'
 - en: '[PRE6]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Parameters
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
     width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
     See [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
     for details.'
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pixel_values`（形状为`(batch_size, num_channels, height, width)`的`torch.FloatTensor`）—
+    像素值。像素值可以使用[AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)获取。有关详细信息，请参阅[ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*）— 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*）— 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-93
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）— 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
 - en: '`labels` (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
     for computing the image classification/regression loss. Indices should be in `[0,
     ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
     computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
     is computed (Cross-Entropy).'
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`labels`（形状为`(batch_size,)`的`torch.LongTensor`，*可选*）— 用于计算图像分类/回归损失的标签。索引应在`[0,
+    ..., config.num_labels - 1]`范围内。如果`config.num_labels == 1`，则计算回归损失（均方损失），如果`config.num_labels
+    > 1`，则计算分类损失（交叉熵）。'
 - en: Returns
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`transformers.models.dinat.modeling_dinat.DinatImageClassifierOutput` or `tuple(torch.FloatTensor)`'
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: '`transformers.models.dinat.modeling_dinat.DinatImageClassifierOutput`或`tuple(torch.FloatTensor)`'
 - en: A `transformers.models.dinat.modeling_dinat.DinatImageClassifierOutput` or a
     tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration ([DinatConfig](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatConfig))
     and inputs.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个`transformers.models.dinat.modeling_dinat.DinatImageClassifierOutput`或一个`torch.FloatTensor`元组（如果传递`return_dict=False`或`config.return_dict=False`）包含根据配置（[DinatConfig](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatConfig)）和输入的各种元素。
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
     is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`loss`（形状为`(1,)`的`torch.FloatTensor`，*可选*，在提供`labels`时返回） — 分类（如果`config.num_labels==1`则为回归）损失。'
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
     Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logits`（形状为`(batch_size, config.num_labels)`的`torch.FloatTensor`） — 分类（如果`config.num_labels==1`则为回归）分数（SoftMax之前）。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings + one for the output of each stage) of shape
     `(batch_size, sequence_length, hidden_size)`.'
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）
+    — 形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（一个用于嵌入的输出
+    + 一个用于每个阶段的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the initial embedding
     outputs.
+  id: totrans-101
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态加上初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each stage) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）
+    — 形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每个阶段一个）。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
+  id: totrans-103
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 在注意力softmax之后的注意力权重，用于计算自注意力头中的加权平均值。
 - en: '`reshaped_hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned
     when `output_hidden_states=True` is passed or when `config.output_hidden_states=True`)
     — Tuple of `torch.FloatTensor` (one for the output of the embeddings + one for
     the output of each stage) of shape `(batch_size, hidden_size, height, width)`.'
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`reshaped_hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）
+    — 形状为`(batch_size, hidden_size, height, width)`的`torch.FloatTensor`元组（一个用于嵌入的输出
+    + 一个用于每个阶段的输出）。'
 - en: Hidden-states of the model at the output of each layer plus the initial embedding
     outputs reshaped to include the spatial dimensions.
+  id: totrans-105
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态加上初始嵌入输出，重塑以包括空间维度。
 - en: The [DinatForImageClassification](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatForImageClassification)
     forward method, overrides the `__call__` special method.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DinatForImageClassification](/docs/transformers/v4.37.2/en/model_doc/dinat#transformers.DinatForImageClassification)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管前向传递的配方需要在此函数内定义，但应该在此之后调用`Module`实例，而不是这个，因为前者负责运行预处理和后处理步骤，而后者则默默地忽略它们。
 - en: 'Example:'
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE7]'
+  id: totrans-109
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
