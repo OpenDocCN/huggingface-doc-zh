@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 标记化管道
 - en: 'Original text: [https://huggingface.co/docs/tokenizers/pipeline](https://huggingface.co/docs/tokenizers/pipeline)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/tokenizers/pipeline](https://huggingface.co/docs/tokenizers/pipeline)
 - en: null
   id: totrans-2
   prefs: []
@@ -17,26 +19,31 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在调用`Tokenizer.encode`或`Tokenizer.encode_batch`时，输入文本将通过以下管道进行处理：
 - en: '`normalization`'
   id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`归一化`'
 - en: '`pre-tokenization`'
   id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`预分词`'
 - en: '`model`'
   id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`模型`'
 - en: '`post-processing`'
   id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`后处理`'
 - en: We’ll see in details what happens during each of those steps in detail, as well
     as when you want to `decode <decoding>` some token ids, and how the 🤗 Tokenizers
     library allows you to customize each of those steps to your needs. If you’re already
@@ -45,15 +52,18 @@
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将详细了解每个步骤的详细情况，以及当您想要`解码<解码>`一些标记ID时，以及🤗 Tokenizers库如何允许您根据需要自定义每个步骤。如果您已经熟悉这些步骤，并希望通过查看一些代码来学习，请跳转到`我们的BERT从头开始示例<示例>`。
 - en: 'For the examples that require a `Tokenizer` we will use the tokenizer we trained
     in the `quicktour`, which you can load with:'
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于需要`Tokenizer`的示例，我们将使用在`快速浏览`中训练的分词器，您可以通过以下方式加载：
 - en: PythonRustNode
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE0]'
   id: totrans-11
   prefs: []
@@ -64,6 +74,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 归一化
 - en: Normalization is, in a nutshell, a set of operations you apply to a raw string
     to make it less random or “cleaner”. Common operations include stripping whitespace,
     removing accented characters or lowercasing all text. If you’re familiar with
@@ -72,6 +83,7 @@
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 归一化，简而言之，是对原始字符串应用的一组操作，使其更少随机或“更干净”。常见操作包括去除空格、去除重音字符或将所有文本转换为小写。如果您熟悉[Unicode规范化](https://unicode.org/reports/tr15)，那么大多数分词器中也会应用非常常见的规范化操作。
 - en: 'Each normalization operation is represented in the 🤗 Tokenizers library by
     a `Normalizer`, and you can combine several of those by using a `normalizers.Sequence`.
     Here is a normalizer applying NFD Unicode normalization and removing accents as
@@ -79,10 +91,13 @@
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个规范化操作在🤗 Tokenizers库中由一个`Normalizer`表示，您可以通过使用`normalizers.Sequence`组合其中的几个。这是一个应用NFD
+    Unicode规范化并去除重音的规范化器示例：
 - en: PythonRustNode
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE1]'
   id: totrans-16
   prefs: []
@@ -92,10 +107,12 @@
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过将其应用于任何字符串来手动测试该规范化器：
 - en: PythonRustNode
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE2]'
   id: totrans-19
   prefs: []
@@ -106,10 +123,12 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建`Tokenizer`时，您可以通过更改相应属性来自定义其规范化：
 - en: PythonRustNode
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE3]'
   id: totrans-22
   prefs: []
@@ -120,11 +139,13 @@
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，如果更改了分词器应用归一化的方式，那么之后可能需要从头开始重新训练它。
 - en: Pre-Tokenization
   id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 预分词
 - en: Pre-tokenization is the act of splitting a text into smaller objects that give
     an upper bound to what your tokens will be at the end of training. A good way
     to think of this is that the pre-tokenizer will split your text into “words” and
@@ -132,15 +153,18 @@
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 预分词化是将文本分割为较小对象的行为，这些对象给出了在训练结束时您的标记将是什么的上限。一个好的思考方式是，预分词器将把您的文本分割成“单词”，然后，您的最终标记将是这些单词的一部分。
 - en: 'An easy way to pre-tokenize inputs is to split on spaces and punctuations,
     which is done by the `pre_tokenizers.Whitespace` pre-tokenizer:'
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个简单的预分词输入的方法是在空格和标点符号上进行分割，这是由`pre_tokenizers.Whitespace`预分词器完成的：
 - en: PythonRustNode
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE4]'
   id: totrans-28
   prefs: []
@@ -153,16 +177,19 @@
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 输出是一个元组列表，每个元组包含一个单词及其在原始句子中的跨度（用于确定我们的`Encoding`的最终`offsets`）。请注意，根据标点符号分割将分割像`"I'm"`这个例子中的缩写。
 - en: 'You can combine together any `PreTokenizer` together. For instance, here is
     a pre-tokenizer that will split on space, punctuation and digits, separating numbers
     in their individual digits:'
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以将任何`PreTokenizer`组合在一起。例如，这是一个预分词器，将在空格、标点符号和数字上进行分割，将数字分隔为各自的数字：
 - en: PythonRustNode
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE5]'
   id: totrans-32
   prefs: []
@@ -173,10 +200,12 @@
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们在`快速浏览`中看到的，您可以通过更改相应属性来自定义`Tokenizer`的预分词器：
 - en: PythonRustNode
   id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: PythonRustNode
 - en: '[PRE6]'
   id: totrans-35
   prefs: []
@@ -187,63 +216,75 @@
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，如果更改了预分词器的方式，那么之后可能需要从头开始重新训练您的分词器。
 - en: Model
   id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模型
 - en: Once the input texts are normalized and pre-tokenized, the `Tokenizer` applies
     the model on the pre-tokens. This is the part of the pipeline that needs training
     on your corpus (or that has been trained if you are using a pretrained tokenizer).
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦输入文本被归一化和预分词，`Tokenizer`将在预分词上应用模型。这是管道中需要在您的语料库上进行训练的部分（或者如果您使用预训练的分词器，则已经训练过）。
 - en: The role of the model is to split your “words” into tokens, using the rules
     it has learned. It’s also responsible for mapping those tokens to their corresponding
     IDs in the vocabulary of the model.
   id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 模型的作用是根据其学习的规则将您的“单词”分割为标记。它还负责将这些标记映射到模型词汇表中的相应ID。
 - en: 'This model is passed along when intializing the `Tokenizer` so you already
     know how to customize this part. Currently, the 🤗 Tokenizers library supports:'
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个模型在初始化`Tokenizer`时传递，所以您已经知道如何自定义这部分。目前，🤗 Tokenizers库支持：
 - en: '`models.BPE`'
   id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`models.BPE`'
 - en: '`models.Unigram`'
   id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`models.Unigram`'
 - en: '`models.WordLevel`'
   id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`models.WordLevel`'
 - en: '`models.WordPiece`'
   id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`models.WordPiece`'
 - en: For more details about each model and its behavior, you can check [here](components#models)
   id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关每个模型及其行为的更多详细信息，您可以在[此处](components#models)查看
 - en: Post-Processing
   id: totrans-46
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 后处理
 - en: Post-processing is the last step of the tokenization pipeline, to perform any
     additional transformation to the `Encoding` before it’s returned, like adding
     potential special tokens.
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 后处理是分词管道的最后一步，用于在返回之前对`Encoding`执行任何额外的转换，例如添加潜在的特殊标记。
 - en: 'As we saw in the quick tour, we can customize the post processor of a `Tokenizer`
     by setting the corresponding attribute. For instance, here is how we can post-process
     to make the inputs suitable for the BERT model:'
