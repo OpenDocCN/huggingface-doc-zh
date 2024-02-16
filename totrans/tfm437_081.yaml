@@ -1,39 +1,34 @@
 - en: Instantiating a big model
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/big_models](https://huggingface.co/docs/transformers/v4.37.2/en/big_models)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'When you want to use a very big pretrained model, one challenge is to minimize
     the use of the RAM. The usual workflow from PyTorch is:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: Create your model with random weights.
+  id: totrans-4
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Load your pretrained weights.
+  id: totrans-5
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Put those pretrained weights in your random model.
+  id: totrans-6
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -42,6 +37,7 @@
     those two copies can make you get out of RAM. Even worse, if you are using `torch.distributed`
     to launch a distributed training, each process will load the pretrained model
     and store these two copies in RAM.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: Note that the randomly created model is initialized with “empty” tensors, which
@@ -50,14 +46,17 @@
     the appropriate distribution for the kind of model/parameters instantiated (like
     a normal distribution for instance) is only performed after step 3 on the non-initialized
     weights, to be as fast as possible!
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: In this guide, we explore the solutions Transformers offer to deal with this
     issue. Note that this is an area of active development, so the APIs explained
     here may change slightly in the future.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: Sharded checkpoints
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -66,85 +65,115 @@
     checkpoint when you do `model.save_pretrained(save_dir)`, you will end up with
     several partial checkpoints (each of which being of size < 10GB) and an index
     that maps parameter names to the files they are stored in.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: 'You can control the maximum size before sharding with the `max_shard_size`
     parameter, so for the sake of an example, we’ll use a normal-size models with
     a small shard size: let’s take a traditional BERT model.'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'If you save it using [save_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.save_pretrained),
     you will get a new folder with two files: the config of the model and its weights:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Now let’s use a maximum shard size of 200MB:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'On top of the configuration of the model, we see three different weights files,
     and an `index.json` file which is our index. A checkpoint like this can be fully
     reloaded using the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: The main advantage of doing this for big models is that during step 2 of the
     workflow shown above, each shard of the checkpoint is loaded after the previous
     one, capping the memory usage in RAM to the model size plus the size of the biggest
     shard.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: 'Behind the scenes, the index file is used to determine which keys are in the
     checkpoint, and where the corresponding weights are stored. We can load that index
     like any json and get a dictionary:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'The metadata just consists of the total size of the model for now. We plan
     to add other information in the future:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'The weights map is the main part of this index, which maps each parameter name
     (as usually found in a PyTorch model `state_dict`) to the file it’s stored in:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'If you want to directly load such a sharded checkpoint inside a model without
     using [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     (like you would do `model.load_state_dict()` for a full checkpoint) you should
     use [load_sharded_checkpoint()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.modeling_utils.load_sharded_checkpoint):'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Low memory loading
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Sharded checkpoints reduce the memory usage during step 2 of the workflow mentioned
     above, but in order to use that model in a low memory setting, we recommend leveraging
     our tools based on the Accelerate library.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
 - en: 'Please read the following guide for more information: [Large model loading
     using Accelerate](./main_classes/model#large-model-loading)'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 请阅读以下指南以获取更多信息：[使用 Accelerate 进行大型模型加载](./main_classes/model#large-model-loading)

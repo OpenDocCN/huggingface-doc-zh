@@ -1,26 +1,17 @@
 - en: GPU inference
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: GPU推理
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_gpu_one](https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_gpu_one)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_gpu_one](https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_gpu_one)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: GPUs are the standard choice of hardware for machine learning, unlike CPUs,
@@ -31,415 +22,612 @@
     attention mechanism), BetterTransformer (a PyTorch native fastpath execution),
     and bitsandbytes to quantize your model to a lower precision. Finally, learn how
     to use 🤗 Optimum to accelerate inference with ONNX Runtime on Nvidia and AMD GPUs.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 与CPU不同，GPU是机器学习的标准硬件选择，因为它们针对内存带宽和并行性进行了优化。为了跟上现代模型的更大尺寸或在现有和较旧的硬件上运行这些大型模型，您可以使用几种优化方法来加速GPU推理。在本指南中，您将学习如何使用FlashAttention-2（一种更节省内存的注意力机制）、BetterTransformer（PyTorch本地快速执行路径）和bitsandbytes将模型量化为较低精度。最后，学习如何使用🤗
+    Optimum在Nvidia和AMD GPU上加速推理。
 - en: The majority of the optimizations described here also apply to multi-GPU setups!
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里描述的大多数优化也适用于多GPU设置！
 - en: FlashAttention-2
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FlashAttention-2
 - en: FlashAttention-2 is experimental and may change considerably in future versions.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: FlashAttention-2是实验性的，未来版本可能会发生较大变化。
 - en: '[FlashAttention-2](https://huggingface.co/papers/2205.14135) is a faster and
     more efficient implementation of the standard attention mechanism that can significantly
     speedup inference by:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '[FlashAttention-2](https://huggingface.co/papers/2205.14135)是标准注意力机制的更快、更高效的实现，可以通过以下方式显著加速推理：'
 - en: additionally parallelizing the attention computation over sequence length
+  id: totrans-8
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 此外，可以通过在序列长度上并行化注意力计算来优化
 - en: partitioning the work between GPU threads to reduce communication and shared
     memory reads/writes between them
+  id: totrans-9
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将工作分区在GPU线程之间，以减少它们之间的通信和共享内存读/写
 - en: 'FlashAttention-2 is currently supported for the following architectures:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 目前支持以下架构的FlashAttention-2：
 - en: '[Bark](https://huggingface.co/docs/transformers/model_doc/bark#transformers.BarkModel)'
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Bark](https://huggingface.co/docs/transformers/model_doc/bark#transformers.BarkModel)'
 - en: '[Bart](https://huggingface.co/docs/transformers/model_doc/bart#transformers.BartModel)'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Bart](https://huggingface.co/docs/transformers/model_doc/bart#transformers.BartModel)'
 - en: '[DistilBert](https://huggingface.co/docs/transformers/model_doc/distilbert#transformers.DistilBertModel)'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[DistilBert](https://huggingface.co/docs/transformers/model_doc/distilbert#transformers.DistilBertModel)'
 - en: '[GPTBigCode](https://huggingface.co/docs/transformers/model_doc/gpt_bigcode#transformers.GPTBigCodeModel)'
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[GPTBigCode](https://huggingface.co/docs/transformers/model_doc/gpt_bigcode#transformers.GPTBigCodeModel)'
 - en: '[GPTNeo](https://huggingface.co/docs/transformers/model_doc/gpt_neo#transformers.GPTNeoModel)'
+  id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[GPTNeo](https://huggingface.co/docs/transformers/model_doc/gpt_neo#transformers.GPTNeoModel)'
 - en: '[GPTNeoX](https://huggingface.co/docs/transformers/model_doc/gpt_neox#transformers.GPTNeoXModel)'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[GPTNeoX](https://huggingface.co/docs/transformers/model_doc/gpt_neox#transformers.GPTNeoXModel)'
 - en: '[Falcon](https://huggingface.co/docs/transformers/model_doc/falcon#transformers.FalconModel)'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Falcon](https://huggingface.co/docs/transformers/model_doc/falcon#transformers.FalconModel)'
 - en: '[Llama](https://huggingface.co/docs/transformers/model_doc/llama#transformers.LlamaModel)'
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Llama](https://huggingface.co/docs/transformers/model_doc/llama#transformers.LlamaModel)'
 - en: '[Llava](https://huggingface.co/docs/transformers/model_doc/llava)'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Llava](https://huggingface.co/docs/transformers/model_doc/llava)'
 - en: '[VipLlava](https://huggingface.co/docs/transformers/model_doc/vipllava)'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[VipLlava](https://huggingface.co/docs/transformers/model_doc/vipllava)'
 - en: '[MBart](https://huggingface.co/docs/transformers/model_doc/mbart#transformers.MBartModel)'
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[MBart](https://huggingface.co/docs/transformers/model_doc/mbart#transformers.MBartModel)'
 - en: '[Mistral](https://huggingface.co/docs/transformers/model_doc/mistral#transformers.MistralModel)'
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Mistral](https://huggingface.co/docs/transformers/model_doc/mistral#transformers.MistralModel)'
 - en: '[Mixtral](https://huggingface.co/docs/transformers/model_doc/mixtral#transformers.MixtralModel)'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Mixtral](https://huggingface.co/docs/transformers/model_doc/mixtral#transformers.MixtralModel)'
 - en: '[OPT](https://huggingface.co/docs/transformers/model_doc/opt#transformers.OPTModel)'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[OPT](https://huggingface.co/docs/transformers/model_doc/opt#transformers.OPTModel)'
 - en: '[Phi](https://huggingface.co/docs/transformers/model_doc/phi#transformers.PhiModel)'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Phi](https://huggingface.co/docs/transformers/model_doc/phi#transformers.PhiModel)'
 - en: '[Qwen2](https://huggingface.co/docs/transformers/model_doc/qwen2#transformers.Qwen2Model)'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Qwen2](https://huggingface.co/docs/transformers/model_doc/qwen2#transformers.Qwen2Model)'
 - en: '[Whisper](https://huggingface.co/docs/transformers/model_doc/whisper#transformers.WhisperModel)'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Whisper](https://huggingface.co/docs/transformers/model_doc/whisper#transformers.WhisperModel)'
 - en: You can request to add FlashAttention-2 support for another model by opening
     a GitHub Issue or Pull Request.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过打开GitHub Issue或Pull Request来请求为另一个模型添加FlashAttention-2支持。
 - en: Before you begin, make sure you have FlashAttention-2 installed.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装FlashAttention-2。
 - en: NVIDIAAMD
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: NVIDIAAMD
 - en: '[PRE0]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: We strongly suggest referring to the detailed [installation instructions](https://github.com/Dao-AILab/flash-attention?tab=readme-ov-file#installation-and-features)
     to learn more about supported hardware and data types!
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们强烈建议参考详细的[安装说明](https://github.com/Dao-AILab/flash-attention?tab=readme-ov-file#installation-and-features)以了解更多支持的硬件和数据类型！
 - en: 'To enable FlashAttention-2, pass the argument `attn_implementation="flash_attention_2"`
     to [from_pretrained()](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.FlaxAutoModelForVision2Seq.from_pretrained):'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 要启用FlashAttention-2，请将参数`attn_implementation="flash_attention_2"`传递给[from_pretrained()](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.FlaxAutoModelForVision2Seq.from_pretrained)：
 - en: '[PRE1]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: FlashAttention-2 can only be used when the model’s dtype is `fp16` or `bf16`.
     Make sure to cast your model to the appropriate dtype and load them on a supported
     device before using FlashAttention-2.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 只有当模型的dtype为`fp16`或`bf16`时，才能使用FlashAttention-2。在使用FlashAttention-2之前，请确保将模型转换为适当的dtype并加载到支持的设备上。
 - en: You can also set `use_flash_attention_2=True` to enable FlashAttention-2 but
     it is deprecated in favor of `attn_implementation="flash_attention_2"`.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以设置`use_flash_attention_2=True`来启用FlashAttention-2，但已被弃用，推荐使用`attn_implementation="flash_attention_2"`。
 - en: 'FlashAttention-2 can be combined with other optimization techniques like quantization
     to further speedup inference. For example, you can combine FlashAttention-2 with
     8-bit or 4-bit quantization:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: FlashAttention-2可以与其他优化技术（如量化）结合，以进一步加速推理。例如，您可以将FlashAttention-2与8位或4位量化结合使用：
 - en: '[PRE2]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Expected speedups
+  id: totrans-39
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 预期的加速
 - en: You can benefit from considerable speedups for inference, especially for inputs
     with long sequences. However, since FlashAttention-2 does not support computing
     attention scores with padding tokens, you must manually pad/unpad the attention
     scores for batched inference when the sequence contains padding tokens. This leads
     to a significant slowdown for batched generations with padding tokens.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以从推理中获得相当大的加速，特别是对于具有长序列的输入。但是，由于FlashAttention-2不支持使用填充令牌计算注意力分数，因此在序列包含填充令牌时，您必须手动填充/取消填充注意力分数以进行批量推理。这会导致使用填充令牌进行批量生成时出现显着减速。
 - en: To overcome this, you should use FlashAttention-2 without padding tokens in
     the sequence during training (by packing a dataset or [concatenating sequences](https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py#L516)
     until reaching the maximum sequence length).
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了克服这一点，在训练期间应该使用不带填充令牌的FlashAttention-2（通过打包数据集或[连接序列](https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py#L516)直到达到最大序列长度）。
 - en: 'For a single forward pass on [tiiuae/falcon-7b](https://hf.co/tiiuae/falcon-7b)
     with a sequence length of 4096 and various batch sizes without padding tokens,
     the expected speedup is:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于在[tiiuae/falcon-7b](https://hf.co/tiiuae/falcon-7b)上进行单次前向传递，序列长度为4096，各种批量大小且没有填充令牌，预期的加速是：
 - en: '![](../Images/463d3f3c66f2489865a258a5082f46f7.png)'
+  id: totrans-43
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/463d3f3c66f2489865a258a5082f46f7.png)'
 - en: 'For a single forward pass on [meta-llama/Llama-7b-hf](https://hf.co/meta-llama/Llama-7b-hf)
     with a sequence length of 4096 and various batch sizes without padding tokens,
     the expected speedup is:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于在[meta-llama/Llama-7b-hf](https://hf.co/meta-llama/Llama-7b-hf)上进行单次前向传递，序列长度为4096，各种批量大小且没有填充令牌，预期的加速是：
 - en: '![](../Images/7ae0be2e7a0a9e0f4d275f8884f4d7d3.png)'
+  id: totrans-45
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/7ae0be2e7a0a9e0f4d275f8884f4d7d3.png)'
 - en: 'For sequences with padding tokens (generating with padding tokens), you need
     to unpad/pad the input sequences to correctly compute the attention scores. With
     a relatively small sequence length, a single forward pass creates overhead leading
     to a small speedup (in the example below, 30% of the input is filled with padding
     tokens):'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于具有填充令牌的序列（使用填充令牌生成），您需要取消填充/填充输入序列以正确计算注意力分数。对于相对较小的序列长度，单次前向传递会产生额外开销，导致轻微加速（在下面的示例中，输入的30%填充有填充令牌）：
 - en: '![](../Images/44a86fa9a8504c27decb2bf7133621cb.png)'
+  id: totrans-47
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/44a86fa9a8504c27decb2bf7133621cb.png)'
 - en: 'But for larger sequence lengths, you can expect even more speedup benefits:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是对于更大的序列长度，您可以期望获得更多的加速效益：
 - en: FlashAttention is more memory efficient, meaning you can train on much larger
     sequence lengths without running into out-of-memory issues. You can potentially
     reduce memory usage up to 20x for larger sequence lengths. Take a look at the
     [flash-attention](https://github.com/Dao-AILab/flash-attention) repository for
     more details.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: FlashAttention更具内存效率，这意味着您可以在更大的序列长度上进行训练，而不会遇到内存不足的问题。对于更大的序列长度，您可以将内存使用量降低多达20倍。查看[flash-attention](https://github.com/Dao-AILab/flash-attention)存储库以获取更多详细信息。
 - en: '![](../Images/36c674b28857433397883375e3a3644d.png)'
+  id: totrans-50
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/36c674b28857433397883375e3a3644d.png)'
 - en: PyTorch scaled dot product attention
+  id: totrans-51
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: PyTorch缩放点积注意力
 - en: PyTorch’s [`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention.html)
     (SDPA) can also call FlashAttention and memory-efficient attention kernels under
     the hood. SDPA support is currently being added natively in Transformers and is
     used by default for `torch>=2.1.1` when an implementation is available.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch的[`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention.html)（SDPA）也可以在底层调用FlashAttention和内存高效的注意力核。当可用实现时，SDPA支持目前正在Transformers中本地添加，并且在`torch>=2.1.1`时默认用于`torch`。
 - en: 'For now, Transformers supports SDPA inference and training for the following
     architectures:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 目前，Transformers支持以下架构的SDPA推理和训练：
 - en: '[Bart](https://huggingface.co/docs/transformers/model_doc/bart#transformers.BartModel)'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Bart](https://huggingface.co/docs/transformers/model_doc/bart#transformers.BartModel)'
 - en: '[GPTBigCode](https://huggingface.co/docs/transformers/model_doc/gpt_bigcode#transformers.GPTBigCodeModel)'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[GPTBigCode](https://huggingface.co/docs/transformers/model_doc/gpt_bigcode#transformers.GPTBigCodeModel)'
 - en: '[Falcon](https://huggingface.co/docs/transformers/model_doc/falcon#transformers.FalconModel)'
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Falcon](https://huggingface.co/docs/transformers/model_doc/falcon#transformers.FalconModel)'
 - en: '[Llama](https://huggingface.co/docs/transformers/model_doc/llama#transformers.LlamaModel)'
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Llama](https://huggingface.co/docs/transformers/model_doc/llama#transformers.LlamaModel)'
 - en: '[Idefics](https://huggingface.co/docs/transformers/model_doc/idefics#transformers.IdeficsModel)'
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Idefics](https://huggingface.co/docs/transformers/model_doc/idefics#transformers.IdeficsModel)'
 - en: '[Whisper](https://huggingface.co/docs/transformers/model_doc/whisper#transformers.WhisperModel)'
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Whisper](https://huggingface.co/docs/transformers/model_doc/whisper#transformers.WhisperModel)'
 - en: '[Mistral](https://huggingface.co/docs/transformers/model_doc/mistral#transformers.MistralModel)'
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Mistral](https://huggingface.co/docs/transformers/model_doc/mistral#transformers.MistralModel)'
 - en: '[Mixtral](https://huggingface.co/docs/transformers/model_doc/mixtral#transformers.MixtralModel)'
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Mixtral](https://huggingface.co/docs/transformers/model_doc/mixtral#transformers.MixtralModel)'
 - en: '[Qwen2](https://huggingface.co/docs/transformers/model_doc/qwen2#transformers.Qwen2Model)'
+  id: totrans-62
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Qwen2](https://huggingface.co/docs/transformers/model_doc/qwen2#transformers.Qwen2Model)'
 - en: FlashAttention can only be used for models with the `fp16` or `bf16` torch type,
     so make sure to cast your model to the appropriate type first.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: FlashAttention只能用于具有`fp16`或`bf16` torch类型的模型，因此请确保首先将您的模型转换为适当的类型。
 - en: 'By default, SDPA selects the most performant kernel available but you can check
     whether a backend is available in a given setting (hardware, problem size) with
     [`torch.backends.cuda.sdp_kernel`](https://pytorch.org/docs/master/backends.html#torch.backends.cuda.sdp_kernel)
     as a context manager:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，SDPA选择最高效的可用内核，但您可以使用[`torch.backends.cuda.sdp_kernel`](https://pytorch.org/docs/master/backends.html#torch.backends.cuda.sdp_kernel)作为上下文管理器来检查在给定设置（硬件、问题大小）中是否有可用的后端：
 - en: '[PRE3]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'If you see a bug with the traceback below, try using the nightly version of
     PyTorch which may have broader coverage for FlashAttention:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您看到下面的回溯中有错误，请尝试使用PyTorch的夜间版本，这可能对FlashAttention有更广泛的覆盖范围：
 - en: '[PRE4]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: BetterTransformer
+  id: totrans-68
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: BetterTransformer
 - en: Some BetterTransformer features are being upstreamed to Transformers with default
     support for native `torch.nn.scaled_dot_product_attention`. BetterTransformer
     still has a wider coverage than the Transformers SDPA integration, but you can
     expect more and more architectures to natively support SDPA in Transformers.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些BetterTransformer功能正在被上游到Transformers，支持本机`torch.nn.scaled_dot_product_attention`。BetterTransformer仍然比Transformers
+    SDPA集成具有更广泛的覆盖范围，但您可以期望越来越多的架构在Transformers中本地支持SDPA。
 - en: Check out our benchmarks with BetterTransformer and scaled dot product attention
     in the [Out of the box acceleration and memory savings of 🤗 decoder models with
     PyTorch 2.0](https://pytorch.org/blog/out-of-the-box-acceleration/) and learn
     more about the fastpath execution in the [BetterTransformer](https://medium.com/pytorch/bettertransformer-out-of-the-box-performance-for-huggingface-transformers-3fbe27d50ab2)
     blog post.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看我们在[PyTorch 2.0中使用BetterTransformer和缩放点积注意力的开箱即用加速和内存节省](https://pytorch.org/blog/out-of-the-box-acceleration/)中的基准测试，并在[BetterTransformer](https://medium.com/pytorch/bettertransformer-out-of-the-box-performance-for-huggingface-transformers-3fbe27d50ab2)博客文章中了解更多关于快速执行的信息。
 - en: 'BetterTransformer accelerates inference with its fastpath (native PyTorch specialized
     implementation of Transformer functions) execution. The two optimizations in the
     fastpath execution are:'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: BetterTransformer通过其快速路径（Transformer函数的本机PyTorch专用实现）执行加速推断。快速路径执行中的两个优化是：
 - en: fusion, which combines multiple sequential operations into a single “kernel”
     to reduce the number of computation steps
+  id: totrans-72
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 融合，将多个连续操作组合成一个单一的“内核”，以减少计算步骤的数量
 - en: skipping the inherent sparsity of padding tokens to avoid unnecessary computation
     with nested tensors
+  id: totrans-73
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 跳过填充令牌的固有稀疏性，以避免使用嵌套张量进行不必要的计算
 - en: BetterTransformer also converts all attention operations to use the more memory-efficient
     [scaled dot product attention (SDPA)](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention),
     and it calls optimized kernels like [FlashAttention](https://huggingface.co/papers/2205.14135)
     under the hood.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: BetterTransformer还将所有注意力操作转换为更节省内存的[scaled dot product attention (SDPA)](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention)，并在底层调用优化的内核，如[FlashAttention](https://huggingface.co/papers/2205.14135)。
 - en: Before you start, make sure you have 🤗 Optimum [installed](https://huggingface.co/docs/optimum/installation).
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已安装🤗 Optimum [（已安装）](https://huggingface.co/docs/optimum/installation)。
 - en: 'Then you can enable BetterTransformer with the [PreTrainedModel.to_bettertransformer()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.to_bettertransformer)
     method:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，您可以使用[PreTrainedModel.to_bettertransformer()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.to_bettertransformer)方法启用BetterTransformer：
 - en: '[PRE5]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'You can return the original Transformers model with the [reverse_bettertransformer()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.reverse_bettertransformer)
     method. You should use this before saving your model to use the canonical Transformers
     modeling:'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用[reverse_bettertransformer()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.reverse_bettertransformer)方法返回原始的Transformers模型。在保存模型之前，应该使用这个方法来使用规范的Transformers建模：
 - en: '[PRE6]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: bitsandbytes
+  id: totrans-80
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: bitsandbytes
 - en: bitsandbytes is a quantization library that includes support for 4-bit and 8-bit
     quantization. Quantization reduces your model size compared to its native full
     precision version, making it easier to fit large models onto GPUs with limited
     memory.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: bitsandbytes是一个包含对4位和8位量化支持的量化库。与其原生全精度版本相比，量化可以减小模型大小，使其更容易适应内存有限的GPU。
 - en: 'Make sure you have bitsandbytes and 🤗 Accelerate installed:'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保您已安装bitsandbytes和🤗 Accelerate：
 - en: '[PRE7]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 4-bit
+  id: totrans-84
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 4位
 - en: To load a model in 4-bit for inference, use the `load_in_4bit` parameter. The
     `device_map` parameter is optional, but we recommend setting it to `"auto"` to
     allow 🤗 Accelerate to automatically and efficiently allocate the model given the
     available resources in the environment.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在4位模型中进行推断，使用`load_in_4bit`参数。`device_map`参数是可选的，但我们建议将其设置为`"auto"`，以便🤗 Accelerate根据环境中的可用资源自动高效地分配模型。
 - en: '[PRE8]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'To load a model in 4-bit for inference with multiple GPUs, you can control
     how much GPU RAM you want to allocate to each GPU. For example, to distribute
     600MB of memory to the first GPU and 1GB of memory to the second GPU:'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在多个GPU上加载4位模型进行推断，您可以控制要为每个GPU分配多少GPU RAM。例如，将600MB的内存分配给第一个GPU，将1GB的内存分配给第二个GPU：
 - en: '[PRE9]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 8-bit
+  id: totrans-89
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 8位
 - en: If you’re curious and interested in learning more about the concepts underlying
     8-bit quantization, read the [Gentle Introduction to 8-bit Matrix Multiplication
     for transformers at scale using Hugging Face Transformers, Accelerate and bitsandbytes](https://huggingface.co/blog/hf-bitsandbytes-integration)
     blog post.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您对8位量化的概念感兴趣并想了解更多信息，请阅读[Hugging Face Transformers、Accelerate和bitsandbytes使用规模化变压器进行8位矩阵乘法的初步介绍](https://huggingface.co/blog/hf-bitsandbytes-integration)博客文章。
 - en: 'To load a model in 8-bit for inference, use the `load_in_8bit` parameter. The
     `device_map` parameter is optional, but we recommend setting it to `"auto"` to
     allow 🤗 Accelerate to automatically and efficiently allocate the model given the
     available resources in the environment:'
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在8位模型中进行推断，使用`load_in_8bit`参数。`device_map`参数是可选的，但我们建议将其设置为`"auto"`，以便🤗 Accelerate根据环境中的可用资源自动高效地分配模型：
 - en: '[PRE10]'
+  id: totrans-92
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'If you’re loading a model in 8-bit for text generation, you should use the
     [generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)
     method instead of the [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)
     function which is not optimized for 8-bit models and will be slower. Some sampling
     strategies, like nucleus sampling, are also not supported by the [Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)
     for 8-bit models. You should also place all inputs on the same device as the model:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您要加载8位模型进行文本生成，应该使用[generate()](/docs/transformers/v4.37.2/en/main_classes/text_generation#transformers.GenerationMixin.generate)方法，而不是未经优化的[Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)函数，后者对8位模型不适用且速度较慢。一些采样策略，如核采样，也不受[Pipeline](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Pipeline)支持。您还应该将所有输入放在与模型相同的设备上：
 - en: '[PRE11]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'To load a model in 4-bit for inference with multiple GPUs, you can control
     how much GPU RAM you want to allocate to each GPU. For example, to distribute
     1GB of memory to the first GPU and 2GB of memory to the second GPU:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在多个GPU上加载4位模型进行推断，您可以控制要为每个GPU分配多少GPU RAM。例如，要将1GB内存分配给第一个GPU，将2GB内存分配给第二个GPU：
 - en: '[PRE12]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Feel free to try running a 11 billion parameter [T5 model](https://colab.research.google.com/drive/1YORPWx4okIHXnjW7MSAidXN29mPVNT7F?usp=sharing)
     or the 3 billion parameter [BLOOM model](https://colab.research.google.com/drive/1qOjXfQIAULfKvZqwCen8-MoWKGdSatZ4?usp=sharing)
     for inference on Google Colab’s free tier GPUs!
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 随意尝试在Google Colab的免费GPU上运行一个拥有110亿参数的[T5模型](https://colab.research.google.com/drive/1YORPWx4okIHXnjW7MSAidXN29mPVNT7F?usp=sharing)或30亿参数的[BLOOM模型](https://colab.research.google.com/drive/1qOjXfQIAULfKvZqwCen8-MoWKGdSatZ4?usp=sharing)进行推断！
 - en: 🤗 Optimum
+  id: totrans-98
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 🤗 Optimum
 - en: Learn more details about using ORT with 🤗 Optimum in the [Accelerated inference
     on NVIDIA GPUs](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/gpu#accelerated-inference-on-nvidia-gpus)
     and [Accelerated inference on AMD GPUs](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/amdgpu#accelerated-inference-on-amd-gpus)
     guides. This section only provides a brief and simple example.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 了解有关在[NVIDIA GPU上进行加速推断](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/gpu#accelerated-inference-on-nvidia-gpus)和[AMD
+    GPU上进行加速推断](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/amdgpu#accelerated-inference-on-amd-gpus)的指南中使用ORT的更多详细信息。本节仅提供简要且简单的示例。
 - en: ONNX Runtime (ORT) is a model accelerator that supports accelerated inference
     on Nvidia GPUs, and AMD GPUs that use [ROCm](https://www.amd.com/en/products/software/rocm.html)
     stack. ORT uses optimization techniques like fusing common operations into a single
@@ -447,8 +635,11 @@
     inference. ORT also places the most computationally intensive operations on the
     GPU and the rest on the CPU to intelligently distribute the workload between the
     two devices.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: ONNX Runtime（ORT）是一个模型加速器，支持在Nvidia GPU和使用[ROCm](https://www.amd.com/en/products/software/rocm.html)堆栈的AMD
+    GPU上进行加速推断。ORT使用优化技术，如将常见操作融合为单个节点和常量折叠，以减少执行的计算量并加快推断速度。ORT还将计算密集型操作放在GPU上，其余操作放在CPU上，智能地在两个设备之间分配工作负载。
 - en: 'ORT is supported by 🤗 Optimum which can be used in 🤗 Transformers. You’ll need
     to use an [ORTModel](https://huggingface.co/docs/optimum/v1.16.2/en/onnxruntime/package_reference/modeling_ort#optimum.onnxruntime.ORTModel)
     for the task you’re solving, and specify the `provider` parameter which can be
@@ -457,26 +648,40 @@
     or [`TensorrtExecutionProvider`](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/gpu#tensorrtexecutionprovider).
     If you want to load a model that was not yet exported to ONNX, you can set `export=True`
     to convert your model on-the-fly to the ONNX format:'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: ORT受🤗 Optimum支持，可以在🤗 Transformers中使用。您需要使用一个[ORTModel](https://huggingface.co/docs/optimum/v1.16.2/en/onnxruntime/package_reference/modeling_ort#optimum.onnxruntime.ORTModel)来解决您的任务，并指定`provider`参数，可以设置为[`CUDAExecutionProvider`](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/gpu#cudaexecutionprovider)、[`ROCMExecutionProvider`](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/amdgpu)或[`TensorrtExecutionProvider`](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/gpu#tensorrtexecutionprovider)。如果要加载尚未导出为ONNX的模型，可以设置`export=True`将您的模型即时转换为ONNX格式：
 - en: '[PRE13]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Now you’re free to use the model for inference:'
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以自由地使用模型进行推断：
 - en: '[PRE14]'
+  id: totrans-104
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Combine optimizations
+  id: totrans-105
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 结合优化
 - en: 'It is often possible to combine several of the optimization techniques described
     above to get the best inference performance possible for your model. For example,
     you can load a model in 4-bit, and then enable BetterTransformer with FlashAttention:'
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常可以结合上述描述的多种优化技术，以获得最佳的推断性能。例如，您可以加载一个4位模型，然后启用带有FlashAttention的BetterTransformer：
 - en: '[PRE15]'
+  id: totrans-107
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'

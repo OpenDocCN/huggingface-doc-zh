@@ -1,24 +1,17 @@
 - en: CPU inference
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: CPU推理
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_cpu](https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_cpu)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_cpu](https://huggingface.co/docs/transformers/v4.37.2/en/perf_infer_cpu)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: With some optimizations, it is possible to efficiently run large model inference
@@ -26,57 +19,83 @@
     code into an intermediate format for high-performance environments like C++. The
     other technique fuses multiple operations into one kernel to reduce the overhead
     of running each operation separately.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过一些优化，可以在CPU上高效运行大型模型推理。其中一种优化技术涉及将PyTorch代码编译成高性能环境（如C++）的中间格式。另一种技术是将多个操作融合成一个内核，以减少单独运行每个操作的开销。
 - en: You’ll learn how to use [BetterTransformer](https://pytorch.org/blog/a-better-transformer-for-fast-transformer-encoder-inference/)
     for faster inference, and how to convert your PyTorch code to [TorchScript](https://pytorch.org/tutorials/beginner/Intro_to_TorchScript_tutorial.html).
     If you’re using an Intel CPU, you can also use [graph optimizations](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/tutorials/features.html#graph-optimization)
     from [Intel Extension for PyTorch](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/index.html)
     to boost inference speed even more. Finally, learn how to use 🤗 Optimum to accelerate
     inference with ONNX Runtime or OpenVINO (if you’re using an Intel CPU).
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将学习如何使用[BetterTransformer](https://pytorch.org/blog/a-better-transformer-for-fast-transformer-encoder-inference/)进行更快的推理，以及如何将您的PyTorch代码转换为[TorchScript](https://pytorch.org/tutorials/beginner/Intro_to_TorchScript_tutorial.html)。如果您使用Intel
+    CPU，还可以使用[Intel Extension for PyTorch](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/index.html)中的[图优化](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/tutorials/features.html#graph-optimization)来进一步提高推理速度。最后，学习如何使用🤗
+    Optimum来加速使用ONNX Runtime或OpenVINO进行推理（如果您使用Intel CPU）。
 - en: BetterTransformer
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: BetterTransformer
 - en: 'BetterTransformer accelerates inference with its fastpath (native PyTorch specialized
     implementation of Transformer functions) execution. The two optimizations in the
     fastpath execution are:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: BetterTransformer通过其快速路径（Transformer函数的本机PyTorch专用实现）执行加速推理。快速路径执行中的两个优化是：
 - en: fusion, which combines multiple sequential operations into a single “kernel”
     to reduce the number of computation steps
+  id: totrans-7
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 融合，将多个顺序操作组合成一个“内核”，以减少计算步骤的数量
 - en: skipping the inherent sparsity of padding tokens to avoid unnecessary computation
     with nested tensors
+  id: totrans-8
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 跳过填充令牌的固有稀疏性，以避免与嵌套张量一起进行不必要的计算
 - en: BetterTransformer also converts all attention operations to use the more memory-efficient
     [scaled dot product attention](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention).
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: BetterTransformer还将所有注意力操作转换为更节省内存的[缩放点积注意力](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention)。
 - en: BetterTransformer is not supported for all models. Check this [list](https://huggingface.co/docs/optimum/bettertransformer/overview#supported-models)
     to see if a model supports BetterTransformer.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 并非所有模型都支持BetterTransformer。查看此[列表](https://huggingface.co/docs/optimum/bettertransformer/overview#supported-models)以查看模型是否支持BetterTransformer。
 - en: Before you start, make sure you have 🤗 Optimum [installed](https://huggingface.co/docs/optimum/installation).
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保您已经安装了🤗 Optimum [installed](https://huggingface.co/docs/optimum/installation)。
 - en: 'Enable BetterTransformer with the [PreTrainedModel.to_bettertransformer()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.to_bettertransformer)
     method:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[PreTrainedModel.to_bettertransformer()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.to_bettertransformer)方法启用BetterTransformer：
 - en: '[PRE0]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: TorchScript
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TorchScript
 - en: TorchScript is an intermediate PyTorch model representation that can be run
     in production environments where performance is important. You can train a model
     in PyTorch and then export it to TorchScript to free the model from Python performance
@@ -84,83 +103,123 @@
     a model to return a `ScriptFunction` that is optimized with just-in-time compilation
     (JIT). Compared to the default eager mode, JIT mode in PyTorch typically yields
     better performance for inference using optimization techniques like operator fusion.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: TorchScript是一个中间PyTorch模型表示，可以在性能重要的生产环境中运行。您可以在PyTorch中训练模型，然后将其导出到TorchScript中，以解放模型免受Python性能约束。PyTorch[跟踪](https://pytorch.org/docs/stable/generated/torch.jit.trace.html)一个模型以返回一个经过即时编译（JIT）优化的`ScriptFunction`。与默认的急切模式相比，PyTorch中的JIT模式通常通过操作融合等优化技术为推理提供更好的性能。
 - en: For a gentle introduction to TorchScript, see the [Introduction to PyTorch TorchScript](https://pytorch.org/tutorials/beginner/Intro_to_TorchScript_tutorial.html)
     tutorial.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关TorchScript的简要介绍，请参阅[PyTorch TorchScript简介](https://pytorch.org/tutorials/beginner/Intro_to_TorchScript_tutorial.html)教程。
 - en: 'With the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     class, you can enable JIT mode for CPU inference by setting the `--jit_mode_eval`
     flag:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)类，您可以通过设置`--jit_mode_eval`标志为CPU推理启用JIT模式：
 - en: '[PRE1]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: For PyTorch >= 1.14.0, JIT-mode could benefit any model for prediction and evaluaion
     since the dict input is supported in `jit.trace`.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于PyTorch >= 1.14.0，JIT模式可以使任何模型受益于预测和评估，因为`jit.trace`支持字典输入。
 - en: For PyTorch < 1.14.0, JIT-mode could benefit a model if its forward parameter
     order matches the tuple input order in `jit.trace`, such as a question-answering
     model. If the forward parameter order does not match the tuple input order in
     `jit.trace`, like a text classification model, `jit.trace` will fail and we are
     capturing this with the exception here to make it fallback. Logging is used to
     notify users.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于PyTorch < 1.14.0，如果模型的前向参数顺序与`jit.trace`中的元组输入顺序匹配，例如问答模型，JIT模式可以使模型受益。如果前向参数顺序与`jit.trace`中的元组输入顺序不匹配，例如文本分类模型，`jit.trace`将失败，我们在此处捕获此异常以使其回退。使用日志记录通知用户。
 - en: IPEX graph optimization
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: IPEX图优化
 - en: Intel® Extension for PyTorch (IPEX) provides further optimizations in JIT mode
     for Intel CPUs, and we recommend combining it with TorchScript for even faster
     performance. The IPEX [graph optimization](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/tutorials/features/graph_optimization.html)
     fuses operations like Multi-head attention, Concat Linear, Linear + Add, Linear
     + Gelu, Add + LayerNorm, and more.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: Intel® Extension for PyTorch (IPEX)为Intel CPU的JIT模式提供进一步优化，并建议将其与TorchScript结合使用以获得更快的性能。IPEX
+    [图优化](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/tutorials/features/graph_optimization.html)融合了多头注意力、Concat
+    Linear、Linear + Add、Linear + Gelu、Add + LayerNorm等操作。
 - en: 'To take advantage of these graph optimizations, make sure you have IPEX [installed](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/tutorials/installation.html):'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 要利用这些图优化，请确保已安装IPEX [installed](https://intel.github.io/intel-extension-for-pytorch/cpu/latest/tutorials/installation.html)。
 - en: '[PRE2]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Set the `--use_ipex` and `--jit_mode_eval` flags in the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     class to enable JIT mode with the graph optimizations:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)类中设置`--use_ipex`和`--jit_mode_eval`标志以启用带有图优化的JIT模式：
 - en: '[PRE3]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 🤗 Optimum
+  id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 🤗 Optimum
 - en: Learn more details about using ORT with 🤗 Optimum in the [Optimum Inference
     with ONNX Runtime](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/models)
     guide. This section only provides a brief and simple example.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[Optimum Inference with ONNX Runtime](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/models)指南中了解有关使用ORT与🤗
+    Optimum的更多详细信息。本节仅提供了一个简短且简单的示例。
 - en: ONNX Runtime (ORT) is a model accelerator that runs inference on CPUs by default.
     ORT is supported by 🤗 Optimum which can be used in 🤗 Transformers, without making
     too many changes to your code. You only need to replace the 🤗 Transformers `AutoClass`
     with its equivalent [ORTModel](https://huggingface.co/docs/optimum/v1.16.2/en/onnxruntime/package_reference/modeling_ort#optimum.onnxruntime.ORTModel)
     for the task you’re solving, and load a checkpoint in the ONNX format.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: ONNX Runtime (ORT)是一个模型加速器，默认情况下在CPU上运行推理。ORT受🤗 Optimum支持，可以在🤗 Transformers中使用，而无需对您的代码进行太多更改。您只需要将🤗
+    Transformers的`AutoClass`替换为其等效的[ORTModel](https://huggingface.co/docs/optimum/v1.16.2/en/onnxruntime/package_reference/modeling_ort#optimum.onnxruntime.ORTModel)以解决您正在解决的任务，并加载一个ONNX格式的检查点。
 - en: 'For example, if you’re running inference on a question answering task, load
     the [optimum/roberta-base-squad2](https://huggingface.co/optimum/roberta-base-squad2)
     checkpoint which contains a `model.onnx` file:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，如果您正在运行问题回答任务的推理，加载包含`model.onnx`文件的[optimum/roberta-base-squad2](https://huggingface.co/optimum/roberta-base-squad2)检查点：
 - en: '[PRE4]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: If you have an Intel CPU, take a look at 🤗 [Optimum Intel](https://huggingface.co/docs/optimum/intel/index)
     which supports a variety of compression techniques (quantization, pruning, knowledge
     distillation) and tools for converting models to the [OpenVINO](https://huggingface.co/docs/optimum/intel/inference)
     format for higher performance inference.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您有Intel CPU，请查看🤗 [Optimum Intel](https://huggingface.co/docs/optimum/intel/index)，该支持各种压缩技术（量化、剪枝、知识蒸馏）和将模型转换为[OpenVINO](https://huggingface.co/docs/optimum/intel/inference)格式以获得更高性能推理的工具。
