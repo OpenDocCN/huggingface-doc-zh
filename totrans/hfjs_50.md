@@ -1,6 +1,6 @@
 # 接口: ListFileEntry
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/hub/interfaces/ListFileEntry](https://huggingface.co/docs/huggingface.js/hub/interfaces/ListFileEntry)
+> 原文链接: [`huggingface.co/docs/huggingface.js/hub/interfaces/ListFileEntry`](https://huggingface.co/docs/huggingface.js/hub/interfaces/ListFileEntry)
 
 ## 属性
 
@@ -33,7 +33,7 @@
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `oid` | `字符串` | - |
-| `pointerSize` | `数字` | 原始指针文件的大小，100~200字节 |
+| `pointerSize` | `数字` | 原始指针文件的大小，100~200 字节 |
 | `大小` | `数字` | - |
 
 #### 定义在

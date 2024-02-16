@@ -1,6 +1,6 @@
 # 管理本地和在线存储库
 
-> 原文链接：[https://huggingface.co/docs/huggingface_hub/package_reference/repository](https://huggingface.co/docs/huggingface_hub/package_reference/repository)
+> 原文链接：[`huggingface.co/docs/huggingface_hub/package_reference/repository`](https://huggingface.co/docs/huggingface_hub/package_reference/repository)
 
 `Repository` 类是一个辅助类，包装了 `git` 和 `git-lfs` 命令。它提供了适用于管理可能非常庞大的存储库的工具。
 
@@ -20,7 +20,7 @@
 
 旨在简化与 huggingface.co 托管的模型或数据集存储库的交互，尽管这里（如果有的话）实际上与 huggingface.co 没有太多特定的内容。
 
-[Repository](/docs/huggingface_hub/v0.20.3/en/package_reference/repository#huggingface_hub.Repository) 已被弃用，推荐使用 [HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi) 中实现的基于 http 的替代方案。鉴于它在旧代码中的广泛应用，完全移除 [Repository](/docs/huggingface_hub/v0.20.3/en/package_reference/repository#huggingface_hub.Repository) 将在版本 `v1.0` 中才会发生。更多详情，请阅读 [https://huggingface.co/docs/huggingface_hub/concepts/git_vs_http](https://huggingface.co/docs/huggingface_hub/concepts/git_vs_http)。
+Repository 已被弃用，推荐使用 HfApi 中实现的基于 http 的替代方案。鉴于它在旧代码中的广泛应用，完全移除 Repository 将在版本 `v1.0` 中才会发生。更多详情，请阅读 [`huggingface.co/docs/huggingface_hub/concepts/git_vs_http`](https://huggingface.co/docs/huggingface_hub/concepts/git_vs_http)。
 
 #### `__init__`
 
@@ -42,7 +42,7 @@
 
 +   `repo_type` (`str`, *可选*) — 从 repo_id 克隆存储库时设置。默认为 model。
 
-+   `token` (`bool` 或 `str`, *可选*) — 一个有效的身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 [login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为 `False`，则请求头中不会发送令牌。
++   `token` (`bool` 或 `str`, *可选*) — 一个有效的身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 login()），则令牌将从缓存中检索。如果为 `False`，则请求头中不会发送令牌。
 
 +   `git_user` (`str`, *可选*) — 将覆盖用于提交和推送文件到中心的 `git config user.name`。
 
@@ -52,7 +52,7 @@
 
 +   `skip_lfs_files` (`bool`, *可选*, 默认为 `False`) — 是否跳过 git-LFS 文件。
 
-+   `client` (`HfApi`, *可选*) — 在调用 HF Hub API 时要使用的 [HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi) 实例。如果将其留空，则将创建一个新实例。
++   `client` (`HfApi`, *可选*) — 在调用 HF Hub API 时要使用的 HfApi 实例。如果将其留空，则将创建一个新实例。
 
 引发
 
@@ -60,7 +60,7 @@
 
 实例化一个 git 存储库的本地克隆。
 
-如果设置了 `clone_from`，则将从现有远程存储库克隆存储库。如果远程存储库不存在，则将引发 `EnvironmentError` 异常。请先使用 [create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo) 创建远程存储库。
+如果设置了 `clone_from`，则将从现有远程存储库克隆存储库。如果远程存储库不存在，则将引发 `EnvironmentError` 异常。请先使用 create_repo() 创建远程存储库。
 
 `Repository` 默认使用本地 git 凭据。如果明确设置，则将使用 `token` 或 `git_user`/`git_email` 对。
 
@@ -98,7 +98,7 @@
 
 在当前头部添加标签并推送它
 
-如果远程为None，则只会在本地更新
+如果远程为 None，则只会在本地更新
 
 如果未提供消息，则标签将是轻量级的。如果提供了消息，则标签将是注释的。
 
@@ -120,7 +120,7 @@
 
 由于是二进制文件而现在被跟踪的文件名列表
 
-自动使用git-lfs跟踪二进制文件。
+自动使用 git-lfs 跟踪二进制文件。
 
 #### `auto_track_large_files`
 
@@ -132,7 +132,7 @@
 
 参数
 
-+   `pattern` (`str`, *可选*, 默认为”.“) — 用于跟踪大小超过10MB的文件的模式。
++   `pattern` (`str`, *可选*, 默认为”.“) — 用于跟踪大小超过 10MB 的文件的模式。
 
 返回
 
@@ -140,7 +140,7 @@
 
 由于其大小而现在被跟踪的文件名列表。
 
-自动使用git-lfs跟踪大文件（大于10MB的文件）。
+自动使用 git-lfs 跟踪大文件（大于 10MB 的文件）。
 
 #### `check_git_versions`
 
@@ -166,7 +166,7 @@
 
 参数
 
-+   `repo_url` (`str`) — 从中克隆存储库的URL
++   `repo_url` (`str`) — 从中克隆存储库的 URL
 
 +   `token` (`Union[str, bool]`, *可选*) — 是否使用身份验证令牌。可以是：
 
@@ -180,11 +180,11 @@
 
 从远程克隆。如果文件夹已经存在，将尝试在其中克隆存储库。
 
-如果此文件夹是具有链接历史的git存储库，则将尝试更新存储库。
+如果此文件夹是具有链接历史的 git 存储库，则将尝试更新存储库。
 
 引发以下错误：
 
-+   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果传递了组织令牌（以“api_org”开头）。必须使用您自己的个人访问令牌（请参阅[https://hf.co/settings/tokens](https://hf.co/settings/tokens)）。
++   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果传递了组织令牌（以“api_org”开头）。必须使用您自己的个人访问令牌（请参阅[`hf.co/settings/tokens`](https://hf.co/settings/tokens)）。
 
 +   [`EnvironmentError`](https://docs.python.org/3/library/exceptions.html#EnvironmentError) 如果您尝试在非空文件夹中克隆存储库，或者如果`git`操作引发错误。
 
@@ -396,7 +396,7 @@ git pull
 
 git push
 
-如果不设置`blocking`使用，将返回远程存储库上提交的URL。如果使用`blocking=True`，将返回一个包含提交URL和关于过程信息的命令对象的元组。
+如果不设置`blocking`使用，将返回远程存储库上提交的 URL。如果使用`blocking=True`，将返回一个包含提交 URL 和关于过程信息的命令对象的元组。
 
 #### `git_remote_url`
 
@@ -410,9 +410,9 @@ git push
 
 `str`
 
-`origin`远程的URL。
+`origin`远程的 URL。
 
-获取到原始远程的URL。
+获取到原始远程的 URL。
 
 #### `is_repo_clean`
 
@@ -426,9 +426,9 @@ git push
 
 `bool`
 
-如果git状态干净，则为`True`，否则为`False`。
+如果 git 状态干净，则为`True`，否则为`False`。
 
-返回git状态是否干净或不干净
+返回 git 状态是否干净或不干净
 
 #### `lfs_enable_largefiles`
 
@@ -438,7 +438,7 @@ git push
 ( )
 ```
 
-HF特定。这使得支持上传大于5GB的文件。
+HF 特定。这使得支持上传大于 5GB 的文件。
 
 #### `lfs_prune`
 
@@ -464,11 +464,11 @@ git lfs prune
 
 参数
 
-+   `patterns` (`Union[str, List[str]]`) — 要使用git-lfs跟踪的模式或模式列表。
++   `patterns` (`Union[str, List[str]]`) — 要使用 git-lfs 跟踪的模式或模式列表。
 
 +   `filename` (`bool`, *可选*, 默认为 `False`) — 是否将模式视为字面文件名。
 
-告诉git-lfs根据模式跟踪文件。
+告诉 git-lfs 根据模式跟踪文件。
 
 将`filename`参数设置为`True`将把参数视为字面文件名，而不是模式。写入`.gitattributes`文件时，文件名中的任何特殊通配符将被转义。
 
@@ -482,9 +482,9 @@ git lfs prune
 
 参数
 
-+   `patterns` (`Union[str, List[str]]`) — 要使用git-lfs取消跟踪的模式或模式列表。
++   `patterns` (`Union[str, List[str]]`) — 要使用 git-lfs 取消跟踪的模式或模式列表。
 
-告诉git-lfs取消跟踪这些文件。
+告诉 git-lfs 取消跟踪这些文件。
 
 #### `list_deleted_files`
 
@@ -516,11 +516,11 @@ git lfs prune
 
 +   `blocking` (`bool`, *可选*, 默认为 `True`) — 函数是否应该仅在`git push`完成时返回。
 
-+   `clean_ok` (`bool`, *可选*, 默认为 `True`) — 如果为True，则如果存储库未更改，此函数将返回None。默认行为是失败，因为git命令失败。
++   `clean_ok` (`bool`, *可选*, 默认为 `True`) — 如果为 True，则如果存储库未更改，此函数将返回 None。默认行为是失败，因为 git 命令失败。
 
 +   `auto_lfs_prune` (`bool`, *可选*, 默认为 `False`) — 是否在文件被推送到远程后自动修剪文件。
 
-帮助将文件添加、提交和推送到HuggingFace Hub上的远程存储库。将自动跟踪大文件（>10MB）。
+帮助将文件添加、提交和推送到 HuggingFace Hub 上的远程存储库。将自动跟踪大文件（>10MB）。
 
 #### `tag_exists`
 
@@ -730,7 +730,7 @@ git lfs prune
 
 目的是简化与 huggingface.co 托管的模型或数据集存储库的交互，尽管这里（如果有的话）实际上与 huggingface.co 没有太多特定的内容。
 
-[Repository](/docs/huggingface_hub/v0.20.3/en/package_reference/repository#huggingface_hub.Repository)已被弃用，推荐使用基于http的替代方案，该替代方案已在[HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi)中实现。鉴于其在旧代码中的广泛应用，完全移除[Repository](/docs/huggingface_hub/v0.20.3/en/package_reference/repository#huggingface_hub.Repository)将仅在版本`v1.0`中发生。有关更多详细信息，请阅读[https://huggingface.co/docs/huggingface_hub/concepts/git_vs_http](https://huggingface.co/docs/huggingface_hub/concepts/git_vs_http)。
+Repository 已被弃用，推荐使用基于 http 的替代方案，该替代方案已在 HfApi 中实现。鉴于其在旧代码中的广泛应用，完全移除 Repository 将仅在版本`v1.0`中发生。有关更多详细信息，请阅读[`huggingface.co/docs/huggingface_hub/concepts/git_vs_http`](https://huggingface.co/docs/huggingface_hub/concepts/git_vs_http)。
 
 #### `commands_failed`
 

@@ -1,10 +1,10 @@
 # 自定义指标
 
-> 原文链接：[https://huggingface.co/docs/competitions/custom_metric](https://huggingface.co/docs/competitions/custom_metric)
+> 原文链接：[`huggingface.co/docs/competitions/custom_metric`](https://huggingface.co/docs/competitions/custom_metric)
 
-如果你不满足于默认的scikit-learn指标，你可以定义自己的指标。
+如果你不满足于默认的 scikit-learn 指标，你可以定义自己的指标。
 
-在这里，我们期望组织者了解python。
+在这里，我们期望组织者了解 python。
 
 ### 如何定义自定义指标
 
@@ -31,7 +31,7 @@ def compute_metrics(params):
     .
 ```
 
-你可以在比赛的github存储库`compute_metrics.py`中找到上述部分。
+你可以在比赛的 github 存储库`compute_metrics.py`中找到上述部分。
 
 `params`被定义为：
 

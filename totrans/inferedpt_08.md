@@ -1,8 +1,8 @@
 # 帮助与支持
 
-> 原始文本：[https://huggingface.co/docs/inference-endpoints/support](https://huggingface.co/docs/inference-endpoints/support)
+> 原始文本：[`huggingface.co/docs/inference-endpoints/support`](https://huggingface.co/docs/inference-endpoints/support)
 
-我们有各种推理端点博客文章可以帮助您，请访问 [https://huggingface.co/blog](https://huggingface.co/blog):
+我们有各种推理端点博客文章可以帮助您，请访问 [`huggingface.co/blog`](https://huggingface.co/blog):
 
 +   [使用 Hugging Face 推理端点入门](https://huggingface.co/blog/inference-endpoints)
 
@@ -16,4 +16,4 @@
 
 需要更多帮助吗？
 
-请随时在论坛上提问，这样社区也可以从答案中受益：[https://discuss.huggingface.co/](https://discuss.huggingface.co/)。如果您有其他问题或疑问，请通过 [api-enterprise@huggingface.co](mailto:api-enterprise@huggingface.co) 联系我们。
+请随时在论坛上提问，这样社区也可以从答案中受益：[`discuss.huggingface.co/`](https://discuss.huggingface.co/)。如果您有其他问题或疑问，请通过 api-enterprise@huggingface.co 联系我们。

@@ -1,14 +1,14 @@
 # 快速导览
 
-> 原文：[https://huggingface.co/docs/optimum/quicktour](https://huggingface.co/docs/optimum/quicktour)
+> 原文：[`huggingface.co/docs/optimum/quicktour`](https://huggingface.co/docs/optimum/quicktour)
 
-这个快速导览适用于准备深入代码并查看如何将🤗 Optimum集成到他们的模型训练和推理工作流程中的开发人员。
+这个快速导览适用于准备深入代码并查看如何将🤗 Optimum 集成到他们的模型训练和推理工作流程中的开发人员。
 
 ## 加速推理
 
 #### OpenVINO
 
-要加载模型并使用OpenVINO Runtime进行推理，您只需将您的`AutoModelForXxx`类替换为相应的`OVModelForXxx`类。如果要加载PyTorch检查点，请设置`export=True`以将模型转换为OpenVINO IR（中间表示）。
+要加载模型并使用 OpenVINO Runtime 进行推理，您只需将您的`AutoModelForXxx`类替换为相应的`OVModelForXxx`类。如果要加载 PyTorch 检查点，请设置`export=True`以将模型转换为 OpenVINO IR（中间表示）。
 
 ```py
 - from transformers import AutoModelForSequenceClassification
@@ -30,9 +30,9 @@
 
 #### ONNX Runtime
 
-为了加速使用ONNX Runtime进行推理，🤗 Optimum使用*配置对象*来定义图优化和量化的参数。然后使用这些对象来实例化专用的*优化器*和*量化器*。
+为了加速使用 ONNX Runtime 进行推理，🤗 Optimum 使用*配置对象*来定义图优化和量化的参数。然后使用这些对象来实例化专用的*优化器*和*量化器*。
 
-在应用量化或优化之前，首先我们需要加载我们的模型。要加载模型并使用ONNX Runtime进行推理，您只需将经典的Transformers [`AutoModelForXxx`](https://huggingface.co/docs/transformers/model_doc/auto#transformers.AutoModel)类替换为相应的[`ORTModelForXxx`](https://huggingface.co/docs/optimum/onnxruntime/package_reference/modeling_ort#optimum.onnxruntime.ORTModel)类。如果要从PyTorch检查点加载，请设置`export=True`以将模型导出为ONNX格式。
+在应用量化或优化之前，首先我们需要加载我们的模型。要加载模型并使用 ONNX Runtime 进行推理，您只需将经典的 Transformers [`AutoModelForXxx`](https://huggingface.co/docs/transformers/model_doc/auto#transformers.AutoModel)类替换为相应的[`ORTModelForXxx`](https://huggingface.co/docs/optimum/onnxruntime/package_reference/modeling_ort#optimum.onnxruntime.ORTModel)类。如果要从 PyTorch 检查点加载，请设置`export=True`以将模型导出为 ONNX 格式。
 
 ```py
 >>> from optimum.onnxruntime import ORTModelForSequenceClassification
@@ -50,7 +50,7 @@
 >>> tokenizer.save_pretrained(save_directory)
 ```
 
-现在让我们看看如何使用ONNX Runtime应用动态量化：
+现在让我们看看如何使用 ONNX Runtime 应用动态量化：
 
 ```py
 >>> from optimum.onnxruntime.configuration import AutoQuantizationConfig
@@ -64,7 +64,7 @@
 >>> quantizer.quantize(save_dir=save_directory, quantization_config=qconfig)
 ```
 
-在这个例子中，我们对来自Hugging Face Hub的模型进行了量化，以相同的方式，我们可以通过提供包含模型权重的目录路径来对本地托管的模型进行量化。应用`quantize()`方法的结果是一个`model_quantized.onnx`文件，可用于运行推理。这里是如何加载一个ONNX Runtime模型并生成预测的示例：
+在这个例子中，我们对来自 Hugging Face Hub 的模型进行了量化，以相同的方式，我们可以通过提供包含模型权重的目录路径来对本地托管的模型进行量化。应用`quantize()`方法的结果是一个`model_quantized.onnx`文件，可用于运行推理。这里是如何加载一个 ONNX Runtime 模型并生成预测的示例：
 
 ```py
 >>> from optimum.onnxruntime import ORTModelForSequenceClassification
@@ -82,7 +82,7 @@
 
 #### Habana
 
-为了在Habana的Gaudi处理器上训练transformers，🤗 Optimum提供了一个`GaudiTrainer`，它与🤗 Transformers [Trainer](https://huggingface.co/docs/transformers/main_classes/trainer)非常相似。这里是一个简单的例子：
+为了在 Habana 的 Gaudi 处理器上训练 transformers，🤗 Optimum 提供了一个`GaudiTrainer`，它与🤗 Transformers [Trainer](https://huggingface.co/docs/transformers/main_classes/trainer)非常相似。这里是一个简单的例子：
 
 ```py
 - from transformers import Trainer, TrainingArguments
@@ -118,7 +118,7 @@
 
 #### ONNX Runtime
 
-使用ONNX Runtime的加速功能来训练transformers，🤗 Optimum提供了一个`ORTTrainer`，它与🤗 Transformers [Trainer](https://huggingface.co/docs/transformers/main_classes/trainer)非常相似。这里是一个简单的例子：
+使用 ONNX Runtime 的加速功能来训练 transformers，🤗 Optimum 提供了一个`ORTTrainer`，它与🤗 Transformers [Trainer](https://huggingface.co/docs/transformers/main_classes/trainer)非常相似。这里是一个简单的例子：
 
 ```py
 - from transformers import Trainer, TrainingArguments
@@ -151,11 +151,11 @@
 
 您可以在[文档](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/trainer)和[示例](https://github.com/huggingface/optimum/tree/main/examples/onnxruntime/training)中找到更多示例。
 
-## 开箱即用的ONNX导出
+## 开箱即用的 ONNX 导出
 
-Optimum库可以直接处理Transformers和Diffusers模型的ONNX导出！
+Optimum 库可以直接处理 Transformers 和 Diffusers 模型的 ONNX 导出！
 
-将模型导出到ONNX就像这样简单
+将模型导出到 ONNX 就像这样简单
 
 ```py
 optimum-cli export onnx --model gpt2 gpt2_onnx/
@@ -169,7 +169,7 @@ optimum-cli export onnx --help
 
 查看[文档](https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/export_a_model)获取更多信息。
 
-## PyTorch的BetterTransformer支持
+## PyTorch 的 BetterTransformer 支持
 
 [BetterTransformer](https://pytorch.org/blog/a-better-transformer-for-fast-transformer-encoder-inference/) 是一个免费的 PyTorch 本地优化，可在基于 Transformer 的模型推理中获得 x1.25 - x4 的加速。它已在[PyTorch 1.13](https://pytorch.org/blog/PyTorch-1.13-release/)中标记为稳定。我们将 BetterTransformer 与 🤗 Transformers 库中最常用的模型集成，使用集成就像这样简单：
 

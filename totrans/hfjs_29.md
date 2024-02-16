@@ -1,6 +1,6 @@
 # 接口：TextGenerationStreamToken
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamToken](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamToken)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamToken`](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamToken)
 
 ## 属性
 
@@ -8,7 +8,7 @@
 
 • `id`: `number`
 
-模型分词器中的标记ID
+模型分词器中的标记 ID
 
 #### 定义在
 

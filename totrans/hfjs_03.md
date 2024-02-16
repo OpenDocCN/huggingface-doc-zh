@@ -1,10 +1,10 @@
-# 🤗 Hugging Face推理端点
+# 🤗 Hugging Face 推理端点
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/README](https://huggingface.co/docs/huggingface.js/inference/README)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/README`](https://huggingface.co/docs/huggingface.js/inference/README)
 
-由Typescript支持的Hugging Face推理端点API包装器。了解有关推理端点的更多信息，请访问[Hugging Face](https://huggingface.co/inference-endpoints)。它可以与[无服务器](https://huggingface.co/docs/api-inference/index)和[专用](https://huggingface.co/docs/inference-endpoints/index)端点一起使用。
+由 Typescript 支持的 Hugging Face 推理端点 API 包装器。了解有关推理端点的更多信息，请访问[Hugging Face](https://huggingface.co/inference-endpoints)。它可以与[无服务器](https://huggingface.co/docs/api-inference/index)和[专用](https://huggingface.co/docs/inference-endpoints/index)端点一起使用。
 
-您还可以尝试一个实时的[交互式笔记本](https://observablehq.com/@huggingface/hello-huggingface-js-inference)，在[hf.co/huggingfacejs](https://huggingface.co/huggingfacejs)上查看一些演示，或观看一个[Scrimba教程，解释推理端点的工作原理](https://scrimba.com/scrim/cod8248f5adfd6e129582c523)。
+您还可以尝试一个实时的[交互式笔记本](https://observablehq.com/@huggingface/hello-huggingface-js-inference)，在[hf.co/huggingfacejs](https://huggingface.co/huggingfacejs)上查看一些演示，或观看一个[Scrimba 教程，解释推理端点的工作原理](https://scrimba.com/scrim/cod8248f5adfd6e129582c523)。
 
 ## 开始
 
@@ -196,7 +196,7 @@ await hf.zeroShotClassification({
 
 ### 对话
 
-此任务对应于任何类似于聊天机器人的结构。模型往往具有较短的max_length，因此在使用给定模型时，请谨慎检查是否需要长距离依赖。
+此任务对应于任何类似于聊天机器人的结构。模型往往具有较短的 max_length，因此在使用给定模型时，请谨慎检查是否需要长距离依赖。
 
 ```py
 await hf.conversational({
@@ -513,4 +513,4 @@ HF_TOKEN="your access token" pnpm run test
 
 我们有一个信息丰富的文档项目称为[Tasks](https://huggingface.co/tasks)，列出每个任务的可用模型并详细解释每个任务的工作原理。
 
-它还包含演示，示例输出和其他资源，以便您深入了解ML方面的内容。
+它还包含演示，示例输出和其他资源，以便您深入了解 ML 方面的内容。

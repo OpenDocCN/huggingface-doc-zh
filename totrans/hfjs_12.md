@@ -1,6 +1,6 @@
 # 接口：AutomaticSpeechRecognitionOutput
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/AutomaticSpeechRecognitionOutput](https://huggingface.co/docs/huggingface.js/inference/interfaces/AutomaticSpeechRecognitionOutput)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/AutomaticSpeechRecognitionOutput`](https://huggingface.co/docs/huggingface.js/inference/interfaces/AutomaticSpeechRecognitionOutput)
 
 ## 属性
 

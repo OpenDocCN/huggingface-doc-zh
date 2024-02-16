@@ -1,6 +1,6 @@
 # 接口：WhoAmIUser
 
-> 原文：[https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIUser](https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIUser)
+> 原文：[`huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIUser`](https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIUser)
 
 ## 属性
 
@@ -58,7 +58,7 @@
 
 • `id`: `string`
 
-在重命名过程中保持唯一ID
+在重命名过程中保持唯一 ID
 
 #### 定义在
 
@@ -88,7 +88,7 @@
 
 ### 组织
 
-• `orgs`: [`WhoAmIOrg`](WhoAmIOrg)[]
+• `orgs`: `WhoAmIOrg`[]
 
 #### 定义在
 
@@ -100,7 +100,7 @@
 
 • `结束时间`: `null` | `number`
 
-Unix时间戳（秒）
+Unix 时间戳（秒）
 
 #### 定义在
 

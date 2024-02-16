@@ -1,6 +1,6 @@
 # 接口: SpaceResourceRequirement
 
-> 原始文本: [https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceResourceRequirement](https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceResourceRequirement)
+> 原始文本: [`huggingface.co/docs/huggingface.js/hub/interfaces/SpaceResourceRequirement`](https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceResourceRequirement)
 
 ## 属性
 

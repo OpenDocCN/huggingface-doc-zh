@@ -1,18 +1,18 @@
 # 设计多智能体系统
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit7/multi-agent-setting](https://huggingface.co/learn/deep-rl-course/unit7/multi-agent-setting)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit7/multi-agent-setting`](https://huggingface.co/learn/deep-rl-course/unit7/multi-agent-setting)
 
 在这一部分，您将观看由[Brian Douglas](https://www.youtube.com/channel/UCq0imsn84ShAe9PBOFnoIrg)制作的关于多智能体的优秀介绍。
 
-[https://www.youtube-nocookie.com/embed/qgb0gyrpiGk](https://www.youtube-nocookie.com/embed/qgb0gyrpiGk)
+[`www.youtube-nocookie.com/embed/qgb0gyrpiGk`](https://www.youtube-nocookie.com/embed/qgb0gyrpiGk)
 
-在这个视频中，Brian谈到了如何设计多智能体系统。他特别提到了一个多智能体吸尘器系统，并问：**它们如何可以相互合作**？
+在这个视频中，Brian 谈到了如何设计多智能体系统。他特别提到了一个多智能体吸尘器系统，并问：**它们如何可以相互合作**？
 
 我们有两种解决方案来设计这个多智能体强化学习系统（MARL）。
 
 ## 分散式系统
 
-![Decentralized](../Images/d82bc536a16b8e15791ba574b6f9f35f.png)
+![Decentralized](img/d82bc536a16b8e15791ba574b6f9f35f.png)
 
 来源：[多智能体强化学习介绍](https://www.youtube.com/watch?v=qgb0gyrpiGk)
 
@@ -26,7 +26,7 @@
 
 ## 集中式方法
 
-![Centralized](../Images/5eb69229013368a2d3d27ad287a597e8.png)
+![Centralized](img/5eb69229013368a2d3d27ad287a597e8.png)
 
 来源：[多智能体强化学习介绍](https://www.youtube.com/watch?v=qgb0gyrpiGk)
 

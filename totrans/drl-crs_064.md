@@ -1,16 +1,16 @@
 # 实践
 
-> 原始文本：[https://huggingface.co/learn/deep-rl-course/unit4/hands-on](https://huggingface.co/learn/deep-rl-course/unit4/hands-on)
+> 原始文本：[`huggingface.co/learn/deep-rl-course/unit4/hands-on`](https://huggingface.co/learn/deep-rl-course/unit4/hands-on)
 
-[![提问](../Images/255e59f8542cbd6d3f1c72646b2fff13.png)](http://hf.co/join/discord) [![在Colab中打开](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit4/unit4.ipynb)
+![提问](http://hf.co/join/discord) ![在 Colab 中打开](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit4/unit4.ipynb)
 
-现在我们已经研究了Reinforce背后的理论，**您已经准备好使用PyTorch编写您的Reinforce代理**。并且您将使用CartPole-v1和PixelCopter测试其稳健性。
+现在我们已经研究了 Reinforce 背后的理论，**您已经准备好使用 PyTorch 编写您的 Reinforce 代理**。并且您将使用 CartPole-v1 和 PixelCopter 测试其稳健性。
 
 然后，您将能够迭代和改进此实现，以适用于更高级的环境。
 
-![Environments](../Images/3b1f63eab47a364ef05dcdca4df7bf08.png)
+![Environments](img/3b1f63eab47a364ef05dcdca4df7bf08.png)
 
-为了验证这个实践过程，您需要将训练好的模型推送到Hub并：
+为了验证这个实践过程，您需要将训练好的模型推送到 Hub 并：
 
 +   获得`Cartpole-v1`的结果>= 350
 
@@ -20,29 +20,29 @@
 
 **如果您找不到您的模型，请转到页面底部，然后单击刷新按钮。**
 
-有关认证过程的更多信息，请查看此部分👉 [https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+有关认证过程的更多信息，请查看此部分👉 [`huggingface.co/deep-rl-course/en/unit0/introduction#certification-process`](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
 
-您可以在这里检查您的进度👉 [https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course](https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course)
+您可以在这里检查您的进度👉 [`huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course`](https://huggingface.co/spaces/ThomasSimonini/Check-my-progress-Deep-RL-Course)
 
-**要开始实践，请点击“在Colab中打开”按钮**👇：
+**要开始实践，请点击“在 Colab 中打开”按钮**👇：
 
-[![在Colab中打开](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit4/unit4.ipynb)
+![在 Colab 中打开](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit4/unit4.ipynb)
 
-我们强烈建议学生们在进行实践练习时使用Google Colab**，而不是在个人计算机上运行它们**。
+我们强烈建议学生们在进行实践练习时使用 Google Colab**，而不是在个人计算机上运行它们**。
 
-通过使用Google Colab，**您可以专注于学习和实验，而不必担心设置环境的技术细节**。
+通过使用 Google Colab，**您可以专注于学习和实验，而不必担心设置环境的技术细节**。
 
-# 第4单元：使用PyTorch编写您的第一个深度强化学习算法：Reinforce。并测试其稳健性💪
+# 第 4 单元：使用 PyTorch 编写您的第一个深度强化学习算法：Reinforce。并测试其稳健性💪
 
-![缩略图](../Images/207886028f30a9a8c43010256f915e88.png)
+![缩略图](img/207886028f30a9a8c43010256f915e88.png)
 
 在这本笔记本中，您将从头开始编写您的第一个深度强化学习算法：Reinforce（也称为蒙特卡洛策略梯度）。
 
-Reinforce是一种*基于策略的方法*：一种深度强化学习算法，试图**直接优化策略，而不使用动作值函数**。
+Reinforce 是一种*基于策略的方法*：一种深度强化学习算法，试图**直接优化策略，而不使用动作值函数**。
 
-更准确地说，Reinforce是一种*策略梯度方法*，是*基于策略的方法*的一个子类，旨在**通过估计最优策略的权重来直接优化策略，使用梯度上升**。
+更准确地说，Reinforce 是一种*策略梯度方法*，是*基于策略的方法*的一个子类，旨在**通过估计最优策略的权重来直接优化策略，使用梯度上升**。
 
-为了测试其稳健性，我们将在2个不同的简单环境中对其进行训练：
+为了测试其稳健性，我们将在 2 个不同的简单环境中对其进行训练：
 
 +   Cartpole-v1
 
@@ -50,7 +50,7 @@ Reinforce是一种*基于策略的方法*：一种深度强化学习算法，试
 
 ⬇️ 这是**您将在本笔记本末尾实现的示例。** ⬇️
 
-![Environments](../Images/3b1f63eab47a364ef05dcdca4df7bf08.png)
+![Environments](img/3b1f63eab47a364ef05dcdca4df7bf08.png)
 
 ### 🎮 环境：
 
@@ -64,45 +64,45 @@ Reinforce是一种*基于策略的方法*：一种深度强化学习算法，试
 
 +   PyTorch
 
-我们不断努力改进我们的教程，所以**如果您在本笔记本中发现一些问题**，请[在GitHub Repo上提出问题](https://github.com/huggingface/deep-rl-class/issues)。
+我们不断努力改进我们的教程，所以**如果您在本笔记本中发现一些问题**，请[在 GitHub Repo 上提出问题](https://github.com/huggingface/deep-rl-class/issues)。
 
 ## 本笔记本的目标🏆
 
 在笔记本的末尾，您将：
 
-+   能够**使用PyTorch从头开始编写一个Reinforce算法**。
++   能够**使用 PyTorch 从头开始编写一个 Reinforce 算法**。
 
 +   能够**使用简单环境测试您的代理的稳健性**。
 
-+   能够**将训练好的代理推送到Hub**，并附带一个漂亮的视频回放和评估分数🔥。
++   能够**将训练好的代理推送到 Hub**，并附带一个漂亮的视频回放和评估分数🔥。
 
 ## 先决条件🏗️
 
 在深入研究笔记本之前，您需要：
 
-🔲 📚 [通过阅读第4单元来学习策略梯度](https://huggingface.co/deep-rl-course/unit4/introduction)
+🔲 📚 [通过阅读第 4 单元来学习策略梯度](https://huggingface.co/deep-rl-course/unit4/introduction)
 
-# 让我们从头开始编写Reinforce算法 🔥
+# 让我们从头开始编写 Reinforce 算法 🔥
 
 ## 一些建议 💡
 
-最好在您的谷歌驱动器上运行此colab，这样**如果超时**，您仍然可以在您的谷歌驱动器上保存笔记本，并且不需要从头开始填写所有内容。
+最好在您的谷歌驱动器上运行此 colab，这样**如果超时**，您仍然可以在您的谷歌驱动器上保存笔记本，并且不需要从头开始填写所有内容。
 
 为此，您可以使用 `Ctrl + S` 或 `文件 > 在谷歌驱动器中保存副本。`
 
-## 设置GPU 💪
+## 设置 GPU 💪
 
-+   为了**加速代理的训练，我们将使用GPU**。为此，请转到 `运行时 > 更改运行时类型`
++   为了**加速代理的训练，我们将使用 GPU**。为此，请转到 `运行时 > 更改运行时类型`
 
-![GPU 步骤 1](../Images/5378127c314cdd92729aa31b7e11ca44.png)
+![GPU 步骤 1](img/5378127c314cdd92729aa31b7e11ca44.png)
 
 +   `硬件加速器 > GPU`
 
-![GPU 步骤 2](../Images/e0fec252447f98378386ccca8e57a80a.png)
+![GPU 步骤 2](img/e0fec252447f98378386ccca8e57a80a.png)
 
 ## 创建一个虚拟显示 🖥
 
-在笔记本中，我们需要生成一个重播视频。为此，在colab中，**我们需要有一个虚拟屏幕来渲染环境**（从而记录帧）。
+在笔记本中，我们需要生成一个重播视频。为此，在 colab 中，**我们需要有一个虚拟屏幕来渲染环境**（从而记录帧）。
 
 以下单元格将安装库并创建并运行一个虚拟屏幕 🖥
 
@@ -129,11 +129,11 @@ virtual_display.start()
 
 +   `gym`
 
-+   `gym-games`：使用PyGame制作的额外gym环境。
++   `gym-games`：使用 PyGame 制作的额外 gym 环境。
 
-+   `huggingface_hub`：Hub作为一个中心地方，任何人都可以分享和探索模型和数据集。它具有版本控制、指标、可视化和其他功能，可以让您轻松与他人合作。
++   `huggingface_hub`：Hub 作为一个中心地方，任何人都可以分享和探索模型和数据集。它具有版本控制、指标、可视化和其他功能，可以让您轻松与他人合作。
 
-您可能想知道为什么我们安装gym而不是gymnasium，一个更新版本的gym？**因为我们使用的gym-games还没有与gymnasium更新。**
+您可能想知道为什么我们安装 gym 而不是 gymnasium，一个更新版本的 gym？**因为我们使用的 gym-games 还没有与 gymnasium 更新。**
 
 在这里你会遇到的区别：
 
@@ -141,11 +141,11 @@ virtual_display.start()
 
 +   在`gym`中，使用`env.step()`返回`state, reward, done, info`
 
-您可以在这里了解Gym和Gymnasium之间的区别 👉 [https://gymnasium.farama.org/content/migration-guide/](https://gymnasium.farama.org/content/migration-guide/)
+您可以在这里了解 Gym 和 Gymnasium 之间的区别 👉 [`gymnasium.farama.org/content/migration-guide/`](https://gymnasium.farama.org/content/migration-guide/)
 
-您可以在这里看到所有可用的Reinforce模型 👉 [https://huggingface.co/models?other=reinforce](https://huggingface.co/models?other=reinforce)
+您可以在这里看到所有可用的 Reinforce 模型 👉 [`huggingface.co/models?other=reinforce`](https://huggingface.co/models?other=reinforce)
 
-您可以在这里找到所有深度强化学习模型 👉 [https://huggingface.co/models?pipeline_tag=reinforcement-learning](https://huggingface.co/models?pipeline_tag=reinforcement-learning)
+您可以在这里找到所有深度强化学习模型 👉 [`huggingface.co/models?pipeline_tag=reinforcement-learning`](https://huggingface.co/models?pipeline_tag=reinforcement-learning)
 
 ```py
 !pip install -r https://raw.githubusercontent.com/huggingface/deep-rl-class/main/notebooks/unit4/requirements-unit4.txt
@@ -181,9 +181,9 @@ from huggingface_hub import notebook_login # To log to our Hugging Face account 
 import imageio
 ```
 
-## 检查一下是否有GPU
+## 检查一下是否有 GPU
 
-+   让我们检查一下是否有GPU
++   让我们检查一下是否有 GPU
 
 +   如果是的话，你应该看到 `device:cuda0`
 
@@ -195,27 +195,27 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 ```
 
-我们现在准备实现我们的Reinforce算法 🔥
+我们现在准备实现我们的 Reinforce 算法 🔥
 
-# 第一个代理：玩CartPole-v1 🤖
+# 第一个代理：玩 CartPole-v1 🤖
 
-## 创建CartPole环境并了解其工作原理
+## 创建 CartPole 环境并了解其工作原理
 
 ### 环境 🎮
 
-### 为什么我们要使用像CartPole-v1这样简单的环境？
+### 为什么我们要使用像 CartPole-v1 这样简单的环境？
 
 如[强化学习技巧和技巧](https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html)中所解释的，当您从头开始实现代理时，您需要**确保它能够正确运行，并在更简单的环境中找到错误**，因为在简单环境中找到错误会更容易。
 
 > 尝试在玩具问题上有一些“生命迹象”
 > 
-> 通过在越来越困难的环境中运行来验证实现（您可以将结果与RL动物园进行比较）。通常需要运行超参数优化来进行这一步。
+> 通过在越来越困难的环境中运行来验证实现（您可以将结果与 RL 动物园进行比较）。通常需要运行超参数优化来进行这一步。
 
-### CartPole-v1环境
+### CartPole-v1 环境
 
 > 一个杆通过一个未激活的关节连接到一个小车上，该小车沿着一个无摩擦的轨道移动。摆放在小车上方，并且目标是通过在小车左右方向上施加力来平衡杆。
 
-所以，我们从CartPole-v1开始。目标是将小车向左或向右推动，**使杆保持在平衡状态。**
+所以，我们从 CartPole-v1 开始。目标是将小车向左或向右推动，**使杆保持在平衡状态。**
 
 如果：
 
@@ -223,7 +223,7 @@ print(device)
 
 +   小车位置大于±2.4
 
-+   该集数长度大于500
++   该集数长度大于 500
 
 我们在每个时间步获得 +1 的奖励 💰，杆保持在平衡状态。
 
@@ -252,25 +252,25 @@ print("The Action Space is: ", a_size)
 print("Action Space Sample", env.action_space.sample())  # Take a random action
 ```
 
-## 让我们构建Reinforce架构
+## 让我们构建 Reinforce 架构
 
 这个实现基于三个实现：
 
-+   [PyTorch官方强化学习示例](https://github.com/pytorch/examples/blob/main/reinforcement_learning/reinforce.py)
++   [PyTorch 官方强化学习示例](https://github.com/pytorch/examples/blob/main/reinforcement_learning/reinforce.py)
 
 +   [Udacity Reinforce](https://github.com/udacity/deep-reinforcement-learning/blob/master/reinforce/REINFORCE.ipynb)
 
-+   [由Chris1nexus改进的集成](https://github.com/huggingface/deep-rl-class/pull/95)
++   [由 Chris1nexus 改进的集成](https://github.com/huggingface/deep-rl-class/pull/95)
 
-![Reinforce](../Images/36cf0376b1e1c1f32df0bf4cc6199001.png)
+![Reinforce](img/36cf0376b1e1c1f32df0bf4cc6199001.png)
 
 所以我们希望：
 
-+   两个全连接层（fc1和fc2）。
++   两个全连接层（fc1 和 fc2）。
 
-+   使用ReLU作为fc1的激活函数
++   使用 ReLU 作为 fc1 的激活函数
 
-+   使用Softmax输出动作的概率分布
++   使用 Softmax 输出动作的概率分布
 
 ```py
 class Policy(nn.Module):
@@ -332,9 +332,9 @@ debug_policy.act(env.reset())
 
 +   这意味着`m.log_prob(action)`中的`action`必须是一个张量，但它不是。
 
-+   你知道为什么吗？检查act函数，看看为什么它不起作用。
++   你知道为什么吗？检查 act 函数，看看为什么它不起作用。
 
-建议💡：这个实现中有问题。记住对于act函数，我们想要从动作的概率分布中采样一个动作。
+建议💡：这个实现中有问题。记住对于 act 函数，我们想要从动作的概率分布中采样一个动作。
 
 ### （真正的）解决方案
 
@@ -358,39 +358,39 @@ class Policy(nn.Module):
         return action.item(), m.log_prob(action)
 ```
 
-通过使用CartPole，更容易调试，因为我们知道错误来自于我们的集成，而不是我们简单的环境。
+通过使用 CartPole，更容易调试，因为我们知道错误来自于我们的集成，而不是我们简单的环境。
 
 +   因为我们想要从动作概率分布中采样一个动作，所以不能使用`action = np.argmax(m)`，因为它总是输出具有最高概率的动作。
 
-+   我们需要用`action = m.sample()`替换这个，它将从概率分布P(.|s)中采样一个动作
++   我们需要用`action = m.sample()`替换这个，它将从概率分布 P(.|s)中采样一个动作
 
-### 让我们构建Reinforce训练算法
+### 让我们构建 Reinforce 训练算法
 
-这是Reinforce算法的伪代码：
+这是 Reinforce 算法的伪代码：
 
-![策略梯度伪代码](../Images/98fc23971db3e1a9e35baeee827641dc.png)
+![策略梯度伪代码](img/98fc23971db3e1a9e35baeee827641dc.png)
 
-+   当我们计算回报Gt（第6行）时，我们看到我们计算从时间步t开始的折扣奖励的总和。
++   当我们计算回报 Gt（第 6 行）时，我们看到我们计算从时间步 t 开始的折扣奖励的总和。
 
 +   为什么？因为我们的策略应该只根据后果来强化动作：因此在采取行动之前获得的奖励是无用的（因为它们不是因为行动），只有之后的奖励才重要。
 
 +   在编写这之前，你应该阅读这一部分[不要让过去分散你的注意力](https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html#don-t-let-the-past-distract-you)，解释了为什么我们使用奖励逐步策略梯度。
 
-我们使用了一个由[Chris1nexus](https://github.com/Chris1nexus)编写的有趣的技术来高效地计算每个时间步的回报。评论中解释了该过程。也不要犹豫[查看PR解释](https://github.com/huggingface/deep-rl-class/pull/95)，但总体思路是高效地计算每个时间步的回报。
+我们使用了一个由[Chris1nexus](https://github.com/Chris1nexus)编写的有趣的技术来高效地计算每个时间步的回报。评论中解释了该过程。也不要犹豫[查看 PR 解释](https://github.com/huggingface/deep-rl-class/pull/95)，但总体思路是高效地计算每个时间步的回报。
 
 第二个问题你可能会问的是为什么我们要最小化损失？之前不是讨论过梯度上升，而不是梯度下降吗？
 
-+   我们想要最大化我们的效用函数$J(\theta)$，但在PyTorch和TensorFlow中，更好的做法是最小化一个目标函数。
++   我们想要最大化我们的效用函数$J(\theta)$，但在 PyTorch 和 TensorFlow 中，更好的做法是最小化一个目标函数。
 
-    +   假设我们想要在某个时间步强化动作3。在训练这个动作之前，P为0.25。
+    +   假设我们想要在某个时间步强化动作 3。在训练这个动作之前，P 为 0.25。
 
     +   所以我们想要修改θ theta，使得πθ​(a3​∣s;θ)>0.25
 
-    +   因为所有P必须总和为1，max<math><semantics><mrow><mi>p</mi><msub><mi>i</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">pi_\theta(a_3|s; \theta)</annotation></semantics></math>piθ​(a3​∣s;θ)将**最小化其他动作的概率。**
+    +   因为所有 P 必须总和为 1，max<math><semantics><mrow><mi>p</mi><msub><mi>i</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">pi_\theta(a_3|s; \theta)</annotation></semantics></math>piθ​(a3​∣s;θ)将**最小化其他动作的概率。**
 
-    +   所以我们应该告诉PyTorch**最小化<math><semantics><mrow><mn>1</mn><mo>−</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1 - \pi_\theta(a_3|s; \theta)</annotation></semantics></math>1−πθ​(a3​∣s;θ)。**
+    +   所以我们应该告诉 PyTorch**最小化<math><semantics><mrow><mn>1</mn><mo>−</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1 - \pi_\theta(a_3|s; \theta)</annotation></semantics></math>1−πθ​(a3​∣s;θ)。**
 
-    +   这个损失函数在<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\pi_\theta(a_3|s; \theta)</annotation></semantics></math>πθ​(a3​∣s;θ)接近1时趋近于0。
+    +   这个损失函数在<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\pi_\theta(a_3|s; \theta)</annotation></semantics></math>πθ​(a3​∣s;θ)接近 1 时趋近于 0。
 
     +   因此，我们鼓励梯度最大化<math><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>a</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mi>s</mi><mo separator="true">;</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\pi_\theta(a_3|s; \theta)</annotation></semantics></math>πθ​(a3​∣s;θ)
 
@@ -603,7 +603,7 @@ scores = reinforce(
 
 ## 定义评估方法 📝
 
-+   在这里，我们定义了要使用的评估方法来测试我们的Reinforce代理。
++   在这里，我们定义了要使用的评估方法来测试我们的 Reinforce 代理。
 
 ```py
 def evaluate_agent(env, max_steps, n_eval_episodes, policy):
@@ -643,15 +643,15 @@ evaluate_agent(
 )
 ```
 
-### 在Hub上发布我们训练的模型🔥
+### 在 Hub 上发布我们训练的模型🔥
 
-现在我们看到训练后取得了良好的结果，我们可以用一行代码将我们训练的模型发布到hub 🤗。
+现在我们看到训练后取得了良好的结果，我们可以用一行代码将我们训练的模型发布到 hub 🤗。
 
 这是一个模型卡的示例：
 
-![](../Images/afdb3be9b09aa528c9ee40968ca15774.png)
+![](img/afdb3be9b09aa528c9ee40968ca15774.png)
 
-### 推送到Hub
+### 推送到 Hub
 
 #### 不要修改这段代码
 
@@ -813,7 +813,7 @@ def push_to_hub(repo_id,
     print(f"Your model is pushed to the Hub. You can view your model here: {repo_url}")
 ```
 
-通过使用`push_to_hub`，**您可以评估、记录重播、生成代理的模型卡，并将其推送到Hub**。
+通过使用`push_to_hub`，**您可以评估、记录重播、生成代理的模型卡，并将其推送到 Hub**。
 
 这样：
 
@@ -823,23 +823,23 @@ def push_to_hub(repo_id,
 
 +   您可以**与社区分享一个其他人可以使用的代理**💾
 
-+   您可以**访问排行榜🏆，查看您的代理与同学相比表现如何**👉 [https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
++   您可以**访问排行榜🏆，查看您的代理与同学相比表现如何**👉 [`huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard`](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
 
 要与社区分享您的模型，需要遵循三个步骤：
 
-1️⃣（如果尚未完成）创建一个HF帐户➡ [https://huggingface.co/join](https://huggingface.co/join)
+1️⃣（如果尚未完成）创建一个 HF 帐户➡ [`huggingface.co/join`](https://huggingface.co/join)
 
-2️⃣ 登录，然后，您需要存储来自Hugging Face网站的身份验证令牌。
+2️⃣ 登录，然后，您需要存储来自 Hugging Face 网站的身份验证令牌。
 
-+   创建一个新的令牌（[https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)）**具有写入角色**
++   创建一个新的令牌（[`huggingface.co/settings/tokens`](https://huggingface.co/settings/tokens)）**具有写入角色**
 
-![创建HF令牌](../Images/d21a97c736edaab9119d2d1c1da9deac.png)
+![创建 HF 令牌](img/d21a97c736edaab9119d2d1c1da9deac.png)
 
 ```py
 notebook_login()
 ```
 
-如果您不想使用Google Colab或Jupyter Notebook，您需要使用这个命令：`huggingface-cli login`（或`login`）
+如果您不想使用 Google Colab 或 Jupyter Notebook，您需要使用这个命令：`huggingface-cli login`（或`login`）
 
 3️⃣ 现在我们准备将我们训练的代理推送到🤗 Hub 🔥，使用`package_to_hub()`函数
 
@@ -858,7 +858,7 @@ push_to_hub(
 
 ## 第二个代理：PixelCopter 🚁
 
-### 研究PixelCopter环境👀
+### 研究 PixelCopter 环境👀
 
 +   [环境文档](https://pygame-learning-environment.readthedocs.io/en/latest/user/games/pixelcopter.html)
 
@@ -884,7 +884,7 @@ print("Action Space Sample", env.action_space.sample())  # Take a random action
 
 观察空间（7）👀：
 
-+   玩家y位置
++   玩家 y 位置
 
 +   玩家速度
 
@@ -892,11 +892,11 @@ print("Action Space Sample", env.action_space.sample())  # Take a random action
 
 +   玩家到天花板的距离
 
-+   下一个方块x距离玩家
++   下一个方块 x 距离玩家
 
-+   下一个方块的顶部y位置
++   下一个方块的顶部 y 位置
 
-+   下一个方块的底部y位置
++   下一个方块的底部 y 位置
 
 动作空间（2）：
 
@@ -906,7 +906,7 @@ print("Action Space Sample", env.action_space.sample())  # Take a random action
 
 奖励函数：
 
-+   每通过一个垂直块，它获得+1的正奖励。每次达到终止状态时，它会获得-1的负奖励。
++   每通过一个垂直块，它获得+1 的正奖励。每次达到终止状态时，它会获得-1 的负奖励。
 
 ### 定义新策略
 
@@ -1000,7 +1000,7 @@ scores = reinforce(
 )
 ```
 
-### 在Hub上发布我们训练的模型
+### 在 Hub 上发布我们训练的模型
 
 ```py
 repo_id = ""  # TODO Define your repo id {username/Reinforce-{model-id}}
@@ -1025,22 +1025,22 @@ push_to_hub(
 
 +   尝试不同的超参数，查看同学们的做法
 
-+   将您的新训练模型发布到Hub
++   将您的新训练模型发布到 Hub
 
 +   改进实现以适应更复杂的环境（例如，将网络更改为卷积神经网络以处理帧作为观察？）
 
 * * *
 
-祝贺您完成这个单元！这里有很多信息。祝贺您完成教程。您刚刚使用PyTorch从头开始编写了您的第一个深度强化学习代理，并在Hub上分享了它。
+祝贺您完成这个单元！这里有很多信息。祝贺您完成教程。您刚刚使用 PyTorch 从头开始编写了您的第一个深度强化学习代理，并在 Hub 上分享了它。
 
 不要犹豫，通过改进实现以适应更复杂的环境（例如，将网络更改为卷积神经网络以处理帧作为观察）来迭代这个单元。
 
-在下一个单元中，我们将学习更多关于Unity MLAgents，通过在Unity环境中训练代理。这样，您将准备好参加AI对AI挑战，您将训练您的代理来与其他代理在雪仗和足球比赛中竞争。
+在下一个单元中，我们将学习更多关于 Unity MLAgents，通过在 Unity 环境中训练代理。这样，您将准备好参加 AI 对 AI 挑战，您将训练您的代理来与其他代理在雪仗和足球比赛中竞争。
 
 听起来很有趣吗？下次见！
 
 最后，我们很想知道您对课程的看法以及我们如何改进它。如果您有反馈意见，请填写此表格。
 
-下次见在第5单元！
+下次见在第 5 单元！
 
 ### 继续学习，保持精彩

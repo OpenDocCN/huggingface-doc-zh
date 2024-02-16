@@ -1,6 +1,6 @@
 # 术语表
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit4/glossary](https://huggingface.co/learn/deep-rl-course/unit4/glossary)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit4/glossary`](https://huggingface.co/learn/deep-rl-course/unit4/glossary)
 
 这是一个由社区创建的术语表。欢迎贡献！
 

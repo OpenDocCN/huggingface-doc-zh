@@ -1,24 +1,24 @@
-# 在Amazon SageMaker上训练和部署Hugging Face
+# 在 Amazon SageMaker 上训练和部署 Hugging Face
 
-> 原文链接：[https://huggingface.co/docs/sagemaker/getting-started](https://huggingface.co/docs/sagemaker/getting-started)
+> 原文链接：[`huggingface.co/docs/sagemaker/getting-started`](https://huggingface.co/docs/sagemaker/getting-started)
 
-入门指南将向您展示如何在Amazon SageMaker上快速使用Hugging Face。学习如何在SageMaker上为二进制文本分类任务微调和部署预训练的🤗 Transformers模型。
+入门指南将向您展示如何在 Amazon SageMaker 上快速使用 Hugging Face。学习如何在 SageMaker 上为二进制文本分类任务微调和部署预训练的🤗 Transformers 模型。
 
-💡 如果您是Hugging Face的新手，我们建议先阅读🤗 Transformers的[快速入门](https://huggingface.co/docs/transformers/quicktour)。
+💡 如果您是 Hugging Face 的新手，我们建议先阅读🤗 Transformers 的[快速入门](https://huggingface.co/docs/transformers/quicktour)。
 
-[https://www.youtube.com/embed/pYqjCzoyWyo](https://www.youtube.com/embed/pYqjCzoyWyo)
+[`www.youtube.com/embed/pYqjCzoyWyo`](https://www.youtube.com/embed/pYqjCzoyWyo)
 
 📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/sagemaker-notebook.ipynb)进行跟随！
 
 ## 安装和设置
 
-通过安装必要的Hugging Face库和SageMaker来开始。如果您尚未安装，还需要安装[PyTorch](https://pytorch.org/get-started/locally/)和[TensorFlow](https://www.tensorflow.org/install/pip#tensorflow-2-packages-are-available)。
+通过安装必要的 Hugging Face 库和 SageMaker 来开始。如果您尚未安装，还需要安装[PyTorch](https://pytorch.org/get-started/locally/)和[TensorFlow](https://www.tensorflow.org/install/pip#tensorflow-2-packages-are-available)。
 
 ```py
 pip install "sagemaker>=2.140.0" "transformers==4.26.1" "datasets[s3]==2.10.1" --upgrade
 ```
 
-如果您想在[SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/studio.html)中运行此示例，请升级[ipywidgets](https://ipywidgets.readthedocs.io/en/latest/)以配合🤗 Datasets库，并重新启动内核：
+如果您想在[SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/studio.html)中运行此示例，请升级[ipywidgets](https://ipywidgets.readthedocs.io/en/latest/)以配合🤗 Datasets 库，并重新启动内核：
 
 ```py
 %%capture
@@ -27,11 +27,11 @@ import IPython
 IPython.Application.instance().kernel.do_shutdown(True)
 ```
 
-接下来，您应该设置您的环境：一个SageMaker会话和一个S3存储桶。S3存储桶将存储数据、模型和日志。您需要访问一个具有所需权限的[IAM执行角色](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)。
+接下来，您应该设置您的环境：一个 SageMaker 会话和一个 S3 存储桶。S3 存储桶将存储数据、模型和日志。您需要访问一个具有所需权限的[IAM 执行角色](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)。
 
-如果您计划在本地环境中使用SageMaker，您需要自己提供`role`。了解如何设置请查看[这里](https://huggingface.co/docs/sagemaker/train#installation-and-setup)。
+如果您计划在本地环境中使用 SageMaker，您需要自己提供`role`。了解如何设置请查看[这里](https://huggingface.co/docs/sagemaker/train#installation-and-setup)。
 
-⚠️ 只有在SageMaker内运行笔记本时才可用执行角色。如果您尝试在不在SageMaker上运行的笔记本中运行`get_execution_role`，您将收到区域错误。
+⚠️ 只有在 SageMaker 内运行笔记本时才可用执行角色。如果您尝试在不在 SageMaker 上运行的笔记本中运行`get_execution_role`，您将收到区域错误。
 
 ```py
 import sagemaker
@@ -47,7 +47,7 @@ sess = sagemaker.Session(default_bucket=sagemaker_session_bucket)
 
 ## 预处理
 
-🤗 Datasets库使下载和预处理数据集变得容易。下载和标记[IMDb](https://huggingface.co/datasets/imdb)数据集：
+🤗 Datasets 库使下载和预处理数据集变得容易。下载和标记[IMDb](https://huggingface.co/datasets/imdb)数据集：
 
 ```py
 from datasets import load_dataset
@@ -74,9 +74,9 @@ test_dataset = test_dataset.rename_column("label", "labels")
 test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "labels"])
 ```
 
-## 将数据集上传到S3存储桶
+## 将数据集上传到 S3 存储桶
 
-接下来，使用🤗 Datasets S3 [文件系统](https://huggingface.co/docs/datasets/filesystems.html)实现将预处理的数据集上传到您的S3会话存储桶中：
+接下来，使用🤗 Datasets S3 [文件系统](https://huggingface.co/docs/datasets/filesystems.html)实现将预处理的数据集上传到您的 S3 会话存储桶中：
 
 ```py
 # save train_dataset to s3
@@ -90,11 +90,11 @@ test_dataset.save_to_disk(test_input_path)
 
 ## 开始训练作业
 
-创建一个Hugging Face Estimator来处理端到端的SageMaker训练和部署。需要注意的最重要的参数是：
+创建一个 Hugging Face Estimator 来处理端到端的 SageMaker 训练和部署。需要注意的最重要的参数是：
 
 +   `entry_point`指的是您可以在[这里](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py)找到的微调脚本。
 
-+   `instance_type`指的是将启动的SageMaker实例。查看[这里](https://aws.amazon.com/sagemaker/pricing/)以获取完整的实例类型列表。
++   `instance_type`指的是将启动的 SageMaker 实例。查看[这里](https://aws.amazon.com/sagemaker/pricing/)以获取完整的实例类型列表。
 
 +   `超参数`指的是模型将进行微调的训练超参数。
 
@@ -150,6 +150,6 @@ predictor.delete_endpoint()
 
 ## 接下来做什么？
 
-恭喜，您刚刚在SageMaker上微调和部署了一个预训练的🤗 Transformers模型！🎉
+恭喜，您刚刚在 SageMaker 上微调和部署了一个预训练的🤗 Transformers 模型！🎉
 
-接下来，继续阅读我们的文档，了解更多关于训练和部署的细节。有许多有趣的功能，如[分布式训练](/docs/sagemaker/train#distributed-training)和[Spot实例](/docs/sagemaker/train#spot-instances)。
+接下来，继续阅读我们的文档，了解更多关于训练和部署的细节。有许多有趣的功能，如分布式训练和 Spot 实例。

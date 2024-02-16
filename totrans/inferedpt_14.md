@@ -1,6 +1,6 @@
 # 更新您的终端节点
 
-> 原文链接：[https://huggingface.co/docs/inference-endpoints/guides/update_endpoint](https://huggingface.co/docs/inference-endpoints/guides/update_endpoint)
+> 原文链接：[`huggingface.co/docs/inference-endpoints/guides/update_endpoint`](https://huggingface.co/docs/inference-endpoints/guides/update_endpoint)
 
 您可以更新`正在运行`的终端节点以更改一些配置。但是，如果您的终端节点处于`失败`状态，您需要创建一个新的终端节点。要更新您的终端节点，您需要导航到“设置”选项卡。
 
@@ -10,9 +10,9 @@
 
 您可以在终端节点概览菜单中更新终端节点的实例大小，以满足您不断发展的需求。例如，如果您不需要计算，可以缩小到较小的实例类型，或者如果需要增加计算，可以升级到较大的实例类型。
 
-您可以更新*当前*实例类型：CPU或GPU。无法从一个实例类型更新到另一个实例类型（从CPU到GPU或反之）。
+您可以更新*当前*实例类型：CPU 或 GPU。无法从一个实例类型更新到另一个实例类型（从 CPU 到 GPU 或反之）。
 
-![实例类型选择](../Images/8da2c0a19824e550b79499455e9f4da0.png)
+![实例类型选择](img/8da2c0a19824e550b79499455e9f4da0.png)
 
 ## 自动缩放
 

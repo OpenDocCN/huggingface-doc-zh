@@ -1,6 +1,6 @@
 # 接口：TokenClassificationOutputValue
 
-> 原文链接：[https://huggingface.co/docs/huggingface.js/inference/interfaces/TokenClassificationOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/TokenClassificationOutputValue)
+> 原文链接：[`huggingface.co/docs/huggingface.js/inference/interfaces/TokenClassificationOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/TokenClassificationOutputValue)
 
 ## 属性
 
@@ -16,7 +16,7 @@
 
 * * *
 
-### 实体_组
+### 实体 _ 组
 
 • `entity_group`: `string`
 

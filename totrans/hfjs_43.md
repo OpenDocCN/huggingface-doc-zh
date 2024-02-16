@@ -1,6 +1,6 @@
 # 接口: CommitDeletedEntry
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitDeletedEntry](https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitDeletedEntry)
+> 原文链接: [`huggingface.co/docs/huggingface.js/hub/interfaces/CommitDeletedEntry`](https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitDeletedEntry)
 
 ## 属性
 

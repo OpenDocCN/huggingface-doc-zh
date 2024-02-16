@@ -1,6 +1,6 @@
 # 术语表
 
-> 原文：[https://huggingface.co/learn/deep-rl-course/unit2/glossary](https://huggingface.co/learn/deep-rl-course/unit2/glossary)
+> 原文：[`huggingface.co/learn/deep-rl-course/unit2/glossary`](https://huggingface.co/learn/deep-rl-course/unit2/glossary)
 
 这是一个由社区创建的术语表。欢迎贡献！
 
@@ -20,11 +20,11 @@
 
 +   在强化学习中常用的一种策略，涉及平衡探索和开发。
 
-+   选择具有最高期望奖励的动作，概率为1-epsilon。
++   选择具有最高期望奖励的动作，概率为 1-epsilon。
 
-+   以epsilon的概率选择随机动作。
++   以 epsilon 的概率选择随机动作。
 
-+   随着时间的推移，epsilon通常会减少，以将焦点转向开发。
++   随着时间的推移，epsilon 通常会减少，以将焦点转向开发。
 
 ### 贪婪策略：
 

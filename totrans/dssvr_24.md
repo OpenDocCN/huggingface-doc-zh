@@ -1,8 +1,8 @@
 # 数据类型
 
-> 原始文本：[https://huggingface.co/docs/datasets-server/data_types](https://huggingface.co/docs/datasets-server/data_types)
+> 原始文本：[`huggingface.co/docs/datasets-server/data_types`](https://huggingface.co/docs/datasets-server/data_types)
 
-Datasets Server支持的数据集具有表格格式，意味着数据点以行表示，其特征包含在列中。使用`/first-rows`端点可以预览数据集的前100行以及每个特征的信息。在`features`键中，您会注意到它返回一个`_type`字段。这个值描述了列的数据类型，也被称为数据集的[`Features`](https://huggingface.co/docs/datasets/about_dataset_features)。
+Datasets Server 支持的数据集具有表格格式，意味着数据点以行表示，其特征包含在列中。使用`/first-rows`端点可以预览数据集的前 100 行以及每个特征的信息。在`features`键中，您会注意到它返回一个`_type`字段。这个值描述了列的数据类型，也被称为数据集的[`Features`](https://huggingface.co/docs/datasets/about_dataset_features)。
 
 有几种不同的数据`Features`用于表示不同的数据格式，比如[`Audio`](https://huggingface.co/docs/datasets/v2.5.2/en/package_reference/main_classes#datasets.Audio)和[`Image`](https://huggingface.co/docs/datasets/v2.5.2/en/package_reference/main_classes#datasets.Image)分别用于语音和图像数据。了解数据集特征可以让你更好地理解你正在处理的数据类型，以及如何预处理它。
 

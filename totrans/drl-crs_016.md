@@ -1,6 +1,6 @@
 # 测验
 
-> 原始文本：[https://huggingface.co/learn/deep-rl-course/unit1/quiz](https://huggingface.co/learn/deep-rl-course/unit1/quiz)
+> 原始文本：[`huggingface.co/learn/deep-rl-course/unit1/quiz`](https://huggingface.co/learn/deep-rl-course/unit1/quiz)
 
 学习和[避免能力错觉](https://www.coursera.org/lecture/learning-how-to-learn/illusions-of-competence-BuFzf)的最佳方法是测试自己。这将帮助你找到需要加强知识的地方。
 
@@ -10,21 +10,21 @@
 
 强化学习是通过与环境进行试错交互并接收奖励（积极或消极）作为独特反馈来解决控制任务（也称为决策问题）的框架。</details>
 
-### Q2：定义RL循环
+### Q2：定义 RL 循环
 
-![练习RL循环](../Images/7dd50ea3f5814cad587739a6db3ce516.png)
+![练习 RL 循环](img/7dd50ea3f5814cad587739a6db3ce516.png)
 
 在每一步：
 
-+   我们的Agent从环境中接收__。
++   我们的 Agent 从环境中接收 __。
 
-+   基于那个__，Agent采取一个__。
++   基于那个 __，Agent 采取一个 __。
 
-+   我们的Agent将向右移动
++   我们的 Agent 将向右移动
 
-+   环境进入一个__。
++   环境进入一个 __。
 
-+   环境给Agent一个__。
++   环境给 Agent 一个 __。
 
 ### Q3：状态和观察之间有什么区别？
 
@@ -40,21 +40,21 @@
 
 +   *开发*是利用已知信息来最大化奖励。
 
-![探索开发权衡](../Images/3a59b593e994b9d356515c58b0fa6a24.png)</details>
+![探索开发权衡](img/3a59b593e994b9d356515c58b0fa6a24.png)</details>
 
 ### Q6：什么是策略？
 
 <details data-svelte-h="svelte-su9zbv"><summary>解决方案</summary>
 
-+   策略π是我们Agent的大脑。它是告诉我们在特定状态下应该采取什么行动的函数。因此，它定义了Agent在特定时间的行为。
++   策略π是我们 Agent 的大脑。它是告诉我们在特定状态下应该采取什么行动的函数。因此，它定义了 Agent 在特定时间的行为。
 
-![策略](../Images/83518e23a957f171ab1fe3fa7a6bbe35.png)</details>
+![策略](img/83518e23a957f171ab1fe3fa7a6bbe35.png)</details>
 
 ### Q7：什么是基于价值的方法？
 
 <details data-svelte-h="svelte-g9n3n1"><summary>解决方案</summary>
 
-+   基于价值的方法是解决RL问题的主要方法之一。
++   基于价值的方法是解决 RL 问题的主要方法之一。
 
 +   在基于价值的方法中，我们不是训练一个策略函数，而是训练一个价值函数，将一个状态映射到在该状态的预期价值。</details>
 

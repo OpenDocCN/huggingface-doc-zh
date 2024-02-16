@@ -1,6 +1,6 @@
 # 接口：FileDownloadInfoOutput
 
-> 原文链接：[https://huggingface.co/docs/huggingface.js/hub/interfaces/FileDownloadInfoOutput](https://huggingface.co/docs/huggingface.js/hub/interfaces/FileDownloadInfoOutput)
+> 原文链接：[`huggingface.co/docs/huggingface.js/hub/interfaces/FileDownloadInfoOutput`](https://huggingface.co/docs/huggingface.js/hub/interfaces/FileDownloadInfoOutput)
 
 ## 属性
 
@@ -8,7 +8,7 @@
 
 • `downloadLink`: `null` | `string`
 
-对于LFS文件，链接可直接从云服务提供商下载
+对于 LFS 文件，链接可直接从云服务提供商下载
 
 #### 在以下位置定义：
 

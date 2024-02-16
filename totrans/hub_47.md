@@ -1,15 +1,15 @@
 # 高级主题
 
-> 原文：[https://huggingface.co/docs/hub/spaces-advanced](https://huggingface.co/docs/hub/spaces-advanced)
+> 原文：[`huggingface.co/docs/hub/spaces-advanced`](https://huggingface.co/docs/hub/spaces-advanced)
 
 ## 目录
 
-+   [在空间中使用OpenCV](./spaces-using-opencv)
++   在空间中使用 OpenCV
 
-+   [更多创建空间的方法](./spaces-more-ways-to-create)
++   更多创建空间的方法
 
-+   [使用Github Actions管理空间](./spaces-github-actions)
++   使用 Github Actions 管理空间
 
-+   [使用CircleCI工作流管理空间](./spaces-circleci)
++   使用 CircleCI 工作流管理空间
 
-+   [如何将空间添加到ArXiv](./spaces-add-to-arxiv)
++   如何将空间添加到 ArXiv

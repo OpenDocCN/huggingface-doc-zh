@@ -1,6 +1,6 @@
 # 类: HfInferenceEndpoint
 
-> [https://huggingface.co/docs/huggingface.js/inference/classes/HfInferenceEndpoint](https://huggingface.co/docs/huggingface.js/inference/classes/HfInferenceEndpoint)
+> [`huggingface.co/docs/huggingface.js/inference/classes/HfInferenceEndpoint`](https://huggingface.co/docs/huggingface.js/inference/classes/HfInferenceEndpoint)
 
 ## 层次结构
 
@@ -20,7 +20,7 @@
 | :-- | :-- | :-- |
 | `endpointUrl` | `字符串` | `未定义` |
 | `accessToken` | `字符串` | `""` |
-| `defaultOptions` | [`选项`](../interfaces/Options) | `{}` |
+| `defaultOptions` | `选项` | `{}` |
 
 #### 定义于
 
@@ -30,11 +30,11 @@
 
 ### 音频分类
 
-• `音频分类`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: [`选项`](../interfaces/Options)) => `Promise`<[`音频分类返回`](../modules#audioclassificationreturn)>
+• `音频分类`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: `选项`) => `Promise`<`音频分类返回`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`音频分类返回`](../modules#audioclassificationreturn)>
+▸ (`args`, `options?`): `Promise`<`音频分类返回`>
 
 ##### 参数
 
@@ -42,11 +42,11 @@
 | :-- | :-- | :-- |
 | `args` | `对象` | - |
 | `args.data` | `Blob` &#124; `ArrayBuffer` | 二进制音频数据 |
-| `options?` | [`选项`](../interfaces/Options) | - |
+| `options?` | `选项` | - |
 
 ##### 返回
 
-`Promise`<[`音频分类返回`](../modules#audioclassificationreturn)>
+`Promise`<`音频分类返回`>
 
 #### 定义于
 
@@ -56,11 +56,11 @@
 
 ### 音频到音频
 
-• `音频到音频`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: [`选项`](../interfaces/Options)) => `Promise`<[`音频到音频返回`](../modules#audiotoaudioreturn)>
+• `音频到音频`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: `选项`) => `Promise`<`音频到音频返回`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`音频到音频返回`](../modules#audiotoaudioreturn)>
+▸ (`args`, `options?`): `Promise`<`音频到音频返回`>
 
 ##### 参数
 
@@ -68,11 +68,11 @@
 | :-- | :-- | :-- |
 | `args` | `对象` | - |
 | `args.data` | `Blob` &#124; `ArrayBuffer` | 二进制音频数据 |
-| `options?` | [`选项`](../interfaces/Options) | - |
+| `options?` | `选项` | - |
 
 ##### 返回
 
-`Promise`<[`音频到音频返回`](../modules#audiotoaudioreturn)>
+`Promise`<`音频到音频返回`>
 
 #### 定义于
 
@@ -82,11 +82,11 @@
 
 ### 自动语音识别
 
-• `自动语音识别`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: [`选项`](../interfaces/Options)) => `Promise`<[`自动语音识别输出`](../interfaces/AutomaticSpeechRecognitionOutput)>
+• `自动语音识别`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: `选项`) => `Promise`<`自动语音识别输出`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`自动语音识别输出`](../interfaces/AutomaticSpeechRecognitionOutput)>
+▸ (`args`, `options?`): `Promise`<`自动语音识别输出`>
 
 ##### 参数
 
@@ -94,11 +94,11 @@
 | :-- | :-- | :-- |
 | `args` | `对象` | - |
 | `args.data` | `Blob` &#124; `ArrayBuffer` | 二进制音频数据 |
-| `options?` | [`选项`](../interfaces/Options) | - |
+| `options?` | `选项` | - |
 
 ##### 返回
 
-`Promise`<[`自动语音识别输出`](../interfaces/AutomaticSpeechRecognitionOutput)>
+`Promise`<`自动语音识别输出`>
 
 #### 定义于
 
@@ -108,11 +108,11 @@
 
 ### 对话
 
-• `对话`: (`args`: { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string` } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` } }, `options?`: [`选项`](../interfaces/Options)) => `Promise`<[`对话输出`](../interfaces/ConversationalOutput)>
+• `对话`: (`args`: { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string` } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` } }, `options?`: `选项`) => `Promise`<`对话输出`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`对话输出`](../interfaces/ConversationalOutput)>
+▸ (`args`, `options?`): `Promise`<`对话输出`>
 
 ##### 参数
 
@@ -128,14 +128,14 @@
 | `args.parameters.max_time?` | `number` | (默认: 无). 浮点数 (0-120.0). 查询应该最多花费的时间量，以秒为单位。网络可能会导致一些开销，因此这将是一个软限制。 |
 | `args.parameters.min_length?` | `number` | (默认: 无). 整数，定义输出摘要的最小标记长度。 |
 | `args.parameters.repetition_penalty?` | `number` | (默认: 无). 浮点数 (0.0-100.0). 在生成过程中一个标记被使用得越多，它在后续生成过程中被惩罚的程度就越大。 |
-| `args.parameters.temperature?` | `number` | (默认: 1.0). 浮点数 (0.0-100.0). 采样操作的温度。1表示常规采样，0表示始终选择最高分数，100.0接近均匀概率。 |
-| `args.parameters.top_k?` | `number` | (默认: 无). 整数，定义在样本操作中考虑的前k个标记，以创建新文本。 |
-| `args.parameters.top_p?` | `number` | (默认: 无). 浮点数，定义在文本生成的样本操作中的标记。将标记添加到样本中，以使概率从最可能到最不可能，直到概率之和大于top_p。 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `args.parameters.temperature?` | `number` | (默认: 1.0). 浮点数 (0.0-100.0). 采样操作的温度。1 表示常规采样，0 表示始终选择最高分数，100.0 接近均匀概率。 |
+| `args.parameters.top_k?` | `number` | (默认: 无). 整数，定义在样本操作中考虑的前 k 个标记，以创建新文本。 |
+| `args.parameters.top_p?` | `number` | (默认: 无). 浮点数，定义在文本生成的样本操作中的标记。将标记添加到样本中，以使概率从最可能到最不可能，直到概率之和大于 top_p。 |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`ConversationalOutput`](../interfaces/ConversationalOutput)>
+`Promise`<`ConversationalOutput`>
 
 #### 定义于
 
@@ -145,11 +145,11 @@
 
 ### documentQuestionAnswering
 
-• `documentQuestionAnswering`: (`args`: { `inputs`: { `image`: `Blob` | `ArrayBuffer` ; `question`: `string` } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`DocumentQuestionAnsweringOutput`](../interfaces/DocumentQuestionAnsweringOutput)>
+• `documentQuestionAnswering`: (`args`: { `inputs`: { `image`: `Blob` | `ArrayBuffer` ; `question`: `string` } }, `options?`: `Options`) => `Promise`<`DocumentQuestionAnsweringOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`DocumentQuestionAnsweringOutput`](../interfaces/DocumentQuestionAnsweringOutput)>
+▸ (`args`, `options?`): `Promise`<`DocumentQuestionAnsweringOutput`>
 
 ##### 参数
 
@@ -157,13 +157,13 @@
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
 | `args.inputs` | `Object` | - |
-| `args.inputs.image` | `Blob` &#124; `ArrayBuffer` | 原始图像。您可以在浏览器中使用原生的`File`，或在节点中使用`new Blob([buffer])`，或对于base64图像`new Blob([btoa(base64String)])`，甚至`await (await fetch('...)).blob()` |
+| `args.inputs.image` | `Blob` &#124; `ArrayBuffer` | 原始图像。您可以在浏览器中使用原生的`File`，或在节点中使用`new Blob([buffer])`，或对于 base64 图像`new Blob([btoa(base64String)])`，甚至`await (await fetch('...)).blob()` |
 | `args.inputs.question` | `string` | - |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`DocumentQuestionAnsweringOutput`](../interfaces/DocumentQuestionAnsweringOutput)>
+`Promise`<`DocumentQuestionAnsweringOutput`>
 
 #### 定义于
 
@@ -173,11 +173,11 @@
 
 ### featureExtraction
 
-• `featureExtraction`: (`args`: { `inputs`: `string` | `string`[] }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`FeatureExtractionOutput`](../modules#featureextractionoutput)>
+• `featureExtraction`: (`args`: { `inputs`: `string` | `string`[] }, `options?`: `Options`) => `Promise`<`FeatureExtractionOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`FeatureExtractionOutput`](../modules#featureextractionoutput)>
+▸ (`args`, `options?`): `Promise`<`FeatureExtractionOutput`>
 
 ##### 参数
 
@@ -185,11 +185,11 @@
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
 | `args.inputs` | `string` &#124; `string`[] | 输入是一个字符串或一个字符串列表，用于获取特征。输入: “那是一个快乐的人”， |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`FeatureExtractionOutput`](../modules#featureextractionoutput)>
+`Promise`<`FeatureExtractionOutput`>
 
 #### 定义于
 
@@ -199,11 +199,11 @@
 
 ### fillMask
 
-• `fillMask`: (`args`: { `inputs`: `string` }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`FillMaskOutput`](../modules#fillmaskoutput)>
+• `fillMask`: (`args`: { `inputs`: `string` }, `options?`: `Options`) => `Promise`<`FillMaskOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`FillMaskOutput`](../modules#fillmaskoutput)>
+▸ (`args`, `options?`): `Promise`<`FillMaskOutput`>
 
 ##### 参数
 
@@ -211,11 +211,11 @@
 | :-- | :-- |
 | `args` | `Object` |
 | `args.inputs` | `string` |
-| `options?` | [`Options`](../interfaces/Options) |
+| `options?` | `Options` |
 
 ##### 返回
 
-`Promise`<[`FillMaskOutput`](../modules#fillmaskoutput)>
+`Promise`<`FillMaskOutput`>
 
 #### 定义在
 
@@ -225,11 +225,11 @@
 
 ### imageClassification
 
-• `imageClassification`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ImageClassificationOutput`](../modules#imageclassificationoutput)>
+• `imageClassification`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: `Options`) => `Promise`<`ImageClassificationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`ImageClassificationOutput`](../modules#imageclassificationoutput)>
+▸ (`args`, `options?`): `Promise`<`ImageClassificationOutput`>
 
 ##### 参数
 
@@ -237,11 +237,11 @@
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
 | `args.data` | `Blob` &#124; `ArrayBuffer` | 二进制图像数据 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`ImageClassificationOutput`](../modules#imageclassificationoutput)>
+`Promise`<`ImageClassificationOutput`>
 
 #### 定义在
 
@@ -251,11 +251,11 @@
 
 ### 图像分割
 
-• `imageSegmentation`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ImageSegmentationOutput`](../modules#imagesegmentationoutput)>
+• `imageSegmentation`: (`args`: { `data`: `Blob` | `ArrayBuffer` }, `options?`: `Options`) => `Promise`<`ImageSegmentationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`ImageSegmentationOutput`](../modules#imagesegmentationoutput)>
+▸ (`args`, `options?`): `Promise`<`ImageSegmentationOutput`>
 
 ##### 参数
 
@@ -263,11 +263,11 @@
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
 | `args.data` | `Blob` &#124; `ArrayBuffer` | 二进制图像数据 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`ImageSegmentationOutput`](../modules#imagesegmentationoutput)>
+`Promise`<`ImageSegmentationOutput`>
 
 #### 定义在
 
@@ -277,7 +277,7 @@
 
 ### imageToImage
 
-• `imageToImage`: (`args`: { `inputs`: `Blob` | `ArrayBuffer` ; `parameters?`: { `guess_mode?`: `boolean` ; `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `prompt?`: `string` ; `strength?`: `number` ; `width?`: `number` } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<`Blob`>
+• `imageToImage`: (`args`: { `inputs`: `Blob` | `ArrayBuffer` ; `parameters?`: { `guess_mode?`: `boolean` ; `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `prompt?`: `string` ; `strength?`: `number` ; `width?`: `number` } }, `options?`: `Options`) => `Promise`<`Blob`>
 
 #### 类型声明
 
@@ -290,15 +290,15 @@
 | `args` | `Object` | - |
 | `args.inputs` | `Blob` &#124; `ArrayBuffer` | 初始图像条件 |
 | `args.parameters?` | `Object` | - |
-| `args.parameters.guess_mode?` | `boolean` | 猜测模式仅适用于ControlNet模型，默认为False，在此模式下，ControlNet编码器将尽力识别输入图像的内容，即使您删除所有提示。建议在3.0到5.0之间的`guidance_scale`。 |
+| `args.parameters.guess_mode?` | `boolean` | 猜测模式仅适用于 ControlNet 模型，默认为 False，在此模式下，ControlNet 编码器将尽力识别输入图像的内容，即使您删除所有提示。建议在 3.0 到 5.0 之间的`guidance_scale`。 |
 | `args.parameters.guidance_scale?` | `number` | 引导比例：更高的引导比例鼓励生成与文本“提示”紧密相关的图像，通常以降低图像质量为代价。 |
 | `args.parameters.height?` | `number` | 生成图像的像素高度 |
 | `args.parameters.negative_prompt?` | `string` | 用于图像生成的可选负面提示 |
 | `args.parameters.num_inference_steps?` | `number` | 降噪步骤的数量。更多的降噪步骤通常会导致更高质量的图像，但会降低推理速度。 |
 | `args.parameters.prompt?` | `字符串` | 引导图像生成的文本提示。 |
-| `args.parameters.strength?` | `数字` | 强度参数仅适用于SD img2img和alt扩散img2img模型。在概念上，指示要转换参考`图像`的程度。必须在0和1之间。`图像`将被用作起点，添加更多噪音，`强度`越大。去噪步骤的数量取决于最初添加的噪音量。当`强度`为1时，添加的噪音将是最大的，并且去噪过程将运行指定的`num_inference_steps`的完整迭代次数。因此，值为1基本上忽略了`图像`。 |
+| `args.parameters.strength?` | `数字` | 强度参数仅适用于 SD img2img 和 alt 扩散 img2img 模型。在概念上，指示要转换参考`图像`的程度。必须在 0 和 1 之间。`图像`将被用作起点，添加更多噪音，`强度`越大。去噪步骤的数量取决于最初添加的噪音量。当`强度`为 1 时，添加的噪音将是最大的，并且去噪过程将运行指定的`num_inference_steps`的完整迭代次数。因此，值为 1 基本上忽略了`图像`。 |
 | `args.parameters.width?` | `数字` | 生成图像的像素宽度 |
-| `选项？` | [`选项`](../interfaces/Options) | - |
+| `选项？` | `选项` | - |
 
 ##### 返回
 
@@ -312,11 +312,7 @@
 
 ### imageToText
 
-• `imageToText`：(`参数`：{ `数据`：`Blob` | `ArrayBuffer` }, `选项？`：[`选项`](../interfaces/Options)) => `Promise`<[`图像到文本输出`](../interfaces/ImageToTextOutput]>
-
-#### 类型声明
-
-▸ (`参数`，`选项？`): `Promise`<[`图像到文本输出`](../interfaces/ImageToTextOutput)>
+• `imageToText`：(`参数`：{ `数据`：`Blob` | `ArrayBuffer` }, `选项？`：`选项`) => `Promise`<`图像到文本输出`: `Promise`<`图像到文本输出`>
 
 ##### 参数
 
@@ -324,11 +320,11 @@
 | :-- | :-- | :-- |
 | `args` | `对象` | - |
 | `args.data` | `Blob` &#124; `ArrayBuffer` | 二进制图像数据 |
-| `选项？` | [`选项`](../interfaces/Options) | - |
+| `选项？` | `选项` | - |
 
 ##### 返回
 
-`Promise`<[`图像到文本输出`](../interfaces/ImageToTextOutput)>
+`Promise`<`图像到文本输出`>
 
 #### 定义于
 
@@ -338,11 +334,11 @@
 
 ### objectDetection
 
-• `objectDetection`：(`参数`：{ `数据`：`Blob` | `ArrayBuffer` }, `选项？`：[`选项`](../interfaces/Options)) => `Promise`<[`对象检测输出`](../modules#objectdetectionoutput)>
+• `objectDetection`：(`参数`：{ `数据`：`Blob` | `ArrayBuffer` }, `选项？`：`选项`) => `Promise`<`对象检测输出`>
 
 #### 类型声明
 
-▸ (`参数`，`选项？`): `Promise`<[`对象检测输出`](../modules#objectdetectionoutput)>
+▸ (`参数`，`选项？`): `Promise`<`对象检测输出`>
 
 ##### 参数
 
@@ -350,11 +346,11 @@
 | :-- | :-- | :-- |
 | `args` | `对象` | - |
 | `args.data` | `Blob` &#124; `ArrayBuffer` | 二进制图像数据 |
-| `选项？` | [`选项`](../interfaces/Options) | - |
+| `选项？` | `选项` | - |
 
 ##### 返回
 
-`Promise`<[`对象检测输出`](../modules#objectdetectionoutput)>
+`Promise`<`对象检测输出`>
 
 #### 定义于
 
@@ -364,11 +360,11 @@
 
 ### questionAnswering
 
-• `questionAnswering`：(`参数`：{ `输入`：{ `上下文`：`字符串` ; `问题`：`字符串` } }, `选项？`：[`选项`](../interfaces/Options)) => `Promise`<[`问答输出`](../interfaces/QuestionAnsweringOutput)>
+• `questionAnswering`：(`参数`：{ `输入`：{ `上下文`：`字符串` ; `问题`：`字符串` } }, `选项？`：`选项`) => `Promise`<`问答输出`>
 
 #### 类型声明
 
-▸ (`参数`，`选项？`): `Promise`<[`问答输出`](../interfaces/QuestionAnsweringOutput)>
+▸ (`参数`，`选项？`): `Promise`<`问答输出`>
 
 ##### 参数
 
@@ -378,11 +374,11 @@
 | `args.inputs` | `对象` |
 | `args.inputs.context` | `字符串` |
 | `args.inputs.question` | `字符串` |
-| `选项？` | [`选项`](../interfaces/Options) |
+| `选项？` | `选项` |
 
 ##### 返回
 
-`Promise`<[`问答输出`](../interfaces/QuestionAnsweringOutput)>
+`Promise`<`问答输出`>
 
 #### 定义于
 
@@ -392,7 +388,7 @@
 
 ### 请求
 
-• `请求`：(`参数`：{ `数据`：`Blob` | `ArrayBuffer` ; `参数？`：`Record`<`字符串`，`未知`> } | { `输入`：`未知` ; `参数？`：`Record`<`字符串`，`未知`> }，`选项？`：[`选项`](../interfaces/Options) & { `任务？`：`字符串` ; `任务提示？`：[`推断任务`](../modules#inferencetask) }) => `Promise`<`未知`>
+• `请求`：(`参数`：{ `数据`：`Blob` | `ArrayBuffer` ; `参数？`：`Record`<`字符串`，`未知`> } | { `输入`：`未知` ; `参数？`：`Record`<`字符串`，`未知`> }，`选项？`：`选项` & { `任务？`：`字符串` ; `任务提示？`：`推断任务` }) => `Promise`<`未知`>
 
 #### 类型声明
 
@@ -403,7 +399,7 @@
 | 名称 | 类型 |
 | :-- | :-- |
 | `args` | { `data`: `Blob` &#124; `ArrayBuffer` ; `parameters?`: `Record`<`string`, `unknown`> } &#124; { `inputs`: `unknown` ; `parameters?`: `Record`<`string`, `unknown`> } |
-| `options?` | [`Options`](../interfaces/Options) & { `task?`: `string` ; `taskHint?`: [`InferenceTask`](../modules#inferencetask) } |
+| `options?` | `Options` & { `task?`: `string` ; `taskHint?`: `InferenceTask` } |
 
 ##### 返回
 
@@ -417,23 +413,23 @@
 
 ### sentenceSimilarity
 
-• `sentenceSimilarity`: (`args`: { `inputs`: `Record`<`string`, `unknown`> | `Record`<`string`, `unknown`>[] }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`SentenceSimilarityOutput`](../modules#sentencesimilarityoutput)>
+• `sentenceSimilarity`: (`args`: { `inputs`: `Record`<`string`, `unknown`> | `Record`<`string`, `unknown`>[] }, `options?`: `Options`) => `Promise`<`SentenceSimilarityOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`SentenceSimilarityOutput`](../modules#sentencesimilarityoutput)>
+▸ (`args`, `options?`): `Promise`<`SentenceSimilarityOutput`>
 
 ##### 参数
 
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
-| `args.inputs` | `Record`<`string`, `unknown`> &#124; `Record`<`string`, `unknown`>[] | 输入根据模型而异。例如，当使用sentence-transformers/paraphrase-xlm-r-multilingual-v1时，输入将包含一个`source_sentence`字符串和一个字符串数组`sentences` |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `args.inputs` | `Record`<`string`, `unknown`> &#124; `Record`<`string`, `unknown`>[] | 输入根据模型而异。例如，当使用 sentence-transformers/paraphrase-xlm-r-multilingual-v1 时，输入将包含一个`source_sentence`字符串和一个字符串数组`sentences` |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`SentenceSimilarityOutput`](../modules#sentencesimilarityoutput)>
+`Promise`<`SentenceSimilarityOutput`>
 
 #### 定义在
 
@@ -443,7 +439,7 @@
 
 ### streamingRequest
 
-• `streamingRequest`: (`args`: { `data`: `Blob` | `ArrayBuffer` ; `parameters?`: `Record`<`string`, `unknown`> } | { `inputs`: `unknown` ; `parameters?`: `Record`<`string`, `unknown`> }, `options?`: [`Options`](../interfaces/Options) & { `task?`: `string` ; `taskHint?`: [`InferenceTask`](../modules#inferencetask) }) => `AsyncGenerator`<`unknown`, `any`, `unknown`>
+• `streamingRequest`: (`args`: { `data`: `Blob` | `ArrayBuffer` ; `parameters?`: `Record`<`string`, `unknown`> } | { `inputs`: `unknown` ; `parameters?`: `Record`<`string`, `unknown`> }, `options?`: `Options` & { `task?`: `string` ; `taskHint?`: `InferenceTask` }) => `AsyncGenerator`<`unknown`, `any`, `unknown`>
 
 #### 类型声明
 
@@ -454,7 +450,7 @@
 | 名称 | 类型 |
 | :-- | :-- |
 | `args` | { `data`: `Blob` &#124; `ArrayBuffer` ; `parameters?`: `Record`<`string`, `unknown`> } &#124; { `inputs`: `unknown` ; `parameters?`: `Record`<`string`, `unknown`> } |
-| `options?` | [`Options`](../interfaces/Options) & { `task?`: `string` ; `taskHint?`: [`InferenceTask`](../modules#inferencetask) } |
+| `options?` | `Options` & { `task?`: `string` ; `taskHint?`: `InferenceTask` } |
 
 ##### 返回
 
@@ -468,11 +464,11 @@
 
 ### summarization
 
-• `summarization`: (`args`: { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`SummarizationOutput`](../interfaces/SummarizationOutput)>
+• `summarization`: (`args`: { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` } }, `options?`: `Options`) => `Promise`<`SummarizationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`SummarizationOutput`](../interfaces/SummarizationOutput)>
+▸ (`args`, `options?`): `Promise`<`SummarizationOutput`>
 
 ##### 参数
 
@@ -485,14 +481,14 @@
 | `args.parameters.max_time?` | `number` | (默认值：无). 浮点数 (0-120.0). 查询应该最多花费的时间（以秒为单位）。网络可能会导致一些额外开销，因此这将是一个软限制。 |
 | `args.parameters.min_length?` | `number` | (默认值：无). 整数，定义输出摘要的最小长度（以标记为单位）。 |
 | `args.parameters.repetition_penalty?` | `number` | (默认值：无)。浮点数（0.0-100.0）。在生成过程中一个标记被使用得越多，它在连续的生成过程中被惩罚的可能性就越大。 |
-| `args.parameters.temperature?` | `number` | (默认值：1.0)。浮点数（0.0-100.0）。采样操作的温度。1表示常规采样，0表示始终选择最高分数，100.0接近均匀概率。 |
+| `args.parameters.temperature?` | `number` | (默认值：1.0)。浮点数（0.0-100.0）。采样操作的温度。1 表示常规采样，0 表示始终选择最高分数，100.0 接近均匀概率。 |
 | `args.parameters.top_k?` | `number` | (默认值：无)。整数，用于定义在样本操作中考虑的前几个标记，以创建新文本。 |
-| `args.parameters.top_p?` | `number` | (默认值：无)。浮点数，用于定义在文本生成的样本操作中的标记。在样本中添加标记，以便从最可能到最不可能，直到概率之和大于top_p。 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `args.parameters.top_p?` | `number` | (默认值：无)。浮点数，用于定义在文本生成的样本操作中的标记。在样本中添加标记，以便从最可能到最不可能，直到概率之和大于 top_p。 |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`SummarizationOutput`](../interfaces/SummarizationOutput)>
+`Promise`<`SummarizationOutput`>
 
 #### 定义在
 
@@ -502,11 +498,11 @@
 
 ### tableQuestionAnswering
 
-• `tableQuestionAnswering`: (`args`: { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]> } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TableQuestionAnsweringOutput`](../interfaces/TableQuestionAnsweringOutput)>
+• `tableQuestionAnswering`: (`args`: { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]> } }, `options?`: `Options`) => `Promise`<`TableQuestionAnsweringOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`TableQuestionAnsweringOutput`](../interfaces/TableQuestionAnsweringOutput)>
+▸ (`args`, `options?`): `Promise`<`TableQuestionAnsweringOutput`>
 
 ##### 参数
 
@@ -516,11 +512,11 @@
 | `args.inputs` | `Object` | - |
 | `args.inputs.query` | `string` | 您想要询问表格的纯文本查询 |
 | `args.inputs.table` | `Record`<`string`, `string`[]> | 以字典列表表示的数据表，其中条目是标题，列表是所有值，所有列表必须具有相同的大小。 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`TableQuestionAnsweringOutput`](../interfaces/TableQuestionAnsweringOutput)>
+`Promise`<`TableQuestionAnsweringOutput`>
 
 #### 定义在
 
@@ -530,11 +526,11 @@
 
 ### tabularClassification
 
-• `tabularClassification`: (`args`: { `inputs`: { `data`: `Record`<`string`, `string`[]> } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TabularClassificationOutput`](../modules#tabularclassificationoutput)>
+• `tabularClassification`: (`args`: { `inputs`: { `data`: `Record`<`string`, `string`[]> } }, `options?`: `Options`) => `Promise`<`TabularClassificationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`TabularClassificationOutput`](../modules#tabularclassificationoutput)>
+▸ (`args`, `options?`): `Promise`<`TabularClassificationOutput`>
 
 ##### 参数
 
@@ -543,11 +539,11 @@
 | `args` | `Object` | - |
 | `args.inputs` | `Object` | - |
 | `args.inputs.data` | `Record`<`string`, `string`[]> | 以字典列表表示的数据表，其中条目是标题，列表是所有值，所有列表必须具有相同的大小。 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`TabularClassificationOutput`](../modules#tabularclassificationoutput)>
+`Promise`<`TabularClassificationOutput`>
 
 #### 定义在
 
@@ -557,11 +553,11 @@
 
 ### tabularRegression
 
-• `tabularRegression`: (`args`: { `inputs`: { `data`: `Record`<`string`, `string`[]> } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TabularRegressionOutput`](../modules#tabularregressionoutput)>
+• `tabularRegression`: (`args`: { `inputs`: { `data`: `Record`<`string`, `string`[]> } }, `options?`: `Options`) => `Promise`<`TabularRegressionOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`TabularRegressionOutput`](../modules#tabularregressionoutput)>
+▸ (`args`, `options?`): `Promise`<`TabularRegressionOutput`>
 
 ##### 参数
 
@@ -570,11 +566,11 @@
 | `args` | `Object` | - |
 | `args.inputs` | `Object` | - |
 | `args.inputs.data` | `Record`<`string`, `string`[]> | 以字典列表表示的数据表，其中条目为标题，列表为所有值，所有列表必须具有相同的大小。 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`TabularRegressionOutput`](../modules#tabularregressionoutput)>
+`Promise`<`TabularRegressionOutput`>
 
 #### 定义于
 
@@ -584,11 +580,11 @@
 
 ### 文本分类
 
-• `文本分类`: (`args`: { `inputs`: `string` }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TextClassificationOutput`](../modules#textclassificationoutput)>
+• `文本分类`: (`args`: { `inputs`: `string` }, `options?`: `Options`) => `Promise`<`TextClassificationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`TextClassificationOutput`](../modules#textclassificationoutput)>
+▸ (`args`, `options?`): `Promise`<`TextClassificationOutput`>
 
 ##### 参数
 
@@ -596,11 +592,11 @@
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
 | `args.inputs` | `string` | 要分类的字符串 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`TextClassificationOutput`](../modules#textclassificationoutput)>
+`Promise`<`TextClassificationOutput`>
 
 #### 定义于
 
@@ -610,11 +606,11 @@
 
 ### 文本生成
 
-• `文本生成`: (`args`: { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `stop_sequences?`: `string`[] ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` ; `truncate?`: `number` } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TextGenerationOutput`](../interfaces/TextGenerationOutput)>
+• `文本生成`: (`args`: { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `stop_sequences?`: `string`[] ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` ; `truncate?`: `number` } }, `options?`: `Options`) => `Promise`<`TextGenerationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`TextGenerationOutput`](../interfaces/TextGenerationOutput)>
+▸ (`args`, `options?`): `Promise`<`TextGenerationOutput`>
 
 ##### 参数
 
@@ -634,11 +630,11 @@
 | `args.parameters.top_k?` | `number` | (默认值：无). 整数，用于定义在样本操作中考虑的前几个标记，以生成新文本。 |
 | `args.parameters.top_p?` | `number` | (默认值：无). 浮点数，用于定义在文本生成的采样操作中的标记。将标记添加到采样中，以使概率从最可能到最不可能，直到概率之和大于 top_p。 |
 | `args.parameters.truncate?` | `number` | (默认值：无). 整数。输入中的最大标记数。 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`TextGenerationOutput`](../interfaces/TextGenerationOutput)>
+`Promise`<`TextGenerationOutput`>
 
 #### 定义在
 
@@ -648,11 +644,11 @@
 
 ### textGenerationStream
 
-• `textGenerationStream`: (`args`: { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `stop_sequences?`: `string`[] ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` ; `truncate?`: `number` } }, `options?`: [`Options`](../interfaces/Options)) => `AsyncGenerator`<[`TextGenerationStreamOutput`](../interfaces/TextGenerationStreamOutput), `any`, `unknown`>
+• `textGenerationStream`: (`args`: { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `stop_sequences?`: `string`[] ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` ; `truncate?`: `number` } }, `options?`: `Options`) => `AsyncGenerator`<`TextGenerationStreamOutput`, `any`, `unknown`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `AsyncGenerator`<[`TextGenerationStreamOutput`](../interfaces/TextGenerationStreamOutput), `any`, `unknown`>
+▸ (`args`, `options?`): `AsyncGenerator`<`TextGenerationStreamOutput`, `any`, `unknown`>
 
 ##### 参数
 
@@ -672,11 +668,11 @@
 | `args.parameters.top_k?` | `number` | (默认值：无). 整数，用于定义在采样操作中考虑的前几个标记，以创建新文本。 |
 | `args.parameters.top_p?` | `number` | (默认值：无). 浮点数，用于定义在文本生成的采样操作中的标记。将标记添加到采样中，以使概率从最可能到最不可能，直到概率之和大于 top_p。 |
 | `args.parameters.truncate?` | `number` | (默认值：无). 整数。输入中的最大标记数。 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`AsyncGenerator`<[`TextGenerationStreamOutput`](../interfaces/TextGenerationStreamOutput), `any`, `unknown`>
+`AsyncGenerator`<`TextGenerationStreamOutput`, `any`, `unknown`>
 
 #### 定义在
 
@@ -686,7 +682,7 @@
 
 ### textToImage
 
-• `textToImage`: (`args`: { `inputs`: `string` ; `parameters?`: { `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `width?`: `number` } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<`Blob`>
+• `textToImage`: (`args`: { `inputs`: `string` ; `parameters?`: { `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `width?`: `number` } }, `options?`: `Options`) => `Promise`<`Blob`>
 
 #### 类型声明
 
@@ -704,7 +700,7 @@
 | `args.parameters.negative_prompt?` | `string` | 用于图像生成的可选负面提示 |
 | `args.parameters.num_inference_steps?` | `number` | 降噪步骤的数量。更多的降噪步骤通常会导致更高质量的图像，但会降低推理速度。 |
 | `args.parameters.width?` | `number` | 生成图像的像素宽度 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
@@ -718,7 +714,7 @@
 
 ### textToSpeech
 
-• `textToSpeech`: (`args`: { `inputs`: `string` }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<`Blob`>
+• `textToSpeech`: (`args`: { `inputs`: `string` }, `options?`: `Options`) => `Promise`<`Blob`>
 
 #### 类型声明
 
@@ -730,7 +726,7 @@
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
 | `args.inputs` | `string` | 从中生成音频的文本 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
@@ -744,11 +740,11 @@
 
 ### tokenClassification
 
-• `tokenClassification`: (`args`: { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: `"none"` | `"simple"` | `"first"` | `"average"` | `"max"` } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TokenClassificationOutput`](../modules#tokenclassificationoutput)>
+• `tokenClassification`: (`args`: { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: `"none"` | `"simple"` | `"first"` | `"average"` | `"max"` } }, `options?`: `Options`) => `Promise`<`TokenClassificationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`TokenClassificationOutput`](../modules#tokenclassificationoutput)>
+▸ (`args`, `options?`): `Promise`<`TokenClassificationOutput`>
 
 ##### 参数
 
@@ -758,11 +754,11 @@
 | `args.inputs` | `string` | 要分类的字符串 |
 | `args.parameters?` | `Object` | - |
 | `args.parameters.aggregation_strategy?` | `"none"` &#124; `"simple"` &#124; `"first"` &#124; `"average"` &#124; `"max"` | （默认值：简单）。有几种聚合策略：none：每个标记都会被分类，不会有进一步的聚合。simple：实体根据默认模式进行分组（当标记相似时，B-、I-标记会合并）。first：与简单策略相同，除非单词不能以不同的标记结束。当存在歧义时，单词将使用第一个标记的标记。average：与简单策略相同，除非单词不能以不同的标记结束。分数将在标记上平均，然后应用最大标签。max：与简单策略相同，除非单词不能以不同的标记结束。单词实体将是具有最大分数的标记。 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`TokenClassificationOutput`](../modules#tokenclassificationoutput)>
+`Promise`<`TokenClassificationOutput`>
 
 #### 定义在
 
@@ -772,11 +768,11 @@
 
 ### 翻译
 
-• `translation`: (`args`: { `inputs`: `string` | `string`[] }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TranslationOutput`](../modules#translationoutput)>
+• `translation`: (`args`: { `inputs`: `string` | `string`[] }, `options?`: `Options`) => `Promise`<`TranslationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`TranslationOutput`](../modules#translationoutput)>
+▸ (`args`, `options?`): `Promise`<`TranslationOutput`>
 
 ##### 参数
 
@@ -784,11 +780,11 @@
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
 | `args.inputs` | `string` &#124; `string`[] | 要翻译的字符串 |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`TranslationOutput`](../modules#translationoutput)>
+`Promise`<`TranslationOutput`>
 
 #### 定义于
 
@@ -798,11 +794,11 @@
 
 ### 视觉问答
 
-• `visualQuestionAnswering`: (`args`: { `inputs`: { `image`: `Blob` | `ArrayBuffer` ; `question`: `string` } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`VisualQuestionAnsweringOutput`](../interfaces/VisualQuestionAnsweringOutput)>
+• `visualQuestionAnswering`: (`args`: { `inputs`: { `image`: `Blob` | `ArrayBuffer` ; `question`: `string` } }, `options?`: `Options`) => `Promise`<`VisualQuestionAnsweringOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`VisualQuestionAnsweringOutput`](../interfaces/VisualQuestionAnsweringOutput)>
+▸ (`args`, `options?`): `Promise`<`VisualQuestionAnsweringOutput`>
 
 ##### 参数
 
@@ -810,13 +806,13 @@
 | :-- | :-- | :-- |
 | `args` | `Object` | - |
 | `args.inputs` | `Object` | - |
-| `args.inputs.image` | `Blob` &#124; `ArrayBuffer` | 原始图像，您可以在浏览器中使用本机`File`，或在节点中使用`new Blob([buffer])`，或对于base64图像`new Blob([btoa(base64String)])`，甚至`await (await fetch('...)).blob()` |
+| `args.inputs.image` | `Blob` &#124; `ArrayBuffer` | 原始图像，您可以在浏览器中使用本机`File`，或在节点中使用`new Blob([buffer])`，或对于 base64 图像`new Blob([btoa(base64String)])`，甚至`await (await fetch('...)).blob()` |
 | `args.inputs.question` | `string` | - |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`VisualQuestionAnsweringOutput`](../interfaces/VisualQuestionAnsweringOutput)>
+`Promise`<`VisualQuestionAnsweringOutput`>
 
 #### 定义于
 
@@ -826,11 +822,11 @@
 
 ### zeroShotClassification
 
-• `zeroShotClassification`: (`args`: { `inputs`: `string` | `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean` } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ZeroShotClassificationOutput`](../modules#zeroshotclassificationoutput)>
+• `zeroShotClassification`: (`args`: { `inputs`: `string` | `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean` } }, `options?`: `Options`) => `Promise`<`ZeroShotClassificationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`ZeroShotClassificationOutput`](../modules#zeroshotclassificationoutput)>
+▸ (`args`, `options?`): `Promise`<`ZeroShotClassificationOutput`>
 
 ##### 参数
 
@@ -839,13 +835,13 @@
 | `args` | `Object` | - |
 | `args.inputs` | `string` &#124; `string`[] | 一个字符串或字符串列表 |
 | `args.parameters` | `Object` | - |
-| `args.parameters.candidate_labels` | `string`[] | 一个字符串列表，是输入的潜在类别。（最多10个候选标签，如果需要更多，可以简单地运行多个请求，如果使用太多候选标签，结果会产生误导。如果想保持完全相同，可以简单地运行multi_label=True，并在您的端上进行缩放。） |
-| `args.parameters.multi_label?` | `boolean` | （默认值：false）如果类别可以重叠，则设置为True |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `args.parameters.candidate_labels` | `string`[] | 一个字符串列表，是输入的潜在类别。（最多 10 个候选标签，如果需要更多，可以简单地运行多个请求，如果使用太多候选标签，结果会产生误导。如果想保持完全相同，可以简单地运行 multi_label=True，并在您的端上进行缩放。） |
+| `args.parameters.multi_label?` | `boolean` | （默认值：false）如果类别可以重叠，则设置为 True |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`ZeroShotClassificationOutput`](../modules#zeroshotclassificationoutput)>
+`Promise`<`ZeroShotClassificationOutput`>
 
 #### 定义于
 
@@ -855,11 +851,11 @@
 
 ### zeroShotImageClassification
 
-• `zeroShotImageClassification`: (`args`: { `inputs`: { `image`: `Blob` | `ArrayBuffer` } ; `parameters`: { `candidate_labels`: `string`[] } }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ZeroShotImageClassificationOutput`](../modules#zeroshotimageclassificationoutput)>
+• `zeroShotImageClassification`: (`args`: { `inputs`: { `image`: `Blob` | `ArrayBuffer` } ; `parameters`: { `candidate_labels`: `string`[] } }, `options?`: `Options`) => `Promise`<`ZeroShotImageClassificationOutput`>
 
 #### 类型声明
 
-▸ (`args`, `options?`): `Promise`<[`ZeroShotImageClassificationOutput`](../modules#zeroshotimageclassificationoutput)>
+▸ (`args`, `options?`): `Promise`<`ZeroShotImageClassificationOutput`>
 
 ##### 参数
 
@@ -869,12 +865,12 @@
 | `args.inputs` | `Object` | - |
 | `args.inputs.image` | `Blob` &#124; `ArrayBuffer` | 二进制图像数据 |
 | `args.parameters` | `Object` | - |
-| `args.parameters.candidate_labels` | `string`[] | 一个潜在的输入类别字符串列表（最多10个） |
-| `options?` | [`Options`](../interfaces/Options) | - |
+| `args.parameters.candidate_labels` | `string`[] | 一个潜在的输入类别字符串列表（最多 10 个） |
+| `options?` | `Options` | - |
 
 ##### 返回
 
-`Promise`<[`ZeroShotImageClassificationOutput`](../modules#zeroshotimageclassificationoutput)>
+`Promise`<`ZeroShotImageClassificationOutput`>
 
 #### 定义在
 

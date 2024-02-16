@@ -1,6 +1,6 @@
 # 接口: ImageSegmentationOutputValue
 
-> 原始文本: [https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageSegmentationOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageSegmentationOutputValue)
+> 原始文本: [`huggingface.co/docs/huggingface.js/inference/interfaces/ImageSegmentationOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageSegmentationOutputValue)
 
 ## 属性
 
@@ -20,7 +20,7 @@
 
 • `mask`: `string`
 
-一个表示分割掩模的字符串（单通道黑白图像的base64字符串）。
+一个表示分割掩模的字符串（单通道黑白图像的 base64 字符串）。
 
 #### 定义于
 

@@ -1,64 +1,64 @@
 # 强化学习框架
 
-> [https://huggingface.co/learn/deep-rl-course/unit1/rl-framework](https://huggingface.co/learn/deep-rl-course/unit1/rl-framework)
+> [`huggingface.co/learn/deep-rl-course/unit1/rl-framework`](https://huggingface.co/learn/deep-rl-course/unit1/rl-framework)
 
-## RL过程
+## RL 过程
 
-![RL过程](../Images/018079078cf4ad9c782cc74fc0ce7a20.png)
+![RL 过程](img/018079078cf4ad9c782cc74fc0ce7a20.png)
 
-RL过程：一个状态、动作、奖励和下一个状态的循环
+RL 过程：一个状态、动作、奖励和下一个状态的循环
 
-来源：[强化学习：一种介绍，Richard Sutton和Andrew G. Barto](http://incompleteideas.net/book/RLbook2020.pdf)
+来源：[强化学习：一种介绍，Richard Sutton 和 Andrew G. Barto](http://incompleteideas.net/book/RLbook2020.pdf)
 
-为了理解RL过程，让我们想象一个学习玩平台游戏的Agent：
+为了理解 RL 过程，让我们想象一个学习玩平台游戏的 Agent：
 
-![RL过程](../Images/79d6e90ecca40e7412a5ae37c07bf478.png)
+![RL 过程](img/79d6e90ecca40e7412a5ae37c07bf478.png)
 
-+   我们的Agent从**环境**接收**状态<math><semantics><mrow><msub><mi>S</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">S_0</annotation></semantics></math>S0** — 我们接收游戏的第一帧（环境）。
++   我们的 Agent 从**环境**接收**状态<math><semantics><mrow><msub><mi>S</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">S_0</annotation></semantics></math>S0** — 我们接收游戏的第一帧（环境）。
 
-+   基于那个**状态<math><semantics><mrow><msub><mi>S</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">S_0</annotation></semantics></math>S0**，Agent采取**动作<math><semantics><mrow><msub><mi>A</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">A_0</annotation></semantics></math>A0** — 我们的Agent将向右移动。
++   基于那个**状态<math><semantics><mrow><msub><mi>S</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">S_0</annotation></semantics></math>S0**，Agent 采取**动作<math><semantics><mrow><msub><mi>A</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">A_0</annotation></semantics></math>A0** — 我们的 Agent 将向右移动。
 
 +   环境进入一个**新的**状态<math><semantics><mrow><msub><mi>S</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">S_1</annotation></semantics></math>S1** — 新的帧。
 
-+   环境给Agent一些**奖励<math><semantics><mrow><msub><mi>R</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">R_1</annotation></semantics></math>R1** — 我们还活着（正面奖励+1）。
++   环境给 Agent 一些**奖励<math><semantics><mrow><msub><mi>R</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">R_1</annotation></semantics></math>R1** — 我们还活着（正面奖励+1）。
 
-这个RL循环输出一系列**状态、动作、奖励和下一个状态。**
+这个 RL 循环输出一系列**状态、动作、奖励和下一个状态。**
 
-![状态、动作、奖励、下一个状态](../Images/1f2f9ef9ca66384a7f30cb01df0cc998.png)
+![状态、动作、奖励、下一个状态](img/1f2f9ef9ca66384a7f30cb01df0cc998.png)
 
-Agent的目标是*最大化*其累积奖励，**称为预期回报。**
+Agent 的目标是*最大化*其累积奖励，**称为预期回报。**
 
 ## 奖励假设：强化学习的核心思想
 
-⇒ 为什么Agent的目标是最大化预期回报？
+⇒ 为什么 Agent 的目标是最大化预期回报？
 
-因为RL基于**奖励假设**，即所有目标都可以描述为**最大化预期回报**（预期累积奖励）。
+因为 RL 基于**奖励假设**，即所有目标都可以描述为**最大化预期回报**（预期累积奖励）。
 
 这就是为什么在强化学习中，**为了有最佳行为**，我们的目标是学会采取能够**最大化预期累积奖励**的行动。
 
 ## 马尔可夫性质
 
-在论文中，你会看到RL过程被称为**马尔可夫决策过程**（MDP）。
+在论文中，你会看到 RL 过程被称为**马尔可夫决策过程**（MDP）。
 
-我们将在接下来的单元再次讨论马尔可夫性质。但是如果你今天需要记住一些关于它的东西，那就是：马尔可夫性质意味着我们的Agent只需要**当前状态来决定**采取什么行动，而**不需要所有之前状态和行动的历史**。
+我们将在接下来的单元再次讨论马尔可夫性质。但是如果你今天需要记住一些关于它的东西，那就是：马尔可夫性质意味着我们的 Agent 只需要**当前状态来决定**采取什么行动，而**不需要所有之前状态和行动的历史**。
 
 ## 观察/状态空间
 
-观察/状态是**Agent从环境中获取的信息**。在视频游戏中，它可以是一帧（一张截图）。在交易Agent的情况下，它可以是某只股票的价值等。
+观察/状态是**Agent 从环境中获取的信息**。在视频游戏中，它可以是一帧（一张截图）。在交易 Agent 的情况下，它可以是某只股票的价值等。
 
 然而，需要区分*观察*和*状态*：
 
-+   *状态s*：是**世界状态的完整描述**（没有隐藏信息）。在完全观察的环境中。
++   *状态 s*：是**世界状态的完整描述**（没有隐藏信息）。在完全观察的环境中。
 
-![国际象棋](../Images/4abc718a19af159c3fcd1e3d1eb9daf8.png)
+![国际象棋](img/4abc718a19af159c3fcd1e3d1eb9daf8.png)
 
 在国际象棋游戏中，我们从环境中接收一个状态，因为我们可以访问整个棋盘信息。
 
 在国际象棋游戏中，我们可以访问整个棋盘信息，因此我们从环境中接收一个状态。换句话说，环境是完全观察的。
 
-+   *观察o*：是**状态的部分描述**。在部分观察的环境中。
++   *观察 o*：是**状态的部分描述**。在部分观察的环境中。
 
-![Mario](../Images/f7007613a2e88444f687ee5cdbd82e16.png)
+![Mario](img/f7007613a2e88444f687ee5cdbd82e16.png)
 
 在超级马里奥兄弟中，我们只能看到靠近玩家的部分关卡，因此我们接收一个观察。
 
@@ -70,7 +70,7 @@ Agent的目标是*最大化*其累积奖励，**称为预期回报。**
 
 总结一下：
 
-![观察空间总结](../Images/e7cafbe776324bbcf985e2d4ff4a87f7.png)
+![观察空间总结](img/e7cafbe776324bbcf985e2d4ff4a87f7.png)
 
 ## 动作空间
 
@@ -80,37 +80,37 @@ Agent的目标是*最大化*其累积奖励，**称为预期回报。**
 
 +   *离散空间*：可能动作的数量是**有限**的。
 
-![马里奥](../Images/f7007613a2e88444f687ee5cdbd82e16.png)
+![马里奥](img/f7007613a2e88444f687ee5cdbd82e16.png)
 
-在超级马里奥兄弟中，我们只有4种可能的动作：左、右、上（跳跃）和下（蹲下）。
+在超级马里奥兄弟中，我们只有 4 种可能的动作：左、右、上（跳跃）和下（蹲下）。
 
-同样，在超级马里奥兄弟中，我们只有有限的动作集，因为我们只有4个方向。
+同样，在超级马里奥兄弟中，我们只有有限的动作集，因为我们只有 4 个方向。
 
 +   *连续空间*：可能动作的数量是**无限**的。
 
-![自动驾驶汽车](../Images/97ce48e0905f0673081c9ed15db623c3.png)
+![自动驾驶汽车](img/97ce48e0905f0673081c9ed15db623c3.png)
 
-自动驾驶汽车代理有无限数量的可能动作，因为它可以左转20°，21.1°，21.2°，按喇叭，右转20°...
+自动驾驶汽车代理有无限数量的可能动作，因为它可以左转 20°，21.1°，21.2°，按喇叭，右转 20°...
 
 总结一下：
 
-![动作空间总结](../Images/bbdf7bd1acf438cc4f239937493ab96a.png)
+![动作空间总结](img/bbdf7bd1acf438cc4f239937493ab96a.png)
 
-考虑这些信息是至关重要的，因为在未来选择RL算法时会**具有重要性。**
+考虑这些信息是至关重要的，因为在未来选择 RL 算法时会**具有重要性。**
 
 ## 奖励和折扣
 
-奖励在RL中是至关重要的，因为它是**代理的唯一反馈**。通过它，我们的代理知道**采取的行动是好是坏。**
+奖励在 RL 中是至关重要的，因为它是**代理的唯一反馈**。通过它，我们的代理知道**采取的行动是好是坏。**
 
 在每个时间步骤**t**处的累积奖励可以写成：
 
-![奖励](../Images/d78f5d51ac167cb76cb42cfa4b19d3ba.png)
+![奖励](img/d78f5d51ac167cb76cb42cfa4b19d3ba.png)
 
 累积奖励等于序列中所有奖励的总和。
 
 这等同于：
 
-![奖励](../Images/ebfd3c4b30393947bc58c81d77d53858.png)
+![奖励](img/ebfd3c4b30393947bc58c81d77d53858.png)
 
 累积奖励 = rt+1 (rt+k+1 = rt+0+1 = rt+1)+ rt+2 (rt+k+1 = rt+1+1 = rt+2) + ...
 
@@ -118,7 +118,7 @@ Agent的目标是*最大化*其累积奖励，**称为预期回报。**
 
 假设你的代理是这只小老鼠，每次步长可以移动一个方块，而你的对手是猫（也可以移动）。老鼠的目标是**在被猫吃掉之前尽可能多地吃到奶酪。**
 
-![奖励](../Images/b3b52f9a5548289b29a0f8b1ec21468c.png)
+![奖励](img/b3b52f9a5548289b29a0f8b1ec21468c.png)
 
 正如我们在图表中看到的，**吃掉我们附近的奶酪比吃掉靠近猫的奶酪更有可能**（我们离猫越近，越危险）。
 
@@ -126,7 +126,7 @@ Agent的目标是*最大化*其累积奖励，**称为预期回报。**
 
 为了折扣奖励，我们按照以下方式进行：
 
-1.  我们定义了一个称为伽玛的折扣率。**它必须介于0和1之间。** 大多数情况下介于**0.95和0.99**之间。
+1.  我们定义了一个称为伽玛的折扣率。**它必须介于 0 和 1 之间。** 大多数情况下介于**0.95 和 0.99**之间。
 
 +   伽玛越大，折扣越小。这意味着我们的代理**更关心长期奖励。**
 
@@ -136,4 +136,4 @@ Agent的目标是*最大化*其累积奖励，**称为预期回报。**
 
 我们折扣后的预期累积奖励是：
 
-![奖励](../Images/95b51ffb9bff4a5e5be3a023ab4ec8f4.png)
+![奖励](img/95b51ffb9bff4a5e5be3a023ab4ec8f4.png)

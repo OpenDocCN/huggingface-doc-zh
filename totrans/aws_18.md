@@ -1,10 +1,10 @@
-# 使用AWS Trainium对Transformers进行微调
+# 使用 AWS Trainium 对 Transformers 进行微调
 
-> 原始文本：[https://huggingface.co/docs/optimum-neuron/guides/fine_tune](https://huggingface.co/docs/optimum-neuron/guides/fine_tune)
+> 原始文本：[`huggingface.co/docs/optimum-neuron/guides/fine_tune`](https://huggingface.co/docs/optimum-neuron/guides/fine_tune)
 
-在AWS Trainium上进行训练与Transformers一样简单：
+在 AWS Trainium 上进行训练与 Transformers 一样简单：
 
-+   您需要将Transformers的[`Trainer`](https://huggingface.co/docs/transformers/main_classes/trainer)类替换为[`NeuronTrainer`](https://huggingface.co/docs/optimum/neuron/package_reference/trainer)类。
++   您需要将 Transformers 的[`Trainer`](https://huggingface.co/docs/transformers/main_classes/trainer)类替换为[`NeuronTrainer`](https://huggingface.co/docs/optimum/neuron/package_reference/trainer)类。
 
 您可以在官方存储库中找到以下任务的几个示例：
 
@@ -26,4 +26,4 @@
 
 +   [对比图像文本训练](https://github.com/huggingface/optimum-neuron/tree/main/examples/contrastive-image-text).
 
-如果您想逐步进行示例，请查看[开始使用AWS Trainium和Hugging Face Transformers](../tutorials/fine_tune_bert)指南。
+如果您想逐步进行示例，请查看开始使用 AWS Trainium 和 Hugging Face Transformers 指南。

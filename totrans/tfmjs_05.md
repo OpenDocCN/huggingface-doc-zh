@@ -1,8 +1,8 @@
 # 使用自定义模型
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/custom_usage](https://huggingface.co/docs/transformers.js/custom_usage)
+> 原始文本：[`huggingface.co/docs/transformers.js/custom_usage`](https://huggingface.co/docs/transformers.js/custom_usage)
 
-默认情况下，Transformers.js使用[托管的预训练模型](https://huggingface.co/models?library=transformers.js)和[预编译的WASM二进制文件](https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.0/dist/)，应该可以直接使用。您可以按照以下方式自定义：
+默认情况下，Transformers.js 使用[托管的预训练模型](https://huggingface.co/models?library=transformers.js)和[预编译的 WASM 二进制文件](https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.0/dist/)，应该可以直接使用。您可以按照以下方式自定义：
 
 ### 设置
 
@@ -19,11 +19,11 @@ env.allowRemoteModels = false;
 env.backends.onnx.wasm.wasmPaths = '/path/to/files/';
 ```
 
-要查看所有可用设置的完整列表，请查看[API参考](./api/env)。
+要查看所有可用设置的完整列表，请查看 API 参考。
 
-### 将您的模型转换为ONNX
+### 将您的模型转换为 ONNX
 
-我们建议使用我们的[转换脚本](https://github.com/xenova/transformers.js/blob/main/scripts/convert.py)来将您的PyTorch、TensorFlow或JAX模型一次性转换为ONNX。在幕后，它使用[🤗 Optimum](https://huggingface.co/docs/optimum)来执行模型的转换和量化。
+我们建议使用我们的[转换脚本](https://github.com/xenova/transformers.js/blob/main/scripts/convert.py)来将您的 PyTorch、TensorFlow 或 JAX 模型一次性转换为 ONNX。在幕后，它使用[🤗 Optimum](https://huggingface.co/docs/optimum)来执行模型的转换和量化。
 
 ```py
 python -m scripts.convert --quantize --model_id <model_name_or_path>
@@ -47,4 +47,4 @@ bert-base-uncased/
     └── model_quantized.onnx
 ```
 
-要查看支持的所有架构的完整列表，请参阅[Optimum文档](https://huggingface.co/docs/optimum/main/en/exporters/onnx/overview)。
+要查看支持的所有架构的完整列表，请参阅[Optimum 文档](https://huggingface.co/docs/optimum/main/en/exporters/onnx/overview)。

@@ -1,6 +1,6 @@
 # 在 AWS Inferentia 上使用稳定扩散模型生成图像
 
-> 原始文本：[https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion](https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion)
+> 原始文本：[`huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion`](https://huggingface.co/docs/optimum-neuron/tutorials/stable_diffusion)
 
 ## 稳定扩散
 
@@ -8,7 +8,7 @@
 
 🤗 `Optimum` 扩展了 `Diffusers` 以支持第二代 Neuron 设备（驱动 Trainium 和 Inferentia 2）上的推理。它旨在继承 Neuron 上 Diffusers 的易用性。
 
-要开始，请确保您已经[配置了您的 inf2 / trn1 实例](../installation)，并安装了 optimum：
+要开始，请确保您已经配置了您的 inf2 / trn1 实例，并安装了 optimum：
 
 ```py
 pip install "optimum[neuronx, diffusers]"
@@ -44,7 +44,7 @@ optimum-cli export neuron --model stabilityai/stable-diffusion-2-1-base \
   sd_neuron/
 ```
 
-我们建议使用 `inf2.8xlarge` 或更大的实例来进行模型编译。您也可以在仅CPU实例上使用 Optimum CLI 编译模型（需要约35 GB内存），然后在 `inf2.xlarge` 上运行预编译的模型以减少费用。在这种情况下，不要忘记通过添加 `--disable-validation` 参数来禁用推理的验证。
+我们建议使用 `inf2.8xlarge` 或更大的实例来进行模型编译。您也可以在仅 CPU 实例上使用 Optimum CLI 编译模型（需要约 35 GB 内存），然后在 `inf2.xlarge` 上运行预编译的模型以减少费用。在这种情况下，不要忘记通过添加 `--disable-validation` 参数来禁用推理的验证。
 
 ***通过 Python API 导出***
 
@@ -85,7 +85,7 @@ optimum-cli export neuron --model stabilityai/stable-diffusion-2-1-base \
 >>> image = stable_diffusion(prompt).images[0]
 ```
 
-![稳定扩散生成的图像](../Images/e9bdfbe61952c061089cfa95a2059afb.png)
+![稳定扩散生成的图像](img/e9bdfbe61952c061089cfa95a2059afb.png)
 
 ### 图像到图像
 
@@ -117,7 +117,7 @@ image.save("fantasy_landscape.png")
 
 | `image` | `prompt` | 输出 |  |
 | :-: | :-: | :-: | --: |
-| ![landscape photo](../Images/a03c8be4cac347c435e8607dd6ced9a4.png) | ***吉卜力风格，一个幻想的风景，有雪山、树木、湖泊和详细的倒影。暖色调，8K*** | ![drawing](../Images/9f3025ed17a13258842023d761eaee3c.png) |  |
+| ![landscape photo](img/a03c8be4cac347c435e8607dd6ced9a4.png) | ***吉卜力风格，一个幻想的风景，有雪山、树木、湖泊和详细的倒影。暖色调，8K*** | ![drawing](img/9f3025ed17a13258842023d761eaee3c.png) |  |
 
 ### 修补
 
@@ -151,31 +151,31 @@ image.save("cat_on_bench.png")
 
 | `image` | `mask_image` | `prompt` | 输出 |
 | :-: | :-: | :-: | --: |
-| ![drawing](../Images/ccaa29fadd7036eecdf16d6ed327b788.png) | ![drawing](../Images/845ec3d502fa4754b97332a095702af9.png) | ***一只黄色猫的脸，高分辨率，坐在公园长椅上*** | ![drawing](../Images/229c5966ac3cee6ead365a6a1b86e209.png) |
+| ![drawing](img/ccaa29fadd7036eecdf16d6ed327b788.png) | ![drawing](img/845ec3d502fa4754b97332a095702af9.png) | ***一只黄色猫的脸，高分辨率，坐在公园长椅上*** | ![drawing](img/229c5966ac3cee6ead365a6a1b86e209.png) |
 
 ## 稳定扩散 XL
 
 *该教程有笔记本版本 [在这里](https://github.com/huggingface/optimum-neuron/blob/main/notebooks/stable-diffusion/stable-diffusion-xl-txt2img.ipynb)*。
 
-稳定扩散XL（SDXL）是一种文本到图像的潜在扩散模型。与之前版本的稳定扩散模型相比，它通过一个比UNet大几倍的UNet提高了生成图像的质量。
+稳定扩散 XL（SDXL）是一种文本到图像的潜在扩散模型。与之前版本的稳定扩散模型相比，它通过一个比 UNet 大几倍的 UNet 提高了生成图像的质量。
 
-### 编译稳定扩散XL
+### 编译稳定扩散 XL
 
-要部署SDXL模型，我们也将从编译模型开始。我们支持在流水线中导出以下组件以提高速度：
+要部署 SDXL 模型，我们也将从编译模型开始。我们支持在流水线中导出以下组件以提高速度：
 
 +   文本编码器
 
 +   第二个文本编码器
 
-+   U-Net（比稳定扩散流水线中的UNet大三倍）
++   U-Net（比稳定扩散流水线中的 UNet 大三倍）
 
-+   VAE编码器
++   VAE 编码器
 
-+   VAE解码器
++   VAE 解码器
 
-***通过CLI导出***
+***通过 CLI 导出***
 
-以下是使用`Optimum` CLI导出SDXL组件的示例：
+以下是使用`Optimum` CLI 导出 SDXL 组件的示例：
 
 ```py
 optimum-cli export neuron --model stabilityai/stable-diffusion-xl-base-1.0 \
@@ -189,9 +189,9 @@ optimum-cli export neuron --model stabilityai/stable-diffusion-xl-base-1.0 \
   sd_neuron_xl/
 ```
 
-我们建议使用`inf2.8xlarge`或更大的实例进行模型编译。您还可以在仅CPU实例上使用Optimum CLI编译模型（需要约92 GB内存），然后在`inf2.xlarge`上运行预编译的模型以减少费用。在这种情况下，不要忘记通过添加`--disable-validation`参数来禁用推理的验证。
+我们建议使用`inf2.8xlarge`或更大的实例进行模型编译。您还可以在仅 CPU 实例上使用 Optimum CLI 编译模型（需要约 92 GB 内存），然后在`inf2.xlarge`上运行预编译的模型以减少费用。在这种情况下，不要忘记通过添加`--disable-validation`参数来禁用推理的验证。
 
-***通过Python API导出***
+***通过 Python API 导出***
 
 以下是使用`NeuronStableDiffusionXLPipeline`导出稳定扩散组件的示例：
 
@@ -214,7 +214,7 @@ optimum-cli export neuron --model stabilityai/stable-diffusion-xl-base-1.0 \
 
 ### 文本到图像
 
-使用预编译的SDXL模型，在Neuron上生成带有文本提示的图像：
+使用预编译的 SDXL 模型，在 Neuron 上生成带有文本提示的图像：
 
 ```py
 >>> from optimum.neuron import NeuronStableDiffusionXLPipeline
@@ -224,7 +224,7 @@ optimum-cli export neuron --model stabilityai/stable-diffusion-xl-base-1.0 \
 >>> image = stable_diffusion_xl(prompt).images[0]
 ```
 
-![sdxl 生成的图像](../Images/459955f189c918feb31cbea2635a34a6.png)
+![sdxl 生成的图像](img/459955f189c918feb31cbea2635a34a6.png)
 
 ### 图像到图像
 
@@ -244,7 +244,7 @@ image = pipe(prompt=prompt, image=init_image).images[0]
 
 | `图像` | `提示` | 输出 |  |
 | :-: | :-: | :-: | --: |
-| ![城堡照片](../Images/e5215d4ce7ccbc07b76cb40644414686.png) | ***一只狗奔跑，湖泊，护城河*** | ![带狗的城堡](../Images/29129c40c7a3a79920bce7731bc121d1.png) |  |
+| ![城堡照片](img/e5215d4ce7ccbc07b76cb40644414686.png) | ***一只狗奔跑，湖泊，护城河*** | ![带狗的城堡](img/29129c40c7a3a79920bce7731bc121d1.png) |  |
 
 ### 修补
 
@@ -269,11 +269,11 @@ image = pipe(prompt=prompt, image=init_image, mask_image=mask_image, strength=0.
 
 | `图像` | `遮罩图像` | `提示` | 输出 |
 | :-: | :-: | :-: | --: |
-| ![drawing](../Images/47eb848e4e09fd8ca2c920b1f98d089d.png) | ![drawing](../Images/8b01e9765d5fea46006fd0c5b7114470.png) | ***一名潜水员漂浮*** | ![drawing](../Images/6b61a673bfb3f2ec07bfa522a6e3a183.png) |
+| ![drawing](img/47eb848e4e09fd8ca2c920b1f98d089d.png) | ![drawing](img/8b01e9765d5fea46006fd0c5b7114470.png) | ***一名潜水员漂浮*** | ![drawing](img/6b61a673bfb3f2ec07bfa522a6e3a183.png) |
 
 ### 精化图像质量
 
-SDXL包括一个[精化模型](https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0)，用于去噪从基础模型生成的低噪声阶段图像。有两种使用精化模型的方式：
+SDXL 包括一个[精化模型](https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0)，用于去噪从基础模型生成的低噪声阶段图像。有两种使用精化模型的方式：
 
 1.  将基础和精化模型一起使用以生成精化图像。
 
@@ -304,7 +304,7 @@ image = image = refiner(
 ).images[0]
 ```
 
-![sdxl 基础 + 精化器](../Images/59c8ddd276bac26aa0202d6cef205b32.png)
+![sdxl 基础 + 精化器](img/59c8ddd276bac26aa0202d6cef205b32.png)
 
 #### 基础到精化模型
 
@@ -322,25 +322,25 @@ image = refiner(prompt=prompt, image=image[None, :]).images[0]
 
 | `基础图像` | 精化图像 |
 | :-: | --: |
-| ![drawing](../Images/40389db8dd5d1a686e6a53d11695fce3.png) | ![drawing](../Images/4e196d834fb8351ee9138956a8b23cd3.png) |
+| ![drawing](img/40389db8dd5d1a686e6a53d11695fce3.png) | ![drawing](img/4e196d834fb8351ee9138956a8b23cd3.png) |
 
-为避免Neuron设备内存不足，建议在运行精化器之前完成所有基础推理并释放设备内存。
+为避免 Neuron 设备内存不足，建议在运行精化器之前完成所有基础推理并释放设备内存。
 
 ## 潜在一致性模型
 
-潜在一致性模型（LCMs）是由Simian Luo、Yiqin Tan、Longbo Huang、Jian Li和Hang Zhao提出的[潜在一致性模型：通过少步推理合成高分辨率图像](https://huggingface.co/papers/2310.04378)。LCMs使得在任何预训练的LDM上进行推理时可以减少步骤，包括稳定扩散和SDXL。
+潜在一致性模型（LCMs）是由 Simian Luo、Yiqin Tan、Longbo Huang、Jian Li 和 Hang Zhao 提出的[潜在一致性模型：通过少步推理合成高分辨率图像](https://huggingface.co/papers/2310.04378)。LCMs 使得在任何预训练的 LDM 上进行推理时可以减少步骤，包括稳定扩散和 SDXL。
 
 在`optimum-neuron`中，您可以：
 
-+   使用类`NeuronLatentConsistencyModelPipeline`来编译和运行从稳定扩散（SD）模型中提炼的LCMs的推理。
++   使用类`NeuronLatentConsistencyModelPipeline`来编译和运行从稳定扩散（SD）模型中提炼的 LCMs 的推理。
 
-+   并继续使用从SDXL模型中提炼的LCM类`NeuronStableDiffusionXLPipeline`。
++   并继续使用从 SDXL 模型中提炼的 LCM 类`NeuronStableDiffusionXLPipeline`。
 
-以下是编译稳定扩散的LCMs（[SimianLuo/LCM_Dreamshaper_v7](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)）和稳定扩散XL（[latent-consistency/lcm-sdxl](https://huggingface.co/latent-consistency/lcm-sdxl)）的示例，然后在AWS Inferentia 2上运行推理：
+以下是编译稳定扩散的 LCMs（[SimianLuo/LCM_Dreamshaper_v7](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7)）和稳定扩散 XL（[latent-consistency/lcm-sdxl](https://huggingface.co/latent-consistency/lcm-sdxl)）的示例，然后在 AWS Inferentia 2 上运行推理：
 
-### 编译LCM
+### 编译 LCM
 
-***稳定扩散的LCM***
+***稳定扩散的 LCM***
 
 ```py
 from optimum.neuron import NeuronLatentConsistencyModelPipeline
@@ -360,7 +360,7 @@ stable_diffusion.save_pretrained(save_directory)
 stable_diffusion.push_to_hub(save_directory, repository_id="my-neuron-repo", use_auth_token=True)  # Replace with your repo id, eg. "Jingya/LCM_Dreamshaper_v7_neuronx"
 ```
 
-***稳定扩散XL的LCM***
+***稳定扩散 XL 的 LCM***
 
 ```py
 from optimum.neuron import NeuronStableDiffusionXLPipeline
@@ -383,9 +383,9 @@ stable_diffusion.push_to_hub(save_directory, repository_id="my-neuron-repo", use
 
 ### 文本到图像
 
-现在我们可以在Inf2上使用预编译模型从文本提示生成图像。
+现在我们可以在 Inf2 上使用预编译模型从文本提示生成图像。
 
-***稳定扩散的LCM***
+***稳定扩散的 LCM***
 
 ```py
 from optimum.neuron import NeuronLatentConsistencyModelPipeline
@@ -396,7 +396,7 @@ prompts = ["Self-portrait oil painting, a beautiful cyborg with golden hair, 8k"
 images = pipe(prompt=prompts, num_inference_steps=4, guidance_scale=8.0).images
 ```
 
-***稳定扩散XL的LCM***
+***稳定扩散 XL 的 LCM***
 
 ```py
 from optimum.neuron import NeuronStableDiffusionXLPipeline
@@ -407,17 +407,17 @@ prompts = ["a close-up picture of an old man standing in the rain"] * 2
 images = pipe(prompt=prompts, num_inference_steps=4, guidance_scale=8.0).images
 ```
 
-## 稳定扩散XL Turbo
+## 稳定扩散 XL Turbo
 
-SDXL Turbo是一种对抗时间蒸馏的稳定扩散XL（SDXL）模型，能够在仅1步骤中运行推断（[查看`🤗diffusers`获取更多详情](https://huggingface.co/docs/diffusers/using-diffusers/sdxl_turbo)）。
+SDXL Turbo 是一种对抗时间蒸馏的稳定扩散 XL（SDXL）模型，能够在仅 1 步骤中运行推断（[查看`🤗diffusers`获取更多详情](https://huggingface.co/docs/diffusers/using-diffusers/sdxl_turbo)）。
 
 在`optimum-neuron`中，您可以：
 
 +   使用类`NeuronStableDiffusionXLPipeline`来编译和运行推断。
 
-在这里，我们将使用Optimum CLI编译[`stabilityai/sdxl-turbo`](https://huggingface.co/stabilityai/sdxl-turbo)模型。
+在这里，我们将使用 Optimum CLI 编译[`stabilityai/sdxl-turbo`](https://huggingface.co/stabilityai/sdxl-turbo)模型。
 
-### 编译SDXL Turbo
+### 编译 SDXL Turbo
 
 ```py
 optimum-cli export neuron --model stabilityai/sdxl-turbo --task stable-diffusion-xl --batch_size 1 --height 512 --width 512 --auto_cast matmul --auto_cast_type bf16 sdxl_turbo_neuron/
@@ -425,7 +425,7 @@ optimum-cli export neuron --model stabilityai/sdxl-turbo --task stable-diffusion
 
 ### 文本到图像
 
-现在我们可以在Inf2上使用预编译模型从文本提示生成图像：
+现在我们可以在 Inf2 上使用预编译模型从文本提示生成图像：
 
 ```py
 from optimum.neuron import NeuronStableDiffusionXLPipeline
@@ -436,6 +436,6 @@ prompt = ["Self-portrait oil painting, a beautiful cyborg with golden hair, 8k"]
 images = pipe(prompt=prompt, guidance_scale=0.0, num_inference_steps=1).images
 ```
 
-Inf2实例包含一个或多个神经元设备，每个神经元设备包括2个NeuronCore-v2。默认情况下，我们将LCM的整个流水线加载到两个神经元核心中。这意味着当批量大小可以被2整除时，您可以充分利用两个核心的计算能力。
+Inf2 实例包含一个或多个神经元设备，每个神经元设备包括 2 个 NeuronCore-v2。默认情况下，我们将 LCM 的整个流水线加载到两个神经元核心中。这意味着当批量大小可以被 2 整除时，您可以充分利用两个核心的计算能力。
 
-您是否希望我们支持🤗`Optimum-neuron`中的其他稳定扩散功能？请在[`Optimum-neuron` Github仓库](https://github.com/huggingface/optimum-neuron)上提交问题或在[HuggingFace的社区论坛](https://discuss.huggingface.co/c/optimum/)上与我们讨论，谢谢🤗！
+您是否希望我们支持🤗`Optimum-neuron`中的其他稳定扩散功能？请在[`Optimum-neuron` Github 仓库](https://github.com/huggingface/optimum-neuron)上提交问题或在[HuggingFace 的社区论坛](https://discuss.huggingface.co/c/optimum/)上与我们讨论，谢谢🤗！

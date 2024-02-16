@@ -1,6 +1,6 @@
 # 获取行数和字节大小
 
-> 原始文本：[https://huggingface.co/docs/datasets-server/size](https://huggingface.co/docs/datasets-server/size)
+> 原始文本：[`huggingface.co/docs/datasets-server/size`](https://huggingface.co/docs/datasets-server/size)
 
 本指南向您展示如何使用数据集服务器的 `/size` 终端以编程方式检索数据集的大小。也可以尝试使用 [ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json#operation/getSize)。
 

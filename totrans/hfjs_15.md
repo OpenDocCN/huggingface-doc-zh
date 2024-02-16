@@ -1,6 +1,6 @@
 # 接口：DocumentQuestionAnsweringOutput
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/DocumentQuestionAnsweringOutput](https://huggingface.co/docs/huggingface.js/inference/interfaces/DocumentQuestionAnsweringOutput)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/DocumentQuestionAnsweringOutput`](https://huggingface.co/docs/huggingface.js/inference/interfaces/DocumentQuestionAnsweringOutput)
 
 ## 属性
 

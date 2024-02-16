@@ -1,10 +1,10 @@
 # 与讨论和拉取请求交互
 
-> [https://huggingface.co/docs/huggingface_hub/guides/community](https://huggingface.co/docs/huggingface_hub/guides/community)
+> [`huggingface.co/docs/huggingface_hub/guides/community`](https://huggingface.co/docs/huggingface_hub/guides/community)
 
-`huggingface_hub`库提供了一个Python接口，用于与Hub上的拉取请求和讨论进行交互。访问[专门的文档页面](https://huggingface.co/docs/hub/repositories-pull-requests-discussions)以深入了解Hub上的讨论和拉取请求是什么，以及它们在幕后是如何工作的。
+`huggingface_hub`库提供了一个 Python 接口，用于与 Hub 上的拉取请求和讨论进行交互。访问[专门的文档页面](https://huggingface.co/docs/hub/repositories-pull-requests-discussions)以深入了解 Hub 上的讨论和拉取请求是什么，以及它们在幕后是如何工作的。
 
-## 从Hub检索讨论和拉取请求
+## 从 Hub 检索讨论和拉取请求
 
 `HfApi`类允许您检索给定存储库上的讨论和拉取请求：
 
@@ -36,14 +36,14 @@
 # 19 - Add Flax weights by ArthurZ, pr: True
 ```
 
-`HfApi.get_repo_discussions`返回一个[生成器](https://docs.python.org/3.7/howto/functional.html#generators)，它产生[Discussion](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.Discussion)对象。要获取单个列表中的所有讨论，请运行：
+`HfApi.get_repo_discussions`返回一个[生成器](https://docs.python.org/3.7/howto/functional.html#generators)，它产生 Discussion 对象。要获取单个列表中的所有讨论，请运行：
 
 ```py
 >>> from huggingface_hub import get_repo_discussions
 >>> discussions_list = list(get_repo_discussions(repo_id="bert-base-uncased"))
 ```
 
-[HfApi.get_repo_discussions()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_repo_discussions)返回的[Discussion](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.Discussion)对象包含了讨论或拉取请求的高级概述。您还可以使用[HfApi.get_discussion_details()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_discussion_details)获取更详细的信息：
+HfApi.get_repo_discussions()返回的 Discussion 对象包含了讨论或拉取请求的高级概述。您还可以使用 HfApi.get_discussion_details()获取更详细的信息：
 
 ```py
 >>> from huggingface_hub import get_discussion_details
@@ -69,25 +69,25 @@ DiscussionWithDetails(
 )
 ```
 
-[HfApi.get_discussion_details()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_discussion_details)返回一个[DiscussionWithDetails](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionWithDetails)对象，它是[Discussion](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.Discussion)的子类，提供有关讨论或拉取请求的更详细信息。信息包括所有评论、状态更改和通过`DiscussionWithDetails.events`重命名的讨论。
+HfApi.get_discussion_details()返回一个 DiscussionWithDetails 对象，它是 Discussion 的子类，提供有关讨论或拉取请求的更详细信息。信息包括所有评论、状态更改和通过`DiscussionWithDetails.events`重命名的讨论。
 
-在拉取请求的情况下，您可以使用`DiscussionWithDetails.diff`检索原始git差异。拉取请求的所有提交都列在`DiscussionWithDetails.events`中。
+在拉取请求的情况下，您可以使用`DiscussionWithDetails.diff`检索原始 git 差异。拉取请求的所有提交都列在`DiscussionWithDetails.events`中。
 
 ## 通过编程方式创建和编辑讨论或拉取请求
 
-[HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi)类还提供了创建和编辑讨论和拉取请求的方法。您需要一个[访问令牌](https://huggingface.co/docs/hub/security-tokens)来创建和编辑讨论或拉取请求。
+HfApi 类还提供了创建和编辑讨论和拉取请求的方法。您需要一个[访问令牌](https://huggingface.co/docs/hub/security-tokens)来创建和编辑讨论或拉取请求。
 
-在Hub上为存储库提出更改的最简单方法是通过[create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit) API：只需将`create_pr`参数设置为`True`。此参数也适用于其他包装[create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit)的方法：
+在 Hub 上为存储库提出更改的最简单方法是通过 create_commit() API：只需将`create_pr`参数设置为`True`。此参数也适用于其他包装 create_commit()的方法：
 
-+   [upload_file()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_file)
++   upload_file()
 
-+   [upload_folder()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_folder)
++   upload_folder()
 
-+   [delete_file()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.delete_file)
++   delete_file()
 
-+   [delete_folder()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.delete_folder)
++   delete_folder()
 
-+   [metadata_update()](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.metadata_update)
++   metadata_update()
 
 ```py
 >>> from huggingface_hub import metadata_update
@@ -99,7 +99,7 @@ DiscussionWithDetails(
 ... )
 ```
 
-您还可以使用[HfApi.create_discussion()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_discussion)（分别使用[HfApi.create_pull_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_pull_request)）在存储库上创建讨论（分别创建拉取请求）。以这种方式打开拉取请求可能很有用，如果您需要在本地工作进行更改。以这种方式打开的拉取请求将处于“草稿”模式。
+您还可以使用 HfApi.create_discussion()（分别使用 HfApi.create_pull_request()）在存储库上创建讨论（分别创建拉取请求）。以这种方式打开拉取请求可能很有用，如果您需要在本地工作进行更改。以这种方式打开的拉取请求将处于“草稿”模式。
 
 ```py
 >>> from huggingface_hub import create_discussion, create_pull_request
@@ -119,19 +119,19 @@ DiscussionWithDetails(...)
 DiscussionWithDetails(..., is_pull_request=True)
 ```
 
-管理拉取请求和讨论可以完全通过[HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi)类来完成。例如：
+管理拉取请求和讨论可以完全通过 HfApi 类来完成。例如：
 
-+   使用[comment_discussion()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.comment_discussion)来添加评论
++   使用 comment_discussion()来添加评论
 
-+   使用[edit_discussion_comment()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.edit_discussion_comment)来编辑评论
++   使用 edit_discussion_comment()来编辑评论
 
-+   使用[rename_discussion()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.rename_discussion)来重命名讨论或拉取请求
++   使用 rename_discussion()来重命名讨论或拉取请求
 
-+   使用[change_discussion_status()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.change_discussion_status)来打开或关闭讨论/拉取请求
++   使用 change_discussion_status()来打开或关闭讨论/拉取请求
 
-+   使用[merge_pull_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.merge_pull_request)来合并拉取请求
++   使用 merge_pull_request()来合并拉取请求
 
-访问[HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi)文档页面，查看所有可用方法的详尽参考。
+访问 HfApi 文档页面，查看所有可用方法的详尽参考。
 
 ## 推送更改到拉取请求
 
@@ -139,4 +139,4 @@ DiscussionWithDetails(..., is_pull_request=True)
 
 ## 另请参阅
 
-有关更详细的参考，请访问[讨论和拉取请求](../package_reference/community)以及[hf_api](../package_reference/hf_api)文档页面。
+有关更详细的参考，请访问讨论和拉取请求以及 hf_api 文档页面。

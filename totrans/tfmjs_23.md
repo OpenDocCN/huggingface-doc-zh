@@ -1,6 +1,6 @@
 # env
 
-> 原文：[https://huggingface.co/docs/transformers.js/api/env](https://huggingface.co/docs/transformers.js/api/env)
+> 原文：[`huggingface.co/docs/transformers.js/api/env`](https://huggingface.co/docs/transformers.js/api/env)
 
 用于配置 Transformers.js 的模块。
 
@@ -31,7 +31,7 @@ env.cacheDir = '/path/to/cache/directory/';
 
 用于控制执行的全局变量。这为用户提供了一种简单的方法来配置 Transformers.js。
 
-**种类**：[`env`](#module_env) 的静态常量
+**种类**：`env` 的静态常量
 
 **属性**
 
@@ -50,6 +50,6 @@ env.cacheDir = '/path/to/cache/directory/';
 | useFSCache | `boolean` | 是否使用文件系统缓存文件。默认情况下，如果可用，则为 `true`。 |
 | cacheDir | `string` | 用于使用文件系统缓存文件的目录。默认为 `./.cache`。 |
 | useCustomCache | `boolean` | 是否使用自定义缓存系统（由 `customCache` 定义），默认为 `false`。 |
-| customCache | `Object` | 要使用的自定义缓存。默认为 `null`。注意：这必须是一个实现 Web 缓存 API 的 `match` 和 `put` 函数的对象。有关更多信息，请参见 [https://developer.mozilla.org/en-US/docs/Web/API/Cache](https://developer.mozilla.org/en-US/docs/Web/API/Cache) |
+| customCache | `Object` | 要使用的自定义缓存。默认为 `null`。注意：这必须是一个实现 Web 缓存 API 的 `match` 和 `put` 函数的对象。有关更多信息，请参见 [`developer.mozilla.org/en-US/docs/Web/API/Cache`](https://developer.mozilla.org/en-US/docs/Web/API/Cache) |
 
 * * *

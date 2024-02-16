@@ -1,6 +1,6 @@
 # 访问私有/受限模型
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/guides/private](https://huggingface.co/docs/transformers.js/guides/private)
+> 原始文本：[`huggingface.co/docs/transformers.js/guides/private`](https://huggingface.co/docs/transformers.js/guides/private)
 
 由于存在泄露访问令牌给您的网站或 Web 应用程序用户的可能性，我们仅支持从具有对进程环境变量访问权限的服务器端环境（例如 Node.js）访问私有/受限模型。
 
@@ -10,7 +10,7 @@
 
 要生成访问令牌，请转到您的设置中的[访问令牌选项卡](https://huggingface.co/settings/tokens)，然后单击**新建令牌**按钮。为您的令牌选择一个名称，然后单击**生成令牌**（我们建议将“角色”保持为只读）。然后，您可以单击您新创建的令牌旁边的**复制**按钮将其复制到剪贴板中。
 
-![](../Images/fad8ed158713ed3996494a15929f7b2b.png) ![](../Images/3c5777a517394bbd48a556e13d64b7ac.png)
+![](img/fad8ed158713ed3996494a15929f7b2b.png) ![](img/3c5777a517394bbd48a556e13d64b7ac.png)
 
 要删除或刷新用户访问令牌，您可以单击**管理**按钮。
 

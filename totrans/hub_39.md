@@ -1,33 +1,33 @@
 # Streamlit Spaces
 
-> 原始文本：[https://huggingface.co/docs/hub/spaces-sdks-streamlit](https://huggingface.co/docs/hub/spaces-sdks-streamlit)
+> 原始文本：[`huggingface.co/docs/hub/spaces-sdks-streamlit`](https://huggingface.co/docs/hub/spaces-sdks-streamlit)
 
-Streamlit为用户提供了使用Python以*反应式*方式构建完整功能的Web应用程序的自由。每次应用程序状态发生变化时，都会重新运行您的代码。Streamlit还非常适合数据可视化，并支持多个图表库，如Bokeh、Plotly和Altair。阅读这篇关于在Spaces中构建和托管Streamlit应用程序的[博客文章](https://huggingface.co/blog/streamlit-spaces)。
+Streamlit 为用户提供了使用 Python 以*反应式*方式构建完整功能的 Web 应用程序的自由。每次应用程序状态发生变化时，都会重新运行您的代码。Streamlit 还非常适合数据可视化，并支持多个图表库，如 Bokeh、Plotly 和 Altair。阅读这篇关于在 Spaces 中构建和托管 Streamlit 应用程序的[博客文章](https://huggingface.co/blog/streamlit-spaces)。
 
-在[创建新Space](https://huggingface.co/new-space)时选择**Streamlit**作为SDK，将通过在`README.md`文件的YAML块中将`sdk`属性设置为`streamlit`来初始化您的Space的最新版本。如果您想更改Streamlit版本，可以编辑`sdk_version`属性。
+在[创建新 Space](https://huggingface.co/new-space)时选择**Streamlit**作为 SDK，将通过在`README.md`文件的 YAML 块中将`sdk`属性设置为`streamlit`来初始化您的 Space 的最新版本。如果您想更改 Streamlit 版本，可以编辑`sdk_version`属性。
 
-要在Space中使用Streamlit，请在通过[**New Space**表单](https://huggingface.co/new-space)创建Space时选择**Streamlit**作为SDK。这将创建一个包含以下属性的YAML配置块的`README.md`的存储库：
+要在 Space 中使用 Streamlit，请在通过[**New Space**表单](https://huggingface.co/new-space)创建 Space 时选择**Streamlit**作为 SDK。这将创建一个包含以下属性的 YAML 配置块的`README.md`的存储库：
 
 ```py
 sdk: streamlit
 sdk_version: 1.25.0 # The latest supported version
 ```
 
-您可以编辑`sdk_version`，但请注意，当您使用不受支持的Streamlit版本时可能会出现问题。并非所有Streamlit版本都受支持，请参考[参考部分](./spaces-config-reference)查看可用版本。
+您可以编辑`sdk_version`，但请注意，当您使用不受支持的 Streamlit 版本时可能会出现问题。并非所有 Streamlit 版本都受支持，请参考参考部分查看可用版本。
 
-有关Streamlit的详细信息，请参阅[Streamlit文档](https://docs.streamlit.io/)。
+有关 Streamlit 的详细信息，请参阅[Streamlit 文档](https://docs.streamlit.io/)。
 
-只允许使用端口8501进行Streamlit Spaces（默认端口）。因此，如果为您的Space提供了`config.toml`文件，请确保未覆盖默认端口。
+只允许使用端口 8501 进行 Streamlit Spaces（默认端口）。因此，如果为您的 Space 提供了`config.toml`文件，请确保未覆盖默认端口。
 
-## 您的第一个Streamlit Space：Hot Dog Classifier
+## 您的第一个 Streamlit Space：Hot Dog Classifier
 
-在接下来的部分中，您将学习创建Space、配置Space和将代码部署到Space的基础知识。我们将创建一个使用Streamlit的**Hot Dog Classifier** Space，用于演示[julien-c/hotdog-not-hotdog](https://huggingface.co/julien-c/hotdog-not-hotdog)模型，该模型可以检测给定图片是否包含热狗🌭
+在接下来的部分中，您将学习创建 Space、配置 Space 和将代码部署到 Space 的基础知识。我们将创建一个使用 Streamlit 的**Hot Dog Classifier** Space，用于演示[julien-c/hotdog-not-hotdog](https://huggingface.co/julien-c/hotdog-not-hotdog)模型，该模型可以检测给定图片是否包含热狗🌭
 
 您可以在[NimaBoscarino/hotdog-streamlit](https://huggingface.co/spaces/NimaBoscarino/hotdog-streamlit)找到此主机化版本。
 
-## 创建一个新的Streamlit Space
+## 创建一个新的 Streamlit Space
 
-我们将从[创建全新Space](https://huggingface.co/new-space)并选择**Streamlit**作为我们的SDK开始。 Hugging Face Spaces是Git存储库，这意味着您可以通过推送提交逐步（和协作地）处理Space。在继续之前，请查看[开始使用存储库](./repositories-getting-started)指南，了解如何在继续之前创建和编辑文件。
+我们将从[创建全新 Space](https://huggingface.co/new-space)并选择**Streamlit**作为我们的 SDK 开始。 Hugging Face Spaces 是 Git 存储库，这意味着您可以通过推送提交逐步（和协作地）处理 Space。在继续之前，请查看开始使用存储库指南，了解如何在继续之前创建和编辑文件。
 
 ## 添加依赖项
 
@@ -38,11 +38,11 @@ transformers
 torch
 ```
 
-Spaces运行时将处理安装依赖项！
+Spaces 运行时将处理安装依赖项！
 
-## 创建Streamlit应用程序
+## 创建 Streamlit 应用程序
 
-要创建Streamlit应用程序，请在存储库中创建一个名为**app.py**的新文件，并添加以下代码：
+要创建 Streamlit 应用程序，请在存储库中创建一个名为**app.py**的新文件，并添加以下代码：
 
 ```py
 import streamlit as st
@@ -67,11 +67,11 @@ if file_name is not None:
         col2.subheader(f"{ p['label'] }: { round(p['score'] * 100, 1)}%")
 ```
 
-此Python脚本使用[🤗 Transformers pipeline](https://huggingface.co/docs/transformers/pipeline_tutorial)加载[julien-c/hotdog-not-hotdog](https://huggingface.co/julien-c/hotdog-not-hotdog)模型，该模型由Streamlit界面使用。Streamlit应用程序将要求您上传一张图片，然后将其分类为*热狗*或*非热狗*。保存代码到**app.py**文件后，访问**App**选项卡以查看您的应用程序运行情况！
+此 Python 脚本使用[🤗 Transformers pipeline](https://huggingface.co/docs/transformers/pipeline_tutorial)加载[julien-c/hotdog-not-hotdog](https://huggingface.co/julien-c/hotdog-not-hotdog)模型，该模型由 Streamlit 界面使用。Streamlit 应用程序将要求您上传一张图片，然后将其分类为*热狗*或*非热狗*。保存代码到**app.py**文件后，访问**App**选项卡以查看您的应用程序运行情况！
 
-![](../Images/c3481cc29034be8134667fb3042f09ab.png) ![](../Images/cacfe2f21d36f60d9537f92cb3bb0e64.png)
+![](img/c3481cc29034be8134667fb3042f09ab.png) ![](img/cacfe2f21d36f60d9537f92cb3bb0e64.png)
 
-## 在其他网页上嵌入Streamlit Spaces
+## 在其他网页上嵌入 Streamlit Spaces
 
 您可以使用 HTML `<iframe>` 标签将 Streamlit Space 嵌入到其他网页的内联框架中。只需包含您的 Space 的 URL，以 `.hf.space` 结尾。要找到您的 Space 的 URL，您可以使用 Spaces 选项中的“嵌入此 Space”按钮。
 
@@ -84,7 +84,7 @@ if file_name is not None:
 ></iframe>
 ```
 
-[https://NimaBoscarino-hotdog-streamlit.hf.space?embed=true](https://NimaBoscarino-hotdog-streamlit.hf.space?embed=true)
+[`NimaBoscarino-hotdog-streamlit.hf.space?embed=true`](https://NimaBoscarino-hotdog-streamlit.hf.space?embed=true)
 
 请注意，我们已将 `?embed=true` 添加到 URL 中，这将激活 Streamlit 应用程序的嵌入模式，删除一些间隔和页脚以实现精简嵌入。
 
@@ -114,4 +114,4 @@ if file_name is not None:
 <script> iFrameResize({}, "#your-iframe-id") </script>
 ```
 
-此外，您可以查看[我们的文档](./spaces-embed)。
+此外，您可以查看我们的文档。

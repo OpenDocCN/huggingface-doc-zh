@@ -1,10 +1,10 @@
-# 管理huggingface_hub缓存系统
+# 管理 huggingface_hub 缓存系统
 
-> 原文链接：[https://huggingface.co/docs/huggingface_hub/guides/manage-cache](https://huggingface.co/docs/huggingface_hub/guides/manage-cache)
+> 原文链接：[`huggingface.co/docs/huggingface_hub/guides/manage-cache`](https://huggingface.co/docs/huggingface_hub/guides/manage-cache)
 
 ## 理解缓存
 
-Hugging Face Hub缓存系统旨在成为依赖于Hub的库之间共享的中央缓存。在v0.8.0中已更新，以防止在不同版本之间重新下载相同的文件。
+Hugging Face Hub 缓存系统旨在成为依赖于 Hub 的库之间共享的中央缓存。在 v0.8.0 中已更新，以防止在不同版本之间重新下载相同的文件。
 
 缓存系统设计如下：
 
@@ -29,7 +29,7 @@ Hugging Face Hub缓存系统旨在成为依赖于Hub的库之间共享的中央�
 ├─ spaces--dalle-mini--dalle-mini
 ```
 
-现在所有文件将从Hub中下载到这些文件夹中。缓存确保如果文件已经存在且未更新，则不会下载两次；但如果文件已更新，并且您要求最新文件，则它将下载最新文件（同时保留以防您再次需要的先前文件）。
+现在所有文件将从 Hub 中下载到这些文件夹中。缓存确保如果文件已经存在且未更新，则不会下载两次；但如果文件已更新，并且您要求最新文件，则它将下载最新文件（同时保留以防您再次需要的先前文件）。
 
 为了实现这一点，所有文件夹都包含相同的骨架：
 
@@ -74,17 +74,17 @@ Hugging Face Hub缓存系统旨在成为依赖于Hub的库之间共享的中央�
 
 ### .no_exist（高级）
 
-除了`blobs`、`refs`和`snapshots`文件夹外，您还可能在缓存中找到一个`.no_exist`文件夹。这个文件夹用于跟踪您尝试下载但在Hub上不存在的文件。它的结构与`snapshots`文件夹相同，每个已知修订版本一个子文件夹：
+除了`blobs`、`refs`和`snapshots`文件夹外，您还可能在缓存中找到一个`.no_exist`文件夹。这个文件夹用于跟踪您尝试下载但在 Hub 上不存在的文件。它的结构与`snapshots`文件夹相同，每个已知修订版本一个子文件夹：
 
 ```py
 <CACHE_DIR>/<REPO_NAME>/.no_exist/aaaaaa/config_that_does_not_exist.json
 ```
 
-与`snapshots`文件夹不同，文件是简单的空文件（没有符号链接）。在这个例子中，文件`"config_that_does_not_exist.json"`在修订版本`"aaaaaa"`上不存在于Hub上。由于它只存储空文件，这个文件夹在磁盘使用方面可以忽略不计。
+与`snapshots`文件夹不同，文件是简单的空文件（没有符号链接）。在这个例子中，文件`"config_that_does_not_exist.json"`在修订版本`"aaaaaa"`上不存在于 Hub 上。由于它只存储空文件，这个文件夹在磁盘使用方面可以忽略不计。
 
 现在您可能会想，为什么这些信息甚至相关呢？在某些情况下，框架尝试加载模型的可选文件。保存可选文件不存在会使加载模型更快，因为它可以节省每个可能的可选文件的 1 次 HTTP 调用。例如，在 `transformers` 中，每个分词器都可以支持额外的文件。第一次在您的机器上加载分词器时，它将缓存哪些可选文件存在（哪些不存在），以便在下一次初始化时加快加载速度。
 
-要测试文件是否在本地缓存中（而不进行任何 HTTP 请求），可以使用 [try_to_load_from_cache()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.try_to_load_from_cache) 助手。它将返回文件路径（如果存在且已缓存），对象 `_CACHED_NO_EXIST`（如果不存在已缓存）或 `None`（如果我们不知道）。
+要测试文件是否在本地缓存中（而不进行任何 HTTP 请求），可以使用 try_to_load_from_cache() 助手。它将返回文件路径（如果存在且已缓存），对象 `_CACHED_NO_EXIST`（如果不存在已缓存）或 `None`（如果我们不知道）。
 
 ```py
 from huggingface_hub import try_to_load_from_cache, _CACHED_NO_EXIST
@@ -133,7 +133,7 @@ else:
 
 ## 缓存资产
 
-除了从 Hub 缓存文件外，下游库通常需要缓存与 HF 相关但不直接由 `huggingface_hub` 处理的其他文件（例如：从 GitHub 下载的文件，预处理数据，日志等）。为了缓存这些称为 `assets` 的文件，可以使用 [cached_assets_path()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.cached_assets_path)。这个小助手以请求它的库的名称为基础，在 HF 缓存中以统一的方式生成路径，还可以选择性地使用命名空间和子文件夹名称。目标是让每个下游库以自己的方式管理其资产（例如：不规定结构），只要它保持在正确的资产文件夹中。然后这些库可以利用 `huggingface_hub` 提供的工具来管理缓存，特别是通过 CLI 命令扫描和删除部分资产。
+除了从 Hub 缓存文件外，下游库通常需要缓存与 HF 相关但不直接由 `huggingface_hub` 处理的其他文件（例如：从 GitHub 下载的文件，预处理数据，日志等）。为了缓存这些称为 `assets` 的文件，可以使用 cached_assets_path()。这个小助手以请求它的库的名称为基础，在 HF 缓存中以统一的方式生成路径，还可以选择性地使用命名空间和子文件夹名称。目标是让每个下游库以自己的方式管理其资产（例如：不规定结构），只要它保持在正确的资产文件夹中。然后这些库可以利用 `huggingface_hub` 提供的工具来管理缓存，特别是通过 CLI 命令扫描和删除部分资产。
 
 ```py
 from huggingface_hub import cached_assets_path
@@ -142,7 +142,7 @@ assets_path = cached_assets_path(library_name="datasets", namespace="SQuAD", sub
 something_path = assets_path / "something.json" # Do anything you like in your assets folder !
 ```
 
-[cached_assets_path()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.cached_assets_path) 是存储资产的推荐方式，但不是强制性的。如果您的库已经使用自己的缓存，请随意使用！
+cached_assets_path() 是存储资产的推荐方式，但不是强制性的。如果您的库已经使用自己的缓存，请随意使用！
 
 ### 实践中的资产
 
@@ -185,9 +185,9 @@ something_path = assets_path / "something.json" # Do anything you like in your a
 
 ### 从终端扫描缓存
 
-扫描您的HF缓存系统的最简单方法是使用`huggingface-cli`工具中的`scan-cache`命令。此命令扫描缓存并打印一个报告，其中包含有关存储库id、存储库类型、磁盘使用情况、引用和完整本地路径的信息。
+扫描您的 HF 缓存系统的最简单方法是使用`huggingface-cli`工具中的`scan-cache`命令。此命令扫描缓存并打印一个报告，其中包含有关存储库 id、存储库类型、磁盘使用情况、引用和完整本地路径的信息。
 
-下面的片段显示了一个文件夹中的扫描报告，其中缓存了4个模型和2个数据集。
+下面的片段显示了一个文件夹中的扫描报告，其中缓存了 4 个模型和 2 个数据集。
 
 ```py
 ➜ huggingface-cli scan-cache
@@ -204,7 +204,7 @@ Done in 0.0s. Scanned 6 repo(s) for a total of 3.4G.
 Got 1 warning(s) while scanning. Use -vvv to print details.
 ```
 
-要获得更详细的报告，请使用`--verbose`选项。对于每个存储库，您将获得已下载的所有修订的列表。如上所述，不在2个修订之间更改的文件通过符号链接共享。这意味着磁盘上的存储库大小预计会小于每个修订的大小之和。例如，这里`bert-base-cased`有1.4G和1.5G的2个修订，但总磁盘使用量仅为1.9G。
+要获得更详细的报告，请使用`--verbose`选项。对于每个存储库，您将获得已下载的所有修订的列表。如上所述，不在 2 个修订之间更改的文件通过符号链接共享。这意味着磁盘上的存储库大小预计会小于每个修订的大小之和。例如，这里`bert-base-cased`有 1.4G 和 1.5G 的 2 个修订，但总磁盘使用量仅为 1.9G。
 
 ```py
 ➜ huggingface-cli scan-cache -v
@@ -226,9 +226,9 @@ Done in 0.0s. Scanned 6 repo(s) for a total of 3.4G.
 Got 1 warning(s) while scanning. Use -vvv to print details.
 ```
 
-#### Grep示例
+#### Grep 示例
 
-由于输出是表格格式，您可以将其与任何类似`grep`的工具结合使用来过滤条目。以下是在基于Unix的机器上仅过滤“t5-small”模型的修订的示例。
+由于输出是表格格式，您可以将其与任何类似`grep`的工具结合使用来过滤条目。以下是在基于 Unix 的机器上仅过滤“t5-small”模型的修订的示例。
 
 ```py
 ➜ eval "huggingface-cli scan-cache -v" | grep "t5-small"
@@ -237,19 +237,19 @@ t5-small                    model     d0a119eedb3718e34c648e594394474cf95e0617  
 t5-small                    model     d78aea13fa7ecd06c29e3e46195d6341255065d5       970.7M        9 1 week ago    main        /home/wauplin/.cache/huggingface/hub/models--t5-small/snapshots/d78aea13fa7ecd06c29e3e46195d6341255065d5
 ```
 
-### 从Python扫描缓存
+### 从 Python 扫描缓存
 
-对于更高级的用法，请使用[scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir)，这是CLI工具调用的Python实用程序。
+对于更高级的用法，请使用 scan_cache_dir()，这是 CLI 工具调用的 Python 实用程序。
 
-您可以使用它来获取一个围绕4个数据类结构化的详细报告：
+您可以使用它来获取一个围绕 4 个数据类结构化的详细报告：
 
-+   [HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo)：由[scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir)返回的完整报告
++   HFCacheInfo：由 scan_cache_dir()返回的完整报告
 
-+   [CachedRepoInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRepoInfo)：有关缓存存储库的信息
++   CachedRepoInfo：有关缓存存储库的信息
 
-+   [CachedRevisionInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRevisionInfo)：有关存储库内缓存修订（例如“快照”）的信息
++   CachedRevisionInfo：有关存储库内缓存修订（例如“快照”）的信息
 
-+   [CachedFileInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedFileInfo)：有关快照中缓存文件的信息
++   CachedFileInfo：有关快照中缓存文件的信息
 
 这里是一个简单的用法示例。有关详细信息，请参阅参考资料。
 
@@ -305,31 +305,31 @@ HFCacheInfo(
 
 ## 清理您的缓存
 
-扫描您的缓存是有趣的，但您真正想要做的下一步通常是删除一些部分以释放驱动器上的一些空间。使用`delete-cache` CLI命令可以实现这一点。也可以在扫描缓存时使用返回的[HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo)对象中的[delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions)助手进行编程。
+扫描您的缓存是有趣的，但您真正想要做的下一步通常是删除一些部分以释放驱动器上的一些空间。使用`delete-cache` CLI 命令可以实现这一点。也可以在扫描缓存时使用返回的 HFCacheInfo 对象中的 delete_revisions()助手进行编程。
 
 ### 删除策略
 
-要删除某些缓存，您需要传递一个要删除的修订列表。工具将根据此列表定义释放空间的策略。它返回一个描述将要删除哪些文件和文件夹的[DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)对象。[DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy)允许您知道预计将释放多少空间。一旦您同意删除，必须执行它以使删除生效。为避免不一致，您不能手动编辑策略对象。
+要删除某些缓存，您需要传递一个要删除的修订列表。工具将根据此列表定义释放空间的策略。它返回一个描述将要删除哪些文件和文件夹的 DeleteCacheStrategy 对象。DeleteCacheStrategy 允许您知道预计将释放多少空间。一旦您同意删除，必须执行它以使删除生效。为避免不一致，您不能手动编辑策略对象。
 
 删除修订的策略如下：
 
 +   包含修订符号链接的`snapshot`文件夹将被删除。
 
-+   仅被要删除的修订目标的blob文件也将被删除。
++   仅被要删除的修订目标的 blob 文件也将被删除。
 
-+   如果一个修订与1个或多个`refs`相关联，则引用将被删除。
++   如果一个修订与 1 个或多个`refs`相关联，则引用将被删除。
 
 +   如果一个存储库的所有修订都被删除，整个缓存的存储库也将被删除。
 
 修订哈希在所有存储库中是唯一的。这意味着在删除修订时，您无需提供任何`repo_id`或`repo_type`。
 
-如果在缓存中找不到修订版本，它将被静默忽略。此外，如果在尝试删除文件或文件夹时找不到它，将记录警告但不会抛出错误。删除将继续进行其他包含在 [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy) 对象中的路径。
+如果在缓存中找不到修订版本，它将被静默忽略。此外，如果在尝试删除文件或文件夹时找不到它，将记录警告但不会抛出错误。删除将继续进行其他包含在 DeleteCacheStrategy 对象中的路径。
 
 ### 从终端清除缓存
 
-从HF缓存系统中删除一些修订版本的最简单方法是使用 `huggingface-cli` 工具中的 `delete-cache` 命令。该命令有两种模式。默认情况下，会显示一个 TUI（终端用户界面）供用户选择要删除的修订版本。此 TUI 目前处于测试阶段，尚未在所有平台上进行测试。如果 TUI 在您的计算机上无法工作，您可以使用 `--disable-tui` 标志禁用它。
+从 HF 缓存系统中删除一些修订版本的最简单方法是使用 `huggingface-cli` 工具中的 `delete-cache` 命令。该命令有两种模式。默认情况下，会显示一个 TUI（终端用户界面）供用户选择要删除的修订版本。此 TUI 目前处于测试阶段，尚未在所有平台上进行测试。如果 TUI 在您的计算机上无法工作，您可以使用 `--disable-tui` 标志禁用它。
 
-#### 使用TUI
+#### 使用 TUI
 
 这是默认模式。要使用它，您首先需要通过运行以下命令安装额外的依赖项：
 
@@ -345,7 +345,7 @@ huggingface-cli delete-cache
 
 现在您应该看到一个修订版本列表，您可以选择/取消选择：
 
-![](../Images/aafc157d3819eea90ace56496a84b8e6.png)
+![](img/aafc157d3819eea90ace56496a84b8e6.png)
 
 说明：
 
@@ -369,7 +369,7 @@ Start deletion.
 Done. Deleted 1 repo(s) and 0 revision(s) for a total of 3.1G.
 ```
 
-#### 无TUI
+#### 无 TUI
 
 如上所述，TUI 模式目前处于测试阶段，是可选的。可能是它在您的计算机上无法工作，或者您认为它不方便。
 
@@ -422,9 +422,9 @@ huggingface-cli delete-cache --disable-tui
 #    9cfa5647b32c0a30d0adfca06bf198d82192a0d1 # Refs: main # modified 5 days ago
 ```
 
-### 从Python清除缓存
+### 从 Python 清除缓存
 
-为了更灵活，您还可以以编程方式使用 [delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions) 方法。这里是一个简单的示例。有关详细信息，请参阅参考资料。
+为了更灵活，您还可以以编程方式使用 delete_revisions() 方法。这里是一个简单的示例。有关详细信息，请参阅参考资料。
 
 ```py
 >>> from huggingface_hub import scan_cache_dir

@@ -1,6 +1,6 @@
 # 接口: SpaceRuntime
 
-> 原始文本: [https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceRuntime](https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceRuntime)
+> 原始文本: [`huggingface.co/docs/huggingface.js/hub/interfaces/SpaceRuntime`](https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceRuntime)
 
 ## 属性
 
@@ -34,9 +34,9 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `current` | `null` &#124; [`SpaceHardwareFlavor`](../modules#spacehardwareflavor) |
+| `current` | `null` &#124; `SpaceHardwareFlavor` |
 | `currentPrettyName?` | `字符串` |
-| `requested` | `null` &#124; [`SpaceHardwareFlavor`](../modules#spacehardwareflavor) |
+| `requested` | `null` &#124; `SpaceHardwareFlavor` |
 | `requestedPrettyName?` | `字符串` |
 
 #### 在以下位置定义
@@ -47,7 +47,7 @@
 
 ### resources
 
-• `可选` `resources`: [`SpaceResourceConfig`](SpaceResourceConfig)
+• `可选` `resources`: `SpaceResourceConfig`
 
 在调用 /spaces 时，只有在 ?full=true 时才会获取这些属性
 
@@ -59,7 +59,7 @@
 
 ### sdk
 
-• `可选` `sdk`: [`SpaceSdk`](../modules#spacesdk)
+• `可选` `sdk`: `SpaceSdk`
 
 #### 在以下位置定义
 
@@ -79,7 +79,7 @@
 
 ### 阶段
 
-• `阶段`: [`SpaceStage`](../modules#spacestage)
+• `阶段`: `SpaceStage`
 
 #### 在以下位置定义
 

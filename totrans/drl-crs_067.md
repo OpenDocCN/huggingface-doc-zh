@@ -1,6 +1,6 @@
 # 额外阅读
 
-> 原文：[https://huggingface.co/learn/deep-rl-course/unit4/additional-readings](https://huggingface.co/learn/deep-rl-course/unit4/additional-readings)
+> 原文：[`huggingface.co/learn/deep-rl-course/unit4/additional-readings`](https://huggingface.co/learn/deep-rl-course/unit4/additional-readings)
 
 这些是**可选阅读**，如果您想深入了解。
 
@@ -10,11 +10,11 @@
 
 ## 策略梯度
 
-+   [https://johnwlambert.github.io/policy-gradients/](https://johnwlambert.github.io/policy-gradients/)
++   [`johnwlambert.github.io/policy-gradients/`](https://johnwlambert.github.io/policy-gradients/)
 
 +   [RL - 策略梯度解释](https://jonathan-hui.medium.com/rl-policy-gradients-explained-9b13b688b146)
 
-+   [第13章，策略梯度方法；由Richard Sutton和Andrew G. Barto撰写的《强化学习简介》](http://incompleteideas.net/book/RLbook2020.pdf)
++   [第十三章，策略梯度方法；由 Richard Sutton 和 Andrew G. Barto 撰写的《强化学习简介》](http://incompleteideas.net/book/RLbook2020.pdf)
 
 ## 实现
 

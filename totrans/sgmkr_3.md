@@ -1,42 +1,42 @@
-# 在Amazon SageMaker上运行训练
+# 在 Amazon SageMaker 上运行训练
 
-> 原始文本：[https://huggingface.co/docs/sagemaker/train](https://huggingface.co/docs/sagemaker/train)
+> 原始文本：[`huggingface.co/docs/sagemaker/train`](https://huggingface.co/docs/sagemaker/train)
 
-[https://www.youtube.com/embed/ok3hetb42gU](https://www.youtube.com/embed/ok3hetb42gU)
+[`www.youtube.com/embed/ok3hetb42gU`](https://www.youtube.com/embed/ok3hetb42gU)
 
-本指南将向您展示如何使用`HuggingFace` SageMaker Python SDK训练一个🤗 Transformers模型。学习如何：
+本指南将向您展示如何使用`HuggingFace` SageMaker Python SDK 训练一个🤗 Transformers 模型。学习如何：
 
-+   [安装和设置您的训练环境](#installation-and-setup)。
++   安装和设置您的训练环境。
 
-+   [准备一个训练脚本](#prepare-a-transformers-fine-tuning-script)。
++   准备一个训练脚本。
 
-+   [创建一个Hugging Face Estimator](#create-a-hugging-face-estimator)。
++   创建一个 Hugging Face Estimator。
 
-+   [使用`fit`方法运行训练](#execute-training)。
++   使用`fit`方法运行训练。
 
-+   [访问您训练的模型](#access-trained-model)。
++   访问您训练的模型。
 
-+   [进行分布式训练](#distributed-training)。
++   进行分布式训练。
 
-+   [创建一个spot实例](#spot-instances)。
++   创建一个 spot 实例。
 
-+   [从GitHub存储库加载训练脚本](#git-repository)。
++   从 GitHub 存储库加载训练脚本。
 
-+   [收集训练指标](#sagemaker-metrics)。
++   收集训练指标。
 
 ## 安装和设置
 
-在您可以使用SageMaker训练🤗 Transformers模型之前，您需要注册AWS账户。如果您还没有AWS账户，请在[这里](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-set-up.html)了解更多信息。
+在您可以使用 SageMaker 训练🤗 Transformers 模型之前，您需要注册 AWS 账户。如果您还没有 AWS 账户，请在[这里](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-set-up.html)了解更多信息。
 
-一旦您拥有AWS账户，可以通过以下方式之一开始使用：
+一旦您拥有 AWS 账户，可以通过以下方式之一开始使用：
 
 +   [SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-studio-onboard.html)
 
-+   [SageMaker笔记本实例](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-console.html)
++   [SageMaker 笔记本实例](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-console.html)
 
 +   本地环境
 
-要在本地开始训练，您需要设置适当的[IAM角色](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)。
+要在本地开始训练，您需要设置适当的[IAM 角色](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)。
 
 升级到最新的`sagemaker`版本：
 
@@ -44,9 +44,9 @@
 pip install sagemaker --upgrade
 ```
 
-**SageMaker环境**
+**SageMaker 环境**
 
-按照下面所示设置您的SageMaker环境：
+按照下面所示设置您的 SageMaker 环境：
 
 ```py
 import sagemaker
@@ -54,7 +54,7 @@ sess = sagemaker.Session()
 role = sagemaker.get_execution_role()
 ```
 
-*注意：执行角色仅在SageMaker内运行笔记本时可用。如果在非SageMaker笔记本中运行`get_execution_role`，则会出现`region`错误。*
+*注意：执行角色仅在 SageMaker 内运行笔记本时可用。如果在非 SageMaker 笔记本中运行`get_execution_role`，则会出现`region`错误。*
 
 **本地环境**
 
@@ -69,17 +69,17 @@ role = iam_client.get_role(RoleName='role-name-of-your-iam-role-with-right-permi
 sess = sagemaker.Session()
 ```
 
-## 准备一个🤗 Transformers微调脚本
+## 准备一个🤗 Transformers 微调脚本
 
-我们的训练脚本与您可能在SageMaker之外运行的训练脚本非常相似。但是，您可以通过各种环境变量访问有关训练环境的有用属性（请参阅[这里](https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md)获取完整列表），例如：
+我们的训练脚本与您可能在 SageMaker 之外运行的训练脚本非常相似。但是，您可以通过各种环境变量访问有关训练环境的有用属性（请参阅[这里](https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md)获取完整列表），例如：
 
-+   `SM_MODEL_DIR`: 一个表示训练作业写入模型工件的路径的字符串。训练后，此目录中的工件将上传到S3以进行模型托管。`SM_MODEL_DIR`始终设置为`/opt/ml/model`。
++   `SM_MODEL_DIR`: 一个表示训练作业写入模型工件的路径的字符串。训练后，此目录中的工件将上传到 S3 以进行模型托管。`SM_MODEL_DIR`始终设置为`/opt/ml/model`。
 
-+   `SM_NUM_GPUS`: 一个表示主机可用GPU数量的整数。
++   `SM_NUM_GPUS`: 一个表示主机可用 GPU 数量的整数。
 
-+   `SM_CHANNEL_XXXX:` 一个表示包含指定通道输入数据的目录路径的字符串。例如，当您在Hugging Face Estimator的`fit`方法中指定`train`和`test`时，环境变量设置为`SM_CHANNEL_TRAIN`和`SM_CHANNEL_TEST`。
++   `SM_CHANNEL_XXXX:` 一个表示包含指定通道输入数据的目录路径的字符串。例如，当您在 Hugging Face Estimator 的`fit`方法中指定`train`和`test`时，环境变量设置为`SM_CHANNEL_TRAIN`和`SM_CHANNEL_TEST`。
 
-在[Hugging Face Estimator](#create-an-huggingface-estimator)中定义的`hyperparameters`作为命名参数传递，并由`ArgumentParser()`处理。
+在 Hugging Face Estimator 中定义的`hyperparameters`作为命名参数传递，并由`ArgumentParser()`处理。
 
 ```py
 import transformers
@@ -102,9 +102,9 @@ if __name__ == "__main__":
     parser.add_argument("--test_dir", type=str, default=os.environ["SM_CHANNEL_TEST"])
 ```
 
-*请注意，SageMaker不支持argparse操作。例如，如果您想使用布尔超参数，请在脚本中将`type`指定为`bool`并提供明确的`True`或`False`值。*
+*请注意，SageMaker 不支持 argparse 操作。例如，如果您想使用布尔超参数，请在脚本中将`type`指定为`bool`并提供明确的`True`或`False`值。*
 
-查看[这里](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py)完整的🤗 Transformers训练脚本示例。
+查看[这里](https://github.com/huggingface/notebooks/blob/main/sagemaker/01_getting_started_pytorch/scripts/train.py)完整的🤗 Transformers 训练脚本示例。
 
 ## 训练输出管理
 
@@ -188,11 +188,11 @@ S3Downloader.download(
 
 ## 分布式训练
 
-SageMaker提供了两种分布式训练策略：数据并行ism和模型并行ism。数据并行ism将训练集分割到多个GPU上，而模型并行ism将模型分割到多个GPU上。
+SageMaker 提供了两种分布式训练策略：数据并行 ism 和模型并行 ism。数据并行 ism 将训练集分割到多个 GPU 上，而模型并行 ism 将模型分割到多个 GPU 上。
 
-### 数据并行ism
+### 数据并行 ism
 
-Hugging Face的[Trainer](https://huggingface.co/docs/transformers/main_classes/trainer)支持SageMaker的数据并行ism库。如果您的训练脚本使用Trainer API，您只需要在Hugging Face Estimator中定义分布参数：
+Hugging Face 的[Trainer](https://huggingface.co/docs/transformers/main_classes/trainer)支持 SageMaker 的数据并行 ism 库。如果您的训练脚本使用 Trainer API，您只需要在 Hugging Face Estimator 中定义分布参数：
 
 ```py
 # configuration for running training on smdistributed data parallel
@@ -213,11 +213,11 @@ huggingface_estimator = HuggingFace(
 )
 ```
 
-📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/07_tensorflow_distributed_training_data_parallelism/sagemaker-notebook.ipynb)以查看如何使用TensorFlow运行数据并行ism库的示例。
+📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/07_tensorflow_distributed_training_data_parallelism/sagemaker-notebook.ipynb)以查看如何使用 TensorFlow 运行数据并行 ism 库的示例。
 
-### 模型并行ism
+### 模型并行 ism
 
-Hugging Face的[Trainer]还支持SageMaker的模型并行ism库。如果您的训练脚本使用Trainer API，您只需要在Hugging Face Estimator中定义分布参数（有关使用模型并行ism的更详细信息，请参见[此处](https://sagemaker.readthedocs.io/en/stable/api/training/smd_model_parallel_general.html?highlight=modelparallel#required-sagemaker-python-sdk-parameters)）：
+Hugging Face 的[Trainer]还支持 SageMaker 的模型并行 ism 库。如果您的训练脚本使用 Trainer API，您只需要在 Hugging Face Estimator 中定义分布参数（有关使用模型并行 ism 的更详细信息，请参见[此处](https://sagemaker.readthedocs.io/en/stable/api/training/smd_model_parallel_general.html?highlight=modelparallel#required-sagemaker-python-sdk-parameters)）：
 
 ```py
 # configuration for running training on smdistributed model parallel
@@ -258,15 +258,15 @@ huggingface_estimator = HuggingFace(
 )
 ```
 
-📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/04_distributed_training_model_parallelism/sagemaker-notebook.ipynb)以查看如何运行模型并行ism库的示例。
+📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/04_distributed_training_model_parallelism/sagemaker-notebook.ipynb)以查看如何运行模型并行 ism 库的示例。
 
-## Spot实例
+## Spot 实例
 
-Hugging Face扩展了SageMaker Python SDK，这意味着我们可以从[完全托管的EC2 spot实例](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html)中受益。这可以帮助您节省高达90%的训练成本！
+Hugging Face 扩展了 SageMaker Python SDK，这意味着我们可以从[完全托管的 EC2 spot 实例](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html)中受益。这可以帮助您节省高达 90%的训练成本！
 
-*注意：除非您的训练作业完成得很快，我们建议您使用[checkpointing](https://docs.aws.amazon.com/sagemaker/latest/dg/model-checkpoints.html)与托管的spot训练。在这种情况下，您需要定义`checkpoint_s3_uri`。*
+*注意：除非您的训练作业完成得很快，我们建议您使用[checkpointing](https://docs.aws.amazon.com/sagemaker/latest/dg/model-checkpoints.html)与托管的 spot 训练。在这种情况下，您需要定义`checkpoint_s3_uri`。*
 
-设置`use_spot_instances=True`并在Estimator中定义您的`max_wait`和`max_run`时间以使用spot实例：
+设置`use_spot_instances=True`并在 Estimator 中定义您的`max_wait`和`max_run`时间以使用 spot 实例：
 
 ```py
 # hyperparameters which are passed to the training job
@@ -299,15 +299,15 @@ huggingface_estimator = HuggingFace(
 # Managed Spot Training savings: 70.0%
 ```
 
-📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/05_spot_instances/sagemaker-notebook.ipynb)以查看如何使用spot实例的示例。
+📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/05_spot_instances/sagemaker-notebook.ipynb)以查看如何使用 spot 实例的示例。
 
-## Git存储库
+## Git 存储库
 
-Hugging Face Estimator可以加载存储在GitHub存储库中的训练脚本（https://sagemaker.readthedocs.io/en/stable/overview.html#use-scripts-stored-in-a-git-repository）。在`entry_point`中提供训练脚本的相对路径，在`source_dir`中提供目录的相对路径。
+Hugging Face Estimator 可以加载存储在 GitHub 存储库中的训练脚本（https://sagemaker.readthedocs.io/en/stable/overview.html#use-scripts-stored-in-a-git-repository）。在`entry_point`中提供训练脚本的相对路径，在`source_dir`中提供目录的相对路径。
 
-如果您正在使用`git_config`来运行[🤗 Transformers示例脚本](https://github.com/huggingface/transformers/tree/main/examples)，您需要在`transformers_version`中配置正确的`'branch'`（例如，如果您使用`transformers_version='4.4.2'`，您必须使用`'branch':'v4.4.2'`）。
+如果您正在使用`git_config`来运行[🤗 Transformers 示例脚本](https://github.com/huggingface/transformers/tree/main/examples)，您需要在`transformers_version`中配置正确的`'branch'`（例如，如果您使用`transformers_version='4.4.2'`，您必须使用`'branch':'v4.4.2'`）。
 
-*提示：通过在训练脚本的超参数中设置`output_dir=/opt/ml/model`将您的模型保存到S3中。*
+*提示：通过在训练脚本的超参数中设置`output_dir=/opt/ml/model`将您的模型保存到 S3 中。*
 
 ```py
 # configure git settings
@@ -328,9 +328,9 @@ huggingface_estimator = HuggingFace(
 )
 ```
 
-## SageMaker指标
+## SageMaker 指标
 
-[SageMaker指标](https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html#define-train-metrics)自动解析训练作业日志以获取指标并将其发送到CloudWatch。如果您希望SageMaker解析日志，您必须指定指标的名称和SageMaker用于查找指标的正则表达式。
+[SageMaker 指标](https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html#define-train-metrics)自动解析训练作业日志以获取指标并将其发送到 CloudWatch。如果您希望 SageMaker 解析日志，您必须指定指标的名称和 SageMaker 用于查找指标的正则表达式。
 
 ```py
 # define metrics definitions
@@ -354,4 +354,4 @@ huggingface_estimator = HuggingFace(
         hyperparameters = hyperparameters)
 ```
 
-📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/06_sagemaker_metrics/sagemaker-notebook.ipynb)以查看如何在SageMaker中捕获指标的示例。
+📓 打开[notebook](https://github.com/huggingface/notebooks/blob/main/sagemaker/06_sagemaker_metrics/sagemaker-notebook.ipynb)以查看如何在 SageMaker 中捕获指标的示例。

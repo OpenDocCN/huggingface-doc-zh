@@ -1,6 +1,6 @@
 # 接口: SafetensorsIndexJson
 
-> 原始文本: [https://huggingface.co/docs/huggingface.js/hub/interfaces/SafetensorsIndexJson](https://huggingface.co/docs/huggingface.js/hub/interfaces/SafetensorsIndexJson)
+> 原始文本: [`huggingface.co/docs/huggingface.js/hub/interfaces/SafetensorsIndexJson`](https://huggingface.co/docs/huggingface.js/hub/interfaces/SafetensorsIndexJson)
 
 ## 属性
 
@@ -24,7 +24,7 @@
 
 * * *
 
-### 权重_映射
+### 权重 _ 映射
 
 • `weight_map`: `记录`<`字符串`, `字符串`>
 

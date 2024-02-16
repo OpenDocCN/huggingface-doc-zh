@@ -1,6 +1,6 @@
 # 从 Hub 下载文件
 
-> 原文：[https://huggingface.co/docs/huggingface_hub/guides/download](https://huggingface.co/docs/huggingface_hub/guides/download)
+> 原文：[`huggingface.co/docs/huggingface_hub/guides/download`](https://huggingface.co/docs/huggingface_hub/guides/download)
 
 `huggingface_hub` 库提供了从存储在 Hub 上的存储库下载文件的函数。您可以独立使用这些函数，也可以将它们集成到您自己的库中，使用户更方便地与 Hub 交互。本指南将向您展示如何：
 
@@ -12,9 +12,9 @@
 
 ## 下载单个文件
 
-[hf_hub_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_download) 函数是从 Hub 下载文件的主要函数。它下载远程文件，在磁盘上缓存它（以版本感知方式），并返回其本地文件路径。
+hf_hub_download() 函数是从 Hub 下载文件的主要函数。它下载远程文件，在磁盘上缓存它（以版本感知方式），并返回其本地文件路径。
 
-返回的文件路径是指向 HF 本地缓存的指针。因此，重要的是不要修改文件以避免缓存损坏。如果您想了解有关文件如何被缓存的更多信息，请参考我们的 [缓存指南](./manage-cache)。
+返回的文件路径是指向 HF 本地缓存的指针。因此，重要的是不要修改文件以避免缓存损坏。如果您想了解有关文件如何被缓存的更多信息，请参考我们的 缓存指南。
 
 ### 从最新版本开始
 
@@ -52,11 +52,11 @@
 
 ### 构建下载 URL
 
-如果您想构建用于从存储库下载文件的 URL，可以使用 [hf_hub_url()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_url) 返回一个 URL。请注意，它在内部被 [hf_hub_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_download) 使用。
+如果您想构建用于从存储库下载文件的 URL，可以使用 hf_hub_url() 返回一个 URL。请注意，它在内部被 hf_hub_download() 使用。
 
 ## 下载整个存储库
 
-[snapshot_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.snapshot_download) 在给定的修订版本下载整个存储库。它内部使用 [hf_hub_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_download)，这意味着所有下载的文件也会被缓存在本地磁盘上。下载是并发进行的以加快进程速度。
+snapshot_download() 在给定的修订版本下载整个存储库。它内部使用 hf_hub_download()，这意味着所有下载的文件也会被缓存在本地磁盘上。下载是并发进行的以加快进程速度。
 
 要下载整个存储库，只需传递 `repo_id` 和 `repo_type`：
 
@@ -70,7 +70,7 @@
 '/home/lysandre/.cache/huggingface/hub/datasets--google--fleurs/snapshots/199e4ae37915137c555b1765c01477c216287d34'
 ```
 
-[snapshot_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.snapshot_download) 默认下载最新的修订版本。如果您想要特定的存储库修订版本，请使用 `revision` 参数：
+snapshot_download() 默认下载最新的修订版本。如果您想要特定的存储库修订版本，请使用 `revision` 参数：
 
 ```py
 >>> from huggingface_hub import snapshot_download
@@ -79,7 +79,7 @@
 
 ### 筛选要下载的文件
 
-[snapshot_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.snapshot_download) 提供了一个简单的方法来下载存储库。但是，并不总是希望下载整个存储库的内容。例如，如果您知道只会使用 `.safetensors` 权重而不是所有 `.bin` 文件，则可能希望阻止下载所有 `.bin` 文件。您可以使用 `allow_patterns` 和 `ignore_patterns` 参数来实现这一点。
+snapshot_download() 提供了一个简单的方法来下载存储库。但是，并不总是希望下载整个存储库的内容。例如，如果您知道只会使用 `.safetensors` 权重而不是所有 `.bin` 文件，则可能希望阻止下载所有 `.bin` 文件。您可以使用 `allow_patterns` 和 `ignore_patterns` 参数来实现这一点。
 
 这些参数接受单个模式或模式列表。模式是标准通配符（globbing patterns），如此处所述 [here](https://tldp.org/LDP/GNU-Linux-Tools-Summary/html/x11655.htm)。模式匹配基于 [`fnmatch`](https://docs.python.org/3/library/fnmatch.html)。
 
@@ -97,7 +97,7 @@
 >>> snapshot_download(repo_id="lysandre/arxiv-nlp", ignore_patterns=["*.msgpack", "*.h5"])
 ```
 
-最后，您可以结合两者来精确过滤您的下载。以下是一个示例，用于下载所有json和markdown文件，除了`vocab.json`。
+最后，您可以结合两者来精确过滤您的下载。以下是一个示例，用于下载所有 json 和 markdown 文件，除了`vocab.json`。
 
 ```py
 >>> from huggingface_hub import snapshot_download
@@ -106,7 +106,7 @@
 
 ## 下载文件到本地文件夹
 
-从Hub下载文件的推荐（也是默认）方式是使用[缓存系统](./manage-cache)。您可以通过设置`cache_dir`参数（在[hf_hub_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_download)和[snapshot_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.snapshot_download)中）来定义缓存位置。
+从 Hub 下载文件的推荐（也是默认）方式是使用缓存系统。您可以通过设置`cache_dir`参数（在 hf_hub_download()和 snapshot_download()中）来定义缓存位置。
 
 然而，在某些情况下，您可能希望下载文件并将它们移动到特定文件夹。这对于获得与`git`命令提供的工作流程更接近的工作流程是有用的。您可以使用`local_dir`和`local_dir_use_symlinks`参数来实现这一点：
 
@@ -114,7 +114,7 @@
 
 +   `local_dir_use_symlinks`定义了文件在本地文件夹中如何保存。
 
-    +   默认行为(`"auto"`)是复制小文件(<5MB)并对较大文件使用符号链接。符号链接可以优化带宽和磁盘使用。但是手动编辑符号链接文件可能会损坏缓存，因此对于小文件会进行复制。5MB的阈值可以通过`HF_HUB_LOCAL_DIR_AUTO_SYMLINK_THRESHOLD`环境变量进行配置。
+    +   默认行为(`"auto"`)是复制小文件(<5MB)并对较大文件使用符号链接。符号链接可以优化带宽和磁盘使用。但是手动编辑符号链接文件可能会损坏缓存，因此对于小文件会进行复制。5MB 的阈值可以通过`HF_HUB_LOCAL_DIR_AUTO_SYMLINK_THRESHOLD`环境变量进行配置。
 
     +   如果设置了`local_dir_use_symlinks=True`，则所有文件都将链接为最佳磁盘空间优化。例如，在下载包含成千上万个小文件的大型数据集时，这是非常有用的。
 
@@ -130,11 +130,11 @@
 | `local_dir="path/to/folder"` `local_dir_use_symlinks=False` | 否 | 文件在文件夹中 | ✅ | ✅ | ❌ *(重新运行时，文件将被重新下载)* | ⚠️ (如果在多个文件夹中运行，则会有多个副本) |
 | `local_dir="path/to/folder"` `local_dir_use_symlinks=False` | 是 | 文件在文件夹中 | ✅ | ✅ | ⚠️ *(文件必须先缓存)* | ❌ *(文件会重复)* |
 
-**注意：**如果您使用的是Windows机器，您需要启用开发者模式或以管理员身份运行`huggingface_hub`以启用符号链接。查看[缓存限制](../guides/manage-cache#limitations)部分以获取更多详细信息。
+**注意：**如果您使用的是 Windows 机器，您需要启用开发者模式或以管理员身份运行`huggingface_hub`以启用符号链接。查看缓存限制部分以获取更多详细信息。
 
-## 从CLI下载
+## 从 CLI 下载
 
-您可以使用终端中的`huggingface-cli download`命令直接从Hub下载文件。在内部，它使用相同的[hf_hub_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_download)和[snapshot_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.snapshot_download)助手描述的方法，并将返回的路径打印到终端。
+您可以使用终端中的`huggingface-cli download`命令直接从 Hub 下载文件。在内部，它使用相同的 hf_hub_download()和 snapshot_download()助手描述的方法，并将返回的路径打印到终端。
 
 ```py
 >>> huggingface-cli download gpt2 config.json
@@ -149,11 +149,11 @@ Fetching 2 files: 100%|███████████████████
 /home/wauplin/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10
 ```
 
-有关CLI下载命令的更多详细信息，请参考[CLI指南](./cli#huggingface-cli-download)。
+有关 CLI 下载命令的更多详细信息，请参考 CLI 指南。
 
 ## 更快的下载速度
 
-如果您在带宽较高的机器上运行，您可以通过[`hf_transfer`](https://github.com/huggingface/hf_transfer)增加下载速度，这是一个基于Rust开发的库，用于加快与Hub的文件传输。要启用它，请安装该软件包（`pip install hf_transfer`）并将`HF_HUB_ENABLE_HF_TRANSFER=1`设置为环境变量。
+如果您在带宽较高的机器上运行，您可以通过[`hf_transfer`](https://github.com/huggingface/hf_transfer)增加下载速度，这是一个基于 Rust 开发的库，用于加快与 Hub 的文件传输。要启用它，请安装该软件包（`pip install hf_transfer`）并将`HF_HUB_ENABLE_HF_TRANSFER=1`设置为环境变量。
 
 进度条在`hf_transfer`版本`0.1.4`开始支持。如果您打算启用更快的下载，请考虑升级（`pip install -U hf-transfer`）。
 

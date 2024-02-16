@@ -1,3 +1,3 @@
-# HF数据集服务器文档
+# HF 数据集服务器文档
 
-来源：[https://huggingface.co/docs/datasets-server/index](https://huggingface.co/docs/datasets-server/index)
+来源：[`huggingface.co/docs/datasets-server/index`](https://huggingface.co/docs/datasets-server/index)

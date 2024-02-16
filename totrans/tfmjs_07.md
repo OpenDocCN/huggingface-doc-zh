@@ -1,12 +1,12 @@
-# 构建一个原生JavaScript应用程序
+# 构建一个原生 JavaScript 应用程序
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/tutorials/vanilla-js](https://huggingface.co/docs/transformers.js/tutorials/vanilla-js)
+> 原始文本：[`huggingface.co/docs/transformers.js/tutorials/vanilla-js`](https://huggingface.co/docs/transformers.js/tutorials/vanilla-js)
 
-在本教程中，您将使用Transformers.js构建一个简单的Web应用程序，用于检测图像中的对象！要跟随本教程，您只需要一个代码编辑器、一个浏览器和一个简单的服务器（例如VS Code Live Server）。
+在本教程中，您将使用 Transformers.js 构建一个简单的 Web 应用程序，用于检测图像中的对象！要跟随本教程，您只需要一个代码编辑器、一个浏览器和一个简单的服务器（例如 VS Code Live Server）。
 
 它的工作原理是：用户点击“上传图像”，然后使用输入对话框选择图像。在使用目标检测模型分析图像后，预测的边界框将叠加在图像上，就像这样：
 
-![演示](../Images/8e870417c611226e6f69a9e332776a4e.png)
+![演示](img/8e870417c611226e6f69a9e332776a4e.png)
 
 有用的链接：
 
@@ -16,9 +16,9 @@
 
 +   [源代码](https://github.com/xenova/transformers.js/tree/main/examples/vanilla-js)
 
-## 第一步：HTML和CSS设置
+## 第一步：HTML 和 CSS 设置
 
-在开始使用Transformers.js构建之前，我们首先需要通过一些标记和样式来奠定基础。创建一个带有基本HTML框架的`index.html`文件，并将以下`<main>`标记添加到`<body>`中：
+在开始使用 Transformers.js 构建之前，我们首先需要通过一些标记和样式来奠定基础。创建一个带有基本 HTML 框架的`index.html`文件，并将以下`<main>`标记添加到`<body>`中：
 
 ```py
 <main class="container">
@@ -38,7 +38,7 @@
 
 我们还添加了一个空的`<div>`容器用于显示图像，以及一个空的`<p>`标记，我们将在下载和运行模型时使用它向用户提供状态更新，因为这两个操作都需要一些时间。
 
-接下来，在`style.css`文件中添加以下CSS规则，并将其链接到HTML中：
+接下来，在`style.css`文件中添加以下 CSS 规则，并将其链接到 HTML 中：
 
 ```py
 html,
@@ -84,33 +84,33 @@ body {
 }
 ```
 
-此时UI的外观如下：
+此时 UI 的外观如下：
 
-![演示](../Images/8b9eb54c5ffe79961986480e9ea6b7ea.png)
+![演示](img/8b9eb54c5ffe79961986480e9ea6b7ea.png)
 
-## 第二步：JavaScript设置
+## 第二步：JavaScript 设置
 
-完成*无聊*的部分后，让我们开始编写一些JavaScript代码！创建一个名为`index.js`的文件，并通过将以下内容添加到`<body>`的末尾来将其链接到`index.html`：
+完成*无聊*的部分后，让我们开始编写一些 JavaScript 代码！创建一个名为`index.js`的文件，并通过将以下内容添加到`<body>`的末尾来将其链接到`index.html`：
 
 ```py
 <script src="./index.js" type="module"></script>
 ```
 
-`type="module"`属性很重要，因为它将我们的文件转换为[JavaScript模块](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)，这意味着我们将能够使用导入和导出。
+`type="module"`属性很重要，因为它将我们的文件转换为[JavaScript 模块](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)，这意味着我们将能够使用导入和导出。
 
-进入`index.js`，让我们通过在文件顶部添加以下行来导入Transformers.js：
+进入`index.js`，让我们通过在文件顶部添加以下行来导入 Transformers.js：
 
 ```py
 import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0";
 ```
 
-由于我们将从Hugging Face Hub下载模型，我们可以通过设置来跳过本地模型检查：
+由于我们将从 Hugging Face Hub 下载模型，我们可以通过设置来跳过本地模型检查：
 
 ```py
 env.allowLocalModels = false;
 ```
 
-接下来，让我们创建对稍后将访问的各种DOM元素的引用：
+接下来，让我们创建对稍后将访问的各种 DOM 元素的引用：
 
 ```py
 const fileUpload = document.getElementById("file-upload");
@@ -120,15 +120,15 @@ const status = document.getElementById("status");
 
 ## 第三步：创建一个目标检测流水线
 
-我们终于准备好创建我们的目标检测流水线了！作为提醒，[流水线](./pipelines)是库提供的用于执行特定任务的高级接口。在我们的情况下，我们将使用`pipeline()`辅助函数实例化一个目标检测流水线。
+我们终于准备好创建我们的目标检测流水线了！作为提醒，流水线是库提供的用于执行特定任务的高级接口。在我们的情况下，我们将使用`pipeline()`辅助函数实例化一个目标检测流水线。
 
-由于这可能需要一些时间（特别是第一次需要下载约40MB的模型时），我们首先更新`status`段落，以便用户知道我们即将加载模型。
+由于这可能需要一些时间（特别是第一次需要下载约 40MB 的模型时），我们首先更新`status`段落，以便用户知道我们即将加载模型。
 
 ```py
 status.textContent = "Loading model...";
 ```
 
-为了使本教程简单，我们将在主（UI）线程中加载和运行模型。这在生产应用程序中不推荐，因为在执行这些操作时，UI将会冻结。这是因为JavaScript是单线程语言。为了克服这个问题，您可以使用[web worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)在后台下载和运行模型。但是，在本教程中我们不会涉及到这一点...
+为了使本教程简单，我们将在主（UI）线程中加载和运行模型。这在生产应用程序中不推荐，因为在执行这些操作时，UI 将会冻结。这是因为 JavaScript 是单线程语言。为了克服这个问题，您可以使用[web worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)在后台下载和运行模型。但是，在本教程中我们不会涉及到这一点...
 
 现在我们可以调用我们在文件顶部导入的`pipeline()`函数，以创建我们的目标检测流水线：
 
@@ -138,7 +138,7 @@ const detector = await pipeline("object-detection", "Xenova/detr-resnet-50");
 
 我们将两个参数传递给`pipeline()`函数：（1）任务和（2）模型。
 
-1.  第一个告诉Transformers.js我们想要执行什么样的任务。在我们的情况下，那就是`object-detection`，但库支持许多其他任务，包括`text-generation`，`sentiment-analysis`，`summarization`或`automatic-speech-recognition`。请参阅[这里](https://huggingface.co/docs/transformers.js/pipelines#tasks)获取完整列表。
+1.  第一个告诉 Transformers.js 我们想要执行什么样的任务。在我们的情况下，那就是`object-detection`，但库支持许多其他任务，包括`text-generation`，`sentiment-analysis`，`summarization`或`automatic-speech-recognition`。请参阅[这里](https://huggingface.co/docs/transformers.js/pipelines#tasks)获取完整列表。
 
 1.  第二个参数指定我们想要使用哪个模型来解决给定的任务。我们将使用[`Xenova/detr-resnet-50`](https://huggingface.co/Xenova/detr-resnet-50)，因为它是一个相对较小（~40MB）但功能强大的模型，用于检测图像中的对象。
 
@@ -177,11 +177,11 @@ fileUpload.addEventListener("change", function (e) {
 
 不要担心`detect(image)`函数调用（已注释掉）-我们稍后会解释！现在，尝试运行应用程序并将图像上传到浏览器。您应该看到您的图像显示在按钮下方，就像这样：
 
-![演示](../Images/cb7cca9d3c88a5511c333c6583724936.png)
+![演示](img/cb7cca9d3c88a5511c333c6583724936.png)
 
 ## 第五步：运行模型
 
-我们终于准备好开始与Transformers.js交互了！让我们取消上面片段中的`detect(image)`函数调用的注释。然后我们将定义函数本身：
+我们终于准备好开始与 Transformers.js 交互了！让我们取消上面片段中的`detect(image)`函数调用的注释。然后我们将定义函数本身：
 
 ```py
 async function detect(img) {
@@ -202,13 +202,13 @@ async function detect(img) {
 
 第二个参数是一个选项对象：
 
-+   我们将`threshold`属性设置为`0.5`。这意味着我们希望模型至少有50%的信心才能声称在图像中检测到一个对象。阈值越低，检测到的对象就越多（但可能会误识别对象）；阈值越高，检测到的对象就越少（但可能会错过场景中的对象）。
++   我们将`threshold`属性设置为`0.5`。这意味着我们希望模型至少有 50%的信心才能声称在图像中检测到一个对象。阈值越低，检测到的对象就越多（但可能会误识别对象）；阈值越高，检测到的对象就越少（但可能会错过场景中的对象）。
 
 +   我们还指定`percentage: true`，这意味着我们希望对象的边界框以百分比形式返回（而不是像素）。
 
 如果您现在尝试运行该应用程序并上传图像，您应该看到以下输出记录到控制台：
 
-![演示](../Images/3b9d7bad794acec4f02358c5e5494057.png)
+![演示](img/3b9d7bad794acec4f02358c5e5494057.png)
 
 在上面的示例中，我们上传了一张两只大象的图像，所以`output`变量包含一个包含两个对象的数组，每个对象包含一个`label`（字符串“elephant”），一个`score`（表示模型对其预测的信心）和一个`box`对象（表示检测到的实体的边界框）。
 
@@ -271,8 +271,8 @@ function renderBox({ box, label }) {
 
 **就是这样！**
 
-您现在已经构建了一个完全功能的AI应用程序，可以在浏览器中检测图像中的对象：没有外部服务器、API或构建工具。非常酷！🥳
+您现在已经构建了一个完全功能的 AI 应用程序，可以在浏览器中检测图像中的对象：没有外部服务器、API 或构建工具。非常酷！🥳
 
-![演示](../Images/483cc54122437ce4a480746160152d3d.png)
+![演示](img/483cc54122437ce4a480746160152d3d.png)
 
-该应用程序已在以下网址上线：[https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector)
+该应用程序已在以下网址上线：[`huggingface.co/spaces/Scrimba/vanilla-js-object-detector`](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector)

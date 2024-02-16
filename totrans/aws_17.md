@@ -1,22 +1,22 @@
 # 神经元模型缓存
 
-> 原文：[https://huggingface.co/docs/optimum-neuron/guides/cache_system](https://huggingface.co/docs/optimum-neuron/guides/cache_system)
+> 原文：[`huggingface.co/docs/optimum-neuron/guides/cache_system`](https://huggingface.co/docs/optimum-neuron/guides/cache_system)
 
 神经元模型缓存是`neff`格式编译的神经元模型的远程缓存。它集成到`NeuronTrainer`和`NeuronModelForCausalLM`类中，以便从缓存中加载预训练模型，而不是在本地编译它们。
 
-**注意：对于使用其他NeuronModelXX类导出的模型，该类使用不同的导出机制，因此不可用。**
+**注意：对于使用其他 NeuronModelXX 类导出的模型，该类使用不同的导出机制，因此不可用。**
 
 神经元模型缓存托管在[Hugging Face Hub](https://huggingface.co/aws-neuron/optimum-neuron-cache)，包括所有流行和支持的`optimum-neuron`预训练模型的编译文件。
 
-在在Neuron平台上训练Transformers或Diffusion模型或加载NeuronModelForCausalLM之前，需要使用[`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)将其导出为神经元格式。
+在在 Neuron 平台上训练 Transformers 或 Diffusion 模型或加载 NeuronModelForCausalLM 之前，需要使用[`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)将其导出为神经元格式。
 
 在导出模型时，[`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)将：
 
 +   将其转换为一组[XLA](https://github.com/pytorch/xla/)子图，
 
-+   使用neuronx编译器将每个子图编译成神经元可执行文件格式（NEFF）二进制文件。
++   使用 neuronx 编译器将每个子图编译成神经元可执行文件格式（NEFF）二进制文件。
 
-第一步相对较快，但编译需要很长时间。为了避免每次在NeuronX主机上加载模型时重新编译所有NEFF文件，[`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)将NEFF文件存储在本地目录中，通常是`/var/tmp/neuron-compile-cache`。
+第一步相对较快，但编译需要很长时间。为了避免每次在 NeuronX 主机上加载模型时重新编译所有 NEFF 文件，[`torch-neuronx`](https://github.com/aws-neuron/aws-neuron-samples/tree/master/torch-neuronx)将 NEFF 文件存储在本地目录中，通常是`/var/tmp/neuron-compile-cache`。
 
 然而，这个本地缓存在平台之间不共享，这意味着每次在新主机上训练或导出模型时，都需要重新编译。
 
@@ -28,47 +28,47 @@
 
 当您使用`NeuronTrainer`或`NeuronModelForCausalLM`类时，将使用公共模型缓存。不需要额外的更改。
 
-在将模型导出为神经元格式时，`optimum-neuron`将在编译模型子图期间在hub存储库中查找缓存的NEFF文件。
+在将模型导出为神经元格式时，`optimum-neuron`将在编译模型子图期间在 hub 存储库中查找缓存的 NEFF 文件。
 
-如果NEFF文件被缓存，它们将从hub中获取并直接加载，而不是重新编译。
+如果 NEFF 文件被缓存，它们将从 hub 中获取并直接加载，而不是重新编译。
 
 ## 缓存是如何工作的
 
-最佳神经元缓存建立在[NeuronX编译器缓存](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-features/neuron-caching.html)之上。
+最佳神经元缓存建立在[NeuronX 编译器缓存](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-features/neuron-caching.html)之上。
 
-重要的是要理解缓存操作的是NEFF二进制文件，而不是模型本身。
+重要的是要理解缓存操作的是 NEFF 二进制文件，而不是模型本身。
 
-正如之前解释的，使用`NeuronTrainer`或`NeuronModelForCausalLM`导出到Neuron的每个模型都由[XLA](https://github.com/pytorch/xla/)子图组成。
+正如之前解释的，使用`NeuronTrainer`或`NeuronModelForCausalLM`导出到 Neuron 的每个模型都由[XLA](https://github.com/pytorch/xla/)子图组成。
 
 每个子图都是独一无二的，是由以下组合而成的：
 
-+   `transformers`或`transformers_neuronx` python建模代码，
++   `transformers`或`transformers_neuronx` python 建模代码，
 
 +   `transformers`模型配置，
 
 +   在导出期间选择的`input_shapes`，
 
-+   模型的精度，全精度、fp16或bf16。
++   模型的精度，全精度、fp16 或 bf16。
 
-在将子图编译为NEFF文件时，其他参数会影响结果：
+在将子图编译为 NEFF 文件时，其他参数会影响结果：
 
-+   神经元X编译器的版本，
++   神经元 X 编译器的版本，
 
 +   使用的神经元核心数量，
 
 +   编译参数（如优化级别）。
 
-所有这些参数结合在一起，创建一个唯一的哈希，用于标识一个NEFF文件。
+所有这些参数结合在一起，创建一个唯一的哈希，用于标识一个 NEFF 文件。
 
 这有两个非常重要的后果：
 
-+   只有在实际导出模型时，才能识别相关的NEFF文件，
++   只有在实际导出模型时，才能识别相关的 NEFF 文件，
 
-+   即使模型配置发生微小变化，也会导致不同的NEFF文件集。
++   即使模型配置发生微小变化，也会导致不同的 NEFF 文件集。
 
-因此很难事先知道与特定模型配置相关联的NEFF是否被缓存。
+因此很难事先知道与特定模型配置相关联的 NEFF 是否被缓存。
 
-## 神经元模型缓存查找（仅限inferentia）
+## 神经元模型缓存查找（仅限 inferentia）
 
 神经元缓存查找是一个功能，允许用户在导出模型进行推理之前查找兼容的缓存模型配置。
 
@@ -193,13 +193,13 @@ torchrun ...
 
 ### 缓存系统流程
 
-![缓存系统流程](../Images/f18b7021150569c164d86f67298a14e8.png)
+![缓存系统流程](img/f18b7021150569c164d86f67298a14e8.png)
 
 *缓存系统流程*
 
-在每个训练步骤开始时，[NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer) 计算一个 `NeuronHash` 并检查 Hugging Face Hub 上的缓存存储库（官方和自定义）是否有与此哈希相关联的编译文件。如果是这样，文件将直接下载到本地缓存目录，无需进行编译。否则将执行编译。
+在每个训练步骤开始时，NeuronTrainer 计算一个 `NeuronHash` 并检查 Hugging Face Hub 上的缓存存储库（官方和自定义）是否有与此哈希相关联的编译文件。如果是这样，文件将直接下载到本地缓存目录，无需进行编译。否则将执行编译。
 
-与下载编译文件一样，[NeuronTrainer](/docs/optimum.neuron/main/en/package_reference/trainer#optimum.neuron.NeuronTrainer) 将在每个训练步骤中跟踪新创建的编译文件，并在保存时或训练结束时将它们上传到 Hugging Face Hub。这假定您对缓存存储库具有写入访问权限，否则将不会推送任何内容。
+与下载编译文件一样，NeuronTrainer 将在每个训练步骤中跟踪新创建的编译文件，并在保存时或训练结束时将它们上传到 Hugging Face Hub。这假定您对缓存存储库具有写入访问权限，否则将不会推送任何内容。
 
 ## Optimum CLI
 

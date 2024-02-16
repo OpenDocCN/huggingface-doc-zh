@@ -1,6 +1,6 @@
 # 接口：ConversationalOutput
 
-> 原文：[https://huggingface.co/docs/huggingface.js/inference/interfaces/ConversationalOutput](https://huggingface.co/docs/huggingface.js/inference/interfaces/ConversationalOutput)
+> 原文：[`huggingface.co/docs/huggingface.js/inference/interfaces/ConversationalOutput`](https://huggingface.co/docs/huggingface.js/inference/interfaces/ConversationalOutput)
 
 ## 属性
 

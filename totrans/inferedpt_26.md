@@ -1,8 +1,8 @@
 # 请求的序列化和反序列化
 
-> 原始文本: [https://huggingface.co/docs/inference-endpoints/others/serialization](https://huggingface.co/docs/inference-endpoints/others/serialization)
+> 原始文本: [`huggingface.co/docs/inference-endpoints/others/serialization`](https://huggingface.co/docs/inference-endpoints/others/serialization)
 
-Hugging Face 推理端点使用默认的服务容器，用于所有[支持的 Transformers 和 Sentence-Transformers 任务](/docs/inference-endpoints/supported_tasks)以及[自定义推理处理程序](/docs/inference-endpoints/guides/custom_handler)。服务容器负责根据请求的 `content-type` 和 `accept` 头部对请求和响应负载进行序列化和反序列化。这意味着当您发送一个带有 JSON 主体和 `content-type: application/json` 头部的请求时，服务容器将将 JSON 负载反序列化为 Python 字典并传递给推理处理程序，如果您发送一个带有 `accept: image/png` 头部的请求，服务容器将把任务/自定义处理程序的响应序列化为图像。
+Hugging Face 推理端点使用默认的服务容器，用于所有支持的 Transformers 和 Sentence-Transformers 任务以及自定义推理处理程序。服务容器负责根据请求的 `content-type` 和 `accept` 头部对请求和响应负载进行序列化和反序列化。这意味着当您发送一个带有 JSON 主体和 `content-type: application/json` 头部的请求时，服务容器将将 JSON 负载反序列化为 Python 字典并传递给推理处理程序，如果您发送一个带有 `accept: image/png` 头部的请求，服务容器将把任务/自定义处理程序的响应序列化为图像。
 
 以下是支持的 `content-types` 列表以及传递给推理处理程序的反序列化负载。
 

@@ -1,6 +1,6 @@
 # 模型
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/api/models](https://huggingface.co/docs/transformers.js/api/models)
+> 原始文本：[`huggingface.co/docs/transformers.js/api/models`](https://huggingface.co/docs/transformers.js/api/models)
 
 Transformers.js 中所有可用模型的定义。
 
@@ -42,731 +42,731 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
     +   *static*
 
-        +   [.PreTrainedModel](#module_models.PreTrainedModel)
+        +   .PreTrainedModel
 
-            +   [`new PreTrainedModel(config, session)`](#new_module_models.PreTrainedModel_new)
+            +   `new PreTrainedModel(config, session)`
 
             +   *instance*
 
-                +   [`.dispose()`](#module_models.PreTrainedModel+dispose) ⇒ `Promise.<Array<unknown>>`
+                +   `.dispose()` ⇒ `Promise.<Array<unknown>>`
 
-                +   [`._call(model_inputs)`](#module_models.PreTrainedModel+_call) ⇒ `Promise.<Object>`
+                +   `._call(model_inputs)` ⇒ `Promise.<Object>`
 
-                +   [`.forward(model_inputs)`](#module_models.PreTrainedModel+forward) ⇒ `Promise.<Object>`
+                +   `.forward(model_inputs)` ⇒ `Promise.<Object>`
 
-                +   [`._get_generation_config(generation_config)`](#module_models.PreTrainedModel+_get_generation_config) ⇒ `*`
+                +   `._get_generation_config(generation_config)` ⇒ `*`
 
-                +   [`.groupBeams(beams)`](#module_models.PreTrainedModel+groupBeams) ⇒ `Array`
+                +   `.groupBeams(beams)` ⇒ `Array`
 
-                +   [`.getPastKeyValues(decoderResults, pastKeyValues)`](#module_models.PreTrainedModel+getPastKeyValues) ⇒ `Object`
+                +   `.getPastKeyValues(decoderResults, pastKeyValues)` ⇒ `Object`
 
-                +   [`.getAttentions(decoderResults)`](#module_models.PreTrainedModel+getAttentions) ⇒ `Object`
+                +   `.getAttentions(decoderResults)` ⇒ `Object`
 
-                +   [`.addPastKeyValues(decoderFeeds, pastKeyValues)`](#module_models.PreTrainedModel+addPastKeyValues)
+                +   `.addPastKeyValues(decoderFeeds, pastKeyValues)`
 
             +   *static*
 
-                +   [`.from_pretrained(pretrained_model_name_or_path, options)`](#module_models.PreTrainedModel.from_pretrained) ⇒ `Promise.<PreTrainedModel>`
+                +   `.from_pretrained(pretrained_model_name_or_path, options)` ⇒ `Promise.<PreTrainedModel>`
 
-        +   [.BaseModelOutput](#module_models.BaseModelOutput)
+        +   .BaseModelOutput
 
-            +   [`new BaseModelOutput(output)`](#new_module_models.BaseModelOutput_new)
+            +   `new BaseModelOutput(output)`
 
-        +   [.BertForMaskedLM](#module_models.BertForMaskedLM)
+        +   .BertForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.BertForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.BertForSequenceClassification](#module_models.BertForSequenceClassification)
+        +   .BertForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.BertForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.BertForTokenClassification](#module_models.BertForTokenClassification)
+        +   .BertForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.BertForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.BertForQuestionAnswering](#module_models.BertForQuestionAnswering)
+        +   .BertForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.BertForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.RoFormerModel](#module_models.RoFormerModel)
+        +   .RoFormerModel
 
-        +   [.RoFormerForMaskedLM](#module_models.RoFormerForMaskedLM)
+        +   .RoFormerForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.RoFormerForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.RoFormerForSequenceClassification](#module_models.RoFormerForSequenceClassification)
+        +   .RoFormerForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.RoFormerForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.RoFormerForTokenClassification](#module_models.RoFormerForTokenClassification)
+        +   .RoFormerForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.RoFormerForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.RoFormerForQuestionAnswering](#module_models.RoFormerForQuestionAnswering)
+        +   .RoFormerForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.RoFormerForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.ConvBertModel](#module_models.ConvBertModel)
+        +   .ConvBertModel
 
-        +   [.ConvBertForMaskedLM](#module_models.ConvBertForMaskedLM)
+        +   .ConvBertForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.ConvBertForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.ConvBertForSequenceClassification](#module_models.ConvBertForSequenceClassification)
+        +   .ConvBertForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.ConvBertForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.ConvBertForTokenClassification](#module_models.ConvBertForTokenClassification)
+        +   .ConvBertForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.ConvBertForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.ConvBertForQuestionAnswering](#module_models.ConvBertForQuestionAnswering)
+        +   .ConvBertForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.ConvBertForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.ElectraModel](#module_models.ElectraModel)
+        +   .ElectraModel
 
-        +   [.ElectraForMaskedLM](#module_models.ElectraForMaskedLM)
+        +   .ElectraForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.ElectraForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.ElectraForSequenceClassification](#module_models.ElectraForSequenceClassification)
+        +   .ElectraForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.ElectraForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.ElectraForTokenClassification](#module_models.ElectraForTokenClassification)
+        +   .ElectraForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.ElectraForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.ElectraForQuestionAnswering](#module_models.ElectraForQuestionAnswering)
+        +   .ElectraForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.ElectraForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.CamembertModel](#module_models.CamembertModel)
+        +   .CamembertModel
 
-        +   [.CamembertForMaskedLM](#module_models.CamembertForMaskedLM)
+        +   .CamembertForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.CamembertForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.CamembertForSequenceClassification](#module_models.CamembertForSequenceClassification)
+        +   .CamembertForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.CamembertForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.CamembertForTokenClassification](#module_models.CamembertForTokenClassification)
+        +   .CamembertForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.CamembertForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.CamembertForQuestionAnswering](#module_models.CamembertForQuestionAnswering)
+        +   .CamembertForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.CamembertForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.DebertaModel](#module_models.DebertaModel)
+        +   .DebertaModel
 
-        +   [.DebertaForMaskedLM](#module_models.DebertaForMaskedLM)
+        +   .DebertaForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.DebertaForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.DebertaForSequenceClassification](#module_models.DebertaForSequenceClassification)
+        +   .DebertaForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.DebertaForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.DebertaForTokenClassification](#module_models.DebertaForTokenClassification)
+        +   .DebertaForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.DebertaForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.DebertaForQuestionAnswering](#module_models.DebertaForQuestionAnswering)
+        +   .DebertaForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.DebertaForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.DebertaV2Model](#module_models.DebertaV2Model)
+        +   .DebertaV2Model
 
-        +   [.DebertaV2ForMaskedLM](#module_models.DebertaV2ForMaskedLM)
+        +   .DebertaV2ForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.DebertaV2ForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.DebertaV2ForSequenceClassification](#module_models.DebertaV2ForSequenceClassification)
+        +   .DebertaV2ForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.DebertaV2ForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.DebertaV2ForTokenClassification](#module_models.DebertaV2ForTokenClassification)
+        +   .DebertaV2ForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.DebertaV2ForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.DebertaV2ForQuestionAnswering](#module_models.DebertaV2ForQuestionAnswering)
+        +   .DebertaV2ForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.DebertaV2ForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.DistilBertForSequenceClassification](#module_models.DistilBertForSequenceClassification)
+        +   .DistilBertForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.DistilBertForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.DistilBertForTokenClassification](#module_models.DistilBertForTokenClassification)
+        +   .DistilBertForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.DistilBertForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.DistilBertForQuestionAnswering](#module_models.DistilBertForQuestionAnswering)
+        +   .DistilBertForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.DistilBertForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.DistilBertForMaskedLM](#module_models.DistilBertForMaskedLM)
+        +   .DistilBertForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.DistilBertForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.EsmModel](#module_models.EsmModel)
+        +   .EsmModel
 
-        +   [.EsmForMaskedLM](#module_models.EsmForMaskedLM)
+        +   .EsmForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.EsmForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.EsmForSequenceClassification](#module_models.EsmForSequenceClassification)
+        +   .EsmForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.EsmForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.EsmForTokenClassification](#module_models.EsmForTokenClassification)
+        +   .EsmForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.EsmForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.MobileBertForMaskedLM](#module_models.MobileBertForMaskedLM)
+        +   .MobileBertForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.MobileBertForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.MobileBertForSequenceClassification](#module_models.MobileBertForSequenceClassification)
+        +   .MobileBertForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.MobileBertForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.MobileBertForQuestionAnswering](#module_models.MobileBertForQuestionAnswering)
+        +   .MobileBertForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.MobileBertForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.MPNetModel](#module_models.MPNetModel)
+        +   .MPNetModel
 
-        +   [.MPNetForMaskedLM](#module_models.MPNetForMaskedLM)
+        +   .MPNetForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.MPNetForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.MPNetForSequenceClassification](#module_models.MPNetForSequenceClassification)
+        +   .MPNetForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.MPNetForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.MPNetForTokenClassification](#module_models.MPNetForTokenClassification)
+        +   .MPNetForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.MPNetForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.MPNetForQuestionAnswering](#module_models.MPNetForQuestionAnswering)
+        +   .MPNetForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.MPNetForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.T5ForConditionalGeneration](#module_models.T5ForConditionalGeneration)
+        +   .T5ForConditionalGeneration
 
-            +   [`new T5ForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.T5ForConditionalGeneration_new)
+            +   `new T5ForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-        +   [.LongT5PreTrainedModel](#module_models.LongT5PreTrainedModel)
+        +   .LongT5PreTrainedModel
 
-        +   [.LongT5Model](#module_models.LongT5Model)
+        +   .LongT5Model
 
-        +   [.LongT5ForConditionalGeneration](#module_models.LongT5ForConditionalGeneration)
+        +   .LongT5ForConditionalGeneration
 
-            +   [`new LongT5ForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.LongT5ForConditionalGeneration_new)
+            +   `new LongT5ForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-        +   [.MT5ForConditionalGeneration](#module_models.MT5ForConditionalGeneration)
+        +   .MT5ForConditionalGeneration
 
-            +   [`new MT5ForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.MT5ForConditionalGeneration_new)
+            +   `new MT5ForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-        +   [.BartModel](#module_models.BartModel)
+        +   .BartModel
 
-        +   [.BartForConditionalGeneration](#module_models.BartForConditionalGeneration)
+        +   .BartForConditionalGeneration
 
-            +   [`new BartForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.BartForConditionalGeneration_new)
+            +   `new BartForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-        +   [.BartForSequenceClassification](#module_models.BartForSequenceClassification)
+        +   .BartForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.BartForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.MBartModel](#module_models.MBartModel)
+        +   .MBartModel
 
-        +   [.MBartForConditionalGeneration](#module_models.MBartForConditionalGeneration)
+        +   .MBartForConditionalGeneration
 
-            +   [`new MBartForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.MBartForConditionalGeneration_new)
+            +   `new MBartForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-        +   [.MBartForSequenceClassification](#module_models.MBartForSequenceClassification)
+        +   .MBartForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.MBartForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.MBartForCausalLM](#module_models.MBartForCausalLM)
+        +   .MBartForCausalLM
 
-            +   [`new MBartForCausalLM(config, decoder_merged_session, generation_config)`](#new_module_models.MBartForCausalLM_new)
+            +   `new MBartForCausalLM(config, decoder_merged_session, generation_config)`
 
-        +   [.BlenderbotModel](#module_models.BlenderbotModel)
+        +   .BlenderbotModel
 
-        +   [.BlenderbotForConditionalGeneration](#module_models.BlenderbotForConditionalGeneration)
+        +   .BlenderbotForConditionalGeneration
 
-            +   [`new BlenderbotForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.BlenderbotForConditionalGeneration_new)
+            +   `new BlenderbotForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-        +   [.BlenderbotSmallModel](#module_models.BlenderbotSmallModel)
+        +   .BlenderbotSmallModel
 
-        +   [.BlenderbotSmallForConditionalGeneration](#module_models.BlenderbotSmallForConditionalGeneration)
+        +   .BlenderbotSmallForConditionalGeneration
 
-            +   [`new BlenderbotSmallForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.BlenderbotSmallForConditionalGeneration_new)
+            +   `new BlenderbotSmallForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-        +   [.RobertaForMaskedLM](#module_models.RobertaForMaskedLM)
+        +   .RobertaForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.RobertaForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.RobertaForSequenceClassification](#module_models.RobertaForSequenceClassification)
+        +   .RobertaForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.RobertaForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.RobertaForTokenClassification](#module_models.RobertaForTokenClassification)
+        +   .RobertaForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.RobertaForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.RobertaForQuestionAnswering](#module_models.RobertaForQuestionAnswering)
+        +   .RobertaForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.RobertaForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.XLMPreTrainedModel](#module_models.XLMPreTrainedModel)
+        +   .XLMPreTrainedModel
 
-        +   [.XLMModel](#module_models.XLMModel)
+        +   .XLMModel
 
-        +   [.XLMWithLMHeadModel](#module_models.XLMWithLMHeadModel)
+        +   .XLMWithLMHeadModel
 
-            +   [`._call(model_inputs)`](#module_models.XLMWithLMHeadModel+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.XLMForSequenceClassification](#module_models.XLMForSequenceClassification)
+        +   .XLMForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.XLMForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.XLMForTokenClassification](#module_models.XLMForTokenClassification)
+        +   .XLMForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.XLMForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.XLMForQuestionAnswering](#module_models.XLMForQuestionAnswering)
+        +   .XLMForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.XLMForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.XLMRobertaForMaskedLM](#module_models.XLMRobertaForMaskedLM)
+        +   .XLMRobertaForMaskedLM
 
-            +   [`._call(model_inputs)`](#module_models.XLMRobertaForMaskedLM+_call) ⇒ `Promise.<MaskedLMOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<MaskedLMOutput>`
 
-        +   [.XLMRobertaForSequenceClassification](#module_models.XLMRobertaForSequenceClassification)
+        +   .XLMRobertaForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.XLMRobertaForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.XLMRobertaForTokenClassification](#module_models.XLMRobertaForTokenClassification)
+        +   .XLMRobertaForTokenClassification
 
-            +   [`._call(model_inputs)`](#module_models.XLMRobertaForTokenClassification+_call) ⇒ `Promise.<TokenClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<TokenClassifierOutput>`
 
-        +   [.XLMRobertaForQuestionAnswering](#module_models.XLMRobertaForQuestionAnswering)
+        +   .XLMRobertaForQuestionAnswering
 
-            +   [`._call(model_inputs)`](#module_models.XLMRobertaForQuestionAnswering+_call) ⇒ `Promise.<QuestionAnsweringModelOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<QuestionAnsweringModelOutput>`
 
-        +   [.ASTModel](#module_models.ASTModel)
+        +   .ASTModel
 
-        +   [.ASTForAudioClassification](#module_models.ASTForAudioClassification)
+        +   .ASTForAudioClassification
 
-        +   [.WhisperModel](#module_models.WhisperModel)
+        +   .WhisperModel
 
-        +   [.WhisperForConditionalGeneration](#module_models.WhisperForConditionalGeneration)
+        +   .WhisperForConditionalGeneration
 
-            +   [`new WhisperForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.WhisperForConditionalGeneration_new)
+            +   `new WhisperForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-            +   [`.generate(inputs, generation_config, logits_processor)`](#module_models.WhisperForConditionalGeneration+generate) ⇒ `Promise.<Object>`
+            +   `.generate(inputs, generation_config, logits_processor)` ⇒ `Promise.<Object>`
 
             +   [`._extract_token_timestamps(generate_outputs, alignment_heads, [num_frames], [time_precision])`](#module_models.WhisperForConditionalGeneration+_extract_token_timestamps) ⇒ `Tensor`
 
-        +   [.VisionEncoderDecoderModel](#module_models.VisionEncoderDecoderModel)
+        +   .VisionEncoderDecoderModel
 
-            +   [`new VisionEncoderDecoderModel(config, session, decoder_merged_session, generation_config)`](#new_module_models.VisionEncoderDecoderModel_new)
+            +   `new VisionEncoderDecoderModel(config, session, decoder_merged_session, generation_config)`
 
-        +   [.CLIPModel](#module_models.CLIPModel)
+        +   .CLIPModel
 
-        +   [.CLIPTextModelWithProjection](#module_models.CLIPTextModelWithProjection)
+        +   .CLIPTextModelWithProjection
 
-            +   [`.from_pretrained()`](#module_models.CLIPTextModelWithProjection.from_pretrained) : `PreTrainedModel.from_pretrained`
+            +   `.from_pretrained()` : `PreTrainedModel.from_pretrained`
 
-        +   [.CLIPVisionModelWithProjection](#module_models.CLIPVisionModelWithProjection)
+        +   .CLIPVisionModelWithProjection
 
-            +   [`.from_pretrained()`](#module_models.CLIPVisionModelWithProjection.from_pretrained) : `PreTrainedModel.from_pretrained`
+            +   `.from_pretrained()` : `PreTrainedModel.from_pretrained`
 
-        +   [.SiglipModel](#module_models.SiglipModel)
+        +   .SiglipModel
 
-        +   [.SiglipTextModel](#module_models.SiglipTextModel)
+        +   .SiglipTextModel
 
-            +   [`.from_pretrained()`](#module_models.SiglipTextModel.from_pretrained) : `PreTrainedModel.from_pretrained`
+            +   `.from_pretrained()` : `PreTrainedModel.from_pretrained`
 
-        +   [.SiglipVisionModel](#module_models.SiglipVisionModel)
+        +   .SiglipVisionModel
 
-            +   [`.from_pretrained()`](#module_models.SiglipVisionModel.from_pretrained) : `PreTrainedModel.from_pretrained`
+            +   `.from_pretrained()` : `PreTrainedModel.from_pretrained`
 
-        +   [.CLIPSegForImageSegmentation](#module_models.CLIPSegForImageSegmentation)
+        +   .CLIPSegForImageSegmentation
 
-        +   [.GPT2PreTrainedModel](#module_models.GPT2PreTrainedModel)
+        +   .GPT2PreTrainedModel
 
-            +   [`new GPT2PreTrainedModel(config, session, generation_config)`](#new_module_models.GPT2PreTrainedModel_new)
+            +   `new GPT2PreTrainedModel(config, session, generation_config)`
 
-        +   [.GPT2LMHeadModel](#module_models.GPT2LMHeadModel)
+        +   .GPT2LMHeadModel
 
-        +   [.GPTNeoPreTrainedModel](#module_models.GPTNeoPreTrainedModel)
+        +   .GPTNeoPreTrainedModel
 
-            +   [`new GPTNeoPreTrainedModel(config, session, generation_config)`](#new_module_models.GPTNeoPreTrainedModel_new)
+            +   `new GPTNeoPreTrainedModel(config, session, generation_config)`
 
-        +   [.GPTNeoXPreTrainedModel](#module_models.GPTNeoXPreTrainedModel)
+        +   .GPTNeoXPreTrainedModel
 
-            +   [`new GPTNeoXPreTrainedModel(config, session, generation_config)`](#new_module_models.GPTNeoXPreTrainedModel_new)
+            +   `new GPTNeoXPreTrainedModel(config, session, generation_config)`
 
-        +   [.GPTJPreTrainedModel](#module_models.GPTJPreTrainedModel)
+        +   .GPTJPreTrainedModel
 
-            +   [`new GPTJPreTrainedModel(config, session, generation_config)`](#new_module_models.GPTJPreTrainedModel_new)
+            +   `new GPTJPreTrainedModel(config, session, generation_config)`
 
-        +   [.GPTBigCodePreTrainedModel](#module_models.GPTBigCodePreTrainedModel)
+        +   .GPTBigCodePreTrainedModel
 
-            +   [`new GPTBigCodePreTrainedModel(config, session, generation_config)`](#new_module_models.GPTBigCodePreTrainedModel_new)
+            +   `new GPTBigCodePreTrainedModel(config, session, generation_config)`
 
-        +   [.CodeGenPreTrainedModel](#module_models.CodeGenPreTrainedModel)
+        +   .CodeGenPreTrainedModel
 
-            +   [`new CodeGenPreTrainedModel(config, session, generation_config)`](#new_module_models.CodeGenPreTrainedModel_new)
+            +   `new CodeGenPreTrainedModel(config, session, generation_config)`
 
-        +   [.CodeGenModel](#module_models.CodeGenModel)
+        +   .CodeGenModel
 
-        +   [.CodeGenForCausalLM](#module_models.CodeGenForCausalLM)
+        +   .CodeGenForCausalLM
 
-        +   [.LlamaPreTrainedModel](#module_models.LlamaPreTrainedModel)
+        +   .LlamaPreTrainedModel
 
-            +   [`new LlamaPreTrainedModel(config, session, generation_config)`](#new_module_models.LlamaPreTrainedModel_new)
+            +   `new LlamaPreTrainedModel(config, session, generation_config)`
 
-        +   [.LlamaModel](#module_models.LlamaModel)
+        +   .LlamaModel
 
-        +   [.Qwen2PreTrainedModel](#module_models.Qwen2PreTrainedModel)
+        +   .Qwen2PreTrainedModel
 
-            +   [`new Qwen2PreTrainedModel(config, session, generation_config)`](#new_module_models.Qwen2PreTrainedModel_new)
+            +   `new Qwen2PreTrainedModel(config, session, generation_config)`
 
-        +   [.Qwen2Model](#module_models.Qwen2Model)
+        +   .Qwen2Model
 
-        +   [.PhiPreTrainedModel](#module_models.PhiPreTrainedModel)
+        +   .PhiPreTrainedModel
 
-            +   [`new PhiPreTrainedModel(config, session, generation_config)`](#new_module_models.PhiPreTrainedModel_new)
+            +   `new PhiPreTrainedModel(config, session, generation_config)`
 
-        +   [.PhiModel](#module_models.PhiModel)
+        +   .PhiModel
 
-        +   [.BloomPreTrainedModel](#module_models.BloomPreTrainedModel)
+        +   .BloomPreTrainedModel
 
-            +   [`new BloomPreTrainedModel(config, session, generation_config)`](#new_module_models.BloomPreTrainedModel_new)
+            +   `new BloomPreTrainedModel(config, session, generation_config)`
 
-        +   [.BloomModel](#module_models.BloomModel)
+        +   .BloomModel
 
-        +   [.BloomForCausalLM](#module_models.BloomForCausalLM)
+        +   .BloomForCausalLM
 
-        +   [.MptPreTrainedModel](#module_models.MptPreTrainedModel)
+        +   .MptPreTrainedModel
 
-            +   [`new MptPreTrainedModel(config, session, generation_config)`](#new_module_models.MptPreTrainedModel_new)
+            +   `new MptPreTrainedModel(config, session, generation_config)`
 
-        +   [.MptModel](#module_models.MptModel)
+        +   .MptModel
 
-        +   [.MptForCausalLM](#module_models.MptForCausalLM)
+        +   .MptForCausalLM
 
-        +   [.OPTPreTrainedModel](#module_models.OPTPreTrainedModel)
+        +   .OPTPreTrainedModel
 
-            +   [`new OPTPreTrainedModel(config, session, generation_config)`](#new_module_models.OPTPreTrainedModel_new)
+            +   `new OPTPreTrainedModel(config, session, generation_config)`
 
-        +   [.OPTModel](#module_models.OPTModel)
+        +   .OPTModel
 
-        +   [.OPTForCausalLM](#module_models.OPTForCausalLM)
+        +   .OPTForCausalLM
 
-        +   [.VitMatteForImageMatting](#module_models.VitMatteForImageMatting)
+        +   .VitMatteForImageMatting
 
-            +   [`._call(model_inputs)`](#module_models.VitMatteForImageMatting+_call)
+            +   `._call(model_inputs)`
 
-        +   [.DetrObjectDetectionOutput](#module_models.DetrObjectDetectionOutput)
+        +   .DetrObjectDetectionOutput
 
-            +   [`new DetrObjectDetectionOutput(output)`](#new_module_models.DetrObjectDetectionOutput_new)
+            +   `new DetrObjectDetectionOutput(output)`
 
-        +   [.DetrSegmentationOutput](#module_models.DetrSegmentationOutput)
+        +   .DetrSegmentationOutput
 
-            +   [`new DetrSegmentationOutput(output)`](#new_module_models.DetrSegmentationOutput_new)
+            +   `new DetrSegmentationOutput(output)`
 
-        +   [.TableTransformerModel](#module_models.TableTransformerModel)
+        +   .TableTransformerModel
 
-        +   [.TableTransformerForObjectDetection](#module_models.TableTransformerForObjectDetection)
+        +   .TableTransformerForObjectDetection
 
-            +   [`._call(model_inputs)`](#module_models.TableTransformerForObjectDetection+_call)
+            +   `._call(model_inputs)`
 
-        +   [.ResNetPreTrainedModel](#module_models.ResNetPreTrainedModel)
+        +   .ResNetPreTrainedModel
 
-        +   [.ResNetModel](#module_models.ResNetModel)
+        +   .ResNetModel
 
-        +   [.ResNetForImageClassification](#module_models.ResNetForImageClassification)
+        +   .ResNetForImageClassification
 
-            +   [`._call(model_inputs)`](#module_models.ResNetForImageClassification+_call)
+            +   `._call(model_inputs)`
 
-        +   [.Swin2SRModel](#module_models.Swin2SRModel)
+        +   .Swin2SRModel
 
-        +   [.Swin2SRForImageSuperResolution](#module_models.Swin2SRForImageSuperResolution)
+        +   .Swin2SRForImageSuperResolution
 
-        +   [.DPTModel](#module_models.DPTModel)
+        +   .DPTModel
 
-        +   [.DPTForDepthEstimation](#module_models.DPTForDepthEstimation)
+        +   .DPTForDepthEstimation
 
-        +   [.DepthAnythingForDepthEstimation](#module_models.DepthAnythingForDepthEstimation)
+        +   .DepthAnythingForDepthEstimation
 
-        +   [.GLPNModel](#module_models.GLPNModel)
+        +   .GLPNModel
 
-        +   [.GLPNForDepthEstimation](#module_models.GLPNForDepthEstimation)
+        +   .GLPNForDepthEstimation
 
-        +   [.DonutSwinModel](#module_models.DonutSwinModel)
+        +   .DonutSwinModel
 
-        +   [.ConvNextModel](#module_models.ConvNextModel)
+        +   .ConvNextModel
 
-        +   [.ConvNextForImageClassification](#module_models.ConvNextForImageClassification)
+        +   .ConvNextForImageClassification
 
-            +   [`._call(model_inputs)`](#module_models.ConvNextForImageClassification+_call)
+            +   `._call(model_inputs)`
 
-        +   [.ConvNextV2Model](#module_models.ConvNextV2Model)
+        +   .ConvNextV2Model
 
-        +   [.ConvNextV2ForImageClassification](#module_models.ConvNextV2ForImageClassification)
+        +   .ConvNextV2ForImageClassification
 
-            +   [`._call(model_inputs)`](#module_models.ConvNextV2ForImageClassification+_call)
+            +   `._call(model_inputs)`
 
-        +   [.Dinov2Model](#module_models.Dinov2Model)
+        +   .Dinov2Model
 
-        +   [.Dinov2ForImageClassification](#module_models.Dinov2ForImageClassification)
+        +   .Dinov2ForImageClassification
 
-            +   [`._call(model_inputs)`](#module_models.Dinov2ForImageClassification+_call)
+            +   `._call(model_inputs)`
 
-        +   [.YolosObjectDetectionOutput](#module_models.YolosObjectDetectionOutput)
+        +   .YolosObjectDetectionOutput
 
-            +   [`new YolosObjectDetectionOutput(output)`](#new_module_models.YolosObjectDetectionOutput_new)
+            +   `new YolosObjectDetectionOutput(output)`
 
-        +   [.SamModel](#module_models.SamModel)
+        +   .SamModel
 
-            +   [`new SamModel(config, vision_encoder, prompt_encoder_mask_decoder)`](#new_module_models.SamModel_new)
+            +   `new SamModel(config, vision_encoder, prompt_encoder_mask_decoder)`
 
-            +   [`.get_image_embeddings(model_inputs)`](#module_models.SamModel+get_image_embeddings) ⇒ `Promise.<{image_embeddings: Tensor, image_positional_embeddings: Tensor}>`
+            +   `.get_image_embeddings(model_inputs)` ⇒ `Promise.<{image_embeddings: Tensor, image_positional_embeddings: Tensor}>`
 
-            +   [`.forward(model_inputs)`](#module_models.SamModel+forward) ⇒ `Promise.<Object>`
+            +   `.forward(model_inputs)` ⇒ `Promise.<Object>`
 
-            +   [`._call(model_inputs)`](#module_models.SamModel+_call) ⇒ `Promise.<SamImageSegmentationOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SamImageSegmentationOutput>`
 
-        +   [.SamImageSegmentationOutput](#module_models.SamImageSegmentationOutput)
+        +   .SamImageSegmentationOutput
 
-            +   [`new SamImageSegmentationOutput(output)`](#new_module_models.SamImageSegmentationOutput_new)
+            +   `new SamImageSegmentationOutput(output)`
 
-        +   [.MarianMTModel](#module_models.MarianMTModel)
+        +   .MarianMTModel
 
-            +   [`new MarianMTModel(config, session, decoder_merged_session, generation_config)`](#new_module_models.MarianMTModel_new)
+            +   `new MarianMTModel(config, session, decoder_merged_session, generation_config)`
 
-        +   [.M2M100ForConditionalGeneration](#module_models.M2M100ForConditionalGeneration)
+        +   .M2M100ForConditionalGeneration
 
-            +   [`new M2M100ForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.M2M100ForConditionalGeneration_new)
+            +   `new M2M100ForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-        +   [.Wav2Vec2Model](#module_models.Wav2Vec2Model)
+        +   .Wav2Vec2Model
 
-        +   [.Wav2Vec2BertModel](#module_models.Wav2Vec2BertModel)
+        +   .Wav2Vec2BertModel
 
-        +   [.Wav2Vec2BertForCTC](#module_models.Wav2Vec2BertForCTC)
+        +   .Wav2Vec2BertForCTC
 
-            +   [`._call(model_inputs)`](#module_models.Wav2Vec2BertForCTC+_call)
+            +   `._call(model_inputs)`
 
-        +   [.Wav2Vec2BertForSequenceClassification](#module_models.Wav2Vec2BertForSequenceClassification)
+        +   .Wav2Vec2BertForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.Wav2Vec2BertForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.HubertModel](#module_models.HubertModel)
+        +   .HubertModel
 
-        +   [.HubertForCTC](#module_models.HubertForCTC)
+        +   .HubertForCTC
 
-            +   [`._call(model_inputs)`](#module_models.HubertForCTC+_call)
+            +   `._call(model_inputs)`
 
-        +   [.HubertForSequenceClassification](#module_models.HubertForSequenceClassification)
+        +   .HubertForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.HubertForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.WavLMPreTrainedModel](#module_models.WavLMPreTrainedModel)
+        +   .WavLMPreTrainedModel
 
-        +   [.WavLMModel](#module_models.WavLMModel)
+        +   .WavLMModel
 
-        +   [.WavLMForCTC](#module_models.WavLMForCTC)
+        +   .WavLMForCTC
 
-            +   [`._call(model_inputs)`](#module_models.WavLMForCTC+_call)
+            +   `._call(model_inputs)`
 
-        +   [.WavLMForSequenceClassification](#module_models.WavLMForSequenceClassification)
+        +   .WavLMForSequenceClassification
 
-            +   [`._call(model_inputs)`](#module_models.WavLMForSequenceClassification+_call) ⇒ `Promise.<SequenceClassifierOutput>`
+            +   `._call(model_inputs)` ⇒ `Promise.<SequenceClassifierOutput>`
 
-        +   [.SpeechT5PreTrainedModel](#module_models.SpeechT5PreTrainedModel)
+        +   .SpeechT5PreTrainedModel
 
-        +   [.SpeechT5Model](#module_models.SpeechT5Model)
+        +   .SpeechT5Model
 
-        +   [.SpeechT5ForSpeechToText](#module_models.SpeechT5ForSpeechToText)
+        +   .SpeechT5ForSpeechToText
 
-        +   [.SpeechT5ForTextToSpeech](#module_models.SpeechT5ForTextToSpeech)
+        +   .SpeechT5ForTextToSpeech
 
-            +   [`new SpeechT5ForTextToSpeech(config, session, decoder_merged_session, generation_config)`](#new_module_models.SpeechT5ForTextToSpeech_new)：新的SpeechT5文本转语音模型  
+            +   `new SpeechT5ForTextToSpeech(config, session, decoder_merged_session, generation_config)`：新的 SpeechT5 文本转语音模型  
 
-            +   [`.generate_speech(input_values, speaker_embeddings, options)`](#module_models.SpeechT5ForTextToSpeech+generate_speech) ⇒ `Promise.<SpeechOutput>`  
+            +   `.generate_speech(input_values, speaker_embeddings, options)` ⇒ `Promise.<SpeechOutput>`  
 
-        +   [.SpeechT5HifiGan](#module_models.SpeechT5HifiGan)：SpeechT5HifiGan  
+        +   .SpeechT5HifiGan：SpeechT5HifiGan  
 
-        +   [.TrOCRPreTrainedModel](#module_models.TrOCRPreTrainedModel)：TrOCR预训练模型  
+        +   .TrOCRPreTrainedModel：TrOCR 预训练模型  
 
-            +   [`new TrOCRPreTrainedModel(config, session, generation_config)`](#new_module_models.TrOCRPreTrainedModel_new)：新的TrOCR预训练模型  
+            +   `new TrOCRPreTrainedModel(config, session, generation_config)`：新的 TrOCR 预训练模型  
 
-        +   [.TrOCRForCausalLM](#module_models.TrOCRForCausalLM)：用于因果LM的TrOCR  
+        +   .TrOCRForCausalLM：用于因果 LM 的 TrOCR  
 
-        +   [.MistralPreTrainedModel](#module_models.MistralPreTrainedModel)：Mistral预训练模型  
+        +   .MistralPreTrainedModel：Mistral 预训练模型  
 
-            +   [`new MistralPreTrainedModel(config, session, generation_config)`](#new_module_models.MistralPreTrainedModel_new)：新的Mistral预训练模型  
+            +   `new MistralPreTrainedModel(config, session, generation_config)`：新的 Mistral 预训练模型  
 
-        +   [.FalconPreTrainedModel](#module_models.FalconPreTrainedModel)：Falcon预训练模型  
+        +   .FalconPreTrainedModel：Falcon 预训练模型  
 
-            +   [`new FalconPreTrainedModel(config, session, generation_config)`](#new_module_models.FalconPreTrainedModel_new)：新的Falcon预训练模型  
+            +   `new FalconPreTrainedModel(config, session, generation_config)`：新的 Falcon 预训练模型  
 
-        +   [.ClapTextModelWithProjection](#module_models.ClapTextModelWithProjection)：带投影的Clap文本模型  
+        +   .ClapTextModelWithProjection：带投影的 Clap 文本模型  
 
-            +   [`.from_pretrained()`](#module_models.ClapTextModelWithProjection.from_pretrained)：`PreTrainedModel.from_pretrained`  
+            +   `.from_pretrained()`：`PreTrainedModel.from_pretrained`  
 
-        +   [.ClapAudioModelWithProjection](#module_models.ClapAudioModelWithProjection)：带投影的Clap音频模型  
+        +   .ClapAudioModelWithProjection：带投影的 Clap 音频模型  
 
-            +   [`.from_pretrained()`](#module_models.ClapAudioModelWithProjection.from_pretrained)：`PreTrainedModel.from_pretrained`  
+            +   `.from_pretrained()`：`PreTrainedModel.from_pretrained`  
 
-        +   [.VitsModel](#module_models.VitsModel)：Vits模型  
+        +   .VitsModel：Vits 模型  
 
-            +   [`._call(model_inputs)`](#module_models.VitsModel+_call) ⇒ `Promise.<VitsModelOutput>`  
+            +   `._call(model_inputs)` ⇒ `Promise.<VitsModelOutput>`  
 
-        +   [.SegformerModel](#module_models.SegformerModel)：Segformer模型  
+        +   .SegformerModel：Segformer 模型  
 
-        +   [.SegformerForImageClassification](#module_models.SegformerForImageClassification)：用于图像分类的Segformer  
+        +   .SegformerForImageClassification：用于图像分类的 Segformer  
 
-        +   [.SegformerForSemanticSegmentation](#module_models.SegformerForSemanticSegmentation)：用于语义分割的Segformer  
+        +   .SegformerForSemanticSegmentation：用于语义分割的 Segformer  
 
-        +   [.PretrainedMixin](#module_models.PretrainedMixin)：预训练混合模型  
+        +   .PretrainedMixin：预训练混合模型  
 
             +   *instance*  
 
-                +   [`.MODEL_CLASS_MAPPINGS`](#module_models.PretrainedMixin+MODEL_CLASS_MAPPINGS)：`*`  
+                +   `.MODEL_CLASS_MAPPINGS`：`*`  
 
-                +   [`.BASE_IF_FAIL`](#module_models.PretrainedMixin+BASE_IF_FAIL)：`*`  
+                +   `.BASE_IF_FAIL`：`*`  
 
             +   *static*  
 
-                +   [`.from_pretrained()`](#module_models.PretrainedMixin.from_pretrained)：`PreTrainedModel.from_pretrained`  
+                +   `.from_pretrained()`：`PreTrainedModel.from_pretrained`  
 
-        +   [.AutoModel](#module_models.AutoModel)：自动模型  
+        +   .AutoModel：自动模型  
 
-            +   [`.MODEL_CLASS_MAPPINGS`](#module_models.AutoModel+MODEL_CLASS_MAPPINGS)：`*`  
+            +   `.MODEL_CLASS_MAPPINGS`：`*`  
 
-        +   [.AutoModelForSequenceClassification](#module_models.AutoModelForSequenceClassification)：用于序列分类的自动模型  
+        +   .AutoModelForSequenceClassification：用于序列分类的自动模型  
 
-        +   [.AutoModelForTokenClassification](#module_models.AutoModelForTokenClassification)：用于标记分类的自动模型  
+        +   .AutoModelForTokenClassification：用于标记分类的自动模型  
 
-        +   [.AutoModelForSeq2SeqLM](#module_models.AutoModelForSeq2SeqLM)：用于Seq2SeqLM的自动模型  
+        +   .AutoModelForSeq2SeqLM：用于 Seq2SeqLM 的自动模型  
 
-        +   [.AutoModelForSpeechSeq2Seq](#module_models.AutoModelForSpeechSeq2Seq)：用于语音Seq2Seq的自动模型  
+        +   .AutoModelForSpeechSeq2Seq：用于语音 Seq2Seq 的自动模型  
 
-        +   [.AutoModelForTextToSpectrogram](#module_models.AutoModelForTextToSpectrogram)：用于文本到频谱图的自动模型  
+        +   .AutoModelForTextToSpectrogram：用于文本到频谱图的自动模型  
 
-        +   [.AutoModelForTextToWaveform](#module_models.AutoModelForTextToWaveform)：用于文本到波形的自动模型  
+        +   .AutoModelForTextToWaveform：用于文本到波形的自动模型  
 
-        +   [.AutoModelForCausalLM](#module_models.AutoModelForCausalLM)：用于因果LM的自动模型  
+        +   .AutoModelForCausalLM：用于因果 LM 的自动模型  
 
-        +   [.AutoModelForMaskedLM](#module_models.AutoModelForMaskedLM)：用于MaskedLM的自动模型  
+        +   .AutoModelForMaskedLM：用于 MaskedLM 的自动模型  
 
-        +   [.AutoModelForQuestionAnswering](#module_models.AutoModelForQuestionAnswering)：用于问答的自动模型  
+        +   .AutoModelForQuestionAnswering：用于问答的自动模型  
 
-        +   [.AutoModelForVision2Seq](#module_models.AutoModelForVision2Seq)：用于Vision2Seq的自动模型  
+        +   .AutoModelForVision2Seq：用于 Vision2Seq 的自动模型  
 
-        +   [.AutoModelForImageClassification](#module_models.AutoModelForImageClassification)：用于图像分类的自动模型  
+        +   .AutoModelForImageClassification：用于图像分类的自动模型  
 
-        +   [.AutoModelForImageSegmentation](#module_models.AutoModelForImageSegmentation)：用于图像分割的自动模型  
+        +   .AutoModelForImageSegmentation：用于图像分割的自动模型  
 
-        +   [.AutoModelForSemanticSegmentation](#module_models.AutoModelForSemanticSegmentation)：用于语义分割的自动模型  
+        +   .AutoModelForSemanticSegmentation：用于语义分割的自动模型  
 
-        +   [.AutoModelForObjectDetection](#module_models.AutoModelForObjectDetection)：用于目标检测的自动模型  
+        +   .AutoModelForObjectDetection：用于目标检测的自动模型  
 
-        +   [.AutoModelForMaskGeneration](#module_models.AutoModelForMaskGeneration)：用于Mask生成的自动模型  
+        +   .AutoModelForMaskGeneration：用于 Mask 生成的自动模型  
 
-        +   [.Seq2SeqLMOutput](#module_models.Seq2SeqLMOutput)：Seq2SeqLM输出  
+        +   .Seq2SeqLMOutput：Seq2SeqLM 输出  
 
-            +   [`new Seq2SeqLMOutput(output)`](#new_module_models.Seq2SeqLMOutput_new)：新的Seq2SeqLM输出  
+            +   `new Seq2SeqLMOutput(output)`：新的 Seq2SeqLM 输出  
 
-        +   [.SequenceClassifierOutput](#module_models.SequenceClassifierOutput)：序列分类器输出
+        +   .SequenceClassifierOutput：序列分类器输出
 
-            +   [`new SequenceClassifierOutput(output)`](#new_module_models.SequenceClassifierOutput_new)：新的序列分类器输出  
+            +   `new SequenceClassifierOutput(output)`：新的序列分类器输出  
 
-        +   [.TokenClassifierOutput](#module_models.TokenClassifierOutput)：标记分类器输出  
+        +   .TokenClassifierOutput：标记分类器输出  
 
-            +   [`new TokenClassifierOutput(output)`](#new_module_models.TokenClassifierOutput_new)：新的标记分类器输出  
+            +   `new TokenClassifierOutput(output)`：新的标记分类器输出  
 
-        +   [.MaskedLMOutput](#module_models.MaskedLMOutput)：MaskedLM输出  
+        +   .MaskedLMOutput：MaskedLM 输出  
 
-            +   [`new MaskedLMOutput(output)`](#new_module_models.MaskedLMOutput_new)：新的MaskedLM输出  
+            +   `new MaskedLMOutput(output)`：新的 MaskedLM 输出  
 
-        +   [.QuestionAnsweringModelOutput](#module_models.QuestionAnsweringModelOutput)：问答模型输出  
+        +   .QuestionAnsweringModelOutput：问答模型输出  
 
-            +   [`new QuestionAnsweringModelOutput(output)`](#new_module_models.QuestionAnsweringModelOutput_new)：新的问答模型输出  
+            +   `new QuestionAnsweringModelOutput(output)`：新的问答模型输出  
 
-        +   [.CausalLMOutput](#module_models.CausalLMOutput)：因果LM输出  
+        +   .CausalLMOutput：因果 LM 输出  
 
-            +   [`new CausalLMOutput(output)`](#new_module_models.CausalLMOutput_new)
+            +   `new CausalLMOutput(output)`
 
-        +   [.CausalLMOutputWithPast](#module_models.CausalLMOutputWithPast)
+        +   .CausalLMOutputWithPast
 
-            +   [`new CausalLMOutputWithPast(output)`](#new_module_models.CausalLMOutputWithPast_new)
+            +   `new CausalLMOutputWithPast(output)`
 
-        +   [.ImageMattingOutput](#module_models.ImageMattingOutput)
+        +   .ImageMattingOutput
 
-            +   [`new ImageMattingOutput(output)`](#new_module_models.ImageMattingOutput_new)
+            +   `new ImageMattingOutput(output)`
 
-        +   [.VitsModelOutput](#module_models.VitsModelOutput)
+        +   .VitsModelOutput
 
-            +   [`new VitsModelOutput(output)`](#new_module_models.VitsModelOutput_new)
+            +   `new VitsModelOutput(output)`
 
     +   *内部*
 
-        +   [`~InferenceSession`](#module_models..InferenceSession) : `*`
+        +   `~InferenceSession` : `*`
 
-        +   [`~TypedArray`](#module_models..TypedArray) : `*`
+        +   `~TypedArray` : `*`
 
-        +   [`~DecoderOutput`](#module_models..DecoderOutput) ⇒ `Promise.<(Array<Array<number>>|EncoderDecoderOutput|DecoderOutput)>`
+        +   `~DecoderOutput` ⇒ `Promise.<(Array<Array<number>>|EncoderDecoderOutput|DecoderOutput)>`
 
-        +   [`~WhisperGenerationConfig`](#module_models..WhisperGenerationConfig) : `Object`
+        +   `~WhisperGenerationConfig` : `Object`
 
-        +   [`~SamModelInputs`](#module_models..SamModelInputs) : `Object`
+        +   `~SamModelInputs` : `Object`
 
-        +   [`~SpeechOutput`](#module_models..SpeechOutput) : `Object`
+        +   `~SpeechOutput` : `Object`
 
 * * *
 
 ## models.PreTrainedModel
 
-提供模型配置和ONNX会话的预训练模型的基类。
+提供模型配置和 ONNX 会话的预训练模型的基类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
-+   [.PreTrainedModel](#module_models.PreTrainedModel)
++   .PreTrainedModel
 
-    +   [`new PreTrainedModel(config, session)`](#new_module_models.PreTrainedModel_new)
+    +   `new PreTrainedModel(config, session)`
 
     +   *实例*
 
-        +   [`.dispose()`](#module_models.PreTrainedModel+dispose) ⇒ `Promise.<Array<unknown>>`
+        +   `.dispose()` ⇒ `Promise.<Array<unknown>>`
 
-        +   [`._call(model_inputs)`](#module_models.PreTrainedModel+_call) ⇒ `Promise.<Object>`
+        +   `._call(model_inputs)` ⇒ `Promise.<Object>`
 
-        +   [`.forward(model_inputs)`](#module_models.PreTrainedModel+forward) ⇒ `Promise.<Object>`
+        +   `.forward(model_inputs)` ⇒ `Promise.<Object>`
 
-        +   [`._get_generation_config(generation_config)`](#module_models.PreTrainedModel+_get_generation_config) ⇒ `*`
+        +   `._get_generation_config(generation_config)` ⇒ `*`
 
-        +   [`.groupBeams(beams)`](#module_models.PreTrainedModel+groupBeams) ⇒ `Array`
+        +   `.groupBeams(beams)` ⇒ `Array`
 
-        +   [`.getPastKeyValues(decoderResults, pastKeyValues)`](#module_models.PreTrainedModel+getPastKeyValues) ⇒ `Object`
+        +   `.getPastKeyValues(decoderResults, pastKeyValues)` ⇒ `Object`
 
-        +   [`.getAttentions(decoderResults)`](#module_models.PreTrainedModel+getAttentions) ⇒ `Object`
+        +   `.getAttentions(decoderResults)` ⇒ `Object`
 
-        +   [`.addPastKeyValues(decoderFeeds, pastKeyValues)`](#module_models.PreTrainedModel+addPastKeyValues)
+        +   `.addPastKeyValues(decoderFeeds, pastKeyValues)`
 
     +   *静态*
 
-        +   [`.from_pretrained(pretrained_model_name_or_path, options)`](#module_models.PreTrainedModel.from_pretrained) ⇒ `Promise.<PreTrainedModel>`
+        +   `.from_pretrained(pretrained_model_name_or_path, options)` ⇒ `Promise.<PreTrainedModel>`
 
 * * *
 
@@ -783,15 +783,15 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 ### preTrainedModel.dispose() ⇒ <code> Promise. < Array < unknown > > </code>
 
-处理在推断期间创建的所有ONNX会话。
+处理在推断期间创建的所有 ONNX 会话。
 
-**类型**: [`PreTrainedModel`](#module_models.PreTrainedModel)的实例方法
+**类型**: `PreTrainedModel`的实例方法
 
-**返回值**: `Promise.<Array<unknown>>` - 一个包含每个正在处理的ONNX会话的Promise数组。
+**返回值**: `Promise.<Array<unknown>>` - 一个包含每个正在处理的 ONNX 会话的 Promise 数组。
 
 **待办事项**
 
-+   使用[https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/FinalizationRegistry](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/FinalizationRegistry)
++   使用[`developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/FinalizationRegistry`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/FinalizationRegistry)
 
 * * *
 
@@ -799,7 +799,7 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 运行提供的输入的模型
 
-**类型**: [`PreTrainedModel`](#module_models.PreTrainedModel)的实例方法
+**类型**: `PreTrainedModel`的实例方法
 
 **返回值**: `Promise.<Object>` - 包含输出张量的对象
 
@@ -813,7 +813,7 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 预训练模型的前向方法。如果子类没有覆盖，将根据模型类型选择正确的前向方法。
 
-**类型**: [`PreTrainedModel`](#module_models.PreTrainedModel)的实例方法
+**类型**: `PreTrainedModel`的实例方法
 
 **返回值**: `Promise.<Object>` - 模型中指定格式的输出数据。
 
@@ -831,7 +831,7 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 此函数将多个生成配置合并在一起，形成最终的生成配置，供模型用于文本生成。首先创建一个空的`GenerationConfig`对象，然后将模型自己的`generation_config`属性应用于它。最后，如果在参数中传递了一个`generation_config`对象，则用传递的配置对象的属性覆盖最终配置中的相应属性。
 
-**类型**：[`PreTrainedModel`](#module_models.PreTrainedModel)的实例方法
+**类型**：`PreTrainedModel`的实例方法
 
 **返回**：`*` - 用于文本生成的最终生成配置对象。
 
@@ -843,15 +843,15 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 ### preTrainedModel.groupBeams(beams) ⇒ <code> Array </code>
 
-按照它们的id将beam对象数组分组。
+按照它们的 id 将 beam 对象数组分组。
 
-**类型**：[`PreTrainedModel`](#module_models.PreTrainedModel)的实例方法
+**类型**：`PreTrainedModel`的实例方法
 
-**返回**：`Array` - 一个数组，其中每个内部数组包含具有相同id的beam对象。
+**返回**：`Array` - 一个数组，其中每个内部数组包含具有相同 id 的 beam 对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| beams | `Array` | 要分组的beam对象数组。 |
+| beams | `Array` | 要分组的 beam 对象数组。 |
 
 * * *
 
@@ -859,7 +859,7 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 从给定的解码器结果对象返回一个包含过去键值的对象。
 
-**类型**：[`PreTrainedModel`](#module_models.PreTrainedModel)的实例方法
+**类型**：`PreTrainedModel`的实例方法
 
 **返回**：`Object` - 一个包含过去键值的对象。
 
@@ -874,7 +874,7 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 从给定的解码器结果对象返回一个包含注意力的对象。
 
-**类型**：[`PreTrainedModel`](#module_models.PreTrainedModel)的实例方法
+**类型**：`PreTrainedModel`的实例方法
 
 **返回**：`Object` - 一个包含注意力的对象。
 
@@ -886,13 +886,13 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 ### preTrainedModel.addPastKeyValues(decoderFeeds, pastKeyValues)
 
-将过去键值添加到解码器feeds对象。如果pastKeyValues为null，则为过去键值创建新张量。
+将过去键值添加到解码器 feeds 对象。如果 pastKeyValues 为 null，则为过去键值创建新张量。
 
-**类型**：[`PreTrainedModel`](#module_models.PreTrainedModel)的实例方法
+**类型**：`PreTrainedModel`的实例方法
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| decoderFeeds | `Object` | 要添加过去键值的解码器feeds对象。 |
+| decoderFeeds | `Object` | 要添加过去键值的解码器 feeds 对象。 |
 | pastKeyValues | `Object` | 包含过去键值的对象。 |
 
 * * *
@@ -903,7 +903,7 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 根据配置对象的`model_type`属性选择要实例化的模型类（如果可能，作为参数传递或从`pretrained_model_name_or_path`加载）
 
-**类型**：[`PreTrainedModel`](#module_models.PreTrainedModel)的静态方法
+**类型**：`PreTrainedModel`的静态方法
 
 **返回**：`Promise.<PreTrainedModel>` - `PreTrainedModel`类的新实例。
 
@@ -912,7 +912,7 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 | pretrained_model_name_or_path | `string` | 预训练模型的名称或路径。可以是：
 
-+   一个字符串，托管在huggingface.co模型存储库中的预训练模型的*模型id*。有效的模型id可以位于根级别，如`bert-base-uncased`，或者在用户或组织名称下命名空间化，如`dbmdz/bert-base-german-cased`。
++   一个字符串，托管在 huggingface.co 模型存储库中的预训练模型的*模型 id*。有效的模型 id 可以位于根级别，如`bert-base-uncased`，或者在用户或组织名称下命名空间化，如`dbmdz/bert-base-german-cased`。
 
 +   包含模型权重的*目录*的路径，例如`./my_model_directory/`。
 
@@ -927,7 +927,7 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 
 模型输出的基类，具有潜在的隐藏状态和注意力。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -938,15 +938,15 @@ let decoded = tokenizer.decode(outputs[0], { skip_special_tokens: true });
 | output | `Object` | 模型的输出。 |
 | output.last_hidden_state | `Tensor` | 模型最后一层输出的隐藏状态序列。 |
 | [output.hidden_states] | `Tensor` | 模型在每一层输出的隐藏状态加上可选的初始嵌入输出。 |
-| [output.attentions] | `Tensor` | 注意力softmax后的注意力权重，用于计算自注意力头中的加权平均值。 |
+| [output.attentions] | `Tensor` | 注意力 softmax 后的注意力权重，用于计算自注意力头中的加权平均值。 |
 
 * * *
 
 ## models.BertForMaskedLM
 
-BertForMaskedLM是表示用于掩码语言建模的BERT模型的类。
+BertForMaskedLM 是表示用于掩码语言建模的 BERT 模型的类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -954,9 +954,9 @@ BertForMaskedLM是表示用于掩码语言建模的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**: [`BertForMaskedLM`](#module_models.BertForMaskedLM)的实例方法
+**类型**: `BertForMaskedLM`的实例方法
 
-**返回**: `Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出logits的对象。
+**返回**: `Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -966,9 +966,9 @@ BertForMaskedLM是表示用于掩码语言建模的BERT模型的类。
 
 ## models.BertForSequenceClassification
 
-BertForSequenceClassification是表示用于序列分类的BERT模型的类。
+BertForSequenceClassification 是表示用于序列分类的 BERT 模型的类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -976,9 +976,9 @@ BertForSequenceClassification是表示用于序列分类的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**: [`BertForSequenceClassification`](#module_models.BertForSequenceClassification)的实例方法
+**类型**: `BertForSequenceClassification`的实例方法
 
-**返回**: `Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出logits的对象。
+**返回**: `Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -988,9 +988,9 @@ BertForSequenceClassification是表示用于序列分类的BERT模型的类。
 
 ## models.BertForTokenClassification
 
-BertForTokenClassification是表示用于标记分类的BERT模型的类。
+BertForTokenClassification 是表示用于标记分类的 BERT 模型的类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -998,9 +998,9 @@ BertForTokenClassification是表示用于标记分类的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**: [`BertForTokenClassification`](#module_models.BertForTokenClassification)的实例方法
+**类型**: `BertForTokenClassification`的实例方法
 
-**返回**: `Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出logits的对象。
+**返回**: `Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1010,9 +1010,9 @@ BertForTokenClassification是表示用于标记分类的BERT模型的类。
 
 ## models.BertForQuestionAnswering
 
-BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
+BertForQuestionAnswering 是表示用于问题回答的 BERT 模型的类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -1020,9 +1020,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**: [`BertForQuestionAnswering`](#module_models.BertForQuestionAnswering)的实例方法
+**类型**: `BertForQuestionAnswering`的实例方法
 
-**返回**: `Promise.<QuestionAnsweringModelOutput>` - 包含模型对问题回答的输出logits的对象。
+**返回**: `Promise.<QuestionAnsweringModelOutput>` - 包含模型对问题回答的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1032,17 +1032,17 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.RoFormerModel
 
-裸RoFormer模型变换器输出没有特定头部的原始隐藏状态。
+裸 RoFormer 模型变换器输出没有特定头部的原始隐藏状态。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
 ## models.RoFormerForMaskedLM
 
-带有顶部`语言建模`头部的RoFormer模型。
+带有顶部`语言建模`头部的 RoFormer 模型。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -1050,9 +1050,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**: [`RoFormerForMaskedLM`](#module_models.RoFormerForMaskedLM)的实例方法
+**类型**: `RoFormerForMaskedLM`的实例方法
 
-**返回**: `Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出logits的对象。
+**返回**: `Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1062,9 +1062,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.RoFormerForSequenceClassification
 
-带有顶部的序列分类/回归头部的RoFormer模型变换器（在汇总输出的顶部有一个线性层）
+带有顶部的序列分类/回归头部的 RoFormer 模型变换器（在汇总输出的顶部有一个线性层）
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -1072,9 +1072,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**：[`RoFormerForSequenceClassification`](#module_models.RoFormerForSequenceClassification)的实例方法
+**类型**：`RoFormerForSequenceClassification`的实例方法
 
-**返回**：`Promise.<SequenceClassifierOutput>` - 包含序列分类模型输出logits的对象。
+**返回**：`Promise.<SequenceClassifierOutput>` - 包含序列分类模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1084,9 +1084,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.RoFormerForTokenClassification
 
-带有标记分类头部的RoFormer模型（隐藏状态输出的顶部线性层），例如用于命名实体识别（NER）任务。
+带有标记分类头部的 RoFormer 模型（隐藏状态输出的顶部线性层），例如用于命名实体识别（NER）任务。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1094,9 +1094,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**：[`RoFormerForTokenClassification`](#module_models.RoFormerForTokenClassification)的实例方法
+**类型**：`RoFormerForTokenClassification`的实例方法
 
-**返回**：`Promise.<TokenClassifierOutput>` - 包含标记分类模型输出logits的对象。
+**返回**：`Promise.<TokenClassifierOutput>` - 包含标记分类模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1106,9 +1106,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.RoFormerForQuestionAnswering
 
-带有用于提取式问答任务的跨度分类头部的RoFormer模型，例如SQuAD（隐藏状态输出的顶部线性层来计算`跨度开始logits`和`跨度结束logits`）。
+带有用于提取式问答任务的跨度分类头部的 RoFormer 模型，例如 SQuAD（隐藏状态输出的顶部线性层来计算`跨度开始 logits`和`跨度结束 logits`）。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1116,9 +1116,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**：[`RoFormerForQuestionAnswering`](#module_models.RoFormerForQuestionAnswering)的实例方法
+**类型**：`RoFormerForQuestionAnswering`的实例方法
 
-**返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含问题回答模型输出logits的对象。
+**返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含问题回答模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1128,17 +1128,17 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.ConvBertModel
 
-裸的ConvBERT模型变换器，输出原始的隐藏状态，没有特定的头部。
+裸的 ConvBERT 模型变换器，输出原始的隐藏状态，没有特定的头部。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ## models.ConvBertForMaskedLM
 
-带有语言建模头部的ConvBERT模型。
+带有语言建模头部的 ConvBERT 模型。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1146,9 +1146,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**：[`ConvBertForMaskedLM`](#module_models.ConvBertForMaskedLM)的实例方法
+**类型**：`ConvBertForMaskedLM`的实例方法
 
-**返回**：`Promise.<MaskedLMOutput>` - 包含遮蔽语言建模模型输出logits的对象。
+**返回**：`Promise.<MaskedLMOutput>` - 包含遮蔽语言建模模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1158,9 +1158,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.ConvBertForSequenceClassification
 
-带有序列分类/回归头部的ConvBERT模型变换器（汇总输出的顶部线性层）
+带有序列分类/回归头部的 ConvBERT 模型变换器（汇总输出的顶部线性层）
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1168,9 +1168,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**：[`ConvBertForSequenceClassification`](#module_models.ConvBertForSequenceClassification)的实例方法
+**类型**：`ConvBertForSequenceClassification`的实例方法
 
-**返回**：`Promise.<SequenceClassifierOutput>` - 包含序列分类模型输出logits的对象。
+**返回**：`Promise.<SequenceClassifierOutput>` - 包含序列分类模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1180,9 +1180,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.ConvBertForTokenClassification
 
-带有标记分类头部的ConvBERT模型（隐藏状态输出的顶部线性层），例如用于命名实体识别（NER）任务。
+带有标记分类头部的 ConvBERT 模型（隐藏状态输出的顶部线性层），例如用于命名实体识别（NER）任务。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1190,9 +1190,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 在新输入上调用模型。
 
-**类型**：[`ConvBertForTokenClassification`](#module_models.ConvBertForTokenClassification)的实例方法
+**类型**：`ConvBertForTokenClassification`的实例方法
 
-**返回**：`Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出logits的对象。  
+**返回**：`Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出 logits 的对象。  
 
 | 参数 | 类型 | 描述 |   |
 | --- | --- | --- | --- |
@@ -1203,9 +1203,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.ConvBertForQuestionAnswering  
 
-带有顶部用于提取式问答任务（如SQuAD）的跨度分类头的ConvBERT模型（在隐藏状态输出的顶部有线性层，用于计算`跨度开始logits`和`跨度结束logits`）。
+带有顶部用于提取式问答任务（如 SQuAD）的跨度分类头的 ConvBERT 模型（在隐藏状态输出的顶部有线性层，用于计算`跨度开始 logits`和`跨度结束 logits`）。
 
-**类型**：[`models`](#module_models)的静态类  
+**类型**：`models`的静态类  
 
 * * *  
 
@@ -1213,9 +1213,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。  
 
-**类型**：[`ConvBertForQuestionAnswering`](#module_models.ConvBertForQuestionAnswering)的实例方法  
+**类型**：`ConvBertForQuestionAnswering`的实例方法  
 
-**返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含模型对问题回答的输出logits的对象。  
+**返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含模型对问题回答的输出 logits 的对象。  
 
 | 参数 | 类型 | 描述 |   |
 | --- | --- | --- | --- |
@@ -1226,17 +1226,17 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.ElectraModel  
 
-裸的ELECTRA模型变换器，输出原始隐藏状态，没有特定的顶部。与BERT模型相同，只是在嵌入层和编码器之间使用额外的线性层，如果隐藏大小和嵌入大小不同。  
+裸的 ELECTRA 模型变换器，输出原始隐藏状态，没有特定的顶部。与 BERT 模型相同，只是在嵌入层和编码器之间使用额外的线性层，如果隐藏大小和嵌入大小不同。  
 
-**类型**：[`models`](#module_models)的静态类  
+**类型**：`models`的静态类  
 
 * * *  
 
 ## models.ElectraForMaskedLM  
 
-带有顶部语言建模头的ELECTRA模型。  
+带有顶部语言建模头的 ELECTRA 模型。  
 
-**类型**：[`models`](#module_models)的静态类  
+**类型**：`models`的静态类  
 
 * * *  
 
@@ -1244,9 +1244,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。  
 
-**类型**：[`ElectraForMaskedLM`](#module_models.ElectraForMaskedLM)的实例方法  
+**类型**：`ElectraForMaskedLM`的实例方法  
 
-**返回**：`Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出logits的对象。  
+**返回**：`Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出 logits 的对象。  
 
 | 参数 | 类型 | 描述 |   |
 | --- | --- | --- | --- |
@@ -1257,9 +1257,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.ElectraForSequenceClassification  
 
-带有顶部序列分类/回归头的ELECTRA模型变换器（在池化输出的顶部有一个线性层）  
+带有顶部序列分类/回归头的 ELECTRA 模型变换器（在池化输出的顶部有一个线性层）  
 
-**类型**：[`models`](#module_models)的静态类  
+**类型**：`models`的静态类  
 
 * * *  
 
@@ -1267,9 +1267,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。  
 
-**类型**：[`ElectraForSequenceClassification`](#module_models.ElectraForSequenceClassification)的实例方法  
+**类型**：`ElectraForSequenceClassification`的实例方法  
 
-**返回**：`Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出logits的对象。  
+**返回**：`Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出 logits 的对象。  
 
 | 参数 | 类型 | 描述 |   |
 | --- | --- | --- | --- |
@@ -1280,9 +1280,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.ElectraForTokenClassification  
 
-带有顶部标记分类头的ELECTRA模型。  
+带有顶部标记分类头的 ELECTRA 模型。  
 
-**类型**：[`models`](#module_models)的静态类  
+**类型**：`models`的静态类  
 
 * * *  
 
@@ -1290,9 +1290,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。  
 
-**类型**：[`ElectraForTokenClassification`](#module_models.ElectraForTokenClassification)的实例方法  
+**类型**：`ElectraForTokenClassification`的实例方法  
 
-**返回**：`Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出logits的对象。  
+**返回**：`Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出 logits 的对象。  
 
 | 参数 | 类型 | 描述 |   |
 | --- | --- | --- | --- |
@@ -1303,9 +1303,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.ElectraForQuestionAnswering  
 
-带有顶部用于提取式问答任务（如SQuAD）的跨度分类头的LECTRA模型（在隐藏状态输出的顶部有线性层，用于计算`跨度开始logits`和`跨度结束logits`）。  
+带有顶部用于提取式问答任务（如 SQuAD）的跨度分类头的 LECTRA 模型（在隐藏状态输出的顶部有线性层，用于计算`跨度开始 logits`和`跨度结束 logits`）。  
 
-**类型**：[`models`](#module_models)的静态类  
+**类型**：`models`的静态类  
 
 * * *  
 
@@ -1313,9 +1313,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。  
 
-**类型**：[`ElectraForQuestionAnswering`](#module_models.ElectraForQuestionAnswering)的实例方法  
+**类型**：`ElectraForQuestionAnswering`的实例方法  
 
-**返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含模型对问题回答的输出logits的对象。  
+**返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含模型对问题回答的输出 logits 的对象。  
 
 | 参数 | 类型 | 描述 |   |
 | --- | --- | --- |
@@ -1325,17 +1325,17 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.CamembertModel
 
-裸CamemBERT模型变换器输出原始隐藏状态，没有特定的头部。
+裸 CamemBERT 模型变换器输出原始隐藏状态，没有特定的头部。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ## models.CamembertForMaskedLM
 
-带有`语言建模`头部的CamemBERT模型。
+带有`语言建模`头部的 CamemBERT 模型。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1343,7 +1343,7 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**类型**：[`CamembertForMaskedLM`](#module_models)的实例方法
+**类型**：`CamembertForMaskedLM`的实例方法
 
 **返回**：`Promise.<MaskedLMOutput>` - 包含用于掩码语言建模的模型输出对数的对象。
 
@@ -1355,9 +1355,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.CamembertForSequenceClassification
 
-带有顺序分类/回归头部（池化输出顶部的线性层）的CamemBERT模型，例如用于GLUE任务。
+带有顺序分类/回归头部（池化输出顶部的线性层）的 CamemBERT 模型，例如用于 GLUE 任务。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1365,7 +1365,7 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**类型**：[`CamembertForSequenceClassification`](#module_models.CamembertForSequenceClassification)的实例方法
+**类型**：`CamembertForSequenceClassification`的实例方法
 
 **返回**：`Promise.<SequenceClassifierOutput>` - 包含用于序列分类的模型输出对数的对象。
 
@@ -1377,9 +1377,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.CamembertForTokenClassification
 
-带有标记分类头部（隐藏状态输出顶部的线性层）的CamemBERT模型，例如用于命名实体识别（NER）任务。
+带有标记分类头部（隐藏状态输出顶部的线性层）的 CamemBERT 模型，例如用于命名实体识别（NER）任务。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1387,7 +1387,7 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**类型**：[`CamembertForTokenClassification`](#module_models.CamembertForTokenClassification)的实例方法
+**类型**：`CamembertForTokenClassification`的实例方法
 
 **返回**：`Promise.<TokenClassifierOutput>` - 包含用于标记分类的模型输出对数的对象。
 
@@ -1399,9 +1399,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.CamembertForQuestionAnswering
 
-带有抽取式问答任务的跨度分类头部的CamemBERT模型
+带有抽取式问答任务的跨度分类头部的 CamemBERT 模型
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1409,7 +1409,7 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**类型**：[`CamembertForQuestionAnswering`](#module_models.CamembertForQuestionAnswering)的实例方法
+**类型**：`CamembertForQuestionAnswering`的实例方法
 
 **返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含用于问题回答的模型输出对数的对象。
 
@@ -1421,17 +1421,17 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.DebertaModel
 
-裸DeBERTa模型变换器输出原始隐藏状态，没有特定的头部。
+裸 DeBERTa 模型变换器输出原始隐藏状态，没有特定的头部。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ## models.DebertaForMaskedLM
 
-带有`语言建模`头部的DeBERTa模型。
+带有`语言建模`头部的 DeBERTa 模型。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1439,7 +1439,7 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**类型**：[`DebertaForMaskedLM`](#module_models.DebertaForMaskedLM)的实例方法
+**类型**：`DebertaForMaskedLM`的实例方法
 
 **返回**：`Promise.<MaskedLMOutput>` - 包含用于掩码语言建模的模型输出对数的对象。
 
@@ -1451,9 +1451,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.DebertaForSequenceClassification
 
-带有顺序分类/回归头部（池化输出顶部的线性层）的DeBERTa模型变换器
+带有顺序分类/回归头部（池化输出顶部的线性层）的 DeBERTa 模型变换器
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1461,9 +1461,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DebertaForSequenceClassification`](#module_models.DebertaForSequenceClassification)的实例方法
+**种类**: `DebertaForSequenceClassification`的实例方法
 
-**返回**: `Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出logits的对象。
+**返回**: `Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1473,9 +1473,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.DebertaForTokenClassification
 
-在顶部带有标记分类头的DeBERTa模型（隐藏状态输出顶部的线性层），例如用于命名实体识别（NER）任务。
+在顶部带有标记分类头的 DeBERTa 模型（隐藏状态输出顶部的线性层），例如用于命名实体识别（NER）任务。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1483,9 +1483,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DebertaForTokenClassification`](#module_models.DebertaForTokenClassification)的实例方法
+**种类**: `DebertaForTokenClassification`的实例方法
 
-**返回**: `Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出logits的对象。
+**返回**: `Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1495,9 +1495,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.DebertaForQuestionAnswering
 
-带有顶部的跨度分类头的DeBERTa模型，用于提取式问答任务，如SQuAD（在隐藏状态输出顶部的线性层上计算`跨度开始logits`和`跨度结束logits`）。
+带有顶部的跨度分类头的 DeBERTa 模型，用于提取式问答任务，如 SQuAD（在隐藏状态输出顶部的线性层上计算`跨度开始 logits`和`跨度结束 logits`）。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1505,9 +1505,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DebertaForQuestionAnswering`](#module_models.DebertaForQuestionAnswering)的实例方法
+**种类**: `DebertaForQuestionAnswering`的实例方法
 
-**返回**: `Promise.<QuestionAnsweringModelOutput>` - 包含模型对问题回答的输出logits的对象。
+**返回**: `Promise.<QuestionAnsweringModelOutput>` - 包含模型对问题回答的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1517,17 +1517,17 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.DebertaV2Model
 
-裸的DeBERTa-V2模型变换器，输出原始的隐藏状态，没有特定的头部。
+裸的 DeBERTa-V2 模型变换器，输出原始的隐藏状态，没有特定的头部。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.DebertaV2ForMaskedLM
 
-在顶部带有`语言建模`头的DeBERTa-V2模型。
+在顶部带有`语言建模`头的 DeBERTa-V2 模型。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1535,9 +1535,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DebertaV2ForMaskedLM`](#module_models.DebertaV2ForMaskedLM)的实例方法
+**种类**: `DebertaV2ForMaskedLM`的实例方法
 
-**返回**: `Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出logits的对象。
+**返回**: `Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1547,9 +1547,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.DebertaV2ForSequenceClassification
 
-带有顶部的序列分类/回归头的DeBERTa-V2模型变换器（在汇总输出的顶部的线性层）
+带有顶部的序列分类/回归头的 DeBERTa-V2 模型变换器（在汇总输出的顶部的线性层）
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1557,9 +1557,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DebertaV2ForSequenceClassification`](#module_models.DebertaV2ForSequenceClassification)的实例方法
+**种类**: `DebertaV2ForSequenceClassification`的实例方法
 
-**返回**: `Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出logits的对象。
+**返回**: `Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1569,9 +1569,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## models.DebertaV2ForTokenClassification
 
-在顶部带有标记分类头的DeBERTa-V2模型（隐藏状态输出顶部的线性层），例如用于命名实体识别（NER）任务。
+在顶部带有标记分类头的 DeBERTa-V2 模型（隐藏状态输出顶部的线性层），例如用于命名实体识别（NER）任务。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1579,9 +1579,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DebertaV2ForTokenClassification`](#module_models.DebertaV2ForTokenClassification)的实例方法
+**种类**: `DebertaV2ForTokenClassification`的实例方法
 
-**返回**: `Promise.<TokenClassifierOutput>` - 包含模型用于标记分类的输出logits的对象。
+**返回**: `Promise.<TokenClassifierOutput>` - 包含模型用于标记分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1591,9 +1591,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## 模型.DebertaV2ForQuestionAnswering
 
-带有用于提取式问答任务（如SQuAD）的跨度分类头部的DeBERTa-V2模型（在隐藏状态输出的顶部有线性层来计算`跨度起始logits`和`跨度结束logits`）。
+带有用于提取式问答任务（如 SQuAD）的跨度分类头部的 DeBERTa-V2 模型（在隐藏状态输出的顶部有线性层来计算`跨度起始 logits`和`跨度结束 logits`）。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1601,9 +1601,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DebertaV2ForQuestionAnswering`](#module_models.DebertaV2ForQuestionAnswering)的实例方法
+**种类**: `DebertaV2ForQuestionAnswering`的实例方法
 
-**返回**: `Promise.<QuestionAnsweringModelOutput>` - 包含模型用于问答的输出logits的对象。
+**返回**: `Promise.<QuestionAnsweringModelOutput>` - 包含模型用于问答的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1613,9 +1613,9 @@ BertForQuestionAnswering是表示用于问题回答的BERT模型的类。
 
 ## 模型.DistilBertForSequenceClassification
 
-DistilBertForSequenceClassification是代表用于序列分类的DistilBERT模型的类。
+DistilBertForSequenceClassification 是代表用于序列分类的 DistilBERT 模型的类。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1623,9 +1623,9 @@ DistilBertForSequenceClassification是代表用于序列分类的DistilBERT模�
 
 对新输入调用模型。
 
-**种类**: [`DistilBertForSequenceClassification`](#module_models.DistilBertForSequenceClassification)的实例方法
+**种类**: `DistilBertForSequenceClassification`的实例方法
 
-**返回**: `Promise.<SequenceClassifierOutput>` - 包含模型用于序列分类的输出logits的对象。
+**返回**: `Promise.<SequenceClassifierOutput>` - 包含模型用于序列分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1635,9 +1635,9 @@ DistilBertForSequenceClassification是代表用于序列分类的DistilBERT模�
 
 ## 模型.DistilBertForTokenClassification
 
-DistilBertForTokenClassification是代表用于标记分类的DistilBERT模型的类。
+DistilBertForTokenClassification 是代表用于标记分类的 DistilBERT 模型的类。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1645,9 +1645,9 @@ DistilBertForTokenClassification是代表用于标记分类的DistilBERT模型�
 
 对新输入调用模型。
 
-**种类**: [`DistilBertForTokenClassification`](#module_models.DistilBertForTokenClassification)的实例方法
+**种类**: `DistilBertForTokenClassification`的实例方法
 
-**返回**: `Promise.<TokenClassifierOutput>` - 包含模型用于标记分类的输出logits的对象。
+**返回**: `Promise.<TokenClassifierOutput>` - 包含模型用于标记分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1657,9 +1657,9 @@ DistilBertForTokenClassification是代表用于标记分类的DistilBERT模型�
 
 ## 模型.DistilBertForQuestionAnswering
 
-DistilBertForQuestionAnswering是代表用于问答的DistilBERT模型的类。
+DistilBertForQuestionAnswering 是代表用于问答的 DistilBERT 模型的类。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1667,9 +1667,9 @@ DistilBertForQuestionAnswering是代表用于问答的DistilBERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DistilBertForQuestionAnswering`](#module_models.DistilBertForQuestionAnswering)的实例方法
+**种类**: `DistilBertForQuestionAnswering`的实例方法
 
-**返回**: `Promise.<QuestionAnsweringModelOutput>` - 包含模型用于问答的输出logits的对象。
+**返回**: `Promise.<QuestionAnsweringModelOutput>` - 包含模型用于问答的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1679,9 +1679,9 @@ DistilBertForQuestionAnswering是代表用于问答的DistilBERT模型的类。
 
 ## 模型.DistilBertForMaskedLM
 
-DistilBertForMaskedLM是代表用于掩码任务的DistilBERT模型的类。
+DistilBertForMaskedLM 是代表用于掩码任务的 DistilBERT 模型的类。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1689,7 +1689,7 @@ DistilBertForMaskedLM是代表用于掩码任务的DistilBERT模型的类。
 
 对新输入调用模型。
 
-**种类**: [`DistilBertForMaskedLM`](#module_models.DistilBertForMaskedLM)的实例方法
+**种类**: `DistilBertForMaskedLM`的实例方法
 
 **返回**: `Promise.<MaskedLMOutput>` - 返回的对象
 
@@ -1701,17 +1701,17 @@ DistilBertForMaskedLM是代表用于掩码任务的DistilBERT模型的类。
 
 ## 模型.EsmModel
 
-ESM模型裸的变压器输出原始隐藏状态，没有特定头部。
+ESM 模型裸的变压器输出原始隐藏状态，没有特定头部。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## 模型.EsmForMaskedLM
 
-带有`语言建模`头部的ESM模型。
+带有`语言建模`头部的 ESM 模型。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -1719,7 +1719,7 @@ ESM模型裸的变压器输出原始隐藏状态，没有特定头部。
 
 调用模型对新输入进行操作。
 
-**类型**：[`EsmForMaskedLM`](#module_models.EsmForMaskedLM)的实例方法
+**类型**：`EsmForMaskedLM`的实例方法
 
 **返回**：`Promise.<MaskedLMOutput>` - 包含模型对掩码语言建模的输出对数的对象。
 
@@ -1731,9 +1731,9 @@ ESM模型裸的变压器输出原始隐藏状态，没有特定头部。
 
 ## models.EsmForSequenceClassification
 
-ESM模型变换器，顶部带有一个序列分类/回归头（汇总输出顶部的线性层）
+ESM 模型变换器，顶部带有一个序列分类/回归头（汇总输出顶部的线性层）
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1741,7 +1741,7 @@ ESM模型变换器，顶部带有一个序列分类/回归头（汇总输出顶�
 
 调用模型对新输入进行操作。
 
-**类型**：[`EsmForSequenceClassification`](#module_models.EsmForSequenceClassification)的实例方法
+**类型**：`EsmForSequenceClassification`的实例方法
 
 **返回**：`Promise.<SequenceClassifierOutput>` - 包含模型对序列分类的输出对数的对象。
 
@@ -1753,9 +1753,9 @@ ESM模型变换器，顶部带有一个序列分类/回归头（汇总输出顶�
 
 ## models.EsmForTokenClassification
 
-ESM模型，顶部带有一个标记分类头（隐藏状态输出顶部的线性层），例如用于命名实体识别（NER）任务。
+ESM 模型，顶部带有一个标记分类头（隐藏状态输出顶部的线性层），例如用于命名实体识别（NER）任务。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1763,7 +1763,7 @@ ESM模型，顶部带有一个标记分类头（隐藏状态输出顶部的线�
 
 调用模型对新输入进行操作。
 
-**类型**：[`EsmForTokenClassification`](#module_models.EsmForTokenClassification)的实例方法
+**类型**：`EsmForTokenClassification`的实例方法
 
 **返回**：`Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出对数的对象。
 
@@ -1775,9 +1775,9 @@ ESM模型，顶部带有一个标记分类头（隐藏状态输出顶部的线�
 
 ## models.MobileBertForMaskedLM
 
-MobileBertForMaskedLM是表示用于掩码任务的MobileBERT模型的类。
+MobileBertForMaskedLM 是表示用于掩码任务的 MobileBERT 模型的类。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1785,7 +1785,7 @@ MobileBertForMaskedLM是表示用于掩码任务的MobileBERT模型的类。
 
 调用模型对新输入进行操作。
 
-**类型**：[`MobileBertForMaskedLM`](#module_models.MobileBertForMaskedLM)的实例方法
+**类型**：`MobileBertForMaskedLM`的实例方法
 
 **返回**：`Promise.<MaskedLMOutput>` - 返回的对象
 
@@ -1797,9 +1797,9 @@ MobileBertForMaskedLM是表示用于掩码任务的MobileBERT模型的类。
 
 ## models.MobileBertForSequenceClassification
 
-MobileBert模型变换器，顶部带有一个序列分类/回归头（汇总输出顶部的线性层）
+MobileBert 模型变换器，顶部带有一个序列分类/回归头（汇总输出顶部的线性层）
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1807,7 +1807,7 @@ MobileBert模型变换器，顶部带有一个序列分类/回归头（汇总输
 
 调用模型对新输入进行操作。
 
-**类型**：[`MobileBertForSequenceClassification`](#module_models.MobileBertForSequenceClassification)的实例方法
+**类型**：`MobileBertForSequenceClassification`的实例方法
 
 **返回**：`Promise.<SequenceClassifierOutput>` - 返回的对象
 
@@ -1819,9 +1819,9 @@ MobileBert模型变换器，顶部带有一个序列分类/回归头（汇总输
 
 ## models.MobileBertForQuestionAnswering
 
-MobileBert模型，顶部带有一个用于提取性问答任务的跨度分类头
+MobileBert 模型，顶部带有一个用于提取性问答任务的跨度分类头
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -1829,7 +1829,7 @@ MobileBert模型，顶部带有一个用于提取性问答任务的跨度分类�
 
 调用模型对新输入进行操作。
 
-**类型**：[`MobileBertForQuestionAnswering`](#module_models.MobileBertForQuestionAnswering)的实例方法
+**类型**：`MobileBertForQuestionAnswering`的实例方法
 
 **返回**：`Promise.<QuestionAnsweringModelOutput>` - 返回的对象
 
@@ -1841,17 +1841,17 @@ MobileBert模型，顶部带有一个用于提取性问答任务的跨度分类�
 
 ## models.MPNetModel
 
-裸MPNet模型变换器，输出原始隐藏状态，没有特定的头部。
+裸 MPNet 模型变换器，输出原始隐藏状态，没有特定的头部。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ## models.MPNetForMaskedLM
 
-MPNetForMaskedLM是表示用于掩码语言建模的MPNet模型的类。
+MPNetForMaskedLM 是表示用于掩码语言建模的 MPNet 模型的类。
 
-**类型**：[`models`](#module_models) 的静态类
+**类型**：`models` 的静态类
 
 * * *
 
@@ -1859,9 +1859,9 @@ MPNetForMaskedLM是表示用于掩码语言建模的MPNet模型的类。
 
 调用模型的新输入。
 
-**类型**：[`MPNetForMaskedLM`](#module_models.MPNetForMaskedLM) 的实例方法
+**类型**：`MPNetForMaskedLM` 的实例方法
 
-**返回**：`Promise.<MaskedLMOutput>` - 包含遮蔽语言建模模型输出logits的对象。
+**返回**：`Promise.<MaskedLMOutput>` - 包含遮蔽语言建模模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1873,7 +1873,7 @@ MPNetForMaskedLM是表示用于掩码语言建模的MPNet模型的类。
 
 MPNetForSequenceClassification 是表示用于序列分类的 MPNet 模型的类。
 
-**类型**：[`models`](#module_models) 的静态类
+**类型**：`models` 的静态类
 
 * * *
 
@@ -1881,9 +1881,9 @@ MPNetForSequenceClassification 是表示用于序列分类的 MPNet 模型的类
 
 调用模型的新输入。
 
-**类型**：[`MPNetForSequenceClassification`](#module_models.MPNetForSequenceClassification) 的实例方法
+**类型**：`MPNetForSequenceClassification` 的实例方法
 
-**返回**：`Promise.<SequenceClassifierOutput>` - 包含序列分类模型输出logits的对象。
+**返回**：`Promise.<SequenceClassifierOutput>` - 包含序列分类模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1895,7 +1895,7 @@ MPNetForSequenceClassification 是表示用于序列分类的 MPNet 模型的类
 
 MPNetForTokenClassification 是表示用于标记分类的 MPNet 模型的类。
 
-**类型**：[`models`](#module_models) 的静态类
+**类型**：`models` 的静态类
 
 * * *
 
@@ -1903,9 +1903,9 @@ MPNetForTokenClassification 是表示用于标记分类的 MPNet 模型的类。
 
 调用模型的新输入。
 
-**类型**：[`MPNetForTokenClassification`](#module_models) 的实例方法
+**类型**：`MPNetForTokenClassification` 的实例方法
 
-**返回**：`Promise.<TokenClassifierOutput>` - 包含标记分类模型输出logits的对象。
+**返回**：`Promise.<TokenClassifierOutput>` - 包含标记分类模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1917,7 +1917,7 @@ MPNetForTokenClassification 是表示用于标记分类的 MPNet 模型的类。
 
 MPNetForQuestionAnswering 是表示用于问答的 MPNet 模型的类。
 
-**类型**：[`models`](#module_models) 的静态类
+**类型**：`models` 的静态类
 
 * * *
 
@@ -1925,9 +1925,9 @@ MPNetForQuestionAnswering 是表示用于问答的 MPNet 模型的类。
 
 调用模型的新输入。
 
-**类型**：[`MPNetForQuestionAnswering`](#module_models.MPNetForQuestionAnswering) 的实例方法
+**类型**：`MPNetForQuestionAnswering` 的实例方法
 
-**返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含问答模型输出logits的对象。
+**返回**：`Promise.<QuestionAnsweringModelOutput>` - 包含问答模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1939,7 +1939,7 @@ MPNetForQuestionAnswering 是表示用于问答的 MPNet 模型的类。
 
 T5Model 是表示用于条件生成的 T5 模型的类。
 
-**类型**：[`models`](#module_models) 的静态类
+**类型**：`models` 的静态类
 
 * * *
 
@@ -1960,7 +1960,7 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 
 一个抽象类，用于处理权重初始化和一个简单的接口，用于下载和加载预训练模型。
 
-**类型**：[`models`](#module_models) 的静态类
+**类型**：`models` 的静态类
 
 * * *
 
@@ -1968,7 +1968,7 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 
 裸 LONGT5 模型变压器，输出原始隐藏状态，没有特定的头部。
 
-**类型**：[`models`](#module_models) 的静态类
+**类型**：`models` 的静态类
 
 * * *
 
@@ -1976,7 +1976,7 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 
 带有`语言建模`头部的 LONGT5 模型。
 
-**类型**：[`models`](#module_models) 的静态类
+**类型**：`models` 的静态类
 
 * * *
 
@@ -1995,9 +1995,9 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 
 ## models.MT5ForConditionalGeneration
 
-基于MT5架构的条件序列到序列模型的类。
+基于 MT5 架构的条件序列到序列模型的类。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -2008,25 +2008,25 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `any` | 模型配置。 |
-| session | `any` | 包含编码器权重的ONNX会话。 |
-| decoder_merged_session | `any` | 包含合并的解码器权重的ONNX会话。 |
+| session | `any` | 包含编码器权重的 ONNX 会话。 |
+| decoder_merged_session | `any` | 包含合并的解码器权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.BartModel
 
-裸BART模型，输出原始隐藏状态，顶部没有特定的头。
+裸 BART 模型，输出原始隐藏状态，顶部没有特定的头。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.BartForConditionalGeneration
 
-带有语言建模头的BART模型。可用于摘要。
+带有语言建模头的 BART 模型。可用于摘要。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -2036,18 +2036,18 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| config | `Object` | Bart模型的配置对象。 |
-| session | `Object` | 用于执行模型的ONNX会话。 |
-| decoder_merged_session | `Object` | 用于执行解码器的ONNX会话。 |
+| config | `Object` | Bart 模型的配置对象。 |
+| session | `Object` | 用于执行模型的 ONNX 会话。 |
+| decoder_merged_session | `Object` | 用于执行解码器的 ONNX 会话。 |
 | generation_config | `Object` | 生成配置对象。 |
 
 * * *
 
 ## models.BartForSequenceClassification
 
-带有序列分类/头（汇总输出的顶部线性层）的Bart模型
+带有序列分类/头（汇总输出的顶部线性层）的 Bart 模型
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -2055,9 +2055,9 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 
 在新输入上调用模型。
 
-**种类**: [`BartForSequenceClassification`](#module_models.BartForSequenceClassification)的实例方法
+**种类**: `BartForSequenceClassification`的实例方法
 
-**返回**: `Promise.<SequenceClassifierOutput>` - 包含用于序列分类的模型输出logits的对象。
+**返回**: `Promise.<SequenceClassifierOutput>` - 包含用于序列分类的模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -2067,17 +2067,17 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 
 ## models.MBartModel
 
-裸MBART模型，顶部没有特定的头。
+裸 MBART 模型，顶部没有特定的头。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.MBartForConditionalGeneration
 
-带有语言建模头的MBART模型。在微调预训练模型后可用于摘要。
+带有语言建模头的 MBART 模型。在微调预训练模型后可用于摘要。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -2087,18 +2087,18 @@ T5Model 是表示用于条件生成的 T5 模型的类。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| config | `Object` | Bart模型的配置对象。 |
-| session | `Object` | 用于执行模型的ONNX会话。 |
-| decoder_merged_session | `Object` | 用于执行解码器的ONNX会话。 |
+| config | `Object` | Bart 模型的配置对象。 |
+| session | `Object` | 用于执行模型的 ONNX 会话。 |
+| decoder_merged_session | `Object` | 用于执行解码器的 ONNX 会话。 |
 | generation_config | `Object` | 生成配置对象。 |
 
 * * *
 
 ## models.MBartForSequenceClassification
 
-MBart模型，顶部带有序列分类/头（汇总输出的顶部线性层）。
+MBart 模型，顶部带有序列分类/头（汇总输出的顶部线性层）。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -2106,9 +2106,9 @@ MBart模型，顶部带有序列分类/头（汇总输出的顶部线性层）�
 
 在新输入上调用模型。
 
-**种类**: [`MBartForSequenceClassification`](#module_models.MBartForSequenceClassification)的实例方法
+**种类**: `MBartForSequenceClassification`的实例方法
 
-**返回**: `Promise.<SequenceClassifierOutput>` - 包含用于序列分类的模型输出logits的对象。
+**返回**: `Promise.<SequenceClassifierOutput>` - 包含用于序列分类的模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -2118,7 +2118,7 @@ MBart模型，顶部带有序列分类/头（汇总输出的顶部线性层）�
 
 ## models.MBartForCausalLM
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -2129,24 +2129,24 @@ MBart模型，顶部带有序列分类/头（汇总输出的顶部线性层）�
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型的配置对象。 |
-| decoder_merged_session | `Object` | 用于解码器的ONNX会话对象。 |
+| decoder_merged_session | `Object` | 用于解码器的 ONNX 会话对象。 |
 | generation_config | `Object` | 生成过程的配置对象。 |
 
 * * *
 
 ## models.BlenderbotModel
 
-裸的Blenderbot模型，输出原始隐藏状态，没有特定的头部。
+裸的 Blenderbot 模型，输出原始隐藏状态，没有特定的头部。
 
-静态类[`models`](#module_models)的Kind：
+静态类`models`的 Kind：
 
 * * *
 
 ## models.BlenderbotForConditionalGeneration
 
-带有语言建模头部的Blenderbot模型。可用于摘要。
+带有语言建模头部的 Blenderbot 模型。可用于摘要。
 
-**Kind**: 静态类[`models`](#module_models)
+**Kind**: 静态类`models`
 
 * * *
 
@@ -2157,25 +2157,25 @@ MBart模型，顶部带有序列分类/头（汇总输出的顶部线性层）�
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `any` | 模型配置。 |
-| session | `any` | 包含编码器权重的ONNX会话。 |
-| decoder_merged_session | `any` | 包含合并的解码器权重的ONNX会话。 |
+| session | `any` | 包含编码器权重的 ONNX 会话。 |
+| decoder_merged_session | `any` | 包含合并的解码器权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.BlenderbotSmallModel
 
-裸的BlenderbotSmall模型，输出原始隐藏状态，没有特定的头部。
+裸的 BlenderbotSmall 模型，输出原始隐藏状态，没有特定的头部。
 
-**Kind**: 静态类[`models`](#module_models)
+**Kind**: 静态类`models`
 
 * * *
 
 ## models.BlenderbotSmallForConditionalGeneration
 
-带有语言建模头部的BlenderbotSmall模型。可用于摘要。
+带有语言建模头部的 BlenderbotSmall 模型。可用于摘要。
 
-**Kind**: 静态类[`models`](#module_models)
+**Kind**: 静态类`models`
 
 * * *
 
@@ -2186,17 +2186,17 @@ MBart模型，顶部带有序列分类/头（汇总输出的顶部线性层）�
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `any` | 模型配置。 |
-| session | `any` | 包含编码器权重的ONNX会话。 |
-| decoder_merged_session | `any` | 包含合并的解码器权重的ONNX会话。 |
+| session | `any` | 包含编码器权重的 ONNX 会话。 |
+| decoder_merged_session | `any` | 包含合并的解码器权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.RobertaForMaskedLM
 
-RobertaForMaskedLM类用于在Roberta模型上执行掩码语言建模。
+RobertaForMaskedLM 类用于在 Roberta 模型上执行掩码语言建模。
 
-静态类[`models`](#module_models)的Kind：
+静态类`models`的 Kind：
 
 * * *
 
@@ -2204,7 +2204,7 @@ RobertaForMaskedLM类用于在Roberta模型上执行掩码语言建模。
 
 对新输入调用模型。
 
-**Kind**: [`RobertaForMaskedLM`](#module_models.RobertaForMaskedLM)的实例方法
+**Kind**: `RobertaForMaskedLM`的实例方法
 
 **返回**: `Promise.<MaskedLMOutput>` - 返回的对象
 
@@ -2216,9 +2216,9 @@ RobertaForMaskedLM类用于在Roberta模型上执行掩码语言建模。
 
 ## models.RobertaForSequenceClassification
 
-RobertaForSequenceClassification类用于在Roberta模型上执行序列分类。
+RobertaForSequenceClassification 类用于在 Roberta 模型上执行序列分类。
 
-**Kind**: 静态类[`models`](#module_models)
+**Kind**: 静态类`models`
 
 * * *
 
@@ -2226,7 +2226,7 @@ RobertaForSequenceClassification类用于在Roberta模型上执行序列分类�
 
 对新输入调用模型。
 
-**Kind**: [`RobertaForSequenceClassification`](#module_models.RobertaForSequenceClassification)的实例方法
+**Kind**: `RobertaForSequenceClassification`的实例方法
 
 **返回**: `Promise.<SequenceClassifierOutput>` - 返回的对象
 
@@ -2238,9 +2238,9 @@ RobertaForSequenceClassification类用于在Roberta模型上执行序列分类�
 
 ## models.RobertaForTokenClassification
 
-RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
+RobertaForTokenClassification 类用于在 Roberta 模型上执行标记分类。
 
-**Kind**: 静态类[`models`](#module_models)
+**Kind**: 静态类`models`
 
 * * *
 
@@ -2248,9 +2248,9 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 对新输入调用模型。
 
-**Kind**: [`RobertaForTokenClassification`](#module_models.RobertaForTokenClassification)的实例方法
+**Kind**: `RobertaForTokenClassification`的实例方法
 
-**返回**: `Promise.<TokenClassifierOutput>` - 包含用于标记分类的模型输出logits的对象。
+**返回**: `Promise.<TokenClassifierOutput>` - 包含用于标记分类的模型输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -2260,9 +2260,9 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 ## models.RobertaForQuestionAnswering
 
-在Roberta模型上执行问答的RobertaForQuestionAnswering类。
+在 Roberta 模型上执行问答的 RobertaForQuestionAnswering 类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -2270,7 +2270,7 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 在新输入上调用模型。
 
-**种类**：[`RobertaForQuestionAnswering`](#module_models.RobertaForQuestionAnswering)的实例方法
+**种类**：`RobertaForQuestionAnswering`的实例方法
 
 **返回**：`Promise.<QuestionAnsweringModelOutput>` - 返回的对象
 
@@ -2284,23 +2284,23 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 一个处理权重初始化和一个简单接口用于下载和加载预训练模型的抽象类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.XLMModel
 
-裸的XLM模型变换器输出原始隐藏状态，没有特定的头部在顶部。
+裸的 XLM 模型变换器输出原始隐藏状态，没有特定的头部在顶部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.XLMWithLMHeadModel
 
-带有语言建模头部的XLM模型变换器（线性层，权重与输入嵌入相关联）。
+带有语言建模头部的 XLM 模型变换器（线性层，权重与输入嵌入相关联）。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -2308,7 +2308,7 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 在新输入上调用模型。
 
-**种类**：[`XLMWithLMHeadModel`](#module_models.XLMWithLMHeadModel)的实例方法
+**种类**：`XLMWithLMHeadModel`的实例方法
 
 **返回**：`Promise.<MaskedLMOutput>` - 返回的对象
 
@@ -2320,9 +2320,9 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 ## models.XLMForSequenceClassification
 
-在顶部有一个序列分类/回归头的XLM模型（在汇总输出的顶部有一个线性层）
+在顶部有一个序列分类/回归头的 XLM 模型（在汇总输出的顶部有一个线性层）
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -2330,7 +2330,7 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 在新输入上调用模型。
 
-**种类**：[`XLMForSequenceClassification`](#module_models.XLMForSequenceClassification)的实例方法
+**种类**：`XLMForSequenceClassification`的实例方法
 
 **返回**：`Promise.<SequenceClassifierOutput>` - 返回的对象
 
@@ -2342,9 +2342,9 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 ## models.XLMForTokenClassification
 
-在顶部有一个标记分类头的XLM模型（在隐藏状态输出的顶部有一个线性层）
+在顶部有一个标记分类头的 XLM 模型（在隐藏状态输出的顶部有一个线性层）
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -2352,9 +2352,9 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 在新输入上调用模型。
 
-**种类**：[`XLMForTokenClassification`](#module_models.XLMForTokenClassification)的实例方法
+**种类**：`XLMForTokenClassification`的实例方法
 
-**返回**：`Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出logits的对象。
+**返回**：`Promise.<TokenClassifierOutput>` - 包含模型对标记分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -2364,9 +2364,9 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 ## models.XLMForQuestionAnswering
 
-在顶部有一个用于提取问答任务的跨度分类头的XLM模型
+在顶部有一个用于提取问答任务的跨度分类头的 XLM 模型
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -2374,7 +2374,7 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 在新输入上调用模型。
 
-**种类**：[`XLMForQuestionAnswering`](#module_models.XLMForQuestionAnswering)的实例方法
+**种类**：`XLMForQuestionAnswering`的实例方法
 
 **返回**：`Promise.<QuestionAnsweringModelOutput>` - 返回的对象
 
@@ -2386,9 +2386,9 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 ## models.XLMRobertaForMaskedLM
 
-用于在XLMRoberta模型上执行掩码语言建模的XLMRobertaForMaskedLM类。
+用于在 XLMRoberta 模型上执行掩码语言建模的 XLMRobertaForMaskedLM 类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -2396,7 +2396,7 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 在新输入上调用模型。
 
-**种类**：[`XLMRobertaForMaskedLM`](#module_models.XLMRobertaForMaskedLM)的实例方法
+**种类**：`XLMRobertaForMaskedLM`的实例方法
 
 **返回**：`Promise.<MaskedLMOutput>` - 返回的对象
 
@@ -2408,9 +2408,9 @@ RobertaForTokenClassification类用于在Roberta模型上执行标记分类。
 
 ## models.XLMRobertaForSequenceClassification
 
-XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列分类。
+XLMRobertaForSequenceClassification 类用于在 XLMRoberta 模型上执行序列分类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -2418,7 +2418,7 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 对新输入调用模型。
 
-**类型**: [`XLMRobertaForSequenceClassification`](#module_models.XLMRobertaForSequenceClassification)的实例方法
+**类型**: `XLMRobertaForSequenceClassification`的实例方法
 
 **返回值**: `Promise.<SequenceClassifierOutput>` - 返回的对象
 
@@ -2430,9 +2430,9 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 ## models.XLMRobertaForTokenClassification
 
-用于在XLMRoberta模型上执行标记分类的XLMRobertaForTokenClassification类。
+用于在 XLMRoberta 模型上执行标记分类的 XLMRobertaForTokenClassification 类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -2440,9 +2440,9 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 对新输入调用模型。
 
-**类型**: [`XLMRobertaForTokenClassification`](#module_models.XLMRobertaForTokenClassification)的实例方法
+**类型**: `XLMRobertaForTokenClassification`的实例方法
 
-**返回值**: `Promise.<TokenClassifierOutput>` - 包含模型用于标记分类的输出logits的对象。
+**返回值**: `Promise.<TokenClassifierOutput>` - 包含模型用于标记分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -2452,9 +2452,9 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 ## models.XLMRobertaForQuestionAnswering
 
-用于在XLMRoberta模型上执行问题回答的XLMRobertaForQuestionAnswering类。
+用于在 XLMRoberta 模型上执行问题回答的 XLMRobertaForQuestionAnswering 类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -2462,7 +2462,7 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 对新输入调用模型。
 
-**类型**: [`XLMRobertaForQuestionAnswering`](#module_models.XLMRobertaForQuestionAnswering)的实例方法
+**类型**: `XLMRobertaForQuestionAnswering`的实例方法
 
 **返回值**: `Promise.<QuestionAnsweringModelOutput>` - 返回的对象
 
@@ -2474,39 +2474,39 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 ## models.ASTModel
 
-输出原始隐藏状态而不在顶部具有特定头部的裸AST模型变换器。
+输出原始隐藏状态而不在顶部具有特定头部的裸 AST 模型变换器。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
 ## models.ASTForAudioClassification
 
-在顶部具有音频分类头部的音频频谱变换器模型（在池化输出的顶部有一个线性层），例如用于AudioSet、Speech Commands v2等数据集。
+在顶部具有音频分类头部的音频频谱变换器模型（在池化输出的顶部有一个线性层），例如用于 AudioSet、Speech Commands v2 等数据集。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
 ## models.WhisperModel
 
-用于训练没有语言模型头的Whisper模型的WhisperModel类。
+用于训练没有语言模型头的 Whisper 模型的 WhisperModel 类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
 ## models.WhisperForConditionalGeneration
 
-用于从Whisper模型生成条件输出的WhisperForConditionalGeneration类。
+用于从 Whisper 模型生成条件输出的 WhisperForConditionalGeneration 类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
-+   [.WhisperForConditionalGeneration](#module_models.WhisperForConditionalGeneration)
++   .WhisperForConditionalGeneration
 
-    +   [`new WhisperForConditionalGeneration(config, session, decoder_merged_session, generation_config)`](#new_module_models.WhisperForConditionalGeneration_new)
+    +   `new WhisperForConditionalGeneration(config, session, decoder_merged_session, generation_config)`
 
-    +   [`.generate(inputs, generation_config, logits_processor)`](#module_models.WhisperForConditionalGeneration+generate) ⇒ `Promise.<Object>`
+    +   `.generate(inputs, generation_config, logits_processor)` ⇒ `Promise.<Object>`
 
     +   [`._extract_token_timestamps(generate_outputs, alignment_heads, [num_frames], [time_precision])`](#module_models.WhisperForConditionalGeneration+_extract_token_timestamps) ⇒ `Tensor`
 
@@ -2519,8 +2519,8 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型的配置对象。 |
-| session | `Object` | 模型的ONNX会话对象。 |
-| decoder_merged_session | `Object` | 解码器的ONNX会话对象。 |
+| session | `Object` | 模型的 ONNX 会话对象。 |
+| decoder_merged_session | `Object` | 解码器的 ONNX 会话对象。 |
 | generation_config | `Object` | 生成过程的配置对象。 |
 
 * * *
@@ -2529,15 +2529,15 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 根据输入和生成配置生成输出。
 
-**种类**：[`WhisperForConditionalGeneration`](#module_models)的实例方法
+**种类**：`WhisperForConditionalGeneration`的实例方法
 
-**返回**：`Promise.<Object>` - Promise对象表示生成的输出。
+**返回**：`Promise.<Object>` - Promise 对象表示生成的输出。
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
 | 输入 | `Object` |  | 模型的输入数据。 |
 | 生成配置 | `WhisperGenerationConfig` |  | 生成过程的配置对象。 |
-| logits_processor | `Object` |  | 可选的logits处理器对象。 |
+| logits_processor | `Object` |  | 可选的 logits 处理器对象。 |
 
 * * *
 
@@ -2545,7 +2545,7 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 使用编码器-解码器交叉注意力和动态时间规整（DTW）计算标记级时间戳，将每个输出标记映射到输入音频中的位置。
 
-**种类**：[`WhisperForConditionalGeneration`](#module_models)的实例方法
+**种类**：`WhisperForConditionalGeneration`的实例方法
 
 **返回**：`Tensor` - 包含每个预测标记的秒数时间戳的张量
 
@@ -2563,9 +2563,9 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 
 ## models.VisionEncoderDecoderModel
 
-基于OpenAI的GPT架构的视觉编码器-解码器模型，用于图像字幕和其他视觉任务
+基于 OpenAI 的 GPT 架构的视觉编码器-解码器模型，用于图像字幕和其他视觉任务
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -2576,15 +2576,15 @@ XLMRobertaForSequenceClassification类用于在XLMRoberta模型上执行序列�
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `Object` | 指定超参数和其他模型设置的配置对象。 |
-| 会话 | `Object` | 包含编码器模型的ONNX会话。 |
-| decoder_merged_session | `any` | 包含合并解码器模型的ONNX会话。 |
+| 会话 | `Object` | 包含编码器模型的 ONNX 会话。 |
+| decoder_merged_session | `any` | 包含合并解码器模型的 ONNX 会话。 |
 | 生成配置 | `Object` | 生成过程的配置对象。 |
 
 * * *
 
 ## models.CLIPModel
 
-带有投影层的CLIP文本和视觉模型
+带有投影层的 CLIP 文本和视觉模型
 
 **示例：** 使用`CLIPModel`进行零样本图像分类。
 
@@ -2626,13 +2626,13 @@ let output = await model({ ...text_inputs, ...image_inputs });
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.CLIPTextModelWithProjection
 
-带有投影层的CLIP文本模型（在池化输出的顶部有一个线性层）
+带有投影层的 CLIP 文本模型（在池化输出的顶部有一个线性层）
 
 **示例：** 使用`CLIPTextModelWithProjection`计算文本嵌入。
 
@@ -2657,19 +2657,19 @@ const { text_embeds } = await text_model(text_inputs);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### CLIPTextModelWithProjection.from_pretrained()：`PreTrainedModel.from_pretrained`
 
-**种类**：[`CLIPTextModelWithProjection`](#module_models.CLIPTextModelWithProjection)的静态方法
+**种类**：`CLIPTextModelWithProjection`的静态方法
 
 * * *
 
 ## models.CLIPVisionModelWithProjection
 
-带有投影层的CLIP视觉模型（在池化输出的顶部有一个线性层）
+带有投影层的 CLIP 视觉模型（在池化输出的顶部有一个线性层）
 
 **示例：** 使用`CLIPVisionModelWithProjection`计算视觉嵌入。
 
@@ -2694,19 +2694,19 @@ const { image_embeds } = await vision_model(image_inputs);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### CLIPVisionModelWithProjection.from_pretrained()：`PreTrainedModel.from_pretrained`
 
-**种类**：[`CLIPVisionModelWithProjection`](#module_models.CLIPVisionModelWithProjection)的静态方法
+**种类**：`CLIPVisionModelWithProjection`的静态方法
 
 * * *
 
 ## models.SiglipModel
 
-带有投影层的SigLIP文本和视觉模型
+带有投影层的 SigLIP 文本和视觉模型
 
 **示例：** 使用`SiglipModel`进行零样本图像分类。
 
@@ -2748,13 +2748,13 @@ const output = await model({ ...text_inputs, ...image_inputs });
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.SiglipTextModel
 
-SigLIP文本模型，没有任何头部或投影层。
+SigLIP 文本模型，没有任何头部或投影层。
 
 **示例：** 使用`SiglipTextModel`计算文本嵌入。
 
@@ -2779,19 +2779,19 @@ const { pooler_output } = await text_model(text_inputs);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### SiglipTextModel.from_pretrained() : <code> PreTrainedModel.from_pretrained </code>
 
-**种类**：[`SiglipTextModel`](#module_models.SiglipTextModel)的静态方法
+**种类**：`SiglipTextModel`的静态方法
 
 * * *
 
 ## models.SiglipVisionModel
 
-来自SigLIP的视觉模型，没有头部或顶部投影。
+来自 SigLIP 的视觉模型，没有头部或顶部投影。
 
 **示例：** 使用`SiglipVisionModel`进行视觉嵌入计算。
 
@@ -2816,19 +2816,19 @@ const { pooler_output } = await vision_model(image_inputs);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### SiglipVisionModel.from_pretrained() : <code> PreTrainedModel.from_pretrained </code>
 
-**种类**：[`models`](#module_models)的静态方法
+**种类**：`models`的静态方法
 
 * * *
 
 ## models.CLIPSegForImageSegmentation
 
-使用基于Transformer的解码器的CLIPSeg模型进行零样本和一次性图像分割。
+使用基于 Transformer 的解码器的 CLIPSeg 模型进行零样本和一次性图像分割。
 
 **示例：** 使用`CLIPSegForImageSegmentation`模型执行零样本图像分割。
 
@@ -2874,297 +2874,297 @@ for (let i = 0; i < preds.dims[0]; ++i) {
 }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.GPT2PreTrainedModel
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 创建一个新的GPT2PreTrainedModel类的实例。
+### 创建一个新的 GPT2PreTrainedModel 类的实例。
 
-创建一个新的GPT2PreTrainedModel类的实例。
+创建一个新的 GPT2PreTrainedModel 类的实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型的配置。 |
-| session | `any` | 包含模型权重的ONNX会话。 |
+| session | `any` | 包含模型权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.GPT2LMHeadModel
 
-GPT-2语言模型头部在GPT-2基础模型之上。该模型适用于文本生成任务。
+GPT-2 语言模型头部在 GPT-2 基础模型之上。该模型适用于文本生成任务。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.GPTNeoPreTrainedModel
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 创建一个新的GPTNeoPreTrainedModel实例。
+### 创建一个新的 GPTNeoPreTrainedModel 实例。
 
-创建一个新的GPTNeoPreTrainedModel类的实例。
+创建一个新的 GPTNeoPreTrainedModel 类的实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型的配置。 |
-| session | `any` | 包含模型权重的ONNX会话。 |
+| session | `any` | 包含模型权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.GPTNeoXPreTrainedModel
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 创建一个新的GPTNeoXPreTrainedModel实例。
+### 创建一个新的 GPTNeoXPreTrainedModel 实例。
 
-创建一个新的GPTNeoXPreTrainedModel类的实例。
+创建一个新的 GPTNeoXPreTrainedModel 类的实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型的配置。 |
-| session | `any` | 包含模型权重的ONNX会话。 |
+| session | `any` | 包含模型权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.GPTJPreTrainedModel
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 创建一个新的GPTJPreTrainedModel实例。
+### 创建一个新的 GPTJPreTrainedModel 实例。
 
-创建一个新的GPTJPreTrainedModel类的实例。
+创建一个新的 GPTJPreTrainedModel 类的实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型的配置。 |
-| session | `any` | 包含模型权重的ONNX会话。 |
+| session | `any` | 包含模型权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.GPTBigCodePreTrainedModel
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 创建一个新的GPTBigCodePreTrainedModel实例。
+### 创建一个新的 GPTBigCodePreTrainedModel 实例。
 
-创建一个新的GPTBigCodePreTrainedModel类的实例。
+创建一个新的 GPTBigCodePreTrainedModel 类的实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型的配置。 |
-| session | `any` | 包含模型权重的ONNX会话。 |
+| session | `any` | 包含模型权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.CodeGenPreTrainedModel
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 创建一个新的CodeGenPreTrainedModel实例。
+### 创建一个新的 CodeGenPreTrainedModel 实例。
 
-创建一个新的CodeGenPreTrainedModel类的实例。
+创建一个新的 CodeGenPreTrainedModel 类的实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型配置对象。 |
-| session | `Object` | ONNX会话对象。 |
+| session | `Object` | ONNX 会话对象。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.CodeGenModel
 
-CodeGenModel是一个代表没有语言模型头部的代码生成模型的类。
+CodeGenModel 是一个代表没有语言模型头部的代码生成模型的类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.CodeGenForCausalLM
 
-CodeGenForCausalLM是基于GPT-2架构的代码生成模型的类。它扩展了`CodeGenPreTrainedModel`类。
+CodeGenForCausalLM 是基于 GPT-2 架构的代码生成模型的类。它扩展了`CodeGenPreTrainedModel`类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.LlamaPreTrainedModel
 
-裸LLama模型输出原始隐藏状态，没有特定的头部。
+裸 LLama 模型输出原始隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的LlamaPreTrainedModel(config, session, generation_config)
+### 新的 LlamaPreTrainedModel(config, session, generation_config)
 
 创建`LlamaPreTrainedModel`类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `Object` | 模型配置对象。 |
-| 会话 | `Object` | ONNX会话对象。 |
+| 会话 | `Object` | ONNX 会话对象。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.LlamaModel
 
-裸LLaMA模型输出原始隐藏状态，没有特定的头部。
+裸 LLaMA 模型输出原始隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.Qwen2PreTrainedModel
 
-裸Qwen2模型输出原始隐藏状态，没有特定的头部。
+裸 Qwen2 模型输出原始隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的Qwen2PreTrainedModel(config, session, generation_config)
+### 新的 Qwen2PreTrainedModel(config, session, generation_config)
 
 创建`Qwen2PreTrainedModel`类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `Object` | 模型配置对象。 |
-| 会话 | `Object` | ONNX会话对象。 |
+| 会话 | `Object` | ONNX 会话对象。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.Qwen2Model
 
-裸Qwen2模型输出原始隐藏状态，没有特定的头部。
+裸 Qwen2 模型输出原始隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.PhiPreTrainedModel
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的PhiPreTrainedModel(config, session, generation_config)
+### 新的 PhiPreTrainedModel(config, session, generation_config)
 
 创建`PhiPreTrainedModel`类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `Object` | 模型配置对象。 |
-| 会话 | `Object` | ONNX会话对象。 |
+| 会话 | `Object` | ONNX 会话对象。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.PhiModel
 
-裸Phi模型输出原始隐藏状态，没有特定的头部。
+裸 Phi 模型输出原始隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.BloomPreTrainedModel
 
-具有语言建模头部的Bloom模型变换器（线性层，其权重与输入嵌入相关联）。
+具有语言建模头部的 Bloom 模型变换器（线性层，其权重与输入嵌入相关联）。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的BloomPreTrainedModel(config, session, generation_config)
+### 新的 BloomPreTrainedModel(config, session, generation_config)
 
 创建`BloomPreTrainedModel`类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `Object` | 模型配置。 |
-| 会话 | `any` | 包含模型权重的ONNX会话。 |
+| 会话 | `any` | 包含模型权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.BloomModel
 
-裸Bloom模型变换器输出原始隐藏状态，没有特定的头部。
+裸 Bloom 模型变换器输出原始隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.BloomForCausalLM
 
-具有语言建模头部的Bloom模型变换器（线性层，其权重与输入嵌入相关联）。
+具有语言建模头部的 Bloom 模型变换器（线性层，其权重与输入嵌入相关联）。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.MptPreTrainedModel
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的MptPreTrainedModel(config, session, generation_config)
+### 新的 MptPreTrainedModel(config, session, generation_config)
 
 创建`MptPreTrainedModel`类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `Object` | 模型配置对象。 |
-| 会话 | `Object` | ONNX会话对象。 |
+| 会话 | `Object` | ONNX 会话对象。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.MptModel
 
-裸Mpt模型变换器输出原始隐藏状态，没有特定的头部。
+裸 Mpt 模型变换器输出原始隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.MptForCausalLM
 
-带有语言建模头部的MPT模型变换器（线性层，权重与输入嵌入绑定）。
+带有语言建模头部的 MPT 模型变换器（线性层，权重与输入嵌入绑定）。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.OPTPreTrainedModel
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -3175,30 +3175,30 @@ CodeGenForCausalLM是基于GPT-2架构的代码生成模型的类。它扩展了
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `Object` | 模型配置对象。 |
-| session | `Object` | ONNX会话对象。 |
+| session | `Object` | ONNX 会话对象。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## models.OPTModel
 
-裸的OPT模型输出原始隐藏状态，顶部没有任何特定的头部。
+裸的 OPT 模型输出原始隐藏状态，顶部没有任何特定的头部。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.OPTForCausalLM
 
-带有语言建模头部的OPT模型变换器（线性层，权重与输入嵌入绑定）。
+带有语言建模头部的 OPT 模型变换器（线性层，权重与输入嵌入绑定）。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.VitMatteForImageMatting
 
-利用任何视觉骨干（例如ADE20k，CityScapes）的ViTMatte框架。
+利用任何视觉骨干（例如 ADE20k，CityScapes）的 ViTMatte 框架。
 
 **示例:** 使用`VitMatteForImageMatting`模型执行图像抠图。
 
@@ -3226,7 +3226,7 @@ const { alphas } = await model(inputs);
 // }
 ```
 
-您可以按以下方式可视化alpha遮罩：
+您可以按以下方式可视化 alpha 遮罩：
 
 ```py
 import { Tensor, cat } from '@xenova/transformers';
@@ -3254,13 +3254,13 @@ const outputImage = RawImage.fromTensor(imageData);
 outputImage.save('output.png');
 ```
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ### vitMatteForImageMatting._call(model_inputs)
 
-**种类**: [`VitMatteForImageMatting`](#module_models.VitMatteForImageMatting)的实例方法
+**种类**: `VitMatteForImageMatting`的实例方法
 
 | 参数 | 类型 |
 | --- | --- |
@@ -3270,7 +3270,7 @@ outputImage.save('output.png');
 
 ## models.DetrObjectDetectionOutput
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -3279,14 +3279,14 @@ outputImage.save('output.png');
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 所有查询的分类logits（包括无对象）。 |
-| output.pred_boxes | `Tensor` | 所有查询的标准化框坐标，表示为（中心_x，中心_y，宽度，高度）。这些值在[0, 1]范围内标准化，相对于批处理中每个单独图像的大小（忽略可能的填充）。 |
+| output.logits | `Tensor` | 所有查询的分类 logits（包括无对象）。 |
+| output.pred_boxes | `Tensor` | 所有查询的标准化框坐标，表示为（中心 _x，中心 _y，宽度，高度）。这些值在[0, 1]范围内标准化，相对于批处理中每个单独图像的大小（忽略可能的填充）。 |
 
 * * *
 
 ## models.DetrSegmentationOutput
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
@@ -3295,7 +3295,7 @@ outputImage.save('output.png');
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 模型的输出logits。 |
+| output.logits | `Tensor` | 模型的输出 logits。 |
 | output.pred_boxes | `Tensor` | 预测的框。 |
 | output.pred_masks | `Tensor` | 预测的掩模。 |
 
@@ -3303,23 +3303,23 @@ outputImage.save('output.png');
 
 ## models.TableTransformerModel
 
-裸的Table Transformer模型（由骨干和编码器-解码器Transformer组成），输出顶部没有任何特定头部的原始隐藏状态。
+裸的 Table Transformer 模型（由骨干和编码器-解码器 Transformer 组成），输出顶部没有任何特定头部的原始隐藏状态。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.TableTransformerForObjectDetection
 
-带有对象检测头部的Table Transformer模型（由骨干和编码器-解码器Transformer组成），用于诸如COCO检测之类的任务。
+带有对象检测头部的 Table Transformer 模型（由骨干和编码器-解码器 Transformer 组成），用于诸如 COCO 检测之类的任务。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ### tableTransformerForObjectDetection._call(model_inputs)
 
-**种类**: [`TableTransformerForObjectDetection`](#module_models.TableTransformerForObjectDetection)的实例方法
+**种类**: `TableTransformerForObjectDetection`的实例方法
 
 | 参数 | 类型 |
 | --- | --- |
@@ -3331,29 +3331,29 @@ outputImage.save('output.png');
 
 一个处理权重初始化和简单接口以下载和加载预训练模型的抽象类。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.ResNetModel
 
-裸的ResNet模型输出原始特征，顶部没有任何特定的头。
+裸的 ResNet 模型输出原始特征，顶部没有任何特定的头。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ## models.ResNetForImageClassification
 
-带有图像分类头部（在池化特征的顶部有一个线性层），例如用于ImageNet的ResNet模型。
+带有图像分类头部（在池化特征的顶部有一个线性层），例如用于 ImageNet 的 ResNet 模型。
 
-**种类**: [`models`](#module_models)的静态类
+**种类**: `models`的静态类
 
 * * *
 
 ### resNetForImageClassification._call(model_inputs)
 
-**种类**: [`models`](#module_models.ResNetForImageClassification)的实例方法
+**种类**: `models`的实例方法
 
 | 参数 | 类型 |
 | --- | --- |
@@ -3363,15 +3363,15 @@ outputImage.save('output.png');
 
 ## models.Swin2SRModel
 
-裸的Swin2SR模型转换器，输出原始的隐藏状态，没有特定的头部。
+裸的 Swin2SR 模型转换器，输出原始的隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.Swin2SRForImageSuperResolution
 
-带有上采样头部的Swin2SR模型转换器，用于图像超分辨率和恢复。
+带有上采样头部的 Swin2SR 模型转换器，用于图像超分辨率和恢复。
 
 **示例**：使用`Xenova/swin2SR-classical-sr-x2-64`进行超分辨率。
 
@@ -3402,21 +3402,21 @@ const outputImage = RawImage.fromTensor(output);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.DPTModel
 
-裸的DPT模型转换器，输出原始的隐藏状态，没有特定的头部。
+裸的 DPT 模型转换器，输出原始的隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.DPTForDepthEstimation
 
-带有深度估计头部的DPT模型（由3个卷积层组成），例如用于KITTI、NYUv2。
+带有深度估计头部的 DPT 模型（由 3 个卷积层组成），例如用于 KITTI、NYUv2。
 
 **示例**：使用`Xenova/dpt-hybrid-midas`进行深度估计。
 
@@ -3452,29 +3452,29 @@ const depth = RawImage.fromTensor(formatted);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.DepthAnythingForDepthEstimation
 
-带有深度估计头部的深度任意模型（由3个卷积层组成），例如用于KITTI、NYUv2。
+带有深度估计头部的深度任意模型（由 3 个卷积层组成），例如用于 KITTI、NYUv2。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.GLPNModel
 
-裸的GLPN编码器（Mix-Transformer），输出原始的隐藏状态，没有特定的头部。
+裸的 GLPN 编码器（Mix-Transformer），输出原始的隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.GLPNForDepthEstimation
 
-带有轻量级深度估计头部的GLPN模型转换器，例如用于KITTI、NYUv2。
+带有轻量级深度估计头部的 GLPN 模型转换器，例如用于 KITTI、NYUv2。
 
 **示例**：使用`Xenova/glpn-kitti`进行深度估计。
 
@@ -3510,13 +3510,13 @@ const depth = RawImage.fromTensor(formatted);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.DonutSwinModel
 
-裸的Donut Swin模型转换器，输出原始的隐藏状态，没有特定的头部。
+裸的 Donut Swin 模型转换器，输出原始的隐藏状态，没有特定的头部。
 
 **示例**：逐步文档解析。
 
@@ -3589,29 +3589,29 @@ const decoded = tokenizer.batch_decode(output)[0];
 // <s_docvqa><s_question> What is the invoice number?</s_question><s_answer> us-001</s_answer></s>
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.ConvNextModel
 
-裸的ConvNext模型，输出原始特征，没有特定的头部。
+裸的 ConvNext 模型，输出原始特征，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.ConvNextForImageClassification
 
-带有图像分类头部的ConvNext模型（在池化特征的顶部有一个线性层），例如用于ImageNet。
+带有图像分类头部的 ConvNext 模型（在池化特征的顶部有一个线性层），例如用于 ImageNet。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### convNextForImageClassification._call(model_inputs)
 
-**种类**：[`models`](#module_models)的实例方法
+**种类**：`models`的实例方法
 
 | 参数 | 类型 |
 | --- | --- |
@@ -3621,23 +3621,23 @@ const decoded = tokenizer.batch_decode(output)[0];
 
 ## models.ConvNextV2Model
 
-裸的ConvNextV2模型，输出原始特征，没有特定的头部。
+裸的 ConvNextV2 模型，输出原始特征，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.ConvNextV2ForImageClassification
 
-带有图像分类头部的ConvNextV2模型（在池化特征的顶部有一个线性层），例如用于ImageNet。
+带有图像分类头部的 ConvNextV2 模型（在池化特征的顶部有一个线性层），例如用于 ImageNet。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### convNextV2ForImageClassification._call(model_inputs)
 
-**种类**：[`models`](#module_models)的`ConvNextV2ForImageClassification`实例方法
+**种类**：`models`的`ConvNextV2ForImageClassification`实例方法
 
 | 参数 | 类型 |
 | --- | --- |
@@ -3647,23 +3647,23 @@ const decoded = tokenizer.batch_decode(output)[0];
 
 ## models.Dinov2Model
 
-裸的DINOv2模型转换器，输出原始的隐藏状态，没有特定的头部。
+裸的 DINOv2 模型转换器，输出原始的隐藏状态，没有特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.Dinov2ForImageClassification
 
-带有图像分类头部的Dinov2模型转换器（在[CLS]标记的最终隐藏状态的顶部有一个线性层），例如用于ImageNet。
+带有图像分类头部的 Dinov2 模型转换器（在[CLS]标记的最终隐藏状态的顶部有一个线性层），例如用于 ImageNet。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### dinov2ForImageClassification._call(model_inputs)
 
-**种类**：[`models`](#module_models)的`Dinov2ForImageClassification`实例方法
+**种类**：`models`的`Dinov2ForImageClassification`实例方法
 
 | 参数 | 类型 |
 | --- | --- |
@@ -3673,23 +3673,23 @@ const decoded = tokenizer.batch_decode(output)[0];
 
 ## models.YolosObjectDetectionOutput
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的YolosObjectDetectionOutput(output)
+### 新的 YolosObjectDetectionOutput(output)
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 所有查询的分类logits（包括无对象）。 |
-| output.pred_boxes | `Tensor` | 所有查询的标准化框坐标，表示为（中心_x，中心_y，宽度，高度）。这些值在[0, 1]范围内标准化，相对于批处理中每个单独图像的大小（忽略可能的填充）。 |
+| output.logits | `Tensor` | 所有查询的分类 logits（包括无对象）。 |
+| output.pred_boxes | `Tensor` | 所有查询的标准化框坐标，表示为（中心 _x，中心 _y，宽度，高度）。这些值在[0, 1]范围内标准化，相对于批处理中每个单独图像的大小（忽略可能的填充）。 |
 
 * * *
 
 ## models.SamModel
 
-Segment Anything Model (SAM)用于生成分割蒙版，给定输入图像和可选的2D位置和边界框。
+Segment Anything Model (SAM)用于生成分割蒙版，给定输入图像和可选的 2D 位置和边界框。
 
 **示例:** 使用`Xenova/sam-vit-base`执行蒙版生成。
 
@@ -3728,17 +3728,17 @@ const scores = outputs.iou_scores;
 // }
 ```
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
-+   [.SamModel](#module_models.SamModel)
++   .SamModel
 
-    +   [`new SamModel(config, vision_encoder, prompt_encoder_mask_decoder)`](#new_module_models.SamModel_new)
+    +   `new SamModel(config, vision_encoder, prompt_encoder_mask_decoder)`
 
-    +   [`.get_image_embeddings(model_inputs)`](#module_models.SamModel+get_image_embeddings) ⇒ `Promise.<{image_embeddings: Tensor, image_positional_embeddings: Tensor}>`
+    +   `.get_image_embeddings(model_inputs)` ⇒ `Promise.<{image_embeddings: Tensor, image_positional_embeddings: Tensor}>`
 
-    +   [`.forward(model_inputs)`](#module_models.SamModel+forward) ⇒ `Promise.<Object>`
+    +   `.forward(model_inputs)` ⇒ `Promise.<Object>`
 
-    +   [`._call(model_inputs)`](#module_models.SamModel+_call) ⇒ `Promise.<SamImageSegmentationOutput>`
+    +   `._call(model_inputs)` ⇒ `Promise.<SamImageSegmentationOutput>`
 
 * * *
 
@@ -3749,8 +3749,8 @@ const scores = outputs.iou_scores;
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 指定超参数和其他模型设置的配置对象。 |
-| vision_encoder | `Object` | 包含视觉编码器模型的ONNX会话。 |
-| prompt_encoder_mask_decoder | `any` | 包含提示编码器和蒙版解码器模型的ONNX会话。 |
+| vision_encoder | `Object` | 包含视觉编码器模型的 ONNX 会话。 |
+| prompt_encoder_mask_decoder | `any` | 包含提示编码器和蒙版解码器模型的 ONNX 会话。 |
 
 * * *
 
@@ -3758,7 +3758,7 @@ const scores = outputs.iou_scores;
 
 计算图像嵌入和位置图像嵌入，给定图像的像素值。
 
-**类型**: [`SamModel`](#module_models)的实例方法
+**类型**: `SamModel`的实例方法
 
 **返回**: `Promise.<{image_embeddings: Tensor, image_positional_embeddings: Tensor}>` - 图像嵌入和位置图像嵌入。
 
@@ -3771,7 +3771,7 @@ const scores = outputs.iou_scores;
 
 ### samModel.forward(model_inputs) ⇒ <code> Promise. < Object > </code>
 
-**类型**: [`SamModel`](#module_models.SamModel)的实例方法
+**类型**: `SamModel`的实例方法
 
 **返回**: `Promise.<Object>` - 模型的输出。
 
@@ -3785,7 +3785,7 @@ const scores = outputs.iou_scores;
 
 运行提供的输入的模型
 
-**类型**: [`SamModel`](#module_models.SamModel)的实例方法
+**类型**: `SamModel`的实例方法
 
 **返回**: `Promise.<SamImageSegmentationOutput>` - 包含分割输出的对象
 
@@ -3797,9 +3797,9 @@ const scores = outputs.iou_scores;
 
 ## models.SamImageSegmentationOutput
 
-Segment-Anything模型输出的基类。
+Segment-Anything 模型输出的基类。
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -3815,7 +3815,7 @@ Segment-Anything模型输出的基类。
 
 ## models.MarianMTModel
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -3826,7 +3826,7 @@ Segment-Anything模型输出的基类。
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 模型配置对象。 |
-| session | `Object` | ONNX会话对象。 |
+| session | `Object` | ONNX 会话对象。 |
 | decoder_merged_session | `any` |  |
 | generation_config | `any` |  |
 
@@ -3834,7 +3834,7 @@ Segment-Anything模型输出的基类。
 
 ## models.M2M100ForConditionalGeneration
 
-**类型**: [`models`](#module_models)的静态类
+**类型**: `models`的静态类
 
 * * *
 
@@ -3845,7 +3845,7 @@ Segment-Anything模型输出的基类。
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `Object` | 模型配置对象。 |
-| 会话 | `Object` | ONNX会话对象。 |
+| 会话 | `Object` | ONNX 会话对象。 |
 | decoder_merged_session | `any` |  |
 | generation_config | `any` |  |
 
@@ -3853,7 +3853,7 @@ Segment-Anything模型输出的基类。
 
 ## models.Wav2Vec2Model
 
-裸的Wav2Vec2模型变压器输出原始隐藏状态，没有特定的头部。
+裸的 Wav2Vec2 模型变压器输出原始隐藏状态，没有特定的头部。
 
 **示例：**加载并运行`Wav2Vec2Model`进行特征提取。
 
@@ -3878,29 +3878,29 @@ const output = await model(inputs);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.Wav2Vec2BertModel
 
-裸的Wav2Vec2Bert模型变压器输出原始隐藏状态，没有任何特定的头部。
+裸的 Wav2Vec2Bert 模型变压器输出原始隐藏状态，没有任何特定的头部。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.Wav2Vec2BertForCTC
 
-Wav2Vec2Bert模型，顶部带有用于连接主义时间分类（CTC）的`语言建模`头。
+Wav2Vec2Bert 模型，顶部带有用于连接主义时间分类（CTC）的`语言建模`头。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### wav2Vec2BertForCTC._call(model_inputs)
 
-**种类**：[`Wav2Vec2BertForCTC`](#module_models.Wav2Vec2BertForCTC)的实例方法
+**种类**：`Wav2Vec2BertForCTC`的实例方法
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -3912,9 +3912,9 @@ Wav2Vec2Bert模型，顶部带有用于连接主义时间分类（CTC）的`语�
 
 ## models.Wav2Vec2BertForSequenceClassification
 
-Wav2Vec2Bert模型，顶部带有序列分类头（在汇总输出上的线性层）。
+Wav2Vec2Bert 模型，顶部带有序列分类头（在汇总输出上的线性层）。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -3922,9 +3922,9 @@ Wav2Vec2Bert模型，顶部带有序列分类头（在汇总输出上的线性�
 
 在新输入上调用模型。
 
-**种类**：[`Wav2Vec2BertForSequenceClassification`](#module_models.Wav2Vec2BertForSequenceClassification)
+**种类**：`Wav2Vec2BertForSequenceClassification`
 
-**返回**：`Promise.<SequenceClassifierOutput>` - 包含模型用于序列分类的输出logits的对象。
+**返回**：`Promise.<SequenceClassifierOutput>` - 包含模型用于序列分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -3934,7 +3934,7 @@ Wav2Vec2Bert模型，顶部带有序列分类头（在汇总输出上的线性�
 
 ## models.HubertModel
 
-裸的Hubert模型变压器输出原始隐藏状态，没有特定的头部。
+裸的 Hubert 模型变压器输出原始隐藏状态，没有特定的头部。
 
 **示例：**加载并运行`HubertModel`进行特征提取。
 
@@ -3959,21 +3959,21 @@ const output = await model(inputs);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.HubertForCTC
 
-Hubert模型，顶部带有用于连接主义时间分类（CTC）的`语言建模`头。
+Hubert 模型，顶部带有用于连接主义时间分类（CTC）的`语言建模`头。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### hubertForCTC._call(model_inputs)
 
-**种类**：[`HubertForCTC`](#module_models.HubertForCTC)的实例方法
+**种类**：`HubertForCTC`的实例方法
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -3985,9 +3985,9 @@ Hubert模型，顶部带有用于连接主义时间分类（CTC）的`语言建�
 
 ## models.HubertForSequenceClassification
 
-Hubert模型，顶部带有序列分类头（在汇总输出上的线性层），用于任务如SUPERB关键词检测。
+Hubert 模型，顶部带有序列分类头（在汇总输出上的线性层），用于任务如 SUPERB 关键词检测。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -3995,9 +3995,9 @@ Hubert模型，顶部带有序列分类头（在汇总输出上的线性层）�
 
 在新输入上调用模型。
 
-**种类**：[`HubertForSequenceClassification`](#module_models.HubertForSequenceClassification)的实例方法
+**种类**：`HubertForSequenceClassification`的实例方法
 
-**返回**：`Promise.<SequenceClassifierOutput>` - 包含模型用于序列分类的输出logits的对象。
+**返回**：`Promise.<SequenceClassifierOutput>` - 包含模型用于序列分类的输出 logits 的对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -4009,13 +4009,13 @@ Hubert模型，顶部带有序列分类头（在汇总输出上的线性层）�
 
 一个抽象类，用于处理权重初始化和一个简单的接口来下载和加载预训练模型。
 
-**种类**：[`models`](#module_models)
+**种类**：`models`
 
 * * *
 
 ## models.WavLMModel
 
-裸的WavLM模型变压器输出原始隐藏状态，没有特定的头部。
+裸的 WavLM 模型变压器输出原始隐藏状态，没有特定的头部。
 
 **示例：**加载并运行`WavLMModel`进行特征提取。
 
@@ -4040,21 +4040,21 @@ const output = await model(inputs);
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.WavLMForCTC
 
-带有`语言建模`头部的WavLM模型，用于连接主义时间分类（CTC）。
+带有`语言建模`头部的 WavLM 模型，用于连接主义时间分类（CTC）。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### wavLMForCTC._call(model_inputs)
 
-**种类**：[`WavLMForCTC`](#module_models.WavLMForCTC)的实例方法
+**种类**：`WavLMForCTC`的实例方法
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -4066,9 +4066,9 @@ const output = await model(inputs);
 
 ## models.WavLMForSequenceClassification
 
-WavLM模型，顶部带有序列分类头（池化输出上的线性层）。
+WavLM 模型，顶部带有序列分类头（池化输出上的线性层）。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4076,9 +4076,9 @@ WavLM模型，顶部带有序列分类头（池化输出上的线性层）。
 
 对新输入调用模型。
 
-**种类**：[`WavLMForSequenceClassification`](#module_models.WavLMForSequenceClassification)的实例方法
+**种类**：`WavLMForSequenceClassification`的实例方法
 
-**返回**：`Promise.<SequenceClassifierOutput>` - 包含模型输出logits的对象，用于序列分类。
+**返回**：`Promise.<SequenceClassifierOutput>` - 包含模型输出 logits 的对象，用于序列分类。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -4090,21 +4090,21 @@ WavLM模型，顶部带有序列分类头（池化输出上的线性层）。
 
 一个抽象类，用于处理权重初始化和下载和加载预训练模型的简单接口。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.SpeechT5Model
 
-SpeechT5编码器-解码器模型裸输出原始隐藏状态，没有任何特定的前置或后置网络。
+SpeechT5 编码器-解码器模型裸输出原始隐藏状态，没有任何特定的前置或后置网络。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.SpeechT5ForSpeechToText
 
-带有语音编码器和文本解码器的SpeechT5模型。
+带有语音编码器和文本解码器的 SpeechT5 模型。
 
 **示例：**使用`SpeechT5ForSpeechToText`从文本生成语音。
 
@@ -4144,21 +4144,21 @@ console.log(waveform)
 // }
 ```
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.SpeechT5ForTextToSpeech
 
-带有文本编码器和语音解码器的SpeechT5模型。
+带有文本编码器和语音解码器的 SpeechT5 模型。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
-+   [.SpeechT5ForTextToSpeech](#module_models.SpeechT5ForTextToSpeech)
++   .SpeechT5ForTextToSpeech
 
-    +   [`new SpeechT5ForTextToSpeech(config, session, decoder_merged_session, generation_config)`](#new_module_models.SpeechT5ForTextToSpeech_new)
+    +   `new SpeechT5ForTextToSpeech(config, session, decoder_merged_session, generation_config)`
 
-    +   [`.generate_speech(input_values, speaker_embeddings, options)`](#module_models.SpeechT5ForTextToSpeech+generate_speech) ⇒ `Promise.<SpeechOutput>`
+    +   `.generate_speech(input_values, speaker_embeddings, options)` ⇒ `Promise.<SpeechOutput>`
 
 * * *
 
@@ -4179,9 +4179,9 @@ console.log(waveform)
 
 将一系列输入标记转换为一系列梅尔频谱图，随后使用声码器将其转换为语音波形。
 
-**种类**：[`SpeechT5ForTextToSpeech`](#module_models.SpeechT5ForTextToSpeech)的实例方法
+**种类**：`SpeechT5ForTextToSpeech`的实例方法
 
-**返回**：`Promise.<SpeechOutput>` - 一个包含频谱图、波形和交叉注意张量的对象的Promise。
+**返回**：`Promise.<SpeechOutput>` - 一个包含频谱图、波形和交叉注意张量的对象的 Promise。
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
@@ -4198,83 +4198,83 @@ console.log(waveform)
 
 ## 模型.SpeechT5HifiGan
 
-HiFi-GAN声码器。
+HiFi-GAN 声码器。
 
-查看[SpeechT5ForSpeechToText](./models#module_models.SpeechT5ForSpeechToText)以获取示例用法。
+查看 SpeechT5ForSpeechToText 以获取示例用法。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ## 模型.TrOCRPreTrainedModel
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
-### 新的TrOCRPreTrainedModel(config, session, generation_config)
+### 新的 TrOCRPreTrainedModel(config, session, generation_config)
 
 创建`TrOCRPreTrainedModel`类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `对象` | 模型的配置。 |
-| 会话 | `任意` | 包含模型权重的ONNX会话。 |
+| 会话 | `任意` | 包含模型权重的 ONNX 会话。 |
 | generation_config | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## 模型.TrOCRForCausalLM
 
-带有语言建模头的TrOCR解码器。
+带有语言建模头的 TrOCR 解码器。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ## 模型.MistralPreTrainedModel
 
-裸Mistral模型输出原始隐藏状态，没有特定的顶部头。
+裸 Mistral 模型输出原始隐藏状态，没有特定的顶部头。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
-### 新的MistralPreTrainedModel(config, session, generation_config)
+### 新的 MistralPreTrainedModel(config, session, generation_config)
 
 创建`MistralPreTrainedModel`类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `对象` | 模型的配置。 |
-| 会话 | `任意` | 包含模型权重的ONNX会话。 |
+| 会话 | `任意` | 包含模型权重的 ONNX 会话。 |
 | 生成配置 | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## 模型.FalconPreTrainedModel
 
-裸Falcon模型输出原始隐藏状态，没有特定的顶部头。
+裸 Falcon 模型输出原始隐藏状态，没有特定的顶部头。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
-### 新的FalconPreTrainedModel(config, session, generation_config)
+### 新的 FalconPreTrainedModel(config, session, generation_config)
 
 创建`FalconPreTrainedModel`类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `对象` | 模型的配置。 |
-| 会话 | `任意` | 包含模型权重的ONNX会话。 |
+| 会话 | `任意` | 包含模型权重的 ONNX 会话。 |
 | 生成配置 | `GenerationConfig` | 生成配置。 |
 
 * * *
 
 ## 模型.ClapTextModelWithProjection
 
-CLAP文本模型，顶部带有投影层（在池化输出的顶部有一个线性层）。
+CLAP 文本模型，顶部带有投影层（在池化输出的顶部有一个线性层）。
 
 **示例：** 使用`ClapTextModelWithProjection`计算文本嵌入。
 
@@ -4299,19 +4299,19 @@ const { text_embeds } = await text_model(text_inputs);
 // }
 ```
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ### ClapTextModelWithProjection.from_pretrained()：`PreTrainedModel.from_pretrained`
 
-**类型**：[`ClapTextModelWithProjection`](#module_models.ClapTextModelWithProjection)的静态方法
+**类型**：`ClapTextModelWithProjection`的静态方法
 
 * * *
 
 ## 模型.ClapAudioModelWithProjection
 
-带有投影层的CLAP音频模型（在池化输出的顶部有一个线性层）。
+带有投影层的 CLAP 音频模型（在池化输出的顶部有一个线性层）。
 
 **示例：** 使用`ClapAudioModelWithProjection`计算音频嵌入。
 
@@ -4336,19 +4336,19 @@ const { audio_embeds } = await audio_model(audio_inputs);
 // }
 ```
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ### ClapAudioModelWithProjection.from_pretrained()：`PreTrainedModel.from_pretrained`
 
-**类型**：[`ClapAudioModelWithProjection`](#module_models.ClapAudioModelWithProjection)的静态方法
+**类型**：`ClapAudioModelWithProjection`的静态方法
 
 * * *
 
 ## 模型.VitsModel
 
-完整的VITS模型，用于文本到语音合成。
+完整的 VITS 模型，用于文本到语音合成。
 
 **示例：** 使用`VitsModel`从文本生成语音。
 
@@ -4372,7 +4372,7 @@ const { waveform } = await model(inputs);
 // }
 ```
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
@@ -4380,9 +4380,9 @@ const { waveform } = await model(inputs);
 
 在新输入上调用模型。
 
-**类型**：[`VitsModel`](#module_models.VitsModel)的实例方法
+**类型**：`VitsModel`的实例方法
 
-**返回**：`Promise.<VitsModelOutput>` - VITS模型的输出。
+**返回**：`Promise.<VitsModelOutput>` - VITS 模型的输出。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -4392,45 +4392,45 @@ const { waveform } = await model(inputs);
 
 ## 模型.SegformerModel
 
-裸SegFormer编码器（Mix-Transformer）输出原始隐藏状态，没有特定的顶部头。
+裸 SegFormer 编码器（Mix-Transformer）输出原始隐藏状态，没有特定的顶部头。
 
-**类型**：[`models`](#module_models)的静态类
+**类型**：`models`的静态类
 
 * * *
 
 ## models.SegformerForImageClassification
 
-SegFormer模型变压器，顶部带有图像分类头（最终隐藏状态顶部的线性层），例如用于ImageNet。
+SegFormer 模型变压器，顶部带有图像分类头（最终隐藏状态顶部的线性层），例如用于 ImageNet。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.SegformerForSemanticSegmentation
 
-SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，CityScapes。
+SegFormer 模型变压器，顶部带有全 MLP 解码头，例如用于 ADE20k，CityScapes。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.PretrainedMixin
 
-所有AutoModels的基类。包含用于实例化预训练模型的`from_pretrained`函数。
+所有 AutoModels 的基类。包含用于实例化预训练模型的`from_pretrained`函数。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
-+   [.PretrainedMixin](#module_models.PretrainedMixin)
++   .PretrainedMixin
 
     +   *实例*
 
-        +   [`.MODEL_CLASS_MAPPINGS`](#module_models.PretrainedMixin+MODEL_CLASS_MAPPINGS)：`*`
+        +   `.MODEL_CLASS_MAPPINGS`：`*`
 
-        +   [`.BASE_IF_FAIL`](#module_models.PretrainedMixin+BASE_IF_FAIL)
+        +   `.BASE_IF_FAIL`
 
     +   *静态*
 
-        +   [`.from_pretrained()`](#module_models.PretrainedMixin.from_pretrained)：`PreTrainedModel.from_pretrained`
+        +   `.from_pretrained()`：`PreTrainedModel.from_pretrained`
 
 * * *
 
@@ -4438,7 +4438,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 从模型类型到模型类的映射。
 
-**种类**：[`PretrainedMixin`](#module_models.PretrainedMixin)的实例属性
+**种类**：`PretrainedMixin`的实例属性
 
 * * *
 
@@ -4446,13 +4446,13 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 是否尝试实例化基类（`PretrainedModel`）如果在映射中找不到模型类型。
 
-**种类**：[`PretrainedMixin`](#module_models.PretrainedMixin)的实例属性
+**种类**：`PretrainedMixin`的实例属性
 
 * * *
 
 ### PretrainedMixin.from_pretrained()：`PreTrainedModel.from_pretrained`
 
-**种类**：[`PretrainedMixin`](#module_models.PretrainedMixin)的静态方法
+**种类**：`PretrainedMixin`的静态方法
 
 * * *
 
@@ -4460,13 +4460,13 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练模型的辅助类。所选的模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ### autoModel.MODEL_CLASS_MAPPINGS：`*`
 
-**种类**：[`AutoModel`](#module_models.AutoModel)的实例属性
+**种类**：`AutoModel`的实例属性
 
 * * *
 
@@ -4474,7 +4474,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练序列分类模型的辅助类。所选的模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4482,7 +4482,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练标记分类模型的辅助类。所选的模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4490,7 +4490,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练序列到序列模型的辅助类。所选的模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4498,7 +4498,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练序列到序列语音到文本模型的辅助类。所选的模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4506,7 +4506,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练序列到序列文本到频谱图模型的辅助类。所选的模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4514,7 +4514,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练文本到波形模型的辅助类。所选的模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4522,7 +4522,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练因果语言模型的辅助类。所选的模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4530,7 +4530,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练掩蔽语言模型的辅助类。所选模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4538,7 +4538,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练问答模型的辅助类。所选模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4546,7 +4546,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练视觉到序列模型的辅助类。所选模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4554,7 +4554,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练图像分类模型的辅助类。所选模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4562,7 +4562,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练图像分割模型的辅助类。所选模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4570,7 +4570,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练图像分割模型的辅助类。所选模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4578,7 +4578,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练目标检测模型的辅助类。所选模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4586,26 +4586,26 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于使用`from_pretrained`函数实例化预训练掩蔽生成模型的辅助类。所选模型类由模型配置中指定的类型确定。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
 ## models.Seq2SeqLMOutput
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的Seq2SeqLMOutput(output)
+### 新的 Seq2SeqLMOutput(output)
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 模型的输出logits。 |
+| output.logits | `Tensor` | 模型的输出 logits。 |
 | output.past_key_values | `Tensor` | 代表模型先前状态的键/值对张量。 |
 | output.encoder_outputs | `Tensor` | 序列到序列模型中编码器的输出。 |
-| [output.decoder_attentions] | `Tensor` | 解码器的注意力权重，在注意力softmax之后，用于计算自注意力头中的加权平均。 |
-| [output.cross_attentions] | `Tensor` | 解码器交叉注意力层的注意力权重，在注意力softmax之后，用于计算交叉注意力头中的加权平均。 |
+| [output.decoder_attentions] | `Tensor` | 解码器的注意力权重，在注意力 softmax 之后，用于计算自注意力头中的加权平均。 |
+| [output.cross_attentions] | `Tensor` | 解码器交叉注意力层的注意力权重，在注意力 softmax 之后，用于计算交叉注意力头中的加权平均。 |
 
 * * *
 
@@ -4613,16 +4613,16 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于句子分类模型输出的基类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的SequenceClassifierOutput(output)
+### 新的 SequenceClassifierOutput(output)
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 分类（如果config.num_labels==1则为回归）得分（SoftMax之前）。 |
+| output.logits | `Tensor` | 分类（如果 config.num_labels==1 则为回归）得分（SoftMax 之前）。 |
 
 * * *
 
@@ -4630,16 +4630,16 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于标记分类模型输出的基类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
-### 新的TokenClassifierOutput(output)
+### 新的 TokenClassifierOutput(output)
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 分类得分（SoftMax之前）。 |
+| output.logits | `Tensor` | 分类得分（SoftMax 之前）。 |
 
 * * *
 
@@ -4647,7 +4647,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于掩蔽语言模型输出的基类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4656,7 +4656,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 语言建模头的预测分数（SoftMax之前每个词汇标记的分数）。 |
+| output.logits | `Tensor` | 语言建模头的预测分数（SoftMax 之前每个词汇标记的分数）。 |
 
 * * *
 
@@ -4664,7 +4664,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于问答模型输出的基类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4673,8 +4673,8 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.start_logits | `Tensor` | 跨度开始分数（SoftMax之前）。 |
-| output.end_logits | `Tensor` | 跨度结束分数（SoftMax之前）。 |
+| output.start_logits | `Tensor` | 跨度开始分数（SoftMax 之前）。 |
+| output.end_logits | `Tensor` | 跨度结束分数（SoftMax 之前）。 |
 
 * * *
 
@@ -4682,7 +4682,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于因果语言模型（或自回归）输出的基类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4691,7 +4691,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 语言建模头的预测分数（SoftMax之前每个词汇标记的分数）。 |
+| output.logits | `Tensor` | 语言建模头的预测分数（SoftMax 之前每个词汇标记的分数）。 |
 
 * * *
 
@@ -4699,7 +4699,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 用于因果语言模型（或自回归）输出的基类。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4708,14 +4708,14 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.logits | `Tensor` | 语言建模头的预测分数（SoftMax之前每个词汇标记的分数）。 |
+| output.logits | `Tensor` | 语言建模头的预测分数（SoftMax 之前每个词汇标记的分数）。 |
 | output.past_key_values | `Tensor` | 包含预先计算的隐藏状态（自注意力块中的键和值），可用于加速顺序解码（参见`past_key_values`输入）。 |
 
 * * *
 
 ## models.ImageMattingOutput
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4724,15 +4724,15 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
-| output.alphas | `Tensor` | 估计的alpha值，形状为`(batch_size, num_channels, height, width)`。 |
+| output.alphas | `Tensor` | 估计的 alpha 值，形状为`(batch_size, num_channels, height, width)`。 |
 
 * * *
 
 ## models.VitsModelOutput
 
-描述VITS模型的输出。
+描述 VITS 模型的输出。
 
-**种类**：[`models`](#module_models)的静态类
+**种类**：`models`的静态类
 
 * * *
 
@@ -4742,19 +4742,19 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 | --- | --- | --- |
 | output | `Object` | 模型的输出。 |
 | output.waveform | `Tensor` | 模型预测的最终音频波形，形状为`(batch_size, sequence_length)`。 |
-| output.spectrogram | `Tensor` | 在流模型输出处预测的对数梅尔频谱图。将此频谱图传递给Hi-Fi GAN解码器模型以获得最终音频波形。 |
+| output.spectrogram | `Tensor` | 在流模型输出处预测的对数梅尔频谱图。将此频谱图传递给 Hi-Fi GAN 解码器模型以获得最终音频波形。 |
 
 * * *
 
 ## models~InferenceSession： <code> * </code>
 
-**种类**：[`models`](#module_models)的内部类型定义
+**种类**：`models`的内部类型定义
 
 * * *
 
 ## models~TypedArray： <code> * </code>
 
-**种类**：[`models`](#module_models)的内部类型定义
+**种类**：`models`的内部类型定义
 
 * * *
 
@@ -4762,9 +4762,9 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 根据给定的输入和生成配置使用模型生成文本。
 
-**种类**：[`models`](#module_models)的内部类型定义
+**种类**：`models`的内部类型定义
 
-**返回**：`Promise.<(Array<Array<number>>|EncoderDecoderOutput|DecoderOutput)>` - 生成的输出序列的数组，其中每个序列都是一个标记ID数组。
+**返回**：`Promise.<(Array<Array<number>>|EncoderDecoderOutput|DecoderOutput)>` - 生成的输出序列的数组，其中每个序列都是一个标记 ID 数组。
 
 **抛出**：
 
@@ -4772,9 +4772,9 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
-| 输入 | `Tensor` &#124; `Array` &#124; `TypedArray` |  | 输入标记ID的数组。 |
-| generation_config | `Object` &#124; `GenerationConfig` &#124; `null` |  | 要使用的生成配置。如果为null，将使用默认配置。 |
-| logits_processor | `Object` &#124; `null` |  | 要使用的可选logits处理器。如果为null，将创建一个新的LogitsProcessorList实例。 |
+| 输入 | `Tensor` &#124; `Array` &#124; `TypedArray` |  | 输入标记 ID 的数组。 |
+| generation_config | `Object` &#124; `GenerationConfig` &#124; `null` |  | 要使用的生成配置。如果为 null，将使用默认配置。 |
+| logits_processor | `Object` &#124; `null` |  | 要使用的可选 logits 处理器。如果为 null，将创建一个新的 LogitsProcessorList 实例。 |
 | 选项 | `Object` |  | 选项 |
 | [options.inputs_attention_mask] | `对象` |  | 输入的可选注意力掩码。 |
 
@@ -4782,7 +4782,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 ## models~WhisperGenerationConfig： <code>对象</code>
 
-**种类**：[`models`](#module_models)的内部类型定义
+**种类**：`models`的内部类型定义
 
 **扩展**：`GenerationConfig`
 
@@ -4800,16 +4800,16 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 包含模型输入的对象。
 
-**种类**：[`models`](#module_models)的内部类型定义
+**种类**：`models`的内部类型定义
 
 **属性**
 
 | 名称 | 类型 | 描述 |
 | --- | --- | --- |
 | pixel_values | `Tensor` | 像素值作为形状为`(batch_size, num_channels, height, width)`的张量。这些可以使用`SamProcessor`获得。 |
-| input_points | `Tensor` | 具有形状`(batch_size, num_points, 2)`的输入2D空间点。这由提示编码器用于编码提示。 |
+| input_points | `Tensor` | 具有形状`(batch_size, num_points, 2)`的输入 2D 空间点。这由提示编码器用于编码提示。 |
 
-| [input_labels] | `Tensor` | 点的输入标签，作为形状为`(batch_size, point_batch_size, num_points)`的张量。这由提示编码器用于编码提示。有4种类型的标签：
+| [input_labels] | `Tensor` | 点的输入标签，作为形状为`(batch_size, point_batch_size, num_points)`的张量。这由提示编码器用于编码提示。有 4 种类型的标签：
 
 +   `1`：该点是包含感兴趣对象的点
 
@@ -4829,7 +4829,7 @@ SegFormer模型变压器，顶部带有全MLP解码头，例如用于ADE20k，Ci
 
 ## models~SpeechOutput： <code>对象</code>
 
-**种类**：[`models`](#module_models)的内部类型定义
+**种类**：`models`的内部类型定义
 
 **属性**
 

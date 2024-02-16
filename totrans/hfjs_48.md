@@ -1,6 +1,6 @@
 # 接口：DatasetEntry
 
-> 原文：[https://huggingface.co/docs/huggingface.js/hub/interfaces/DatasetEntry](https://huggingface.co/docs/huggingface.js/hub/interfaces/DatasetEntry)
+> 原文：[`huggingface.co/docs/huggingface.js/hub/interfaces/DatasetEntry`](https://huggingface.co/docs/huggingface.js/hub/interfaces/DatasetEntry)
 
 ## 属性
 

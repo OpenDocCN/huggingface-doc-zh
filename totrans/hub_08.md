@@ -1,6 +1,6 @@
 # Webhooks
 
-> 原始文本：[https://huggingface.co/docs/hub/webhooks](https://huggingface.co/docs/hub/webhooks)
+> 原始文本：[`huggingface.co/docs/hub/webhooks`](https://huggingface.co/docs/hub/webhooks)
 
 Webhooks 现在已经公开可用！
 
@@ -10,11 +10,11 @@ Webhooks 是与 MLOps 相关功能的基础。它们允许您监听特定仓库�
 
 Webhooks 的文档如下 - 或者您也可以浏览我们的 **指南**，展示了 Webhooks 的一些可能用例：
 
-+   [每当数据集更新时微调新模型（Python）](./webhooks-guide-auto-retrain)
++   每当数据集更新时微调新模型（Python）
 
-+   [在 Hub 上使用 LLM API（NodeJS）创建讨论机器人](./webhooks-guide-discussion-bot)
++   在 Hub 上使用 LLM API（NodeJS）创建讨论机器人
 
-+   [创建元数据质量报告（Python）](./webhooks-guide-metadata-review)
++   创建元数据质量报告（Python）
 
 +   更多内容即将推出...
 
@@ -22,7 +22,7 @@ Webhooks 的文档如下 - 或者您也可以浏览我们的 **指南**，展示
 
 您可以在您的 Webhooks [设置](https://huggingface.co/settings/webhooks) 中创建新的 Webhooks 并编辑现有的 Webhooks：
 
-![单个 Webhook 的设置](../Images/af3acc42f93a2feab8c5e348191439ad.png)
+![单个 Webhook 的设置](img/af3acc42f93a2feab8c5e348191439ad.png)
 
 Webhooks 可以监视仓库更新、拉取请求、讨论和新评论。甚至可以创建一个 Space 来响应您的 Webhooks！
 
@@ -32,7 +32,7 @@ Webhooks 可以监视仓库更新、拉取请求、讨论和新评论。甚至�
 
 您可以在 Webhook 设置页面的活动选项卡中查看发送的有效载荷历史记录，也可以重播过去的 Webhooks 以便更轻松地进行调试：
 
-![image.png](../Images/98e757933f19477796ddf8aa93e44e75.png)
+![image.png](img/98e757933f19477796ddf8aa93e44e75.png)
 
 当打开拉取请求时，以下是完整的有效载荷：
 
@@ -183,42 +183,42 @@ Webhooks 可以监视仓库更新、拉取请求、讨论和新评论。甚至�
 
 ## Webhook 密钥
 
-设置Webhook密钥对于确保发送到您的Webhook处理程序URL的有效负载实际来自Hugging Face非常有用。
+设置 Webhook 密钥对于确保发送到您的 Webhook 处理程序 URL 的有效负载实际来自 Hugging Face 非常有用。
 
-如果为您的Webhook设置了一个密钥，它将作为`X-Webhook-Secret` HTTP标头发送到每个请求中。仅支持ASCII字符。
+如果为您的 Webhook 设置了一个密钥，它将作为`X-Webhook-Secret` HTTP 标头发送到每个请求中。仅支持 ASCII 字符。
 
-还可以直接在处理程序URL中添加密钥。例如，将其设置为查询参数：https://example.com/webhook?secret=XXX。
+还可以直接在处理程序 URL 中添加密钥。例如，将其设置为查询参数：https://example.com/webhook?secret=XXX。
 
-如果访问请求的HTTP标头对于您的Webhook处理程序来说很复杂，这可能会有所帮助。
+如果访问请求的 HTTP 标头对于您的 Webhook 处理程序来说很复杂，这可能会有所帮助。
 
 ## 速率限制
 
-每个Webhook每24小时限制为1,000次触发。您可以在“活动”选项卡中的Webhook设置页面中查看您的使用情况。
+每个 Webhook 每 24 小时限制为 1,000 次触发。您可以在“活动”选项卡中的 Webhook 设置页面中查看您的使用情况。
 
-如果您需要增加Webhook的触发次数，请联系我们[website@huggingface.co](mailto:website@huggingface.co)。
+如果您需要增加 Webhook 的触发次数，请联系我们 website@huggingface.co。
 
-## 开发您的Webhooks
+## 开发您的 Webhooks
 
-如果您没有HTTPS端点/URL，您可以尝试使用公共工具进行Webhook测试。这些工具充当捕获所有请求并返回200 OK状态代码的接收器。[Beeceptor](https://beeceptor.com/)是一个工具，您可以使用它创建临时的HTTP端点并查看传入的有效负载。另一个类似的工具是[Webhook.site](https://webhook.site/)。
+如果您没有 HTTPS 端点/URL，您可以尝试使用公共工具进行 Webhook 测试。这些工具充当捕获所有请求并返回 200 OK 状态代码的接收器。[Beeceptor](https://beeceptor.com/)是一个工具，您可以使用它创建临时的 HTTP 端点并查看传入的有效负载。另一个类似的工具是[Webhook.site](https://webhook.site/)。
 
-此外，您可以在开发过程中将真实的Webhook有效负载路由到本地计算机上运行的代码。这是测试和调试更快集成的好方法。您可以通过将本地主机端口暴露到互联网来实现这一点。要走这条路，您可以使用[ngrok](https://ngrok.com/)或[localtunnel](https://theboroer.github.io/localtunnel-www/)。
+此外，您可以在开发过程中将真实的 Webhook 有效负载路由到本地计算机上运行的代码。这是测试和调试更快集成的好方法。您可以通过将本地主机端口暴露到互联网来实现这一点。要走这条路，您可以使用[ngrok](https://ngrok.com/)或[localtunnel](https://theboroer.github.io/localtunnel-www/)。
 
-## 调试Webhooks
+## 调试 Webhooks
 
-您可以轻松找到您的Webhook最近生成的事件。打开您的Webhook的活动选项卡。在那里您将看到最近事件的列表。
+您可以轻松找到您的 Webhook 最近生成的事件。打开您的 Webhook 的活动选项卡。在那里您将看到最近事件的列表。
 
-![image.png](../Images/b58cdf49e2538ba07a3d6be8b112089a.png)
+![image.png](img/b58cdf49e2538ba07a3d6be8b112089a.png)
 
-在这里，您可以查看生成事件的HTTP状态代码和有效负载。此外，您可以通过单击“重新播放”按钮来重新播放这些事件！
+在这里，您可以查看生成事件的 HTTP 状态代码和有效负载。此外，您可以通过单击“重新播放”按钮来重新播放这些事件！
 
-注意：更改Webhook的目标URL或密钥时，重新播放事件将将有效负载发送到更新后的URL。
+注意：更改 Webhook 的目标 URL 或密钥时，重新播放事件将将有效负载发送到更新后的 URL。
 
 ## 常见问题
 
-##### 我可以在我的组织上定义Webhook，还是在我的用户帐户上定义？
+##### 我可以在我的组织上定义 Webhook，还是在我的用户帐户上定义？
 
 不，目前不支持。
 
 ##### 如何订阅所有存储库的事件（或跨整个存储库类型，例如所有模型）？
 
-目前尚未向最终用户公开，但如果您发送电子邮件至[website@huggingface.co](mailto:website@huggingface.co)，我们可以为您切换此功能。
+目前尚未向最终用户公开，但如果您发送电子邮件至 website@huggingface.co，我们可以为您切换此功能。

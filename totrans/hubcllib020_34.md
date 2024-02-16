@@ -1,12 +1,12 @@
-# 文件系统API
+# 文件系统 API
 
-> [https://huggingface.co/docs/huggingface_hub/package_reference/hf_file_system](https://huggingface.co/docs/huggingface_hub/package_reference/hf_file_system)
+> [`huggingface.co/docs/huggingface_hub/package_reference/hf_file_system`](https://huggingface.co/docs/huggingface_hub/package_reference/hf_file_system)
 
-`HfFileSystem`类提供了一个基于[`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/)的Python文件接口，用于Hugging Face Hub。
+`HfFileSystem`类提供了一个基于[`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/)的 Python 文件接口，用于 Hugging Face Hub。
 
 ## HfFileSystem
 
-`HfFileSystem`基于[fsspec](https://filesystem-spec.readthedocs.io/en/latest/)，因此与其提供的大多数API兼容。有关更多详细信息，请查看[我们的指南](../guides/hf_file_system)和fsspec的[API参考](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem)。
+`HfFileSystem`基于[fsspec](https://filesystem-spec.readthedocs.io/en/latest/)，因此与其提供的大多数 API 兼容。有关更多详细信息，请查看我们的指南和 fsspec 的[API 参考](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem)。
 
 ### `class huggingface_hub.HfFileSystem`
 
@@ -20,7 +20,7 @@
 
 +   `token` (`str`, *可选*) — 认证令牌，使用`HfApi.login`方法获取。将默认使用存储的令牌。
 
-像访问本地文件系统一样访问远程Hugging Face Hub存储库。
+像访问本地文件系统一样访问远程 Hugging Face Hub 存储库。
 
 用法：
 

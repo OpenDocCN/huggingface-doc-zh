@@ -1,6 +1,6 @@
 # processors
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/api/processors](https://huggingface.co/docs/transformers.js/api/processors)
+> 原始文本：[`huggingface.co/docs/transformers.js/api/processors`](https://huggingface.co/docs/transformers.js/api/processors)
 
 Processors are used to prepare non-textual inputs (e.g., image or audio) for a model.
 
@@ -20,77 +20,77 @@ let { input_features } = await processor(audio);
 // }
 ```
 
-+   [processors](#module_processors)
++   processors
 
     +   *static*
 
-        +   [.FeatureExtractor](#module_processors.FeatureExtractor) ⇐ `Callable`
+        +   .FeatureExtractor ⇐ `Callable`
 
-            +   [`new FeatureExtractor(config)`](#new_module_processors.FeatureExtractor_new)
+            +   `new FeatureExtractor(config)`
 
-        +   [.ImageFeatureExtractor](#module_processors.ImageFeatureExtractor) ⇐ `FeatureExtractor`
+        +   .ImageFeatureExtractor ⇐ `FeatureExtractor`
 
-            +   [`new ImageFeatureExtractor(config)`](#new_module_processors.ImageFeatureExtractor_new)
+            +   `new ImageFeatureExtractor(config)`
 
             +   [`.thumbnail(image, size, [resample])`](#module_processors.ImageFeatureExtractor+thumbnail) ⇒ `Promise.<RawImage>`
 
-            +   [`.crop_margin(image, gray_threshold)`](#module_processors.ImageFeatureExtractor+crop_margin) ⇒ `Promise.<RawImage>`
+            +   `.crop_margin(image, gray_threshold)` ⇒ `Promise.<RawImage>`
 
-            +   [`.pad_image(pixelData, imgDims, padSize, options)`](#module_processors.ImageFeatureExtractor+pad_image) ⇒ `*`
+            +   `.pad_image(pixelData, imgDims, padSize, options)` ⇒ `*`
 
-            +   [`.rescale(pixelData)`](#module_processors.ImageFeatureExtractor+rescale) ⇒ `void`
+            +   `.rescale(pixelData)` ⇒ `void`
 
-            +   [`.get_resize_output_image_size(image, size)`](#module_processors.ImageFeatureExtractor+get_resize_output_image_size) ⇒ `*`
+            +   `.get_resize_output_image_size(image, size)` ⇒ `*`
 
-            +   [`.resize(image)`](#module_processors.ImageFeatureExtractor+resize) ⇒ `Promise.<RawImage>`
+            +   `.resize(image)` ⇒ `Promise.<RawImage>`
 
-            +   [`.preprocess(image, overrides)`](#module_processors.ImageFeatureExtractor+preprocess) ⇒ `Promise.<PreprocessedImage>`
+            +   `.preprocess(image, overrides)` ⇒ `Promise.<PreprocessedImage>`
 
-            +   [`._call(images, ...args)`](#module_processors.ImageFeatureExtractor+_call) ⇒ `Promise.<ImageFeatureExtractorResult>`
+            +   `._call(images, ...args)` ⇒ `Promise.<ImageFeatureExtractorResult>`
 
-        +   [.DetrFeatureExtractor](#module_processors.DetrFeatureExtractor) ⇐ `ImageFeatureExtractor`
+        +   .DetrFeatureExtractor ⇐ `ImageFeatureExtractor`
 
-            +   [`._call(images)`](#module_processors.DetrFeatureExtractor+_call) ⇒ `Promise.<DetrFeatureExtractorResult>`
+            +   `._call(images)` ⇒ `Promise.<DetrFeatureExtractorResult>`
 
-            +   [`.post_process_object_detection()`](#module_processors.DetrFeatureExtractor+post_process_object_detection) : `post_process_object_detection`
+            +   `.post_process_object_detection()` : `post_process_object_detection`
 
-            +   [`.remove_low_and_no_objects(class_logits, mask_logits, object_mask_threshold, num_labels)`](#module_processors.DetrFeatureExtractor+remove_low_and_no_objects) ⇒ `*`
+            +   `.remove_low_and_no_objects(class_logits, mask_logits, object_mask_threshold, num_labels)` ⇒ `*`
 
-            +   [`.check_segment_validity(mask_labels, mask_probs, k, mask_threshold, overlap_mask_area_threshold)`](#module_processors.DetrFeatureExtractor+check_segment_validity) ⇒ `*`
+            +   `.check_segment_validity(mask_labels, mask_probs, k, mask_threshold, overlap_mask_area_threshold)` ⇒ `*`
 
-            +   [`.compute_segments(mask_probs, pred_scores, pred_labels, mask_threshold, overlap_mask_area_threshold, label_ids_to_fuse, target_size)`](#module_processors.DetrFeatureExtractor+compute_segments) ⇒ `*`
+            +   `.compute_segments(mask_probs, pred_scores, pred_labels, mask_threshold, overlap_mask_area_threshold, label_ids_to_fuse, target_size)` ⇒ `*`
 
             +   [`.post_process_panoptic_segmentation(outputs, [threshold], [mask_threshold], [overlap_mask_area_threshold], [label_ids_to_fuse], [target_sizes])`](#module_processors.DetrFeatureExtractor+post_process_panoptic_segmentation) ⇒ `Array.<{segmentation: Tensor, segments_info: Array<{id: number, label_id: number, score: number}>}>`
 
-        +   [.Processor](#module_processors.Processor) ⇐ `Callable`
+        +   .Processor ⇐ `Callable`
 
-            +   [`new Processor(feature_extractor)`](#new_module_processors.Processor_new)
+            +   `new Processor(feature_extractor)`
 
-            +   [`._call(input, ...args)`](#module_processors.Processor+_call) ⇒ `Promise.<any>`
+            +   `._call(input, ...args)` ⇒ `Promise.<any>`
 
-        +   [.WhisperProcessor](#module_processors.WhisperProcessor) ⇐ `Processor`
+        +   .WhisperProcessor ⇐ `Processor`
 
-            +   [`._call(audio)`](#module_processors.WhisperProcessor+_call) ⇒ `Promise.<any>`
+            +   `._call(audio)` ⇒ `Promise.<any>`
 
-        +   [.AutoProcessor](#module_processors.AutoProcessor)
+        +   .AutoProcessor
 
-            +   [`.from_pretrained(pretrained_model_name_or_path, options)`](#module_processors.AutoProcessor.from_pretrained) ⇒ `Promise.<Processor>`
+            +   `.from_pretrained(pretrained_model_name_or_path, options)` ⇒ `Promise.<Processor>`
 
     +   *inner*
 
-        +   [`~center_to_corners_format(arr)`](#module_processors..center_to_corners_format) ⇒ `Array.<number>`
+        +   `~center_to_corners_format(arr)` ⇒ `Array.<number>`
 
-        +   [`~enforce_size_divisibility(size, divisor)`](#module_processors..enforce_size_divisibility) ⇒ `*`
+        +   `~enforce_size_divisibility(size, divisor)` ⇒ `*`
 
-        +   [`~HeightWidth`](#module_processors..HeightWidth) : `*`
+        +   `~HeightWidth` : `*`
 
-        +   [`~ImageFeatureExtractorResult`](#module_processors..ImageFeatureExtractorResult) : `object`
+        +   `~ImageFeatureExtractorResult` : `object`
 
-        +   [`~PreprocessedImage`](#module_processors..PreprocessedImage) : `object`
+        +   `~PreprocessedImage` : `object`
 
-        +   [`~DetrFeatureExtractorResult`](#module_processors..DetrFeatureExtractorResult) : `object`
+        +   `~DetrFeatureExtractorResult` : `object`
 
-        +   [`~SamImageProcessorResult`](#module_processors..SamImageProcessorResult) : `object`
+        +   `~SamImageProcessorResult` : `object`
 
 * * *
 
@@ -98,7 +98,7 @@ let { input_features } = await processor(audio);
 
 特征提取器的基类。
 
-**Kind**: 静态类 [`processors`](#module_processors)
+**Kind**: 静态类 `processors`
 
 **扩展**: `Callable`
 
@@ -106,7 +106,7 @@ let { input_features } = await processor(audio);
 
 ### new FeatureExtractor(config)
 
-构造一个新的FeatureExtractor实例。
+构造一个新的 FeatureExtractor 实例。
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -118,35 +118,35 @@ let { input_features } = await processor(audio);
 
 用于图像模型的特征提取器。
 
-**Kind**: 静态类 [`processors`](#module_processors)
+**Kind**: 静态类 `processors`
 
 **扩展**: `FeatureExtractor`
 
-+   [.ImageFeatureExtractor](#module_processors.ImageFeatureExtractor) ⇐ `FeatureExtractor`
++   .ImageFeatureExtractor ⇐ `FeatureExtractor`
 
-    +   [`new ImageFeatureExtractor(config)`](#new_module_processors.ImageFeatureExtractor_new)
+    +   `new ImageFeatureExtractor(config)`
 
     +   [`.thumbnail(image, size, [resample])`](#module_processors.ImageFeatureExtractor+thumbnail) ⇒ `Promise.<RawImage>`
 
-    +   [`.crop_margin(image, gray_threshold)`](#module_processors.ImageFeatureExtractor+crop_margin) ⇒ `Promise.<RawImage>`
+    +   `.crop_margin(image, gray_threshold)` ⇒ `Promise.<RawImage>`
 
-    +   [`.pad_image(pixelData, imgDims, padSize, options)`](#module_processors.ImageFeatureExtractor+pad_image) ⇒ `*`
+    +   `.pad_image(pixelData, imgDims, padSize, options)` ⇒ `*`
 
-    +   [`.rescale(pixelData)`](#module_processors.ImageFeatureExtractor+rescale) ⇒ `void`
+    +   `.rescale(pixelData)` ⇒ `void`
 
-    +   [`.get_resize_output_image_size(image, size)`](#module_processors.ImageFeatureExtractor+get_resize_output_image_size) ⇒ `*`
+    +   `.get_resize_output_image_size(image, size)` ⇒ `*`
 
-    +   [`.resize(image)`](#module_processors.ImageFeatureExtractor+resize) ⇒ `Promise.<RawImage>`
+    +   `.resize(image)` ⇒ `Promise.<RawImage>`
 
-    +   [`.preprocess(image, overrides)`](#module_processors.ImageFeatureExtractor+preprocess) ⇒ `Promise.<PreprocessedImage>`
+    +   `.preprocess(image, overrides)` ⇒ `Promise.<PreprocessedImage>`
 
-    +   [`._call(images, ...args)`](#module_processors.ImageFeatureExtractor+_call) ⇒ `Promise.<ImageFeatureExtractorResult>`
+    +   `._call(images, ...args)` ⇒ `Promise.<ImageFeatureExtractorResult>`
 
 * * *
 
 ### new ImageFeatureExtractor(config)
 
-构造一个新的ImageFeatureExtractor实例。
+构造一个新的 ImageFeatureExtractor 实例。
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -166,7 +166,7 @@ let { input_features } = await processor(audio);
 
 将图像调整大小以制作缩略图。调整图像大小，使得没有任何维度大于指定尺寸的相应维度。
 
-**Kind**: [`ImageFeatureExtractor`](#module_processors.ImageFeatureExtractor)的实例方法
+**Kind**: `ImageFeatureExtractor`的实例方法
 
 **返回**: `Promise.<RawImage>` - 调整大小后的图像。
 
@@ -182,7 +182,7 @@ let { input_features } = await processor(audio);
 
 裁剪图像的边缘。灰色像素被视为边缘（即像素值低于阈值）。
 
-**Kind**: [`ImageFeatureExtractor`](#module_processors.ImageFeatureExtractor)的实例方法
+**Kind**: `ImageFeatureExtractor`的实例方法
 
 **返回**: `Promise.<RawImage>` - 裁剪后的图像。
 
@@ -197,7 +197,7 @@ let { input_features } = await processor(audio);
 
 通过一定量进行图像填充。
 
-**Kind**: [`ImageFeatureExtractor`](#module_processors.ImageFeatureExtractor)的实例方法
+**Kind**: `ImageFeatureExtractor`的实例方法
 
 **返回**：`*` - 填充后的像素数据和图像尺寸。
 
@@ -217,7 +217,7 @@ let { input_features } = await processor(audio);
 
 通过`this.rescale_factor`重新调整图像的像素值。
 
-**类型**：[`ImageFeatureExtractor`](#module_processors.ImageFeatureExtractor)的实例方法
+**类型**：`ImageFeatureExtractor`的实例方法
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -229,7 +229,7 @@ let { input_features } = await processor(audio);
 
 查找给定输入图像和所需尺寸的目标（宽度、高度）调整大小后的输出图像维度。
 
-**类型**：[`ImageFeatureExtractor`](#module_processors.ImageFeatureExtractor)的实例方法
+**类型**：`ImageFeatureExtractor`的实例方法
 
 **返回**：`*` - 调整大小后输出图像的目标（宽度、高度）维度。
 
@@ -244,7 +244,7 @@ let { input_features } = await processor(audio);
 
 调整图像大小。
 
-**类型**：[`ImageFeatureExtractor`](#module_processors.ImageFeatureExtractor)的实例方法
+**类型**：`ImageFeatureExtractor`的实例方法
 
 **返回**：`Promise.<RawImage>` - 调整大小后的图像。
 
@@ -258,7 +258,7 @@ let { input_features } = await processor(audio);
 
 预处理给定的图像。
 
-**类型**：[`ImageFeatureExtractor`](#module_processors.ImageFeatureExtractor)的实例方法
+**类型**：`ImageFeatureExtractor`的实例方法
 
 **返回**：`Promise.<PreprocessedImage>` - 预处理后的图像。
 
@@ -273,7 +273,7 @@ let { input_features } = await processor(audio);
 
 对图像数组调用特征提取过程，预处理每个图像，并将生成的特征连接成单个张量。
 
-**类型**：[`ImageFeatureExtractor`](#module_processors.ImageFeatureExtractor)的实例方法
+**类型**：`ImageFeatureExtractor`的实例方法
 
 **返回**：`Promise.<ImageFeatureExtractorResult>` - 包含预处理图像的连接像素值（和其他元数据）的对象。
 
@@ -286,23 +286,23 @@ let { input_features } = await processor(audio);
 
 ## processors.DetrFeatureExtractor ⇐ <code> ImageFeatureExtractor </code>
 
-Detr特征提取器。
+Detr 特征提取器。
 
-**类型**：[`processors`](#module_processors)的静态类
+**类型**：`processors`的静态类
 
 **扩展自**：`ImageFeatureExtractor`
 
-+   [.DetrFeatureExtractor](#module_processors.DetrFeatureExtractor) ⇐ `ImageFeatureExtractor`
++   .DetrFeatureExtractor ⇐ `ImageFeatureExtractor`
 
-    +   [`._call(images)`](#module_processors.DetrFeatureExtractor+_call) ⇒ `Promise.<DetrFeatureExtractorResult>`
+    +   `._call(images)` ⇒ `Promise.<DetrFeatureExtractorResult>`
 
-    +   [`.post_process_object_detection()`](#module_processors.DetrFeatureExtractor+post_process_object_detection) : `post_process_object_detection`
+    +   `.post_process_object_detection()` : `post_process_object_detection`
 
-    +   [`.remove_low_and_no_objects(class_logits, mask_logits, object_mask_threshold, num_labels)`](#module_processors.DetrFeatureExtractor+remove_low_and_no_objects) ⇒ `*`
+    +   `.remove_low_and_no_objects(class_logits, mask_logits, object_mask_threshold, num_labels)` ⇒ `*`
 
-    +   [`.check_segment_validity(mask_labels, mask_probs, k, mask_threshold, overlap_mask_area_threshold)`](#module_processors.DetrFeatureExtractor+check_segment_validity) ⇒ `*`
+    +   `.check_segment_validity(mask_labels, mask_probs, k, mask_threshold, overlap_mask_area_threshold)` ⇒ `*`
 
-    +   [`.compute_segments(mask_probs, pred_scores, pred_labels, mask_threshold, overlap_mask_area_threshold, label_ids_to_fuse, target_size)`](#module_processors.DetrFeatureExtractor+compute_segments) ⇒ `*`
+    +   `.compute_segments(mask_probs, pred_scores, pred_labels, mask_threshold, overlap_mask_area_threshold, label_ids_to_fuse, target_size)` ⇒ `*`
 
     +   [`.post_process_panoptic_segmentation(outputs, [threshold], [mask_threshold], [overlap_mask_area_threshold], [label_ids_to_fuse], [target_sizes])`](#module_processors.DetrFeatureExtractor+post_process_panoptic_segmentation) ⇒ `Array.<{segmentation: Tensor, segments_info: Array<{id: number, label_id: number, score: number}>}>`
 
@@ -312,7 +312,7 @@ Detr特征提取器。
 
 对图像数组调用特征提取过程，预处理每个图像，并将生成的特征连接成单个张量。
 
-**类型**：[`DetrFeatureExtractor`](#module_processors.DetrFeatureExtractor)的实例方法
+**类型**：`DetrFeatureExtractor`的实例方法
 
 **返回**：`Promise.<DetrFeatureExtractorResult>` - 包含预处理图像的像素值的对象。
 
@@ -324,7 +324,7 @@ Detr特征提取器。
 
 ### detrFeatureExtractor.post_process_object_detection() : <code> post_process_object_detection </code>
 
-**类型**：[`DetrFeatureExtractor`](#module_processors.DetrFeatureExtractor)的实例方法
+**类型**：`DetrFeatureExtractor`的实例方法
 
 * * *
 
@@ -332,7 +332,7 @@ Detr特征提取器。
 
 使用`object_mask_threshold`对给定的掩模进行二值化，返回`masks`、`scores`和`labels`的相关值。
 
-**类型**：[`DetrFeatureExtractor`](#module_processors.DetrFeatureExtractor)的实例方法
+**类型**：`DetrFeatureExtractor`的实例方法
 
 **返回**：`*` - 二值化的掩模、分数和标签。
 
@@ -340,7 +340,7 @@ Detr特征提取器。
 | --- | --- | --- |
 | class_logits | `Tensor` | 类别对数。 |
 | mask_logits | `Tensor` | 掩模对数。 |
-| object_mask_threshold | `number` | 用于二值化掩模的介于0和1之间的数字。 |
+| object_mask_threshold | `number` | 用于二值化掩模的介于 0 和 1 之间的数字。 |
 | num_labels | `number` | 标签数量。 |
 
 * * *
@@ -349,7 +349,7 @@ Detr特征提取器。
 
 检查分段是否有效。
 
-**类型**：[`DetrFeatureExtractor`](#module_processors.DetrFeatureExtractor)的实例方法
+**类型**：`DetrFeatureExtractor`的实例方法
 
 **返回**：`*` - 分段是否有效以及有效标签的索引。
 
@@ -357,7 +357,7 @@ Detr特征提取器。
 | --- | --- | --- | --- |
 | mask_labels | `Int32Array` |  | 掩模中每个像素的标签。 |
 | mask_probs | `Array.<Tensor>` |  | 掩模中每个像素的概率。 |
-| k | `number` |  | 分段的类别ID。 |
+| k | `number` |  | 分段的类别 ID。 |
 | mask_threshold | `number` | `0.5` | 掩模阈值。 |
 | overlap_mask_area_threshold | `number` | `0.8` | 重叠掩模区域阈值。 |
 
@@ -367,7 +367,7 @@ Detr特征提取器。
 
 计算分段。
 
-**类型**：[`DetrFeatureExtractor`](#module_processors.DetrFeatureExtractor)的实例方法
+**类型**：`DetrFeatureExtractor`的实例方法
 
 **返回**：`*` - 计算得到的分段。
 
@@ -378,7 +378,7 @@ Detr特征提取器。
 | pred_labels | `Array.<number>` |  | 预测的标签。 |
 | mask_threshold | `number` |  | 掩模阈值。 |
 | overlap_mask_area_threshold | `number` |  | 重叠掩模区域阈值。 |
-| label_ids_to_fuse | `Set.<number>` |  | 要融合的标签ID。 |
+| label_ids_to_fuse | `Set.<number>` |  | 要融合的标签 ID。 |
 | target_size | `Array.<number>` |  | 图像的目标尺寸。 |
 
 * * *
@@ -387,7 +387,7 @@ Detr特征提取器。
 
 后处理模型输出以生成最终的全景分割。
 
-**种类**: [`DetrFeatureExtractor`](#module_processors.DetrFeatureExtractor)的实例方法
+**种类**: `DetrFeatureExtractor`的实例方法
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
@@ -404,15 +404,15 @@ Detr特征提取器。
 
 表示从输入中提取特征的处理器。
 
-**种类**: [`processors`](#module_processors)的静态类
+**种类**: `processors`的静态类
 
 **扩展**: `Callable`
 
-+   [.Processor](#module_processors.Processor) ⇐ `Callable`
++   .Processor ⇐ `Callable`
 
-    +   [`new Processor(feature_extractor)`](#new_module_processors.Processor_new)
+    +   `new Processor(feature_extractor)`
 
-    +   [`._call(input, ...args)`](#module_processors.Processor+_call) ⇒ `Promise.<any>`
+    +   `._call(input, ...args)` ⇒ `Promise.<any>`
 
 * * *
 
@@ -428,11 +428,11 @@ Detr特征提取器。
 
 ### processor._call(input, ...args) ⇒ <code> Promise. < any > </code>
 
-调用feature_extractor函数并提供输入。
+调用 feature_extractor 函数并提供输入。
 
-**种类**: [`Processor`](#module_processors)的实例方法
+**种类**: `Processor`的实例方法
 
-**返回**: `Promise.<any>` - 一个解析为提取特征的Promise。
+**返回**: `Promise.<any>` - 一个解析为提取特征的 Promise。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -443,9 +443,9 @@ Detr特征提取器。
 
 ## 处理器。WhisperProcessor ⇐ <code>处理器</code>
 
-表示从音频输入提取特征的WhisperProcessor。
+表示从音频输入提取特征的 WhisperProcessor。
 
-**种类**: [`processors`](#module_processors)的静态类
+**种类**: `processors`的静态类
 
 **扩展**: `Processor`
 
@@ -453,11 +453,11 @@ Detr特征提取器。
 
 ### whisperProcessor._call(audio) ⇒ <code> Promise. < any > </code>
 
-调用feature_extractor函数并提供音频输入。
+调用 feature_extractor 函数并提供音频输入。
 
-**种类**: [`WhisperProcessor`](#module_processors.WhisperProcessor)的实例方法
+**种类**: `WhisperProcessor`的实例方法
 
-**返回**: `Promise.<any>` - 一个解析为提取特征的Promise。
+**返回**: `Promise.<any>` - 一个解析为提取特征的 Promise。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -497,7 +497,7 @@ let image_inputs = await processor(image);
 // }
 ```
 
-**种类**: [`processors`](#module_processors)的静态类
+**种类**: `processors`的静态类
 
 * * *
 
@@ -507,7 +507,7 @@ let image_inputs = await processor(image);
 
 要实例化的处理器类是根据配置对象的`feature_extractor_type`属性选择的（如果可能，可以作为参数传递或从`pretrained_model_name_or_path`加载）
 
-**种类**: [`AutoProcessor`](#module_processors.AutoProcessor)的静态方法
+**种类**: `AutoProcessor`的静态方法
 
 **返回**: `Promise.<处理器>` - 处理器类的一个新实例。
 
@@ -516,7 +516,7 @@ let image_inputs = await processor(image);
 
 | pretrained_model_name_or_path | `string` | 预训练模型的名称或路径。可以是：
 
-+   一个字符串，预训练处理器的*模型ID*，托管在huggingface.co上的模型存储库中。有效的模型ID可以位于根级别，如`bert-base-uncased`，或者在用户或组织名称下命名空间，如`dbmdz/bert-base-german-cased`。
++   一个字符串，预训练处理器的*模型 ID*，托管在 huggingface.co 上的模型存储库中。有效的模型 ID 可以位于根级别，如`bert-base-uncased`，或者在用户或组织名称下命名空间，如`dbmdz/bert-base-german-cased`。
 
 +   一个包含处理器文件的*目录*的路径，例如`./my_model_directory/`。
 
@@ -531,7 +531,7 @@ let image_inputs = await processor(image);
 
 将边界框从中心格式转换为角格式。
 
-**种类**：[`processors`](#module_processors)的内部方法
+**种类**：`processors`的内部方法
 
 **返回**：`Array.<number>` - 盒子的左上角和右下角的坐标（top_left_x，top_left_y，bottom_right_x，bottom_right_y）
 
@@ -543,9 +543,9 @@ let image_inputs = await processor(image);
 
 ## 处理器~enforce_size_divisibility(size, divisor) ⇒ `<code> * </code>`
 
-将高度和宽度四舍五入到最接近的size_divisibility的倍数
+将高度和宽度四舍五入到最接近的 size_divisibility 的倍数
 
-**种类**：[`processors`](#module_processors)的内部方法
+**种类**：`processors`的内部方法
 
 **返回**：`*` - 四舍五入的大小。
 
@@ -558,15 +558,15 @@ let image_inputs = await processor(image);
 
 ## 处理器~HeightWidth：`<code> * </code>`
 
-命名元组指示我们使用的顺序是（高度x宽度），即使图形行业标准是（宽度x高度）。
+命名元组指示我们使用的顺序是（高度 x 宽度），即使图形行业标准是（宽度 x 高度）。
 
-**种类**：[`processors`](#module_processors)的内部typedef
+**种类**：`processors`的内部 typedef
 
 * * *
 
 ## 处理器~ImageFeatureExtractorResult：`<code> object </code>`
 
-**种类**：[`processors`](#module_processors)的内部typedef
+**种类**：`processors`的内部 typedef
 
 **属性**
 
@@ -580,7 +580,7 @@ let image_inputs = await processor(image);
 
 ## 处理器~PreprocessedImage：`<code> object </code>`
 
-**种类**：[`processors`](#module_processors)的内部typedef
+**种类**：`processors`的内部 typedef
 
 **属性**
 
@@ -594,7 +594,7 @@ let image_inputs = await processor(image);
 
 ## 处理器~DetrFeatureExtractorResult：`<code> object </code>`
 
-**种类**：[`processors`](#module_processors)的内部typedef
+**种类**：`processors`的内部 typedef
 
 **属性**
 
@@ -606,7 +606,7 @@ let image_inputs = await processor(image);
 
 ## 处理器~SamImageProcessorResult：`<code> object </code>`
 
-**种类**：[`processors`](#module_processors)的内部typedef
+**种类**：`processors`的内部 typedef
 
 **属性**
 

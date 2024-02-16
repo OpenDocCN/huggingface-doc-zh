@@ -1,6 +1,6 @@
 # 接口：TensorInfo
 
-> 原文：[https://huggingface.co/docs/huggingface.js/hub/interfaces/TensorInfo](https://huggingface.co/docs/huggingface.js/hub/interfaces/TensorInfo)
+> 原文：[`huggingface.co/docs/huggingface.js/hub/interfaces/TensorInfo`](https://huggingface.co/docs/huggingface.js/hub/interfaces/TensorInfo)
 
 ## 属性
 
@@ -16,7 +16,7 @@
 
 ### dtype
 
-• `dtype`: [`Dtype`](../modules#dtype)
+• `dtype`: `Dtype`
 
 #### 定义在
 

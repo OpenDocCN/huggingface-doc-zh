@@ -1,6 +1,6 @@
 # Static HTML Spaces
 
-> 原始文本：[https://huggingface.co/docs/hub/spaces-sdks-static](https://huggingface.co/docs/hub/spaces-sdks-static)
+> 原始文本：[`huggingface.co/docs/hub/spaces-sdks-static`](https://huggingface.co/docs/hub/spaces-sdks-static)
 
 Spaces 还可以为您的应用程序提供自定义 HTML，而不是使用 Streamlit 或 Gradio。在 Spaces **README.md** 文件的顶部的 `YAML` 块内设置 `sdk: static`。然后，您可以将 HTML 代码放在一个 **index.html** 文件中。
 
@@ -12,7 +12,7 @@ Spaces 还可以为您的应用程序提供自定义 HTML，而不是使用 Stre
 
 ## Space 变量
 
-可以将自定义[环境变量](./spaces-overview#managing-secrets)传递给您的 Space。如果为您的 Space 启用了 OAuth，那么 OAuth 信息，如客户端 ID 和范围，也可以作为环境变量使用。
+可以将自定义环境变量传递给您的 Space。如果为您的 Space 启用了 OAuth，那么 OAuth 信息，如客户端 ID 和范围，也可以作为环境变量使用。
 
 要在 JavaScript 中使用这些变量，可以使用 `window.huggingface.variables` 对象。例如，要访问 `OAUTH_CLIENT_ID` 变量，可以使用 `window.huggingface.variables.OAUTH_CLIENT_ID`。
 

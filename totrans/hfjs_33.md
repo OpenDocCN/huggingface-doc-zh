@@ -1,6 +1,6 @@
 # 接口: ZeroShotClassificationOutputValue
 
-> [https://huggingface.co/docs/huggingface.js/inference/interfaces/ZeroShotClassificationOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/ZeroShotClassificationOutputValue)
+> [`huggingface.co/docs/huggingface.js/inference/interfaces/ZeroShotClassificationOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/ZeroShotClassificationOutputValue)
 
 ## 属性
 

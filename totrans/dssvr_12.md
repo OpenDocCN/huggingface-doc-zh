@@ -1,12 +1,12 @@
 # 在数据集中过滤行
 
-> 原文链接：[https://huggingface.co/docs/datasets-server/filter](https://huggingface.co/docs/datasets-server/filter)
+> 原文链接：[`huggingface.co/docs/datasets-server/filter`](https://huggingface.co/docs/datasets-server/filter)
 
-Datasets Server为数据集提供了一个 `/filter` 端点，用于过滤行。
+Datasets Server 为数据集提供了一个 `/filter` 端点，用于过滤行。
 
-目前，仅支持具有 Parquet 导出的数据集，因此Datasets Server可以索引内容并运行过滤查询，而无需下载整个数据集。
+目前，仅支持具有 Parquet 导出的数据集，因此 Datasets Server 可以索引内容并运行过滤查询，而无需下载整个数据集。
 
-本指南向您展示如何使用Datasets Server的 `/filter` 端点根据查询字符串过滤行。也可以尝试使用 [ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json#operation/filterRows) 进行尝试。
+本指南向您展示如何使用 Datasets Server 的 `/filter` 端点根据查询字符串过滤行。也可以尝试使用 [ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json#operation/filterRows) 进行尝试。
 
 `/filter` 端点接受以下查询参数：
 
@@ -38,9 +38,9 @@ Datasets Server为数据集提供了一个 `/filter` 端点，用于过滤行。
 where=age>30 AND (name='Simone' OR children=0)
 ```
 
-将过滤数据，仅选择那些浮点数“age”列大于30且字符串“name”列等于‘Simone’或整数“children”列等于0的行。
+将过滤数据，仅选择那些浮点数“age”列大于 30 且字符串“name”列等于‘Simone’或整数“children”列等于 0 的行。
 
-请注意，根据SQL语法，比较谓词中的字符串值必须用单引号括起来，例如：`'Scarlett'`。此外，如果字符串值包含单引号，则必须用另一个单引号进行转义，例如：`'O''Hara'`。
+请注意，根据 SQL 语法，比较谓词中的字符串值必须用单引号括起来，例如：`'Scarlett'`。此外，如果字符串值包含单引号，则必须用另一个单引号进行转义，例如：`'O''Hara'`。
 
 例如，让我们在 `ibm/duorc` 数据集的 `SelfRC` 配置的 `train` 分割中过滤那些 `no_answer=false` 的行，将结果限制在第 150-151 行：
 
@@ -56,7 +56,7 @@ def query():
 data = query()
 ```
 
-端点响应是一个包含两个键的 JSON（与 [`/rows`](./rows) 的格式相同）：
+端点响应是一个包含两个键的 JSON（与 `/rows` 的格式相同）：
 
 +   数据集的 [`features`](https://huggingface.co/docs/datasets/about_dataset_features)，包括列名和数据类型。
 
@@ -173,4 +173,4 @@ data = query()
 
 如果结果中有 `partial: true`，这意味着过滤无法在完整数据集上运行，因为数据集太大。
 
-实际上，如果数据集大于5GB，则 `/filter` 的索引可以是部分的。在这种情况下，它只使用前5GB。
+实际上，如果数据集大于 5GB，则 `/filter` 的索引可以是部分的。在这种情况下，它只使用前 5GB。

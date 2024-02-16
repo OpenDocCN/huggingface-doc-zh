@@ -1,6 +1,6 @@
 # 结论
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit7/conclusion](https://huggingface.co/learn/deep-rl-course/unit7/conclusion)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit7/conclusion`](https://huggingface.co/learn/deep-rl-course/unit7/conclusion)
 
 今天就到这里。恭喜你完成了这个单元和教程！
 

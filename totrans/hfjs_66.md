@@ -1,6 +1,6 @@
 # 类: HfAgent
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/agents/classes/HfAgent](https://huggingface.co/docs/huggingface.js/agents/classes/HfAgent)
+> 原文链接: [`huggingface.co/docs/huggingface.js/agents/classes/HfAgent`](https://huggingface.co/docs/huggingface.js/agents/classes/HfAgent)
 
 ## 构造函数
 

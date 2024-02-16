@@ -1,22 +1,22 @@
 # 常见问题解答
 
-> 原始文本：[https://huggingface.co/docs/inference-endpoints/faq](https://huggingface.co/docs/inference-endpoints/faq)
+> 原始文本：[`huggingface.co/docs/inference-endpoints/faq`](https://huggingface.co/docs/inference-endpoints/faq)
 
 ### 问：推理端点在哪些地区可用？
 
-答：推理端点目前在AWS的us-east-1（北弗吉尼亚）和eu-west-1（爱尔兰）以及Azure的eastus（弗吉尼亚）上可用。如果您需要在其他地区部署，请告诉我们。
+答：推理端点目前在 AWS 的 us-east-1（北弗吉尼亚）和 eu-west-1（爱尔兰）以及 Azure 的 eastus（弗吉尼亚）上可用。如果您需要在其他地区部署，请告诉我们。
 
 ### 问：我可以访问我的端点正在运行的实例吗？
 
 答：不，您无法访问托管您的端点的实例。但是，如果您缺少信息或需要有关运行端点的机器的更多见解，请联系我们。
 
-### 问：我能看到我的私有端点在我的VPC帐户上运行吗？
+### 问：我能看到我的私有端点在我的 VPC 帐户上运行吗？
 
-答：不，当创建私有端点（一个通过AWS/Azure PrivateLink与您的VPC连接的Hugging Face推理端点）时，您只能看到端点可用的VPC中的ENI。
+答：不，当创建私有端点（一个通过 AWS/Azure PrivateLink 与您的 VPC 连接的 Hugging Face 推理端点）时，您只能看到端点可用的 VPC 中的 ENI。
 
 ### 问：我可以批量运行推理吗？
 
-答：这取决于任务。[支持的任务](/docs/inference-endpoints/supported_tasks)在幕后使用transformers或sentence-transformers管道。如果您的任务管道支持批处理，例如零样本分类，则支持批量推理。无论如何，您始终可以创建自己的[推理处理程序](/docs/inference-endpoints/guides/custom_handler)并实现批处理。
+答：这取决于任务。支持的任务在幕后使用 transformers 或 sentence-transformers 管道。如果您的任务管道支持批处理，例如零样本分类，则支持批量推理。无论如何，您始终可以创建自己的推理处理程序并实现批处理。
 
 ### 问：如何扩展我的部署？
 
@@ -28,7 +28,7 @@
 
 ### 问：我想部署一个不在支持任务中的模型，这可能吗？
 
-答：是的，您可以部署来自[Hugging Face Hub](https://huggingface.co/models)的任何存储库，如果您的任务/模型/框架不受支持，您可以[创建自己的推理处理程序](/docs/inference-endpoints/guides/custom_handler)，然后将您的模型部署到端点。
+答：是的，您可以部署来自[Hugging Face Hub](https://huggingface.co/models)的任何存储库，如果您的任务/模型/框架不受支持，您可以创建自己的推理处理程序，然后将您的模型部署到端点。
 
 ### 问：运行我的端点需要多少费用？
 
@@ -36,7 +36,7 @@
 
 ### 问：传输到端点的数据是否加密？
 
-答：是的，数据在传输过程中使用TLS/SSL加密。
+答：是的，数据在传输过程中使用 TLS/SSL 加密。
 
 ### 问：如何减少我的端点的延迟？
 
@@ -44,7 +44,7 @@
 
 ### 问：如何监视我部署的端点？
 
-答：您目前可以通过[🤗推理端点Web应用程序](https://ui.endpoints.huggingface.co/endpoints)监视您的端点，在那里您可以访问您的端点的[日志](/docs/inference-endpoints/guides/logs)以及[指标仪表板](/docs/inference-endpoints/guides/metrics)。如果您需要编程访问或更多信息，请联系我们。
+答：您目前可以通过[🤗推理端点 Web 应用程序](https://ui.endpoints.huggingface.co/endpoints)监视您的端点，在那里您可以访问您的端点的日志以及指标仪表板。如果您需要编程访问或更多信息，请联系我们。
 
 ### 问：如果我想部署到未列出的不同实例类型怎么办？
 
@@ -52,4 +52,4 @@
 
 ### 问：我不小心泄露了我的令牌。我需要删除我的端点吗？
 
-答：您可以在此处使现有的个人令牌无效并创建新的令牌：[https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)。对于组织令牌，请转到组织设置。
+答：您可以在此处使现有的个人令牌无效并创建新的令牌：[`huggingface.co/settings/tokens`](https://huggingface.co/settings/tokens)。对于组织令牌，请转到组织设置。

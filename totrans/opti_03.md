@@ -1,14 +1,14 @@
 # 安装
 
-> 原文链接: [https://huggingface.co/docs/optimum/installation](https://huggingface.co/docs/optimum/installation)
+> 原文链接: [`huggingface.co/docs/optimum/installation`](https://huggingface.co/docs/optimum/installation)
 
-🤗 Optimum可以通过以下方式使用`pip`安装：
+🤗 Optimum 可以通过以下方式使用`pip`安装：
 
 ```py
 python -m pip install optimum
 ```
 
-如果您想使用🤗 Optimum的特定加速器功能，可以根据下表安装所需的依赖项：
+如果您想使用🤗 Optimum 的特定加速器功能，可以根据下表安装所需的依赖项：
 
 | 加速器 | 安装 |
 | :-- | :-- |

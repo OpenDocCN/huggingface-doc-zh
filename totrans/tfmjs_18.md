@@ -1,8 +1,8 @@
 # 管道
 
-> 原始文本: [https://huggingface.co/docs/transformers.js/api/pipelines](https://huggingface.co/docs/transformers.js/api/pipelines)
+> 原始文本: [`huggingface.co/docs/transformers.js/api/pipelines`](https://huggingface.co/docs/transformers.js/api/pipelines)
 
-管道提供了一个高级、易于使用的API，用于运行机器学习模型。
+管道提供了一个高级、易于使用的 API，用于运行机器学习模型。
 
 **示例:** 使用`pipeline`函数实例化管道。
 
@@ -18,153 +18,153 @@ const output = await classifier('I love transformers!');
 
     +   *static*
 
-        +   [.Pipeline](#module_pipelines.Pipeline) ⇐ `可调用`
+        +   .Pipeline ⇐ `可调用`
 
-            +   [`new Pipeline(options)`](#new_module_pipelines.Pipeline_new) : `管道`
+            +   `new Pipeline(options)` : `管道`
 
-            +   [`.dispose()`](#module_pipelines.Pipeline+dispose) : `释放类型`
+            +   `.dispose()` : `释放类型`
 
-        +   [.TextClassificationPipeline](#module_pipelines.TextClassificationPipeline) : `文本分类管道`
+        +   .TextClassificationPipeline : `文本分类管道`
 
-            +   [`new TextClassificationPipeline(options)`](#new_module_pipelines.TextClassificationPipeline_new) : `文本分类管道`
+            +   `new TextClassificationPipeline(options)` : `文本分类管道`
 
-            +   [`._call()`](#module_pipelines.TextClassificationPipeline+_call) : `文本分类管道回调`
+            +   `._call()` : `文本分类管道回调`
 
-        +   [.TokenClassificationPipeline](#module_pipelines.TokenClassificationPipeline) : `标记分类管道`
+        +   .TokenClassificationPipeline : `标记分类管道`
 
-            +   [`new TokenClassificationPipeline(options)`](#new_module_pipelines.TokenClassificationPipeline_new) : `标记分类管道`
+            +   `new TokenClassificationPipeline(options)` : `标记分类管道`
 
-            +   [`._call()`](#module_pipelines.TokenClassificationPipeline+_call) : `标记分类管道回调`
+            +   `._call()` : `标记分类管道回调`
 
-        +   [.QuestionAnsweringPipeline](#module_pipelines.QuestionAnsweringPipeline) : `问答管道`
+        +   .QuestionAnsweringPipeline : `问答管道`
 
-            +   [`new QuestionAnsweringPipeline(options)`](#new_module_pipelines.QuestionAnsweringPipeline_new) : `问答管道`
+            +   `new QuestionAnsweringPipeline(options)` : `问答管道`
 
-            +   [`._call()`](#module_pipelines.QuestionAnsweringPipeline+_call) : `问答管道回调`
+            +   `._call()` : `问答管道回调`
 
-        +   [.FillMaskPipeline](#module_pipelines.FillMaskPipeline) : `填充掩码管道`
+        +   .FillMaskPipeline : `填充掩码管道`
 
-            +   [`new FillMaskPipeline(options)`](#new_module_pipelines.FillMaskPipeline_new) : `填充掩码管道`
+            +   `new FillMaskPipeline(options)` : `填充掩码管道`
 
-            +   [`._call()`](#module_pipelines.FillMaskPipeline+_call) : `填充掩码管道回调`
+            +   `._call()` : `填充掩码管道回调`
 
-        +   [.Text2TextGenerationPipeline](#module_pipelines.Text2TextGenerationPipeline) : `文本生成管道`
+        +   .Text2TextGenerationPipeline : `文本生成管道`
 
-            +   [`new Text2TextGenerationPipeline(options)`](#new_module_pipelines.Text2TextGenerationPipeline_new) : `文本生成管道`
+            +   `new Text2TextGenerationPipeline(options)` : `文本生成管道`
 
-            +   [`._key`](#module_pipelines.Text2TextGenerationPipeline+_key) : `生成的文本`
+            +   `._key` : `生成的文本`
 
-            +   [`._call()`](#module_pipelines.Text2TextGenerationPipeline+_call) : `文本生成管道回调`
+            +   `._call()` : `文本生成管道回调`
 
-        +   [.SummarizationPipeline](#module_pipelines.SummarizationPipeline) : `摘要生成管道`
+        +   .SummarizationPipeline : `摘要生成管道`
 
-            +   [`new SummarizationPipeline(options)`](#new_module_pipelines.SummarizationPipeline_new) : `摘要生成管道`
+            +   `new SummarizationPipeline(options)` : `摘要生成管道`
 
-            +   [`._key`](#module_pipelines.SummarizationPipeline+_key) : `摘要文本`
+            +   `._key` : `摘要文本`
 
-        +   [.TranslationPipeline](#module_pipelines.TranslationPipeline) : `翻译管道`
+        +   .TranslationPipeline : `翻译管道`
 
-            +   [`new TranslationPipeline(options)`](#new_module_pipelines.TranslationPipeline_new) : `翻译管道`
+            +   `new TranslationPipeline(options)` : `翻译管道`
 
-            +   [`._key`](#module_pipelines.TranslationPipeline+_key) : `翻译文本`
+            +   `._key` : `翻译文本`
 
-        +   [.TextGenerationPipeline](#module_pipelines.TextGenerationPipeline) : `文本生成管道`
+        +   .TextGenerationPipeline : `文本生成管道`
 
-            +   [`new TextGenerationPipeline(options)`](#new_module_pipelines.TextGenerationPipeline_new) : `文本生成管道`
+            +   `new TextGenerationPipeline(options)` : `文本生成管道`
 
-            +   [`._call()`](#module_pipelines.TextGenerationPipeline+_call) : `文本生成管道回调`
+            +   `._call()` : `文本生成管道回调`
 
-        +   [.ZeroShotClassificationPipeline](#module_pipelines.ZeroShotClassificationPipeline) : `零样本分类管道`
+        +   .ZeroShotClassificationPipeline : `零样本分类管道`
 
-            +   [`new ZeroShotClassificationPipeline(options)`](#new_module_pipelines.ZeroShotClassificationPipeline_new) : `零样本分类管道`
+            +   `new ZeroShotClassificationPipeline(options)` : `零样本分类管道`
 
-            +   [`.model`](#module_pipelines.ZeroShotClassificationPipeline+model) : `任意`
+            +   `.model` : `任意`
 
-            +   [`._call()`](#module_pipelines.ZeroShotClassificationPipeline+_call) : `零样本分类管道回调`
+            +   `._call()` : `零样本分类管道回调`
 
-        +   [.FeatureExtractionPipeline](#module_pipelines.FeatureExtractionPipeline) : `特征提取管道`
+        +   .FeatureExtractionPipeline : `特征提取管道`
 
-            +   [`new FeatureExtractionPipeline(options)`](#new_module_pipelines.FeatureExtractionPipeline_new) : `特征提取管道`
+            +   `new FeatureExtractionPipeline(options)` : `特征提取管道`
 
-            +   [`._call()`](#module_pipelines.FeatureExtractionPipeline+_call) : `特征提取管道回调`
+            +   `._call()` : `特征提取管道回调`
 
-        +   [.AudioClassificationPipeline](#module_pipelines.AudioClassificationPipeline) : `音频分类管道`
+        +   .AudioClassificationPipeline : `音频分类管道`
 
-            +   [`new AudioClassificationPipeline(options)`](#new_module_pipelines.AudioClassificationPipeline_new) : `音频分类管道`
+            +   `new AudioClassificationPipeline(options)` : `音频分类管道`
 
-            +   [`._call()`](#module_pipelines.AudioClassificationPipeline+_call) : `音频分类管道回调`
+            +   `._call()` : `音频分类管道回调`
 
-        +   [.ZeroShotAudioClassificationPipeline](#module_pipelines.ZeroShotAudioClassificationPipeline) : `零样本音频分类管道`
+        +   .ZeroShotAudioClassificationPipeline : `零样本音频分类管道`
 
-            +   [`new ZeroShotAudioClassificationPipeline(options)`](#new_module_pipelines.ZeroShotAudioClassificationPipeline_new) : `零样本音频分类管道`
+            +   `new ZeroShotAudioClassificationPipeline(options)` : `零样本音频分类管道`
 
-            +   [`._call()`](#module_pipelines.ZeroShotAudioClassificationPipeline+_call) : `零样本音频分类管道回调`
+            +   `._call()` : `零样本音频分类管道回调`
 
-        +   [.AutomaticSpeechRecognitionPipeline](#module_pipelines.AutomaticSpeechRecognitionPipeline) : `自动语音识别管道`
+        +   .AutomaticSpeechRecognitionPipeline : `自动语音识别管道`
 
-            +   [`new AutomaticSpeechRecognitionPipeline(options)`](#new_module_pipelines.AutomaticSpeechRecognitionPipeline_new) => 新的自动语音识别管道
+            +   `new AutomaticSpeechRecognitionPipeline(options)` => 新的自动语音识别管道
 
-            +   [`._call()`](#module_pipelines.AutomaticSpeechRecognitionPipeline+_call) : `AutomaticSpeechRecognitionPipelineCallback` => 调用
+            +   `._call()` : `AutomaticSpeechRecognitionPipelineCallback` => 调用
 
-        +   [.ImageToTextPipeline](#module_pipelines.ImageToTextPipeline) => 图像到文本管道
+        +   .ImageToTextPipeline => 图像到文本管道
 
-            +   [`new ImageToTextPipeline(options)`](#new_module_pipelines.ImageToTextPipeline_new) => 新的图像转文本管道
+            +   `new ImageToTextPipeline(options)` => 新的图像转文本管道
 
-            +   [`._call()`](#module_pipelines.ImageToTextPipeline+_call) : `ImageToTextPipelineCallback` => 调用
+            +   `._call()` : `ImageToTextPipelineCallback` => 调用
 
-        +   [.ImageClassificationPipeline](#module_pipelines.ImageClassificationPipeline) => 图像分类管道
+        +   .ImageClassificationPipeline => 图像分类管道
 
-            +   [`new ImageClassificationPipeline(options)`](#new_module_pipelines.ImageClassificationPipeline_new) => 新的图像分类管道
+            +   `new ImageClassificationPipeline(options)` => 新的图像分类管道
 
-            +   [`._call()`](#module_pipelines.ImageClassificationPipeline+_call) : `ImageClassificationPipelineCallback` => 调用
+            +   `._call()` : `ImageClassificationPipelineCallback` => 调用
 
-        +   [.ImageSegmentationPipeline](#module_pipelines.ImageSegmentationPipeline) => 图像分割管道
+        +   .ImageSegmentationPipeline => 图像分割管道
 
-            +   [`new ImageSegmentationPipeline(options)`](#new_module_pipelines.ImageSegmentationPipeline_new) => 新的图像分割管道
+            +   `new ImageSegmentationPipeline(options)` => 新的图像分割管道
 
-            +   [`._call()`](#module_pipelines.ImageSegmentationPipeline+_call) : `ImageSegmentationPipelineCallback` => 调用
+            +   `._call()` : `ImageSegmentationPipelineCallback` => 调用
 
-        +   [.ZeroShotImageClassificationPipeline](#module_pipelines.ZeroShotImageClassificationPipeline) => 零样本图像分类管道
+        +   .ZeroShotImageClassificationPipeline => 零样本图像分类管道
 
-            +   [`new ZeroShotImageClassificationPipeline(options)`](#new_module_pipelines.ZeroShotImageClassificationPipeline_new) => 新的零样本图像分类管道
+            +   `new ZeroShotImageClassificationPipeline(options)` => 新的零样本图像分类管道
 
-            +   [`._call()`](#module_pipelines.ZeroShotImageClassificationPipeline+_call) : `ZeroShotImageClassificationPipelineCallback` => 调用
+            +   `._call()` : `ZeroShotImageClassificationPipelineCallback` => 调用
 
-        +   [.ObjectDetectionPipeline](#module_pipelines.ObjectDetectionPipeline) => 目标检测管道
+        +   .ObjectDetectionPipeline => 目标检测管道
 
-            +   [`new ObjectDetectionPipeline(options)`](#new_module_pipelines.ObjectDetectionPipeline_new) => 新的目标检测管道
+            +   `new ObjectDetectionPipeline(options)` => 新的目标检测管道
 
-            +   [`._call()`](#module_pipelines.ObjectDetectionPipeline+_call) : `ObjectDetectionPipelineCallback` => 调用
+            +   `._call()` : `ObjectDetectionPipelineCallback` => 调用
 
-        +   [.ZeroShotObjectDetectionPipeline](#module_pipelines.ZeroShotObjectDetectionPipeline) => 零样本目标检测管道
+        +   .ZeroShotObjectDetectionPipeline => 零样本目标检测管道
 
-            +   [`new ZeroShotObjectDetectionPipeline(options)`](#new_module_pipelines.ZeroShotObjectDetectionPipeline_new) => 新的零样本目标检测管道
+            +   `new ZeroShotObjectDetectionPipeline(options)` => 新的零样本目标检测管道
 
-            +   [`._call()`](#module_pipelines.ZeroShotObjectDetectionPipeline+_call) : `ZeroShotObjectDetectionPipelineCallback` => 调用
+            +   `._call()` : `ZeroShotObjectDetectionPipelineCallback` => 调用
 
-        +   [.DocumentQuestionAnsweringPipeline](#module_pipelines.DocumentQuestionAnsweringPipeline) => 文档问答管道
+        +   .DocumentQuestionAnsweringPipeline => 文档问答管道
 
-            +   [`new DocumentQuestionAnsweringPipeline(options)`](#new_module_pipelines.DocumentQuestionAnsweringPipeline_new) => 新的文档问答管道
+            +   `new DocumentQuestionAnsweringPipeline(options)` => 新的文档问答管道
 
-            +   [`._call()`](#module_pipelines.DocumentQuestionAnsweringPipeline+_call) : `DocumentQuestionAnsweringPipelineCallback` => 调用
+            +   `._call()` : `DocumentQuestionAnsweringPipelineCallback` => 调用
 
-        +   [.TextToAudioPipeline](#module_pipelines.TextToAudioPipeline) => 文本转音频管道
+        +   .TextToAudioPipeline => 文本转音频管道
 
-            +   [`new TextToAudioPipeline(options)`](#new_module_pipelines.TextToAudioPipeline_new) => 新的文本转音频管道
+            +   `new TextToAudioPipeline(options)` => 新的文本转音频管道
 
-            +   [`._call()`](#module_pipelines.TextToAudioPipeline+_call) : `TextToAudioPipelineCallback` => 调用
+            +   `._call()` : `TextToAudioPipelineCallback` => 调用
 
-        +   [.ImageToImagePipeline](#module_pipelines.ImageToImagePipeline) => 图像到图像管道
+        +   .ImageToImagePipeline => 图像到图像管道
 
-            +   [`new ImageToImagePipeline(options)`](#new_module_pipelines.ImageToImagePipeline_new) => 新的图像到图像管道
+            +   `new ImageToImagePipeline(options)` => 新的图像到图像管道
 
-            +   [`._call()`](#module_pipelines.ImageToImagePipeline+_call) : `ImageToImagePipelineCallback` => 调用
+            +   `._call()` : `ImageToImagePipelineCallback` => 调用
 
-        +   [.DepthEstimationPipeline](#module_pipelines.DepthEstimationPipeline) => 深度估计管道
+        +   .DepthEstimationPipeline => 深度估计管道
 
-            +   [`new DepthEstimationPipeline(options)`](#new_module_pipelines.DepthEstimationPipeline_new) => 新的深度估计管道
+            +   `new DepthEstimationPipeline(options)` => 新的深度估计管道
 
-            +   [`._call()`](#module_pipelines.DepthEstimationPipeline+_call) : `DepthEstimationPipelineCallback` => 调用
+            +   `._call()` : `DepthEstimationPipelineCallback` => 调用
 
         +   [`.pipeline(task, [model], [options])`](#module_pipelines.pipeline) ⇒ `*` => 管道
 
@@ -172,95 +172,95 @@ const output = await classifier('I love transformers!');
 
         +   [`~x[1]`](#module_pipelines..x%5B1%5D) : `number` => x[1] : 数字
 
-        +   [`~ImagePipelineInputs`](#module_pipelines..ImagePipelineInputs) : `string` | `RawImage` | `URL` => 图像管道输入
+        +   `~ImagePipelineInputs` : `string` | `RawImage` | `URL` => 图像管道输入
 
-        +   [`~AudioPipelineInputs`](#module_pipelines..AudioPipelineInputs) : `string` | `URL` | `Float32Array` | `Float64Array` => 音频管道输入
+        +   `~AudioPipelineInputs` : `string` | `URL` | `Float32Array` | `Float64Array` => 音频管道输入
 
-        +   [`~BoundingBox`](#module_pipelines..BoundingBox) : `Object` => 边界框
+        +   `~BoundingBox` : `Object` => 边界框
 
-        +   [`~Disposable`](#module_pipelines..Disposable) ⇒ `Promise.<void>` => 一次性的
+        +   `~Disposable` ⇒ `Promise.<void>` => 一次性的
 
-        +   [`~TextPipelineConstructorArgs`](#module_pipelines..TextPipelineConstructorArgs) : `Object` => 文本管道构造参数
+        +   `~TextPipelineConstructorArgs` : `Object` => 文本管道构造参数
 
-        +   [`~ImagePipelineConstructorArgs`](#module_pipelines..ImagePipelineConstructorArgs) : `Object` => 图像管道构造参数
+        +   `~ImagePipelineConstructorArgs` : `Object` => 图像管道构造参数
 
-        +   [`~TextImagePipelineConstructorArgs`](#module_pipelines..TextImagePipelineConstructorArgs) : `Object` => 文本图像管道构造参数
+        +   `~TextImagePipelineConstructorArgs` : `Object` => 文本图像管道构造参数
 
-        +   [`~TextClassificationPipelineType`](#module_pipelines..TextClassificationPipelineType) ⇒ `Promise.<(TextClassificationOutput|Array<TextClassificationOutput>)>` => 文本分类管道类型
+        +   `~TextClassificationPipelineType` ⇒ `Promise.<(TextClassificationOutput|Array<TextClassificationOutput>)>` => 文本分类管道类型
 
-        +   [`~TokenClassificationPipelineType`](#module_pipelines..TokenClassificationPipelineType) ⇒ `Promise.<(TokenClassificationOutput|Array<TokenClassificationOutput>)>`
+        +   `~TokenClassificationPipelineType` ⇒ `Promise.<(TokenClassificationOutput|Array<TokenClassificationOutput>)>`
 
-        +   [`~QuestionAnsweringPipelineType`](#module_pipelines..QuestionAnsweringPipelineType) ⇒ `Promise.<(QuestionAnsweringOutput|Array<QuestionAnsweringOutput>)>`
+        +   `~QuestionAnsweringPipelineType` ⇒ `Promise.<(QuestionAnsweringOutput|Array<QuestionAnsweringOutput>)>`
 
-        +   [`~FillMaskPipelineType`](#module_pipelines..FillMaskPipelineType) ⇒ `Promise.<(FillMaskOutput|Array<FillMaskOutput>)>`
+        +   `~FillMaskPipelineType` ⇒ `Promise.<(FillMaskOutput|Array<FillMaskOutput>)>`
 
-        +   [`~Text2TextGenerationPipelineType`](#module_pipelines..Text2TextGenerationPipelineType) ⇒ `Promise.<(Text2TextGenerationOutput|Array<Text2TextGenerationOutput>)>`
+        +   `~Text2TextGenerationPipelineType` ⇒ `Promise.<(Text2TextGenerationOutput|Array<Text2TextGenerationOutput>)>`
 
-        +   [`~SummarizationPipelineType`](#module_pipelines..SummarizationPipelineType) ⇒ `Promise.<(SummarizationOutput|Array<SummarizationOutput>)>`
+        +   `~SummarizationPipelineType` ⇒ `Promise.<(SummarizationOutput|Array<SummarizationOutput>)>`
 
-        +   [`~TranslationPipelineType`](#module_pipelines..TranslationPipelineType) ⇒ `Promise.<(TranslationOutput|Array<TranslationOutput>)>`
+        +   `~TranslationPipelineType` ⇒ `Promise.<(TranslationOutput|Array<TranslationOutput>)>`
 
-        +   [`~TextGenerationPipelineType`](#module_pipelines..TextGenerationPipelineType) ⇒ `Promise.<(TextGenerationOutput|Array<TextGenerationOutput>)>`
+        +   `~TextGenerationPipelineType` ⇒ `Promise.<(TextGenerationOutput|Array<TextGenerationOutput>)>`
 
-        +   [`~ZeroShotClassificationPipelineType`](#module_pipelines..ZeroShotClassificationPipelineType) ⇒ `Promise.<(ZeroShotClassificationOutput|Array<ZeroShotClassificationOutput>)>`
+        +   `~ZeroShotClassificationPipelineType` ⇒ `Promise.<(ZeroShotClassificationOutput|Array<ZeroShotClassificationOutput>)>`
 
-        +   [`~FeatureExtractionPipelineType`](#module_pipelines..FeatureExtractionPipelineType) ⇒ `Promise.<Tensor>`
+        +   `~FeatureExtractionPipelineType` ⇒ `Promise.<Tensor>`
 
-        +   [`~AudioClassificationPipelineType`](#module_pipelines..AudioClassificationPipelineType) ⇒ `Promise.<(AudioClassificationOutput|Array<AudioClassificationOutput>)>`
+        +   `~AudioClassificationPipelineType` ⇒ `Promise.<(AudioClassificationOutput|Array<AudioClassificationOutput>)>`
 
-        +   [`~ZeroShotAudioClassificationPipelineType`](#module_pipelines..ZeroShotAudioClassificationPipelineType) ⇒ `Promise.<(Array<ZeroShotAudioClassificationOutput>|Array<Array<ZeroShotAudioClassificationOutput>>)>`
+        +   `~ZeroShotAudioClassificationPipelineType` ⇒ `Promise.<(Array<ZeroShotAudioClassificationOutput>|Array<Array<ZeroShotAudioClassificationOutput>>)>`
 
-        +   [`~ChunkCallback`](#module_pipelines..ChunkCallback) : `function`
+        +   `~ChunkCallback` : `function`
 
-        +   [`~Chunk`](#module_pipelines..Chunk) : `Object`
+        +   `~Chunk` : `Object`
 
-        +   [`~AutomaticSpeechRecognitionPipelineType`](#module_pipelines..AutomaticSpeechRecognitionPipelineType) ⇒ `Promise.<(AutomaticSpeechRecognitionOutput|Array<AutomaticSpeechRecognitionOutput>)>`
+        +   `~AutomaticSpeechRecognitionPipelineType` ⇒ `Promise.<(AutomaticSpeechRecognitionOutput|Array<AutomaticSpeechRecognitionOutput>)>`
 
-        +   [`~ImageToTextPipelineType`](#module_pipelines..ImageToTextPipelineType) ⇒ `Promise.<(ImageToTextOutput|Array<ImageToTextOutput>)>`
+        +   `~ImageToTextPipelineType` ⇒ `Promise.<(ImageToTextOutput|Array<ImageToTextOutput>)>`
 
-        +   [`~ImageClassificationPipelineType`](#module_pipelines..ImageClassificationPipelineType) ⇒ `Promise.<(ImageClassificationOutput|Array<ImageClassificationOutput>)>`
+        +   `~ImageClassificationPipelineType` ⇒ `Promise.<(ImageClassificationOutput|Array<ImageClassificationOutput>)>`
 
-        +   [`~ImageSegmentationPipelineType`](#module_pipelines..ImageSegmentationPipelineType) ⇒ `Promise.<Array<ImageSegmentationPipelineOutput>>`
+        +   `~ImageSegmentationPipelineType` ⇒ `Promise.<Array<ImageSegmentationPipelineOutput>>`
 
-        +   [`~ZeroShotImageClassificationPipelineType`](#module_pipelines..ZeroShotImageClassificationPipelineType) ⇒ `Promise.<(Array<ZeroShotImageClassificationOutput>|Array<Array<ZeroShotImageClassificationOutput>>)>`
+        +   `~ZeroShotImageClassificationPipelineType` ⇒ `Promise.<(Array<ZeroShotImageClassificationOutput>|Array<Array<ZeroShotImageClassificationOutput>>)>`
 
-        +   [`~ObjectDetectionPipelineType`](#module_pipelines..ObjectDetectionPipelineType) ⇒ `Promise.<(ObjectDetectionPipelineOutput|Array<ObjectDetectionPipelineOutput>)>`
+        +   `~ObjectDetectionPipelineType` ⇒ `Promise.<(ObjectDetectionPipelineOutput|Array<ObjectDetectionPipelineOutput>)>`
 
-        +   [`~ZeroShotObjectDetectionPipelineType`](#module_pipelines..ZeroShotObjectDetectionPipelineType) ⇒ `Promise.<(Array<ZeroShotObjectDetectionOutput>|Array<Array<ZeroShotObjectDetectionOutput>>)>`
+        +   `~ZeroShotObjectDetectionPipelineType` ⇒ `Promise.<(Array<ZeroShotObjectDetectionOutput>|Array<Array<ZeroShotObjectDetectionOutput>>)>`
 
-        +   [`~DocumentQuestionAnsweringPipelineType`](#module_pipelines..DocumentQuestionAnsweringPipelineType) ⇒ `Promise.<(DocumentQuestionAnsweringOutput|Array<DocumentQuestionAnsweringOutput>)>`
+        +   `~DocumentQuestionAnsweringPipelineType` ⇒ `Promise.<(DocumentQuestionAnsweringOutput|Array<DocumentQuestionAnsweringOutput>)>`
 
-        +   [`~TextToAudioPipelineConstructorArgs`](#module_pipelines..TextToAudioPipelineConstructorArgs) : `Object`
+        +   `~TextToAudioPipelineConstructorArgs` : `Object`
 
-        +   [`~TextToAudioPipelineType`](#module_pipelines..TextToAudioPipelineType) ⇒ `Promise.<TextToAudioOutput>`
+        +   `~TextToAudioPipelineType` ⇒ `Promise.<TextToAudioOutput>`
 
-        +   [`~ImageToImagePipelineType`](#module_pipelines..ImageToImagePipelineType) ⇒ `Promise.<(RawImage|Array<RawImage>)>`
+        +   `~ImageToImagePipelineType` ⇒ `Promise.<(RawImage|Array<RawImage>)>`
 
-        +   [`~DepthEstimationPipelineType`](#module_pipelines..DepthEstimationPipelineType) ⇒ `Promise.<(DepthEstimationPipelineOutput|Array<DepthEstimationPipelineOutput>)>`
+        +   `~DepthEstimationPipelineType` ⇒ `Promise.<(DepthEstimationPipelineOutput|Array<DepthEstimationPipelineOutput>)>`
 
-        +   [`~AllTasks`](#module_pipelines..AllTasks) : `*`
+        +   `~AllTasks` : `*`
 
 * * *
 
 ## pipelines.Pipeline ⇐ <code> Callable </code>
 
-Pipeline类是所有流水线继承的类。请参考此类以获取不同流水线共享的方法。
+Pipeline 类是所有流水线继承的类。请参考此类以获取不同流水线共享的方法。
 
-**Kind**: static class of [`pipelines`](#module_pipelines)
+**Kind**: static class of `pipelines`
 
 **Extends**: `Callable`
 
-+   [.Pipeline](#module_pipelines.Pipeline) ⇐ `Callable`
++   .Pipeline ⇐ `Callable`
 
-    +   [`new Pipeline(options)`](#new_module_pipelines.Pipeline_new)
+    +   `new Pipeline(options)`
 
-    +   [`.dispose()`](#module_pipelines.Pipeline+dispose)：`DisposeType`
+    +   `.dispose()`：`DisposeType`
 
 * * *
 
 ### 新管道(options)
 
-创建一个新的Pipeline。
+创建一个新的 Pipeline。
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
@@ -274,7 +274,7 @@ Pipeline类是所有流水线继承的类。请参考此类以获取不同流水
 
 ### pipeline.dispose()： <code> DisposeType </code>
 
-**种类**：[`Pipeline`](#module_pipelines.Pipeline)的实例方法
+**种类**：`Pipeline`的实例方法
 
 * * *
 
@@ -290,7 +290,7 @@ const output = await classifier('I love transformers!');
 // [{ label: 'POSITIVE', score: 0.999788761138916 }]
 ```
 
-**示例：** 使用 `Xenova/bert-base-multilingual-uncased-sentiment` 进行多语言情感分析（并返回前5个类）。
+**示例：** 使用 `Xenova/bert-base-multilingual-uncased-sentiment` 进行多语言情感分析（并返回前 5 个类）。
 
 ```py
 const classifier = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
@@ -319,19 +319,19 @@ const output = await classifier('I hate you!', { topk: null });
 // ]
 ```
 
-**种类**：[`pipelines`](#module_pipelines)的静态类
+**种类**：`pipelines`的静态类
 
-+   [.TextClassificationPipeline](#module_pipelines.TextClassificationPipeline)
++   .TextClassificationPipeline
 
-    +   [`new TextClassificationPipeline(options)`](#new_module_pipelines.TextClassificationPipeline_new)
+    +   `new TextClassificationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.TextClassificationPipeline+_call)：`TextClassificationPipelineCallback`
+    +   `._call()`：`TextClassificationPipelineCallback`
 
 * * *
 
-### 新的TextClassificationPipeline(options)
+### 新的 TextClassificationPipeline(options)
 
-创建一个新的TextClassificationPipeline。
+创建一个新的 TextClassificationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -341,7 +341,7 @@ const output = await classifier('I hate you!', { topk: null });
 
 ### textClassificationPipeline._call()： <code> TextClassificationPipelineCallback </code>
 
-**种类**：[`TextClassificationPipeline`](#module_pipelines.TextClassificationPipeline)的实例方法
+**种类**：`TextClassificationPipeline`的实例方法
 
 * * *
 
@@ -377,19 +377,19 @@ const output = await classifier('Sarah lives in the United States of America', {
 // ]
 ```
 
-**种类**：[`pipelines`](#module_pipelines)的静态类
+**种类**：`pipelines`的静态类
 
-+   [.TokenClassificationPipeline](#module_pipelines.TokenClassificationPipeline)
++   .TokenClassificationPipeline
 
-    +   [`new TokenClassificationPipeline(options)`](#new_module_pipelines.TokenClassificationPipeline_new)
+    +   `new TokenClassificationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.TokenClassificationPipeline+_call)：`TokenClassificationPipelineCallback`
+    +   `._call()`：`TokenClassificationPipelineCallback`
 
 * * *
 
-### 新的TokenClassificationPipeline(options)
+### 新的 TokenClassificationPipeline(options)
 
-创建一个新的TokenClassificationPipeline。
+创建一个新的 TokenClassificationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -399,7 +399,7 @@ const output = await classifier('Sarah lives in the United States of America', {
 
 ### tokenClassificationPipeline._call()： <code> TokenClassificationPipelineCallback </code>
 
-**种类**：[`TokenClassificationPipeline`](#module_pipelines.TokenClassificationPipeline)的实例方法
+**种类**：`TokenClassificationPipeline`的实例方法
 
 * * *
 
@@ -420,19 +420,19 @@ const output = await answerer(question, context);
 // }
 ```
 
-**种类**：[`pipelines`](#module_pipelines)的静态类
+**种类**：`pipelines`的静态类
 
-+   [.QuestionAnsweringPipeline](#module_pipelines.QuestionAnsweringPipeline)
++   .QuestionAnsweringPipeline
 
-    +   [`new QuestionAnsweringPipeline(options)`](#new_module_pipelines.QuestionAnsweringPipeline_new)
+    +   `new QuestionAnsweringPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.QuestionAnsweringPipeline+_call)：`QuestionAnsweringPipelineCallback`
+    +   `._call()`：`QuestionAnsweringPipelineCallback`
 
 * * *
 
-### 新的QuestionAnsweringPipeline(options)
+### 新的 QuestionAnsweringPipeline(options)
 
-创建一个新的QuestionAnsweringPipeline。
+创建一个新的 QuestionAnsweringPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -442,7 +442,7 @@ const output = await answerer(question, context);
 
 ### questionAnsweringPipeline._call()： <code> QuestionAnsweringPipelineCallback </code>
 
-**种类**：[`QuestionAnsweringPipeline`](#module_pipelines.QuestionAnsweringPipeline)的实例方法
+**种类**：`QuestionAnsweringPipeline`的实例方法
 
 * * *
 
@@ -472,19 +472,19 @@ const output = await unmasker('The Milky Way is a [MASK] galaxy.', { topk: 1 });
 // [{ token_str: 'spiral', score: 0.6299987435340881, token: 14061, sequence: 'The Milky Way is a spiral galaxy.' }]
 ```
 
-**种类**：[`pipelines`](#module_pipelines)的静态类
+**种类**：`pipelines`的静态类
 
-+   [.FillMaskPipeline](#module_pipelines.FillMaskPipeline)
++   .FillMaskPipeline
 
-    +   [`new FillMaskPipeline(options)`](#new_module_pipelines.FillMaskPipeline_new)
+    +   `new FillMaskPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.FillMaskPipeline+_call)：`FillMaskPipelineCallback`
+    +   `._call()`：`FillMaskPipelineCallback`
 
 * * *
 
 ### new FillMaskPipeline(options)
 
-创建一个新的FillMaskPipeline。
+创建一个新的 FillMaskPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -494,13 +494,13 @@ const output = await unmasker('The Milky Way is a [MASK] galaxy.', { topk: 1 });
 
 ### fillMaskPipeline._call()：`<code> FillMaskPipelineCallback </code>`
 
-**种类**：[`FillMaskPipeline`](#module_pipelines.FillMaskPipeline)的实例方法
+**种类**：`FillMaskPipeline`的实例方法
 
 * * *
 
 ## pipelines.Text2TextGenerationPipeline
 
-Text2TextGenerationPipeline类用于使用执行文本到文本生成任务的模型生成文本。
+Text2TextGenerationPipeline 类用于使用执行文本到文本生成任务的模型生成文本。
 
 **示例：** 使用`Xenova/LaMini-Flan-T5-783M`进行文本到文本生成。
 
@@ -512,21 +512,21 @@ const output = await generator('how can I become more healthy?', {
 // [{ generated_text: "To become more healthy, you can: 1\. Eat a balanced diet with plenty of fruits, vegetables, whole grains, lean proteins, and healthy fats. 2\. Stay hydrated by drinking plenty of water. 3\. Get enough sleep and manage stress levels. 4\. Avoid smoking and excessive alcohol consumption. 5\. Regularly exercise and maintain a healthy weight. 6\. Practice good hygiene and sanitation. 7\. Seek medical attention if you experience any health issues." }]
 ```
 
-**种类**：[`pipelines`](#module_pipelines)的静态类
+**种类**：`pipelines`的静态类
 
-+   [.Text2TextGenerationPipeline](#module_pipelines.Text2TextGenerationPipeline)
++   .Text2TextGenerationPipeline
 
-    +   [`new Text2TextGenerationPipeline(options)`](#new_module_pipelines.Text2TextGenerationPipeline_new)
+    +   `new Text2TextGenerationPipeline(options)`
 
-    +   [`._key`](#module_pipelines.Text2TextGenerationPipeline+_key)：`’generated_text’`
+    +   `._key`：`’generated_text’`
 
-    +   [`._call()`](#module_pipelines.Text2TextGenerationPipeline+_call)：`Text2TextGenerationPipelineCallback`
+    +   `._call()`：`Text2TextGenerationPipelineCallback`
 
 * * *
 
 ### new Text2TextGenerationPipeline(options)
 
-创建一个新的Text2TextGenerationPipeline。
+创建一个新的 Text2TextGenerationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -536,19 +536,19 @@ const output = await generator('how can I become more healthy?', {
 
 ### text2TextGenerationPipeline._key：`<code> ’ generated_text ’ </code>`
 
-**种类**：[`Text2TextGenerationPipeline`](#module_pipelines.Text2TextGenerationPipeline)的实例属性
+**种类**：`Text2TextGenerationPipeline`的实例属性
 
 * * *
 
 ### text2TextGenerationPipeline._call()：`<code> Text2TextGenerationPipelineCallback </code>`
 
-**种类**：[`Text2TextGenerationPipeline`](#module_pipelines.Text2TextGenerationPipeline)的实例方法
+**种类**：`Text2TextGenerationPipeline`的实例方法
 
 * * *
 
 ## pipelines.SummarizationPipeline
 
-一个用于摘要任务的管道，继承自Text2TextGenerationPipeline。
+一个用于摘要任务的管道，继承自 Text2TextGenerationPipeline。
 
 **示例：** 使用`Xenova/distilbart-cnn-6-6`进行摘要。
 
@@ -568,19 +568,19 @@ const output = await generator(text, {
 // [{ summary_text: ' The Eiffel Tower is about the same height as an 81-storey building and the tallest structure in Paris. It is the second tallest free-standing structure in France after the Millau Viaduct.' }]
 ```
 
-**种类**：[`pipelines`](#module_pipelines)的静态类
+**种类**：`pipelines`的静态类
 
-+   [.SummarizationPipeline](#module_pipelines.SummarizationPipeline)
++   .SummarizationPipeline
 
-    +   [`new SummarizationPipeline(options)`](#new_module_pipelines.SummarizationPipeline_new)
+    +   `new SummarizationPipeline(options)`
 
-    +   [`._key`](#module_pipelines.SummarizationPipeline+_key)：`’summary_text’`
+    +   `._key`：`’summary_text’`
 
 * * *
 
 ### new SummarizationPipeline(options)
 
-创建一个新的SummarizationPipeline。
+创建一个新的 SummarizationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -590,7 +590,7 @@ const output = await generator(text, {
 
 ### summarizationPipeline._key：`<code> ’ summary_text ’ </code>`
 
-**种类**：[`SummarizationPipeline`](#module_pipelines.SummarizationPipeline)的实例属性
+**种类**：`SummarizationPipeline`的实例属性
 
 * * *
 
@@ -637,19 +637,19 @@ const output = await translator('संयुक्त राष्ट्र क
 // [{ translation_text: 'Le chef des Nations affirme qu 'il n 'y a military solution in Syria.' }]
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.TranslationPipeline](#module_pipelines.TranslationPipeline)
++   .TranslationPipeline
 
-    +   [`new TranslationPipeline(options)`](#new_module_pipelines.TranslationPipeline_new)
+    +   `new TranslationPipeline(options)`
 
-    +   [`._key`](#module_pipelines.TranslationPipeline+_key)：`’translation_text’`
+    +   `._key`：`’translation_text’`
 
 * * *
 
 ### new TranslationPipeline(options)
 
-创建一个新的TranslationPipeline。
+创建一个新的 TranslationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -659,13 +659,13 @@ const output = await translator('संयुक्त राष्ट्र क
 
 ### translationPipeline._key：<code>’translation_text’</code>
 
-**类型**：[`TranslationPipeline`](#module_pipelines.TranslationPipeline)的实例属性
+**类型**：`TranslationPipeline`的实例属性
 
 * * *
 
 ## pipelines.TextGenerationPipeline
 
-使用任何`ModelWithLMHead`或`ModelForCausalLM`的语言生成管道。该管道预测将跟随指定文本提示的单词。注意：有关生成参数的完整列表，请参阅[`GenerationConfig`](./utils/generation#module_utils/generation.GenerationConfig)。
+使用任何`ModelWithLMHead`或`ModelForCausalLM`的语言生成管道。该管道预测将跟随指定文本提示的单词。注意：有关生成参数的完整列表，请参阅`GenerationConfig`。
 
 **示例：** 使用`Xenova/distilgpt2`（默认设置）进行文本生成。
 
@@ -715,19 +715,19 @@ const output = await generator(text, {
 // }]
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.TextGenerationPipeline](#module_pipelines.TextGenerationPipeline)
++   .TextGenerationPipeline
 
-    +   [`new TextGenerationPipeline(options)`](#new_module_pipelines.TextGenerationPipeline_new)
+    +   `new TextGenerationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.TextGenerationPipeline+_call)：`TextGenerationPipelineCallback`
+    +   `._call()`：`TextGenerationPipelineCallback`
 
 * * *
 
 ### new TextGenerationPipeline(options)
 
-创建一个新的TextGenerationPipeline。
+创建一个新的 TextGenerationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -737,13 +737,13 @@ const output = await generator(text, {
 
 ### textGenerationPipeline._call()：<code>TextGenerationPipelineCallback</code>
 
-**类型**：[`TextGenerationPipeline`](#module_pipelines.TextGenerationPipeline)的实例方法
+**类型**：`TextGenerationPipeline`的实例方法
 
 * * *
 
 ## pipelines.ZeroShotClassificationPipeline
 
-基于NLI的零样本分类管道，使用在NLI（自然语言推理）任务上训练的`ModelForSequenceClassification`。相当于`text-classification`管道，但这些模型不需要预先确定的潜在类别数量，可以在运行时选择。通常意味着它更慢，但**更加**灵活。
+基于 NLI 的零样本分类管道，使用在 NLI（自然语言推理）任务上训练的`ModelForSequenceClassification`。相当于`text-classification`管道，但这些模型不需要预先确定的潜在类别数量，可以在运行时选择。通常意味着它更慢，但**更加**灵活。
 
 **示例：** 使用`Xenova/mobilebert-uncased-mnli`进行零样本分类。
 
@@ -773,21 +773,21 @@ const output = await classifier(text, labels, { multi_label: true });
 // }
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.ZeroShotClassificationPipeline](#module_pipelines.ZeroShotClassificationPipeline)
++   .ZeroShotClassificationPipeline
 
-    +   [`new ZeroShotClassificationPipeline(options)`](#new_module_pipelines.ZeroShotClassificationPipeline_new)
+    +   `new ZeroShotClassificationPipeline(options)`
 
-    +   [`.model`](#module_pipelines.ZeroShotClassificationPipeline+model)：`any`
+    +   `.model`：`any`
 
-    +   [`._call()`](#module_pipelines.ZeroShotClassificationPipeline+_call)：`ZeroShotClassificationPipelineCallback`
+    +   `._call()`：`ZeroShotClassificationPipelineCallback`
 
 * * *
 
 ### new ZeroShotClassificationPipeline(options)
 
-创建一个新的ZeroShotClassificationPipeline。
+创建一个新的 ZeroShotClassificationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -797,13 +797,13 @@ const output = await classifier(text, labels, { multi_label: true });
 
 ### zeroShotClassificationPipeline.model：<code>any</code>
 
-**类型**：[`ZeroShotClassificationPipeline`](#module_pipelines.ZeroShotClassificationPipeline)的实例属性
+**类型**：`ZeroShotClassificationPipeline`的实例属性
 
 * * *
 
 ### zeroShotClassificationPipeline._call()：<code>ZeroShotClassificationPipelineCallback</code>
 
-**类型**：[`ZeroShotClassificationPipeline`](#module_pipelines.ZeroShotClassificationPipeline)的实例方法
+**类型**：`ZeroShotClassificationPipeline`的实例方法
 
 * * *
 
@@ -847,19 +847,19 @@ const output = await extractor('This is a simple test.', { pooling: 'mean', norm
 // }
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.FeatureExtractionPipeline](#module_pipelines.FeatureExtractionPipeline)
++   .FeatureExtractionPipeline
 
-    +   [`new FeatureExtractionPipeline(options)`](#new_module_pipelines.FeatureExtractionPipeline_new)
+    +   `new FeatureExtractionPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.FeatureExtractionPipeline+_call)：`FeatureExtractionPipelineCallback`
+    +   `._call()`：`FeatureExtractionPipelineCallback`
 
 * * *
 
-### 新的FeatureExtractionPipeline(options)
+### 新的 FeatureExtractionPipeline(options)
 
-创建一个新的FeatureExtractionPipeline。
+创建一个新的 FeatureExtractionPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -869,7 +869,7 @@ const output = await extractor('This is a simple test.', { pooling: 'mean', norm
 
 ### featureExtractionPipeline._call()：<code> FeatureExtractionPipelineCallback </code>
 
-**类型**：[`FeatureExtractionPipeline`](#module_pipelines.FeatureExtractionPipeline)的实例方法
+**类型**：`FeatureExtractionPipeline`的实例方法
 
 * * *
 
@@ -889,7 +889,7 @@ const output = await classifier(url);
 // ]
 ```
 
-**示例**：使用`Xenova/ast-finetuned-audioset-10-10-0.4593`进行音频分类并返回前4个结果。
+**示例**：使用`Xenova/ast-finetuned-audioset-10-10-0.4593`进行音频分类并返回前 4 个结果。
 
 ```py
 const classifier = await pipeline('audio-classification', 'Xenova/ast-finetuned-audioset-10-10-0.4593');
@@ -903,19 +903,19 @@ const output = await classifier(url, { topk: 4 });
 // ]
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.AudioClassificationPipeline](#module_pipelines.AudioClassificationPipeline)
++   .AudioClassificationPipeline
 
-    +   [`new AudioClassificationPipeline(options)`](#new_module_pipelines.AudioClassificationPipeline_new)
+    +   `new AudioClassificationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.AudioClassificationPipeline+_call)：`AudioClassificationPipelineCallback`
+    +   `._call()`：`AudioClassificationPipelineCallback`
 
 * * *
 
-### 新的AudioClassificationPipeline(options)
+### 新的 AudioClassificationPipeline(options)
 
-创建一个新的AudioClassificationPipeline。
+创建一个新的 AudioClassificationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -925,7 +925,7 @@ const output = await classifier(url, { topk: 4 });
 
 ### audioClassificationPipeline._call()：<code> AudioClassificationPipelineCallback </code>
 
-**类型**：[`AudioClassificationPipeline`](#module_pipelines.AudioClassificationPipeline)的实例方法
+**类型**：`AudioClassificationPipeline`的实例方法
 
 * * *
 
@@ -946,19 +946,19 @@ const scores = await classifier(audio, candidate_labels);
 // ]
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.ZeroShotAudioClassificationPipeline](#module_pipelines.ZeroShotAudioClassificationPipeline)
++   .ZeroShotAudioClassificationPipeline
 
-    +   [`new ZeroShotAudioClassificationPipeline(options)`](#new_module_pipelines.ZeroShotAudioClassificationPipeline_new)
+    +   `new ZeroShotAudioClassificationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.ZeroShotAudioClassificationPipeline+_call)：`ZeroShotAudioClassificationPipelineCallback`
+    +   `._call()`：`ZeroShotAudioClassificationPipelineCallback`
 
 * * *
 
-### 新的ZeroShotAudioClassificationPipeline(options)
+### 新的 ZeroShotAudioClassificationPipeline(options)
 
-创建一个新的ZeroShotAudioClassificationPipeline。
+创建一个新的 ZeroShotAudioClassificationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -968,7 +968,7 @@ const scores = await classifier(audio, candidate_labels);
 
 ### zeroShotAudioClassificationPipeline._call()：<code> ZeroShotAudioClassificationPipelineCallback </code>
 
-**类型**：[`ZeroShotAudioClassificationPipeline`](#module_pipelines.ZeroShotAudioClassificationPipeline)的实例方法
+**类型**：`ZeroShotAudioClassificationPipeline`的实例方法
 
 * * *
 
@@ -1038,7 +1038,7 @@ const output = await transcriber(url, { language: 'french', task: 'translate' })
 // { text: " I love, I like, I don't like, I hate." }
 ```
 
-**示例**：转录/翻译超过30秒的音频。
+**示例**：转录/翻译超过 30 秒的音频。
 
 ```py
 const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
@@ -1047,19 +1047,19 @@ const output = await transcriber(url, { chunk_length_s: 30, stride_length_s: 5 }
 // { text: " So in college, I was a government major, which means [...] So I'd start off light and I'd bump it up" }
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.AutomaticSpeechRecognitionPipeline](#module_pipelines.AutomaticSpeechRecognitionPipeline)
++   .AutomaticSpeechRecognitionPipeline
 
-    +   [`new AutomaticSpeechRecognitionPipeline(options)`](#new_module_pipelines.AutomaticSpeechRecognitionPipeline_new)
+    +   `new AutomaticSpeechRecognitionPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.AutomaticSpeechRecognitionPipeline+_call)：`AutomaticSpeechRecognitionPipelineCallback`
+    +   `._call()`：`AutomaticSpeechRecognitionPipelineCallback`
 
 * * *
 
 ### new AutomaticSpeechRecognitionPipeline(options)
 
-创建一个新的AutomaticSpeechRecognitionPipeline。
+创建一个新的 AutomaticSpeechRecognitionPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1069,13 +1069,13 @@ const output = await transcriber(url, { chunk_length_s: 30, stride_length_s: 5 }
 
 ### automaticSpeechRecognitionPipeline._call()： <code> AutomaticSpeechRecognitionPipelineCallback </code>
 
-**类型**：[`AutomaticSpeechRecognitionPipeline`](#module_pipelines.AutomaticSpeechRecognitionPipeline)的实例方法
+**类型**：`AutomaticSpeechRecognitionPipeline`的实例方法
 
 * * *
 
 ## pipelines.ImageToTextPipeline
 
-使用`AutoModelForVision2Seq`的Image To Text流水线。该流水线为给定图像预测标题。
+使用`AutoModelForVision2Seq`的 Image To Text 流水线。该流水线为给定图像预测标题。
 
 **示例：**使用`Xenova/vit-gpt2-image-captioning`为图像生成标题。
 
@@ -1095,19 +1095,19 @@ const output = await captioner(url);
 // [{ generated_text: 'Mr. Brown commented icily.' }]
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.ImageToTextPipeline](#module_pipelines.ImageToTextPipeline)
++   .ImageToTextPipeline
 
-    +   [`new ImageToTextPipeline(options)`](#new_module_pipelines.ImageToTextPipeline_new)
+    +   `new ImageToTextPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.ImageToTextPipeline+_call)：`ImageToTextPipelineCallback`
+    +   `._call()`：`ImageToTextPipelineCallback`
 
 * * *
 
 ### new ImageToTextPipeline(options)
 
-创建一个新的ImageToTextPipeline。
+创建一个新的 ImageToTextPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1117,7 +1117,7 @@ const output = await captioner(url);
 
 ### imageToTextPipeline._call()： <code> ImageToTextPipelineCallback </code>
 
-**类型**：[`ImageToTextPipeline`](#module_pipelines.ImageToTextPipeline)的实例方法
+**类型**：`ImageToTextPipeline`的实例方法
 
 * * *
 
@@ -1164,19 +1164,19 @@ const output = await classifier(url, { topk: 0 });
 // ]
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.ImageClassificationPipeline](#module_pipelines.ImageClassificationPipeline)
++   .ImageClassificationPipeline
 
-    +   [`new ImageClassificationPipeline(options)`](#new_module_pipelines.ImageClassificationPipeline_new)
+    +   `new ImageClassificationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.ImageClassificationPipeline+_call)：`ImageClassificationPipelineCallback`
+    +   `._call()`：`ImageClassificationPipelineCallback`
 
 * * *
 
 ### new ImageClassificationPipeline(options)
 
-创建一个新的ImageClassificationPipeline。
+创建一个新的 ImageClassificationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1186,7 +1186,7 @@ const output = await classifier(url, { topk: 0 });
 
 ### imageClassificationPipeline._call()： <code> ImageClassificationPipelineCallback </code>
 
-**类型**：[`ImageClassificationPipeline`](#module_pipelines.ImageClassificationPipeline)的实例方法
+**类型**：`ImageClassificationPipeline`的实例方法
 
 * * *
 
@@ -1206,19 +1206,19 @@ const output = await segmenter(url);
 // ]
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.ImageSegmentationPipeline](#module_pipelines.ImageSegmentationPipeline)
++   .ImageSegmentationPipeline
 
-    +   [`new ImageSegmentationPipeline(options)`](#new_module_pipelines.ImageSegmentationPipeline_new)
+    +   `new ImageSegmentationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.ImageSegmentationPipeline+_call)：`ImageSegmentationPipelineCallback`
+    +   `._call()`：`ImageSegmentationPipelineCallback`
 
 * * *
 
 ### new ImageSegmentationPipeline(options)
 
-创建一个新的ImageSegmentationPipeline。
+创建一个新的 ImageSegmentationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1228,7 +1228,7 @@ const output = await segmenter(url);
 
 ### imageSegmentationPipeline._call()： <code> ImageSegmentationPipelineCallback </code>
 
-**类型**：[`ImageSegmentationPipeline`](#module_pipelines.ImageSegmentationPipeline)的实例方法
+**类型**：`ImageSegmentationPipeline`的实例方法
 
 * * *
 
@@ -1249,19 +1249,19 @@ const output = await classifier(url, ['tiger', 'horse', 'dog']);
 // ]
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.ZeroShotImageClassificationPipeline](#module_pipelines.ZeroShotImageClassificationPipeline)
++   .ZeroShotImageClassificationPipeline
 
-    +   [`new ZeroShotImageClassificationPipeline(options)`](#new_module_pipelines.ZeroShotImageClassificationPipeline_new)
+    +   `new ZeroShotImageClassificationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.ZeroShotImageClassificationPipeline+_call) : `ZeroShotImageClassificationPipelineCallback`
+    +   `._call()` : `ZeroShotImageClassificationPipelineCallback`
 
 * * *
 
-### 新建一个ZeroShotImageClassificationPipeline。
+### 新建一个 ZeroShotImageClassificationPipeline。
 
-创建一个新的ZeroShotImageClassificationPipeline。
+创建一个新的 ZeroShotImageClassificationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1271,7 +1271,7 @@ const output = await classifier(url, ['tiger', 'horse', 'dog']);
 
 ### zeroShotImageClassificationPipeline._call() : <code> ZeroShotImageClassificationPipelineCallback </code>
 
-**种类**: [`ZeroShotImageClassificationPipeline`](#module_pipelines.ZeroShotImageClassificationPipeline)的实例方法
+**种类**: `ZeroShotImageClassificationPipeline`的实例方法
 
 * * *
 
@@ -1298,19 +1298,19 @@ const output = await detector(img, { threshold: 0.9 });
 // }]
 ```
 
-**种类**: [`pipelines`](#module_pipelines)的静态类
+**种类**: `pipelines`的静态类
 
-+   [.ObjectDetectionPipeline](#module_pipelines.ObjectDetectionPipeline)
++   .ObjectDetectionPipeline
 
-    +   [`new ObjectDetectionPipeline(options)`](#new_module_pipelines.ObjectDetectionPipeline_new)
+    +   `new ObjectDetectionPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.ObjectDetectionPipeline+_call) : `ObjectDetectionPipelineCallback`
+    +   `._call()` : `ObjectDetectionPipelineCallback`
 
 * * *
 
-### 新建一个ObjectDetectionPipeline。
+### 新建一个 ObjectDetectionPipeline。
 
-创建一个新的ObjectDetectionPipeline。
+创建一个新的 ObjectDetectionPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1320,7 +1320,7 @@ const output = await detector(img, { threshold: 0.9 });
 
 ### objectDetectionPipeline._call() : <code> ObjectDetectionPipelineCallback </code>
 
-**种类**: [`ObjectDetectionPipeline`](#module_pipelines.ObjectDetectionPipeline)的实例方法
+**种类**: `ObjectDetectionPipeline`的实例方法
 
 * * *
 
@@ -1359,7 +1359,7 @@ const output = await detector(url, candidate_labels);
 // ]
 ```
 
-**示例:** 零样本目标检测，使用`Xenova/owlvit-base-patch32`（返回前4个匹配项并设置阈值）。
+**示例:** 零样本目标检测，使用`Xenova/owlvit-base-patch32`（返回前 4 个匹配项并设置阈值）。
 
 ```py
 const detector = await pipeline('zero-shot-object-detection', 'Xenova/owlvit-base-patch32');
@@ -1390,19 +1390,19 @@ const output = await detector(url, candidate_labels, { topk: 4, threshold: 0.05 
 // ]
 ```
 
-**种类**: [`pipelines`](#module_pipelines)的静态类
+**种类**: `pipelines`的静态类
 
-+   [.ZeroShotObjectDetectionPipeline](#module_pipelines.ZeroShotObjectDetectionPipeline)
++   .ZeroShotObjectDetectionPipeline
 
-    +   [`new ZeroShotObjectDetectionPipeline(options)`](#new_module_pipelines.ZeroShotObjectDetectionPipeline_new)
+    +   `new ZeroShotObjectDetectionPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.ZeroShotObjectDetectionPipeline+_call) : `ZeroShotObjectDetectionPipelineCallback`
+    +   `._call()` : `ZeroShotObjectDetectionPipelineCallback`
 
 * * *
 
-### 新建一个ZeroShotObjectDetectionPipeline。
+### 新建一个 ZeroShotObjectDetectionPipeline。
 
-创建一个新的ZeroShotObjectDetectionPipeline。
+创建一个新的 ZeroShotObjectDetectionPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1412,13 +1412,13 @@ const output = await detector(url, candidate_labels, { topk: 4, threshold: 0.05 
 
 ### zeroShotObjectDetectionPipeline._call() : <code> ZeroShotObjectDetectionPipelineCallback </code>
 
-**种类**: [`ZeroShotObjectDetectionPipeline`](#module_pipelines.ZeroShotObjectDetectionPipeline)的实例方法
+**种类**: `ZeroShotObjectDetectionPipeline`的实例方法
 
 * * *
 
 ## pipelines.DocumentQuestionAnsweringPipeline
 
-使用任何`AutoModelForDocumentQuestionAnswering`的文档问答管道。输入/输出与（抽取式）问答管道类似；但是，该管道以图像（和可选的OCR单词/框）作为输入，而不是文本上下文。
+使用任何`AutoModelForDocumentQuestionAnswering`的文档问答管道。输入/输出与（抽取式）问答管道类似；但是，该管道以图像（和可选的 OCR 单词/框）作为输入，而不是文本上下文。
 
 **示例:** 使用`Xenova/donut-base-finetuned-docvqa`回答关于文档的问题。
 
@@ -1430,19 +1430,19 @@ const output = await qa_pipeline(image, question);
 // [{ answer: 'us-001' }]
 ```
 
-**种类**: [`pipelines`](#module_pipelines)的静态类
+**种类**: `pipelines`的静态类
 
-+   [.DocumentQuestionAnsweringPipeline](#module_pipelines.DocumentQuestionAnsweringPipeline)
++   .DocumentQuestionAnsweringPipeline
 
-    +   [`new DocumentQuestionAnsweringPipeline(options)`](#new_module_pipelines.DocumentQuestionAnsweringPipeline_new)
+    +   `new DocumentQuestionAnsweringPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.DocumentQuestionAnsweringPipeline+_call) : `DocumentQuestionAnsweringPipelineCallback`
+    +   `._call()` : `DocumentQuestionAnsweringPipelineCallback`
 
 * * *
 
-### 新建一个DocumentQuestionAnsweringPipeline。
+### 新建一个 DocumentQuestionAnsweringPipeline。
 
-创建一个新的DocumentQuestionAnsweringPipeline。
+创建一个新的 DocumentQuestionAnsweringPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1452,7 +1452,7 @@ const output = await qa_pipeline(image, question);
 
 ### 文档问答管道._call()： <code> DocumentQuestionAnsweringPipelineCallback </code>
 
-**类型**：[`DocumentQuestionAnsweringPipeline`](#module_pipelines.DocumentQuestionAnsweringPipeline)的实例方法
+**类型**：`DocumentQuestionAnsweringPipeline`的实例方法
 
 * * *
 
@@ -1472,7 +1472,7 @@ const out = await synthesizer('Hello, my dog is cute', { speaker_embeddings });
 // }
 ```
 
-然后，您可以使用`wavefile`包将音频保存为.wav文件：
+然后，您可以使用`wavefile`包将音频保存为.wav 文件：
 
 ```py
 import wavefile from 'wavefile';
@@ -1494,19 +1494,19 @@ const out = await synthesizer('Bonjour');
 // }
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.TextToAudioPipeline](#module_pipelines.TextToAudioPipeline)
++   .TextToAudioPipeline
 
-    +   [`new TextToAudioPipeline(options)`](#new_module_pipelines.TextToAudioPipeline_new)
+    +   `new TextToAudioPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.TextToAudioPipeline+_call)：`TextToAudioPipelineCallback`
+    +   `._call()`：`TextToAudioPipelineCallback`
 
 * * *
 
 ### new TextToAudioPipeline(options)
 
-创建一个新的TextToAudioPipeline。
+创建一个新的 TextToAudioPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1516,7 +1516,7 @@ const out = await synthesizer('Bonjour');
 
 ### textToAudioPipeline._call()： <code> TextToAudioPipelineCallback </code>
 
-**类型**：[`TextToAudioPipeline`](#module_pipelines.TextToAudioPipeline)的实例方法
+**类型**：`TextToAudioPipeline`的实例方法
 
 * * *
 
@@ -1538,19 +1538,19 @@ const output = await upscaler(url);
 // }
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.ImageToImagePipeline](#module_pipelines.ImageToImagePipeline)
++   .ImageToImagePipeline
 
-    +   [`new ImageToImagePipeline(options)`](#new_module_pipelines.ImageToImagePipeline_new)
+    +   `new ImageToImagePipeline(options)`
 
-    +   [`._call()`](#module_pipelines.ImageToImagePipeline+_call)：`ImageToImagePipelineCallback`
+    +   `._call()`：`ImageToImagePipelineCallback`
 
 * * *
 
 ### new ImageToImagePipeline(options)
 
-创建一个新的ImageToImagePipeline。
+创建一个新的 ImageToImagePipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1560,7 +1560,7 @@ const output = await upscaler(url);
 
 ### imageToImagePipeline._call()： <code> ImageToImagePipelineCallback </code>
 
-**类型**：[`ImageToImagePipeline`](#module_pipelines.ImageToImagePipeline)的实例方法
+**类型**：`ImageToImagePipeline`的实例方法
 
 * * *
 
@@ -1590,19 +1590,19 @@ const out = await depth_estimator(url);
 // }
 ```
 
-**类型**：[`pipelines`](#module_pipelines)的静态类
+**类型**：`pipelines`的静态类
 
-+   [.DepthEstimationPipeline](#module_pipelines.DepthEstimationPipeline)
++   .DepthEstimationPipeline
 
-    +   [`new DepthEstimationPipeline(options)`](#new_module_pipelines.DepthEstimationPipeline_new)
+    +   `new DepthEstimationPipeline(options)`
 
-    +   [`._call()`](#module_pipelines.DepthEstimationPipeline+_call)：`DepthEstimationPipelineCallback`
+    +   `._call()`：`DepthEstimationPipelineCallback`
 
 * * *
 
 ### new DepthEstimationPipeline(options)
 
-创建一个新的DepthEstimationPipeline。
+创建一个新的 DepthEstimationPipeline。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1612,7 +1612,7 @@ const out = await depth_estimator(url);
 
 ### depthEstimationPipeline._call()： <code> DepthEstimationPipelineCallback </code>
 
-**类型**：[`DepthEstimationPipeline`](#module_pipelines.DepthEstimationPipeline)的实例方法
+**类型**：`DepthEstimationPipeline`的实例方法
 
 * * *
 
@@ -1620,9 +1620,9 @@ const out = await depth_estimator(url);
 
 构建`Pipeline`对象的实用工厂方法。
 
-**类型**：[`pipelines`](#module_pipelines)的静态方法
+**类型**：`pipelines`的静态方法
 
-**返回**：`*` - 指定任务的Pipeline对象。
+**返回**：`*` - 指定任务的 Pipeline 对象。
 
 **抛出**：
 
@@ -1687,48 +1687,48 @@ const out = await depth_estimator(url);
 
 ## pipelines~x[1]： <code> number </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部属性。
+**种类**：`pipelines`的内部属性。
 
 * * *
 
 ## pipelines~ImagePipelineInputs： <code> string </code> | <code> RawImage </code> | <code> URL </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef。
+**种类**：`pipelines`的内部 typedef。
 
 * * *
 
 ## pipelines~AudioPipelineInputs： <code> string </code> | <code> URL </code> | <code> Float32Array </code> | <code> Float64Array </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef。
+**种类**：`pipelines`的内部 typedef。
 
 * * *
 
 ## pipelines~BoundingBox： <code> Object </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef。
+**种类**：`pipelines`的内部 typedef。
 
 **属性**
 
 | 名称 | 类型 | 描述 |
 | --- | --- | --- |
-| xmin | `number` | 边界框的最小x坐标。 |
-| ymin | `number` | 边界框的最小y坐标。 |
-| xmax | `number` | 边界框的最大x坐标。 |
-| ymax | `number` | 边界框的最大y坐标。 |
+| xmin | `number` | 边界框的最小 x 坐标。 |
+| ymin | `number` | 边界框的最小 y 坐标。 |
+| xmax | `number` | 边界框的最大 x 坐标。 |
+| ymax | `number` | 边界框的最大 y 坐标。 |
 
 * * *
 
 ## pipelines~Disposable ⇒ <code> Promise. < void > </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef。
+**种类**：`pipelines`的内部 typedef。
 
-**返回值**：`Promise.<void>` - 一个在项目被处理后解决的Promise。
+**返回值**：`Promise.<void>` - 一个在项目被处理后解决的 Promise。
 
 **属性**
 
 | 名称 | 类型 | 描述 |
 | --- | --- | --- |
-| dispose | `DisposeType` | 一个在管道被处理后解决的Promise。 |
+| dispose | `DisposeType` | 一个在管道被处理后解决的 Promise。 |
 
 * * *
 
@@ -1736,7 +1736,7 @@ const out = await depth_estimator(url);
 
 用于实例化基于文本的管道的对象。
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef。
+**种类**：`pipelines`的内部 typedef。
 
 **属性**
 
@@ -1752,7 +1752,7 @@ const out = await depth_estimator(url);
 
 用于实例化基于音频的管道的对象。
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef。
+**种类**：`pipelines`的内部 typedef。
 
 **属性**
 
@@ -1768,7 +1768,7 @@ const out = await depth_estimator(url);
 
 用于实例化文本和音频管道的对象。
 
-**种类**：[`pipelines`](#module_pipelines)的内部类型
+**种类**：`pipelines`的内部类型
 
 **属性**
 
@@ -1785,7 +1785,7 @@ const out = await depth_estimator(url);
 
 特定于文本分类管道的参数。
 
-**种类**：[`pipelines`](#module_pipelines)
+**种类**：`pipelines`
 
 **返回**: `Promise.<(TextClassificationOutput|Array<TextClassificationOutput>)>` - 包含预测标签和分数的数组或对象。
 
@@ -1808,7 +1808,7 @@ const out = await depth_estimator(url);
 
 特定于标记分类管道的参数。
 
-**种类**：[`pipelines`](#module_pipelines)的内部类型
+**种类**：`pipelines`的内部类型
 
 **返回**: `Promise.<(TokenClassificationOutput|Array<TokenClassificationOutput>)>` - 结果。
 
@@ -1835,7 +1835,7 @@ const out = await depth_estimator(url);
 
 特定于问答管道的参数。
 
-**种类**：[`pipelines`](#module_pipelines)的内部类型
+**种类**：`pipelines`的内部类型
 
 **返回**: `Promise.<(QuestionAnsweringOutput|Array<QuestionAnsweringOutput>)>` - 包含预测答案和分数的数组或对象。
 
@@ -1861,7 +1861,7 @@ const out = await depth_estimator(url);
 
 特定于填充掩码管道的参数。
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 **返回**：`Promise.<(FillMaskOutput|Array<FillMaskOutput>)>` - 包含得分、预测标记、预测标记字符串以及带有预测标记填充的序列的对象数组，或这样的数组（每个输入文本一个）。如果只提供一个输入文本，则输出将是一个对象数组。
 
@@ -1880,7 +1880,7 @@ const out = await depth_estimator(url);
 | --- | --- | --- | --- |
 | sequence | `string` |  | 带有掩码标记预测的相应输入。 |
 | score | `number` |  | 相应的概率。 |
-| token | `number` |  | 预测的标记id（用于替换掩码标记）。 |
+| token | `number` |  | 预测的标记 id（用于替换掩码标记）。 |
 | token_str | `string` |  | 预测的标记（用于替换掩码标记）。 |
 | [topk] | `number` | `5` | 当传递时，覆盖要返回的预测数量。 |
 
@@ -1888,12 +1888,12 @@ const out = await depth_estimator(url);
 
 ## 管道~Text2TextGenerationPipelineType ⇒ <code> Promise. < (Text2TextGenerationOutput|Array < Text2TextGenerationOutput > ) > </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | texts | `string` &#124; `Array<string>` | 编码器的输入文本。 |
-| [options] | `*` | 传递给模型的generate方法的额外关键字参数。 |
+| [options] | `*` | 传递给模型的 generate 方法的额外关键字参数。 |
 
 **属性**
 
@@ -1905,12 +1905,12 @@ const out = await depth_estimator(url);
 
 ## 管道~SummarizationPipelineType ⇒ <code> Promise. < (SummarizationOutput|Array < SummarizationOutput > ) > </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | texts | `string` &#124; `Array<string>` | 一个或多个文章（或一个文章列表）要总结。 |
-| [options] | `*` | 传递给模型的generate方法的额外关键字参数。 |
+| [options] | `*` | 传递给模型的 generate 方法的额外关键字参数。 |
 
 **属性**
 
@@ -1922,12 +1922,12 @@ const out = await depth_estimator(url);
 
 ## 管道~TranslationPipelineType ⇒ <code> Promise. < (TranslationOutput|Array < TranslationOutput > ) > </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | texts | `string` &#124; `Array<string>` | 要翻译的文本。 |
-| [options] | `*` | 传递给模型的generate方法的额外关键字参数。 |
+| [options] | `*` | 传递给模型的 generate 方法的额外关键字参数。 |
 
 **属性**
 
@@ -1941,14 +1941,14 @@ const out = await depth_estimator(url);
 
 特定于文本生成管道的参数。
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 **返回**：`Promise.<(TextGenerationOutput|Array<TextGenerationOutput>)>` - 包含生成文本的数组或对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | texts | `string` &#124; `Array<string>` | 一个或多个提示（或一个提示列表）以完成。 |
-| [options] | `TextGenerationConfig` | 传递给模型的generate方法的额外关键字参数。 |
+| [options] | `TextGenerationConfig` | 传递给模型的 generate 方法的额外关键字参数。 |
 
 **属性**
 
@@ -1963,7 +1963,7 @@ const out = await depth_estimator(url);
 
 特定于零样本分类管道的参数。
 
-**种类**: [`pipelines`](#module_pipelines) 的内部类型
+**种类**: `pipelines` 的内部类型
 
 **返回**: `Promise.<(零样本分类输出|Array<零样本分类输出>)>` - 包含预测标签和分数的数组或对象。
 
@@ -1989,7 +1989,7 @@ const out = await depth_estimator(url);
 
 特定于特征提取管道的参数。
 
-**种类**: [`pipelines`](#module_pipelines) 的内部类型
+**种类**: `pipelines` 的内部类型
 
 **返回**: `Promise.<张量>` - 模型计算的特征。
 
@@ -2011,7 +2011,7 @@ const out = await depth_estimator(url);
 
 特定于音频分类管道的参数。
 
-**种类**: [`pipelines`](#module_pipelines) 的内部类型
+**种类**: `pipelines` 的内部类型
 
 **返回**: `Promise.<(音频分类输出|Array<音频分类输出>)>` - 包含预测标签和分数的数组或对象。
 
@@ -2035,7 +2035,7 @@ const out = await depth_estimator(url);
 | --- | --- | --- | --- |
 | 标签 | `字符串` |  | 预测的标签。 |
 | 分数 | `数字` |  | 相应的概率。 |
-| [topk] | `number` | 返回的前k个标签的数量。如果提供的数字为`null`或高于模型配置中可用标签的数量，则默认为标签的数量。 |
+| [topk] | `number` | 返回的前 k 个标签的数量。如果提供的数字为`null`或高于模型配置中可用标签的数量，则默认为标签的数量。 |
 
 * * *
 
@@ -2043,7 +2043,7 @@ const out = await depth_estimator(url);
 
 特定于零样本音频分类管道的参数。
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 **返回**：`Promise.<(Array<ZeroShotAudioClassificationOutput>|Array<Array<ZeroShotAudioClassificationOutput>>)>` - 包含预测标签和分数的对象数组。
 
@@ -2052,7 +2052,7 @@ const out = await depth_estimator(url);
 
 | audio | `AudioPipelineInputs` | 要分类的输入音频文件。输入可以是：
 
-+   `string`或`URL`，是音频文件的文件名/URL，文件将以处理器的采样率读取，以获取使用[`AudioContext`](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext) API获取波形。如果`AudioContext`不可用，应将原始波形作为形状为`(n, )`的Float32Array传递。
++   `string`或`URL`，是音频文件的文件名/URL，文件将以处理器的采样率读取，以获取使用[`AudioContext`](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext) API 获取波形。如果`AudioContext`不可用，应将原始波形作为形状为`(n, )`的 Float32Array 传递。
 
 +   形状为`(n, )`的`Float32Array`或`Float64Array`，表示以正确采样率的原始音频（不会进行进一步检查）。
 
@@ -2067,14 +2067,14 @@ const out = await depth_estimator(url);
 | 名称 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
 | 标签 | `string` | 标签由模型识别。它是建议的`candidate_label`之一。 |
-| 分数 | `number` | 模型为该标签分配的分数（介于0和1之间）。 |
-| [hypothesis_template] | `string` | `""这是一个{}的声音。""` | 与`candidate_labels`一起使用的句子，通过将占位符替换为candidate_labels尝试音频分类，然后使用`logits_per_audio`来估计可能性。 |
+| 分数 | `number` | 模型为该标签分配的分数（介于 0 和 1 之间）。 |
+| [hypothesis_template] | `string` | `""这是一个{}的声音。""` | 与`candidate_labels`一起使用的句子，通过将占位符替换为 candidate_labels 尝试音频分类，然后使用`logits_per_audio`来估计可能性。 |
 
 * * *
 
 ## pipelines~ChunkCallback : <code> function </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 | Param | 类型 | 描述 |
 | --- | --- | --- |
@@ -2084,7 +2084,7 @@ const out = await depth_estimator(url);
 
 ## pipelines~Chunk : <code> Object </code>
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 **属性**
 
@@ -2099,7 +2099,7 @@ const out = await depth_estimator(url);
 
 特定于自动语音识别管道的参数。
 
-**种类**：[`pipelines`](#module_pipelines)的内部typedef
+**种类**：`pipelines`的内部 typedef
 
 **返回**：`Promise.<(AutomaticSpeechRecognitionOutput|Array<AutomaticSpeechRecognitionOutput>)>` - 包含转录文本和可选时间戳的对象，如果`return_timestamps`为`true`。
 
@@ -2108,13 +2108,13 @@ const out = await depth_estimator(url);
 
 | audio | `AudioPipelineInputs` | 要转录的输入音频文件。输入可以是：
 
-+   `string`或`URL`，是音频文件的文件名/URL，文件将以处理器的采样率读取，以获取使用[`AudioContext`](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext) API获取波形。如果`AudioContext`不可用，应将原始波形作为形状为`(n, )`的Float32Array传递。
++   `string`或`URL`，是音频文件的文件名/URL，文件将以处理器的采样率读取，以获取使用[`AudioContext`](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext) API 获取波形。如果`AudioContext`不可用，应将原始波形作为形状为`(n, )`的 Float32Array 传递。
 
 +   形状为`(n, )`的`Float32Array`或`Float64Array`，表示以正确采样率的原始音频（不会进行进一步检查）。
 
 |
 
-| [options] | `AutomaticSpeechRecognitionConfig` | 传递给模型的generate方法的附加关键字参数。 |
+| [options] | `AutomaticSpeechRecognitionConfig` | 传递给模型的 generate 方法的附加关键字参数。 |
 | --- | --- | --- |
 
 **属性**
@@ -2137,7 +2137,7 @@ const out = await depth_estimator(url);
 
 ## pipelines~ImageToTextPipelineType ⇒ <code> Promise. < (ImageToTextOutput|Array < ImageToTextOutput > ) > </code>
 
-**种类**：[`pipelines`](#module_pipelines) 的内部类型
+**种类**：`pipelines` 的内部类型
 
 **返回值**：`Promise.<(ImageToTextOutput|Array<ImageToTextOutput>)>` - 包含生成的文本的对象（或对象数组）。
 
@@ -2158,7 +2158,7 @@ const out = await depth_estimator(url);
 
 特定于图像分类流程的参数。
 
-**种类**：[`pipelines`](#module_pipelines) 的内部类型
+**种类**：`pipelines` 的内部类型
 
 **返回值**：`Promise.<(ImageClassificationOutput|Array<ImageClassificationOutput>)>` - 包含预测标签和分数的数组或对象。
 
@@ -2181,7 +2181,7 @@ const out = await depth_estimator(url);
 
 特定于图像分割流程的参数。
 
-**种类**：[`pipelines`](#module_pipelines) 的内部类型
+**种类**：`pipelines` 的内部类型
 
 **返回值**：`Promise.<Array<ImageSegmentationPipelineOutput>>` - 带有注释的分段。
 
@@ -2201,7 +2201,7 @@ const out = await depth_estimator(url);
 | [mask_threshold] | `number` | `0.5` | 将预测的掩模转换为二进制值时使用的阈值。 |
 | [overlap_mask_area_threshold] | `number` | `0.8` | 排除小的、不连续的段的掩模重叠阈值。 |
 | [subtask] | `null` &#124; `string` |  | 要执行的分割任务。根据模型的能力，其中之一是[`panoptic`、`instance`和`semantic`]。如果未设置，管道将尝试按照这个顺序解决。 |
-| [label_ids_to_fuse] | `Array.<number>` |  | 要融合的标签id列表。如果未设置，则不融合任何标签。 |
+| [label_ids_to_fuse] | `Array.<number>` |  | 要融合的标签 id 列表。如果未设置，则不融合任何标签。 |
 | [target_sizes] | `Array.<Array<number>>` |  | 输入图像的目标尺寸列表。如果未设置，则使用原始图像尺寸。 |
 
 * * *
@@ -2210,7 +2210,7 @@ const out = await depth_estimator(url);
 
 特定于零样本图像分类管道的参数。
 
-**种类**: [`pipelines`](#module_pipelines)的内部类型定义
+**种类**: `pipelines`的内部类型定义
 
 **返回**: `Promise.<(Array<ZeroShotImageClassificationOutput>|Array<Array<ZeroShotImageClassificationOutput>>)>` - 包含预测标签和分数的对象数组。
 
@@ -2225,7 +2225,7 @@ const out = await depth_estimator(url);
 | 名称 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
 | label | `string` |  | 模型识别的标签。它是建议的`candidate_label`之一。 |
-| score | `number` |  | 模型为该标签分配的分数（介于0和1之间）。 |
+| score | `number` |  | 模型为该标签分配的分数（介于 0 和 1 之间）。 |
 | [hypothesis_template] | `string` | `""这是一张{}的照片""` | 与`candidate_labels`一起使用的句子，通过将占位符替换为候选标签来尝试图像分类。然后使用`logits_per_image`来估计可能性。 |
 
 * * *
@@ -2234,7 +2234,7 @@ const out = await depth_estimator(url);
 
 特定于目标检测管道的参数。
 
-**种类**: [`pipelines`](#module_pipelines)的内部类型定义
+**种类**: `pipelines`的内部类型定义
 
 **返回**: `Promise.<(ObjectDetectionPipelineOutput|Array<ObjectDetectionPipelineOutput>)>` - 一组对象或一组对象的列表。
 
@@ -2249,7 +2249,7 @@ const out = await depth_estimator(url);
 | --- | --- | --- | --- |
 | label | `string` |  | 模型识别的类别标签。 |
 | score | `number` |  | 模型为该标签分配的分数。 |
-| box | `BoundingBox` |  | 图像原始尺寸中检测到的对象的边界框，如果`percentage`设置为true，则为百分比。 |
+| box | `BoundingBox` |  | 图像原始尺寸中检测到的对象的边界框，如果`percentage`设置为 true，则为百分比。 |
 | [threshold] | `number` | `0.9` | 用于按分数筛选框的阈值。 |
 | [percentage] | `boolean` | `false` | 是否以百分比（true）或像素（false）返回框坐标。 |
 
@@ -2259,7 +2259,7 @@ const out = await depth_estimator(url);
 
 特定于零样本目标检测管道的参数。
 
-**种类**: [`pipelines`](#module_pipelines)的内部类型定义
+**种类**: `pipelines`的内部类型定义
 
 **返回**: `Promise.<(Array<ZeroShotObjectDetectionOutput>|Array<Array<ZeroShotObjectDetectionOutput>>)>` - 包含预测标签、分数和边界框的对象数组。
 
@@ -2274,8 +2274,8 @@ const out = await depth_estimator(url);
 | 名称 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
 | 标签 | `string` |  | 找到对象对应的文本查询。 |
-| 分数 | `number` |  | 与对象对应的分数（介于0和1之间）。 |
-| 包围盒 | `BoundingBox` |  | 图像原始尺寸中检测到的对象的边界框，如果`percentage`设置为true，则为百分比。 |
+| 分数 | `number` |  | 与对象对应的分数（介于 0 和 1 之间）。 |
+| 包围盒 | `BoundingBox` |  | 图像原始尺寸中检测到的对象的边界框，如果`percentage`设置为 true，则为百分比。 |
 | [threshold] | `number` | `0.1` | 进行预测所需的概率。 |
 | [topk] | `number` |  | 管道返回的前几个预测的数量。如果提供的数字为`null`或高于可用的预测数量，则默认为预测数量。 |
 | [百分比] | `boolean` | `false` | 是否以百分比（true）或像素（false）返回框坐标。 |
@@ -2284,7 +2284,7 @@ const out = await depth_estimator(url);
 
 ## pipelines~DocumentQuestionAnsweringPipelineType ⇒ <code> Promise. < (DocumentQuestionAnsweringOutput|Array < DocumentQuestionAnsweringOutput > ) > </code>
 
-**种类**: [`pipelines`](#module_pipelines)的内部类型定义
+**种类**: `pipelines`的内部类型定义
 
 **返回**: `Promise.<(DocumentQuestionAnsweringOutput|Array<DocumentQuestionAnsweringOutput>)>` - 包含答案的对象（或对象数组）。
 
@@ -2304,13 +2304,13 @@ const out = await depth_estimator(url);
 
 ## pipelines~TextToAudioPipelineConstructorArgs : <code> Object </code>
 
-**种类**: [`pipelines`](#module_pipelines)的内部类型定义
+**种类**: `pipelines`的内部类型定义
 
 **属性**
 
 | 名称 | 类型 | 描述 |
 | --- | --- | --- |
-| [vocoder] | `PreTrainedModel` | 管道使用的声码器（如果模型使用）。如果未提供，则使用默认的HifiGan声码器。 |
+| [vocoder] | `PreTrainedModel` | 管道使用的声码器（如果模型使用）。如果未提供，则使用默认的 HifiGan 声码器。 |
 
 * * *
 
@@ -2318,7 +2318,7 @@ const out = await depth_estimator(url);
 
 特定于文本到音频管道的参数。
 
-**种类**: [`pipelines`](#module_pipelines)的内部类型定义
+**种类**: `pipelines`的内部类型定义
 
 **返回**: `Promise.<TextToAudioOutput>` - 包含生成的音频和采样率的对象。
 
@@ -2339,7 +2339,7 @@ const out = await depth_estimator(url);
 
 ## pipelines~ImageToImagePipelineType ⇒ <code> Promise. < (RawImage|Array < RawImage > ) > </code>
 
-**种类**: [`pipelines`](#module_pipelines)的内部类型定义
+**种类**: `pipelines`的内部类型定义
 
 **返回**: `Promise.<(RawImage|Array<RawImage>)>` - 转换后的图像或图像列表。
 
@@ -2351,7 +2351,7 @@ const out = await depth_estimator(url);
 
 ## pipelines~DepthEstimationPipelineType ⇒ <code> Promise. < (DepthEstimationPipelineOutput|Array < DepthEstimationPipelineOutput > ) > </code>
 
-**种类**: [`pipelines`](#module_pipelines)的内部类型定义
+**种类**: `pipelines`的内部类型定义
 
 **返回**: `Promise.<(DepthEstimationPipelineOutput|Array<DepthEstimationPipelineOutput>)>` - 包含结果的图像或图像列表。
 
@@ -2372,6 +2372,6 @@ const out = await depth_estimator(url);
 
 所有可能的管道类型。
 
-**种类**：`pipelines`模块的内部typedef
+**种类**：`pipelines`模块的内部 typedef
 
 * * *

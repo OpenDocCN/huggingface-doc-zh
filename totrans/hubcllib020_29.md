@@ -1,12 +1,12 @@
-# HfApi客户端
+# HfApi 客户端
 
-> 原始文本：[https://huggingface.co/docs/huggingface_hub/package_reference/hf_api](https://huggingface.co/docs/huggingface_hub/package_reference/hf_api)
+> 原始文本：[`huggingface.co/docs/huggingface_hub/package_reference/hf_api`](https://huggingface.co/docs/huggingface_hub/package_reference/hf_api)
 
-下面是`HfApi`类的文档，它作为Hugging Face Hub的API的Python包装器。
+下面是`HfApi`类的文档，它作为 Hugging Face Hub 的 API 的 Python 包装器。
 
 `HfApi`中的所有方法也可以直接从包的根目录访问。下面详细介绍了这两种方法。
 
-使用根方法更为直接，但[HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi)类提供更多灵活性。特别是，您可以传递一个将在所有HTTP调用中重复使用的令牌。这与`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)不同，因为令牌不会持久保存在计算机上。还可以提供不同的端点或配置自定义用户代理。
+使用根方法更为直接，但 HfApi 类提供更多灵活性。特别是，您可以传递一个将在所有 HTTP 调用中重复使用的令牌。这与`huggingface-cli login`或 login()不同，因为令牌不会持久保存在计算机上。还可以提供不同的端点或配置自定义用户代理。
 
 ```py
 from huggingface_hub import HfApi, list_models
@@ -42,33 +42,33 @@ models = hf_api.list_models()
 
 参数
 
-+   `repo_id` (`str`) — 要接受访问请求的存储库的ID。
++   `repo_id` (`str`) — 要接受访问请求的存储库的 ID。
 
 +   `user` (`str`) — 应接受访问请求的用户的用户名。
 
 +   `repo_type` (`str`, *可选*) — 要接受访问请求的存储库类型。必须是`model`、`dataset`或`space`之一。默认为`model`。
 
-+   `token` (`str`, *可选*) — 有效的身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *可选*) — 有效的身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 引发
 
 `HTTPError`
 
-+   `HTTPError` — 如果存储库未受限，则为HTTP 400。
++   `HTTPError` — 如果存储库未受限，则为 HTTP 400。
 
-+   `HTTPError` — 如果您只有对存储库的只读访问权限，则为HTTP 403。如果您在存储库所属组织中没有`write`或`admin`角色，或者如果您传递了一个`read`令牌，这可能是情况。
++   `HTTPError` — 如果您只有对存储库的只读访问权限，则为 HTTP 403。如果您在存储库所属组织中没有`write`或`admin`角色，或者如果您传递了一个`read`令牌，这可能是情况。
 
-+   `HTTPError` — 如果用户在Hub上不存在，则为HTTP 404。
++   `HTTPError` — 如果用户在 Hub 上不存在，则为 HTTP 404。
 
-+   `HTTPError` — 如果找不到用户访问请求，则为HTTP 404。
++   `HTTPError` — 如果找不到用户访问请求，则为 HTTP 404。
 
-+   `HTTPError` — 如果用户访问请求已经在接受列表中，则为HTTP 404。
++   `HTTPError` — 如果用户访问请求已经在接受列表中，则为 HTTP 404。
 
 接受来自用户的对给定受限存储库的访问请求。
 
-一旦请求被接受，用户将能够下载存储库的任何文件并访问社区选项卡。如果批准模式是自动的，您不必手动接受请求。接受的请求可以随时使用[cancel_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.cancel_access_request)和[reject_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.reject_access_request)进行取消或拒绝。
+一旦请求被接受，用户将能够下载存储库的任何文件并访问社区选项卡。如果批准模式是自动的，您不必手动接受请求。接受的请求可以随时使用 cancel_access_request()和 reject_access_request()进行取消或拒绝。
 
-有关受限存储库的更多信息，请参阅[https://huggingface.co/docs/hub/models-gated](https://huggingface.co/docs/hub/models-gated)。
+有关受限存储库的更多信息，请参阅[`huggingface.co/docs/hub/models-gated`](https://huggingface.co/docs/hub/models-gated)。
 
 #### `add_collection_item`
 
@@ -80,21 +80,21 @@ models = hf_api.list_models()
 
 参数
 
-+   `collection_slug` (`str`) — 要更新的集合的Slug。示例：`"TheBloke/recent-models-64f9a55bb3115b4f513ec026"`。
++   `collection_slug` (`str`) — 要更新的集合的 Slug。示例：`"TheBloke/recent-models-64f9a55bb3115b4f513ec026"`。
 
-+   `item_id` (`str`) — 要添加到集合中的项目的ID。它可以是Hub上存储库的ID（例如`"facebook/bart-large-mnli"`）或论文ID（例如`"2307.09288"`）。
++   `item_id` (`str`) — 要添加到集合中的项目的 ID。它可以是 Hub 上存储库的 ID（例如`"facebook/bart-large-mnli"`）或论文 ID（例如`"2307.09288"`）。
 
 +   `item_type` (`str`) — 要添加的项目类型。可以是`"model"`、`"dataset"`、`"space"`或`"paper"`之一。
 
-+   `note` (`str`, *可选*) — 要附加到集合中项目的注释。注释的最大长度为500个字符。
++   `note` (`str`, *可选*) — 要附加到集合中项目的注释。注释的最大长度为 500 个字符。
 
 +   `exists_ok` (`bool`, *可选*) — 如果为`True`，则如果项目已经存在，则不会引发错误。
 
-+   `token` (`str`, *可选*) — Hugging Face令牌。如果未提供，将默认使用本地保存的令牌。
++   `token` (`str`, *可选*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
-将项目添加到Hub上的集合中。
+将项目添加到 Hub 上的集合中。
 
-返回：[Collection](/docs/huggingface_hub/v0.20.3/en/package_reference/collections#huggingface_hub.Collection)
+返回：Collection
 
 示例：
 
@@ -129,19 +129,19 @@ models = hf_api.list_models()
 
 参数
 
-+   `repo_id` (`str`) — 要更新的仓库的ID。示例："bigcode/in-the-stack"。
++   `repo_id` (`str`) — 要更新的仓库的 ID。示例："bigcode/in-the-stack"。
 
 +   `key` (`str`) — 秘密键。示例："GITHUB_API_KEY"
 
 +   `value` (`str`) — 秘密值。示例："your_github_api_key"。
 
-+   `description` (`str`, *可选*) — 秘密描述。示例："用于访问Github API的Github API密钥"。
++   `description` (`str`, *可选*) — 秘密描述。示例："用于访问 Github API 的 Github API 密钥"。
 
-+   `token` (`str`, *可选*) — Hugging Face令牌。如果未提供，将默认使用本地保存的令牌。
++   `token` (`str`, *可选*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
 在空间中添加或更新一个秘密。
 
-秘密允许在空间中设置秘密键或令牌，而无需将它们硬编码。有关更多详细信息，请参见[https://huggingface.co/docs/hub/spaces-overview#managing-secrets](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。
+秘密允许在空间中设置秘密键或令牌，而无需将它们硬编码。有关更多详细信息，请参见[`huggingface.co/docs/hub/spaces-overview#managing-secrets`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。
 
 #### `add_space_variable`
 
@@ -153,19 +153,19 @@ models = hf_api.list_models()
 
 参数
 
-+   `repo_id` (`str`) — 要更新的仓库的ID。示例："bigcode/in-the-stack"。
++   `repo_id` (`str`) — 要更新的仓库的 ID。示例："bigcode/in-the-stack"。
 
 +   `key` (`str`) — 变量键。示例："MODEL_REPO_ID"
 
 +   `value` (`str`) — 变量值。示例："the_model_repo_id"。
 
-+   `description` (`str`) — 变量描述。示例："实现模型的模型仓库ID"。
++   `description` (`str`) — 变量描述。示例："实现模型的模型仓库 ID"。
 
-+   `token` (`str`, *可选*) — Hugging Face令牌。如果未提供，将默认使用本地保存的令牌。
++   `token` (`str`, *可选*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
 在空间中添加或更新一个变量。
 
-变量允许在空间中设置环境变量，而无需将它们硬编码。有关更多详细信息，请参见[https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)
+变量允许在空间中设置环境变量，而无需将它们硬编码。有关更多详细信息，请参见[`huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)
 
 #### `cancel_access_request`
 
@@ -177,33 +177,33 @@ models = hf_api.list_models()
 
 参数
 
-+   `repo_id` (`str`) — 要取消访问请求的仓库的ID。
++   `repo_id` (`str`) — 要取消访问请求的仓库的 ID。
 
 +   `user` (`str`) — 应取消访问请求的用户的用户名。
 
 +   `repo_type` (`str`, *可选*) — 要取消访问请求的仓库类型。必须是`model`、`dataset`或`space`之一。默认为`model`。
 
-+   `token` (`str`, *可选*) — 有效的身份验证令牌（请参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *可选*) — 有效的身份验证令牌（请参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 引发
 
 `HTTPError`
 
-+   `HTTPError` — 如果仓库未受限，则返回HTTP 400。
++   `HTTPError` — 如果仓库未受限，则返回 HTTP 400。
 
-+   `HTTPError` — 如果您只有对仓库的只读访问权限，则返回HTTP 403。如果您在仓库所属组织中没有`write`或`admin`角色，或者如果您传递了一个`read`令牌，则可能会出现这种情况。
++   `HTTPError` — 如果您只有对仓库的只读访问权限，则返回 HTTP 403。如果您在仓库所属组织中没有`write`或`admin`角色，或者如果您传递了一个`read`令牌，则可能会出现这种情况。
 
-+   `HTTPError` — 如果Hub上不存在用户，则返回HTTP 404。
++   `HTTPError` — 如果 Hub 上不存在用户，则返回 HTTP 404。
 
-+   `HTTPError` — 如果找不到用户访问请求，则返回HTTP 404。
++   `HTTPError` — 如果找不到用户访问请求，则返回 HTTP 404。
 
-+   `HTTPError` — 如果用户访问请求已在待处理列表中，则返回HTTP 404。
++   `HTTPError` — 如果用户访问请求已在待处理列表中，则返回 HTTP 404。
 
 取消用户对特定受限仓库的访问请求。
 
 取消的请求将返回到待处理列表，并且用户将失去对仓库的访问权限。
 
-有关受限仓库的更多信息，请参见[https://huggingface.co/docs/hub/models-gated](https://huggingface.co/docs/hub/models-gated)。
+有关受限仓库的更多信息，请参见[`huggingface.co/docs/hub/models-gated`](https://huggingface.co/docs/hub/models-gated)。
 
 #### `change_discussion_status`
 
@@ -225,11 +225,11 @@ models = hf_api.list_models()
 
 +   `repo_type` (`str`, *可选*) — 如果上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果上传到模型，则为`None`或`"model"`。默认为`None`。
 
-+   `token` (`str`, *可选*) — 身份验证令牌（请参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *可选*) — 身份验证令牌（请参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 返回
 
-[DiscussionStatusChange](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionStatusChange)
+DiscussionStatusChange
 
 状态更改事件
 
@@ -250,7 +250,7 @@ models = hf_api.list_models()
 
 引发以下错误：
 
-+   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) - 如果HuggingFace API返回错误
++   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) - 如果 HuggingFace API 返回错误
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) - 如果某个参数值无效
 
@@ -270,15 +270,15 @@ models = hf_api.list_models()
 
 +   `discussion_num`（`int`） - 讨论或拉取请求的编号。必须是严格的正整数。
 
-+   `comment`（`str`） - 要创建的评论内容。评论支持Markdown格式。
++   `comment`（`str`） - 要创建的评论内容。评论支持 Markdown 格式。
 
 +   `repo_type`（`str`，*可选*） - 如果上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果上传到模型，则为`None`或`"model"`。默认为`None`。
 
-+   `token`（`str`，*可选*） - 身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token`（`str`，*可选*） - 身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 返回
 
-[DiscussionComment](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionComment)
+DiscussionComment
 
 新创建的评论
 
@@ -308,7 +308,7 @@ models = hf_api.list_models()
 
 引发以下错误：
 
-+   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) - 如果HuggingFace API返回错误
++   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) - 如果 HuggingFace API 返回错误
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) - 如果某个参数值无效
 
@@ -328,7 +328,7 @@ models = hf_api.list_models()
 
 +   `branch`（`str`） - 要创建的分支的名称。
 
-+   `revision`（`str`，*可选*） - 创建分支的git修订版。可以是分支名称或提交的OID/SHA，以十六进制字符串表示。默认为`"main"`分支的头部。
++   `revision`（`str`，*可选*） - 创建分支的 git 修订版。可以是分支名称或提交的 OID/SHA，以十六进制字符串表示。默认为`"main"`分支的头部。
 
 +   `token`（`str`，*可选*） - 身份验证令牌。将默认为存储的令牌。
 
@@ -340,13 +340,13 @@ models = hf_api.list_models()
 
 [RepositoryNotFoundError] 或 [BadRequestError] 或 [HfHubHTTPError]
 
-+   [RepositoryNotFoundError] - 如果找不到存储库（错误404）：错误的repo_id/repo_type，私有但未经身份验证或存储库不存在。
++   [RepositoryNotFoundError] - 如果找不到存储库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或存储库不存在。
 
 +   [BadRequestError] - 如果分支的引用无效。例如：`refs/pr/5`或‘refs/foo/bar’。
 
-+   [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError) — 如果仓库中已经存在该分支（错误409），并且`exist_ok`设置为`False`。
++   HfHubHTTPError — 如果仓库中已经存在该分支（错误 409），并且`exist_ok`设置为`False`。
 
-在Hub上为仓库创建一个新分支，从指定的修订版本开始（默认为`main`）。要找到适合您需求的修订版本，可以使用[list_repo_refs()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_repo_refs)或[list_repo_commits()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_repo_commits)。
+在 Hub 上为仓库创建一个新分支，从指定的修订版本开始（默认为`main`）。要找到适合您需求的修订版本，可以使用 list_repo_refs()或 list_repo_commits()。
 
 #### `create_collection`
 
@@ -368,11 +368,11 @@ models = hf_api.list_models()
 
 +   `exists_ok` (`bool`, *optional*) — 如果为`True`，则如果集合已经存在，则不会引发错误。
 
-+   `token` (`str`, *optional*) — Hugging Face令牌。如果未提供，将默认为本地保存的令牌。
++   `token` (`str`, *optional*) — Hugging Face 令牌。如果未提供，将默认为本地保存的令牌。
 
-在Hub上创建一个新的集合。
+在 Hub 上创建一个新的集合。
 
-返回：[Collection](/docs/huggingface_hub/v0.20.3/en/package_reference/collections#huggingface_hub.Collection)
+返回：Collection
 
 示例：
 
@@ -400,11 +400,11 @@ models = hf_api.list_models()
 
 +   `operations` (`Iterable` of `CommitOperation()`) — 要包含在提交中的操作的可迭代对象，可以是：
 
-    +   [CommitOperationAdd](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationAdd) 用于上传文件
+    +   CommitOperationAdd 用于上传文件
 
-    +   [CommitOperationDelete](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationDelete) 用于删除文件
+    +   CommitOperationDelete 用于删除文件
 
-    +   [CommitOperationCopy](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationCopy) 用于复制文件
+    +   CommitOperationCopy 用于复制文件
 
     操作对象将被修改以包含与上传相关的信息。不要重复使用相同的对象进行多次提交。
 
@@ -416,11 +416,11 @@ models = hf_api.list_models()
 
 +   `repo_type` (`str`, *optional*) — 如果上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果上传到模型，则为`None`或`"model"`。默认为`None`。
 
-+   `revision` (`str`, *optional*) — 提交的git修订版本。默认为`"main"`分支的头部。
++   `revision` (`str`, *optional*) — 提交的 git 修订版本。默认为`"main"`分支的头部。
 
-+   `create_pr` (`boolean`, *optional*) — 是否创建一个包含该提交的Pull Request。默认为`False`。如果未设置`revision`，则PR将针对`"main"`分支打开。如果设置了`revision`并且是一个分支，则PR将针对该分支打开。如果设置了`revision`并且不是分支名称（例如：一个提交oid），服务器将返回`RevisionNotFoundError`。
++   `create_pr` (`boolean`, *optional*) — 是否创建一个包含该提交的 Pull Request。默认为`False`。如果未设置`revision`，则 PR 将针对`"main"`分支打开。如果设置了`revision`并且是一个分支，则 PR 将针对该分支打开。如果设置了`revision`并且不是分支名称（例如：一个提交 oid），服务器将返回`RevisionNotFoundError`。
 
-+   `num_threads` (`int`, *optional*) — 用于上传文件的并发线程数。默认为5。将其设置为2意味着最多同时上传2个文件。
++   `num_threads` (`int`, *optional*) — 用于上传文件的并发线程数。默认为 5。将其设置为 2 意味着最多同时上传 2 个文件。
 
 +   `parent_commit` (`str`, *可选*) — 父提交的 OID / SHA，以十六进制字符串表示。也支持缩写（前 7 个字符）。如果指定且 `create_pr` 为 `False`，则如果 `revision` 没有指向 `parent_commit`，提交将失败。如果指定且 `create_pr` 为 `True`，将从 `parent_commit` 创建拉取请求。指定 `parent_commit` 确保在提交更改之前存储库未更改，并且如果存储库同时更新/提交，则尤其有用。
 
@@ -428,13 +428,13 @@ models = hf_api.list_models()
 
 返回
 
-[CommitInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitInfo) 或 `Future`
+CommitInfo 或 `Future`
 
-包含有关新创建提交的信息的 [CommitInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitInfo) 实例（提交哈希、提交 URL、PR URL、提交消息等）。如果传递 `run_as_future=True`，则返回一个 Future 对象，该对象在执行时将包含结果。
+包含有关新创建提交的信息的 CommitInfo 实例（提交哈希、提交 URL、PR URL、提交消息等）。如果传递 `run_as_future=True`，则返回一个 Future 对象，该对象在执行时将包含结果。
 
 引发
 
-`ValueError` 或 [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError)
+`ValueError` 或 RepositoryNotFoundError
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) — 如果提交消息为空。
 
@@ -444,13 +444,13 @@ models = hf_api.list_models()
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) — 如果 `create_pr` 为 `True`，且修订版本既不是 `None` 也不是 `"main"`。
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到存储库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证，或存储库不存在。
++   RepositoryNotFoundError — 如果找不到存储库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证，或存储库不存在。
 
 在给定存储库中创建提交，根据需要删除和上传文件。
 
 在提交过程中，输入的 `CommitOperation` 列表将发生变化。不要重复使用相同的对象进行多次提交。
 
-`create_commit` 假定存储库已经存在于 Hub 上。如果收到客户端错误 404，请确保已经进行了身份验证，并且 `repo_id` 和 `repo_type` 设置正确。如果存储库不存在，请先使用 [create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo) 创建它。
+`create_commit` 假定存储库已经存在于 Hub 上。如果收到客户端错误 404，请确保已经进行了身份验证，并且 `repo_id` 和 `repo_type` 设置正确。如果存储库不存在，请先使用 create_repo() 创建它。
 
 `create_commit` 限制为 25k 个 LFS 文件和 1GB 的常规文件负载。
 
@@ -466,9 +466,9 @@ models = hf_api.list_models()
 
 +   `repo_id` (`str`) — 将提交推送到的存储库。示例："username/my-cool-model"。
 
-+   `addition_commits` (`List` of `List` of [CommitOperationAdd](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationAdd)) — 包含 [CommitOperationAdd](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationAdd) 列表的列表。每个子列表将导致一个提交到 PR。
++   `addition_commits` (`List` of `List` of CommitOperationAdd) — 包含 CommitOperationAdd 列表的列表。每个子列表将导致一个提交到 PR。
 
-    deletion_commits — 包含 [CommitOperationDelete](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationDelete) 列表的列表。每个子列表将导致一个提交到 PR。删除提交在添加提交之前推送。
+    deletion_commits — 包含 CommitOperationDelete 列表的列表。每个子列表将导致一个提交到 PR。删除提交在添加提交之前推送。
 
 +   `commit_message` (`str`) — 将要创建的提交的摘要（第一行）。也将是 PR 的标题。
 
@@ -504,7 +504,7 @@ models = hf_api.list_models()
 
 `create_commits_on_pr` 是实验性的。其 API 和行为可能会在未来发生变化，恕不另行通知。
 
-`create_commits_on_pr` 假设仓库已经存在于 Hub 上。如果收到客户端错误 404，请确保已经进行了身份验证，并且 `repo_id` 和 `repo_type` 设置正确。如果仓库不存在，请先使用 [create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo) 创建它。
+`create_commits_on_pr` 假设仓库已经存在于 Hub 上。如果收到客户端错误 404，请确保已经进行了身份验证，并且 `repo_id` 和 `repo_type` 设置正确。如果仓库不存在，请先使用 create_repo() 创建它。
 
 示例：
 
@@ -542,7 +542,7 @@ models = hf_api.list_models()
 
 +   `title` (`str`) — 讨论的标题。最多可以有 200 个字符，并且必须至少有 3 个字符。前导和尾随空格将被删除。
 
-+   `token` (`str`, *optional*) — 认证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *optional*) — 认证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 +   `description` (`str`, *optional*) — 一个可选的描述，用于 Pull Request。默认为 `"Discussion opened with the huggingface_hub Python library"`
 
@@ -554,9 +554,9 @@ models = hf_api.list_models()
 
 通过编程方式创建的 Pull Request 将处于 `"draft"` 状态。
 
-使用 [HfApi.create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit) 可以一次性创建带有更改的 Pull Request。
+使用 HfApi.create_commit() 可以一次性创建带有更改的 Pull Request。
 
-返回：[DiscussionWithDetails](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionWithDetails)
+返回：DiscussionWithDetails
 
 引发以下错误：
 
@@ -564,7 +564,7 @@ models = hf_api.list_models()
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果某个参数值无效
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果要下载的仓库找不到。这可能是因为它不存在，或者因为它被设置为 `private`，而您没有访问权限。
++   RepositoryNotFoundError 如果要下载的仓库找不到。这可能是因为它不存在，或者因为它被设置为 `private`，而您没有访问权限。
 
 #### `create_inference_endpoint`
 
@@ -592,27 +592,27 @@ models = hf_api.list_models()
 
 +   `vendor` (`str`) — 将托管推理端点的云提供商或供应商（例如 `"aws"`）。
 
-+   `account_id` (`str`, *optional*) — 用于将VPC链接到私有推理端点的帐户ID（如果适用）。
++   `account_id` (`str`, *optional*) — 用于将 VPC 链接到私有推理端点的帐户 ID（如果适用）。
 
-+   `min_replica` (`int`, *optional*) — 保持运行的最小副本（实例）数量。默认为0。
++   `min_replica` (`int`, *optional*) — 保持运行的最小副本（实例）数量。默认为 0。
 
-+   `max_replica` (`int`, *optional*) — 要扩展到的最大副本（实例）数量。默认为1。
++   `max_replica` (`int`, *optional*) — 要扩展到的最大副本（实例）数量。默认为 1。
 
 +   `revision` (`str`, *optional*) — 部署在推理端点上的特定模型修订版（例如 `"6c0e6080953db56375760c0471a8c5f2929baf11"`）。
 
 +   `task` (`str`, *optional*) — 部署模型的任务（例如 `"text-classification"`）。
 
-+   `custom_image` (`Dict`, *optional*) — 用于推理端点的自定义Docker镜像。如果要部署在`text-generation-inference`（TGI）框架上运行的推理端点，则这很有用（请参阅示例）。
++   `custom_image` (`Dict`, *optional*) — 用于推理端点的自定义 Docker 镜像。如果要部署在`text-generation-inference`（TGI）框架上运行的推理端点，则这很有用（请参阅示例）。
 
 +   `type` ([`InferenceEndpointType]`, *optional*) -- 推理端点的类型，可以是`“protected”`（默认）、`“public”`或`“private”`。
 
 +   `namespace` (`str`, *optional*) — 推理端点将被创建的命名空间。默认为当前用户的命名空间。
 
-+   `token` (`str`, *optional*) — 认证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *optional*) — 认证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
-[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+InferenceEndpoint
 
 有关更新的推理端点的信息。
 
@@ -684,9 +684,9 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `repo_id` (`str`) — 由斜杠分隔的命名空间（用户或组织）和存储库名称。
 
-+   `title` (`str`) — 讨论的标题。最多可以有200个字符，并且必须至少有3个字符。前导和尾随空格将被剥离。
++   `title` (`str`) — 讨论的标题。最多可以有 200 个字符，并且必须至少有 3 个字符。前导和尾随空格将被剥离。
 
-+   `token` (`str`, *optional*) — 认证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *optional*) — 认证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 +   `description` (`str`, *optional*) — 拉取请求的可选描述。默认为 `"Discussion opened with the huggingface_hub Python library"`。
 
@@ -694,19 +694,19 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 创建拉取请求。以编程方式创建的拉取请求将处于`"draft"`状态。
 
-还可以使用[HfApi.create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit)一次性创建带有更改的拉取请求；
+还可以使用 HfApi.create_commit()一次性创建带有更改的拉取请求；
 
-这是[HfApi.create_discussion()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_discussion)的包装器。
+这是 HfApi.create_discussion()的包装器。
 
-返回：[DiscussionWithDetails](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionWithDetails)
+返回：DiscussionWithDetails
 
 引发以下错误：
 
-+   如果HuggingFace API返回错误，则引发[`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError)
++   如果 HuggingFace API 返回错误，则引发[`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError)
 
 +   如果某个参数值无效，则引发[`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError)
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果要下载的存储库找不到。这可能是因为它不存在，或者因为它被设置为`private`而您无法访问。
++   RepositoryNotFoundError 如果要下载的存储库找不到。这可能是因为它不存在，或者因为它被设置为`private`而您无法访问。
 
 #### `create_repo`
 
@@ -720,7 +720,7 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `repo_id` (`str`) — 由斜杠分隔的命名空间（用户或组织）和存储库名称。
 
-+   `token` (`str`, *optional*) — 身份验证令牌（请参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *optional*) — 身份验证令牌（请参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 +   `private` (`bool`, *optional*, 默认为`False`) — 模型存储库是否应为私有。
 
@@ -728,25 +728,25 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `exist_ok` (`bool`, *optional*, 默认为`False`) — 如果为`True`，则如果存储库已经存在，则不会引发错误。
 
-+   `space_sdk` (`str`, *optional*) — 如果`repo_type`为“space”，则要使用的SDK选择。可以是“streamlit”、“gradio”、“docker”或“static”。
++   `space_sdk` (`str`, *optional*) — 如果`repo_type`为“space”，则要使用的 SDK 选择。可以是“streamlit”、“gradio”、“docker”或“static”。
 
-+   `space_hardware` (`SpaceHardware`或`str`, *optional*) — 如果`repo_type`为“space”，则硬件选择。有关完整列表，请参见[SpaceHardware](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceHardware)。
++   `space_hardware` (`SpaceHardware`或`str`, *optional*) — 如果`repo_type`为“space”，则硬件选择。有关完整列表，请参见 SpaceHardware。
 
-+   `space_storage` (`SpaceStorage`或`str`, *optional*) — 持久性存储层的选择。示例："small"。有关完整列表，请参见[SpaceStorage](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceStorage)。
++   `space_storage` (`SpaceStorage`或`str`, *optional*) — 持久性存储层的选择。示例："small"。有关完整列表，请参见 SpaceStorage。
 
-+   `space_sleep_time` (`int`, *optional`) — 在将Space置于休眠状态之前等待的不活动秒数。如果不希望Space休眠，则设置为`-1`（升级硬件的默认行为）。对于免费硬件，您无法配置休眠时间（值固定为48小时的不活动时间）。有关更多详细信息，请参见[https://huggingface.co/docs/hub/spaces-gpus#sleep-time](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
++   `space_sleep_time` (`int`, *optional`) — 在将 Space 置于休眠状态之前等待的不活动秒数。如果不希望 Space 休眠，则设置为`-1`（升级硬件的默认行为）。对于免费硬件，您无法配置休眠时间（值固定为 48 小时的不活动时间）。有关更多详细信息，请参见[`huggingface.co/docs/hub/spaces-gpus#sleep-time`](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
 
-+   `space_secrets` (`List[Dict[str, str]]`, *optional*) — 要在您的Space中设置的秘密密钥列表。每个项目的形式为`{"key": ..., "value": ..., "description": ...}`，其中描述是可选的。有关更多详细信息，请参见[https://huggingface.co/docs/hub/spaces-overview#managing-secrets](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。
++   `space_secrets` (`List[Dict[str, str]]`, *optional*) — 要在您的 Space 中设置的秘密密钥列表。每个项目的形式为`{"key": ..., "value": ..., "description": ...}`，其中描述是可选的。有关更多详细信息，请参见[`huggingface.co/docs/hub/spaces-overview#managing-secrets`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。
 
-+   `space_variables` (`List[Dict[str, str]]`, *optional*) — 要在您的Space中设置的公共环境变量列表。每个项目的形式为`{"key": ..., "value": ..., "description": ...}`，其中描述是可选的。有关更多详细信息，请参见[https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)。
++   `space_variables` (`List[Dict[str, str]]`, *optional*) — 要在您的 Space 中设置的公共环境变量列表。每个项目的形式为`{"key": ..., "value": ..., "description": ...}`，其中描述是可选的。有关更多详细信息，请参见[`huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)。
 
 返回
 
-[RepoUrl](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.RepoUrl)
+RepoUrl
 
-新创建的存储库的URL。值是包含`endpoint`、`repo_type`和`repo_id`等属性的`str`子类。
+新创建的存储库的 URL。值是包含`endpoint`、`repo_type`和`repo_id`等属性的`str`子类。
 
-在HuggingFace Hub上创建一个空的存储库。
+在 HuggingFace Hub 上创建一个空的存储库。
 
 #### `create_tag`
 
@@ -764,7 +764,7 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `tag_message` (`str`, *optional*) — 要创建的标签的描述。
 
-+   `revision` (`str`, *optional*) — 要标记的git修订版。可以是分支名称或提交的OID/SHA，以十六进制字符串表示。也支持缩写（前7个字符）。默认为`"main"`分支的头部。
++   `revision` (`str`, *optional*) — 要标记的 git 修订版。可以是分支名称或提交的 OID/SHA，以十六进制字符串表示。也支持缩写（前 7 个字符）。默认为`"main"`分支的头部。
 
 +   `token` (`str`, *可选*) — 认证令牌。将默认为存储的令牌。
 
@@ -774,15 +774,15 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 或 [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 或 [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError)
+RepositoryNotFoundError 或 RevisionNotFoundError 或 HfHubHTTPError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到存储库（错误404）：错误的repo_id/repo_type，私有但未经身份验证或存储库不存在。
++   RepositoryNotFoundError — 如果找不到存储库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或存储库不存在。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) — 如果在存储库中找不到修订版（错误404）。
++   RevisionNotFoundError — 如果在存储库中找不到修订版（错误 404）。
 
-+   [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError) — 如果存储库中已经存在该分支（错误409），并且`exist_ok`设置为`False`。
++   HfHubHTTPError — 如果存储库中已经存在该分支（错误 409），并且`exist_ok`设置为`False`。
 
-在Hub上标记存储库的给定提交。
+在 Hub 上标记存储库的给定提交。
 
 #### `dataset_info`
 
@@ -798,27 +798,27 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `revision` (`str`, *可选*) — 要获取信息的数据集存储库的修订版。
 
-+   `timeout` (`float`, *可选*) — 是否为请求到Hub设置超时。
++   `timeout` (`float`, *可选*) — 是否为请求到 Hub 设置超时。
 
-+   `files_metadata` (`bool`, *可选*) — 是否检索存储库中文件的元数据（大小、LFS元数据等）。默认为`False`。
++   `files_metadata` (`bool`, *可选*) — 是否检索存储库中文件的元数据（大小、LFS 元数据等）。默认为`False`。
 
-+   `token` (`bool` 或 `str`, *可选*) — 有效的认证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则不会在请求头中发送令牌。
++   `token` (`bool` 或 `str`, *可选*) — 有效的认证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则不会在请求头中发送令牌。
 
 返回
 
-[hf_api.DatasetInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.DatasetInfo)
+hf_api.DatasetInfo
 
 数据集存储库信息。
 
-获取huggingface.co上一个特定数据集的信息。
+获取 huggingface.co 上一个特定数据集的信息。
 
 如果传递一个可接受的令牌，数据集可以是私有的。
 
 引发以下错误：
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为`private`而您没有访问权限。
++   RepositoryNotFoundError 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为`private`而您没有访问权限。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 如果无法找到要下载的修订版。
++   RevisionNotFoundError 如果无法找到要下载的修订版。
 
 #### `delete_branch`
 
@@ -840,13 +840,13 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 或 [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError)
+RepositoryNotFoundError 或 HfHubHTTPError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到仓库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或仓库不存在。
++   RepositoryNotFoundError — 如果找不到仓库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或仓库不存在。
 
-+   [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError) — 尝试删除受保护的分支时。例如：`main` 无法删除。
++   HfHubHTTPError — 尝试删除受保护的分支时。例如：`main` 无法删除。
 
-+   [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError) — 尝试删除不存在的分支时。
++   HfHubHTTPError — 尝试删除不存在的分支时。
 
 从 Hub 上的仓库中删除一个分支。
 
@@ -889,7 +889,7 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `collection_slug` (`str`) — 要更新的集合的 slug。示例：`"TheBloke/recent-models-64f9a55bb3115b4f513ec026"`。
 
-+   `item_object_id` (`str`) — 集合中项目的 ID。这不是 Hub 上项目的 id（repo_id 或 paper id）。必须从 [CollectionItem](/docs/huggingface_hub/v0.20.3/en/package_reference/collections#huggingface_hub.CollectionItem) 对象中检索。示例：`collection.items[0]._id`。
++   `item_object_id` (`str`) — 集合中项目的 ID。这不是 Hub 上项目的 id（repo_id 或 paper id）。必须从 CollectionItem 对象中检索。示例：`collection.items[0]._id`。
 
 +   `missing_ok` (`bool`, *optional*) — 如果为 `True`，则如果项目不存在则不会引发错误。
 
@@ -938,13 +938,13 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `create_pr` (`boolean`, *optional*) — 是否创建一个包含该提交的 Pull Request。默认为 `False`。如果未设置 `revision`，PR 将针对 `"main"` 分支打开。如果设置了 `revision` 并且是一个分支，PR 将针对该分支打开。如果设置了 `revision` 并且不是分支名称（例如：提交 oid），服务器将返回 `RevisionNotFoundError`。
 
-+   `parent_commit` (`str`, *可选*) — 父提交的OID / SHA，以十六进制字符串表示。也支持缩写（前7个字符）。如果指定并且`create_pr`为`False`，则如果`revision`不指向`parent_commit`，提交将失败。如果指定并且`create_pr`为`True`，将从`parent_commit`创建拉取请求。指定`parent_commit`可确保在提交更改之前存储库未更改，并且如果存储库同时更新/提交，则尤其有用。
++   `parent_commit` (`str`, *可选*) — 父提交的 OID / SHA，以十六进制字符串表示。也支持缩写（前 7 个字符）。如果指定并且`create_pr`为`False`，则如果`revision`不指向`parent_commit`，提交将失败。如果指定并且`create_pr`为`True`，将从`parent_commit`创建拉取请求。指定`parent_commit`可确保在提交更改之前存储库未更改，并且如果存储库同时更新/提交，则尤其有用。
 
 删除给定存储库中的文件。
 
 引发以下错误：
 
-+   [HTTPError](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果HuggingFace API返回错误
++   [HTTPError](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果 HuggingFace API 返回错误
 
 +   [ValueError](https://docs.python.org/3/library/exceptions.html#ValueError) 如果某个参数值无效
 
@@ -972,19 +972,19 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `repo_type` (`str`, *可选*) — 如果文件夹在数据集或空间中，则设置为`"dataset"`或`"space"`，如果在模型中则为`None`或`"model"`。默认为`None`。
 
-+   `revision` (`str`, *可选*) — 要提交的git修订版本。默认为`"main"`分支的头部。
++   `revision` (`str`, *可选*) — 要提交的 git 修订版本。默认为`"main"`分支的头部。
 
 +   `commit_message` (`str`, *可选*) — 生成提交的摘要/标题/第一行。默认为`f"Delete folder {path_in_repo} with huggingface_hub"`。
 
 +   `commit_description` (`str` *可选*) — 生成提交的描述。
 
-+   `create_pr` (`boolean`, *可选*) — 是否创建具有该提交的拉取请求。默认为`False`。如果未设置`revision`，则PR将针对`"main"`分支打开。如果设置了`revision`并且是一个分支，则PR将针对此分支打开。如果设置了`revision`并且不是分支名称（例如：一个提交oid），服务器将返回`RevisionNotFoundError`。
++   `create_pr` (`boolean`, *可选*) — 是否创建具有该提交的拉取请求。默认为`False`。如果未设置`revision`，则 PR 将针对`"main"`分支打开。如果设置了`revision`并且是一个分支，则 PR 将针对此分支打开。如果设置了`revision`并且不是分支名称（例如：一个提交 oid），服务器将返回`RevisionNotFoundError`。
 
-+   `parent_commit` (`str`, *可选*) — 父提交的OID / SHA，以十六进制字符串表示。也支持缩写（前7个字符）。如果指定并且`create_pr`为`False`，则如果`revision`不指向`parent_commit`，提交将失败。如果指定并且`create_pr`为`True`，将从`parent_commit`创建拉取请求。指定`parent_commit`可确保在提交更改之前存储库未更改，并且如果存储库同时更新/提交，则尤其有用。
++   `parent_commit` (`str`, *可选*) — 父提交的 OID / SHA，以十六进制字符串表示。也支持缩写（前 7 个字符）。如果指定并且`create_pr`为`False`，则如果`revision`不指向`parent_commit`，提交将失败。如果指定并且`create_pr`为`True`，将从`parent_commit`创建拉取请求。指定`parent_commit`可确保在提交更改之前存储库未更改，并且如果存储库同时更新/提交，则尤其有用。
 
 删除给定存储库中的文件夹。
 
-对[create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit)方法的简单包装。
+对 create_commit()方法的简单包装。
 
 #### `delete_inference_endpoint`
 
@@ -1000,13 +1000,13 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 +   `namespace` (`str`, *可选*) — 推断端点所在的命名空间。默认为当前用户。
 
-+   `token` (`str`, *可选*) — 认证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *可选*) — 认证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 删除一个推理端点。
 
-此操作是不可逆的。如果您不想为推理端点付费，最好使用[pause_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.pause_inference_endpoint)暂停它或使用[scale_to_zero_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.scale_to_zero_inference_endpoint)将其缩减为零。
+此操作是不可逆的。如果您不想为推理端点付费，最好使用 pause_inference_endpoint()暂停它或使用 scale_to_zero_inference_endpoint()将其缩减为零。
 
-为了方便起见，您也可以使用[InferenceEndpoint.delete()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.delete)删除推理端点。
+为了方便起见，您也可以使用 InferenceEndpoint.delete()删除推理端点。
 
 #### `delete_repo`
 
@@ -1018,19 +1018,19 @@ InferenceEndpoint(name='my-endpoint-name', status="pending",...)
 
 参数
 
-+   `repo_id` (`str`) — 由命名空间（用户或组织）和由`/`分隔的repo名称。
++   `repo_id` (`str`) — 由命名空间（用户或组织）和由`/`分隔的 repo 名称。
 
-+   `token` (`str`, *可选*) — 认证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *可选*) — 认证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 +   `repo_type` (`str`, *可选*) — 如果上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果上传到模型，则设置为`None`或`"model"`。
 
-+   `missing_ok` (`bool`, *可选*, 默认为`False`) — 如果为`True`，则如果repo不存在，则不会引发错误。
++   `missing_ok` (`bool`, *可选*, 默认为`False`) — 如果为`True`，则如果 repo 不存在，则不会引发错误。
 
 Raises
 
-+   +   — [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果要删除的存储库找不到且`missing_ok`设置为False（默认）。
++   +   — RepositoryNotFoundError 如果要删除的存储库找不到且`missing_ok`设置为 False（默认）。
 
-从HuggingFace Hub中删除一个repo。注意：这是不可逆的。
+从 HuggingFace Hub 中删除一个 repo。注意：这是不可逆的。
 
 #### `delete_space_secret`
 
@@ -1042,15 +1042,15 @@ Raises
 
 参数
 
-+   `repo_id` (`str`) — 要更新的repo的ID。示例："bigcode/in-the-stack"。
++   `repo_id` (`str`) — 要更新的 repo 的 ID。示例："bigcode/in-the-stack"。
 
 +   `key` (`str`) — 秘密键。示例："GITHUB_API_KEY"。
 
-+   `token` (`str`, *可选*) — Hugging Face令牌。如果未提供，将默认使用本地保存的令牌。
++   `token` (`str`, *可选*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
 从空间中删除一个秘密。
 
-秘密允许在不硬编码的情况下将秘密键或令牌设置到空间中。有关更多详细信息，请参阅[https://huggingface.co/docs/hub/spaces-overview#managing-secrets](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。
+秘密允许在不硬编码的情况下将秘密键或令牌设置到空间中。有关更多详细信息，请参阅[`huggingface.co/docs/hub/spaces-overview#managing-secrets`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。
 
 #### `delete_space_storage`
 
@@ -1062,13 +1062,13 @@ Raises
 
 参数
 
-+   `repo_id` (`str`) — 要更新的空间的ID。示例："HuggingFaceH4/open_llm_leaderboard"。
++   `repo_id` (`str`) — 要更新的空间的 ID。示例："HuggingFaceH4/open_llm_leaderboard"。
 
-+   `token` (`str`, *可选*) — Hugging Face令牌。如果未提供，将默认使用本地保存的令牌。
++   `token` (`str`, *可选*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
 返回
 
-[SpaceRuntime](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceRuntime)
+SpaceRuntime
 
 关于空间的运行时信息，包括空间阶段和硬件。
 
@@ -1090,15 +1090,15 @@ Raises
 
 参数
 
-+   `repo_id` (`str`) — 要更新的repo的ID。示例："bigcode/in-the-stack"。
++   `repo_id` (`str`) — 要更新的 repo 的 ID。示例："bigcode/in-the-stack"。
 
 +   `key` (`str`) — 变量键。示例："MODEL_REPO_ID"
 
-+   `token` (`str`, *可选*) — Hugging Face令牌。如果未提供，将默认使用本地保存的令牌。
++   `token` (`str`, *可选*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
 从空间中删除一个变量。
 
-变量允许在不硬编码的情况下将环境变量设置到空间中。有关更多详细信息，请参阅[https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)
+变量允许在不硬编码的情况下将环境变量设置到空间中。有关更多详细信息，请参阅[`huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)
 
 #### `delete_tag`
 
@@ -1120,11 +1120,11 @@ Raises
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 或 [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError)
+RepositoryNotFoundError 或 RevisionNotFoundError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果未找到仓库（错误 404）：错误的 repo_id/repo_type、私有但未经身份验证或仓库不存在。
++   RepositoryNotFoundError — 如果未找到仓库（错误 404）：错误的 repo_id/repo_type、私有但未经身份验证或仓库不存在。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) — 如果未找到标签。
++   RevisionNotFoundError — 如果未找到标签。
 
 从 Hub 上的仓库中删除一个标签。
 
@@ -1148,19 +1148,19 @@ Raises
 
 +   `exist_ok` (`bool`, *optional*, 默认为 `False`) — 如果为 `True`，则如果仓库已经存在，则不会引发错误。
 
-+   `hardware` (`SpaceHardware` 或 `str`, *optional*) — 硬件选择。示例："t4-medium"。查看 [SpaceHardware](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceHardware) 获取完整列表。
++   `hardware` (`SpaceHardware` 或 `str`, *optional*) — 硬件选择。示例："t4-medium"。查看 SpaceHardware 获取完整列表。
 
-+   `storage` (`SpaceStorage` 或 `str`, *optional*) — 持久存储层的选择。示例："small"。查看 [SpaceStorage](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceStorage) 获取完整列表。
++   `storage` (`SpaceStorage` 或 `str`, *optional*) — 持久存储层的选择。示例："small"。查看 SpaceStorage 获取完整列表。
 
-+   `sleep_time` (`int`, *optional*) — 在将空间置于休眠状态之前等待的不活动秒数。如果不希望您的空间休眠（升级后硬件的默认行为），请设置为 `-1`。对于免费硬件，您无法配置休眠时间（值固定为 48 小时的不活动时间）。有关更多详细信息，请参见 [https://huggingface.co/docs/hub/spaces-gpus#sleep-time](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
++   `sleep_time` (`int`, *optional*) — 在将空间置于休眠状态之前等待的不活动秒数。如果不希望您的空间休眠（升级后硬件的默认行为），请设置为 `-1`。对于免费硬件，您无法配置休眠时间（值固定为 48 小时的不活动时间）。有关更多详细信息，请参见 [`huggingface.co/docs/hub/spaces-gpus#sleep-time`](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
 
-+   `secrets` (`List[Dict[str, str]]`, *optional*) — 要在您的空间中设置的秘密密钥列表。每个项目的形式为 `{"key": ..., "value": ..., "description": ...}`，其中描述是可选的。有关更多详细信息，请参见 [https://huggingface.co/docs/hub/spaces-overview#managing-secrets](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。
++   `secrets` (`List[Dict[str, str]]`, *optional*) — 要在您的空间中设置的秘密密钥列表。每个项目的形式为 `{"key": ..., "value": ..., "description": ...}`，其中描述是可选的。有关更多详细信息，请参见 [`huggingface.co/docs/hub/spaces-overview#managing-secrets`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。
 
-+   `variables` (`List[Dict[str, str]]`, *optional*) — 一个要在您的空间中设置的公共环境变量列表。每个项目的形式为 `{"key": ..., "value": ..., "description": ...}`，其中描述是可选的。有关更多详细信息，请参见 [https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)。
++   `variables` (`List[Dict[str, str]]`, *optional*) — 一个要在您的空间中设置的公共环境变量列表。每个项目的形式为 `{"key": ..., "value": ..., "description": ...}`，其中描述是可选的。有关更多详细信息，请参见 [`huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)。
 
 返回值
 
-[RepoUrl](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.RepoUrl)
+RepoUrl
 
 新创建的仓库的 URL。值是 `str` 的子类，包含 `endpoint`、`repo_type` 和 `repo_id` 等属性。
 
@@ -1168,7 +1168,7 @@ Raises
 
 +   +   — 如果 HuggingFace API 返回错误，则为 [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError)
 
-+   +   — [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果`from_id`或`to_id`中的一个无法找到。这可能是因为它不存在，或者因为它设置为`private`且您无权访问。
++   +   — RepositoryNotFoundError 如果`from_id`或`to_id`中的一个无法找到。这可能是因为它不存在，或者因为它设置为`private`且您无权访问。
 
 复制一个空间。
 
@@ -1202,17 +1202,17 @@ RepoUrl('https://huggingface.co/spaces/nateraw/my-dreambooth',...)
 
 +   `discussion_num` (`int`) — 讨论或拉取请求的编号。必须是严格正整数。
 
-+   `comment_id` (`str`) — 要编辑的评论的ID。
++   `comment_id` (`str`) — 要编辑的评论的 ID。
 
-+   `new_content` (`str`) — 评论的新内容。评论支持Markdown格式。
++   `new_content` (`str`) — 评论的新内容。评论支持 Markdown 格式。
 
 +   `repo_type` (`str`, *可选*) — 如果要上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果要上传到模型，则设置为`None`或`"model"`。默认为`None`。
 
-+   `token` (`str`, *可选*) — 身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *可选*) — 身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 返回
 
-[DiscussionComment](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionComment)
+DiscussionComment
 
 编辑后的评论
 
@@ -1220,11 +1220,11 @@ RepoUrl('https://huggingface.co/spaces/nateraw/my-dreambooth',...)
 
 引发以下错误：
 
-+   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果HuggingFace API返回错误
++   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果 HuggingFace API 返回错误
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果某个参数值无效
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为`private`且您无权访问。
++   RepositoryNotFoundError 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为`private`且您无权访问。
 
 #### `file_exists`
 
@@ -1244,9 +1244,9 @@ RepoUrl('https://huggingface.co/spaces/nateraw/my-dreambooth',...)
 
 +   `revision` (`str`, *可选*) — 要获取信息的存储库的修订版本。默认为`"main"`分支。
 
-+   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
++   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
 
-检查Hugging Face Hub上存储库中是否存在文件。
+检查 Hugging Face Hub 上存储库中是否存在文件。
 
 示例：
 
@@ -1270,13 +1270,13 @@ False
 
 参数
 
-+   `collection_slug` (`str`) — Hub集合的slug。示例："TheBloke/recent-models-64f9a55bb3115b4f513ec026"。
++   `collection_slug` (`str`) — Hub 集合的 slug。示例："TheBloke/recent-models-64f9a55bb3115b4f513ec026"。
 
 +   `token` (`str`, *可选*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
-获取有关Hub上集合的信息。
+获取有关 Hub 上集合的信息。
 
-返回：[Collection](/docs/huggingface_hub/v0.20.3/en/package_reference/collections#huggingface_hub.Collection)
+返回：Collection
 
 示例：
 
@@ -1323,19 +1323,19 @@ CollectionItem(
 
 +   `repo_type` (`str`, *optional*) — 如果上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果上传到模型，则为`None`或`"model"`。默认为`None`。
 
-+   `token` (`str`, *optional*) — 身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *optional*) — 身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
-从Hub获取讨论/拉取请求的详细信息。
+从 Hub 获取讨论/拉取请求的详细信息。
 
-返回：[DiscussionWithDetails](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionWithDetails)
+返回：DiscussionWithDetails
 
 引发以下错误：
 
-+   如果HuggingFace API返回错误，则返回[`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError)。
++   如果 HuggingFace API 返回错误，则返回[`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError)。
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError)如果某个参数值无效
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError)如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为`private`并且您无法访问。
++   RepositoryNotFoundError 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为`private`并且您无法访问。
 
 #### `get_full_repo_name`
 
@@ -1351,15 +1351,15 @@ CollectionItem(
 
 +   `organization` (`str`, *optional*) — 如果传递，则存储库名称将位于组织命名空间而不是用户命名空间中。
 
-+   `token` (`bool`或`str`, *optional*) — 有效的身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则不会在请求标头中发送令牌。
++   `token` (`bool`或`str`, *optional*) — 有效的身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则不会在请求标头中发送令牌。
 
 返回
 
 `str`
 
-如果未传递组织，则在用户命名空间中的存储库名称（{用户名}/{模型ID}），否则在组织命名空间中（{组织}/{模型ID}）。
+如果未传递组织，则在用户命名空间中的存储库名称（{用户名}/{模型 ID}），否则在组织命名空间中（{组织}/{模型 ID}）。
 
-给定模型ID和可选组织的存储库名称。
+给定模型 ID 和可选组织的存储库名称。
 
 #### `get_hf_file_metadata`
 
@@ -1371,21 +1371,21 @@ CollectionItem(
 
 参数
 
-+   `url` (`str`) — 文件URL，例如由[hf_hub_url()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_url)返回。
++   `url` (`str`) — 文件 URL，例如由 hf_hub_url()返回。
 
 +   `token` (`str`或`bool`, *optional*) — 用于下载的令牌。
 
-    +   如果为`True`，则从HuggingFace配置文件夹中读取令牌。
+    +   如果为`True`，则从 HuggingFace 配置文件夹中读取令牌。
 
     +   如果为`False`或`None`，则不提供令牌。
 
     +   如果是字符串，则用作身份验证令牌。
 
-+   `proxies` (`dict`, *optional*) — 将协议映射到传递给 `requests.request` 的代理的URL的字典。
++   `proxies` (`dict`, *optional*) — 将协议映射到传递给 `requests.request` 的代理的 URL 的字典。
 
-+   `timeout` (`float`, *optional*, 默认为10) — 等待服务器发送元数据的秒数，超过后放弃。
++   `timeout` (`float`, *optional*, 默认为 10) — 等待服务器发送元数据的秒数，超过后放弃。
 
-获取在Hub上版本化的文件的元数据。
+获取在 Hub 上版本化的文件的元数据。
 
 #### `get_inference_endpoint`
 
@@ -1401,11 +1401,11 @@ CollectionItem(
 
 +   `namespace` (`str`, *optional*) — 推理端点所在的命名空间。默认为当前用户。
 
-+   `token` (`str`, *optional*) — 身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *optional*) — 身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
-[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+InferenceEndpoint
 
 有关请求的推理端点的信息。
 
@@ -1460,7 +1460,7 @@ InferenceEndpoint(name='my-text-to-image', ...)
 
 +   `repo_type` (`str`，*可选*) — 从中获取信息的仓库类型（`"model"`、`"dataset"` 或 `"space"`）。默认为 `"model"`。
 
-+   `token` (`bool` 或 `str`，*可选*) — 有效的身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 [login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），令牌将从缓存中检索。如果为 `False`，则令牌不会在请求头中发送。
++   `token` (`bool` 或 `str`，*可选*) — 有效的身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 login()），令牌将从缓存中检索。如果为 `False`，则令牌不会在请求头中发送。
 
 返回
 
@@ -1470,11 +1470,11 @@ InferenceEndpoint(name='my-text-to-image', ...)
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 或 [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError)
+RepositoryNotFoundError 或 RevisionNotFoundError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到仓库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或仓库不存在。
++   RepositoryNotFoundError — 如果找不到仓库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或仓库不存在。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) — 如果在仓库中找不到修订版本（错误 404）。
++   RevisionNotFoundError — 如果在仓库中找不到修订版本（错误 404）。
 
 获取有关仓库路径的信息。
 
@@ -1510,13 +1510,13 @@ InferenceEndpoint(name='my-text-to-image', ...)
 
 +   `repo_type` (`str`，*可选*) — 如果从数据集或空间获取，则设置为 `"dataset"` 或 `"space"`，如果从模型获取，则设置为 `None` 或 `"model"`。默认为 `None`。
 
-+   `token` (`str`，*可选*) — 身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`，*可选*) — 身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
 `Iterator[Discussion]`
 
-[Discussion](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.Discussion) 对象的迭代器。
+Discussion 对象的迭代器。
 
 获取给定仓库的讨论和拉取请求。
 
@@ -1553,29 +1553,29 @@ InferenceEndpoint(name='my-text-to-image', ...)
 
 +   `repo_type`（`str`，*可选*）—如果文件在数据集或空间中，则设置为`"dataset"`或`"space"`，如果在模型中则为`None`或`"model"`。默认为`None`。
 
-+   `revision`（`str`，*可选*）—要从中提取文件的git修订版。可以是分支名称、标签或提交哈希。默认为`"main"`分支的头部。
++   `revision`（`str`，*可选*）—要从中提取文件的 git 修订版。可以是分支名称、标签或提交哈希。默认为`"main"`分支的头部。
 
-+   `token`（`bool`或`str`，*可选*）—有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
++   `token`（`bool`或`str`，*可选*）—有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
 
 返回
 
 `SafetensorsRepoMetadata`
 
-与safetensors仓库相关的信息。
+与 safetensors 仓库相关的信息。
 
 引发
 
-+   +   — `NotASafetensorsRepoError`：如果仓库不是safetensors仓库，即没有`model.safetensors`或`model.safetensors.index.json`文件。
++   +   — `NotASafetensorsRepoError`：如果仓库不是 safetensors 仓库，即没有`model.safetensors`或`model.safetensors.index.json`文件。
 
-+   +   — `SafetensorsParsingError`：如果无法正确解析safetensors文件头。
++   +   — `SafetensorsParsingError`：如果无法正确解析 safetensors 文件头。
 
-解析Hub上safetensors仓库的元数据。
+解析 Hub 上 safetensors 仓库的元数据。
 
-我们首先检查仓库是否具有单个safetensors文件或分片的safetensors仓库。如果是单个safetensors文件，则从该文件中解析元数据。如果是分片的safetensors仓库，则从索引文件中解析元数据，然后从每个分片中解析元数据。
+我们首先检查仓库是否具有单个 safetensors 文件或分片的 safetensors 仓库。如果是单个 safetensors 文件，则从该文件中解析元数据。如果是分片的 safetensors 仓库，则从索引文件中解析元数据，然后从每个分片中解析元数据。
 
-要从单个safetensors文件中解析元数据，请使用[get_safetensors_metadata()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_safetensors_metadata)。
+要从单个 safetensors 文件中解析元数据，请使用 get_safetensors_metadata()。
 
-有关safetensors格式的更多详细信息，请查看[https://huggingface.co/docs/safetensors/index#format](https://huggingface.co/docs/safetensors/index#format)。
+有关 safetensors 格式的更多详细信息，请查看[`huggingface.co/docs/safetensors/index#format`](https://huggingface.co/docs/safetensors/index#format)。
 
 示例：
 
@@ -1615,13 +1615,13 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 参数
 
-+   `repo_id`（`str`）—要更新的仓库的ID。示例：`"bigcode/in-the-stack"`。
++   `repo_id`（`str`）—要更新的仓库的 ID。示例：`"bigcode/in-the-stack"`。
 
-+   `token`（`str`，*可选*）—Hugging Face令牌。如果未提供，则将默认为本地保存的令牌。
++   `token`（`str`，*可选*）—Hugging Face 令牌。如果未提供，则将默认为本地保存的令牌。
 
 返回
 
-[SpaceRuntime](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceRuntime)
+SpaceRuntime
 
 有关空间的运行时信息，包括空间阶段和硬件。
 
@@ -1637,13 +1637,13 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 参数
 
-+   `repo_id`（`str`）—要查询的仓库的ID。示例：`"bigcode/in-the-stack"`。
++   `repo_id`（`str`）—要查询的仓库的 ID。示例：`"bigcode/in-the-stack"`。
 
-+   `token`（`str`，*可选*）—Hugging Face令牌。如果未提供，则将默认为本地保存的令牌。
++   `token`（`str`，*可选*）—Hugging Face 令牌。如果未提供，则将默认为本地保存的令牌。
 
 获取空间中的所有变量。
 
-变量允许将环境变量设置为一个空间，而无需将它们硬编码。有关更多详细信息，请参阅[https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)。
+变量允许将环境变量设置为一个空间，而无需将它们硬编码。有关更多详细信息，请参阅[`huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables`](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables)。
 
 #### `get_token_permission`
 
@@ -1665,7 +1665,7 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 检查给定的`token`是否有效并返回其权限。
 
-有关令牌的更多详细信息，请参阅[https://huggingface.co/docs/hub/security-tokens#what-are-user-access-tokens](https://huggingface.co/docs/hub/security-tokens#what-are-user-access-tokens)。
+有关令牌的更多详细信息，请参阅[`huggingface.co/docs/hub/security-tokens#what-are-user-access-tokens`](https://huggingface.co/docs/hub/security-tokens#what-are-user-access-tokens)。
 
 #### `grant_access`
 
@@ -1683,7 +1683,7 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 +   `repo_type` (`str`，*可选*) — 要授予访问权限的存储库类型。必须是`model`、`dataset`或`space`之一。默认为`model`。
 
-+   `token` (`str`，*可选*) — 有效的身份验证令牌（请参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`，*可选*) — 有效的身份验证令牌（请参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 引发
 
@@ -1699,9 +1699,9 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 为给定的受限存储库授予用户访问权限。
 
-授予访问权限不需要用户自己发送访问请求。用户会自动添加到接受列表中，这意味着他们可以下载文件。您可以随时使用[cancel_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.cancel_access_request)或[reject_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.reject_access_request)来撤销授予的访问权限。
+授予访问权限不需要用户自己发送访问请求。用户会自动添加到接受列表中，这意味着他们可以下载文件。您可以随时使用 cancel_access_request()或 reject_access_request()来撤销授予的访问权限。
 
-有关受限存储库的更多信息，请参见[https://huggingface.co/docs/hub/models-gated](https://huggingface.co/docs/hub/models-gated)。
+有关受限存储库的更多信息，请参见[`huggingface.co/docs/hub/models-gated`](https://huggingface.co/docs/hub/models-gated)。
 
 #### `hf_hub_download`
 
@@ -1737,35 +1737,35 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 +   `resume_download` (`bool`，*可选*，默认为`False`) — 如果为`True`，则恢复先前中断的下载。
 
-+   `token`（`bool`或`str`，*可选*）— 有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则不会在请求标头中发送令牌。
++   `token`（`bool`或`str`，*可选*）— 有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则不会在请求标头中发送令牌。
 
 +   `local_files_only`（`bool`，*可选*，默认为`False`）— 如果为`True`，则避免下载文件，并返回本地缓存文件的路径（如果存在）。
 
-+   `legacy_cache_layout`（`bool`，*可选*，默认为`False`）— 如果为`True`，则使用传统的文件缓存布局，即只需调用[hf_hub_url()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_url)然后`cached_download`。由于新的缓存布局更强大，因此此方法已被弃用。
++   `legacy_cache_layout`（`bool`，*可选*，默认为`False`）— 如果为`True`，则使用传统的文件缓存布局，即只需调用 hf_hub_url()然后`cached_download`。由于新的缓存布局更强大，因此此方法已被弃用。
 
 如果本地缓存中不存在给定文件，则下载该文件。
 
 新的缓存文件布局如下：
 
-+   缓存目录包含每个repo_id的一个子文件夹（由repo类型命名空间化）
++   缓存目录包含每个 repo_id 的一个子文件夹（由 repo 类型命名空间化）
 
 +   在每个存储库文件夹内：
 
-    +   refs是最新已知的修订 => 提交哈希对列表
+    +   refs 是最新已知的修订 => 提交哈希对列表
 
-    +   blobs包含实际的文件blob（通过它们的git-sha或sha256标识，取决于它们是否是LFS文件）
+    +   blobs 包含实际的文件 blob（通过它们的 git-sha 或 sha256 标识，取决于它们是否是 LFS 文件）
 
-    +   快照包含每个提交的一个子文件夹，每个“提交”包含在该特定提交中已解析的文件子集。每个文件名都是指向该特定提交中的blob的符号链接。
+    +   快照包含每个提交的一个子文件夹，每个“提交”包含在该特定提交中已解析的文件子集。每个文件名都是指向该特定提交中的 blob 的符号链接。
 
 如果提供了`local_dir`，则将在此位置复制来自存储库的文件结构。您可以配置如何移动这些文件：
 
-+   如果`local_dir_use_symlinks="auto"`（默认），文件将被下载并存储在缓存目录中作为blob文件。小文件（<5MB）将在`local_dir`中复制，而对于较大的文件将创建符号链接。目标是能够手动编辑和保存小文件而不会破坏缓存，同时为二进制文件节省磁盘空间。可以使用`HF_HUB_LOCAL_DIR_AUTO_SYMLINK_THRESHOLD`环境变量配置5MB阈值。
++   如果`local_dir_use_symlinks="auto"`（默认），文件将被下载并存储在缓存目录中作为 blob 文件。小文件（<5MB）将在`local_dir`中复制，而对于较大的文件将创建符号链接。目标是能够手动编辑和保存小文件而不会破坏缓存，同时为二进制文件节省磁盘空间。可以使用`HF_HUB_LOCAL_DIR_AUTO_SYMLINK_THRESHOLD`环境变量配置 5MB 阈值。
 
 +   如果`local_dir_use_symlinks=True`，文件将被下载，存储在缓存目录中，并在`local_dir`中创建符号链接。这在磁盘使用方面是最佳的，但文件不能手动编辑。
 
-+   如果`local_dir_use_symlinks=False`并且blob文件存在于缓存目录中，则会在本地目录中复制这些文件。这意味着磁盘使用量没有优化。
++   如果`local_dir_use_symlinks=False`并且 blob 文件存在于缓存目录中，则会在本地目录中复制这些文件。这意味着磁盘使用量没有优化。
 
-+   最后，如果`local_dir_use_symlinks=False`并且blob文件不存在于缓存目录中，则文件将被下载并直接放在`local_dir`下。这意味着如果以后需要重新下载它们，它们将被完全重新下载。
++   最后，如果`local_dir_use_symlinks=False`并且 blob 文件不存在于缓存目录中，则文件将被下载并直接放在`local_dir`下。这意味着如果以后需要重新下载它们，它们将被完全重新下载。
 
 ```py
 [  96]  .
@@ -1789,17 +1789,17 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 +   [`EnvironmentError`](https://docs.python.org/3/library/exceptions.html#EnvironmentError) 如果`token=True`且找不到令牌。
 
-+   [`OSError`](https://docs.python.org/3/library/exceptions.html#OSError) 如果无法确定ETag。
++   [`OSError`](https://docs.python.org/3/library/exceptions.html#OSError) 如果无法确定 ETag。
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果某个参数值无效
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它被设置为`private`并且您无法访问。
++   RepositoryNotFoundError 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它被设置为`private`并且您无法访问。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 如果无法找到要下载的修订版本。
++   RevisionNotFoundError 如果无法找到要下载的修订版本。
 
-+   [EntryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.EntryNotFoundError) 如果无法找到要下载的文件。
++   EntryNotFoundError 如果无法找到要下载的文件。
 
-+   [LocalEntryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.LocalEntryNotFoundError) 如果网络已禁用或不可用，并且在缓存中找不到文件。
++   LocalEntryNotFoundError 如果网络已禁用或不可用，并且在缓存中找不到文件。
 
 #### `hide_discussion_comment`
 
@@ -1815,15 +1815,15 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 +   `discussion_num` (`int`) — 讨论或拉取请求的编号。必须是严格正整数。
 
-+   `comment_id` (`str`) — 要编辑的评论的ID。
++   `comment_id` (`str`) — 要编辑的评论的 ID。
 
 +   `repo_type` (`str`, *可选*) — 如果上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果上传到模型，则为`None`或`"model"`。默认为`None`。
 
-+   `token` (`str`, *可选*) — 认证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *可选*) — 认证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 返回
 
-[DiscussionComment](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionComment)
+DiscussionComment
 
 隐藏的评论
 
@@ -1833,11 +1833,11 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 引发以下错误：
 
-+   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果HuggingFace API返回错误
++   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果 HuggingFace API 返回错误
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果某个参数值无效
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的仓库。这可能是因为它不存在，或者因为它被设置为`private`而您没有访问权限。
++   RepositoryNotFoundError 如果无法找到要下载的仓库。这可能是因为它不存在，或者因为它被设置为`private`而您没有访问权限。
 
 #### `like`
 
@@ -1857,13 +1857,13 @@ NotASafetensorsRepoError: 'runwayml/stable-diffusion-v1-5' is not a safetensors 
 
 Raises
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError)
+RepositoryNotFoundError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到仓库（错误404）：错误的repo_id/repo_type，私有但未经身份验证或仓库不存在。
++   RepositoryNotFoundError — 如果找不到仓库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或仓库不存在。
 
-在Hub上喜欢给定的仓库（例如设置为收藏）。
+在 Hub 上喜欢给定的仓库（例如设置为收藏）。
 
-另请参阅[unlike()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.unlike)和[list_liked_repos()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_liked_repos)。
+另请参阅 unlike()和 list_liked_repos()。
 
 示例：
 
@@ -1887,11 +1887,11 @@ False
 
 参数
 
-+   `repo_id` (`str`) — 要获取访问请求的仓库的ID。
++   `repo_id` (`str`) — 要获取访问请求的仓库的 ID。
 
 +   `repo_type` (`str`, *可选*) — 要获取访问请求的仓库类型。必须是`model`、`dataset`或`space`之一。默认为`model`。
 
-+   `token` (`str`, *可选*) — 有效的认证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *可选*) — 有效的认证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
@@ -1903,15 +1903,15 @@ Raises
 
 `HTTPError`
 
-+   `HTTPError` — 如果仓库没有受限制，则返回HTTP 400。
++   `HTTPError` — 如果仓库没有受限制，则返回 HTTP 400。
 
-+   `HTTPError` — 如果您只有对仓库的只读访问权限，则会返回HTTP 403。如果您在所属组织中没有`write`或`admin`角色，或者如果您传递了一个`read`令牌，这可能是情况。
++   `HTTPError` — 如果您只有对仓库的只读访问权限，则会返回 HTTP 403。如果您在所属组织中没有`write`或`admin`角色，或者如果您传递了一个`read`令牌，这可能是情况。
 
 获取给定受限制仓库的已接受访问请求。
 
-接受的请求意味着用户已请求访问存储库，并且请求已被接受。用户可以下载存储库的任何文件。如果批准模式是自动的，默认情况下此列表应包含所有请求。接受的请求可以随时使用[cancel_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.cancel_access_request)和[reject_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.reject_access_request)进行取消或拒绝。取消的请求将返回到待处理列表，而拒绝的请求将进入拒绝列表。在这两种情况下，用户将失去对存储库的访问权限。
+接受的请求意味着用户已请求访问存储库，并且请求已被接受。用户可以下载存储库的任何文件。如果批准模式是自动的，默认情况下此列表应包含所有请求。接受的请求可以随时使用 cancel_access_request()和 reject_access_request()进行取消或拒绝。取消的请求将返回到待处理列表，而拒绝的请求将进入拒绝列表。在这两种情况下，用户将失去对存储库的访问权限。
 
-有关受控存储库的更多信息，请参见[https://huggingface.co/docs/hub/models-gated](https://huggingface.co/docs/hub/models-gated)。
+有关受控存储库的更多信息，请参见[`huggingface.co/docs/hub/models-gated`](https://huggingface.co/docs/hub/models-gated)。
 
 示例：
 
@@ -1953,17 +1953,17 @@ Raises
 
 +   `limit` (`int`，*可选*) — 要返回的集合的最大数量。
 
-+   `token` (`bool`或`str`，*可选*) — 身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`bool`或`str`，*可选*) — 身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回值
 
 `Iterable[Collection]`
 
-一个[Collection](/docs/huggingface_hub/v0.20.3/en/package_reference/collections#huggingface_hub.Collection)对象的可迭代。
+一个 Collection 对象的可迭代。
 
-给定一些过滤器，在Huggingface Hub上列出集合。
+给定一些过滤器，在 Huggingface Hub 上列出集合。
 
-在列出集合时，每个集合的项列表被截断为最多4个项。要检索集合中的所有项，必须使用[get_collection()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_collection)。
+在列出集合时，每个集合的项列表被截断为最多 4 个项。要检索集合中的所有项，必须使用 get_collection()。
 
 #### `list_datasets`
 
@@ -1975,29 +1975,29 @@ Raises
 
 参数
 
-+   `filter` ([DatasetFilter](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.DatasetFilter)或`str`或`Iterable`，*可选*) — 用于在hub上识别数据集的字符串或[DatasetFilter](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.DatasetFilter)。
++   `filter` (DatasetFilter 或`str`或`Iterable`，*可选*) — 用于在 hub 上识别数据集的字符串或 DatasetFilter。
 
 +   `author` (`str`，*可选*) — 用于标识返回数据集的作者的字符串。
 
 +   `search` (`str`，*可选*) — 包含在返回数据集中的字符串。
 
-+   `sort` (`Literal["last_modified"]`或`str`，*可选*) — 用于对结果数据集进行排序的键。可能的值是[huggingface_hub.hf_api.DatasetInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.DatasetInfo)类的属性。
++   `sort` (`Literal["last_modified"]`或`str`，*可选*) — 用于对结果数据集进行排序的键。可能的值是 huggingface_hub.hf_api.DatasetInfo 类的属性。
 
 +   `direction` (`Literal[-1]`或`int`，*可选*) — 排序方向。值`-1`按降序排序，而所有其他值按升序排序。
 
 +   `limit` (`int`，*可选*) — 获取数据集的数量限制。将此选项留空将获取所有数据集。
 
-+   `full` (`bool`，*可选*) — 是否获取所有数据集数据，包括`last_modified`，`card_data`和文件。可以包含有用的信息，如PapersWithCode ID。
++   `full` (`bool`，*可选*) — 是否获取所有数据集数据，包括`last_modified`，`card_data`和文件。可以包含有用的信息，如 PapersWithCode ID。
 
-+   `token` (`bool`或`str`，*可选*) — 有效的身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则不会在请求头中发送令牌。
++   `token` (`bool`或`str`，*可选*) — 有效的身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则不会在请求头中发送令牌。
 
 返回值
 
 `Iterable[DatasetInfo]`
 
-[huggingface_hub.hf_api.DatasetInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.DatasetInfo)对象的可迭代对象。
+huggingface_hub.hf_api.DatasetInfo 对象的可迭代对象。
 
-给定一些过滤器，列出托管在Huggingface Hub上的数据集。
+给定一些过滤器，列出托管在 Huggingface Hub 上的数据集。
 
 带有`filter`参数的示例用法：
 
@@ -2052,13 +2052,13 @@ Raises
 
 +   `paths`（`Union[List[str], str, None]`，*可选*）—要获取信息的路径。文件路径直接解析。文件夹路径将递归解析，这意味着将返回有关文件夹及其子文件夹中的所有文件的信息。如果为`None`，则返回所有文件（默认）。如果路径不存在，则会忽略而不会引发异常。
 
-+   `expand`（`bool`，*可选*，默认为`False`）—是否获取有关文件的更多信息（例如最后一次提交和安全扫描结果）。对于服务器来说，这个操作更昂贵，因此每页只返回50个结果（而不是1000个）。由于`huggingface_hub`中实现了分页，因此对于您来说，这是透明的，除了获取结果所需的时间。
++   `expand`（`bool`，*可选*，默认为`False`）—是否获取有关文件的更多信息（例如最后一次提交和安全扫描结果）。对于服务器来说，这个操作更昂贵，因此每页只返回 50 个结果（而不是 1000 个）。由于`huggingface_hub`中实现了分页，因此对于您来说，这是透明的，除了获取结果所需的时间。
 
 +   `revision`（`str`，*可选*）—要获取信息的存储库的修订版。默认为`"main"`分支。
 
 +   `repo_type`（`str`，*可选*）—要获取信息的存储库的类型（`"model"`，`"dataset"`或`"space"`。默认为`"model"`。
 
-+   `token`（`bool`或`str`，*可选*）—有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则令牌不会在请求标头中发送。
++   `token`（`bool`或`str`，*可选*）—有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则令牌不会在请求标头中发送。
 
 返回
 
@@ -2068,11 +2068,11 @@ Raises
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError)或[RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError)
+RepositoryNotFoundError 或 RevisionNotFoundError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到存储库（错误404）：错误的`repo_id/repo_type`，私有但未经身份验证或存储库不存在。
++   RepositoryNotFoundError — 如果找不到存储库（错误 404）：错误的`repo_id/repo_type`，私有但未经身份验证或存储库不存在。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) — 如果在存储库上找不到修订版（错误404）。
++   RevisionNotFoundError — 如果在存储库上找不到修订版（错误 404）。
 
 列出存储库中的文件并获取有关它们的信息。
 
@@ -2080,7 +2080,7 @@ Raises
 
 1.  POST “/paths-info”以获取有关提供的路径的信息。仅调用一次。
 
-1.  GET “/tree?recursive=True”以对输入文件夹进行分页。仅在提供文件夹路径作为输入时调用。将被多次调用以跟随分页。如果未提供路径作为输入，则忽略步骤1，并列出存储库中的所有文件。
+1.  GET “/tree?recursive=True”以对输入文件夹进行分页。仅在提供文件夹路径作为输入时调用。将被多次调用以跟随分页。如果未提供路径作为输入，则忽略步骤 1，并列出存储库中的所有文件。
 
 示例：
 
@@ -2158,7 +2158,7 @@ Raises
 ]
 ```
 
-从“stabilityai/stable-diffusion-2”存储库中的“vae/”文件夹中列出LFS文件。
+从“stabilityai/stable-diffusion-2”存储库中的“vae/”文件夹中列出 LFS 文件。
 
 ```py
 >>> from huggingface_hub import list_files_info
@@ -2186,11 +2186,11 @@ Raises
 
 +   `namespace`（`str`，*可选*）—要列出端点的命名空间。默认为当前用户。设置为`"*"`以列出所有命名空间的所有端点（即个人命名空间和用户所属的所有组织）。
 
-+   `token`（`str`，*可选*）— 身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token`（`str`，*可选*）— 身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
-List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+ListInferenceEndpoint
 
 给定命名空间的所有推理端点列表。
 
@@ -2217,13 +2217,13 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 +   `user`（`str`，*可选*）— 要获取喜欢的用户的名称。
 
-+   `token`（`str`，*可选*）— 有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。仅在未传递`user`以隐式确定当前用户名时使用。
++   `token`（`str`，*可选*）— 有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。仅在未传递`user`以隐式确定当前用户名时使用。
 
 返回
 
-[UserLikes](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.UserLikes)
+UserLikes
 
-包含用户名称和3个存储库ID列表的对象（1个用于模型，1个用于数据集，1个用于Spaces）。
+包含用户名称和 3 个存储库 ID 列表的对象（1 个用于模型，1 个用于数据集，1 个用于 Spaces）。
 
 引发
 
@@ -2231,11 +2231,11 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) — 如果未传递`user`且未找到令牌（从参数或机器中）。
 
-列出用户在huggingface.co上喜欢的所有公共存储库。
+列出用户在 huggingface.co 上喜欢的所有公共存储库。
 
 此列表是公开的，因此令牌是可选的。如果未传递`user`，则默认为已登录用户。
 
-另请参阅[like()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.like)和[unlike()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.unlike)。
+另请参阅 like()和 unlike()。
 
 示例：
 
@@ -2265,7 +2265,7 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 一个包含`MetricInfo`对象的列表。
 
-获取huggingface.co上所有指标的公共列表
+获取 huggingface.co 上所有指标的公共列表
 
 #### `list_models`
 
@@ -2277,15 +2277,15 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 参数
 
-+   `filter`（[ModelFilter](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.ModelFilter)或`str`或`Iterable`，*可选*）— 一个字符串或[ModelFilter](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.ModelFilter)，可用于在Hub上识别模型。
++   `filter`（ModelFilter 或`str`或`Iterable`，*可选*）— 一个字符串或 ModelFilter，可用于在 Hub 上识别模型。
 
 +   `author`（`str`，*可选*）— 用于标识返回模型的作者（用户或组织）的字符串
 
-+   `search`（`str`，*可选*）— 将包含在返回的模型ID中的字符串。
++   `search`（`str`，*可选*）— 将包含在返回的模型 ID 中的字符串。
 
 +   `emissions_thresholds`（`Tuple`，*可选*）— 一个由两个整数或浮点数组成的元组，表示筛选结果模型的最小和最大碳足迹（以克为单位）。
 
-+   `sort`（`Literal["last_modified"]`或`str`，*可选*）— 用于对结果模型进行排序的键。可能的值是[huggingface_hub.hf_api.ModelInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.ModelInfo)类的属性。
++   `sort`（`Literal["last_modified"]`或`str`，*可选*）— 用于对结果模型进行排序的键。可能的值是 huggingface_hub.hf_api.ModelInfo 类的属性。
 
 +   `direction`（`Literal[-1]`或`int`，*可选*）— 要排序的方向。值`-1`按降序排序，而所有其他值按升序排序。
 
@@ -2297,15 +2297,15 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 +   `fetch_config`（`bool`，*可选*）— 是否也获取模型配置。由于其大小，这不包含在`full`中。
 
-+   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则不会在请求标头中发送令牌。
++   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则不会在请求标头中发送令牌。
 
 返回
 
 `Iterable[ModelInfo]`
 
-[huggingface_hub.hf_api.ModelInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.ModelInfo)对象的可迭代对象。
+huggingface_hub.hf_api.ModelInfo 对象的可迭代对象。
 
-列出托管在Huggingface Hub上的模型，给定一些过滤条件。
+列出托管在 Huggingface Hub 上的模型，给定一些过滤条件。
 
 带有`filter`参数的示例用法：
 
@@ -2350,11 +2350,11 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 参数
 
-+   `repo_id` (`str`) — 获取访问请求的存储库的ID。
++   `repo_id` (`str`) — 获取访问请求的存储库的 ID。
 
 +   `repo_type` (`str`, *可选*) — 要获取访问请求的存储库类型。必须是`model`、`dataset`或`space`之一。默认为`model`。
 
-+   `token` (`str`, *可选*) — 有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *可选*) — 有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
@@ -2366,15 +2366,15 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 `HTTPError`
 
-+   `HTTPError` — 如果存储库未受限，则为HTTP 400。
++   `HTTPError` — 如果存储库未受限，则为 HTTP 400。
 
-+   `HTTPError` — 如果您只有对存储库的只读访问权限，则为HTTP 403。如果您在存储库所属的组织中没有`write`或`admin`角色，或者传递了一个`read`令牌，这可能是情况。
++   `HTTPError` — 如果您只有对存储库的只读访问权限，则为 HTTP 403。如果您在存储库所属的组织中没有`write`或`admin`角色，或者传递了一个`read`令牌，这可能是情况。
 
 获取给定受限存储库的待处理访问请求。
 
-待处理请求意味着用户已请求访问存储库，但请求尚未处理。如果批准模式是自动的，则此列表应为空。可以使用[accept_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.accept_access_request)和[reject_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.reject_access_request)接受或拒绝待处理请求。
+待处理请求意味着用户已请求访问存储库，但请求尚未处理。如果批准模式是自动的，则此列表应为空。可以使用 accept_access_request()和 reject_access_request()接受或拒绝待处理请求。
 
-有关受限存储库的更多信息，请参阅[https://huggingface.co/docs/hub/models-gated](https://huggingface.co/docs/hub/models-gated)。
+有关受限存储库的更多信息，请参阅[`huggingface.co/docs/hub/models-gated`](https://huggingface.co/docs/hub/models-gated)。
 
 示例：
 
@@ -2412,11 +2412,11 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 参数
 
-+   `repo_id` (`str`) — 获取访问请求的存储库的ID。
++   `repo_id` (`str`) — 获取访问请求的存储库的 ID。
 
 +   `repo_type` (`str`, *可选*) — 要获取访问请求的存储库类型。必须是`model`、`dataset`或`space`之一。默认为`model`。
 
-+   `token` (`str`, *可选*) — 有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *可选*) — 有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
@@ -2428,15 +2428,15 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 `HTTPError`
 
-+   `HTTPError` — 如果存储库未受限，则为HTTP 400。
++   `HTTPError` — 如果存储库未受限，则为 HTTP 400。
 
-+   `HTTPError` — 如果您只有对存储库的只读访问权限，则为HTTP 403。如果您在存储库所属的组织中没有`write`或`admin`角色，或者传递了一个`read`令牌，这可能是情况。
++   `HTTPError` — 如果您只有对存储库的只读访问权限，则为 HTTP 403。如果您在存储库所属的组织中没有`write`或`admin`角色，或者传递了一个`read`令牌，这可能是情况。
 
 获取给定受限存储库的被拒绝访问请求。
 
-拒绝的请求意味着用户已请求访问存储库，并且该请求已被存储库所有者明确拒绝（您或您组织的另一个用户）。用户无法下载存储库的任何文件。拒绝的请求可以随时使用[accept_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.accept_access_request)和[cancel_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.cancel_access_request)接受或取消。取消的请求将返回到待处理列表，而接受的请求将进入已接受列表。
+拒绝的请求意味着用户已请求访问存储库，并且该请求已被存储库所有者明确拒绝（您或您组织的另一个用户）。用户无法下载存储库的任何文件。拒绝的请求可以随时使用 accept_access_request()和 cancel_access_request()接受或取消。取消的请求将返回到待处理列表，而接受的请求将进入已接受列表。
 
-有关受限存储库的更多信息，请参见[https://huggingface.co/docs/hub/models-gated](https://huggingface.co/docs/hub/models-gated)。
+有关受限存储库的更多信息，请参见[`huggingface.co/docs/hub/models-gated`](https://huggingface.co/docs/hub/models-gated)。
 
 示例：
 
@@ -2474,27 +2474,27 @@ List[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/infer
 
 +   `repo_type` (`str`, *可选*) — 如果从数据集或空间列出提交，请设置为`"dataset"`或`"space"`，如果从模型列出，请设置为`None`或`"model"`。默认为`None`。
 
-+   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（请参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
++   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（请参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
 
-+   `revision` (`str`, *可选*) — 要提交的git修订版本。默认为`"main"`分支的头部。
++   `revision` (`str`, *可选*) — 要提交的 git 修订版本。默认为`"main"`分支的头部。
 
-+   `formatted` (`bool`) — 是否返回提交的HTML格式化标题和描述。默认为False。
++   `formatted` (`bool`) — 是否返回提交的 HTML 格式化标题和描述。默认为 False。
 
 返回
 
-List[[GitCommitInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.GitCommitInfo)]
+List[GitCommitInfo]
 
-包含有关Hub上存储库提交的信息的对象列表。
+包含有关 Hub 上存储库提交的信息的对象列表。
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError)或[RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError)
+RepositoryNotFoundError 或 RevisionNotFoundError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到存储库（错误404）：错误的repo_id/repo_type，私有但未经身份验证或存储库不存在。
++   RepositoryNotFoundError — 如果找不到存储库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或存储库不存在。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) — 如果在存储库上找不到修订版本（错误404）。
++   RevisionNotFoundError — 如果在存储库上找不到修订版本（错误 404）。
 
-获取Hub上给定修订版本的存储库的提交列表。
+获取 Hub 上给定修订版本的存储库的提交列表。
 
 提交按日期排序（最新提交在前）。
 
@@ -2539,7 +2539,7 @@ GitCommitInfo(
 
 +   `repo_type` (`str`, *可选*) — 如果上传到数据集或空间，请设置为`"dataset"`或`"space"`，如果上传到模型，则设置为`None`或`"model"`。默认为`None`。
 
-+   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（请参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
++   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（请参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
 
 返回
 
@@ -2569,11 +2569,11 @@ GitCommitInfo(
 
 `List[User]`
 
-[User](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.User) 对象的列表。
+User 对象的列表。
 
 列出在 Hugging Face Hub 上喜欢给定存储库的所有用户。
 
-另请参阅 [like()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.like) 和 [list_liked_repos()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_liked_repos)。
+另请参阅 like() 和 list_liked_repos()。
 
 #### `list_repo_refs`
 
@@ -2591,11 +2591,11 @@ GitCommitInfo(
 
 +   `include_pull_requests` (`bool`, *可选*) — 是否在列表中包含来自拉取请求的引用。默认为 `False`。
 
-+   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌 (参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token))。如果为 `None` 或 `True` 并且机器已登录 (通过 `huggingface-cli login` 或 [login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)), 令牌将从缓存中检索。如果为 `False`，则令牌不会在请求头中发送。
++   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌 (参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token))。如果为 `None` 或 `True` 并且机器已登录 (通过 `huggingface-cli login` 或 login()), 令牌将从缓存中检索。如果为 `False`，则令牌不会在请求头中发送。
 
 返回
 
-[GitRefs](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.GitRefs)
+GitRefs
 
 包含有关存储库在 Hub 上的所有分支和标签的信息的对象。
 
@@ -2644,7 +2644,7 @@ GitRefs(
 
 +   `repo_type` (`str`, *可选*) — 从中获取树的存储库的类型 (`"model"`, `"dataset"` 或 `"space"`. 默认为 `"model"`。
 
-+   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌 (参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token))。如果为 `None` 或 `True` 并且机器已登录 (通过 `huggingface-cli login` 或 [login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)), 令牌将从缓存中检索。如果为 `False`，则令牌不会在请求头中发送。
++   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌 (参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token))。如果为 `None` 或 `True` 并且机器已登录 (通过 `huggingface-cli login` 或 login()), 令牌将从缓存中检索。如果为 `False`，则令牌不会在请求头中发送。
 
 返回
 
@@ -2654,13 +2654,13 @@ GitRefs(
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 或 [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 或 [EntryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.EntryNotFoundError)
+RepositoryNotFoundError 或 RevisionNotFoundError 或 EntryNotFoundError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到仓库（错误404）：错误的repo_id/repo_type、私有但未经身份验证或仓库不存在。
++   RepositoryNotFoundError — 如果找不到仓库（错误 404）：错误的 repo_id/repo_type、私有但未经身份验证或仓库不存在。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) — 如果在仓库上找不到修订版（错误404）。
++   RevisionNotFoundError — 如果在仓库上找不到修订版（错误 404）。
 
-+   [EntryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.EntryNotFoundError) — 如果仓库上的树（文件夹）不存在（错误404）。
++   EntryNotFoundError — 如果仓库上的树（文件夹）不存在（错误 404）。
 
 列出仓库树的文件和文件夹，并获取有关它们的信息。
 
@@ -2746,13 +2746,13 @@ GitRefs(
 
 参数
 
-+   `filter` (`str` 或 `Iterable`, *可选*) — 可用于识别Hub上的空间的字符串标签或标签列表。
++   `filter` (`str` 或 `Iterable`, *可选*) — 可用于识别 Hub 上的空间的字符串标签或标签列表。
 
 +   `author` (`str`, *可选*) — 用于标识返回的空间的作者的字符串。
 
 +   `search` (`str`, *可选*) — 将包含在返回的空间中的字符串。
 
-+   `sort` (`Literal["last_modified"]` 或 `str`, *可选*) — 用于对结果空间进行排序的键。可能的值是[huggingface_hub.hf_api.SpaceInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.SpaceInfo)`类的属性。
++   `sort` (`Literal["last_modified"]` 或 `str`, *可选*) — 用于对结果空间进行排序的键。可能的值是 huggingface_hub.hf_api.SpaceInfo`类的属性。
 
 +   `direction` (`Literal[-1]` 或 `int`, *可选*) — 要排序的方向。值`-1`按降序排序，而所有其他值按升序排序。
 
@@ -2766,15 +2766,15 @@ GitRefs(
 
 +   `full` (`bool`, *可选*) — 是否获取所有空间数据，包括`last_modified`、`siblings`和`card_data`字段。
 
-+   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
++   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
 
 返回
 
 `Iterable[SpaceInfo]`
 
-[huggingface_hub.hf_api.SpaceInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.SpaceInfo)对象的可迭代。
+huggingface_hub.hf_api.SpaceInfo 对象的可迭代。
 
-列出托管在Huggingface Hub上的空间，给定一些过滤条件。
+列出托管在 Huggingface Hub 上的空间，给定一些过滤条件。
 
 #### `merge_pull_request`
 
@@ -2794,11 +2794,11 @@ GitRefs(
 
 +   `repo_type` (`str`, *可选*) — 如果上传到数据集或空间，则设置为 `"dataset"` 或 `"space"`，如果上传到模型，则为 `None` 或 `"model"`。默认为 `None`。
 
-+   `token` (`str`, *可选*) — 身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *可选*) — 身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 返回
 
-[DiscussionStatusChange](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionStatusChange)
+DiscussionStatusChange
 
 状态更改事件
 
@@ -2810,7 +2810,7 @@ GitRefs(
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果某个参数值无效
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的仓库。这可能是因为它不存在，或者因为它设置为 `private`，而您没有访问权限。
++   RepositoryNotFoundError 如果无法找到要下载的仓库。这可能是因为它不存在，或者因为它设置为 `private`，而您没有访问权限。
 
 #### `model_info`
 
@@ -2832,11 +2832,11 @@ GitRefs(
 
 +   `files_metadata` (`bool`, *可选*) — 是否检索仓库中文件的元数据（大小、LFS 元数据等）。默认为 `False`。
 
-+   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 [login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为 `False`，则令牌不会发送到请求头中。
++   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 login()），则令牌将从缓存中检索。如果为 `False`，则令牌不会发送到请求头中。
 
 返回
 
-[huggingface_hub.hf_api.ModelInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.ModelInfo)
+huggingface_hub.hf_api.ModelInfo
 
 模型仓库信息。
 
@@ -2846,9 +2846,9 @@ GitRefs(
 
 引发以下错误：
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的仓库。这可能是因为它不存在，或者因为它设置为 `private`，而您没有访问权限。
++   RepositoryNotFoundError 如果无法找到要下载的仓库。这可能是因为它不存在，或者因为它设置为 `private`，而您没有访问权限。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 如果无法找到要下载的修订版本。
++   RevisionNotFoundError 如果无法找到要下载的修订版本。
 
 #### `move_repo`
 
@@ -2866,15 +2866,15 @@ GitRefs(
 
 +   `repo_type` (`str`, *可选*) — 如果上传到数据集或空间，则设置为 `"dataset"` 或 `"space"`，如果上传到模型，则为 `None` 或 `"model"`。默认为 `None`。
 
-+   `token` (`str`, *可选*) — 身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *可选*) — 身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 将仓库从 namespace1/repo_name1 移动到 namespace2/repo_name2
 
-请注意有一些限制。有关移动仓库的更多信息，请参阅 [https://hf.co/docs/hub/repositories-settings#renaming-or-transferring-a-repo](https://hf.co/docs/hub/repositories-settings#renaming-or-transferring-a-repo)。
+请注意有一些限制。有关移动仓库的更多信息，请参阅 [`hf.co/docs/hub/repositories-settings#renaming-or-transferring-a-repo`](https://hf.co/docs/hub/repositories-settings#renaming-or-transferring-a-repo)。
 
 引发以下错误：
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为 `private`，您无法访问。
++   RepositoryNotFoundError 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为 `private`，您无法访问。
 
 #### `parse_safetensors_file_metadata`
 
@@ -2894,7 +2894,7 @@ GitRefs(
 
 +   `revision` (`str`，*可选*) — 从中提取文件的 git 修订版。可以是分支名称、标签或提交哈希。默认为 `"main"` 分支的头部。
 
-+   `token` (`bool` 或 `str`，*可选*) — 有效的身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 [login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为 `False`，则令牌不会在请求头中发送。
++   `token` (`bool` 或 `str`，*可选*) — 有效的身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 login()），则令牌将从缓存中检索。如果为 `False`，则令牌不会在请求头中发送。
 
 返回
 
@@ -2910,9 +2910,9 @@ GitRefs(
 
 从 Hub 上的 safetensors 文件中解析元数据。
 
-要一次从存储库中解析所有 safetensors 文件的元数据，请使用 [get_safetensors_metadata()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_safetensors_metadata)。
+要一次从存储库中解析所有 safetensors 文件的元数据，请使用 get_safetensors_metadata()。
 
-有关 safetensors 格式的更多详细信息，请查看 [https://huggingface.co/docs/safetensors/index#format](https://huggingface.co/docs/safetensors/index#format)。
+有关 safetensors 格式的更多详细信息，请查看 [`huggingface.co/docs/safetensors/index#format`](https://huggingface.co/docs/safetensors/index#format)。
 
 #### `pause_inference_endpoint`
 
@@ -2928,19 +2928,19 @@ GitRefs(
 
 +   `namespace` (`str`，*可选*) — 推理端点所在的命名空间。默认为当前用户。
 
-+   `token` (`str`，*可选*) — 身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`，*可选*) — 身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
-[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+InferenceEndpoint
 
 有关暂停推理端点的信息。
 
 暂停推理端点。
 
-暂停的推理端点不会收费。可以随时使用 [resume_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.resume_inference_endpoint) 恢复。这与使用 [scale_to_zero_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.scale_to_zero_inference_endpoint) 将推理端点缩减到零不同，后者在请求时会自动重新启动。
+暂停的推理端点不会收费。可以随时使用 resume_inference_endpoint() 恢复。这与使用 scale_to_zero_inference_endpoint() 将推理端点缩减到零不同，后者在请求时会自动重新启动。
 
-为方便起见，您也可以使用 [pause_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.pause_inference_endpoint) 暂停推理端点。
+为方便起见，您也可以使用 pause_inference_endpoint() 暂停推理端点。
 
 #### `pause_space`
 
@@ -2958,23 +2958,23 @@ GitRefs(
 
 返回
 
-[SpaceRuntime](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceRuntime)
+SpaceRuntime
 
 有关您的空间的运行时信息，包括`stage=PAUSED`和请求的硬件。
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError)或[HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError)或[BadRequestError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.BadRequestError)
+RepositoryNotFoundError 或 HfHubHTTPError 或 BadRequestError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到您的空间（错误404）。很可能是错误的repo_id或您的空间是私有的，但您未经过身份验证。
++   RepositoryNotFoundError — 如果找不到您的空间（错误 404）。很可能是错误的 repo_id 或您的空间是私有的，但您未经过身份验证。
 
-+   [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError) — 403 Forbidden：只有空间所有者才能暂停空间。如果要管理您不拥有的空间，请通过打开讨论向所有者请求或复制空间。
++   HfHubHTTPError — 403 Forbidden：只有空间所有者才能暂停空间。如果要管理您不拥有的空间，请通过打开讨论向所有者请求或复制空间。
 
-+   [BadRequestError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.BadRequestError) — 如果您的空间是静态空间。静态空间始终运行且不计费。如果要隐藏静态空间，可以将其设置为私有。
++   BadRequestError — 如果您的空间是静态空间。静态空间始终运行且不计费。如果要隐藏静态空间，可以将其设置为私有。
 
 暂停您的空间。
 
-暂停的空间会停止执行，直到其所有者手动重新启动。这与免费空间在48小时不活动后进入的睡眠状态不同。暂停时间不会计入您的账户，无论您选择的硬件如何。要重新启动您的空间，请使用[restart_space()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.restart_space)并转到您的空间设置页面。
+暂停的空间会停止执行，直到其所有者手动重新启动。这与免费空间在 48 小时不活动后进入的睡眠状态不同。暂停时间不会计入您的账户，无论您选择的硬件如何。要重新启动您的空间，请使用 restart_space()并转到您的空间设置页面。
 
 有关更多详细信息，请访问[文档](https://huggingface.co/docs/hub/spaces-gpus#pause)。
 
@@ -2990,27 +2990,27 @@ GitRefs(
 
 +   `repo_id`（`str`） — 您将提交文件的存储库，例如：`"username/custom_transformers"`。
 
-+   `operations`（[CommitOperationAdd](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationAdd)的`Iterable`） — 要上传的文件列表。警告：此列表中的对象将被修改以包含与上传相关的信息。不要重复使用相同的对象进行多次提交。
++   `operations`（CommitOperationAdd 的`Iterable`） — 要上传的文件列表。警告：此列表中的对象将被修改以包含与上传相关的信息。不要重复使用相同的对象进行多次提交。
 
 +   `token`（`str`，*可选*） — 认证令牌。将默认为存储的令牌。
 
 +   `repo_type`（`str`，*可选*） — 要上传到的存储库类型（例如`"model"`-默认-，`"dataset"`或`"space"`）。
 
-+   `revision`（`str`，*可选*） — 要从中提交的git修订版本。默认为`"main"`分支的头部。
++   `revision`（`str`，*可选*） — 要从中提交的 git 修订版本。默认为`"main"`分支的头部。
 
 +   `create_pr`（`boolean`，*可选*） — 您是否计划使用该提交创建拉取请求。默认为`False`。
 
-+   `num_threads`（`int`，*可选*） — 用于上传文件的并发线程数。默认为5。将其设置为2意味着最多同时上传2个文件。
++   `num_threads`（`int`，*可选*） — 用于上传文件的并发线程数。默认为 5。将其设置为 2 意味着最多同时上传 2 个文件。
 
-+   `gitignore_content`（`str`，*可选*） — `.gitignore`文件的内容，用于了解应忽略哪些文件。优先级顺序是首先检查是否传递了`gitignore_content`，然后检查文件提交列表中是否存在`.gitignore`文件，最后默认使用Hub上已托管的`.gitignore`文件（如果有）。
++   `gitignore_content`（`str`，*可选*） — `.gitignore`文件的内容，用于了解应忽略哪些文件。优先级顺序是首先检查是否传递了`gitignore_content`，然后检查文件提交列表中是否存在`.gitignore`文件，最后默认使用 Hub 上已托管的`.gitignore`文件（如果有）。
 
-在未来提交之前，将LFS文件预先上传到S3。
+在未来提交之前，将 LFS 文件预先上传到 S3。
 
 如果您正在动态生成要上传的文件，并且不希望在一次性上传之前将它们存储在内存中，则此方法很有用。
 
-这是一个高级用户方法。您不应该直接调用它来进行正常提交。而是直接使用[create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit)。
+这是一个高级用户方法。您不应该直接调用它来进行正常提交。而是直接使用 create_commit()。
 
-在过程中，提交操作将被改变。特别是，在上传后，附加的`path_or_fileobj`将被删除以节省内存（并替换为一个空的`bytes`对象）。除了将它们传递给[create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit)之外，不要重复使用相同的对象。如果您不想从提交操作对象中删除附加的内容，请传递`free_memory=False`。
+在过程中，提交操作将被改变。特别是，在上传后，附加的`path_or_fileobj`将被删除以节省内存（并替换为一个空的`bytes`对象）。除了将它们传递给 create_commit()之外，不要重复使用相同的对象。如果您不想从提交操作对象中删除附加的内容，请传递`free_memory=False`。
 
 Example:
 
@@ -3041,33 +3041,33 @@ Example:
 
 Parameters
 
-+   `repo_id` (`str`) — 要拒绝访问请求的存储库的ID。
++   `repo_id` (`str`) — 要拒绝访问请求的存储库的 ID。
 
 +   `user` (`str`) — 应拒绝访问请求的用户的用户名。
 
 +   `repo_type` (`str`, *optional*) — 要拒绝访问请求的存储库类型。必须是`model`、`dataset`或`space`之一。默认为`model`。
 
-+   `token` (`str`, *optional*) — 有效的身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *optional*) — 有效的身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 Raises
 
 `HTTPError`
 
-+   `HTTPError` — 如果存储库没有受限，则为HTTP 400。
++   `HTTPError` — 如果存储库没有受限，则为 HTTP 400。
 
-+   `HTTPError` — 如果您只有对存储库的只读访问权限，则为HTTP 403。如果您在存储库所属的组织中没有`write`或`admin`角色，或者如果您传递了一个`read`令牌，则可能会出现这种情况。
++   `HTTPError` — 如果您只有对存储库的只读访问权限，则为 HTTP 403。如果您在存储库所属的组织中没有`write`或`admin`角色，或者如果您传递了一个`read`令牌，则可能会出现这种情况。
 
-+   `HTTPError` — 如果Hub上不存在用户，则为HTTP 404。
++   `HTTPError` — 如果 Hub 上不存在用户，则为 HTTP 404。
 
-+   `HTTPError` — 如果找不到用户访问请求，则为HTTP 404。
++   `HTTPError` — 如果找不到用户访问请求，则为 HTTP 404。
 
-+   `HTTPError` — 如果用户访问请求已在被拒绝列表中，则为HTTP 404。
++   `HTTPError` — 如果用户访问请求已在被拒绝列表中，则为 HTTP 404。
 
 拒绝用户对给定受限存储库的访问请求。
 
-被拒绝的请求将进入被拒绝列表。用户无法下载存储库的任何文件。可以随时使用[accept_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.accept_access_request)和[cancel_access_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.cancel_access_request)接受或取消被拒绝的请求。取消的请求将返回到待处理列表，而接受的请求将进入已接受列表。
+被拒绝的请求将进入被拒绝列表。用户无法下载存储库的任何文件。可以随时使用 accept_access_request()和 cancel_access_request()接受或取消被拒绝的请求。取消的请求将返回到待处理列表，而接受的请求将进入已接受列表。
 
-有关受限存储库的更多信息，请参见[https://huggingface.co/docs/hub/models-gated](https://huggingface.co/docs/hub/models-gated)。
+有关受限存储库的更多信息，请参见[`huggingface.co/docs/hub/models-gated`](https://huggingface.co/docs/hub/models-gated)。
 
 #### `rename_discussion`
 
@@ -3087,11 +3087,11 @@ Parameters
 
 +   `repo_type` (`str`, *optional*) — 如果上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果上传到模型，则设置为`None`或`"model"`。默认为`None`。
 
-+   `token` (`str`, *optional*) — 身份验证令牌（请参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token))。
++   `token` (`str`, *optional*) — 身份验证令牌（请参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token))。
 
 Returns
 
-[DiscussionTitleChange](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionTitleChange)
+DiscussionTitleChange
 
 标题更改事件
 
@@ -3112,11 +3112,11 @@ Examples:
 
 引发以下错误：
 
-+   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果HuggingFace API返回错误
++   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果 HuggingFace API 返回错误
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果某个参数值无效
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它被设置为`private`，而您没有访问权限。
++   RepositoryNotFoundError 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它被设置为`private`，而您没有访问权限。
 
 #### `repo_exists`
 
@@ -3132,9 +3132,9 @@ Parameters
 
 +   `repo_type` (`str`, *可选*) — 如果从数据集或空间获取存储库信息，则设置为`"dataset"`或`"space"`，如果从模型获取存储库信息，则设置为`None`或`"model"`。默认为`None`。
 
-+   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
++   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
 
-检查Hugging Face Hub上是否存在存储库。
+检查 Hugging Face Hub 上是否存在存储库。
 
 示例：
 
@@ -3162,25 +3162,25 @@ False
 
 +   `repo_type` (`str`, *可选*) — 如果从数据集或空间获取存储库信息，则设置为`"dataset"`或`"space"`，如果从模型获取存储库信息，则设置为`None`或`"model"`。默认为`None`。
 
-+   `timeout` (`float`, *可选*) — 是否为Hub请求设置超时。
++   `timeout` (`float`, *可选*) — 是否为 Hub 请求设置超时。
 
-+   `files_metadata` (`bool`, *可选*) — 是否检索存储库中文件的元数据（大小，LFS元数据等）。默认为`False`。
++   `files_metadata` (`bool`, *可选*) — 是否检索存储库中文件的元数据（大小，LFS 元数据等）。默认为`False`。
 
-+   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
++   `token` (`bool`或`str`, *可选*) — 有效的身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为`None`或`True`且机器已登录（通过`huggingface-cli login`或 login()），则令牌将从缓存中检索。如果为`False`，则令牌不会发送到请求头中。
 
 返回
 
 `Union[SpaceInfo, DatasetInfo, ModelInfo]`
 
-存储库信息，作为[huggingface_hub.hf_api.DatasetInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.DatasetInfo)、[huggingface_hub.hf_api.ModelInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.ModelInfo)或[huggingface_hub.hf_api.SpaceInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.SpaceInfo)对象。
+存储库信息，作为 huggingface_hub.hf_api.DatasetInfo、huggingface_hub.hf_api.ModelInfo 或 huggingface_hub.hf_api.SpaceInfo 对象。
 
 获取给定类型的给定存储库的信息对象。
 
 引发以下错误：
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它被设置为`private`而您无法访问。
++   RepositoryNotFoundError 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它被设置为`private`而您无法访问。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 如果无法找到要下载的修订版本。
++   RevisionNotFoundError 如果无法找到要下载的修订版本。
 
 #### `request_space_hardware`
 
@@ -3192,23 +3192,23 @@ False
 
 参数
 
-+   `repo_id` (`str`) — 要更新的存储库的ID。示例："bigcode/in-the-stack"。
++   `repo_id` (`str`) — 要更新的存储库的 ID。示例："bigcode/in-the-stack"。
 
-+   `hardware` (`str`或[SpaceHardware](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceHardware)) — 在哪种硬件上运行空间。示例："t4-medium"。
++   `hardware` (`str`或 SpaceHardware) — 在哪种硬件上运行空间。示例："t4-medium"。
 
-+   `token` (`str`, *可选*) — Hugging Face令牌。如果未提供，将默认使用本地保存的令牌。
++   `token` (`str`, *可选*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
-+   `sleep_time` (`int`, *可选*) — 在将空间置于休眠状态之前等待的不活动秒数。如果不希望空间休眠（升级硬件的默认行为），请将其设置为`-1`。对于免费硬件，无法配置休眠时间（值固定为48小时的不活动时间）。有关更多详细信息，请参见[https://huggingface.co/docs/hub/spaces-gpus#sleep-time](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
++   `sleep_time` (`int`, *可选*) — 在将空间置于休眠状态之前等待的不活动秒数。如果不希望空间休眠（升级硬件的默认行为），请将其设置为`-1`。对于免费硬件，无法配置休眠时间（值固定为 48 小时的不活动时间）。有关更多详细信息，请参见[`huggingface.co/docs/hub/spaces-gpus#sleep-time`](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
 
 返回
 
-[SpaceRuntime](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceRuntime)
+SpaceRuntime
 
 关于空间的运行时信息，包括空间阶段和硬件。
 
 为空间请求新的硬件。
 
-在创建空间存储库时也可以直接请求硬件！有关详细信息，请参阅[create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo)。
+在创建空间存储库时也可以直接请求硬件！有关详细信息，请参阅 create_repo()。
 
 #### `request_space_storage`
 
@@ -3220,21 +3220,21 @@ False
 
 参数
 
-+   `repo_id` (`str`) — 要更新的空间的ID。示例："HuggingFaceH4/open_llm_leaderboard"。
++   `repo_id` (`str`) — 要更新的空间的 ID。示例："HuggingFaceH4/open_llm_leaderboard"。
 
-+   `storage` (`str` 或 [SpaceStorage](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceStorage)) — 存储层。可以是‘small’、‘medium’或‘large’。
++   `storage` (`str` 或 SpaceStorage) — 存储层。可以是‘small’、‘medium’或‘large’。
 
 +   `token` (`str`, *可选*) — Hugging Face token。如果未提供，将默认使用本地保存的令牌。
 
 返回
 
-[SpaceRuntime](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceRuntime)
+SpaceRuntime
 
 关于空间的运行时信息，包括空间阶段和硬件。
 
 为空间请求持久存储。
 
-一旦授予持久存储，就无法减少持久存储。要这样做，必须通过[delete_space_storage()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.delete_space_storage)删除它。
+一旦授予持久存储，就无法减少持久存储。要这样做，必须通过 delete_space_storage()删除它。
 
 #### `restart_space`
 
@@ -3246,7 +3246,7 @@ False
 
 参数
 
-+   `repo_id` (`str`) — 要重新启动的空间的ID。示例："Salesforce/BLIP2"。
++   `repo_id` (`str`) — 要重新启动的空间的 ID。示例："Salesforce/BLIP2"。
 
 +   `token` (`str`, *可选*) — Hugging Face token。如果未提供，将默认使用本地保存的令牌。
 
@@ -3254,23 +3254,23 @@ False
 
 返回
 
-[SpaceRuntime](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceRuntime)
+SpaceRuntime
 
 关于您的空间的运行时信息。
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 或 [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError) 或 [BadRequestError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.BadRequestError)
+RepositoryNotFoundError 或 HfHubHTTPError 或 BadRequestError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果未找到您的空间（错误404）。很可能是错误的repo_id或您的空间是私有的，但您未经过身份验证。
++   RepositoryNotFoundError — 如果未找到您的空间（错误 404）。很可能是错误的 repo_id 或您的空间是私有的，但您未经过身份验证。
 
-+   [HfHubHTTPError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.HfHubHTTPError) — 403 Forbidden: 只有空间的所有者才能重新启动它。如果要重新启动您不拥有的空间，请向所有者提出请求，或复制该空间。
++   HfHubHTTPError — 403 Forbidden: 只有空间的所有者才能重新启动它。如果要重新启动您不拥有的空间，请向所有者提出请求，或复制该空间。
 
-+   [BadRequestError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.BadRequestError) — 如果您的空间是静态空间。静态空间始终运行且不收费。如果要隐藏静态空间，可以将其设置为私有。
++   BadRequestError — 如果您的空间是静态空间。静态空间始终运行且不收费。如果要隐藏静态空间，可以将其设置为私有。
 
 重新启动您的空间。
 
-这是唯一一种以编程方式重新启动空间的方法，如果您将其暂停（请参阅[pause_space()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.pause_space)）。您必须是空间的所有者才能重新启动它。如果您正在使用升级后的硬件，一旦重新启动空间，您的帐户将被收费。无论空间的当前状态如何，都可以触发重新启动。
+这是唯一一种以编程方式重新启动空间的方法，如果您将其暂停（请参阅 pause_space()）。您必须是空间的所有者才能重新启动它。如果您正在使用升级后的硬件，一旦重新启动空间，您的帐户将被收费。无论空间的当前状态如何，都可以触发重新启动。
 
 有关更多详细信息，请访问[文档](https://huggingface.co/docs/hub/spaces-gpus#pause)。
 
@@ -3288,17 +3288,17 @@ False
 
 +   `namespace` (`str`, *可选*) — 推理端点所在的命名空间。默认为当前用户。
 
-+   `token` (`str`, *可选*) — 认证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *可选*) — 认证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
-[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+InferenceEndpoint
 
 有关已恢复的推理端点的信息。
 
 恢复推理端点。
 
-为方便起见，您还可以使用[InferenceEndpoint.resume()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.resume)来恢复推理端点。
+为方便起见，您还可以使用 InferenceEndpoint.resume()来恢复推理端点。
 
 #### `run_as_future`
 
@@ -3320,11 +3320,11 @@ False
 
 一个[Future](https://docs.python.org/3/library/concurrent.futures.html#future-objects)实例，用于获取任务的结果。
 
-在后台运行方法并返回Future实例。
+在后台运行方法并返回 Future 实例。
 
-主要目标是在不阻塞主线程的情况下运行方法（例如在训练期间推送数据）。后台作业被排队以保持顺序，但不会并行运行。如果您需要通过并行化大量调用API来加快脚本的速度，您必须设置并使用自己的[ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor)。
+主要目标是在不阻塞主线程的情况下运行方法（例如在训练期间推送数据）。后台作业被排队以保持顺序，但不会并行运行。如果您需要通过并行化大量调用 API 来加快脚本的速度，您必须设置并使用自己的[ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor)。
 
-注意：像[upload_file()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_file)、[upload_folder()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_folder)和[create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit)这样的常用方法有一个`run_as_future: bool`参数，可以直接在后台调用它们。这等同于在它们上调用`api.run_as_future(...)`，但更简洁。
+注意：像 upload_file()、upload_folder()和 create_commit()这样的常用方法有一个`run_as_future: bool`参数，可以直接在后台调用它们。这等同于在它们上调用`api.run_as_future(...)`，但更简洁。
 
 示例：
 
@@ -3354,19 +3354,19 @@ True
 
 +   `namespace` (`str`, *可选*) — 推理端点所在的命名空间。默认为当前用户。
 
-+   `token` (`str`, *可选*) — 认证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *可选*) — 认证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
-[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+InferenceEndpoint
 
 有关缩减到零的推理端点的信息。
 
 将推理端点缩减到零。
 
-缩减到零的推理端点不会收费。它将在下一次请求时恢复，但会有冷启动延迟。这与使用[pause_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.pause_inference_endpoint)暂停推理端点不同，后者需要使用[resume_inference_endpoint()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.resume_inference_endpoint)手动恢复。
+缩减到零的推理端点不会收费。它将在下一次请求时恢复，但会有冷启动延迟。这与使用 pause_inference_endpoint()暂停推理端点不同，后者需要使用 resume_inference_endpoint()手动恢复。
 
-为方便起见，您还可以使用[InferenceEndpoint.scale_to_zero()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.scale_to_zero)将推理端点缩减到零。
+为方便起见，您还可以使用 InferenceEndpoint.scale_to_zero()将推理端点缩减到零。
 
 #### `set_space_sleep_time`
 
@@ -3378,23 +3378,23 @@ True
 
 参数
 
-+   `repo_id` (`str`) — 要更新的存储库的ID。示例："bigcode/in-the-stack"。
++   `repo_id` (`str`) — 要更新的存储库的 ID。示例："bigcode/in-the-stack"。
 
-+   `sleep_time` (`int`, *optional*) — 在将 Space 设置为休眠之前等待的不活动秒数。如果不想让 Space 暂停（升级硬件的默认行为），请将其设置为 `-1`。对于免费硬件，无法配置休眠时间（值固定为48小时的不活动时间）。有关更多详细信息，请参阅[https://huggingface.co/docs/hub/spaces-gpus#sleep-time](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
++   `sleep_time` (`int`, *optional*) — 在将 Space 设置为休眠之前等待的不活动秒数。如果不想让 Space 暂停（升级硬件的默认行为），请将其设置为 `-1`。对于免费硬件，无法配置休眠时间（值固定为 48 小时的不活动时间）。有关更多详细信息，请参阅[`huggingface.co/docs/hub/spaces-gpus#sleep-time`](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
 
 +   `token` (`str`, *optional*) — Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
 返回
 
-[SpaceRuntime](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceRuntime)
+SpaceRuntime
 
 有关 Space 的运行时信息，包括 Space 阶段和硬件。
 
 为在升级的硬件上运行的 Space 设置自定义休眠时间。
 
-您的 Space 在 X 秒的不活动后会进入休眠状态。当您的 Space 处于“休眠”模式时，不会收费。如果新访客登陆您的 Space，它将“唤醒”它。只有升级的硬件才能具有可配置的休眠时间。要了解有关休眠阶段的更多信息，请参阅[https://huggingface.co/docs/hub/spaces-gpus#sleep-time](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
+您的 Space 在 X 秒的不活动后会进入休眠状态。当您的 Space 处于“休眠”模式时，不会收费。如果新访客登陆您的 Space，它将“唤醒”它。只有升级的硬件才能具有可配置的休眠时间。要了解有关休眠阶段的更多信息，请参阅[`huggingface.co/docs/hub/spaces-gpus#sleep-time`](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
 
-在请求硬件时，也可以设置自定义休眠时间，使用 [request_space_hardware()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.request_space_hardware)。
+在请求硬件时，也可以设置自定义休眠时间，使用 request_space_hardware()。
 
 #### `snapshot_download`
 
@@ -3418,7 +3418,7 @@ True
 
 +   `local_dir_use_symlinks` (`"auto"` or `bool`, 默认为 `"auto"`) — 与 `local_dir` 一起使用。如果设置为 `"auto"`，将使用缓存目录，并根据文件大小将文件复制或创建符号链接到本地目录。如果设置为 `True`，将创建符号链接，无论文件大小如何。如果设置为 `False`，文件将从缓存中复制（如果已存在）或从 Hub 下载并不缓存。有关更多详细信息，请参见描述。
 
-+   `proxies` (`dict`, *optional*) — 将协议映射到传递给 `requests.request` 的代理的URL的字典。
++   `proxies` (`dict`, *optional*) — 将协议映射到传递给 `requests.request` 的代理的 URL 的字典。
 
 +   `etag_timeout` (`float`, *optional*, 默认为 `10`) — 在获取 ETag 时，等待服务器发送数据的秒数，超过这个时间将放弃，这个时间会传递给 `requests.request`。
 
@@ -3426,7 +3426,7 @@ True
 
 +   `force_download` (`bool`, *optional*, 默认为 `False`) — 是否应下载文件，即使它已经存在于本地缓存中。
 
-+   `token` (`bool` or `str`, *optional*) — 有效的身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 [login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为 `False`，则请求标头中不会发送令牌。
++   `token` (`bool` or `str`, *optional*) — 有效的身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果为 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 login()），则令牌将从缓存中检索。如果为 `False`，则请求标头中不会发送令牌。
 
 +   `local_files_only` (`bool`, *optional*, 默认为 `False`) — 如果为 `True`，避免下载文件，并返回本地缓存文件的路径（如果存在）。
 
@@ -3480,23 +3480,23 @@ True
 
 +   `files_metadata` (`bool`, *可选*) — 是否检索存储库中文件的元数据（大小、LFS 元数据等）。默认为 `False`。
 
-+   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌（参见 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 [login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌将从缓存中检索。如果为 `False`，则请求头中不会发送令牌。
++   `token` (`bool` 或 `str`, *可选*) — 有效的身份验证令牌（参见 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果 `None` 或 `True` 并且机器已登录（通过 `huggingface-cli login` 或 login()），则令牌将从缓存中检索。如果为 `False`，则请求头中不会发送令牌。
 
 返回
 
-[SpaceInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.SpaceInfo)
+SpaceInfo
 
 空间存储库信息。
 
-获取有关huggingface.co上一个特定空间的信息。
+获取有关 huggingface.co 上一个特定空间的信息。
 
 如果传递一个可接受的令牌，空间可以是私有的。
 
 引发以下错误：
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果找不到要下载的存储库。这可能是因为它不存在，或者因为它被设置为`private`而您无法访问。
++   RepositoryNotFoundError 如果找不到要下载的存储库。这可能是因为它不存在，或者因为它被设置为`private`而您无法访问。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 如果找不到要下载的修订版本。
++   RevisionNotFoundError 如果找不到要下载的修订版本。
 
 #### `super_squash_history`
 
@@ -3516,19 +3516,19 @@ True
 
 +   `repo_type` (`str`, *optional*) — 如果从数据集或空间列出提交，则设置为`"dataset"`或`"space"`，如果从模型列出，则设置为`None`或`"model"`。默认为`None`。
 
-+   `token` (`str`, *optional*) — 有效的身份验证令牌（参见[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。如果机器已登录（通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)），则令牌可以自动从缓存中检索。
++   `token` (`str`, *optional*) — 有效的身份验证令牌（参见[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。如果机器已登录（通过`huggingface-cli login`或 login()），则令牌可以自动从缓存中检索。
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 或 [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 或 [BadRequestError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.BadRequestError)
+RepositoryNotFoundError 或 RevisionNotFoundError 或 BadRequestError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到存储库（错误404）：错误的repo_id/repo_type，私有但未经身份验证或存储库不存在。
++   RepositoryNotFoundError — 如果找不到存储库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或存储库不存在。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) — 如果找不到要合并的分支。
++   RevisionNotFoundError — 如果找不到要合并的分支。
 
-+   [BadRequestError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.BadRequestError) — 如果分支的引用无效。您不能在标签上合并历史记录。
++   BadRequestError — 如果分支的引用无效。您不能在标签上合并历史记录。
 
-在Hub上为存储库的分支合并提交历史。
+在 Hub 上为存储库的分支合并提交历史。
 
 当您知道将要进行数百次提交并且不想混乱历史记录时，合并存储库历史非常有用。只能从分支的头部执行合并提交。
 
@@ -3572,13 +3572,13 @@ True
 
 引发
 
-[RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError)
+RepositoryNotFoundError
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) — 如果找不到存储库（错误404）：错误的repo_id/repo_type，私有但未经身份验证或存储库不存在。
++   RepositoryNotFoundError — 如果找不到存储库（错误 404）：错误的 repo_id/repo_type，私有但未经身份验证或存储库不存在。
 
-取消关注Hub上的给定存储库（例如，从收藏列表中删除）。
+取消关注 Hub 上的给定存储库（例如，从收藏列表中删除）。
 
-另请参阅[like()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.like)和[list_liked_repos()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_liked_repos)。
+另请参阅 like()和 list_liked_repos()。
 
 示例：
 
@@ -3602,15 +3602,15 @@ False
 
 参数
 
-+   `collection_slug` (`str`) — 要更新的集合的slug。示例："TheBloke/recent-models-64f9a55bb3115b4f513ec026"。
++   `collection_slug` (`str`) — 要更新的集合的 slug。示例："TheBloke/recent-models-64f9a55bb3115b4f513ec026"。
 
-+   `item_object_id` (`str`) — 集合中项目的ID。这不是Hub上项目的ID（repo_id或paper id）。必须从[CollectionItem](/docs/huggingface_hub/v0.20.3/en/package_reference/collections#huggingface_hub.CollectionItem)对象中检索。示例：`collection.items[0].item_object_id`。
++   `item_object_id` (`str`) — 集合中项目的 ID。这不是 Hub 上项目的 ID（repo_id 或 paper id）。必须从 CollectionItem 对象中检索。示例：`collection.items[0].item_object_id`。
 
-+   `note` (`str`, *optional*) — 要附加到集合中项目的注释。注释的最大长度为500个字符。
++   `note` (`str`, *optional*) — 要附加到集合中项目的注释。注释的最大长度为 500 个字符。
 
 +   `position` (`int`, *optional*) — 项目在集合中的新位置。
 
-+   `token` (`str`, *optional*) — Hugging Face令牌。如果未提供，将默认为本地保存的令牌。
++   `token` (`str`, *optional*) — Hugging Face 令牌。如果未提供，将默认为本地保存的令牌。
 
 更新集合中的项目。
 
@@ -3641,7 +3641,7 @@ False
 
 参数
 
-+   `collection_slug` (`str`) — 要更新的集合的slug。示例："TheBloke/recent-models-64f9a55bb3115b4f513ec026"。
++   `collection_slug` (`str`) — 要更新的集合的 slug。示例："TheBloke/recent-models-64f9a55bb3115b4f513ec026"。
 
 +   `title` (`str`) — 要更新的集合的标题。
 
@@ -3651,15 +3651,15 @@ False
 
 +   `private` (`bool`, *optional*) — 集合是否应为私有。
 
-+   `theme` (`str`, *optional*) — Hub上集合的主题。
++   `theme` (`str`, *optional*) — Hub 上集合的主题。
 
-+   `token` (`str`, *optional*) — Hugging Face令牌。如果未提供，将默认为本地保存的令牌。
++   `token` (`str`, *optional*) — Hugging Face 令牌。如果未提供，将默认为本地保存的令牌。
 
-更新Hub上集合的元数据。
+更新 Hub 上集合的元数据。
 
 所有参数都是可选的。只会更新提供的元数据。
 
-返回：[Collection](/docs/huggingface_hub/v0.20.3/en/package_reference/collections#huggingface_hub.Collection)
+返回：Collection
 
 示例：
 
@@ -3709,11 +3709,11 @@ False
 
 +   `namespace` (`str`, *optional*) — 要更新推理端点的命名空间。默认为当前用户的命名空间。
 
-+   `token` (`str`, *optional*) — 身份验证令牌（请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token)）。
++   `token` (`str`, *optional*) — 身份验证令牌（请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token)）。
 
 返回
 
-[InferenceEndpoint](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint)
+InferenceEndpoint
 
 有关更新后的推理端点的信息。
 
@@ -3721,7 +3721,7 @@ False
 
 此方法允许更新计算配置、部署模型或两者。所有参数都是可选的，但至少必须提供一个。
 
-为方便起见，您还可以使用 [InferenceEndpoint.update()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_endpoints#huggingface_hub.InferenceEndpoint.update) 更新推理端点。
+为方便起见，您还可以使用 InferenceEndpoint.update() 更新推理端点。
 
 #### `update_repo_visibility`
 
@@ -3737,7 +3737,7 @@ False
 
 +   `private` (`bool`, *可选*, 默认为 `False`) — 模型仓库是否应该是私有的。
 
-+   `token` (`str`, *可选*) — 认证令牌（请参阅 [https://huggingface.co/settings/token](https://huggingface.co/settings/token)）
++   `token` (`str`, *可选*) — 认证令牌（请参阅 [`huggingface.co/settings/token`](https://huggingface.co/settings/token)）
 
 +   `repo_type` (`str`, *可选*) — 如果上传到数据集或空间，则设置为 `"dataset"` 或 `"space"`, 如果上传到模型则设置为 `None` 或 `"model"`。默认为 `None`。
 
@@ -3745,7 +3745,7 @@ False
 
 引发以下错误：
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的仓库。这可能是因为它不存在，或者因为它被设置为 `private` 且您无法访问。
++   RepositoryNotFoundError 如果无法找到要下载的仓库。这可能是因为它不存在，或者因为它被设置为 `private` 且您无法访问。
 
 #### `upload_file`
 
@@ -3775,29 +3775,29 @@ False
 
 +   `create_pr` (`boolean`, *可选*) — 是否创建一个带有该提交的拉取请求。默认为 `False`。如果未设置 `revision`，则 PR 将针对 `"main"` 分支打开。如果设置了 `revision` 并且是一个分支，则 PR 将针对此分支打开。如果设置了 `revision` 并且不是分支名称（例如：提交 oid），服务器将返回 `RevisionNotFoundError`。
 
-+   `parent_commit` (`str`, *可选*) — 父提交的 OID / SHA，以十六进制字符串表示。也支持缩写（前7个字符）。如果指定并且 `create_pr` 为 `False`，则如果 `revision` 没有指向 `parent_commit`，提交将失败。如果指定并且 `create_pr` 为 `True`，将从 `parent_commit` 创建拉取请求。指定 `parent_commit` 可确保在提交更改之前仓库未更改，并且如果仓库同时更新 / 提交，则尤其有用。
++   `parent_commit` (`str`, *可选*) — 父提交的 OID / SHA，以十六进制字符串表示。也支持缩写（前 7 个字符）。如果指定并且 `create_pr` 为 `False`，则如果 `revision` 没有指向 `parent_commit`，提交将失败。如果指定并且 `create_pr` 为 `True`，将从 `parent_commit` 创建拉取请求。指定 `parent_commit` 可确保在提交更改之前仓库未更改，并且如果仓库同时更新 / 提交，则尤其有用。
 
 +   `run_as_future` (`bool`, *可选*) — 是否在后台运行此方法。后台作业按顺序运行，不会阻塞主线程。传递 `run_as_future=True` 将返回一个 [Future](https://docs.python.org/3/library/concurrent.futures.html#future-objects) 对象。默认为 `False`。
 
 返回
 
-[CommitInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitInfo) 或 `Future`
+CommitInfo 或 `Future`
 
-包含有关新创建提交的信息的[CommitInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitInfo)实例（提交哈希、提交URL、PR URL、提交消息等）。如果传递了`run_as_future=True`，则返回一个Future对象，该对象在执行时将包含结果。
+包含有关新创建提交的信息的 CommitInfo 实例（提交哈希、提交 URL、PR URL、提交消息等）。如果传递了`run_as_future=True`，则返回一个 Future 对象，该对象在执行时将包含结果。
 
-将本地文件（最多50 GB）上传到给定的存储库。上传通过HTTP post请求完成，不需要安装git或git-lfs。
+将本地文件（最多 50 GB）上传到给定的存储库。上传通过 HTTP post 请求完成，不需要安装 git 或 git-lfs。
 
 引发以下错误：
 
-+   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果HuggingFace API返回错误
++   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError) 如果 HuggingFace API 返回错误
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) 如果某个参数值无效
 
-+   [RepositoryNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RepositoryNotFoundError) 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为`private`并且您无权访问。
++   RepositoryNotFoundError 如果无法找到要下载的存储库。这可能是因为它不存在，或者因为它设置为`private`并且您无权访问。
 
-+   [RevisionNotFoundError](/docs/huggingface_hub/v0.20.3/en/package_reference/utilities#huggingface_hub.utils.RevisionNotFoundError) 如果无法找到要下载的修订版本。
++   RevisionNotFoundError 如果无法找到要下载的修订版本。
 
-`upload_file` 假定存储库已经存在于Hub上。如果收到客户端错误404，请确保已经进行了身份验证，并且`repo_id`和`repo_type`已正确设置。如果存储库不存在，请先使用[create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo)创建它。
+`upload_file` 假定存储库已经存在于 Hub 上。如果收到客户端错误 404，请确保已经进行了身份验证，并且`repo_id`和`repo_type`已正确设置。如果存储库不存在，请先使用 create_repo()创建它。
 
 示例：
 
@@ -3852,15 +3852,15 @@ False
 
 +   `repo_type` (`str`, *optional*) — 如果上传到数据集或空间，则设置为`"dataset"`或`"space"`，如果上传到模型，则为`None`或`"model"`。默认为`None`。
 
-+   `revision` (`str`, *optional*) — 要提交的git修订版本。默认为`"main"`分支的头部。
++   `revision` (`str`, *optional*) — 要提交的 git 修订版本。默认为`"main"`分支的头部。
 
 +   `commit_message` (`str`, *optional*) — 生成提交的摘要/标题/第一行。默认为：`f"Upload {path_in_repo} with huggingface_hub"`
 
 +   `commit_description` (`str` *optional*) — 生成的提交描述
 
-+   `create_pr` (`boolean`, *optional*) — 是否创建具有该提交的拉取请求。默认为`False`。如果未设置`revision`，则PR将针对`"main"`分支打开。如果设置了`revision`并且是一个分支，则PR将针对此分支打开。如果设置了`revision`并且不是分支名称（例如：提交oid），服务器将返回`RevisionNotFoundError`。如果`multi_commits`和`create_pr`都为True，则在多次提交过程中创建的PR将保持打开状态。
++   `create_pr` (`boolean`, *optional*) — 是否创建具有该提交的拉取请求。默认为`False`。如果未设置`revision`，则 PR 将针对`"main"`分支打开。如果设置了`revision`并且是一个分支，则 PR 将针对此分支打开。如果设置了`revision`并且不是分支名称（例如：提交 oid），服务器将返回`RevisionNotFoundError`。如果`multi_commits`和`create_pr`都为 True，则在多次提交过程中创建的 PR 将保持打开状态。
 
-+   `parent_commit` (`str`, *optional*) — 父提交的OID / SHA，以十六进制字符串表示。也支持缩写（前7个字符）。如果指定并且`create_pr`为`False`，则如果`revision`不指向`parent_commit`，提交将失败。如果指定并且`create_pr`为`True`，将从`parent_commit`创建拉取请求。指定`parent_commit`可确保在提交更改之前存储库未更改，并且如果存储库同时更新/提交，这可能特别有用。
++   `parent_commit` (`str`, *optional*) — 父提交的 OID / SHA，以十六进制字符串表示。也支持缩写（前 7 个字符）。如果指定并且`create_pr`为`False`，则如果`revision`不指向`parent_commit`，提交将失败。如果指定并且`create_pr`为`True`，将从`parent_commit`创建拉取请求。指定`parent_commit`可确保在提交更改之前存储库未更改，并且如果存储库同时更新/提交，这可能特别有用。
 
 +   `allow_patterns` (`List[str]` or `str`, *optional*) — 如果提供，只有至少匹配一个模式的文件才会被上传。
 
@@ -3868,19 +3868,19 @@ False
 
 +   `delete_patterns`（`List[str]`或`str`，*可选*）— 如果提供，与任何模式匹配的远程文件将在提交新文件时从存储库中删除。如果您不知道已经上传了哪些文件，这将很有用。注意：为了避免不一致，即使匹配模式，也不会删除`.gitattributes`文件。
 
-+   `multi_commits`（`bool`）— 如果为True，则使用多次提交过程将更改推送到PR。默认为`False`。
++   `multi_commits`（`bool`）— 如果为 True，则使用多次提交过程将更改推送到 PR。默认为`False`。
 
-+   `multi_commits_verbose`（`bool`）— 如果为True并且使用了`multi_commits`，将向用户显示更多信息。
++   `multi_commits_verbose`（`bool`）— 如果为 True 并且使用了`multi_commits`，将向用户显示更多信息。
 
 +   `run_as_future`（`bool`，*可选*）— 是否在后台运行此方法。后台作业按顺序运行，不会阻塞主线程。传递`run_as_future=True`将返回一个[Future](https://docs.python.org/3/library/concurrent.futures.html#future-objects)对象。默认为`False`。
 
 返回
 
-[CommitInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitInfo)或`Future`
+CommitInfo 或`Future`
 
-包含有关新创建提交的信息（提交哈希、提交URL、PR URL、提交消息等）的[CommitInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitInfo)实例。如果传递了`run_as_future=True`，则返回一个Future对象，该对象在执行时将包含结果。`str`或`Future`：如果`multi_commits=True`，则返回创建用于推送更改的PR的URL。如果传递了`run_as_future=True`，则返回一个Future对象，该对象在执行时将包含结果。
+包含有关新创建提交的信息（提交哈希、提交 URL、PR URL、提交消息等）的 CommitInfo 实例。如果传递了`run_as_future=True`，则返回一个 Future 对象，该对象在执行时将包含结果。`str`或`Future`：如果`multi_commits=True`，则返回创建用于推送更改的 PR 的 URL。如果传递了`run_as_future=True`，则返回一个 Future 对象，该对象在执行时将包含结果。
 
-将本地文件夹上传到给定的存储库。上传通过HTTP请求完成，不需要安装git或git-lfs。
+将本地文件夹上传到给定的存储库。上传通过 HTTP 请求完成，不需要安装 git 或 git-lfs。
 
 文件夹的结构将被保留。已经存在于存储库中的同名文件将被覆盖。其他文件将保持不变。
 
@@ -3894,13 +3894,13 @@ False
 
 引发以下错误：
 
-+   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError)如果HuggingFace API返回错误
++   [`HTTPError`](https://requests.readthedocs.io/en/latest/api/#requests.HTTPError)如果 HuggingFace API 返回错误
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError)如果某个参数值无效
 
-`upload_folder`假定存储库已经存在于Hub上。如果收到客户端错误404，请确保已经进行了身份验证，并且`repo_id`和`repo_type`已正确设置。如果存储库不存在，请先使用[create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo)创建它。
+`upload_folder`假定存储库已经存在于 Hub 上。如果收到客户端错误 404，请确保已经进行了身份验证，并且`repo_id`和`repo_type`已正确设置。如果存储库不存在，请先使用 create_repo()创建它。
 
-`multi_commits`是实验性的。其API和行为可能会在未来发生变化，而不事先通知。
+`multi_commits`是实验性的。其 API 和行为可能会在未来发生变化，而不事先通知。
 
 示例：
 
@@ -3951,9 +3951,9 @@ False
 
 参数
 
-+   `token`（`str`，*可选*）— Hugging Face令牌。如果未提供，将默认使用本地保存的令牌。
++   `token`（`str`，*可选*）— Hugging Face 令牌。如果未提供，将默认使用本地保存的令牌。
 
-调用HF API以了解“whoami”。
+调用 HF API 以了解“whoami”。
 
 #### `huggingface_hub.plan_multi_commits`
 
@@ -3967,15 +3967,15 @@ False
 
 +   `operations` (`List` of `CommitOperation()`) — 要拆分为提交的操作列表。
 
-+   `max_operations_per_commit` (`int`) — 单个提交中的最大操作数。默认为50。
++   `max_operations_per_commit` (`int`) — 单个提交中的最大操作数。默认为 50。
 
-+   `max_upload_size_per_commit` (`int`) — 单个提交中要上传的最大大小（以字节为单位）。默认为2GB。超过此限制的文件将以每个提交1个的方式上传。
++   `max_upload_size_per_commit` (`int`) — 单个提交中要上传的最大大小（以字节为单位）。默认为 2GB。超过此限制的文件将以每个提交 1 个的方式上传。
 
 返回
 
 `Tuple[List[List[CommitOperationAdd]], List[List[CommitOperationDelete]]]`
 
-一个元组。第一个项目是一个列表的列表，表示要推送的添加提交的[CommitOperationAdd](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationAdd)。第二个项目是一个列表的列表，表示删除提交的[CommitOperationDelete](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationDelete)。
+一个元组。第一个项目是一个列表的列表，表示要推送的添加提交的 CommitOperationAdd。第二个项目是一个列表的列表，表示删除提交的 CommitOperationDelete。
 
 将操作列表拆分为要执行的提交列表。
 
@@ -3987,9 +3987,9 @@ False
 
 1.  所有剩余的添加操作都将分组在一起，并在达到`max_operations_per_commit`或`max_upload_size_per_commit`限制时拆分。
 
-我们不尝试优化拆分以获得最少数量的提交，因为这是一个NP难题（参见[装箱问题](https://en.wikipedia.org/wiki/Bin_packing_problem)）。对于我们的用例，使用次优化解决方案并不成问题，因此我们选择了一个易于解释的实现。
+我们不尝试优化拆分以获得最少数量的提交，因为这是一个 NP 难题（参见[装箱问题](https://en.wikipedia.org/wiki/Bin_packing_problem)）。对于我们的用例，使用次优化解决方案并不成问题，因此我们选择了一个易于解释的实现。
 
-`plan_multi_commits`是实验性的。其API和行为可能会在未来发生变化，恕不另行通知。
+`plan_multi_commits`是实验性的。其 API 和行为可能会在未来发生变化，恕不另行通知。
 
 示例：
 
@@ -4015,7 +4015,7 @@ False
 
 操作的初始顺序不能保证！所有删除操作将在添加操作之前执行。如果您不是多次更新同一文件，则没问题。
 
-## API数据类
+## API 数据类
 
 ### AccessRequest
 
@@ -4055,25 +4055,25 @@ False
 
 参数
 
-+   `commit_url` (`str`) — 提交的URL。
++   `commit_url` (`str`) — 提交的 URL。
 
 +   `commit_message` (`str`) — 创建的提交的摘要（第一行）。
 
 +   `commit_description` (`str`) — 创建的提交的描述。可以为空。
 
-+   `oid` (`str`) — 提交哈希ID。示例：`"91c54ad1727ee830252e457677f467be0bfd8a57"`。
++   `oid` (`str`) — 提交哈希 ID。示例：`"91c54ad1727ee830252e457677f467be0bfd8a57"`。
 
-+   `pr_url` (`str`, *可选*) — 如果有的话，创建的PR的URL。当传递`create_pr=True`时填充。
++   `pr_url` (`str`, *可选*) — 如果有的话，创建的 PR 的 URL。当传递`create_pr=True`时填充。
 
-+   `pr_revision` (`str`, *可选*) — 如果有的话，创建的PR的修订版本。当传递`create_pr=True`时填充。示例：`"refs/pr/1"`。
++   `pr_revision` (`str`, *可选*) — 如果有的话，创建的 PR 的修订版本。当传递`create_pr=True`时填充。示例：`"refs/pr/1"`。
 
-+   `pr_num` (`int`, *可选*) — 如果有的话，创建的PR讨论的编号。当传递`create_pr=True`时填充。可以在[get_discussion_details()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_discussion_details)中作为`discussion_num`传递。示例：`1`。
++   `pr_num` (`int`, *可选*) — 如果有的话，创建的 PR 讨论的编号。当传递`create_pr=True`时填充。可以在 get_discussion_details()中作为`discussion_num`传递。示例：`1`。
 
-+   `_url` (`str`, *可选*) — 用于`str`兼容性的旧URL。可以是Hub上上传文件的URL（如果由[upload_file()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_file)返回），Hub上上传文件夹的URL（如果由[upload_folder()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_folder)返回）或Hub上提交的URL（如果由[create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit)返回）。默认为`commit_url`。使用此属性已被弃用。请改用`commit_url`。
++   `_url` (`str`, *可选*) — 用于`str`兼容性的旧 URL。可以是 Hub 上上传文件的 URL（如果由 upload_file()返回），Hub 上上传文件夹的 URL（如果由 upload_folder()返回）或 Hub 上提交的 URL（如果由 create_commit()返回）。默认为`commit_url`。使用此属性已被弃用。请改用`commit_url`。
 
 包含有关新创建提交的信息的数据结构。
 
-由在Hub上创建提交的任何方法返回：[create_commit()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_commit), [upload_file()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_file), [upload_folder()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_folder), [delete_file()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.delete_file), [delete_folder()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.delete_folder)。它继承自`str`以实现向后兼容，但使用特定于`str`的方法已被弃用。
+由在 Hub 上创建提交的任何方法返回：create_commit(), upload_file(), upload_folder(), delete_file(), delete_folder()。它继承自`str`以实现向后兼容，但使用特定于`str`的方法已被弃用。
 
 ### DatasetInfo
 
@@ -4087,13 +4087,13 @@ False
 
 参数
 
-+   `id` (`str`) — 数据集的ID。
++   `id` (`str`) — 数据集的 ID。
 
 +   `author` (`str`) — 数据集的作者。
 
-+   `sha` (`str`) — 此特定修订版的仓库SHA。
++   `sha` (`str`) — 此特定修订版的仓库 SHA。
 
-+   `created_at` (`datetime`, *可选*) — 仓库在Hub上创建的日期。请注意，最低值为`2022-03-02T23:29:04.000Z`，对应于我们开始存储创建日期的日期。
++   `created_at` (`datetime`, *可选*) — 仓库在 Hub 上创建的日期。请注意，最低值为`2022-03-02T23:29:04.000Z`，对应于我们开始存储创建日期的日期。
 
 +   `last_modified` (`datetime`, *可选*) — 对仓库的最后一次提交日期。
 
@@ -4109,13 +4109,13 @@ False
 
 +   `tags` (`List[str]`) — 数据集的标签列表。
 
-+   `card_data` (`DatasetCardData`, *可选*) — 模型卡片元数据，作为[huggingface_hub.repocard_data.DatasetCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.DatasetCardData)对象。
++   `card_data` (`DatasetCardData`, *可选*) — 模型卡片元数据，作为 huggingface_hub.repocard_data.DatasetCardData 对象。
 
-+   `siblings` (`List[RepoSibling]`) — 构成数据集的[huggingface_hub.hf_api.RepoSibling](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.RepoSibling)对象列表。
++   `siblings` (`List[RepoSibling]`) — 构成数据集的 huggingface_hub.hf_api.RepoSibling 对象列表。
 
-包含有关Hub上数据集的信息。
+包含有关 Hub 上数据集的信息。
 
-此类的大多数属性都是可选的。这是因为Hub返回的数据取决于所做的查询。一般来说，查询越具体，返回的信息就越多。相反，当使用[list_datasets()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_datasets)列出数据集时，只返回属性的子集。
+此类的大多数属性都是可选的。这是因为 Hub 返回的数据取决于所做的查询。一般来说，查询越具体，返回的信息就越多。相反，当使用 list_datasets()列出数据集时，只返回属性的子集。
 
 ### GitRefInfo
 
@@ -4131,11 +4131,11 @@ False
 
 +   `name` (`str`) — 引用的名称（例如标签名称或分支名称）。
 
-+   `ref` (`str`) — Hub上的完整git引用（例如 `"refs/heads/main"` 或 `"refs/tags/v1.0"`）。
++   `ref` (`str`) — Hub 上的完整 git 引用（例如 `"refs/heads/main"` 或 `"refs/tags/v1.0"`）。
 
-+   `target_commit` (`str`) — 引用的目标提交的OID（例如 `"e7da7f221d5bf496a48136c0cd264e630fe9fcc8"`）
++   `target_commit` (`str`) — 引用的目标提交的 OID（例如 `"e7da7f221d5bf496a48136c0cd264e630fe9fcc8"`）
 
-包含有关Hub上仓库的git引用的信息。
+包含有关 Hub 上仓库的 git 引用的信息。
 
 ### GitCommitInfo
 
@@ -4149,7 +4149,7 @@ False
 
 参数
 
-+   `commit_id` (`str`) — 提交的OID（例如`"e7da7f221d5bf496a48136c0cd264e630fe9fcc8"`）
++   `commit_id` (`str`) — 提交的 OID（例如`"e7da7f221d5bf496a48136c0cd264e630fe9fcc8"`）
 
 +   `authors` (`List[str]`) — 提交的作者列表。
 
@@ -4159,11 +4159,11 @@ False
 
 +   `message` (`str`) — 提交的描述。这是作者输入的自由文本值。
 
-+   `formatted_title` (`str`) — 提交的标题格式化为HTML。仅在设置`formatted=True`时返回。
++   `formatted_title` (`str`) — 提交的标题格式化为 HTML。仅在设置`formatted=True`时返回。
 
-+   `formatted_message` (`str`) — 提交的描述格式化为HTML。仅在设置`formatted=True`时返回。
++   `formatted_message` (`str`) — 提交的描述格式化为 HTML。仅在设置`formatted=True`时返回。
 
-包含有关Hub上存储库的git提交的信息。查看[list_repo_commits()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_repo_commits)获取更多详细信息。
+包含有关 Hub 上存储库的 git 提交的信息。查看 list_repo_commits()获取更多详细信息。
 
 ### GitRefs
 
@@ -4177,17 +4177,17 @@ False
 
 参数
 
-+   `branches` (`List[GitRefInfo]`) — 包含有关存储库上分支的信息的[GitRefInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.GitRefInfo)列表。
++   `branches` (`List[GitRefInfo]`) — 包含有关存储库上分支的信息的 GitRefInfo 列表。
 
-+   `converts` (`List[GitRefInfo]`) — 包含有关存储库上“convert”引用的信息的[GitRefInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.GitRefInfo)列表。转换是用于在数据集存储库中推送预处理数据的引用（内部使用）。
++   `converts` (`List[GitRefInfo]`) — 包含有关存储库上“convert”引用的信息的 GitRefInfo 列表。转换是用于在数据集存储库中推送预处理数据的引用（内部使用）。
 
-+   `tags` (`List[GitRefInfo]`) — 包含有关存储库上标签的信息的[GitRefInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.GitRefInfo)列表。
++   `tags` (`List[GitRefInfo]`) — 包含有关存储库上标签的信息的 GitRefInfo 列表。
 
-+   `pull_requests` (`List[GitRefInfo]`, *optional*) — 包含有关存储库上拉取请求的信息的[GitRefInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.GitRefInfo)列表。仅在设置`include_prs=True`时返回。
++   `pull_requests` (`List[GitRefInfo]`, *optional*) — 包含有关存储库上拉取请求的信息的 GitRefInfo 列表。仅在设置`include_prs=True`时返回。
 
-包含有关Hub上存储库的所有git引用的信息。
+包含有关 Hub 上存储库的所有 git 引用的信息。
 
-对象由[list_repo_refs()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_repo_refs)返回。
+对象由 list_repo_refs()返回。
 
 ### ModelInfo
 
@@ -4201,13 +4201,13 @@ False
 
 参数
 
-+   `id` (`str`) — 模型的ID。
++   `id` (`str`) — 模型的 ID。
 
 +   `author` (`str`, *optional*) — 模型的作者。
 
-+   `sha` (`str`, *optional*) — 此特定修订版的存储库SHA。
++   `sha` (`str`, *optional*) — 此特定修订版的存储库 SHA。
 
-+   `created_at` (`datetime`, *optional*) — 存储库在Hub上创建的日期。请注意，最低值为`2022-03-02T23:29:04.000Z`，对应于我们开始存储创建日期的日期。
++   `created_at` (`datetime`, *optional*) — 存储库在 Hub 上创建的日期。请注意，最低值为`2022-03-02T23:29:04.000Z`，对应于我们开始存储创建日期的日期。
 
 +   `last_modified` (`datetime`, *optional*) — 存储库上最后一次提交的日期。
 
@@ -4223,7 +4223,7 @@ False
 
 +   `library_name` (`str`, *optional*) — 与模型关联的库。
 
-+   `tags` (`List[str]`) — 模型的标签列表。与`card_data.tags`相比，包含Hub计算的额外标签（例如支持的库，模型的arXiv）。
++   `tags` (`List[str]`) — 模型的标签列表。与`card_data.tags`相比，包含 Hub 计算的额外标签（例如支持的库，模型的 arXiv）。
 
 +   `pipeline_tag` (`str`, *optional*) — 与模型关联的管道标记。
 
@@ -4235,19 +4235,19 @@ False
 
 +   `config` (`Dict`, *optional*) — 模型配置。
 
-+   `transformers_info` (`TransformersInfo`, *optional*) — 与模型关联的Transformers特定信息（自动类，处理器等）。
++   `transformers_info` (`TransformersInfo`, *optional*) — 与模型关联的 Transformers 特定信息（自动类，处理器等）。
 
-+   `card_data` (`ModelCardData`, *optional*) — 模型卡片元数据，作为[huggingface_hub.repocard_data.ModelCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.ModelCardData)对象。
++   `card_data` (`ModelCardData`, *optional*) — 模型卡片元数据，作为 huggingface_hub.repocard_data.ModelCardData 对象。
 
-+   `siblings` (`List[RepoSibling]`) — 构成模型的[huggingface_hub.hf_api.RepoSibling](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.RepoSibling)对象列表。
++   `siblings` (`List[RepoSibling]`) — 构成模型的 huggingface_hub.hf_api.RepoSibling 对象列表。
 
 +   `spaces` (`List[str]`, *可选*) — 使用该模型的空间列表。
 
-+   `safetensors` (`SafeTensorsInfo`, *可选*) — 模型的safetensors信息。
++   `safetensors` (`SafeTensorsInfo`, *可选*) — 模型的 safetensors 信息。
 
-包含有关Hub上模型的信息。
+包含有关 Hub 上模型的信息。
 
-这个类的大多数属性都是可选的。这是因为Hub返回的数据取决于所做的查询。一般来说，查询越具体，返回的信息就越多。相反，当使用[list_models()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_models)列出模型时，只返回部分属性。
+这个类的大多数属性都是可选的。这是因为 Hub 返回的数据取决于所做的查询。一般来说，查询越具体，返回的信息就越多。相反，当使用 list_models()列出模型时，只返回部分属性。
 
 ### RepoSibling
 
@@ -4263,15 +4263,15 @@ False
 
 +   `rfilename` (str) — 相对于仓库根目录的文件名。
 
-+   `size` (`int`, *可选*) — 文件的大小，以字节为单位。当[repo_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.repo_info)的`files_metadata`参数设置为`True`时，定义此属性。否则为`None`。
++   `size` (`int`, *可选*) — 文件的大小，以字节为单位。当 repo_info()的`files_metadata`参数设置为`True`时，定义此属性。否则为`None`。
 
-+   `blob_id` (`str`, *可选*) — 文件的git OID。当[repo_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.repo_info)的`files_metadata`参数设置为`True`时，定义此属性。否则为`None`。
++   `blob_id` (`str`, *可选*) — 文件的 git OID。当 repo_info()的`files_metadata`参数设置为`True`时，定义此属性。否则为`None`。
 
-+   `lfs` (`BlobLfsInfo`, *可选*) — 文件的LFS元数据。当[repo_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.repo_info)的`files_metadata`参数设置为`True`且文件存储在Git LFS中时，定义此属性。否则为`None`。
++   `lfs` (`BlobLfsInfo`, *可选*) — 文件的 LFS 元数据。当 repo_info()的`files_metadata`参数设置为`True`且文件存储在 Git LFS 中时，定义此属性。否则为`None`。
 
-包含有关Hub上仓库内的一个仓库文件的基本信息。
+包含有关 Hub 上仓库内的一个仓库文件的基本信息。
 
-这个类的所有属性都是可选的，除了`rfilename`。这是因为在Hub上列出仓库时（使用[list_models()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_models)、[list_datasets()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_datasets)或[list_spaces()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_spaces)），只返回文件名。如果需要更多信息，如文件大小、blob id或lfs详细信息，则必须从一个仓库中单独请求它们（使用[model_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.model_info)、[dataset_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.dataset_info)或[space_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.space_info)），因为这会增加后端服务器检索这些信息的约束。
+这个类的所有属性都是可选的，除了`rfilename`。这是因为在 Hub 上列出仓库时（使用 list_models()、list_datasets()或 list_spaces()），只返回文件名。如果需要更多信息，如文件大小、blob id 或 lfs 详细信息，则必须从一个仓库中单独请求它们（使用 model_info()、dataset_info()或 space_info()），因为这会增加后端服务器检索这些信息的约束。
 
 ### RepoFile
 
@@ -4289,13 +4289,13 @@ False
 
 +   `size` (`int`) — 文件的大小，以字节为单位。
 
-+   `blob_id` (`str`) — 文件的git OID。
++   `blob_id` (`str`) — 文件的 git OID。
 
-+   `lfs` (`BlobLfsInfo`) — 文件的LFS元数据。
++   `lfs` (`BlobLfsInfo`) — 文件的 LFS 元数据。
 
-+   `last_commit` (`LastCommitInfo`, *可选*) — 文件的最后提交元数据。仅当使用`expand=True`调用[list_files_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_files_info)、[list_repo_tree()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_repo_tree)和[get_paths_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_paths_info)时才定义。
++   `last_commit` (`LastCommitInfo`, *可选*) — 文件的最后提交元数据。仅当使用`expand=True`调用 list_files_info()、list_repo_tree()和 get_paths_info()时才定义。
 
-+   `security` (`BlobSecurityInfo`, *可选*) — 文件的安全扫描元数据。仅在调用 [list_files_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_files_info)、[list_repo_tree()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_repo_tree) 和 [get_paths_info()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_paths_info) 时定义为 `expand=True`。
++   `security` (`BlobSecurityInfo`, *可选*) — 文件的安全扫描元数据。仅在调用 list_files_info()、list_repo_tree() 和 get_paths_info() 时定义为 `expand=True`。
 
 包含有关 Hub 上文件的信息。
 
@@ -4313,7 +4313,7 @@ False
 
 +   `url` (`Any`) — repo URL 的字符串值。
 
-+   `endpoint` (`str`, *可选*) — Hub 的端点。默认为 [https://huggingface.co](https://huggingface.co)。
++   `endpoint` (`str`, *可选*) — Hub 的端点。默认为 [`huggingface.co`](https://huggingface.co)。
 
 引发
 
@@ -4379,9 +4379,9 @@ Safetensors repo 的元数据。
 
 如果 repo 在其根目录包含 ‘model.safetensors’ 权重文件（非共享模型）或 ‘model.safetensors.index.json’ 索引文件（分片模型），则认为该 repo 是 Safetensors repo。
 
-此类由 [get_safetensors_metadata()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_safetensors_metadata) 返回。
+此类由 get_safetensors_metadata() 返回。
 
-有关 safetensors 格式的更多详细信息，请查看 [https://huggingface.co/docs/safetensors/index#format](https://huggingface.co/docs/safetensors/index#format)。
+有关 safetensors 格式的更多详细信息，请查看 [`huggingface.co/docs/safetensors/index#format`](https://huggingface.co/docs/safetensors/index#format)。
 
 ### SafetensorsFileMetadata
 
@@ -4403,9 +4403,9 @@ Safetensors repo 的元数据。
 
 Hub 上托管的 Safetensors 文件的元数据。
 
-此类由 [parse_safetensors_file_metadata()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.parse_safetensors_file_metadata) 返回。
+此类由 parse_safetensors_file_metadata() 返回。
 
-有关 safetensors 格式的更多详细信息，请查看 [https://huggingface.co/docs/safetensors/index#format](https://huggingface.co/docs/safetensors/index#format)。
+有关 safetensors 格式的更多详细信息，请查看 [`huggingface.co/docs/safetensors/index#format`](https://huggingface.co/docs/safetensors/index#format)。
 
 ### SpaceInfo
 
@@ -4419,13 +4419,13 @@ Hub 上托管的 Safetensors 文件的元数据。
 
 参数
 
-+   `id` (`str`) — 空间的ID。
++   `id` (`str`) — 空间的 ID。
 
 +   `author` (`str`, *可选*) — 空间的作者。
 
-+   `sha` (`str`, *可选*) — 此特定修订版的仓库SHA。
++   `sha` (`str`, *可选*) — 此特定修订版的仓库 SHA。
 
-+   `created_at` (`datetime`, *可选*) — 在Hub上创建仓库的日期。请注意，最低值为`2022-03-02T23:29:04.000Z`，对应于我们开始存储创建日期的日期。
++   `created_at` (`datetime`, *可选*) — 在 Hub 上创建仓库的日期。请注意，最低值为`2022-03-02T23:29:04.000Z`，对应于我们开始存储创建日期的日期。
 
 +   `last_modified` (`datetime`, *可选*) — 仓库的最后提交日期。
 
@@ -4435,7 +4435,7 @@ Hub 上托管的 Safetensors 文件的元数据。
 
 +   `disabled` (`bool`, *可选*) — 空间是否已禁用。
 
-+   `host` (`str`, *可选*) — 空间的主机URL。
++   `host` (`str`, *可选*) — 空间的主机 URL。
 
 +   `subdomain` (`str`, *可选*) — 空间的子域。
 
@@ -4443,21 +4443,21 @@ Hub 上托管的 Safetensors 文件的元数据。
 
 +   `tags` (`List[str]`) — 空间的标签列表。
 
-+   `siblings` (`List[RepoSibling]`) — 构成空间的[huggingface_hub.hf_api.RepoSibling](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.hf_api.RepoSibling)对象列表。
++   `siblings` (`List[RepoSibling]`) — 构成空间的 huggingface_hub.hf_api.RepoSibling 对象列表。
 
-+   `card_data` (`SpaceCardData`, *可选*) — 空间卡片元数据，作为[huggingface_hub.repocard_data.SpaceCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.SpaceCardData)对象。
++   `card_data` (`SpaceCardData`, *可选*) — 空间卡片元数据，作为 huggingface_hub.repocard_data.SpaceCardData 对象。
 
-+   `runtime` (`SpaceRuntime`, *可选*) — 空间运行时信息，作为[huggingface_hub.hf_api.SpaceRuntime](/docs/huggingface_hub/v0.20.3/en/package_reference/space_runtime#huggingface_hub.SpaceRuntime)对象。
++   `runtime` (`SpaceRuntime`, *可选*) — 空间运行时信息，作为 huggingface_hub.hf_api.SpaceRuntime 对象。
 
-+   `sdk` (`str`, *可选*) — 空间使用的SDK。
++   `sdk` (`str`, *可选*) — 空间使用的 SDK。
 
 +   `models` (`List[str]`, *可选*) — 空间使用的模型列表。
 
 +   `datasets` (`List[str]`, *可选*) — 空间使用的数据集列表。
 
-包含有关Hub上空间的信息。
+包含有关 Hub 上空间的信息。
 
-此类的大多数属性都是可选的。这是因为Hub返回的数据取决于所做的查询。一般来说，查询越具体，返回的信息就越多。相反，当使用[list_spaces()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.list_spaces)列出空间时，只返回部分属性。
+此类的大多数属性都是可选的。这是因为 Hub 返回的数据取决于所做的查询。一般来说，查询越具体，返回的信息就越多。相反，当使用 list_spaces()列出空间时，只返回部分属性。
 
 ### TensorInfo
 
@@ -4481,7 +4481,7 @@ Hub 上托管的 Safetensors 文件的元数据。
 
 有关张量的信息。
 
-有关safetensors格式的更多详细信息，请查看[https://huggingface.co/docs/safetensors/index#format](https://huggingface.co/docs/safetensors/index#format)。
+有关 safetensors 格式的更多详细信息，请查看[`huggingface.co/docs/safetensors/index#format`](https://huggingface.co/docs/safetensors/index#format)。
 
 ### 用户
 
@@ -4495,13 +4495,13 @@ Hub 上托管的 Safetensors 文件的元数据。
 
 参数
 
-+   `avatar_url` (`str`) — 用户头像的URL。
++   `avatar_url` (`str`) — 用户头像的 URL。
 
-+   `username` (`str`) — Hub上用户的名称（唯一）。
++   `username` (`str`) — Hub 上用户的名称（唯一）。
 
 +   `fullname` (`str`) — 用户的全名。
 
-包含有关Hub上空间的信息。
+包含有关 Hub 上空间的信息。
 
 ### UserLikes
 
@@ -4519,13 +4519,13 @@ Hub 上托管的 Safetensors 文件的元数据。
 
 +   `total` (`int`) — 喜欢的总数。
 
-+   `datasets` (`List[str]`) — 用户喜欢的数据集列表（作为repo_ids）。
++   `datasets` (`List[str]`) — 用户喜欢的数据集列表（作为 repo_ids）。
 
-+   `models` (`List[str]`) — 用户喜欢的模型列表（作为repo_ids）。
++   `models` (`List[str]`) — 用户喜欢的模型列表（作为 repo_ids）。
 
-+   `spaces` (`List[str]`) — 用户喜欢的空间列表（作为repo_ids）。
++   `spaces` (`List[str]`) — 用户喜欢的空间列表（作为 repo_ids）。
 
-包含有关Hub上用户喜欢的信息。
+包含有关 Hub 上用户喜欢的信息。
 
 ## CommitOperation
 
@@ -4561,7 +4561,7 @@ Hub 上托管的 Safetensors 文件的元数据。
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) —如果`path_or_fileobj`是`io.BufferedIOBase`，但它不支持`seek()`和`tell()`两种方法。
 
-保存在Hub上的存储库中上传文件所需信息的数据结构。
+保存在 Hub 上的存储库中上传文件所需信息的数据结构。
 
 #### `as_file`
 
@@ -4573,7 +4573,7 @@ Hub 上托管的 Safetensors 文件的元数据。
 
 参数
 
-+   `with_tqdm`（`bool`，*可选*，默认为`False`）—如果为True，则在文件对象上迭代将显示进度条。仅在文件类似对象是文件路径时有效。纯字节和缓冲区不受支持。
++   `with_tqdm`（`bool`，*可选*，默认为`False`）—如果为 True，则在文件对象上迭代将显示进度条。仅在文件类似对象是文件路径时有效。纯字节和缓冲区不受支持。
 
 一个上下文管理器，产生一个类似文件的对象，允许读取`path_or_fileobj`背后的基础数据。
 
@@ -4609,7 +4609,7 @@ config.json: 100%|████████████████████�
 ( )
 ```
 
-`path_or_fileobj`的base64编码内容
+`path_or_fileobj`的 base64 编码内容
 
 返回：`bytes`
 
@@ -4627,7 +4627,7 @@ config.json: 100%|████████████████████�
 
 +   `is_folder`（`bool`或`Literal["auto"]`，*可选*）—删除操作是否适用于文件夹。如果为“auto”，则通过查看路径是否以“/”（文件夹）结尾来自动猜测路径类型（文件或文件夹）。要明确设置路径类型，可以设置`is_folder=True`或`is_folder=False`。
 
-保存从Hub上的存储库中删除文件或文件夹所需信息的数据结构。
+保存从 Hub 上的存储库中删除文件或文件夹所需信息的数据结构。
 
 ### `class huggingface_hub.CommitOperationCopy`
 
@@ -4643,17 +4643,17 @@ config.json: 100%|████████████████████�
 
 +   `path_in_repo`（`str`）—要复制文件的存储库中的相对文件路径，例如`"checkpoints/1fec34a/weights_copy.bin"`。
 
-+   `src_revision`（`str`，*可选*）—要复制的文件的git修订版。可以是任何有效的git修订版。默认为目标提交修订版。
++   `src_revision`（`str`，*可选*）—要复制的文件的 git 修订版。可以是任何有效的 git 修订版。默认为目标提交修订版。
 
-保存在Hub上的存储库中复制文件所需信息的数据结构。
+保存在 Hub 上的存储库中复制文件所需信息的数据结构。
 
 限制：
 
-+   只有LFS文件才能被复制。要复制常规文件，您需要将其下载到本地，然后重新上传
++   只有 LFS 文件才能被复制。要复制常规文件，您需要将其下载到本地，然后重新上传
 
 +   不支持跨存储库复制。
 
-注意：您可以将[CommitOperationCopy](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationCopy)和[CommitOperationDelete](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitOperationDelete)组合在一起，以在Hub上重命名LFS文件。
+注意：您可以将 CommitOperationCopy 和 CommitOperationDelete 组合在一起，以在 Hub 上重命名 LFS 文件。
 
 ## CommitScheduler
 
@@ -4667,11 +4667,11 @@ config.json: 100%|████████████████████�
 
 参数
 
-+   `repo_id`（`str`）—要提交的存储库的id。
++   `repo_id`（`str`）—要提交的存储库的 id。
 
 +   `folder_path` (`str` 或 `Path`) — 要定期上传的本地文件夹的路径。
 
-+   `every` (`int` 或 `float`, *可选*) — 每次提交之间的分钟数。默认为5分钟。
++   `every` (`int` 或 `float`, *可选*) — 每次提交之间的分钟数。默认为 5 分钟。
 
 +   `path_in_repo` (`str`, *可选*) — 存储库中目录的相对路径，例如：`"checkpoints/"`。默认为存储库的根文件夹。
 
@@ -4689,9 +4689,9 @@ config.json: 100%|████████████████████�
 
 +   `squash_history` (`bool`, *可选*) — 每次提交后是否压缩存储库的历史记录。默认为 `False`。在存储库变得过大时，压缩提交对避免性能下降很有用。
 
-+   `hf_api` (`HfApi`, *可选*) — 用于提交到Hub的[HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi)客户端。可以使用自定义设置（用户代理，令牌等）进行设置。
++   `hf_api` (`HfApi`, *可选*) — 用于提交到 Hub 的 HfApi 客户端。可以使用自定义设置（用户代理，令牌等）进行设置。
 
-调度器以固定时间间隔（例如每5分钟）将本地文件夹上传到Hub。
+调度器以固定时间间隔（例如每 5 分钟）将本地文件夹上传到 Hub。
 
 调度器在实例化时启动并无限期运行。在脚本结束时，会触发最后一次提交。查看[上传指南](https://huggingface.co/docs/huggingface_hub/guides/upload#scheduled-uploads)以了解如何使用它。
 
@@ -4721,11 +4721,11 @@ config.json: 100%|████████████████████�
 ( )
 ```
 
-将文件夹推送到Hub并返回提交信息。
+将文件夹推送到 Hub 并返回提交信息。
 
 此方法不应直接调用。它由调度器在后台运行，遵循队列机制以避免并发提交。直接调用该方法可能导致并发问题。
 
-`push_to_hub`的默认行为是假定为追加文件夹。它列出文件夹中的所有文件并仅上传更改的文件。如果未发现更改，则该方法返回而不进行提交。如果要更改此行为，可以继承自[CommitScheduler](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.CommitScheduler)并覆盖此方法。例如，在提交之前将数据压缩到单个文件中可能很有用。有关更多详细信息和示例，请查看我们的[集成指南](https://huggingface.co/docs/huggingface_hub/main/en/guides/upload#scheduled-uploads)。
+`push_to_hub`的默认行为是假定为追加文件夹。它列出文件夹中的所有文件并仅上传更改的文件。如果未发现更改，则该方法返回而不进行提交。如果要更改此行为，可以继承自 CommitScheduler 并覆盖此方法。例如，在提交之前将数据压缩到单个文件中可能很有用。有关更多详细信息和示例，请查看我们的[集成指南](https://huggingface.co/docs/huggingface_hub/main/en/guides/upload#scheduled-uploads)。
 
 #### `stop`
 
@@ -4753,7 +4753,7 @@ config.json: 100%|████████████████████�
 
 ## 搜索助手
 
-一些用于在Hub上过滤存储库的助手可在`huggingface_hub`包中找到。
+一些用于在 Hub 上过滤存储库的助手可在`huggingface_hub`包中找到。
 
 ### 数据集过滤器
 
@@ -4767,25 +4767,25 @@ config.json: 100%|████████████████████�
 
 参数
 
-+   `author` (`str`, *可选*) — 用于通过原始上传者（作者或组织）在Hub上识别数据集的字符串或字符串列表，例如 `facebook` 或 `huggingface`。
++   `author` (`str`, *可选*) — 用于通过原始上传者（作者或组织）在 Hub 上识别数据集的字符串或字符串列表，例如 `facebook` 或 `huggingface`。
 
-+   `benchmark` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过官方基准来识别Hub上的数据集。
++   `benchmark` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过官方基准来识别 Hub 上的数据集。
 
-+   `dataset_name` (`str`, *可选*) — 一个字符串或字符串列表，可用于通过名称来识别Hub上的数据集，例如 `SQAC` 或 `wikineural`。
++   `dataset_name` (`str`, *可选*) — 一个字符串或字符串列表，可用于通过名称来识别 Hub 上的数据集，例如 `SQAC` 或 `wikineural`。
 
-+   `language_creators` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过数据的策划方式来识别Hub上的数据集，例如 `crowdsourced` 或 `machine_generated`。
++   `language_creators` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过数据的策划方式来识别 Hub 上的数据集，例如 `crowdsourced` 或 `machine_generated`。
 
-+   `language` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，表示用于在Hub上过滤数据集的两字符语言。
++   `language` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，表示用于在 Hub 上过滤数据集的两字符语言。
 
 +   `multilinguality` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，表示包含多种语言的数据集的过滤器。
 
-+   `size_categories` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过数据集的大小来识别Hub上的数据集，例如 `100K<n<1M` 或 `1M<n<10M`。
++   `size_categories` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过数据集的大小来识别 Hub 上的数据集，例如 `100K<n<1M` 或 `1M<n<10M`。
 
-+   `task_categories` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过设计任务来识别Hub上的数据集，例如 `audio_classification` 或 `named_entity_recognition`。
++   `task_categories` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过设计任务来识别 Hub 上的数据集，例如 `audio_classification` 或 `named_entity_recognition`。
 
-+   `task_ids` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过特定任务来识别Hub上的数据集，例如 `speech_emotion_recognition` 或 `paraphrase`。
++   `task_ids` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，可用于通过特定任务来识别 Hub 上的数据集，例如 `speech_emotion_recognition` 或 `paraphrase`。
 
-一个将人类可读的数据集搜索参数转换为与REST API兼容的参数的类。对于所有参数，大小写不重要。
+一个将人类可读的数据集搜索参数转换为与 REST API 兼容的参数的类。对于所有参数，大小写不重要。
 
 示例：
 
@@ -4832,21 +4832,21 @@ config.json: 100%|████████████████████�
 
 参数
 
-+   `author` (`str`, *可选*) — 一个字符串，可用于通过原始上传者（作者或组织）来识别Hub上的模型，例如 `facebook` 或 `huggingface`。
++   `author` (`str`, *可选*) — 一个字符串，可用于通过原始上传者（作者或组织）来识别 Hub 上的模型，例如 `facebook` 或 `huggingface`。
 
 +   `library` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，表示模型最初训练所使用的基础库，例如 pytorch、tensorflow 或 allennlp。
 
 +   `language` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，表示语言，包括名称和国家代码，例如 “en” 或 “English”
 
-+   `model_name` (`str`, *可选*) — 一个包含模型在Hub上完整或部分名称的字符串，例如 “bert” 或 “bert-base-cased”
++   `model_name` (`str`, *可选*) — 一个包含模型在 Hub 上完整或部分名称的字符串，例如 “bert” 或 “bert-base-cased”
 
 +   `task` (`str` 或 `List`, *可选*) — 一个字符串或字符串列表，表示模型设计用于的任务，例如: “fill-mask” 或 “automatic-speech-recognition”
 
-+   `tags` (`str` 或 `List`, *可选*) — 一个字符串标签或标签列表，用于通过标签来过滤Hub上的模型，例如 `text-generation` 或 `spacy`。
++   `tags` (`str` 或 `List`, *可选*) — 一个字符串标签或标签列表，用于通过标签来过滤 Hub 上的模型，例如 `text-generation` 或 `spacy`。
 
-+   `trained_dataset` (`str` 或 `List`, *可选*) — 一个模型在Hub上训练数据集的字符串标签或字符串标签列表。
++   `trained_dataset` (`str` 或 `List`, *可选*) — 一个模型在 Hub 上训练数据集的字符串标签或字符串标签列表。
 
-一个将人类可读的模型搜索参数转换为与REST API兼容的参数的类。对于所有参数，大小写不重要。
+一个将人类可读的模型搜索参数转换为与 REST API 兼容的参数的类。对于所有参数，大小写不重要。
 
 ```py
 >>> from huggingface_hub import ModelFilter

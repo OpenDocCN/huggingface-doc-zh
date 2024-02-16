@@ -1,6 +1,6 @@
 # 接口：OAuthResult
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/hub/interfaces/OAuthResult](https://huggingface.co/docs/huggingface.js/hub/interfaces/OAuthResult)
+> 原始文本：[`huggingface.co/docs/huggingface.js/hub/interfaces/OAuthResult`](https://huggingface.co/docs/huggingface.js/hub/interfaces/OAuthResult)
 
 ## 属性
 
@@ -40,7 +40,7 @@
 
 • `可选` `state`: `string`
 
-在原始请求中传递给OAuth提供程序的状态。
+在原始请求中传递给 OAuth 提供程序的状态。
 
 #### 定义在
 

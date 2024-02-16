@@ -1,6 +1,6 @@
 # 支持的模型和硬件
 
-> 原始文本：[https://huggingface.co/docs/text-embeddings-inference/supported_models](https://huggingface.co/docs/text-embeddings-inference/supported_models)
+> 原始文本：[`huggingface.co/docs/text-embeddings-inference/supported_models`](https://huggingface.co/docs/text-embeddings-inference/supported_models)
 
 我们正在不断扩大对其他模型类型的支持，并计划在未来更新中包括它们。
 

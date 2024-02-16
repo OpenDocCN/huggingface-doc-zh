@@ -1,8 +1,8 @@
 # 表格分类/回归
 
-> 原文：[https://huggingface.co/docs/autotrain/tabular](https://huggingface.co/docs/autotrain/tabular)
+> 原文：[`huggingface.co/docs/autotrain/tabular`](https://huggingface.co/docs/autotrain/tabular)
 
-使用AutoTrain，您可以轻松训练一个模型来对表格数据进行分类或回归。您只需要从模型列表中选择并上传您的数据集。参数调整会自动完成。
+使用 AutoTrain，您可以轻松训练一个模型来对表格数据进行分类或回归。您只需要从模型列表中选择并上传您的数据集。参数调整会自动完成。
 
 ## 模型
 
@@ -49,4 +49,4 @@ id,category1,category2,feature1,target
 
 ## 列
 
-您的CSV数据集必须有两列：`id`和`target`。
+您的 CSV 数据集必须有两列：`id`和`target`。

@@ -1,6 +1,6 @@
 # 接口: ImageClassificationOutputValue
 
-> 原始文本: [https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageClassificationOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageClassificationOutputValue)
+> 原始文本: [`huggingface.co/docs/huggingface.js/inference/interfaces/ImageClassificationOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageClassificationOutputValue)
 
 ## 属性
 

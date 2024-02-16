@@ -1,6 +1,6 @@
 # 接口：RepoId
 
-> 原文：[https://huggingface.co/docs/huggingface.js/hub/interfaces/RepoId](https://huggingface.co/docs/huggingface.js/hub/interfaces/RepoId)
+> 原文：[`huggingface.co/docs/huggingface.js/hub/interfaces/RepoId`](https://huggingface.co/docs/huggingface.js/hub/interfaces/RepoId)
 
 ## 属性
 
@@ -16,7 +16,7 @@
 
 ### 类型
 
-• `type`: [`RepoType`](../modules#repotype)
+• `type`: `RepoType`
 
 #### 定义在
 

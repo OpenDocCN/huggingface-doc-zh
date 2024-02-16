@@ -1,6 +1,6 @@
 # 接口：TranslationOutputValue
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/TranslationOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/TranslationOutputValue)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/TranslationOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/TranslationOutputValue)
 
 ## 属性
 

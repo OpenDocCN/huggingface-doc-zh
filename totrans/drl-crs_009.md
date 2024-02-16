@@ -1,6 +1,6 @@
 # 任务类型
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit1/tasks](https://huggingface.co/learn/deep-rl-course/unit1/tasks)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit1/tasks`](https://huggingface.co/learn/deep-rl-course/unit1/tasks)
 
 任务是强化学习问题的一个**实例**。我们可以有两种类型的任务：**情节性**和**持续性**。
 
@@ -10,7 +10,7 @@
 
 例如，想想超级马里奥兄弟：一个情节从新的马里奥关卡开始，直到**你被杀死或到达关卡的结尾为止。**
 
-![马里奥](../Images/f7007613a2e88444f687ee5cdbd82e16.png)
+![马里奥](img/f7007613a2e88444f687ee5cdbd82e16.png)
 
 开始一个新的情节。
 
@@ -20,8 +20,8 @@
 
 例如，一个进行自动股票交易的代理。对于这个任务，没有起始点和终止状态。**代理会一直运行，直到我们决定停止它。**
 
-![股市](../Images/4c47ce3cffa94c15878140fc06b53695.png)
+![股市](img/4c47ce3cffa94c15878140fc06b53695.png)
 
 回顾一下：
 
-![任务回顾](../Images/28c627e993c1e15ed3cc6270a0dd14e1.png)
+![任务回顾](img/28c627e993c1e15ed3cc6270a0dd14e1.png)

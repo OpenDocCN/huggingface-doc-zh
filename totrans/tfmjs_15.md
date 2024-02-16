@@ -1,12 +1,12 @@
-# 在Node.js中进行服务器端音频处理
+# 在 Node.js 中进行服务器端音频处理
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/guides/node-audio-processing](https://huggingface.co/docs/transformers.js/guides/node-audio-processing)
+> 原始文本：[`huggingface.co/docs/transformers.js/guides/node-audio-processing`](https://huggingface.co/docs/transformers.js/guides/node-audio-processing)
 
-在Web上编写代码的一个主要好处是您可以访问现代浏览器中提供的众多API。不幸的是，在编写服务器端代码时，我们无法享受到这样的便利，因此我们必须找到另一种方法。在本教程中，我们将设计一个简单的Node.js应用程序，该应用程序使用Transformers.js进行语音识别，同时学习如何在服务器上处理音频。
+在 Web 上编写代码的一个主要好处是您可以访问现代浏览器中提供的众多 API。不幸的是，在编写服务器端代码时，我们无法享受到这样的便利，因此我们必须找到另一种方法。在本教程中，我们将设计一个简单的 Node.js 应用程序，该应用程序使用 Transformers.js 进行语音识别，同时学习如何在服务器上处理音频。
 
-我们需要解决的主要问题是[Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)在Node.js中不可用，这意味着我们无法使用[`AudioContext`](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext)类来处理音频。因此，我们需要安装第三方库来获取原始音频数据。在本例中，我们只考虑`.wav`文件，但相同的原则也适用于其他音频格式。
+我们需要解决的主要问题是[Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)在 Node.js 中不可用，这意味着我们无法使用[`AudioContext`](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext)类来处理音频。因此，我们需要安装第三方库来获取原始音频数据。在本例中，我们只考虑`.wav`文件，但相同的原则也适用于其他音频格式。
 
-本教程将以ES模块的形式编写，但您可以轻松地将其改为使用CommonJS。更多信息，请参阅[node教程](https://huggingface.co/docs/transformers.js/tutorials/node)。
+本教程将以 ES 模块的形式编写，但您可以轻松地将其改为使用 CommonJS。更多信息，请参阅[node 教程](https://huggingface.co/docs/transformers.js/tutorials/node)。
 
 **有用链接：**
 
@@ -22,14 +22,14 @@
 
 ## 入门
 
-让我们从创建一个新的Node.js项目并通过[NPM](https://www.npmjs.com/package/@xenova/transformers)安装Transformers.js开始：
+让我们从创建一个新的 Node.js 项目并通过[NPM](https://www.npmjs.com/package/@xenova/transformers)安装 Transformers.js 开始：
 
 ```py
 npm init -y
 npm i @xenova/transformers
 ```
 
-记得在你的`package.json`中添加`"type": "module"`，以指示你的项目使用ECMAScript模块。
+记得在你的`package.json`中添加`"type": "module"`，以指示你的项目使用 ECMAScript 模块。
 
 接下来，让我们安装[`wavefile`](https://www.npmjs.com/package/wavefile)包，我们将用它来加载`.wav`文件：
 
@@ -46,13 +46,13 @@ import { pipeline } from '@xenova/transformers';
 import wavefile from 'wavefile';
 ```
 
-在本教程中，我们将使用`Xenova/whisper-tiny.en`模型，但请随意从[Hugging Face Hub](https://huggingface.co/models?library=transformers.js&search=whisper)中选择其他whisper模型。让我们创建我们的管道：
+在本教程中，我们将使用`Xenova/whisper-tiny.en`模型，但请随意从[Hugging Face Hub](https://huggingface.co/models?library=transformers.js&search=whisper)中选择其他 whisper 模型。让我们创建我们的管道：
 
 ```py
 let transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
 ```
 
-接下来，让我们加载一个音频文件并将其转换为Transformers.js所需的格式：
+接下来，让我们加载一个音频文件并将其转换为 Transformers.js 所需的格式：
 
 ```py
 // Load audio data
@@ -100,4 +100,4 @@ Execution duration: 0.6460317999720574 seconds
 }
 ```
 
-就是这样！您已成功创建了一个使用Transformers.js进行语音识别的Node.js应用程序。您现在可以将其用作自己应用程序的起点。
+就是这样！您已成功创建了一个使用 Transformers.js 进行语音识别的 Node.js 应用程序。您现在可以将其用作自己应用程序的起点。

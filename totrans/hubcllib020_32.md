@@ -1,14 +1,14 @@
 # 推断
 
-> 原始文本：[https://huggingface.co/docs/huggingface_hub/package_reference/inference_client](https://huggingface.co/docs/huggingface_hub/package_reference/inference_client)
+> 原始文本：[`huggingface.co/docs/huggingface_hub/package_reference/inference_client`](https://huggingface.co/docs/huggingface_hub/package_reference/inference_client)
 
 推断是使用训练好的模型对新数据进行预测的过程。由于这个过程可能需要大量计算资源，运行在专用服务器上可能是一个有趣的选择。`huggingface_hub`库提供了一种简单的方法来调用一个运行托管模型推断的服务。您可以连接到几种服务：
 
-+   [推断API](https://huggingface.co/docs/api-inference/index)：一个允许您在Hugging Face基础设施上加速推断的服务，免费使用。这项服务是一个快速开始、测试不同模型和原型化AI产品的方式。
++   [推断 API](https://huggingface.co/docs/api-inference/index)：一个允许您在 Hugging Face 基础设施上加速推断的服务，免费使用。这项服务是一个快速开始、测试不同模型和原型化 AI 产品的方式。
 
-+   [推断端点](https://huggingface.co/inference-endpoints)：一个产品，可以轻松部署模型到生产环境。推断由Hugging Face在您选择的云提供商上的专用、完全托管的基础设施上运行。
++   [推断端点](https://huggingface.co/inference-endpoints)：一个产品，可以轻松部署模型到生产环境。推断由 Hugging Face 在您选择的云提供商上的专用、完全托管的基础设施上运行。
 
-这些服务可以通过[InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient)对象调用。请参考[此指南](../guides/inference)获取更多关于如何使用它的信息。
+这些服务可以通过 InferenceClient 对象调用。请参考此指南获取更多关于如何使用它的信息。
 
 ## 推断客户端
 
@@ -22,19 +22,19 @@
 
 参数
 
-+   `model` (`str`, `可选`) — 用于进行推断的模型。可以是托管在Hugging Face Hub上的模型ID，例如`bigcode/starcoder`，也可以是指向部署的推断端点的URL。默认为None，此时将自动选择适合任务的推荐模型。
++   `model` (`str`, `可选`) — 用于进行推断的模型。可以是托管在 Hugging Face Hub 上的模型 ID，例如`bigcode/starcoder`，也可以是指向部署的推断端点的 URL。默认为 None，此时将自动选择适合任务的推荐模型。
 
-+   `token` (`str`, *可选*) — Hugging Face token。默认为本地保存的token。如果不想将您的token发送到服务器，请传递`token=False`。
++   `token` (`str`, *可选*) — Hugging Face token。默认为本地保存的 token。如果不想将您的 token 发送到服务器，请传递`token=False`。
 
-+   `timeout` (`float`, `可选`) — 等待服务器响应的最大秒数。在推断API中加载新模型可能需要几分钟。默认为None，意味着会循环直到服务器可用。
++   `timeout` (`float`, `可选`) — 等待服务器响应的最大秒数。在推断 API 中加载新模型可能需要几分钟。默认为 None，意味着会循环直到服务器可用。
 
 +   `headers` (`Dict[str, str]`, `可选`) — 要发送到服务器的额外标头。默认只发送授权和用户代理标头。此字典中的值将覆盖默认值。
 
-+   `cookies` (`Dict[str, str]`, `可选`) — 要发送到服务器的额外cookie。
++   `cookies` (`Dict[str, str]`, `可选`) — 要发送到服务器的额外 cookie。
 
 初始化一个新的推断客户端。
 
-[InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient)旨在提供一个统一的体验来执行推断。该客户端可以无缝地与（免费的）推断API或自托管的推断端点一起使用。
+InferenceClient 旨在提供一个统一的体验来执行推断。该客户端可以无缝地与（免费的）推断 API 或自托管的推断端点一起使用。
 
 #### `audio_classification`
 
@@ -46,9 +46,9 @@
 
 参数
 
-+   `audio` (Union[str, Path, bytes, BinaryIO]) — 要分类的音频内容。可以是原始音频字节、本地音频文件或指向音频文件的URL。
++   `audio` (Union[str, Path, bytes, BinaryIO]) — 要分类的音频内容。可以是原始音频字节、本地音频文件或指向音频文件的 URL。
 
-+   `model` (`str`, *可选*) — 用于音频分类的模型。可以是托管在Hugging Face Hub上的模型ID或指向部署的推断端点的URL。如果未提供，默认将使用音频分类的推荐模型。
++   `model` (`str`, *可选*) — 用于音频分类的模型。可以是托管在 Hugging Face Hub 上的模型 ID 或指向部署的推断端点的 URL。如果未提供，默认将使用音频分类的推荐模型。
 
 返回
 
@@ -58,11 +58,11 @@
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 对提供的音频内容进行音频分类。
 
@@ -85,9 +85,9 @@
 
 参数
 
-+   `audio`（Union[str, Path, bytes, BinaryIO）—要转录的内容。可以是原始音频字节、本地音频文件或音频文件的URL。
++   `audio`（Unionstr, Path, bytes, BinaryIO）—要转录的内容。可以是原始音频字节、本地音频文件或音频文件的 URL。
 
-+   `model`（`str`，*可选*）—用于ASR的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的ASR模型将被使用。
++   `model`（`str`，*可选*）—用于 ASR 的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的 ASR 模型将被使用。
 
 返回
 
@@ -97,13 +97,13 @@ str
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+[InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) —如果模型不可用或请求超时。
++   InferenceTimeoutError —如果模型不可用或请求超时。
 
-+   `HTTPError` —如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` —如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
-对给定音频内容执行自动语音识别（ASR或音频转文本）。
+对给定音频内容执行自动语音识别（ASR 或音频转文本）。
 
 示例：
 
@@ -126,13 +126,13 @@ str
 
 +   `text`（`str`）—对话中用户的最后输入。
 
-+   `generated_responses`（`List[str]`，*可选*）—与模型先前回复对应的字符串列表。默认为None。
++   `generated_responses`（`List[str]`，*可选*）—与模型先前回复对应的字符串列表。默认为 None。
 
-+   `past_user_inputs`（`List[str]`，*可选*）—与用户先前回复对应的字符串列表。应与`generated_responses`的长度相同。默认为None。
++   `past_user_inputs`（`List[str]`，*可选*）—与用户先前回复对应的字符串列表。应与`generated_responses`的长度相同。默认为 None。
 
-+   `parameters`（`Dict[str, Any]`，*可选*）—对话任务的附加参数。默认为None。有关可用参数的更多详细信息，请参考[此页面](https://huggingface.co/docs/api-inference/detailed_parameters#conversational-task)
++   `parameters`（`Dict[str, Any]`，*可选*）—对话任务的附加参数。默认为 None。有关可用参数的更多详细信息，请参考[此页面](https://huggingface.co/docs/api-inference/detailed_parameters#conversational-task)
 
-+   `model`（`str`，*可选*）—用于对话任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的对话模型将被使用。默认为None。
++   `model`（`str`，*可选*）—用于对话任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的对话模型将被使用。默认为 None。
 
 返回
 
@@ -142,13 +142,13 @@ str
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) —如果模型不可用或请求超时。
++   InferenceTimeoutError —如果模型不可用或请求超时。
 
-+   `HTTPError` —如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` —如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
-根据给定的输入文本生成对话响应（即与API聊天）。
+根据给定的输入文本生成对话响应（即与 API 聊天）。
 
 示例：
 
@@ -175,25 +175,25 @@ str
 
 参数
 
-+   `image`（`Union[str, Path, bytes, BinaryIO]`）—上下文的输入图像。可以是原始字节、图像文件或在线图像的URL。
++   `image`（`Union[str, Path, bytes, BinaryIO]`）—上下文的输入图像。可以是原始字节、图像文件或在线图像的 URL。
 
 +   `question`（`str`）—要回答的问题。
 
-+   `model`（`str`，*可选*）—用于文档问答任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的文档问答模型将被使用。默认为None。
++   `model`（`str`，*可选*）—用于文档问答任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的文档问答模型将被使用。默认为 None。
 
 返回
 
 `List[Dict]`
 
-包含预测标签、相关概率、单词ID和页码的字典列表。
+包含预测标签、相关概率、单词 ID 和页码的字典列表。
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) —如果模型不可用或请求超时。
++   InferenceTimeoutError —如果模型不可用或请求超时。
 
-+   `HTTPError` —如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` —如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
 回答文档图像上的问题。
 
@@ -218,21 +218,21 @@ str
 
 +   `text` (`str`) — 要嵌入的文本。
 
-+   `model` (`str`，*可选*) — 用于对话任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的对话模型将被使用。默认为None。
++   `model` (`str`，*可选*) — 用于对话任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的对话模型将被使用。默认为 None。
 
 返回
 
 `np.ndarray`
 
-将输入文本表示为float32 numpy数组的嵌入。
+将输入文本表示为 float32 numpy 数组的嵌入。
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，状态码不是 HTTP 503。
 
 为给定文本生成嵌入。
 
@@ -260,7 +260,7 @@ array([[ 2.424802  ,  2.93384   ,  1.1750331 , ...,  1.240499, -0.13776633, -0.7
 
 +   `text` (`str`) — 要填充的字符串，必须包含[MASK]标记（检查模型卡片以获取掩码的确切名称）。
 
-+   `model` (`str`，*可选*) — 用于填充掩码任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的填充掩码模型将被使用。默认为None。
++   `model` (`str`，*可选*) — 用于填充掩码任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的填充掩码模型将被使用。默认为 None。
 
 返回
 
@@ -270,11 +270,11 @@ array([[ 2.424802  ,  2.93384   ,  1.1750331 , ...,  1.240499, -0.13776633, -0.7
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，状态码不是 HTTP 503。
 
 用缺失的单词（确切地说是标记）填充空白。
 
@@ -304,17 +304,17 @@ Raises
 
 参数
 
-+   `model` (`str`，*可选*) — 要检查状态的模型标识符。如果未提供模型，则将使用与此[InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient)实例关联的模型。只能检查InferenceAPI服务，因此标识符不能是URL。
++   `model` (`str`，*可选*) — 要检查状态的模型标识符。如果未提供模型，则将使用与此 InferenceClient 实例关联的模型。只能检查 InferenceAPI 服务，因此标识符不能是 URL。
 
 返回
 
 `ModelStatus`
 
-包含有关模型状态的ModelStatus数据类的实例：加载、状态、计算类型和框架的信息。
+包含有关模型状态的 ModelStatus 数据类的实例：加载、状态、计算类型和框架的信息。
 
-获取托管在推理API上的模型的状态。
+获取托管在推理 API 上的模型的状态。
 
-当您已经知道要使用哪个模型并想要检查其可用性时，此端点非常有用。如果要发现已部署的模型，您应该使用[list_deployed_models()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.list_deployed_models)。
+当您已经知道要使用哪个模型并想要检查其可用性时，此端点非常有用。如果要发现已部署的模型，您应该使用 list_deployed_models()。
 
 示例：
 
@@ -335,7 +335,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 参数
 
-+   `task` (`str`) — 要获取Hugging Face推荐的模型的任务。所有可用任务可以在[这里](https://huggingface.co/tasks)找到。
++   `task` (`str`) — 要获取 Hugging Face 推荐的模型的任务。所有可用任务可以在[这里](https://huggingface.co/tasks)找到。
 
 返回
 
@@ -347,9 +347,9 @@ Raises
 
 `ValueError`
 
-+   `ValueError` — 如果Hugging Face没有对输入任务的推荐。
++   `ValueError` — 如果 Hugging Face 没有对输入任务的推荐。
 
-获取Hugging Face推荐的输入任务模型。
+获取 Hugging Face 推荐的输入任务模型。
 
 #### `image_classification`
 
@@ -373,9 +373,9 @@ Raises
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
@@ -412,9 +412,9 @@ Raises
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
@@ -465,9 +465,9 @@ Raises
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
@@ -494,9 +494,9 @@ Raises
 
 参数
 
-+   `image`（`Union[str，Path，bytes，BinaryIO]`）—要添加标题的输入图像。它可以是原始字节，图像文件或在线图像的URL。
++   `image`（`Union[str，Path，bytes，BinaryIO]`）—要添加标题的输入图像。它可以是原始字节，图像文件或在线图像的 URL。
 
-+   `model`（`str`，*可选*）—用于推断的模型。可以是托管在Hugging Face Hub上的模型ID或部署的推断端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model`（`str`，*可选*）—用于推断的模型。可以是托管在 Hugging Face Hub 上的模型 ID 或部署的推断端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -506,15 +506,15 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) —如果模型不可用或请求超时。
++   InferenceTimeoutError —如果模型不可用或请求超时。
 
-+   `HTTPError`—如果请求失败，并且HTTP错误状态代码不是HTTP 503。
++   `HTTPError`—如果请求失败，并且 HTTP 错误状态代码不是 HTTP 503。
 
 接受输入图像并返回文本。
 
-根据您的用例（图像字幕，光学字符识别（OCR），Pix2Struct等），模型的输出可能会有很大的不同。请查看模型卡片以了解有关模型特定性的更多信息。
+根据您的用例（图像字幕，光学字符识别（OCR），Pix2Struct 等），模型的输出可能会有很大的不同。请查看模型卡片以了解有关模型特定性的更多信息。
 
 示例：
 
@@ -543,13 +543,13 @@ Raises
 
 `Dict[str，List[str]]`
 
-将任务名称映射到模型ID的排序列表的字典。
+将任务名称映射到模型 ID 的排序列表的字典。
 
-列出当前部署在推断API服务上的模型。
+列出当前部署在推断 API 服务上的模型。
 
-此助手按框架检查部署的模型。默认情况下，它将检查支持的四个主要框架，并占托管模型的95％。但是，如果您想要完整的模型列表，可以指定`frameworks="all"`作为输入。或者，如果您事先知道您感兴趣的框架，也可以将搜索限制为该框架（例如`frameworks="text-generation-inference"`）。检查的框架越多，花费的时间就越多。
+此助手按框架检查部署的模型。默认情况下，它将检查支持的四个主要框架，并占托管模型的 95％。但是，如果您想要完整的模型列表，可以指定`frameworks="all"`作为输入。或者，如果您事先知道您感兴趣的框架，也可以将搜索限制为该框架（例如`frameworks="text-generation-inference"`）。检查的框架越多，花费的时间就越多。
 
-此端点主要用于可发现性。如果您已经知道要使用哪个模型并想要检查其可用性，则可以直接使用[get_model_status()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.get_model_status)。
+此端点主要用于可发现性。如果您已经知道要使用哪个模型并想要检查其可用性，则可以直接使用 get_model_status()。
 
 示例：
 
@@ -577,9 +577,9 @@ Raises
 
 参数
 
-+   `image`（`Union[str，Path，bytes，BinaryIO]`）—要在其上检测对象的图像。它可以是原始字节，图像文件或在线图像的URL。
++   `image`（`Union[str，Path，bytes，BinaryIO]`）—要在其上检测对象的图像。它可以是原始字节，图像文件或在线图像的 URL。
 
-+   `model`（`str`，*可选*）—用于对象检测的模型。可以是托管在Hugging Face Hub上的模型ID或部署的推断端点的URL。如果未提供，默认推荐的对象检测模型（DETR）将被使用。
++   `model`（`str`，*可选*）—用于对象检测的模型。可以是托管在 Hugging Face Hub 上的模型 ID 或部署的推断端点的 URL。如果未提供，默认推荐的对象检测模型（DETR）将被使用。
 
 返回
 
@@ -589,11 +589,11 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`或`ValueError`
+InferenceTimeoutError 或`HTTPError`或`ValueError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) —如果模型不可用或请求超时。
++   InferenceTimeoutError —如果模型不可用或请求超时。
 
-+   `HTTPError`—如果请求失败，并且HTTP错误状态代码不是HTTP 503。
++   `HTTPError`—如果请求失败，并且 HTTP 错误状态代码不是 HTTP 503。
 
 +   `ValueError`—如果请求输出不是列表。
 
@@ -620,15 +620,15 @@ Raises
 
 Parameters
 
-+   `json` (`Union[str, Dict, List]`, *optional*) — 要发送到请求体中的JSON数据，针对每个任务特定。默认为None。
++   `json` (`Union[str, Dict, List]`, *optional*) — 要发送到请求体中的 JSON 数据，针对每个任务特定。默认为 None。
 
-+   `data` (`Union[str, Path, bytes, BinaryIO]`, *optional*) — 要发送到请求体中的内容，针对每个任务特定。可以是原始字节、指向已打开文件的指针、本地文件路径或在线资源的URL（图像、音频文件等）。如果同时传递了`json`和`data`，则`data`将优先。必须提供至少`json`或`data`。默认为None。
++   `data` (`Union[str, Path, bytes, BinaryIO]`, *optional*) — 要发送到请求体中的内容，针对每个任务特定。可以是原始字节、指向已打开文件的指针、本地文件路径或在线资源的 URL（图像、音频文件等）。如果同时传递了`json`和`data`，则`data`将优先。必须提供至少`json`或`data`。默认为 None。
 
-+   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是指向部署的推理端点的URL。将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是指向部署的推理端点的 URL。将覆盖实例级别定义的模型。默认为 None。
 
-+   `task` (`str`, *optional*) — 在推理上执行的任务。所有可用任务可以在[这里](https://huggingface.co/tasks)找到。仅在未提供`model`时才用于默认推荐模型。必须提供至少`model`或`task`。默认为None。
++   `task` (`str`, *optional*) — 在推理上执行的任务。所有可用任务可以在[这里](https://huggingface.co/tasks)找到。仅在未提供`model`时才用于默认推荐模型。必须提供至少`model`或`task`。默认为 None。
 
-+   `stream` (`bool`, *optional*) — 是否迭代流式API。
++   `stream` (`bool`, *optional*) — 是否迭代流式 API。
 
 Returns
 
@@ -638,13 +638,13 @@ bytes
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
-向推理服务器发出POST请求。
+向推理服务器发出 POST 请求。
 
 #### `question_answering`
 
@@ -660,7 +660,7 @@ Parameters
 
 +   `context` (`str`) — 问题的上下文。
 
-+   `model` (`str`) — 用于问答任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是指向部署的推理端点的URL。
++   `model` (`str`) — 用于问答任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是指向部署的推理端点的 URL。
 
 Returns
 
@@ -670,11 +670,11 @@ Returns
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
 从给定文本中检索问题的答案。
 
@@ -701,7 +701,7 @@ Parameters
 
 +   `other_sentences` (`List[str]`) — 要进行比较的句子列表。
 
-+   `model` (`str`, *optional*) — 用于对话任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是指向部署的推理端点的URL。如果未提供，默认将使用推荐的对话模型。默认为None。
++   `model` (`str`, *optional*) — 用于对话任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是指向部署的推理端点的 URL。如果未提供，默认将使用推荐的对话模型。默认为 None。
 
 Returns
 
@@ -711,11 +711,11 @@ Returns
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
 通过比较它们的嵌入来计算句子与其他句子列表之间的语义相似性。
 
@@ -749,7 +749,7 @@ Raises
 
 +   `parameters` (`Dict[str, Any]`, *optional*) — 用于总结的额外参数。查看此 [页面](https://huggingface.co/docs/api-inference/detailed_parameters#summarization-task) 获取更多详细信息。
 
-+   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数会覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数会覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -759,11 +759,11 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 使用指定的模型生成给定文本的摘要。
 
@@ -790,7 +790,7 @@ Raises
 
 +   `query` (`str`) — 您想要询问表格的纯文本查询。
 
-+   `model` (`str`) — 用于表格问题回答任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。
++   `model` (`str`) — 用于表格问题回答任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。
 
 返回
 
@@ -800,11 +800,11 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 从表中给定的信息中检索问题的答案。
 
@@ -831,7 +831,7 @@ Raises
 
 +   `table` (`Dict[str, Any]`) — 用于分类的属性集。
 
-+   `model` (`str`) — 用于表格分类任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。
++   `model` (`str`) — 用于表格分类任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。
 
 返回
 
@@ -841,11 +841,11 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 基于一组属性对目标类别（一组）进行分类。
 
@@ -883,7 +883,7 @@ Raises
 
 +   `table` (`Dict[str, Any]`) — 存储在表中的属性集。用于预测目标的属性可以是数值和分类的。
 
-+   `model` (`str`) — 用于表格回归任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。
++   `model` (`str`) — 用于表格回归任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。
 
 返回
 
@@ -893,11 +893,11 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并返回除HTTP 503以外的HTTP错误状态码。
++   `HTTPError` — 如果请求失败，并返回除 HTTP 503 以外的 HTTP 错误状态码。
 
 在表中给定一组属性/特征，预测数值目标值。
 
@@ -930,7 +930,7 @@ Raises
 
 +   `text` (`str`) — 待分类的字符串。
 
-+   `model` (`str`, *可选*) — 用于文本分类任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，则将使用默认推荐的文本分类模型。默认为None。
++   `model` (`str`, *可选*) — 用于文本分类任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，则将使用默认推荐的文本分类模型。默认为 None。
 
 返回
 
@@ -940,11 +940,11 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并返回除HTTP 503以外的HTTP错误状态码。
++   `HTTPError` — 如果请求失败，并返回除 HTTP 503 以外的 HTTP 错误状态码。
 
 对给定文本执行文本分类（例如情感分析）。
 
@@ -969,39 +969,39 @@ Raises
 
 +   `prompt` (`str`) — 输入文本。
 
-+   `details` (`bool`, *可选*) — 默认情况下，text_generation返回一个字符串。如果要获取详细输出（token、概率、种子、完成原因等），请传递`details=True`。仅适用于在`text-generation-inference`后端上运行的模型。
++   `details` (`bool`, *可选*) — 默认情况下，text_generation 返回一个字符串。如果要获取详细输出（token、概率、种子、完成原因等），请传递`details=True`。仅适用于在`text-generation-inference`后端上运行的模型。
 
-+   `stream` (`bool`, *可选*) — 默认情况下，text_generation返回完整生成的文本。如果要返回token流，请传递`stream=True`。仅适用于在`text-generation-inference`后端上运行的模型。
++   `stream` (`bool`, *可选*) — 默认情况下，text_generation 返回完整生成的文本。如果要返回 token 流，请传递`stream=True`。仅适用于在`text-generation-inference`后端上运行的模型。
 
-+   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数会覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数会覆盖实例级别定义的模型。默认为 None。
 
-+   `do_sample` (`bool`) — 激活logits采样
++   `do_sample` (`bool`) — 激活 logits 采样
 
-+   `max_new_tokens` (`int`) — 生成的token的最大数量
++   `max_new_tokens` (`int`) — 生成的 token 的最大数量
 
-+   `best_of` (`int`) — 生成best_of序列并返回具有最高token对数概率的一个
++   `best_of` (`int`) — 生成 best_of 序列并返回具有最高 token 对数概率的一个
 
-+   `repetition_penalty` (`float`) — 重复惩罚的参数。1.0表示没有惩罚。有关更多详细信息，请参阅[此论文](https://arxiv.org/pdf/1909.05858.pdf)。
++   `repetition_penalty` (`float`) — 重复惩罚的参数。1.0 表示没有惩罚。有关更多详细信息，请参阅[此论文](https://arxiv.org/pdf/1909.05858.pdf)。
 
 +   `return_full_text` (`bool`) — 是否将提示添加到生成的文本之前
 
 +   `seed` (`int`) — 随机采样种子
 
-+   `stop_sequences` (`List[str]`) — 如果生成了`stop_sequences`中的成员，则停止生成token
++   `stop_sequences` (`List[str]`) — 如果生成了`stop_sequences`中的成员，则停止生成 token
 
-+   `temperature` (`float`) — 用于调节logits分布的值。
++   `temperature` (`float`) — 用于调节 logits 分布的值。
 
-+   `top_k` (`int`) — 保留最高概率词汇token的数量以进行top-k过滤。
++   `top_k` (`int`) — 保留最高概率词汇 token 的数量以进行 top-k 过滤。
 
-+   `top_p` (`float`) — 如果设置为 < 1，则仅保留概率相加达到 `top_p` 或更高的最可能token集合用于生成。
++   `top_p` (`float`) — 如果设置为 < 1，则仅保留概率相加达到 `top_p` 或更高的最可能 token 集合用于生成。
 
-+   `truncate` (`int`) — 将输入token截断为给定大小
++   `truncate` (`int`) — 将输入 token 截断为给定大小
 
 +   `typical_p` (`float`) — 典型解码质量。有关更多信息，请参阅[Typical Decoding for Natural Language Generation](https://arxiv.org/abs/2202.00666)。
 
 +   `watermark` (`bool`) — 使用[A Watermark for Large Language Models](https://arxiv.org/abs/2301.10226)进行水印处理
 
-+   `decoder_input_details` (`bool`) — 返回解码器输入token的对数概率和ID。您必须同时设置`details=True`才能考虑。默认为`False`。
++   `decoder_input_details` (`bool`) — 返回解码器输入 token 的对数概率和 ID。您必须同时设置`details=True`才能考虑。默认为`False`。
 
 返回
 
@@ -1013,27 +1013,27 @@ Raises
 
 +   如果`stream=True`和`details=False`，生成的文本将逐个标记返回，作为`Iterable[str]`。
 
-+   如果`stream=False`和`details=True`，生成的文本将以更多细节的形式返回，作为[TextGenerationResponse](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.inference._text_generation.TextGenerationResponse)
++   如果`stream=False`和`details=True`，生成的文本将以更多细节的形式返回，作为 TextGenerationResponse
 
-+   如果`details=True`和`stream=True`，生成的文本将逐个标记返回，作为[TextGenerationStreamResponse](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.inference._text_generation.TextGenerationStreamResponse)的可迭代对象
++   如果`details=True`和`stream=True`，生成的文本将逐个标记返回，作为 TextGenerationStreamResponse 的可迭代对象
 
 引发
 
-`ValidationError` 或 [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+`ValidationError` 或 InferenceTimeoutError 或 `HTTPError`
 
-+   `ValidationError` — 如果输入值无效。不会向服务器发出HTTP调用。
++   `ValidationError` — 如果输入值无效。不会向服务器发出 HTTP 调用。
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 给定提示，生成以下文本。
 
-建议安装Pydantic以验证输入。这样做更好，因为它可以提前失败。
+建议安装 Pydantic 以验证输入。这样做更好，因为它可以提前失败。
 
-API端点应该使用`text-generation-inference`后端（TGI）运行。这个后端是运行大型语言模型的首选解决方案。但是，对于一些较小的模型（例如“gpt2”），仍在使用默认的`transformers` + `api-inference`解决方案。这两种方法具有非常相似的API，但并非完全相同。此方法与两种方法兼容，但某些参数仅适用于`text-generation-inference`。如果忽略了某些参数，将触发警告消息，但进程将继续正确进行。
+API 端点应该使用`text-generation-inference`后端（TGI）运行。这个后端是运行大型语言模型的首选解决方案。但是，对于一些较小的模型（例如“gpt2”），仍在使用默认的`transformers` + `api-inference`解决方案。这两种方法具有非常相似的 API，但并非完全相同。此方法与两种方法兼容，但某些参数仅适用于`text-generation-inference`。如果忽略了某些参数，将触发警告消息，但进程将继续正确进行。
 
-要了解有关TGI项目的更多信息，请参阅[https://github.com/huggingface/text-generation-inference](https://github.com/huggingface/text-generation-inference)。
+要了解有关 TGI 项目的更多信息，请参阅[`github.com/huggingface/text-generation-inference`](https://github.com/huggingface/text-generation-inference)。
 
 示例：
 
@@ -1133,7 +1133,7 @@ TextGenerationStreamResponse(token=Token(
 
 +   `guidance_scale` (`float`, *可选*) — 更高的引导比例鼓励生成与文本`prompt`密切相关的图像，通常以降低图像质量为代价。
 
-+   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -1143,11 +1143,11 @@ TextGenerationStreamResponse(token=Token(
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 根据给定文本使用指定模型生成图像。
 
@@ -1182,7 +1182,7 @@ Parameters
 
 +   `text` (`str`) — 要合成的文本。
 
-+   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 Returns
 
@@ -1192,11 +1192,11 @@ Returns
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 错误状态码不是 HTTP 503。
 
 合成一个发音给定文本的声音的音频。
 
@@ -1223,7 +1223,7 @@ Parameters
 
 +   `text` (`str`) — 要分类的字符串。
 
-+   `model` (`str`, *optional*) — 用于标记分类任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，则将使用默认推荐的标记分类模型。默认为None。
++   `model` (`str`, *optional*) — 用于标记分类任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，则将使用默认推荐的标记分类模型。默认为 None。
 
 Returns
 
@@ -1233,11 +1233,11 @@ Returns
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError`
+InferenceTimeoutError 或 `HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 错误状态码不是 HTTP 503。
 
 对给定文本执行标记分类。通常用于句子解析，无论是语法还是命名实体识别（NER），以理解文本中包含的关键字。
 
@@ -1271,7 +1271,7 @@ Parameters
 
 +   `text` (`str`) — 要翻译的字符串。
 
-+   `model` (`str`, *optional*) — 用于翻译任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，则将使用默认推荐的翻译模型。默认为None。
++   `model` (`str`, *optional*) — 用于翻译任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，则将使用默认推荐的翻译模型。默认为 None。
 
 +   `src_lang` (`str`, *optional*) — 翻译任务的源语言，即输入语言。不能在没有`tgt_lang`的情况下传递。
 
@@ -1285,17 +1285,17 @@ Returns
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `HTTPError` 或 `ValueError`
+InferenceTimeoutError 或 `HTTPError` 或 `ValueError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP错误状态码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 错误状态码不是 HTTP 503。
 
 +   `ValueError` — 如果只提供了`src_lang`和`tgt_lang`参数中的一个。
 
 将文本从一种语言转换为另一种语言。
 
-查看[https://huggingface.co/tasks/translation](https://huggingface.co/tasks/translation)以获取有关如何为特定用例选择最佳模型的更多信息。源语言和目标语言通常取决于模型。但是，可以为某些模型指定源语言和目标语言。如果您正在使用这些模型之一，可以使用`src_lang`和`tgt_lang`参数传递相关信息。您可以在模型卡中找到这些信息。
+查看[`huggingface.co/tasks/translation`](https://huggingface.co/tasks/translation)以获取有关如何为特定用例选择最佳模型的更多信息。源语言和目标语言通常取决于模型。但是，可以为某些模型指定源语言和目标语言。如果您正在使用这些模型之一，可以使用`src_lang`和`tgt_lang`参数传递相关信息。您可以在模型卡中找到这些信息。
 
 示例：
 
@@ -1325,11 +1325,11 @@ Raises
 
 参数
 
-+   `image` (`Union[str, Path, bytes, BinaryIO]`) — 上下文的输入图像。可以是原始字节、图像文件或在线图像的URL。
++   `image` (`Union[str, Path, bytes, BinaryIO]`) — 上下文的输入图像。可以是原始字节、图像文件或在线图像的 URL。
 
 +   `question` (`str`) — 要回答的问题。
 
-+   `model` (`str`, *可选*) — 用于视觉问答任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的视觉问答模型将被使用。默认为None。
++   `model` (`str`, *可选*) — 用于视觉问答任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的视觉问答模型将被使用。默认为 None。
 
 返回
 
@@ -1343,7 +1343,7 @@ Raises
 
 +   `InferenceTimeoutError` — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
 基于图像回答开放式问题。
 
@@ -1371,11 +1371,11 @@ Raises
 
 +   `text` (`str`) — 要分类的输入文本。
 
-+   `labels` (`List[str]`) — 字符串可能标签的列表。必须至少有2个标签。
++   `labels` (`List[str]`) — 字符串可能标签的列表。必须至少有 2 个标签。
 
-+   `multi_label` (`bool`) — 如果类别可以重叠，则设置为True。
++   `multi_label` (`bool`) — 如果类别可以重叠，则设置为 True。
 
-+   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -1385,11 +1385,11 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
 提供一个文本和一组候选标签作为输入，对输入文本进行分类。
 
@@ -1432,11 +1432,11 @@ Raises
 
 参数
 
-+   `image` (`Union[str, Path, bytes, BinaryIO]`) — 输入图像以进行描述。可以是原始字节、图像文件或在线图像的URL。
++   `image` (`Union[str, Path, bytes, BinaryIO]`) — 输入图像以进行描述。可以是原始字节、图像文件或在线图像的 URL。
 
-+   `labels` (`List[str]`) — 字符串可能标签的列表。必须至少有2个标签。
++   `labels` (`List[str]`) — 字符串可能标签的列表。必须至少有 2 个标签。
 
-+   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -1446,11 +1446,11 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`HTTPError`
+InferenceTimeoutError 或`HTTPError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `HTTPError` — 如果请求失败，并且HTTP状态代码不是HTTP 503。
++   `HTTPError` — 如果请求失败，并且 HTTP 状态代码不是 HTTP 503。
 
 提供输入图像和文本标签以预测图像的文本标签。
 
@@ -1487,19 +1487,19 @@ pip install --upgrade huggingface_hub[inference]
 
 参数
 
-+   `model` (`str`, `optional`) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，例如`bigcode/starcoder`，也可以是部署的推理端点的URL。默认为None，此时将自动选择任务的推荐模型。
++   `model` (`str`, `optional`) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，例如`bigcode/starcoder`，也可以是部署的推理端点的 URL。默认为 None，此时将自动选择任务的推荐模型。
 
-+   `token` (`str`, *optional*) — Hugging Face令牌。将默认使用本地保存的令牌。如果不想将令牌发送到服务器，请传递`token=False`。
++   `token` (`str`, *optional*) — Hugging Face 令牌。将默认使用本地保存的令牌。如果不想将令牌发送到服务器，请传递`token=False`。
 
-+   `timeout` (`float`, `optional`) — 等待服务器响应的最大秒数。在推理API中加载新模型可能需要几分钟。默认为None，表示会循环直到服务器可用。
++   `timeout` (`float`, `optional`) — 等待服务器响应的最大秒数。在推理 API 中加载新模型可能需要几分钟。默认为 None，表示会循环直到服务器可用。
 
 +   `headers` (`Dict[str, str]`, `optional`) — 要发送到服务器的额外标头。默认情况下，只发送授权和用户代理标头。此字典中的值将覆盖默认值。
 
-+   `cookies` (`Dict[str, str]`, `optional`) — 要发送到服务器的额外cookie。
++   `cookies` (`Dict[str, str]`, `optional`) — 要发送到服务器的额外 cookie。
 
 初始化一个新的推理客户端。
 
-[InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient)旨在提供执行推理的统一体验。该客户端可以无缝地与（免费的）推理API或自托管的推理端点一起使用。
+InferenceClient 旨在提供执行推理的统一体验。该客户端可以无缝地与（免费的）推理 API 或自托管的推理端点一起使用。
 
 #### `audio_classification`
 
@@ -1511,9 +1511,9 @@ pip install --upgrade huggingface_hub[inference]
 
 参数
 
-+   `audio` (Union[str, Path, bytes, BinaryIO]) — 要分类的音频内容。可以是原始音频字节、本地音频文件或指向音频文件的URL。
++   `audio` (Union[str, Path, bytes, BinaryIO]) — 要分类的音频内容。可以是原始音频字节、本地音频文件或指向音频文件的 URL。
 
-+   `model` (`str`, *optional*) — 用于音频分类的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，则将使用默认推荐的音频分类模型。
++   `model` (`str`, *optional*) — 用于音频分类的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，则将使用默认推荐的音频分类模型。
 
 返回
 
@@ -1523,11 +1523,11 @@ pip install --upgrade huggingface_hub[inference]
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`aiohttp.ClientResponseError`
+InferenceTimeoutError 或`aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，并且HTTP错误状态代码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，并且 HTTP 错误状态代码不是 HTTP 503。
 
 对提供的音频内容执行音频分类。
 
@@ -1551,9 +1551,9 @@ Raises
 
 参数
 
-+   `audio` (Union[str, Path, bytes, BinaryIO]) — 要转录的内容。可以是原始音频字节、本地音频文件或音频文件的URL。
++   `audio` (Union[str, Path, bytes, BinaryIO]) — 要转录的内容。可以是原始音频字节、本地音频文件或音频文件的 URL。
 
-+   `model` (`str`, *optional*) — 用于ASR的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，则将使用默认推荐的ASR模型。
++   `model` (`str`, *optional*) — 用于 ASR 的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，则将使用默认推荐的 ASR 模型。
 
 返回
 
@@ -1563,13 +1563,13 @@ str
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`aiohttp.ClientResponseError`
+InferenceTimeoutError 或`aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
-对给定音频内容执行自动语音识别（ASR或音频转文本）。
+对给定音频内容执行自动语音识别（ASR 或音频转文本）。
 
 示例：
 
@@ -1593,13 +1593,13 @@ Raises
 
 +   `text` (`str`) — 用户在对话中的最后输入。
 
-+   `generated_responses` (`List[str]`, *可选*) — 与模型先前回复对应的字符串列表。默认为None。
++   `generated_responses` (`List[str]`, *可选*) — 与模型先前回复对应的字符串列表。默认为 None。
 
-+   `past_user_inputs` (`List[str]`, *可选*) — 与用户先前回复对应的字符串列表。应与`generated_responses`长度相同。默认为None。
++   `past_user_inputs` (`List[str]`, *可选*) — 与用户先前回复对应的字符串列表。应与`generated_responses`长度相同。默认为 None。
 
-+   `parameters` (`Dict[str, Any]`, *可选*) — 对话任务的其他参数。默认为None。有关可用参数的更多详细信息，请参考[此页面](https://huggingface.co/docs/api-inference/detailed_parameters#conversational-task)
++   `parameters` (`Dict[str, Any]`, *可选*) — 对话任务的其他参数。默认为 None。有关可用参数的更多详细信息，请参考[此页面](https://huggingface.co/docs/api-inference/detailed_parameters#conversational-task)
 
-+   `model` (`str`, *可选*) — 用于对话任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的对话模型将被使用。默认为None。
++   `model` (`str`, *可选*) — 用于对话任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的对话模型将被使用。默认为 None。
 
 返回
 
@@ -1609,13 +1609,13 @@ Raises
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
-根据给定的输入文本生成对话响应（即与API聊天）。
+根据给定的输入文本生成对话响应（即与 API 聊天）。
 
 示例：
 
@@ -1643,25 +1643,25 @@ Raises
 
 参数
 
-+   `image` (`Union[str, Path, bytes, BinaryIO]`) — 上下文的输入图像。可以是原始字节、图像文件或在线图像的URL。
++   `image` (`Union[str, Path, bytes, BinaryIO]`) — 上下文的输入图像。可以是原始字节、图像文件或在线图像的 URL。
 
 +   `question` (`str`) — 要回答的问题。
 
-+   `model` (`str`, *可选*) — 用于文档问答任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的文档问答模型将被使用。默认为None。
++   `model` (`str`, *可选*) — 用于文档问答任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的文档问答模型将被使用。默认为 None。
 
 返回
 
 `List[Dict]`
 
-包含预测标签、相关概率、单词ID和页码的字典列表。
+包含预测标签、相关概率、单词 ID 和页码的字典列表。
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 回答文档图像上的问题。
 
@@ -1687,21 +1687,21 @@ Raises
 
 +   `text` (`str`) — 要嵌入的文本。
 
-+   `model` (`str`, *可选*) — 用于对话任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的对话模型将被使用。默认为None。
++   `model` (`str`, *可选*) — 用于对话任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的对话模型将被使用。默认为 None。
 
 返回
 
 `np.ndarray`
 
-将输入文本表示为float32 numpy数组的嵌入。
+将输入文本表示为 float32 numpy 数组的嵌入。
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
 为给定文本生成嵌入。
 
@@ -1730,7 +1730,7 @@ array([[ 2.424802  ,  2.93384   ,  1.1750331 , ...,  1.240499, -0.13776633, -0.7
 
 +   `text` (`str`) — 要填充的字符串，必须包含[MASK]标记（检查模型卡片以获取掩码的确切名称）。
 
-+   `model` (`str`, *可选*) — 用于填充掩码任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的填充掩码模型将被使用。默认为None。
++   `model` (`str`, *可选*) — 用于填充掩码任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的填充掩码模型将被使用。默认为 None。
 
 返回
 
@@ -1740,11 +1740,11 @@ array([[ 2.424802  ,  2.93384   ,  1.1750331 , ...,  1.240499, -0.13776633, -0.7
 
 抛出异常
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
 用缺失的单词填充空格（确切地说是标记）。
 
@@ -1775,17 +1775,17 @@ array([[ 2.424802  ,  2.93384   ,  1.1750331 , ...,  1.240499, -0.13776633, -0.7
 
 参数
 
-+   `model` (`str`, *可选*) — 要检查状态的模型标识符。如果未提供模型，则将使用与此[InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient)实例关联的模型。只能检查InferenceAPI服务，因此标识符不能是URL。
++   `model` (`str`, *可选*) — 要检查状态的模型标识符。如果未提供模型，则将使用与此 InferenceClient 实例关联的模型。只能检查 InferenceAPI 服务，因此标识符不能是 URL。
 
 返回
 
 `ModelStatus`
 
-包含有关模型状态的ModelStatus数据类的实例：加载、状态、计算类型和框架。
+包含有关模型状态的 ModelStatus 数据类的实例：加载、状态、计算类型和框架。
 
-获取托管在推理API上的模型的状态。
+获取托管在推理 API 上的模型的状态。
 
-当您已经知道要使用哪个模型并想要检查其可用性时，此端点非常有用。如果要发现已部署的模型，您应该使用[list_deployed_models()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.list_deployed_models)。
+当您已经知道要使用哪个模型并想要检查其可用性时，此端点非常有用。如果要发现已部署的模型，您应该使用 list_deployed_models()。
 
 示例：
 
@@ -1807,7 +1807,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 参数
 
-+   `task` (`str`) — Hugging Face推荐的任务。所有可用任务可以在[这里](https://huggingface.co/tasks)找到。
++   `task` (`str`) — Hugging Face 推荐的任务。所有可用任务可以在[这里](https://huggingface.co/tasks)找到。
 
 返回
 
@@ -1819,9 +1819,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 `ValueError`
 
-+   `ValueError` — 如果Hugging Face没有对输入任务的推荐。
++   `ValueError` — 如果 Hugging Face 没有对输入任务的推荐。
 
-获取Hugging Face推荐的用于输入任务的模型。
+获取 Hugging Face 推荐的用于输入任务的模型。
 
 #### `image_classification`
 
@@ -1833,9 +1833,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 参数
 
-+   `image` (`Union[str, Path, bytes, BinaryIO]`) — 要分类的图像。可以是原始字节、图像文件或在线图像的URL。
++   `image` (`Union[str, Path, bytes, BinaryIO]`) — 要分类的图像。可以是原始字节、图像文件或在线图像的 URL。
 
-+   `model` (`str`, *可选*) — 用于图像分类的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的图像分类模型将被使用。
++   `model` (`str`, *可选*) — 用于图像分类的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的图像分类模型将被使用。
 
 返回
 
@@ -1845,9 +1845,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 抛出异常
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 状态码不是 HTTP 503。
 
@@ -1885,9 +1885,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 状态码不是 HTTP 503。
 
@@ -1939,9 +1939,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 状态码不是 HTTP 503。
 
@@ -1969,9 +1969,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 参数
 
-+   `image`（`Union[str，Path，bytes，BinaryIO]`） - 要标注的输入图像。它可以是原始字节，图像文件或在线图像的URL。
++   `image`（`Union[str，Path，bytes，BinaryIO]`） - 要标注的输入图像。它可以是原始字节，图像文件或在线图像的 URL。
 
-+   `model`（`str`，*可选*） - 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID或部署的推理端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model`（`str`，*可选*） - 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID 或部署的推理端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -1985,11 +1985,11 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   推理超时错误 - 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` - 如果请求失败，并且HTTP错误状态代码不是HTTP 503。
++   `aiohttp.ClientResponseError` - 如果请求失败，并且 HTTP 错误状态代码不是 HTTP 503。
 
 接受输入图像并返回文本。
 
-根据您的用例（图像字幕，光学字符识别（OCR），Pix2Struct等），模型的输出可能会有很大不同。请查看模型卡以了解有关模型特定性的更多信息。
+根据您的用例（图像字幕，光学字符识别（OCR），Pix2Struct 等），模型的输出可能会有很大不同。请查看模型卡以了解有关模型特定性的更多信息。
 
 示例：
 
@@ -2019,13 +2019,13 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 `Dict[str，List[str]]`
 
-将任务名称映射到模型ID的排序列表的字典。
+将任务名称映射到模型 ID 的排序列表的字典。
 
-列出当前部署在推理API服务上的模型。
+列出当前部署在推理 API 服务上的模型。
 
-此助手逐个框架检查部署的模型。默认情况下，它将检查支持的四个主要框架，并占托管模型的95％。但是，如果您想要完整的模型列表，可以指定`frameworks="all"`作为输入。或者，如果您事先知道您感兴趣的框架，也可以将搜索限制为此框架（例如，`frameworks="text-generation-inference"`）。检查的框架越多，所需的时间就越长。
+此助手逐个框架检查部署的模型。默认情况下，它将检查支持的四个主要框架，并占托管模型的 95％。但是，如果您想要完整的模型列表，可以指定`frameworks="all"`作为输入。或者，如果您事先知道您感兴趣的框架，也可以将搜索限制为此框架（例如，`frameworks="text-generation-inference"`）。检查的框架越多，所需的时间就越长。
 
-此端点主要用于可发现性。如果您已经知道要使用哪个模型并且要检查其可用性，可以直接使用[get_model_status()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.get_model_status)。
+此端点主要用于可发现性。如果您已经知道要使用哪个模型并且要检查其可用性，可以直接使用 get_model_status()。
 
 示例：
 
@@ -2054,9 +2054,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 参数
 
-+   `image`（`Union[str，Path，bytes，BinaryIO]`） - 要在其上检测对象的图像。它可以是原始字节，图像文件或在线图像的URL。
++   `image`（`Union[str，Path，bytes，BinaryIO]`） - 要在其上检测对象的图像。它可以是原始字节，图像文件或在线图像的 URL。
 
-+   `model`（`str`，*可选*） - 用于对象检测的模型。可以是托管在Hugging Face Hub上的模型ID或部署的推理端点的URL。如果未提供，默认推荐的对象检测模型（DETR）将被使用。
++   `model`（`str`，*可选*） - 用于对象检测的模型。可以是托管在 Hugging Face Hub 上的模型 ID 或部署的推理端点的 URL。如果未提供，默认推荐的对象检测模型（DETR）将被使用。
 
 返回
 
@@ -2070,7 +2070,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   推理超时错误 - 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` - 如果请求失败，并且HTTP错误状态代码不是HTTP 503。
++   `aiohttp.ClientResponseError` - 如果请求失败，并且 HTTP 错误状态代码不是 HTTP 503。
 
 +   `ValueError` - 如果请求输出不是列表。
 
@@ -2116,9 +2116,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
@@ -2148,9 +2148,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
@@ -2190,9 +2190,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
@@ -2229,7 +2229,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   `parameters` (`Dict[str, Any]`, *可选*) — 用于摘要的附加参数。查看此[页面](https://huggingface.co/docs/api-inference/detailed_parameters#summarization-task)获取更多详细信息。
 
-+   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数覆盖了实例级别定义的模型。默认为None。
++   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数覆盖了实例级别定义的模型。默认为 None。
 
 返回
 
@@ -2239,11 +2239,11 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`aiohttp.ClientResponseError`
+InferenceTimeoutError 或`aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 使用指定的模型生成给定文本的摘要。
 
@@ -2271,7 +2271,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   `query` (`str`) — 您想要询问表格的纯文本查询。
 
-+   `model` (`str`) — 用于表-问题回答任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。
++   `model` (`str`) — 用于表-问题回答任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。
 
 返回
 
@@ -2281,11 +2281,11 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`aiohttp.ClientResponseError`
+InferenceTimeoutError 或`aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 从表中给出的信息中检索问题的答案。
 
@@ -2313,7 +2313,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   `table` (`Dict[str, Any]`) — 用于分类的属性集。
 
-+   `model` (`str`) — 用于表格分类任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。
++   `model` (`str`) — 用于表格分类任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。
 
 返回
 
@@ -2323,11 +2323,11 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`aiohttp.ClientResponseError`
+InferenceTimeoutError 或`aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 基于一组属性对目标类别（一组）进行分类。
 
@@ -2366,7 +2366,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   `table` (`Dict[str, Any]`) — 存储在表中的属性集。用于预测目标的属性可以是数值和分类的。
 
-+   `model` (`str`) — 用于表格回归任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。
++   `model` (`str`) — 用于表格回归任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。
 
 返回
 
@@ -2376,11 +2376,11 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
 在表中给定一组属性/特征时预测数值目标值。
 
@@ -2414,7 +2414,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   `text` (`str`) — 要分类的字符串。
 
-+   `model` (`str`, *可选*) — 用于文本分类任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，则将使用默认推荐的文本分类模型。默认为None。
++   `model` (`str`, *可选*) — 用于文本分类任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，则将使用默认推荐的文本分类模型。默认为 None。
 
 返回
 
@@ -2424,11 +2424,11 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
 对给定文本执行文本分类（例如情感分析）。
 
@@ -2454,19 +2454,19 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   `prompt` (`str`) — 输入文本。
 
-+   `details` (`bool`, *可选*) — 默认情况下，text_generation返回一个字符串。如果要获得详细输出（令牌、概率、种子、完成原因等），请传递`details=True`。仅适用于在`text-generation-inference`后端上运行的模型。
++   `details` (`bool`, *可选*) — 默认情况下，text_generation 返回一个字符串。如果要获得详细输出（令牌、概率、种子、完成原因等），请传递`details=True`。仅适用于在`text-generation-inference`后端上运行的模型。
 
-+   `stream` (`bool`, *可选*) — 默认情况下，text_generation返回完整生成的文本。如果要返回令牌流，请传递`stream=True`。仅适用于在`text-generation-inference`后端上运行的模型。
++   `stream` (`bool`, *可选*) — 默认情况下，text_generation 返回完整生成的文本。如果要返回令牌流，请传递`stream=True`。仅适用于在`text-generation-inference`后端上运行的模型。
 
-+   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *可选*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
-+   `do_sample` (`bool`) — 激活logits抽样
++   `do_sample` (`bool`) — 激活 logits 抽样
 
 +   `max_new_tokens` (`int`) — 生成的令牌的最大数量
 
-+   `best_of` (`int`) — 生成best_of序列并返回具有最高令牌对数概率的序列
++   `best_of` (`int`) — 生成 best_of 序列并返回具有最高令牌对数概率的序列
 
-+   `repetition_penalty` (`float`) — 重复惩罚的参数。1.0表示没有惩罚。有关更多详细信息，请参阅[此论文](https://arxiv.org/pdf/1909.05858.pdf)。
++   `repetition_penalty` (`float`) — 重复惩罚的参数。1.0 表示没有惩罚。有关更多详细信息，请参阅[此论文](https://arxiv.org/pdf/1909.05858.pdf)。
 
 +   `return_full_text` (`bool`) — 是否将提示添加到生成的文本之前
 
@@ -2474,9 +2474,9 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   `stop_sequences` (`List[str]`) — 如果生成了`stop_sequences`的成员，则停止生成令牌
 
-+   `temperature` (`float`) — 用于调节logits分布的值。
++   `temperature` (`float`) — 用于调节 logits 分布的值。
 
-+   `top_k` (`int`) — 保留最高概率词汇标记的数量以进行top-k过滤。
++   `top_k` (`int`) — 保留最高概率词汇标记的数量以进行 top-k 过滤。
 
 +   `top_p` (`float`) — 如果设置为<1，则仅保留概率相加达到`top_p`或更高的最小一组最有可能的令牌进行生成。
 
@@ -2486,7 +2486,7 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   `watermark` (`bool`) — 使用[A Watermark for Large Language Models](https://arxiv.org/abs/2301.10226)进行水印处理。
 
-+   `decoder_input_details` (`bool`) — 返回解码器输入令牌的对数概率和id。您必须同时设置`details=True`才能考虑。默认为`False`。
++   `decoder_input_details` (`bool`) — 返回解码器输入令牌的对数概率和 id。您必须同时设置`details=True`才能考虑。默认为`False`。
 
 返回
 
@@ -2498,27 +2498,27 @@ ModelStatus(loaded=True, state='Loaded', compute_type='gpu', framework='text-gen
 
 +   如果`stream=True`和`details=False`，生成的文本将逐令牌返回，作为`Iterable[str]`
 
-+   如果`stream=False`和`details=True`，生成的文本将以更多细节的形式返回，作为[TextGenerationResponse](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.inference._text_generation.TextGenerationResponse)
++   如果`stream=False`和`details=True`，生成的文本将以更多细节的形式返回，作为 TextGenerationResponse
 
-+   如果`details=True`和`stream=True`，生成的文本将逐令牌返回，作为[TextGenerationStreamResponse](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.inference._text_generation.TextGenerationStreamResponse)的可迭代对象
++   如果`details=True`和`stream=True`，生成的文本将逐令牌返回，作为 TextGenerationStreamResponse 的可迭代对象
 
 Raises
 
-`ValidationError`或[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`aiohttp.ClientResponseError`
+`ValidationError`或 InferenceTimeoutError 或`aiohttp.ClientResponseError`
 
-+   `ValidationError` — 如果输入值无效。不会向服务器发出HTTP调用。
++   `ValidationError` — 如果输入值无效。不会向服务器发出 HTTP 调用。
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，返回的HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 错误状态码不是 HTTP 503。
 
 给定提示，生成以下文本。
 
-建议安装Pydantic以验证输入。这是首选的，因为它可以提前失败。
+建议安装 Pydantic 以验证输入。这是首选的，因为它可以提前失败。
 
-API端点应该使用`text-generation-inference`后端（TGI）。这个后端是运行大型语言模型的首选解决方案。然而，对于一些较小的模型（例如“gpt2”），仍在使用默认的`transformers` + `api-inference`解决方案。这两种方法具有非常相似的API，但并非完全相同。这种方法与两种方法兼容，但某些参数仅适用于`text-generation-inference`。如果某些参数被忽略，将触发警告消息，但流程将继续正确进行。
+API 端点应该使用`text-generation-inference`后端（TGI）。这个后端是运行大型语言模型的首选解决方案。然而，对于一些较小的模型（例如“gpt2”），仍在使用默认的`transformers` + `api-inference`解决方案。这两种方法具有非常相似的 API，但并非完全相同。这种方法与两种方法兼容，但某些参数仅适用于`text-generation-inference`。如果某些参数被忽略，将触发警告消息，但流程将继续正确进行。
 
-要了解有关TGI项目的更多信息，请参阅[https://github.com/huggingface/text-generation-inference](https://github.com/huggingface/text-generation-inference)。
+要了解有关 TGI 项目的更多信息，请参阅[`github.com/huggingface/text-generation-inference`](https://github.com/huggingface/text-generation-inference)。
 
 示例：
 
@@ -2619,7 +2619,7 @@ TextGenerationStreamResponse(token=Token(
 
 +   `guidance_scale` (`float`, *可选*) — 更高的指导比例鼓励生成与文本`prompt`密切相关的图像，通常以降低图像质量为代价。
 
-+   `model` (`str`, *可选*) — 用于推断的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推断端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *可选*) — 用于推断的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推断端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -2629,9 +2629,9 @@ TextGenerationStreamResponse(token=Token(
 
 Raises
 
-[推理超时错误](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+推理超时错误 或 `aiohttp.ClientResponseError`
 
-+   [推理超时错误](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   推理超时错误 — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
@@ -2679,9 +2679,9 @@ Raises
 
 引发
 
-[推理超时错误](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+推理超时错误 或 `aiohttp.ClientResponseError`
 
-+   [推理超时错误](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   推理超时错误 — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
@@ -2721,9 +2721,9 @@ Raises
 
 引发
 
-[推理超时错误](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+推理超时错误 或 `aiohttp.ClientResponseError`
 
-+   [推理超时错误](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   推理超时错误 — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
@@ -2774,17 +2774,17 @@ Raises
 
 引发
 
-[推理超时错误](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError` 或 `ValueError`
+推理超时错误 或 `aiohttp.ClientResponseError` 或 `ValueError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
 +   `ValueError` — 如果只提供了`src_lang`和`tgt_lang`参数中的一个。
 
 将文本从一种语言转换为另一种语言。
 
-查看[https://huggingface.co/tasks/translation](https://huggingface.co/tasks/translation)以获取有关如何为特定用例选择最佳模型的更多信息。源语言和目标语言通常取决于模型。但是，对于某些模型，可以指定源语言和目标语言。如果您正在使用这些模型之一，可以使用`src_lang`和`tgt_lang`参数传递相关信息。您可以在模型卡中找到这些信息。
+查看[`huggingface.co/tasks/translation`](https://huggingface.co/tasks/translation)以获取有关如何为特定用例选择最佳模型的更多信息。源语言和目标语言通常取决于模型。但是，对于某些模型，可以指定源语言和目标语言。如果您正在使用这些模型之一，可以使用`src_lang`和`tgt_lang`参数传递相关信息。您可以在模型卡中找到这些信息。
 
 示例：
 
@@ -2815,11 +2815,11 @@ Raises
 
 参数
 
-+   `image` (`Union[str, Path, bytes, BinaryIO]`) — 上下文的输入图像。可以是原始字节、图像文件或在线图像的URL。
++   `image` (`Union[str, Path, bytes, BinaryIO]`) — 上下文的输入图像。可以是原始字节、图像文件或在线图像的 URL。
 
 +   `question` (`str`) — 要回答的问题。
 
-+   `model` (`str`, *optional*) — 用于视觉问答任务的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。如果未提供，默认推荐的视觉问答模型将被使用。默认为None。
++   `model` (`str`, *optional*) — 用于视觉问答任务的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。如果未提供，默认推荐的视觉问答模型将被使用。默认为 None。
 
 返回
 
@@ -2833,7 +2833,7 @@ Raises
 
 +   `InferenceTimeoutError` — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
 基于图像回答开放性问题。
 
@@ -2862,11 +2862,11 @@ Raises
 
 +   `text` (`str`) — 输入要分类的文本。
 
-+   `labels` (`List[str]`) — 字符串可能标签的列表。必须至少有2个标签。
++   `labels` (`List[str]`) — 字符串可能标签的列表。必须至少有 2 个标签。
 
-+   `multi_label` (`bool`) — 如果类别可以重叠，则设置为True。
++   `multi_label` (`bool`) — 如果类别可以重叠，则设置为 True。
 
-+   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -2876,11 +2876,11 @@ Raises
 
 引发
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError)或`aiohttp.ClientResponseError`
+InferenceTimeoutError 或`aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
-+   `aiohttp.ClientResponseError` — 如果请求失败，HTTP错误状态码不是HTTP 503。
++   `aiohttp.ClientResponseError` — 如果请求失败，HTTP 错误状态码不是 HTTP 503。
 
 将文本和一组候选标签作为输入，对输入文本进行分类。
 
@@ -2924,11 +2924,11 @@ Raises
 
 参数
 
-+   `image` (`Union[str, Path, bytes, BinaryIO]`) — 要加注的输入图像。可以是原始字节、图像文件或在线图像的URL。
++   `image` (`Union[str, Path, bytes, BinaryIO]`) — 要加注的输入图像。可以是原始字节、图像文件或在线图像的 URL。
 
-+   `labels` (`List[str]`) — 字符串可能标签的列表。必须至少有2个标签。
++   `labels` (`List[str]`) — 字符串可能标签的列表。必须至少有 2 个标签。
 
-+   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在Hugging Face Hub上的模型ID，也可以是部署的推理端点的URL。此参数将覆盖实例级别定义的模型。默认为None。
++   `model` (`str`, *optional*) — 用于推理的模型。可以是托管在 Hugging Face Hub 上的模型 ID，也可以是部署的推理端点的 URL。此参数将覆盖实例级别定义的模型。默认为 None。
 
 返回
 
@@ -2938,9 +2938,9 @@ Raises
 
 Raises
 
-[InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) 或 `aiohttp.ClientResponseError`
+InferenceTimeoutError 或 `aiohttp.ClientResponseError`
 
-+   [InferenceTimeoutError](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceTimeoutError) — 如果模型不可用或请求超时。
++   InferenceTimeoutError — 如果模型不可用或请求超时。
 
 +   `aiohttp.ClientResponseError` — 如果请求失败，返回的 HTTP 状态码不是 HTTP 503。
 
@@ -2992,7 +2992,7 @@ Raises
 
 +   `score` (`float`) — 模型预测的标签的分数。
 
-包含 [audio_classification()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.audio_classification) 和 [image_classification()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.image_classification) 任务的输出的字典。
+包含 audio_classification() 和 image_classification() 任务的输出的字典。
 
 ### ConversationalOutputConversation
 
@@ -3010,7 +3010,7 @@ Raises
 
 +   `past_user_inputs` (`List[str]`) — 用户的输入列表。必须与 `generated_responses` 的长度相同。
 
-包含 [conversational()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.conversational) 任务的“对话”部分的字典。
+包含 conversational() 任务的“对话”部分的字典。
 
 ### ConversationalOutput
 
@@ -3030,7 +3030,7 @@ Raises
 
 +   `warnings` (`List[str]`) — 与过程相关的警告列表。
 
-包含 [conversational()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.conversational) 任务的输出的字典。
+包含 conversational() 任务的输出的字典。
 
 ### ImageSegmentationOutput
 
@@ -3050,7 +3050,7 @@ Raises
 
 +   `score` (`float`) — 与此掩码的标签相关联的分数。
 
-包含有关 [image_segmentation()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.image_segmentation) 任务的信息的字典。实际上，图像分割返回一个包含每个掩码的 `ImageSegmentationOutput` 的列表。
+包含有关 image_segmentation() 任务的信息的字典。实际上，图像分割返回一个包含每个掩码的 `ImageSegmentationOutput` 的列表。
 
 ### ModelStatus
 
@@ -3064,7 +3064,7 @@ Raises
 
 参数
 
-+   `loaded` (`bool`) — 如果模型当前加载到Hugging Face的推理API中。模型是按需加载的，导致用户的第一个请求需要更长时间。如果模型已加载，您可以确保它处于健康状态。
++   `loaded` (`bool`) — 如果模型当前加载到 Hugging Face 的推理 API 中。模型是按需加载的，导致用户的第一个请求需要更长时间。如果模型已加载，您可以确保它处于健康状态。
 
 +   `state` (`str`) — 模型的当前状态。可以是‘Loaded’、‘Loadable’、‘TooBig’。如果模型的状态是‘Loadable’，那么它不会太大并且有一个支持的后端。当用户首次请求端点上的推理时，可加载的模型会自动加载。这意味着对用户来说加载模型是透明的，只是第一次调用需要更长时间才能完成。
 
@@ -3072,7 +3072,7 @@ Raises
 
 +   `framework` (`str`) — 模型构建时使用的框架名称，如‘transformers’或‘text-generation-inference’。
 
-这个数据类代表了Hugging Face推理API中模型的状态。
+这个数据类代表了 Hugging Face 推理 API 中模型的状态。
 
 ### TokenClassificationOutput
 
@@ -3096,13 +3096,13 @@ Raises
 
 +   `end` (`int`) — 答案所在的字符串偏移量。如果单词出现多次，这个信息很有用。
 
-包含[token_classification()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.token_classification)任务输出的字典。
+包含 token_classification()任务输出的字典。
 
 ### 文本生成类型
 
-[text_generation()](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient.text_generation)任务在`InferenceClient`中有比其他任务更好的支持。特别是，如果安装了此包，用户输入和服务器输出将使用[Pydantic](https://docs.pydantic.dev/latest/)进行验证。因此，我们建议安装它（`pip install pydantic`）以获得更好的用户体验。
+text_generation()任务在`InferenceClient`中有比其他任务更好的支持。特别是，如果安装了此包，用户输入和服务器输出将使用[Pydantic](https://docs.pydantic.dev/latest/)进行验证。因此，我们建议安装它（`pip install pydantic`）以获得更好的用户体验。
 
-以下是用于验证数据的数据类，特别是[TextGenerationParameters](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.inference._text_generation.TextGenerationParameters)（输入）、[TextGenerationResponse](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.inference._text_generation.TextGenerationResponse)（输出）和[TextGenerationStreamResponse](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.inference._text_generation.TextGenerationStreamResponse)（流式输出）。
+以下是用于验证数据的数据类，特别是 TextGenerationParameters（输入）、TextGenerationResponse（输出）和 TextGenerationStreamResponse（流式输出）。
 
 ### `class huggingface_hub.inference._text_generation.TextGenerationParameters`
 
@@ -3114,35 +3114,35 @@ Raises
 
 参数
 
-+   `do_sample` (`bool`, *可选*) — 激活logits抽样。默认为False。
++   `do_sample` (`bool`, *可选*) — 激活 logits 抽样。默认为 False。
 
-+   `max_new_tokens` (`int`, *可选*) — 生成的标记的最大数量。默认为20。
++   `max_new_tokens` (`int`, *可选*) — 生成的标记的最大数量。默认为 20。
 
-+   `repetition_penalty` (`Optional[float]`, *可选*) — 重复惩罚的参数。值为1.0表示没有惩罚。有关更多详细信息，请参阅[此论文](https://arxiv.org/pdf/1909.05858.pdf)。默认为None。
++   `repetition_penalty` (`Optional[float]`, *可选*) — 重复惩罚的参数。值为 1.0 表示没有惩罚。有关更多详细信息，请参阅[此论文](https://arxiv.org/pdf/1909.05858.pdf)。默认为 None。
 
-+   `return_full_text` (`bool`, *可选*) — 是否将提示添加到生成的文本之前。默认为False。
++   `return_full_text` (`bool`, *可选*) — 是否将提示添加到生成的文本之前。默认为 False。
 
 +   `stop` (`List[str]`, *可选*) — 如果生成了`stop_sequences`的成员，则停止生成标记。默认为空列表。
 
-+   `seed` (`Optional[int]`, *可选*) — 随机抽样种子。默认为None。
++   `seed` (`Optional[int]`, *可选*) — 随机抽样种子。默认为 None。
 
-+   `temperature` (`Optional[float]`, *可选*) — 用于调节logits分布的值。默认为None。
++   `temperature` (`Optional[float]`, *可选*) — 用于调节 logits 分布的值。默认为 None。
 
-+   `top_k` (`Optional[int]`, *optional*) — 保留最高概率词汇标记的数量以进行top-k过滤。默认为None。
++   `top_k` (`Optional[int]`, *optional*) — 保留最高概率词汇标记的数量以进行 top-k 过滤。默认为 None。
 
-+   `top_p` (`Optional[float]`, *optional*) — 如果设置为小于1的值，则仅保留概率相加达到`top_p`或更高的最可能标记集。默认为None。
++   `top_p` (`Optional[float]`, *optional*) — 如果设置为小于 1 的值，则仅保留概率相加达到`top_p`或更高的最可能标记集。默认为 None。
 
-+   `truncate` (`Optional[int]`, *optional*) — 将输入标记截断到给定大小。默认为None。
++   `truncate` (`Optional[int]`, *optional*) — 将输入标记截断到给定大小。默认为 None。
 
-+   `typical_p` (`Optional[float]`, *optional*) — 典型解码质量。有关更多信息，请参阅[Typical Decoding for Natural Language Generation](https://arxiv.org/abs/2202.00666)。默认为None。
++   `typical_p` (`Optional[float]`, *optional*) — 典型解码质量。有关更多信息，请参阅[Typical Decoding for Natural Language Generation](https://arxiv.org/abs/2202.00666)。默认为 None。
 
-+   `best_of` (`Optional[int]`, *optional*) — 生成`best_of`序列并返回具有最高标记对数概率的序列。默认为None。
++   `best_of` (`Optional[int]`, *optional*) — 生成`best_of`序列并返回具有最高标记对数概率的序列。默认为 None。
 
-+   `watermark` (`bool`, *optional*) — 使用[A Watermark for Large Language Models](https://arxiv.org/abs/2301.10226)进行水印处理。默认为False。
++   `watermark` (`bool`, *optional*) — 使用[A Watermark for Large Language Models](https://arxiv.org/abs/2301.10226)进行水印处理。默认为 False。
 
-+   `details` (`bool`, *optional*) — 获取生成细节。默认为False。
++   `details` (`bool`, *optional*) — 获取生成细节。默认为 False。
 
-+   `decoder_input_details` (`bool`, *optional*) — 获取解码器输入标记的对数概率和ID。默认为False。
++   `decoder_input_details` (`bool`, *optional*) — 获取解码器输入标记的对数概率和 ID。默认为 False。
 
 文本生成的参数。
 
@@ -3194,7 +3194,7 @@ Raises
 
 参数
 
-+   `id` (`int`) — 模型标记器中的标记ID。
++   `id` (`int`) — 模型标记器中的标记 ID。
 
 +   `text` (`str`) — 标记文本。
 
@@ -3212,7 +3212,7 @@ Raises
 
 参数
 
-+   `id` (`int`) — 模型标记器中的标记ID。
++   `id` (`int`) — 模型标记器中的标记 ID。
 
 +   `text` (`str`) — 标记文本。
 
@@ -3250,7 +3250,7 @@ Raises
 
 +   `seed` (`Optional[int]`) — 如果启用了抽样，则为抽样种子。
 
-+   `prefill`（`List[InputToken]`）— 解码器输入标记。如果`decoder_input_details`为False，则为空。默认为空列表。
++   `prefill`（`List[InputToken]`）— 解码器输入标记。如果`decoder_input_details`为 False，则为空。默认为空列表。
 
 +   `tokens`（`List[Token]`）— 生成的标记。默认为空列表。
 
@@ -3272,7 +3272,7 @@ Raises
 
 +   `seed`（`Optional[int]`）— 如果激活了采样，则为采样种子。
 
-+   `prefill`（`List[InputToken]`，*可选*）— 解码器输入标记。如果`decoder_input_details`为False，则为空。默认为空列表。
++   `prefill`（`List[InputToken]`，*可选*）— 解码器输入标记。如果`decoder_input_details`为 False，则为空。默认为空列表。
 
 +   `tokens`（`List[Token]`）— 生成的标记。默认为空列表。
 
@@ -3300,7 +3300,7 @@ Raises
 
 ## InferenceAPI
 
-`InferenceAPI`是调用推理API的传统方式。该接口更简单，需要知道每个任务的输入参数和输出格式。它还缺乏连接到其他服务（如推理端点或AWS SageMaker）的能力。`InferenceAPI`将很快被弃用，因此我们建议尽可能使用[InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient)。查看[此指南](../guides/inference#legacy-inferenceapi-client)以了解如何从`InferenceAPI`切换到[InferenceClient](/docs/huggingface_hub/v0.20.3/en/package_reference/inference_client#huggingface_hub.InferenceClient)在您的脚本中。
+`InferenceAPI`是调用推理 API 的传统方式。该接口更简单，需要知道每个任务的输入参数和输出格式。它还缺乏连接到其他服务（如推理端点或 AWS SageMaker）的能力。`InferenceAPI`将很快被弃用，因此我们建议尽可能使用 InferenceClient。查看此指南以了解如何从`InferenceAPI`切换到 InferenceClient 在您的脚本中。
 
 ### `class huggingface_hub.InferenceApi`
 
@@ -3310,7 +3310,7 @@ Raises
 ( repo_id: str task: Optional = None token: Optional = None gpu: bool = False )
 ```
 
-用于配置请求并调用HuggingFace推理API的客户端。
+用于配置请求并调用 HuggingFace 推理 API 的客户端。
 
 示例：
 
@@ -3365,15 +3365,15 @@ b'(...)'
 
 参数
 
-+   `repo_id`（`str`）— 仓库的ID（例如*user/bert-base-uncased*）。
++   `repo_id`（`str`）— 仓库的 ID（例如*user/bert-base-uncased*）。
 
 +   `task`（`str`，*可选*，默认值`None`）— 是否强制执行任务，而不是使用存储库中指定的任务。
 
-+   `token`（*str*，*可选*）— 用作HTTP bearer授权的API令牌。这不是身份验证令牌。您可以在[https://huggingface.co/settings/token](https://huggingface.co/settings/token)中找到令牌。或者，您可以使用*HfApi().whoami(token)*找到您的组织和个人API令牌。
++   `token`（*str*，*可选*）— 用作 HTTP bearer 授权的 API 令牌。这不是身份验证令牌。您可以在[`huggingface.co/settings/token`](https://huggingface.co/settings/token)中找到令牌。或者，您可以使用*HfApi().whoami(token)*找到您的组织和个人 API 令牌。
 
-+   `gpu`（*布尔*，*可选*，默认值*False*）— 是否在推理时使用GPU而不是CPU（至少需要启动计划）。
++   `gpu`（*布尔*，*可选*，默认值*False*）— 是否在推理时使用 GPU 而不是 CPU（至少需要启动计划）。
 
-初始化标题和API调用信息。
+初始化标题和 API 调用信息。
 
 #### `__call__`
 
@@ -3391,6 +3391,6 @@ b'(...)'
 
 +   `data`（`bytes`，*可选*）— 请求的字节内容。在这种情况下，将`inputs`和`params`留空。
 
-+   `raw_response` (`bool`, 默认为 `False`) — 如果为 `True`，则返回原始的 `Response` 对象。您可以根据需要解析其内容。默认情况下，内容会被解析为更实用的格式（例如json字典或PIL图像）。
++   `raw_response` (`bool`, 默认为 `False`) — 如果为 `True`，则返回原始的 `Response` 对象。您可以根据需要解析其内容。默认情况下，内容会被解析为更实用的格式（例如 json 字典或 PIL 图像）。
 
-调用推理API。
+调用推理 API。

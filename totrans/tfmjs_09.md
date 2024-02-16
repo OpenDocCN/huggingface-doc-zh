@@ -1,10 +1,10 @@
-# 构建Next.js应用程序
+# 构建 Next.js 应用程序
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/tutorials/next](https://huggingface.co/docs/transformers.js/tutorials/next)
+> 原始文本：[`huggingface.co/docs/transformers.js/tutorials/next`](https://huggingface.co/docs/transformers.js/tutorials/next)
 
-在本教程中，我们将构建一个简单的Next.js应用程序，使用Transformers.js执行情感分析！由于Transformers.js可以在浏览器或Node.js中运行，您可以选择是在[客户端](#client-side-inference)还是[服务器端](#server-side-inference)执行推理（我们将向您展示如何执行两者）。在任何情况下，我们将使用新的[App Router](https://nextjs.org/docs/app)范式进行开发。最终产品将如下所示：
+在本教程中，我们将构建一个简单的 Next.js 应用程序，使用 Transformers.js 执行情感分析！由于 Transformers.js 可以在浏览器或 Node.js 中运行，您可以选择是在客户端还是服务器端执行推理（我们将向您展示如何执行两者）。在任何情况下，我们将使用新的[App Router](https://nextjs.org/docs/app)范式进行开发。最终产品将如下所示：
 
-![演示](../Images/263f9827f1a37479fa322dad0df05303.png)
+![演示](img/263f9827f1a37479fa322dad0df05303.png)
 
 有用链接：
 
@@ -20,9 +20,9 @@
 
 ## 客户端推理
 
-### 步骤1：初始化项目
+### 步骤 1：初始化项目
 
-首先使用`create-next-app`创建一个新的Next.js应用程序：
+首先使用`create-next-app`创建一个新的 Next.js 应用程序：
 
 ```py
 npx create-next-app@latest
@@ -41,9 +41,9 @@ npx create-next-app@latest
 
 ```
 
-### 步骤2：安装和配置Transformers.js
+### 步骤 2：安装和配置 Transformers.js
 
-您可以使用以下命令从[NPM](https://www.npmjs.com/package/@xenova/transformers)安装Transformers.js：
+您可以使用以下命令从[NPM](https://www.npmjs.com/package/@xenova/transformers)安装 Transformers.js：
 
 ```py
 npm i @xenova/transformers
@@ -73,7 +73,7 @@ const nextConfig = {
 module.exports = nextConfig
 ```
 
-接下来，我们将创建一个新的[Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)脚本，我们将在其中放置所有与ML相关的代码。这是为了确保在模型加载和执行推理时不会阻塞主线程。对于此应用程序，我们将使用[`Xenova/distilbert-base-uncased-finetuned-sst-2-english`](https://huggingface.co/Xenova/distilbert-base-uncased-finetuned-sst-2-english)，这是一个在[Stanford Sentiment Treebank](https://huggingface.co/datasets/sst)数据集上微调的约67M参数模型。将以下代码添加到`./src/app/worker.js`中：
+接下来，我们将创建一个新的[Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)脚本，我们将在其中放置所有与 ML 相关的代码。这是为了确保在模型加载和执行推理时不会阻塞主线程。对于此应用程序，我们将使用[`Xenova/distilbert-base-uncased-finetuned-sst-2-english`](https://huggingface.co/Xenova/distilbert-base-uncased-finetuned-sst-2-english)，这是一个在[Stanford Sentiment Treebank](https://huggingface.co/datasets/sst)数据集上微调的约 67M 参数模型。将以下代码添加到`./src/app/worker.js`中：
 
 ```py
 import { pipeline, env } from "@xenova/transformers";
@@ -117,7 +117,7 @@ self.addEventListener('message', async (event) => {
 
 ```
 
-### 步骤3：设计用户界面
+### 步骤 3：设计用户界面
 
 现在我们将修改默认的`./src/app/page.js`文件，以便连接到我们的工作线程。由于我们将只在浏览器中执行推理，我们可以选择使用[`'use client'`指令](https://nextjs.org/docs/getting-started/react-essentials#the-use-client-directive)来使用客户端组件。
 
@@ -187,7 +187,7 @@ const onMessageReceived = (e) => {
 };
 ```
 
-最后，我们可以向`Home`组件添加一个简单的UI，包括一个输入文本框和一个预格式化文本元素，用于显示分类结果：
+最后，我们可以向`Home`组件添加一个简单的 UI，包括一个输入文本框和一个预格式化文本元素，用于显示分类结果：
 
 ```py
 <main className="flex min-h-screen flex-col items-center justify-center p-12">
@@ -217,9 +217,9 @@ const onMessageReceived = (e) => {
 npm run dev
 ```
 
-访问终端中显示的URL（例如，[http://localhost:3000/](http://localhost:3000/)）以查看应用程序的运行情况！
+访问终端中显示的 URL（例如，[`localhost:3000/`](http://localhost:3000/)）以查看应用程序的运行情况！
 
-### （可选）步骤4：构建和部署
+### （可选）步骤 4：构建和部署
 
 要构建您的应用程序，只需运行：
 
@@ -229,9 +229,9 @@ npm run build
 
 这将打包您的应用程序并将静态文件输出到`out`文件夹。
 
-对于此演示，我们将将应用程序部署为静态[Hugging Face Space](https://huggingface.co/docs/hub/spaces)，但您可以将其部署到任何您喜欢的地方！如果尚未创建免费的Hugging Face帐户，您可以在[此处](https://huggingface.co/join)创建。
+对于此演示，我们将将应用程序部署为静态[Hugging Face Space](https://huggingface.co/docs/hub/spaces)，但您可以将其部署到任何您喜欢的地方！如果尚未创建免费的 Hugging Face 帐户，您可以在[此处](https://huggingface.co/join)创建。
 
-1.  访问[https://huggingface.co/new-space](https://huggingface.co/new-space)并填写表格。记得选择“静态”作为空间类型。
+1.  访问[`huggingface.co/new-space`](https://huggingface.co/new-space)并填写表格。记得选择“静态”作为空间类型。
 
 1.  点击页面底部的“创建空间”按钮。
 
@@ -243,9 +243,9 @@ npm run build
 
 虽然有许多不同的方法可以执行服务器端推断，但最简单的方法（我们将在本教程中讨论）是使用新的[路由处理程序](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)功能。
 
-### 步骤1：初始化项目
+### 步骤 1：初始化项目
 
-首先使用`create-next-app`创建一个新的Next.js应用程序：
+首先使用`create-next-app`创建一个新的 Next.js 应用程序：
 
 ```py
 npx create-next-app@latest
@@ -264,15 +264,15 @@ npx create-next-app@latest
 
 ```
 
-### 步骤2：安装和配置Transformers.js
+### 步骤 2：安装和配置 Transformers.js
 
-您可以使用以下命令从[NPM](https://www.npmjs.com/package/@xenova/transformers)安装Transformers.js：
+您可以使用以下命令从[NPM](https://www.npmjs.com/package/@xenova/transformers)安装 Transformers.js：
 
 ```py
 npm i @xenova/transformers
 ```
 
-我们还需要更新`next.config.js`文件，以防止Webpack捆绑某些包：
+我们还需要更新`next.config.js`文件，以防止 Webpack 捆绑某些包：
 
 ```py
 /** @type {import('next').NextConfig} */
@@ -351,7 +351,7 @@ module.exports = nextConfig
     }
     ```
 
-### 步骤3：设计用户界面
+### 步骤 3：设计用户界面
 
 我们现在将修改默认的`./src/app/page.js`文件，以向我们新创建的路由处理程序发出请求。
 
@@ -409,15 +409,15 @@ export default function Home() {
 npm run dev
 ```
 
-访问终端中显示的URL（例如，[http://localhost:3000/](http://localhost:3000/)）以查看您的应用程序运行情况！
+访问终端中显示的 URL（例如，[`localhost:3000/`](http://localhost:3000/)）以查看您的应用程序运行情况！
 
-### （可选）步骤4：构建和部署
+### （可选）步骤 4：构建和部署
 
-对于此演示，我们将构建并部署我们的应用程序到[Hugging Face Spaces](https://huggingface.co/docs/hub/spaces)。如果您还没有，可以在[此处](https://huggingface.co/join)创建一个免费的Hugging Face帐户。
+对于此演示，我们将构建并部署我们的应用程序到[Hugging Face Spaces](https://huggingface.co/docs/hub/spaces)。如果您还没有，可以在[此处](https://huggingface.co/join)创建一个免费的 Hugging Face 帐户。
 
-1.  在项目的根目录中创建一个新的`Dockerfile`。您可以使用我们的[示例Dockerfile](https://github.com/xenova/transformers.js/blob/main/examples/next-server/Dockerfile)作为模板。
+1.  在项目的根目录中创建一个新的`Dockerfile`。您可以使用我们的[示例 Dockerfile](https://github.com/xenova/transformers.js/blob/main/examples/next-server/Dockerfile)作为模板。
 
-1.  访问[https://huggingface.co/new-space](https://huggingface.co/new-space)并填写表格。记得选择“Docker”作为空间类型（您可以选择“空白”Docker模板）。
+1.  访问[`huggingface.co/new-space`](https://huggingface.co/new-space)并填写表格。记得选择“Docker”作为空间类型（您可以选择“空白”Docker 模板）。
 
 1.  点击页面底部的“创建空间”按钮。
 

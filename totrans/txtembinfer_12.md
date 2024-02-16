@@ -1,6 +1,6 @@
-# CLI参数
+# CLI 参数
 
-> 原文链接：[https://huggingface.co/docs/text-embeddings-inference/cli_arguments](https://huggingface.co/docs/text-embeddings-inference/cli_arguments)
+> 原文链接：[`huggingface.co/docs/text-embeddings-inference/cli_arguments`](https://huggingface.co/docs/text-embeddings-inference/cli_arguments)
 
 要查看为模型提供服务的所有选项，请运行以下命令行参数：
 

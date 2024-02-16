@@ -1,12 +1,12 @@
 # 竞赛空间
 
-> 原文链接：[https://huggingface.co/docs/competitions/competition_space](https://huggingface.co/docs/competitions/competition_space)
+> 原文链接：[`huggingface.co/docs/competitions/competition_space`](https://huggingface.co/docs/competitions/competition_space)
 
-竞赛空间是一个Hugging Face空间，实际的竞赛活动在这里进行。在这个空间里，你可以提交你的模型并获得评分。竞争者也可以在这个空间看到排行榜，讨论并提交作品。
+竞赛空间是一个 Hugging Face 空间，实际的竞赛活动在这里进行。在这个空间里，你可以提交你的模型并获得评分。竞争者也可以在这个空间看到排行榜，讨论并提交作品。
 
 查看下面的一个示例竞赛空间：
 
-![竞赛空间](../Images/42975e4386aad470b0b36aa2c34096f3.png)
+![竞赛空间](img/42975e4386aad470b0b36aa2c34096f3.png)
 
 竞赛空间包括以下内容：
 
@@ -34,7 +34,7 @@
 
 竞赛空间需要两个秘密：
 
-+   `HF_TOKEN`：这是创建竞赛空间的用户的Hugging Face写入令牌。这个令牌必须在竞赛期间保持活动状态。如果令牌过期，竞赛空间将停止工作。如果您更改/刷新/删除此令牌，您将需要更新此秘密。
++   `HF_TOKEN`：这是创建竞赛空间的用户的 Hugging Face 写入令牌。这个令牌必须在竞赛期间保持活动状态。如果令牌过期，竞赛空间将停止工作。如果您更改/刷新/删除此令牌，您将需要更新此秘密。
 
 +   `COMPETITION_ID`：这是私人竞赛存储库的路径。例如 `abhishek/private-competition-data`。如果您更改私人竞赛存储库的名称，您将需要更新此秘密。
 

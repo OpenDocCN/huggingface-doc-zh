@@ -1,6 +1,6 @@
 # 小部件
 
-> 原文链接：[https://huggingface.co/docs/hub/models-widgets](https://huggingface.co/docs/hub/models-widgets)
+> 原文链接：[`huggingface.co/docs/hub/models-widgets`](https://huggingface.co/docs/hub/models-widgets)
 
 ## 什么是小部件？
 
@@ -20,13 +20,13 @@
 
 ## 启用小部件
 
-当您将模型上传到Hub时，将自动为您的模型创建一个小部件。为了确定显示哪个管道和小部件（`文本分类`，`标记分类`，`翻译`等），我们会分析存储库中提供的元数据和配置文件等信息。这些信息被映射到一个单一的`pipeline_tag`。为了简单起见，我们选择**仅显示一个**模型的小部件。
+当您将模型上传到 Hub 时，将自动为您的模型创建一个小部件。为了确定显示哪个管道和小部件（`文本分类`，`标记分类`，`翻译`等），我们会分析存储库中提供的元数据和配置文件等信息。这些信息被映射到一个单一的`pipeline_tag`。为了简单起见，我们选择**仅显示一个**模型的小部件。
 
-对于大多数用例，我们从标签中确定模型类型。例如，如果在[model卡片元数据](./model-cards)中有`tag: text-classification`，则推断的`pipeline_tag`将是`text-classification`。
+对于大多数用例，我们从标签中确定模型类型。例如，如果在 model 卡片元数据中有`tag: text-classification`，则推断的`pipeline_tag`将是`text-classification`。
 
 对于一些库，例如🤗`Transformers`，应根据配置文件（`config.json`）自动推断模型类型。架构可以确定类型：例如，`AutoModelForTokenClassification`对应于`token-classification`。如果您对此感兴趣，可以在[此代码片段](https://gist.github.com/julien-c/857ba86a6c6a895ecd90e7f7cab48046)中看到伪代码。
 
-**您可以始终在您的[model卡片元数据](./model-cards#model-card-metadata)中手动覆盖您的管道类型，使用`pipeline_tag: xxx`。**（您也可以使用元数据GUI编辑器来执行此操作）。
+**您可以始终在您的 model 卡片元数据中手动覆盖您的管道类型，使用`pipeline_tag: xxx`。**（您也可以使用元数据 GUI 编辑器来执行此操作）。
 
 ### 如何控制我的模型的小部件示例输入？
 
@@ -37,9 +37,9 @@ widget:
 - text: "Jens Peter Hansen kommer fra Danmark"
 ```
 
-您可以提供多个示例输入。在小部件的示例下拉菜单中，它们将显示为`示例1`，`示例2`等。也可以选择提供`example_title`。
+您可以提供多个示例输入。在小部件的示例下拉菜单中，它们将显示为`示例 1`，`示例 2`等。也可以选择提供`example_title`。
 
-![](../Images/2e667af198cffeb9b266712fc947a249.png) ![](../Images/b3e00f232523405c5b89a7cbb3c63c02.png)
+![](img/2e667af198cffeb9b266712fc947a249.png) ![](img/b3e00f232523405c5b89a7cbb3c63c02.png)
 
 ```py
 widget:
@@ -53,7 +53,7 @@ widget:
   example_title: "Reading comprehension"
 ```
 
-此外，您可以在模型卡片元数据中指定非文本示例输入。请参考[此处](./models-widgets-examples)以获取所有小部件类型的示例输入格式的完整列表。对于视觉和音频小部件类型，请使用`src`而不是`text`提供示例输入。
+此外，您可以在模型卡片元数据中指定非文本示例输入。请参考此处以获取所有小部件类型的示例输入格式的完整列表。对于视觉和音频小部件类型，请使用`src`而不是`text`提供示例输入。
 
 例如，允许用户从两个示例音频文件中选择，用于自动语音识别任务：
 
@@ -88,15 +88,15 @@ widget:
   - src: nested/directory/sample1.flac
 ```
 
-我们为一些语言和大多数小部件类型提供示例输入，[default-widget-inputs.ts文件](https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/default-widget-inputs.ts)中有。如果缺少某些示例，我们欢迎社区提供PR来添加它们！
+我们为一些语言和大多数小部件类型提供示例输入，[default-widget-inputs.ts 文件](https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/default-widget-inputs.ts)中有。如果缺少某些示例，我们欢迎社区提供 PR 来添加它们！
 
 ## 示例输出
 
 作为示例输入的扩展，对于每个小部件示例，您还可以选择在`output`属性中直接描述相应的模型输出。
 
-当模型尚未受到推理API的支持时（例如，模型库尚未受到支持或模型过大），这将非常有用，以便模型页面仍然可以展示模型的工作原理和结果。
+当模型尚未受到推理 API 的支持时（例如，模型库尚未受到支持或模型过大），这将非常有用，以便模型页面仍然可以展示模型的工作原理和结果。
 
-例如，对于[automatic-speech-recognition](./models-widgets-examples#automatic-speech-recognition)模型：
+例如，对于 automatic-speech-recognition 模型：
 
 ```py
 widget:
@@ -105,13 +105,13 @@ widget:
       text: "Hello my name is Julien"
 ```
 
-![](../Images/08c477c6d1dd4bb7c844c730f176c3e9.png) ![](../Images/c80148c8cad45a4510b41176888bfa95.png)
+![](img/08c477c6d1dd4bb7c844c730f176c3e9.png) ![](img/c80148c8cad45a4510b41176888bfa95.png)
 
-`output`属性应该是一个表示推理API输出的YAML字典。
+`output`属性应该是一个表示推理 API 输出的 YAML 字典。
 
 对于输出文本的模型，请参阅上面的示例。
 
-对于输出标签的模型（例如[文本分类](./models-widgets-examples#text-classification)模型），输出应如下所示：
+对于输出标签的模型（例如文本分类模型），输出应如下所示：
 
 ```py
 widget:
@@ -123,9 +123,9 @@ widget:
         score: 0.2
 ```
 
-![](../Images/933ebdde720cfeda653c4dfa6dd91f56.png) ![](../Images/51974136749f2869e4b018133697ada9.png)
+![](img/933ebdde720cfeda653c4dfa6dd91f56.png) ![](img/51974136749f2869e4b018133697ada9.png)
 
-最后，对于输出图像、音频或任何其他类型资产的模型，输出应包括一个`url`属性，链接到存储库内的文件名或路径，或远程URL。例如，对于文本到图像模型：
+最后，对于输出图像、音频或任何其他类型资产的模型，输出应包括一个`url`属性，链接到存储库内的文件名或路径，或远程 URL。例如，对于文本到图像模型：
 
 ```py
 widget:
@@ -134,15 +134,15 @@ widget:
       url: images/tiger.jpg
 ```
 
-![](../Images/d1f98b52d0f98e0639af7b77624d07af.png) ![](../Images/5002ad2cf1d0dcdf434b887f68789704.png)
+![](img/d1f98b52d0f98e0639af7b77624d07af.png) ![](img/5002ad2cf1d0dcdf434b887f68789704.png)
 
-我们还可以在Hugging Face UI中展示示例输出，例如，对于文本到图像模型，以显示一个酷炫图像生成的画廊。
+我们还可以在 Hugging Face UI 中展示示例输出，例如，对于文本到图像模型，以显示一个酷炫图像生成的画廊。
 
-![](../Images/0576121b8e46b63008259c4e8831cc52.png)
+![](img/0576121b8e46b63008259c4e8831cc52.png)
 
 ## 所有可能的任务/小部件类型是什么？
 
-您可以在[pipelines.ts文件](https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/pipelines.ts)中找到所有支持的任务。
+您可以在[pipelines.ts 文件](https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/pipelines.ts)中找到所有支持的任务。
 
 以下是一些示例链接：
 
@@ -162,17 +162,17 @@ widget:
 
 +   `fill-mask`，例如[`distilroberta-base`](https://huggingface.co/distilroberta-base)
 
-+   `zero-shot-classification`（建立在nli `text-classification`模型之上），例如[`facebook/bart-large-mnli`](https://huggingface.co/facebook/bart-large-mnli)
++   `zero-shot-classification`（建立在 nli `text-classification`模型之上），例如[`facebook/bart-large-mnli`](https://huggingface.co/facebook/bart-large-mnli)
 
 +   `table-question-answering`，例如[`google/tapas-base-finetuned-wtq`](https://huggingface.co/google/tapas-base-finetuned-wtq)
 
-+   `sentence-similarity`，例如[`osanseviero/full-sentence-distillroberta2`](/osanseviero/full-sentence-distillroberta2)
++   `sentence-similarity`，例如`osanseviero/full-sentence-distillroberta2`
 
-## 如何控制我的模型小部件推理API参数？
+## 如何控制我的模型小部件推理 API 参数？
 
-通常，模型的推理API使用与每个任务相关的默认管道设置。但是，如果您想更改管道的默认设置并指定额外的推理参数，可以通过模型卡片元数据直接配置参数。有关与每个任务相关的一些常用参数，请参考[这里](https://huggingface.co/docs/api-inference/detailed_parameters)。
+通常，模型的推理 API 使用与每个任务相关的默认管道设置。但是，如果您想更改管道的默认设置并指定额外的推理参数，可以通过模型卡片元数据直接配置参数。有关与每个任务相关的一些常用参数，请参考[这里](https://huggingface.co/docs/api-inference/detailed_parameters)。
 
-例如，如果您想为小部件中的NER任务指定聚合策略：
+例如，如果您想为小部件中的 NER 任务指定聚合策略：
 
 ```py
 inference:
@@ -188,4 +188,4 @@ inference:
     temperature: 0.7
 ```
 
-推理API允许您向Hugging Face Hub中的模型发送HTTP请求，比小部件快2倍到10倍！⚡⚡ 通过阅读[推理API文档](./models-inference)了解更多。最后，您还可以将所有这些模型部署到专用的[推理端点](https://huggingface.co/docs/inference-endpoints)。
+推理 API 允许您向 Hugging Face Hub 中的模型发送 HTTP 请求，比小部件快 2 倍到 10 倍！⚡⚡ 通过阅读推理 API 文档了解更多。最后，您还可以将所有这些模型部署到专用的[推理端点](https://huggingface.co/docs/inference-endpoints)。

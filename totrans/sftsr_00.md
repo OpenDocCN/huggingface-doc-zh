@@ -1,3 +1,3 @@
 # HF Safetensors 文档
 
-来源：[https://huggingface.co/docs/safetensors/index](https://huggingface.co/docs/safetensors/index)
+来源：[`huggingface.co/docs/safetensors/index`](https://huggingface.co/docs/safetensors/index)

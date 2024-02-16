@@ -1,6 +1,6 @@
 # 接口: SummarizationOutput
 
-> 原始文本: [https://huggingface.co/docs/huggingface.js/inference/interfaces/SummarizationOutput](https://huggingface.co/docs/huggingface.js/inference/interfaces/SummarizationOutput)
+> 原始文本: [`huggingface.co/docs/huggingface.js/inference/interfaces/SummarizationOutput`](https://huggingface.co/docs/huggingface.js/inference/interfaces/SummarizationOutput)
 
 ## 属性
 

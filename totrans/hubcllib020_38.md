@@ -1,12 +1,12 @@
 # 仓库卡片
 
-> 原文：[https://huggingface.co/docs/huggingface_hub/package_reference/cards](https://huggingface.co/docs/huggingface_hub/package_reference/cards)
+> 原文：[`huggingface.co/docs/huggingface_hub/package_reference/cards`](https://huggingface.co/docs/huggingface_hub/package_reference/cards)
 
-huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更新模型/数据集卡片。访问[专门的文档页面](https://huggingface.co/docs/hub/models-cards)深入了解 Hub 上的模型卡片是什么，以及它们在幕后是如何工作的。您还可以查看我们的[模型卡片指南](../how-to-model-cards)了解如何在自己的项目中使用这些实用程序。
+huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更新模型/数据集卡片。访问[专门的文档页面](https://huggingface.co/docs/hub/models-cards)深入了解 Hub 上的模型卡片是什么，以及它们在幕后是如何工作的。您还可以查看我们的模型卡片指南了解如何在自己的项目中使用这些实用程序。
 
 ## 仓库卡片
 
-`RepoCard` 对象是 [ModelCard](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.ModelCard)、[DatasetCard](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.DatasetCard) 和 `SpaceCard` 的父类。
+`RepoCard` 对象是 ModelCard、DatasetCard 和 `SpaceCard` 的父类。
 
 ### `class huggingface_hub.RepoCard`
 
@@ -70,7 +70,7 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 返回
 
-[huggingface_hub.repocard.RepoCard](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.RepoCard)
+huggingface_hub.repocard.RepoCard
 
 具有指定卡片数据和模板内容的 RepoCard 实例。
 
@@ -98,7 +98,7 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 返回
 
-[huggingface_hub.repocard.RepoCard](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.RepoCard)
+huggingface_hub.repocard.RepoCard
 
 从仓库的 README.md 文件或文件路径初始化的 RepoCard（或子类）。
 
@@ -137,7 +137,7 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 +   `create_pr` (`bool`, *optional*) — 是否创建一个带有此提交的拉取请求。默认为 `False`。
 
-+   `parent_commit` (`str`, *optional*) — 父提交的 OID / SHA，以十六进制字符串表示。也支持缩写（前7个字符）。如果指定并且 `create_pr` 为 `False`，则如果 `revision` 没有指向 `parent_commit`，提交将失败。如果指定并且 `create_pr` 为 `True`，将从 `parent_commit` 创建拉取请求。指定 `parent_commit` 可以确保在提交更改之前仓库没有发生变化，并且如果仓库同时更新/提交，这可能特别有用。
++   `parent_commit` (`str`, *optional*) — 父提交的 OID / SHA，以十六进制字符串表示。也支持缩写（前 7 个字符）。如果指定并且 `create_pr` 为 `False`，则如果 `revision` 没有指向 `parent_commit`，提交将失败。如果指定并且 `create_pr` 为 `True`，将从 `parent_commit` 创建拉取请求。指定 `parent_commit` 可以确保在提交更改之前仓库没有发生变化，并且如果仓库同时更新/提交，这可能特别有用。
 
 返回
 
@@ -182,7 +182,7 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 +   `repo_type` (`str`, *optional*，默认为 “model”) — 要推送到的 Hugging Face 仓库的类型。选项为 “model”、“dataset” 和 “space”。如果从子类调用此函数，则默认为子类的 `repo_type`。
 
-根据 Hugging Face Hub 的卡片验证逻辑验证卡片。使用此函数需要访问互联网，因此仅由 [huggingface_hub.repocard.RepoCard.push_to_hub()](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.RepoCard.push_to_hub) 内部调用。
+根据 Hugging Face Hub 的卡片验证逻辑验证卡片。使用此函数需要访问互联网，因此仅由 huggingface_hub.repocard.RepoCard.push_to_hub() 内部调用。
 
 引发以下错误：
 
@@ -192,7 +192,7 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 ## 卡片数据
 
-[CardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.CardData) 对象是 [ModelCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.ModelCardData) 和 [DatasetCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.DatasetCardData) 的父类。
+CardData 对象是 ModelCardData 和 DatasetCardData 的父类。
 
 ### `class huggingface_hub.CardData`
 
@@ -204,7 +204,7 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 包含来自 RepoCard 的元数据的结构。
 
-[CardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.CardData) 是 [ModelCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.ModelCardData) 和 [DatasetCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.DatasetCardData) 的父类。
+CardData 是 ModelCardData 和 DatasetCardData 的父类。
 
 元数据可以导出为字典或 YAML。导出可以定制以更改数据的表示方式（例如：展平评估结果）。`CardData` 表现为字典（可以获取、弹出、设置值），但不继承自 `dict`，以允许此导出步骤。
 
@@ -292,11 +292,11 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 返回
 
-[huggingface_hub.ModelCard](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.ModelCard)
+huggingface_hub.ModelCard
 
 具有指定卡片数据和模板内容的 ModelCard 实例。
 
-从模板初始化 ModelCard。默认情况下，它使用默认模板，可以在此处找到：[https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/modelcard_template.md](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/modelcard_template.md)
+从模板初始化 ModelCard。默认情况下，它使用默认模板，可以在此处找到：[`github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/modelcard_template.md`](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/modelcard_template.md)
 
 模板是可以通过传递关键字参数进行自定义的 Jinja2 模板。
 
@@ -363,25 +363,25 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 +   `language` (`Union[str, List[str]]`, *optional*) — 模型训练数据或元数据的语言。必须是 ISO 639-1、639-2 或 639-3 代码（两/三个字母），或者像“code”、“multilingual”这样的特殊值。默认为 `None`。
 
-+   `license` (`str`, *optional*) — 此模型的许可证。示例：apache-2.0 或来自 [https://huggingface.co/docs/hub/repositories-licenses](https://huggingface.co/docs/hub/repositories-licenses) 的任何许可证。默认为 None。
++   `license` (`str`, *optional*) — 此模型的许可证。示例：apache-2.0 或来自 [`huggingface.co/docs/hub/repositories-licenses`](https://huggingface.co/docs/hub/repositories-licenses) 的任何许可证。默认为 None。
 
-+   `library_name` (`str`, *optional*) — 此模型使用的库的名称。示例：keras 或来自 [https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/model-libraries.ts](https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/model-libraries.ts) 的任何库。默认为 None。
++   `library_name` (`str`, *optional*) — 此模型使用的库的名称。示例：keras 或来自 [`github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/model-libraries.ts`](https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/model-libraries.ts) 的任何库。默认为 None。
 
 +   `tags` (`List[str]`, *optional*) — 要添加到您的模型的标签列表，可在 Hugging Face Hub 上进行过滤时使用。默认为 None。
 
-+   `datasets` (`List[str]`, *optional*) — 用于训练此模型的数据集列表。应该是在 [https://hf.co/datasets](https://hf.co/datasets) 上找到的数据集 ID。默认为 None。
++   `datasets` (`List[str]`, *optional*) — 用于训练此模型的数据集列表。应该是在 [`hf.co/datasets`](https://hf.co/datasets) 上找到的数据集 ID。默认为 None。
 
-+   `metrics` (`List[str]`, *optional*) — 用于评估此模型的指标列表。应该是可以在 [https://hf.co/metrics](https://hf.co/metrics) 找到的指标名称。示例：‘accuracy’。默认为 None。
++   `metrics` (`List[str]`, *optional*) — 用于评估此模型的指标列表。应该是可以在 [`hf.co/metrics`](https://hf.co/metrics) 找到的指标名称。示例：‘accuracy’。默认为 None。
 
 +   `eval_results` (`Union[List[EvalResult], EvalResult]`, *optional*) — 定义模型评估结果的 `huggingface_hub.EvalResult` 列表。如果提供了，`model_name` 将用作 PapersWithCode 排行榜上的名称。默认为 `None`。
 
 +   `model_name` (`str`, *optional*) — 此模型的名称。与 `eval_results` 一起用于构建卡片元数据中的 `model-index`。您在此处提供的名称将用于 PapersWithCode 排行榜。如果未提供，则将使用存储库名称作为默认值。默认为 None。
 
-+   `ignore_metadata_errors` (`str`) — 如果为True，则在解析元数据部分时将忽略错误。在此过程中可能会丢失一些信息。请自行承担风险使用。
++   `ignore_metadata_errors` (`str`) — 如果为 True，则在解析元数据部分时将忽略错误。在此过程中可能会丢失一些信息。请自行承担风险使用。
 
-+   `kwargs` (`dict`, *optional*) — 将添加到模型卡片中的其他元数据。默认为None。
++   `kwargs` (`dict`, *optional*) — 将添加到模型卡片中的其他元数据。默认为 None。
 
-模型卡片元数据，当包含在您的README.md顶部时，将被Hugging Face Hub使用
+模型卡片元数据，当包含在您的 README.md 顶部时，将被 Hugging Face Hub 使用
 
 示例：
 
@@ -400,7 +400,7 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 ## 数据集卡片
 
-数据集卡片在ML社区中也被称为数据卡片。
+数据集卡片在 ML 社区中也被称为数据卡片。
 
 ### DatasetCard
 
@@ -422,19 +422,19 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 参数
 
-+   `card_data` (`huggingface_hub.DatasetCardData`) — 一个包含要包含在Hugging Face Hub数据集卡片的YAML头部中的元数据的huggingface_hub.DatasetCardData实例。
++   `card_data` (`huggingface_hub.DatasetCardData`) — 一个包含要包含在 Hugging Face Hub 数据集卡片的 YAML 头部中的元数据的 huggingface_hub.DatasetCardData 实例。
 
-+   `template_path` (`str`, *optional*) — 指向一个带有可选Jinja模板变量的markdown文件的路径，这些变量可以用`template_kwargs`填充。默认为默认模板。
++   `template_path` (`str`, *optional*) — 指向一个带有可选 Jinja 模板变量的 markdown 文件的路径，这些变量可以用`template_kwargs`填充。默认为默认模板。
 
 返回
 
-[huggingface_hub.DatasetCard](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.DatasetCard)
+huggingface_hub.DatasetCard
 
-一个包含指定卡片数据和模板内容的DatasetCard实例。
+一个包含指定卡片数据和模板内容的 DatasetCard 实例。
 
-从模板初始化一个DatasetCard。默认情况下，它使用默认模板，可以在这里找到：[https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/datasetcard_template.md](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/datasetcard_template.md)
+从模板初始化一个 DatasetCard。默认情况下，它使用默认模板，可以在这里找到：[`github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/datasetcard_template.md`](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/datasetcard_template.md)
 
-模板是可以通过传递关键字参数进行自定义的Jinja2模板。
+模板是可以通过传递关键字参数进行自定义的 Jinja2 模板。
 
 示例：
 
@@ -481,9 +481,9 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 参数
 
-+   `language` (`List[str]`, *optional*) — 数据集的数据或元数据的语言。它必须是ISO 639-1、639-2或639-3代码（两/三个字母），或者像“code”、“multilingual”这样的特殊值。
++   `language` (`List[str]`, *optional*) — 数据集的数据或元数据的语言。它必须是 ISO 639-1、639-2 或 639-3 代码（两/三个字母），或者像“code”、“multilingual”这样的特殊值。
 
-+   `license` (`Union[str, List[str]]`, *optional*) — 此数据集的许可证。示例：apache-2.0或来自[https://huggingface.co/docs/hub/repositories-licenses](https://huggingface.co/docs/hub/repositories-licenses)的任何许可证。
++   `license` (`Union[str, List[str]]`, *optional*) — 此数据集的许可证。示例：apache-2.0 或来自[`huggingface.co/docs/hub/repositories-licenses`](https://huggingface.co/docs/hub/repositories-licenses)的任何许可证。
 
 +   `annotations_creators` (`Union[str, List[str]]`, *optional*) — 数据集的注释是如何创建的。选项有：‘found’、‘crowdsourced’、‘expert-generated’、‘machine-generated’、‘no-annotation’、‘other’。
 
@@ -499,15 +499,15 @@ huggingface_hub 库提供了一个 Python 接口，用于创建、共享和更�
 
 +   `task_ids` (`Union[str, List[str]]`, *optional*) — 数据集支持哪些具体任务？
 
-+   `paperswithcode_id` (`str`, *optional*) — PapersWithCode上数据集的ID。
++   `paperswithcode_id` (`str`, *optional*) — PapersWithCode 上数据集的 ID。
 
 +   `pretty_name` (`str`, *optional*) — 数据集的更易读名称。 (例如 “猫与狗”)
 
-+   `train_eval_index` (`Dict`, *optional*) — 描述在Hub上进行评估所需规范的字典。如果未提供，将从kwargs的‘train-eval-index’键中获取。
++   `train_eval_index` (`Dict`, *optional*) — 描述在 Hub 上进行评估所需规范的字典。如果未提供，将从 kwargs 的‘train-eval-index’键中获取。
 
 +   `config_names` (`Union[str, List[str]]`, *optional*) — 数据集的可用配置列表。
 
-Dataset Card Metadata是Hugging Face Hub在您的README.md顶部包含时使用的。
+Dataset Card Metadata 是 Hugging Face Hub 在您的 README.md 顶部包含时使用的。
 
 ## Space Cards
 
@@ -533,35 +533,35 @@ Dataset Card Metadata是Hugging Face Hub在您的README.md顶部包含时使用�
 
 参数
 
-+   `title` (`str`, *optional*) — Space的标题。
++   `title` (`str`, *optional*) — Space 的标题。
 
-+   `sdk` (`str`, *optional*) — Space的SDK（`gradio`、`streamlit`、`docker`或`static`之一）。
++   `sdk` (`str`, *optional*) — Space 的 SDK（`gradio`、`streamlit`、`docker`或`static`之一）。
 
-+   `sdk_version` (`str`, *optional*) — 使用的SDK的版本（如果是Gradio/Streamlit sdk）。
++   `sdk_version` (`str`, *optional*) — 使用的 SDK 的版本（如果是 Gradio/Streamlit sdk）。
 
-+   `python_version` (`str`, *optional*) — Space中使用的Python版本（如果是Gradio/Streamlit sdk）。
++   `python_version` (`str`, *optional*) — Space 中使用的 Python 版本（如果是 Gradio/Streamlit sdk）。
 
-+   `app_file` (`str`, *optional*) — 您的主应用程序文件的路径（其中包含gradio或streamlit Python代码，或静态html代码）。路径相对于存储库的根目录。
++   `app_file` (`str`, *optional*) — 您的主应用程序文件的路径（其中包含 gradio 或 streamlit Python 代码，或静态 html 代码）。路径相对于存储库的根目录。
 
-+   `app_port` (`str`, *optional*) — 应用程序运行的端口。仅在sdk为`docker`时使用。
++   `app_port` (`str`, *optional*) — 应用程序运行的端口。仅在 sdk 为`docker`时使用。
 
-+   `license` (`str`, *optional*) — 此模型的许可证。示例：apache-2.0或来自[https://huggingface.co/docs/hub/repositories-licenses](https://huggingface.co/docs/hub/repositories-licenses)的任何许可证。
++   `license` (`str`, *optional*) — 此模型的许可证。示例：apache-2.0 或来自[`huggingface.co/docs/hub/repositories-licenses`](https://huggingface.co/docs/hub/repositories-licenses)的任何许可证。
 
-+   `duplicated_from` (`str`, *optional*) — 如果这是一个重复的Space，则为原始Space的ID。
++   `duplicated_from` (`str`, *optional*) — 如果这是一个重复的 Space，则为原始 Space 的 ID。
 
-+   `models`（List`str`，*optional*） — 与此Space相关的模型列表。应该是在[https://hf.co/models](https://hf.co/models)上找到的数据集ID。
++   `models`（List`str`，*optional*） — 与此 Space 相关的模型列表。应该是在[`hf.co/models`](https://hf.co/models)上找到的数据集 ID。
 
-+   `datasets` (`List[str]`, *optional*) — 与此Space相关的数据集列表。应该是在[https://hf.co/datasets](https://hf.co/datasets)上找到的数据集ID。
++   `datasets` (`List[str]`, *optional*) — 与此 Space 相关的数据集列表。应该是在[`hf.co/datasets`](https://hf.co/datasets)上找到的数据集 ID。
 
-+   `tags` (`List[str]`, *optional*) — 要添加到Space的标签列表，可在Hub上进行过滤时使用。
++   `tags` (`List[str]`, *optional*) — 要添加到 Space 的标签列表，可在 Hub 上进行过滤时使用。
 
-+   `ignore_metadata_errors` (`str`) — 如果为True，则在解析元数据部分时将忽略错误。在此过程中可能会丢失一些信息。请自行承担风险使用。
++   `ignore_metadata_errors` (`str`) — 如果为 True，则在解析元数据部分时将忽略错误。在此过程中可能会丢失一些信息。请自行承担风险使用。
 
-+   `kwargs` (`dict`, *optional*) — 将添加到Space卡中的其他元数据。
++   `kwargs` (`dict`, *optional*) — 将添加到 Space 卡中的其他元数据。
 
-Space Card Metadata是Hugging Face Hub在您的README.md顶部包含时使用的。
+Space Card Metadata 是 Hugging Face Hub 在您的 README.md 顶部包含时使用的。
 
-要获取Spaces配置的详尽参考，请访问[https://huggingface.co/docs/hub/spaces-config-reference#spaces-configuration-reference](https://huggingface.co/docs/hub/spaces-config-reference#spaces-configuration-reference)。
+要获取 Spaces 配置的详尽参考，请访问[`huggingface.co/docs/hub/spaces-config-reference#spaces-configuration-reference`](https://huggingface.co/docs/hub/spaces-config-reference#spaces-configuration-reference)。
 
 示例：
 
@@ -593,41 +593,41 @@ Space Card Metadata是Hugging Face Hub在您的README.md顶部包含时使用的
 
 +   `task_type` (`str`) — 任务标识符。示例：“图像分类”。
 
-+   `dataset_type` (`str`) — 数据集标识符。示例：“common_voice”。使用数据集id来自[https://hf.co/datasets](https://hf.co/datasets)。
++   `dataset_type` (`str`) — 数据集标识符。示例：“common_voice”。使用数据集 id 来自[`hf.co/datasets`](https://hf.co/datasets)。
 
 +   `dataset_name` (`str`) — 数据集的漂亮名称。示例：“Common Voice（法语）”。
 
-+   `metric_type` (`str`) — 指标标识符。示例：“wer”。使用来自[https://hf.co/metrics](https://hf.co/metrics)的指标id。
++   `metric_type` (`str`) — 指标标识符。示例：“wer”。使用来自[`hf.co/metrics`](https://hf.co/metrics)的指标 id。
 
-+   `metric_value` (`Any`) — 指标值。示例：0.9或“20.0 ± 1.2”。
++   `metric_value` (`Any`) — 指标值。示例：0.9 或“20.0 ± 1.2”。
 
 +   `task_name` (`str`, *optional*) — 任务的漂亮名称。示例：“语音识别”。
 
-+   `dataset_config` (`str`, *optional*) — 在`load_dataset()`中使用的数据集配置的名称。示例：`load_dataset("common_voice", "fr")`中的fr。有关更多信息，请参阅`datasets`文档：[https://hf.co/docs/datasets/package_reference/loading_methods#datasets.load_dataset.name](https://hf.co/docs/datasets/package_reference/loading_methods#datasets.load_dataset.name)
++   `dataset_config` (`str`, *optional*) — 在`load_dataset()`中使用的数据集配置的名称。示例：`load_dataset("common_voice", "fr")`中的 fr。有关更多信息，请参阅`datasets`文档：[`hf.co/docs/datasets/package_reference/loading_methods#datasets.load_dataset.name`](https://hf.co/docs/datasets/package_reference/loading_methods#datasets.load_dataset.name)
 
 +   `dataset_split` (`str`, *optional*) — 在`load_dataset()`中使用的拆分。示例：“test”。
 
-+   `dataset_revision` (`str`, *optional*) — 在`load_dataset()`中使用的数据集的修订版（也称为Git Sha）。示例：5503434ddd753f426f4b38109466949a1217c2bb
++   `dataset_revision` (`str`, *optional*) — 在`load_dataset()`中使用的数据集的修订版（也称为 Git Sha）。示例：5503434ddd753f426f4b38109466949a1217c2bb
 
 +   `dataset_args` (`Dict[str, Any]`, *可选*) — 在`Metric.compute()`期间传递的参数。例如对于`bleu`: `{"max_order": 4}`
 
 +   `metric_name` (`str`, *可选*) — 指标的漂亮名称。示例: “Test WER”。
 
-+   `metric_config` (`str`, *可选*) — 在`load_metric()`中使用的指标配置的名称。例如: 在`load_metric("bleurt", "bleurt-large-512")`中的bleurt-large-512。有关更多信息，请参阅`datasets`文档: [https://huggingface.co/docs/datasets/v2.1.0/en/loading#load-configurations](https://huggingface.co/docs/datasets/v2.1.0/en/loading#load-configurations)
++   `metric_config` (`str`, *可选*) — 在`load_metric()`中使用的指标配置的名称。例如: 在`load_metric("bleurt", "bleurt-large-512")`中的 bleurt-large-512。有关更多信息，请参阅`datasets`文档: [`huggingface.co/docs/datasets/v2.1.0/en/loading#load-configurations`](https://huggingface.co/docs/datasets/v2.1.0/en/loading#load-configurations)
 
 +   `metric_args` (`Dict[str, Any]`, *可选*) — 在`Metric.compute()`期间传递的参数。例如对于`bleu`: max_order: 4
 
-+   `verified` (`bool`, *可选*) — 指示指标是否来自Hugging Face的[评估服务](https://huggingface.co/spaces/autoevaluate/model-evaluator)。由Hugging Face自动计算，不要设置。
++   `verified` (`bool`, *可选*) — 指示指标是否来自 Hugging Face 的[评估服务](https://huggingface.co/spaces/autoevaluate/model-evaluator)。由 Hugging Face 自动计算，不要设置。
 
-+   `verify_token` (`str`, *可选*) — 用于验证指标是否来自Hugging Face的[评估服务](https://huggingface.co/spaces/autoevaluate/model-evaluator)的JSON Web Token。
++   `verify_token` (`str`, *可选*) — 用于验证指标是否来自 Hugging Face 的[评估服务](https://huggingface.co/spaces/autoevaluate/model-evaluator)的 JSON Web Token。
 
 +   `source_name` (`str`, *可选*) — 评估结果来源的名称。示例: “Open LLM Leaderboard”。
 
-+   `source_url` (`str`, *可选*) — 评估结果来源的URL。示例: "[https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard%22)"。
++   `source_url` (`str`, *可选*) — 评估结果来源的 URL。示例: "[`huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard`](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard%22)"。
 
-在Model Cards的模型索引中找到的单个评估结果的扁平表示。
+在 Model Cards 的模型索引中找到的单个评估结果的扁平表示。
 
-有关模型索引规范的更多信息，请参见[https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1](https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1)。
+有关模型索引规范的更多信息，请参见[`github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1`](https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1)。
 
 #### `is_equal_except_value`
 
@@ -637,7 +637,7 @@ Space Card Metadata是Hugging Face Hub在您的README.md顶部包含时使用的
 ( other: EvalResult )
 ```
 
-如果`self`和`other`描述完全相同的指标但值不同，则返回True。
+如果`self`和`other`描述完全相同的指标但值不同，则返回 True。
 
 ### model_index_to_eval_results
 
@@ -651,17 +651,17 @@ Space Card Metadata是Hugging Face Hub在您的README.md顶部包含时使用的
 
 参数
 
-+   `model_index` (`List[Dict[str, Any]]`) — 一个模型索引数据结构，可能来自Hugging Face Hub上的README.md文件。
++   `model_index` (`List[Dict[str, Any]]`) — 一个模型索引数据结构，可能来自 Hugging Face Hub 上的 README.md 文件。
 
 返回
 
 model_name (`str`)
 
-在模型索引中找到的模型名称。这将用作模型在像PapersWithCode这样的排行榜上的标识符。eval_results (`List[EvalResult]`): 包含在提供的model_index中报告的指标的`huggingface_hub.EvalResult`对象列表。
+在模型索引中找到的模型名称。这将用作模型在像 PapersWithCode 这样的排行榜上的标识符。eval_results (`List[EvalResult]`): 包含在提供的 model_index 中报告的指标的`huggingface_hub.EvalResult`对象列表。
 
 接受一个模型索引并返回模型名称以及一个包含`huggingface_hub.EvalResult`对象的列表。
 
-可以在此处找到模型索引的详细规范: [https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1](https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1)
+可以在此处找到模型索引的详细规范: [`github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1`](https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1)
 
 示例：
 
@@ -712,7 +712,7 @@ model_name (`str`)
 
 参数
 
-+   `model_name` (`str`) — 模型的名称（例如“my-cool-model”）。这将用作模型在像PapersWithCode这样的排行榜上的标识符。
++   `model_name` (`str`) — 模型的名称（例如“my-cool-model”）。这将用作模型在像 PapersWithCode 这样的排行榜上的标识符。
 
 +   `eval_results` (`List[EvalResult]`) — 包含要在模型索引中报告的指标的`huggingface_hub.EvalResult`对象列表。
 
@@ -720,9 +720,9 @@ model_name (`str`)
 
 model_index (`List[Dict[str, Any]]`)
 
-将eval_results转换为模型索引。
+将 eval_results 转换为模型索引。
 
-接受给定的模型名称和`huggingface_hub.EvalResult`列表，并返回一个有效的模型索引，该索引将与Hugging Face Hub期望的格式兼容。
+接受给定的模型名称和`huggingface_hub.EvalResult`列表，并返回一个有效的模型索引，该索引将与 Hugging Face Hub 期望的格式兼容。
 
 示例：
 
@@ -759,17 +759,17 @@ model_index (`List[Dict[str, Any]]`)
 
 +   `task_pretty_name` (`str`) — 以自然语言命名的任务名称。
 
-+   `task_id` (`str`) — 示例：automatic-speech-recognition。任务ID。
++   `task_id` (`str`) — 示例：automatic-speech-recognition。任务 ID。
 
 +   `metrics_pretty_name` (`str`) — 以自然语言命名的指标名称。示例：测试 WER。
 
-+   `metrics_id` (`str`) — 示例：wer。来自[https://hf.co/metrics](https://hf.co/metrics)的指标ID。
++   `metrics_id` (`str`) — 示例：wer。来自[`hf.co/metrics`](https://hf.co/metrics)的指标 ID。
 
 +   `metrics_value` (`Any`) — 指标的值。示例：20.0 或“20.0 ± 1.2”。
 
 +   `dataset_pretty_name` (`str`) — 以自然语言命名的数据集名称。
 
-+   `dataset_id` (`str`) — 示例：common_voice。来自[https://hf.co/datasets](https://hf.co/datasets)的数据集ID。
++   `dataset_id` (`str`) — 示例：common_voice。来自[`hf.co/datasets`](https://hf.co/datasets)的数据集 ID。
 
 +   `metrics_config` (`str`, *可选*) — 在`load_metric()`中使用的指标配置的名称。示例：在`load_metric("bleurt", "bleurt-large-512")`中的 bleurt-large-512。
 
@@ -870,7 +870,7 @@ True
 
 +   `create_pr` (`boolean`, *可选*) — 是否从`revision`创建一个拉取请求并提交该提交。默认为`False`。
 
-+   `parent_commit` (`str`, *可选*) — 父提交的 OID/SHA，以十六进制字符串表示。也支持缩写（前7个字符）。如果指定且`create_pr`为`False`，则如果`revision`不指向`parent_commit`，提交将失败。如果指定且`create_pr`为`True`，将从`parent_commit`创建拉取请求。指定`parent_commit`可确保在提交更改之前仓库未更改，并且在仓库同时更新/提交时特别有用。
++   `parent_commit` (`str`, *可选*) — 父提交的 OID/SHA，以十六进制字符串表示。也支持缩写（前 7 个字符）。如果指定且`create_pr`为`False`，则如果`revision`不指向`parent_commit`，提交将失败。如果指定且`create_pr`为`True`，将从`parent_commit`创建拉取请求。指定`parent_commit`可确保在提交更改之前仓库未更改，并且在仓库同时更新/提交时特别有用。
 
 返回值
 

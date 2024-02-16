@@ -1,10 +1,10 @@
-# 将模型导出到Inferentia
+# 将模型导出到 Inferentia
 
-> 原始文本：[https://huggingface.co/docs/optimum-neuron/guides/export_model](https://huggingface.co/docs/optimum-neuron/guides/export_model)
+> 原始文本：[`huggingface.co/docs/optimum-neuron/guides/export_model`](https://huggingface.co/docs/optimum-neuron/guides/export_model)
 
 ## 总结
 
-将PyTorch模型导出为Neuron模型就像这样简单
+将 PyTorch 模型导出为 Neuron 模型就像这样简单
 
 ```py
 optimum-cli export neuron \
@@ -20,49 +20,49 @@ optimum-cli export neuron \
 optimum-cli export neuron --help
 ```
 
-## 为什么要编译成Neuron模型？
+## 为什么要编译成 Neuron 模型？
 
-AWS提供了两代用于机器学习推理的Inferentia加速器，具有更高的吞吐量、更低的延迟但更低的成本：[inf2（NeuronCore-v2）](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/inf2-arch.html) 和 [inf1（NeuronCore-v1）](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/inf1-arch.html#aws-inf1-arch)。
+AWS 提供了两代用于机器学习推理的 Inferentia 加速器，具有更高的吞吐量、更低的延迟但更低的成本：[inf2（NeuronCore-v2）](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/inf2-arch.html) 和 [inf1（NeuronCore-v1）](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/inf1-arch.html#aws-inf1-arch)。
 
-在生产环境中，要在Neuron设备上部署🤗 [Transformers](https://huggingface.co/docs/transformers/index) 模型，您需要在推理之前将模型编译并导出到序列化格式。通过使用Neuron编译器（[neuronx-cc](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/release-notes/compiler/neuronx-cc/index.html) 或 [neuron-cc](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/release-notes/compiler/neuron-cc/neuron-cc.html) ）进行提前编译，您的模型将被转换为序列化和优化的[TorchScript模块](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)。
+在生产环境中，要在 Neuron 设备上部署🤗 [Transformers](https://huggingface.co/docs/transformers/index) 模型，您需要在推理之前将模型编译并导出到序列化格式。通过使用 Neuron 编译器（[neuronx-cc](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/release-notes/compiler/neuronx-cc/index.html) 或 [neuron-cc](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/release-notes/compiler/neuron-cc/neuron-cc.html) ）进行提前编译，您的模型将被转换为序列化和优化的[TorchScript 模块](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)。
 
-为了更好地了解编译过程，这里是在幕后执行的一般步骤：![编译流程](../Images/3da5312c8a92cea4b2c1cbc3d4bb83f0.png "编译流程")
+为了更好地了解编译过程，这里是在幕后执行的一般步骤：![编译流程](img/3da5312c8a92cea4b2c1cbc3d4bb83f0.png "编译流程")
 
-**NEFF**：Neuron可执行文件格式，是Neuron设备上的二进制可执行文件。
+**NEFF**：Neuron 可执行文件格式，是 Neuron 设备上的二进制可执行文件。
 
-尽管预编译可以避免推理期间的开销，但跟踪的Neuron模块有一些限制：
+尽管预编译可以避免推理期间的开销，但跟踪的 Neuron 模块有一些限制：
 
-+   跟踪的Neuron模块将是静态的，这需要在编译期间使用固定的输入形状和数据类型。由于模型不会动态重新编译，如果上述条件中的任何一个发生变化，推理将失败。(*但这些限制可以通过[动态批处理](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/frameworks/torch/torch-neuronx/api-reference-guide/inference/api-torch-neuronx-trace.html#dynamic-batching)和[分桶](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/appnotes/torch-neuron/bucketing-app-note.html#bucketing-app-note)*)。
++   跟踪的 Neuron 模块将是静态的，这需要在编译期间使用固定的输入形状和数据类型。由于模型不会动态重新编译，如果上述条件中的任何一个发生变化，推理将失败。(*但这些限制可以通过[动态批处理](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/frameworks/torch/torch-neuronx/api-reference-guide/inference/api-torch-neuronx-trace.html#dynamic-batching)和[分桶](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/appnotes/torch-neuron/bucketing-app-note.html#bucketing-app-note)*)。
 
-+   Neuron模型是硬件专用的，这意味着：
++   Neuron 模型是硬件专用的，这意味着：
 
-    +   使用Neuron跟踪的模型将无法在非Neuron环境中执行。
+    +   使用 Neuron 跟踪的模型将无法在非 Neuron 环境中执行。
 
-    +   为inf1（NeuronCore-v1）编译的模型与inf2（NeuronCore-v2）不兼容，反之亦然。
+    +   为 inf1（NeuronCore-v1）编译的模型与 inf2（NeuronCore-v2）不兼容，反之亦然。
 
-在本指南中，我们将向您展示如何将您的模型导出为针对Neuron设备进行优化的序列化模型。
+在本指南中，我们将向您展示如何将您的模型导出为针对 Neuron 设备进行优化的序列化模型。
 
-🤗 Optimum通过利用配置对象提供了对Neuron导出的支持。这些配置对象已经为许多模型架构准备好，并且设计为易于扩展到其他架构。
+🤗 Optimum 通过利用配置对象提供了对 Neuron 导出的支持。这些配置对象已经为许多模型架构准备好，并且设计为易于扩展到其他架构。
 
-**要检查支持的架构，请转到[配置参考页面](../package_reference/configuration)。**
+**要检查支持的架构，请转到配置参考页面。**
 
-## 使用CLI将模型导出到Neuron
+## 使用 CLI 将模型导出到 Neuron
 
-将🤗 Transformers模型导出到Neuron，您首先需要安装一些额外的依赖项：
+将🤗 Transformers 模型导出到 Neuron，您首先需要安装一些额外的依赖项：
 
-**对于Inf2**
+**对于 Inf2**
 
 ```py
 pip install optimum[neuronx]
 ```
 
-**对于Inf1**
+**对于 Inf1**
 
 ```py
 pip install optimum[neuron]
 ```
 
-最佳的Neuron导出可以通过Optimum命令行使用：
+最佳的 Neuron 导出可以通过 Optimum 命令行使用：
 
 ```py
 optimum-cli export neuron --help
@@ -155,7 +155,7 @@ Input shapes:
 optimum-cli export neuron --model distilbert-base-uncased-distilled-squad --batch_size 1 --sequence_length 16 distilbert_base_uncased_squad_neuron/
 ```
 
-您应该看到以下日志，通过与CPU上的PyTorch模型进行比较，验证在Neuron设备上的模型：
+您应该看到以下日志，通过与 CPU 上的 PyTorch 模型进行比较，验证在 Neuron 设备上的模型：
 
 ```py
 Validating Neuron model...
@@ -166,19 +166,19 @@ Validating Neuron model...
 The Neuronx export succeeded and the exported model was saved at: distilbert_base_uncased_squad_neuron/
 ```
 
-这将导出由`--model`参数定义的检查点的神经元编译的TorchScript模块。
+这将导出由`--model`参数定义的检查点的神经元编译的 TorchScript 模块。
 
-如您所见，任务已被自动检测到。这是因为模型在Hub上。对于本地模型，需要提供`--task`参数，否则将默认为没有任何特定任务头的模型架构：
+如您所见，任务已被自动检测到。这是因为模型在 Hub 上。对于本地模型，需要提供`--task`参数，否则将默认为没有任何特定任务头的模型架构：
 
 ```py
 optimum-cli export neuron --model local_path --task question-answering --batch_size 1 --sequence_length 16 --dynamic-batch-size distilbert_base_uncased_squad_neuron/
 ```
 
-请注意，对于Hub上的模型，提供`--task`参数将禁用自动任务检测。然后，生成的`model.neuron`文件可以加载并在Neuron设备上运行。
+请注意，对于 Hub 上的模型，提供`--task`参数将禁用自动任务检测。然后，生成的`model.neuron`文件可以加载并在 Neuron 设备上运行。
 
-## 通过NeuronModel将模型导出到Neuron
+## 通过 NeuronModel 将模型导出到 Neuron
 
-您还可以使用`optimum.neuron.NeuronModelForXXX`模型类将模型导出到Neuron格式。这里是一个例子：
+您还可以使用`optimum.neuron.NeuronModelForXXX`模型类将模型导出到 Neuron 格式。这里是一个例子：
 
 ```py
 >>> from optimum.neuron import NeuronModelForSequenceClassification
@@ -207,25 +207,25 @@ optimum-cli export neuron --model local_path --task question-answering --batch_s
 'POSITIVE'
 ```
 
-## 将稳定扩散导出到Neuron
+## 将稳定扩散导出到 Neuron
 
-使用Optimum CLI，您可以编译稳定扩散管道中的组件，以在推断期间在神经元设备上获得加速。
+使用 Optimum CLI，您可以编译稳定扩散管道中的组件，以在推断期间在神经元设备上获得加速。
 
 到目前为止，我们支持在管道中导出以下组件：
 
-+   CLIP文本编码器
++   CLIP 文本编码器
 
 +   U-Net
 
-+   VAE编码器
++   VAE 编码器
 
-+   VAE解码器
++   VAE 解码器
 
-“选择这些块是因为它们代表管道中的大部分计算量，并且性能基准测试表明在Neuron上运行它们会带来显著的性能优势。”
+“选择这些块是因为它们代表管道中的大部分计算量，并且性能基准测试表明在 Neuron 上运行它们会带来显著的性能优势。”
 
-此外，请随时调整编译配置，以在您的用例中找到性能与准确性之间的最佳权衡。默认情况下，我们建议将FP32矩阵乘法运算转换为BF16，这在适度牺牲准确性的情况下提供良好的性能。查看[AWS Neuron文档](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/appnotes/neuronx-cc/neuronx-cc-training-mixed-precision.html#neuronx-cc-training-mixed-precision)中的指南，以更好地了解编译选项。
+此外，请随时调整编译配置，以在您的用例中找到性能与准确性之间的最佳权衡。默认情况下，我们建议将 FP32 矩阵乘法运算转换为 BF16，这在适度牺牲准确性的情况下提供良好的性能。查看[AWS Neuron 文档](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/appnotes/neuronx-cc/neuronx-cc-training-mixed-precision.html#neuronx-cc-training-mixed-precision)中的指南，以更好地了解编译选项。
 
-可以使用CLI导出稳定扩散检查点：
+可以使用 CLI 导出稳定扩散检查点：
 
 ```py
 optimum-cli export neuron --model stabilityai/stable-diffusion-2-1-base \
@@ -239,9 +239,9 @@ optimum-cli export neuron --model stabilityai/stable-diffusion-2-1-base \
   sd_neuron/
 ```
 
-## 将稳定扩散XL导出到Neuron
+## 将稳定扩散 XL 导出到 Neuron
 
-与稳定扩散类似，您将能够使用Optimum CLI在SDXL管道上编译组件，以便在神经元设备上进行推断。
+与稳定扩散类似，您将能够使用 Optimum CLI 在 SDXL 管道上编译组件，以便在神经元设备上进行推断。
 
 我们支持将以下组件导出到管道中以提高速度：
 
@@ -249,15 +249,15 @@ optimum-cli export neuron --model stabilityai/stable-diffusion-2-1-base \
 
 +   第二个文本编码器
 
-+   U-Net（比稳定扩散管道中的UNet大三倍）
++   U-Net（比稳定扩散管道中的 UNet 大三倍）
 
-+   VAE编码器
++   VAE 编码器
 
-+   VAE解码器
++   VAE 解码器
 
-“稳定扩散XL在768到1024之间的图像上表现特别好。”
+“稳定扩散 XL 在 768 到 1024 之间的图像上表现特别好。”
 
-可以使用CLI导出SDXL检查点：
+可以使用 CLI 导出 SDXL 检查点：
 
 ```py
 optimum-cli export neuron --model stabilityai/stable-diffusion-xl-base-1.0 \
@@ -273,11 +273,11 @@ optimum-cli export neuron --model stabilityai/stable-diffusion-xl-base-1.0 \
 
 ## 选择一个任务
 
-在从Hugging Face Hub上的模型导出时，大多数情况下不需要指定`--task`。
+在从 Hugging Face Hub 上的模型导出时，大多数情况下不需要指定`--task`。
 
-但是，如果您需要检查给定模型架构的Neuron导出支持哪些任务，我们已经为您提供了。首先，您可以在[这里](https://huggingface.co/docs/optimum/exporters/task_manager#pytorch)检查支持的任务列表。
+但是，如果您需要检查给定模型架构的 Neuron 导出支持哪些任务，我们已经为您提供了。首先，您可以在[这里](https://huggingface.co/docs/optimum/exporters/task_manager#pytorch)检查支持的任务列表。
 
-对于每个模型架构，您可以通过`~exporters.tasks.TasksManager`找到支持的任务列表。例如，对于DistilBERT，对于Neuron导出，我们有：
+对于每个模型架构，您可以通过`~exporters.tasks.TasksManager`找到支持的任务列表。例如，对于 DistilBERT，对于 Neuron 导出，我们有：
 
 ```py
 >>> from optimum.exporters.tasks import TasksManager

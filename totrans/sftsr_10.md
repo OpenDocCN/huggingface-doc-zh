@@ -1,6 +1,6 @@
 # PaddlePaddle API
 
-> 原始文本: [https://huggingface.co/docs/safetensors/api/paddle](https://huggingface.co/docs/safetensors/api/paddle)
+> 原始文本: [`huggingface.co/docs/safetensors/api/paddle`](https://huggingface.co/docs/safetensors/api/paddle)
 
 #### `safetensors.paddle.load_file`
 
@@ -14,7 +14,7 @@
 
 +   `filename` (`str`, 或 `os.PathLike`)) — 包含张量的文件的名称
 
-+   `device` (`Dict[str, any]`, *可选*, 默认为 `cpu`) — 加载后张量需要位于的设备。可用选项为所有常规的Paddle设备位置
++   `device` (`Dict[str, any]`, *可选*, 默认为 `cpu`) — 加载后张量需要位于的设备。可用选项为所有常规的 Paddle 设备位置
 
 返回
 
@@ -22,7 +22,7 @@
 
 包含名称作为键，值为 `paddle.Tensor` 的字典
 
-将safetensors文件加载到Paddle格式中。
+将 safetensors 文件加载到 Paddle 格式中。
 
 示例:
 
@@ -43,15 +43,15 @@ loaded = load_file(file_path)
 
 参数
 
-+   `data` (`bytes`) — safetensors文件的内容
++   `data` (`bytes`) — safetensors 文件的内容
 
 返回
 
 `Dict[str, paddle.Tensor]`
 
-包含名称作为键，值为 `paddle.Tensor` 在cpu上的字典
+包含名称作为键，值为 `paddle.Tensor` 在 cpu 上的字典
 
-从纯字节将safetensors文件加载到Paddle格式。
+从纯字节将 safetensors 文件加载到 Paddle 格式。
 
 示例:
 
@@ -85,7 +85,7 @@ loaded = load(data)
 
 `None`
 
-将张量字典以safetensors格式保存为原始字节。
+将张量字典以 safetensors 格式保存为原始字节。
 
 示例:
 
@@ -117,7 +117,7 @@ save_file(tensors, "model.safetensors")
 
 表示格式的原始字节
 
-将张量字典以safetensors格式保存为原始字节。
+将张量字典以 safetensors 格式保存为原始字节。
 
 示例:
 

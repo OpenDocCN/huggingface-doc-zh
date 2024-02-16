@@ -1,6 +1,6 @@
 # 接口: Credentials
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/hub/interfaces/Credentials](https://huggingface.co/docs/huggingface.js/hub/interfaces/Credentials)
+> 原文链接: [`huggingface.co/docs/huggingface.js/hub/interfaces/Credentials`](https://huggingface.co/docs/huggingface.js/hub/interfaces/Credentials)
 
 ## 属性
 

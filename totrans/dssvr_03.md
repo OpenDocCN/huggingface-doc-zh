@@ -1,14 +1,14 @@
 # 快速入门
 
-> 原文：[https://huggingface.co/docs/datasets-server/quick_start](https://huggingface.co/docs/datasets-server/quick_start)
+> 原文：[`huggingface.co/docs/datasets-server/quick_start`](https://huggingface.co/docs/datasets-server/quick_start)
 
-在这个快速入门中，您将学习如何使用Datasets Server的REST API：
+在这个快速入门中，您将学习如何使用 Datasets Server 的 REST API：
 
-+   检查Hub上的数据集是否可用。
++   检查 Hub 上的数据集是否可用。
 
 +   返回数据集的配置和拆分。
 
-+   预览数据集的前100行。
++   预览数据集的前 100 行。
 
 +   下载数据集的行片段。
 
@@ -16,34 +16,34 @@
 
 +   根据查询字符串过滤行。
 
-+   访问数据集的parquet文件。
++   访问数据集的 parquet 文件。
 
 +   获取数据集的大小（行数或字节数）。
 
 +   获取有关数据集的统计信息。
 
-## API端点
+## API 端点
 
 每个特征都通过下表中总结的端点提供：
 
 | 端点 | 方法 | 描述 | 查询参数 |
 | --- | --- | --- | --- |
-| [/is-valid](./valid) | GET | 检查特定数据集是否有效。 | `dataset`：数据集的名称 |
-| [/splits](./splits) | GET | 获取数据集的配置和拆分列表。 | `dataset`：数据集的名称 |
+| /is-valid | GET | 检查特定数据集是否有效。 | `dataset`：数据集的名称 |
+| /splits | GET | 获取数据集的配置和拆分列表。 | `dataset`：数据集的名称 |
 
-| [/first-rows](./first_rows) | GET | 获取数据集拆分的前几行。 | - `dataset`：数据集的名称 - `config`：配置的名称
+| /first-rows | GET | 获取数据集拆分的前几行。 | - `dataset`：数据集的名称 - `config`：配置的名称
 
 - `split`：拆分的名称|
 
-| [/rows](./rows) | GET | 获取数据集拆分的行片段。 | - `dataset`：数据集的名称 - `config`：配置的名称
+| /rows | GET | 获取数据集拆分的行片段。 | - `dataset`：数据集的名称 - `config`：配置的名称
 
 - `split`：拆分的名称
 
 - `offset`：片段的偏移量
 
-- `length`：片段的长度（最大100）|
+- `length`：片段的长度（最大 100）|
 
-| [/search](./search) | GET | 在数据集拆分中搜索文本。 | - `dataset`：数据集的名称 - `config`：配置的名称
+| /search | GET | 在数据集拆分中搜索文本。 | - `dataset`：数据集的名称 - `config`：配置的名称
 
 - `split`：拆分的名称
 
@@ -51,7 +51,7 @@
 
 |
 
-| [/filter](./filter) | GET | 过滤数据集拆分中的行。 | - `dataset`：数据集的名称 - `config`：配置的名称
+| /filter | GET | 过滤数据集拆分中的行。 | - `dataset`：数据集的名称 - `config`：配置的名称
 
 - `split`：拆分的名称
 
@@ -59,23 +59,23 @@
 
 - `offset`：片段的偏移量
 
-- `length`：片段的长度（最大100）|
+- `length`：片段的长度（最大 100）|
 
-| [/parquet](./parquet) | GET | 获取数据集的parquet文件列表。 | `dataset`：数据集的名称 |
+| /parquet | GET | 获取数据集的 parquet 文件列表。 | `dataset`：数据集的名称 |
 | --- | --- | --- | --- |
-| [/size](./size) | GET | 获取数据集的大小。 | `dataset`：数据集的名称 |
+| /size | GET | 获取数据集的大小。 | `dataset`：数据集的名称 |
 
-| [/statistics](./statistics) | GET | 获取数据集拆分的统计信息。 | - `dataset`：数据集的名称 - `config`：配置的名称
+| /statistics | GET | 获取数据集拆分的统计信息。 | - `dataset`：数据集的名称 - `config`：配置的名称
 
 - `split`：拆分的名称|
 
-使用Datasets Server不需要安装或设置。
+使用 Datasets Server 不需要安装或设置。
 
-如果您还没有[Hugging Face账户](https://huggingface.co/join)，请注册一个！虽然您可以在没有Hugging Face账户的情况下使用Datasets Server，但是如果不提供您在用户设置中找到的[用户令牌](https://huggingface.co/settings/tokens)，则无法访问[受限数据集](https://huggingface.co/docs/hub/datasets-gated)如[CommonVoice](https://huggingface.co/datasets/mozilla-foundation/common_voice_10_0)和[ImageNet](https://huggingface.co/datasets/imagenet-1k)。
+如果您还没有[Hugging Face 账户](https://huggingface.co/join)，请注册一个！虽然您可以在没有 Hugging Face 账户的情况下使用 Datasets Server，但是如果不提供您在用户设置中找到的[用户令牌](https://huggingface.co/settings/tokens)，则无法访问[受限数据集](https://huggingface.co/docs/hub/datasets-gated)如[CommonVoice](https://huggingface.co/datasets/mozilla-foundation/common_voice_10_0)和[ImageNet](https://huggingface.co/datasets/imagenet-1k)。
 
-请随时在[Postman](https://www.postman.com/huggingface/workspace/hugging-face-apis/documentation/23242779-d068584e-96d1-4d92-a703-7cb12cbd8053)、[ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json)或[RapidAPI](https://rapidapi.com/hugging-face-hugging-face-default/api/hugging-face-datasets-api/)中尝试API。这个快速入门将向您展示如何以编程方式查询端点。
+请随时在[Postman](https://www.postman.com/huggingface/workspace/hugging-face-apis/documentation/23242779-d068584e-96d1-4d92-a703-7cb12cbd8053)、[ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json)或[RapidAPI](https://rapidapi.com/hugging-face-hugging-face-default/api/hugging-face-datasets-api/)中尝试 API。这个快速入门将向您展示如何以编程方式查询端点。
 
-REST API的基本URL是：
+REST API 的基本 URL 是：
 
 ```py
 https://datasets-server.huggingface.co
@@ -127,7 +127,7 @@ data = query()
 
 ## 列出配置和拆分
 
-`/splits`端点返回数据集中拆分的JSON列表：
+`/splits`端点返回数据集中拆分的 JSON 列表：
 
 PythonJavaScriptcURL
 
@@ -160,7 +160,7 @@ data = query()
 
 ## 预览数据集
 
-`/first-rows`端点返回数据集的前100行的JSON列表。它还返回数据特征的类型（“列”数据类型）。您应该指定数据集名称，配置名称（您可以从`/splits`端点找到配置名称），以及您想要预览的数据集的拆分名称：
+`/first-rows`端点返回数据集的前 100 行的 JSON 列表。它还返回数据特征的类型（“列”数据类型）。您应该指定数据集名称，配置名称（您可以从`/splits`端点找到配置名称），以及您想要预览的数据集的拆分名称：
 
 PythonJavaScriptcURL
 
@@ -173,7 +173,7 @@ def query():
 data = query()
 ```
 
-这将返回数据集的前100行：
+这将返回数据集的前 100 行：
 
 ```py
 {
@@ -217,7 +217,7 @@ data = query()
 
 ## 下载数据集的片段
 
-`/rows`端点返回数据集在任何给定位置（偏移量）的行片段的JSON列表。它还返回数据特征的类型（“列”数据类型）。您应该指定数据集名称，配置名称（您可以从`/splits`端点找到配置名称），拆分名称以及您想要下载的片段的偏移量和长度：
+`/rows`端点返回数据集在任何给定位置（偏移量）的行片段的 JSON 列表。它还返回数据特征的类型（“列”数据类型）。您应该指定数据集名称，配置名称（您可以从`/splits`端点找到配置名称），拆分名称以及您想要下载的片段的偏移量和长度：
 
 PythonJavaScriptcURL
 
@@ -230,7 +230,7 @@ def query():
 data = query()
 ```
 
-您可以一次下载最多100行的片段。
+您可以一次下载最多 100 行的片段。
 
 响应如下：
 
@@ -276,7 +276,7 @@ data = query()
 
 ## 在数据集中搜索文本
 
-`/search`端点返回一个JSON列表，其中包含与文本查询匹配的数据集行片段。即使值嵌套在字典中，文本也会在类型为`string`的列中搜索。它还返回数据特征的类型（“列”数据类型）。响应格式与/rows端点相同。您应该指定数据集名称，配置名称（您可以从`/splits`端点找到配置名称），拆分名称和您想在文本列中查找的搜索查询：
+`/search`端点返回一个 JSON 列表，其中包含与文本查询匹配的数据集行片段。即使值嵌套在字典中，文本也会在类型为`string`的列中搜索。它还返回数据特征的类型（“列”数据类型）。响应格式与/rows 端点相同。您应该指定数据集名称，配置名称（您可以从`/splits`端点找到配置名称），拆分名称和您想在文本列中查找的搜索查询：
 
 PythonJavaScriptcURL
 
@@ -289,7 +289,7 @@ def query():
 data = query()
 ```
 
-您可以一次获取最多100行的片段，并且可以使用`offset`和`length`参数请求其他片段，就像对`/rows`端点一样。
+您可以一次获取最多 100 行的片段，并且可以使用`offset`和`length`参数请求其他片段，就像对`/rows`端点一样。
 
 响应如下：
 
@@ -333,9 +333,9 @@ data = query()
 }
 ```
 
-## 访问Parquet文件
+## 访问 Parquet 文件
 
-数据集服务器将Hub上的每个数据集转换为[Parquet](https://parquet.apache.org/)格式。 `/parquet`端点返回一个JSON列表，其中包含数据集的Parquet URL：
+数据集服务器将 Hub 上的每个数据集转换为[Parquet](https://parquet.apache.org/)格式。 `/parquet`端点返回一个 JSON 列表，其中包含数据集的 Parquet URL：
 
 PythonJavaScriptcURL
 
@@ -348,7 +348,7 @@ def query():
 data = query()
 ```
 
-这将为每个拆分返回一个Parquet文件的URL：
+这将为每个拆分返回一个 Parquet 文件的 URL：
 
 ```py
 {
@@ -386,7 +386,7 @@ data = query()
 
 ## 获取数据集的大小
 
-`/size`端点返回一个JSON，其中包含数据集的大小（行数和字节大小），以及每个配置和拆分：
+`/size`端点返回一个 JSON，其中包含数据集的大小（行数和字节大小），以及每个配置和拆分：
 
 PythonJavaScriptcURL
 

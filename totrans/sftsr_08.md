@@ -1,6 +1,6 @@
 # Torch API
 
-> 原文：[https://huggingface.co/docs/safetensors/api/torch](https://huggingface.co/docs/safetensors/api/torch)
+> 原文：[`huggingface.co/docs/safetensors/api/torch`](https://huggingface.co/docs/safetensors/api/torch)
 
 #### `safetensors.torch.load_file`
 
@@ -14,7 +14,7 @@
 
 +   `filename` (`str`或`os.PathLike`) — 包含张量的文件的名称
 
-+   `device` (`Dict[str, any]`, *可选*, 默认为`cpu`) — 加载后张量需要位于的设备。可用选项是所有常规的torch设备位置
++   `device` (`Dict[str, any]`, *可选*, 默认为`cpu`) — 加载后张量需要位于的设备。可用选项是所有常规的 torch 设备位置
 
 返回
 
@@ -22,7 +22,7 @@
 
 包含名称为键，值为`torch.Tensor`的字典
 
-将safetensors文件加载到torch格式。
+将 safetensors 文件加载到 torch 格式。
 
 示例：
 
@@ -43,15 +43,15 @@ loaded = load_file(file_path)
 
 参数
 
-+   `data` (`bytes`) — safetensors文件的内容
++   `data` (`bytes`) — safetensors 文件的内容
 
 返回
 
 `Dict[str, torch.Tensor]`
 
-包含名称为键，值为在cpu上的`torch.Tensor`的字典
+包含名称为键，值为在 cpu 上的`torch.Tensor`的字典
 
-将safetensors文件从纯字节加载到torch格式。
+将 safetensors 文件从纯字节加载到 torch 格式。
 
 示例：
 
@@ -85,7 +85,7 @@ loaded = load(data)
 
 `None`
 
-将张量字典保存为safetensors格式的原始字节。
+将张量字典保存为 safetensors 格式的原始字节。
 
 示例：
 
@@ -117,7 +117,7 @@ save_file(tensors, "model.safetensors")
 
 表示格式的原始字节
 
-将张量字典保存为safetensors格式的原始字节。
+将张量字典保存为 safetensors 格式的原始字节。
 
 示例：
 
@@ -143,7 +143,7 @@ byte_data = save(tensors)
 
 +   `filename` (`str`或`os.PathLike`) — 要从中加载文件的文件名位置。
 
-+   `strict` (`bool`, *可选*, 默认为True) — 是否在缺少键或存在意外键时失败。当为false时，该函数仅返回缺失和意外的名称。
++   `strict` (`bool`, *可选*, 默认为 True) — 是否在缺少键或存在意外键时失败。当为 false 时，该函数仅返回缺失和意外的名称。
 
 返回
 
@@ -151,7 +151,7 @@ byte_data = save(tensors)
 
 (List[str], List[str])缺失的是在加载过程中未修改的模型中的名称，意外的是文件中存在但在加载过程中未使用的名称。
 
-将给定的文件名加载到torch模型上。此方法专门存在以避免在`safetensors`中不允许的张量共享问题。[有关张量共享的更多信息](../torch_shared_tensors)
+将给定的文件名加载到 torch 模型上。此方法专门存在以避免在`safetensors`中不允许的张量共享问题。有关张量共享的更多信息
 
 #### `safetensors.torch.save_model`
 
@@ -169,6 +169,6 @@ byte_data = save(tensors)
 
 +   `metadata` (`Dict[str, str]`, *可选*) — 要与文件一起保存的额外信息。对于每个丢弃的张量，将添加一些元数据。这些信息将不足以恢复整个共享结构，但可能有助于理解事物
 
-+   `force_contiguous` (`boolean`, *optional*, defaults to True) — 强制将state_dict保存为连续张量。这不会影响模型的正确性，但如果张量的布局是为了特定原因而选择的，可能会改变性能。
++   `force_contiguous` (`boolean`, *optional*, defaults to True) — 强制将 state_dict 保存为连续张量。这不会影响模型的正确性，但如果张量的布局是为了特定原因而选择的，可能会改变性能。
 
-将给定的torch模型保存到指定的文件名。此方法专门存在以避免在`safetensors`中不允许的张量共享问题。[有关张量共享的更多信息](../torch_shared_tensors)
+将给定的 torch 模型保存到指定的文件名。此方法专门存在以避免在`safetensors`中不允许的张量共享问题。有关张量共享的更多信息

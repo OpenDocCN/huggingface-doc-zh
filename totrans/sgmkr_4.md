@@ -1,8 +1,8 @@
-# 将模型部署到Amazon SageMaker
+# 将模型部署到 Amazon SageMaker
 
-> 原始文本：[https://huggingface.co/docs/sagemaker/inference](https://huggingface.co/docs/sagemaker/inference)
+> 原始文本：[`huggingface.co/docs/sagemaker/inference`](https://huggingface.co/docs/sagemaker/inference)
 
-在SageMaker中部署🤗 Transformers模型进行推理就像这样简单：
+在 SageMaker 中部署🤗 Transformers 模型进行推理就像这样简单：
 
 ```py
 from sagemaker.huggingface import HuggingFaceModel
@@ -11,31 +11,31 @@ from sagemaker.huggingface import HuggingFaceModel
 huggingface_model = HuggingFaceModel(...).deploy()
 ```
 
-本指南将向您展示如何使用[推理工具包](https://github.com/aws/sagemaker-huggingface-inference-toolkit)零代码部署模型。推理工具包建立在🤗 Transformers的[`pipeline`功能](https://huggingface.co/docs/transformers/main_classes/pipelines)之上。学习如何：
+本指南将向您展示如何使用[推理工具包](https://github.com/aws/sagemaker-huggingface-inference-toolkit)零代码部署模型。推理工具包建立在🤗 Transformers 的[`pipeline`功能](https://huggingface.co/docs/transformers/main_classes/pipelines)之上。学习如何：
 
-+   [安装和设置推理工具包](#installation-and-setup)。
++   安装和设置推理工具包。
 
-+   [在SageMaker中部署经过训练的🤗 Transformers模型](#deploy-a-transformer-model-trained-in-sagemaker)。
++   在 SageMaker 中部署经过训练的🤗 Transformers 模型。
 
-+   [从Hugging Face [模型Hub](https://huggingface.co/models)部署🤗 Transformers模型](#deploy-a-model-from-the-hub)。
++   [从 Hugging Face [模型 Hub](https://huggingface.co/models)部署🤗 Transformers 模型](#deploy-a-model-from-the-hub)。
 
-+   [使用🤗 Transformers和Amazon SageMaker运行批量转换作业](#run-batch-transform-with-transformers-and-sagemaker)。
++   使用🤗 Transformers 和 Amazon SageMaker 运行批量转换作业。
 
-+   [创建自定义推理模块](#user-defined-code-and-modules)。
++   创建自定义推理模块。
 
 ## 安装和设置
 
-在将🤗 Transformers模型部署到SageMaker之前，您需要注册AWS账户。如果您还没有AWS账户，请在[此处](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-set-up.html)了解更多。
+在将🤗 Transformers 模型部署到 SageMaker 之前，您需要注册 AWS 账户。如果您还没有 AWS 账户，请在[此处](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-set-up.html)了解更多。
 
-一旦您拥有AWS账户，可以通过以下方式之一开始使用：
+一旦您拥有 AWS 账户，可以通过以下方式之一开始使用：
 
 +   [SageMaker Studio](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-studio-onboard.html)
 
-+   [SageMaker笔记本实例](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-console.html)
++   [SageMaker 笔记本实例](https://docs.aws.amazon.com/sagemaker/latest/dg/gs-console.html)
 
 +   本地环境
 
-要开始本地训练，您需要设置适当的[IAM角色](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)。
+要开始本地训练，您需要设置适当的[IAM 角色](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html)。
 
 升级到最新的`sagemaker`版本。
 
@@ -43,9 +43,9 @@ huggingface_model = HuggingFaceModel(...).deploy()
 pip install sagemaker --upgrade
 ```
 
-**SageMaker环境**
+**SageMaker 环境**
 
-按照下面所示设置您的SageMaker环境：
+按照下面所示设置您的 SageMaker 环境：
 
 ```py
 import sagemaker
@@ -53,7 +53,7 @@ sess = sagemaker.Session()
 role = sagemaker.get_execution_role()
 ```
 
-*注意：执行角色仅在SageMaker内运行笔记本时可用。如果在不在SageMaker上运行的笔记本中运行`get_execution_role`，则会出现`region`错误。*
+*注意：执行角色仅在 SageMaker 内运行笔记本时可用。如果在不在 SageMaker 上运行的笔记本中运行`get_execution_role`，则会出现`region`错误。*
 
 **本地环境**
 
@@ -68,23 +68,23 @@ role = iam_client.get_role(RoleName='role-name-of-your-iam-role-with-right-permi
 sess = sagemaker.Session()
 ```
 
-## 在SageMaker中部署经过训练的🤗 Transformers模型
+## 在 SageMaker 中部署经过训练的🤗 Transformers 模型
 
-[https://www.youtube.com/embed/pfBGgSGnYLs](https://www.youtube.com/embed/pfBGgSGnYLs)
+[`www.youtube.com/embed/pfBGgSGnYLs`](https://www.youtube.com/embed/pfBGgSGnYLs)
 
-有两种方法可以部署在SageMaker中训练的Hugging Face模型：
+有两种方法可以部署在 SageMaker 中训练的 Hugging Face 模型：
 
 +   在训练完成后部署它。
 
-+   稍后可以使用`model_data`从S3部署保存的模型。
++   稍后可以使用`model_data`从 S3 部署保存的模型。
 
-📓打开[笔记本](https://github.com/huggingface/notebooks/blob/main/sagemaker/10_deploy_model_from_s3/deploy_transformer_model_from_s3.ipynb)查看如何将模型从S3部署到SageMaker进行推理的示例。
+📓打开[笔记本](https://github.com/huggingface/notebooks/blob/main/sagemaker/10_deploy_model_from_s3/deploy_transformer_model_from_s3.ipynb)查看如何将模型从 S3 部署到 SageMaker 进行推理的示例。
 
 ### 训练后部署
 
 在训练后直接部署您的模型，请确保所有必需的文件都保存在您的训练脚本中，包括分词器和模型。
 
-如果使用Hugging Face的`Trainer`，您可以将分词器作为参数传递给`Trainer`。当您调用`trainer.save_model()`时，它将自动保存。
+如果使用 Hugging Face 的`Trainer`，您可以将分词器作为参数传递给`Trainer`。当您调用`trainer.save_model()`时，它将自动保存。
 
 ```py
 from sagemaker.huggingface import HuggingFace
@@ -118,7 +118,7 @@ predictor.predict(data)
 predictor.delete_endpoint()
 ```
 
-### 使用model_data部署
+### 使用 model_data 部署
 
 如果您已经训练了模型并希望在以后部署它，请使用`model_data`参数指定您的分词器和模型权重的位置。
 
@@ -179,7 +179,7 @@ model.tar.gz/
 |- special_tokens_map.json
 ```
 
-从🤗 Hub创建自己的`model.tar.gz`文件：
+从🤗 Hub 创建自己的`model.tar.gz`文件：
 
 1.  下载模型：
 
@@ -195,19 +195,19 @@ cd {repository}
 tar zcvf model.tar.gz *
 ```
 
-1.  将`model.tar.gz`上传到S3：
+1.  将`model.tar.gz`上传到 S3：
 
 ```py
 aws s3 cp model.tar.gz <s3://{my-s3-path}>
 ```
 
-现在您可以提供S3 URI给`model_data`参数，以便稍后部署您的模型。
+现在您可以提供 S3 URI 给`model_data`参数，以便稍后部署您的模型。
 
-## 从🤗 Hub部署模型
+## 从🤗 Hub 部署模型
 
-[https://www.youtube.com/embed/l9QZuazbzWM](https://www.youtube.com/embed/l9QZuazbzWM)
+[`www.youtube.com/embed/l9QZuazbzWM`](https://www.youtube.com/embed/l9QZuazbzWM)
 
-要直接从🤗 Hub部署模型到SageMaker，创建`HuggingFaceModel`时定义两个环境变量：
+要直接从🤗 Hub 部署模型到 SageMaker，创建`HuggingFaceModel`时定义两个环境变量：
 
 +   `HF_MODEL_ID` 定义了模型 ID，当您创建 SageMaker 端点时，它会自动从[huggingface.co/models](http://huggingface.co/models)加载。通过这个环境变量可以访问 🤗 Hub 上的 10,000 多个模型。
 
@@ -260,7 +260,7 @@ predictor.delete_endpoint()
 
 ## 使用 🤗 Transformers 和 SageMaker 运行批量转换
 
-[https://www.youtube.com/embed/lnTixz0tUBg](https://www.youtube.com/embed/lnTixz0tUBg)
+[`www.youtube.com/embed/lnTixz0tUBg`](https://www.youtube.com/embed/lnTixz0tUBg)
 
 训练模型后，您可以使用[SageMaker 批量转换](https://docs.aws.amazon.com/sagemaker/latest/dg/how-it-works-batch.html)来执行模型推断。批量转换接受您的推断数据作为 S3 URI，然后 SageMaker 将负责下载数据，运行预测，并将结果上传到 S3。有关批量转换的更多详细信息，请查看[这里](https://docs.aws.amazon.com/sagemaker/latest/dg/batch-transform.html)。
 
@@ -332,7 +332,7 @@ batch_job.transform(
 
 ## 用户定义的代码和模块
 
-Hugging Face 推断工具包允许用户覆盖 `HuggingFaceHandlerService` 的默认方法。您需要创建一个名为 `code/` 的文件夹，并在其中放置一个 `inference.py` 文件。有关如何归档模型工件的更多详细信息，请参阅[这里](#create-a-model-artifact-for-deployment)。例如：
+Hugging Face 推断工具包允许用户覆盖 `HuggingFaceHandlerService` 的默认方法。您需要创建一个名为 `code/` 的文件夹，并在其中放置一个 `inference.py` 文件。有关如何归档模型工件的更多详细信息，请参阅这里。例如：
 
 ```py
 model.tar.gz/
@@ -361,7 +361,7 @@ model.tar.gz/
 
     +   `predictions`是来自`predict`的结果。
 
-    +   `accept`是来自HTTP请求的返回接受类型，例如`application/json`。
+    +   `accept`是来自 HTTP 请求的返回接受类型，例如`application/json`。
 
 这里是一个带有`model_fn`、`input_fn`、`predict_fn`和`output_fn`的自定义推理模块示例：
 

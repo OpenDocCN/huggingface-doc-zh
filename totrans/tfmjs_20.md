@@ -1,6 +1,6 @@
 # tokenizers
 
-> 原始文本: [https://huggingface.co/docs/transformers.js/api/tokenizers](https://huggingface.co/docs/transformers.js/api/tokenizers)
+> 原始文本: [`huggingface.co/docs/transformers.js/api/tokenizers`](https://huggingface.co/docs/transformers.js/api/tokenizers)
 
 分词器用于为模型准备文本输入。
 
@@ -19,209 +19,209 @@ const { input_ids } = await tokenizer('I love transformers!');
 // }
 ```
 
-+   [tokenizers](#module_tokenizers)
++   tokenizers
 
     +   *static*
 
-        +   [.TokenizerModel](#module_tokenizers.TokenizerModel) ⇐ `Callable`
+        +   .TokenizerModel ⇐ `Callable`
 
-            +   [`new TokenizerModel(config)`](#new_module_tokenizers.TokenizerModel_new)
+            +   `new TokenizerModel(config)`
 
             +   *instance*
 
-                +   [`.vocab`](#module_tokenizers.TokenizerModel+vocab) : `Array.<string>`
+                +   `.vocab` : `Array.<string>`
 
-                +   [`.tokens_to_ids`](#module_tokenizers.TokenizerModel+tokens_to_ids) : `Map.<string, number>`
+                +   `.tokens_to_ids` : `Map.<string, number>`
 
-                +   [`.fuse_unk`](#module_tokenizers.TokenizerModel+fuse_unk) : `boolean`
+                +   `.fuse_unk` : `boolean`
 
-                +   [`._call(tokens)`](#module_tokenizers.TokenizerModel+_call) ⇒ `Array.<string>`
+                +   `._call(tokens)` ⇒ `Array.<string>`
 
-                +   [`.encode(tokens)`](#module_tokenizers.TokenizerModel+encode) ⇒ `Array.<string>`
+                +   `.encode(tokens)` ⇒ `Array.<string>`
 
-                +   [`.convert_tokens_to_ids(tokens)`](#module_tokenizers.TokenizerModel+convert_tokens_to_ids) ⇒ `Array.<number>`
+                +   `.convert_tokens_to_ids(tokens)` ⇒ `Array.<number>`
 
-                +   [`.convert_ids_to_tokens(ids)`](#module_tokenizers.TokenizerModel+convert_ids_to_tokens) ⇒ `Array.<string>`
+                +   `.convert_ids_to_tokens(ids)` ⇒ `Array.<string>`
 
             +   *static*
 
-                +   [`.fromConfig(config, ...args)`](#module_tokenizers.TokenizerModel.fromConfig) ⇒ `TokenizerModel`
+                +   `.fromConfig(config, ...args)` ⇒ `TokenizerModel`
 
-        +   [.PreTrainedTokenizer](#module_tokenizers.PreTrainedTokenizer)
+        +   .PreTrainedTokenizer
 
-            +   [`new PreTrainedTokenizer(tokenizerJSON, tokenizerConfig)`](#new_module_tokenizers.PreTrainedTokenizer_new)
+            +   `new PreTrainedTokenizer(tokenizerJSON, tokenizerConfig)`
 
             +   *instance*
 
-                +   [`.added_tokens`](#module_tokenizers.PreTrainedTokenizer+added_tokens) : `Array.<AddedToken>`
+                +   `.added_tokens` : `Array.<AddedToken>`
 
-                +   [`.remove_space`](#module_tokenizers.PreTrainedTokenizer+remove_space) : `boolean`
+                +   `.remove_space` : `boolean`
 
-                +   [`.padding_side`](#module_tokenizers.PreTrainedTokenizer+padding_side) : `’right’` | `’left’`
+                +   `.padding_side` : `’right’` | `’left’`
 
-                +   [`.getToken(...keys)`](#module_tokenizers.PreTrainedTokenizer+getToken) ⇒ `string` | `null`
+                +   `.getToken(...keys)` ⇒ `string` | `null`
 
-                +   [`._call(text, options)`](#module_tokenizers.PreTrainedTokenizer+_call) ⇒ `BatchEncoding`
+                +   `._call(text, options)` ⇒ `BatchEncoding`
 
-                +   [`._encode_text(text)`](#module_tokenizers.PreTrainedTokenizer+_encode_text) ⇒ `Array<string>` | `null`
+                +   `._encode_text(text)` ⇒ `Array<string>` | `null`
 
-                +   [`.encode(text, text_pair, options)`](#module_tokenizers.PreTrainedTokenizer+encode) ⇒ `Array.<number>`
+                +   `.encode(text, text_pair, options)` ⇒ `Array.<number>`
 
-                +   [`.batch_decode(batch, decode_args)`](#module_tokenizers.PreTrainedTokenizer+batch_decode) ⇒ `Array.<string>`
+                +   `.batch_decode(batch, decode_args)` ⇒ `Array.<string>`
 
                 +   [`.decode(token_ids, [decode_args])`](#module_tokenizers.PreTrainedTokenizer+decode) ⇒ `string`
 
-                +   [`.decode_single(token_ids, decode_args)`](#module_tokenizers.PreTrainedTokenizer+decode_single) ⇒ `string`
+                +   `.decode_single(token_ids, decode_args)` ⇒ `string`
 
-                +   [`.apply_chat_template(conversation, options)`](#module_tokenizers.PreTrainedTokenizer+apply_chat_template) ⇒ `string` | `Tensor` | `Array<number>` | `Array<Array<number>>`
+                +   `.apply_chat_template(conversation, options)` ⇒ `string` | `Tensor` | `Array<number>` | `Array<Array<number>>`
 
             +   *static*
 
-                +   [`.from_pretrained(pretrained_model_name_or_path, options)`](#module_tokenizers.PreTrainedTokenizer.from_pretrained) ⇒ `Promise.<PreTrainedTokenizer>`
+                +   `.from_pretrained(pretrained_model_name_or_path, options)` ⇒ `Promise.<PreTrainedTokenizer>`
 
-        +   [.BertTokenizer](#module_tokenizers.BertTokenizer) ⇐ `PreTrainedTokenizer`
+        +   .BertTokenizer ⇐ `PreTrainedTokenizer`
 
-        +   [.AlbertTokenizer](#module_tokenizers.AlbertTokenizer) ⇐ `PreTrainedTokenizer`
+        +   .AlbertTokenizer ⇐ `PreTrainedTokenizer`
 
-        +   [.NllbTokenizer](#module_tokenizers.NllbTokenizer)
+        +   .NllbTokenizer
 
-            +   [`._build_translation_inputs(raw_inputs, tokenizer_options, generate_kwargs)`](#module_tokenizers.NllbTokenizer+_build_translation_inputs) ⇒ `Object`
+            +   `._build_translation_inputs(raw_inputs, tokenizer_options, generate_kwargs)` ⇒ `Object`
 
-        +   [.M2M100Tokenizer](#module_tokenizers.M2M100Tokenizer)
+        +   .M2M100Tokenizer
 
-            +   [`._build_translation_inputs(raw_inputs, tokenizer_options, generate_kwargs)`](#module_tokenizers.M2M100Tokenizer+_build_translation_inputs) ⇒ `Object`
+            +   `._build_translation_inputs(raw_inputs, tokenizer_options, generate_kwargs)` ⇒ `Object`
 
-        +   [.WhisperTokenizer](#module_tokenizers.WhisperTokenizer) ⇐ `PreTrainedTokenizer`
+        +   .WhisperTokenizer ⇐ `PreTrainedTokenizer`
 
-            +   [`._decode_asr(sequences, options)`](#module_tokenizers.WhisperTokenizer+_decode_asr) ⇒ `*`
+            +   `._decode_asr(sequences, options)` ⇒ `*`
 
-            +   [`.decode()`](#module_tokenizers.WhisperTokenizer+decode) : `*`
+            +   `.decode()` : `*`
 
-            +   [`.get_decoder_prompt_ids(options)`](#module_tokenizers.WhisperTokenizer+get_decoder_prompt_ids) ⇒ `Array.<Array<number>>`
+            +   `.get_decoder_prompt_ids(options)` ⇒ `Array.<Array<number>>`
 
-        +   [.MarianTokenizer](#module_tokenizers.MarianTokenizer)
+        +   .MarianTokenizer
 
-            +   [`new MarianTokenizer(tokenizerJSON, tokenizerConfig)`](#new_module_tokenizers.MarianTokenizer_new)
+            +   `new MarianTokenizer(tokenizerJSON, tokenizerConfig)`
 
-            +   [`._encode_text(text)`](#module_tokenizers.MarianTokenizer+_encode_text) ⇒ `Array`
+            +   `._encode_text(text)` ⇒ `Array`
 
-        +   [.AutoTokenizer](#module_tokenizers.AutoTokenizer)
+        +   .AutoTokenizer
 
-            +   [`.from_pretrained(pretrained_model_name_or_path, options)`](#module_tokenizers.AutoTokenizer.from_pretrained) ⇒ `Promise.<PreTrainedTokenizer>`
+            +   `.from_pretrained(pretrained_model_name_or_path, options)` ⇒ `Promise.<PreTrainedTokenizer>`
 
     +   *inner*
 
-        +   [~AddedToken](#module_tokenizers..AddedToken)
+        +   ~AddedToken
 
-            +   [`new AddedToken(config)`](#new_module_tokenizers..AddedToken_new)
+            +   `new AddedToken(config)`
 
-        +   [~WordPieceTokenizer](#module_tokenizers..WordPieceTokenizer) ⇐ `TokenizerModel`
+        +   ~WordPieceTokenizer ⇐ `TokenizerModel`
 
-            +   [`new WordPieceTokenizer(config)`](#new_module_tokenizers..WordPieceTokenizer_new)
+            +   `new WordPieceTokenizer(config)`
 
-            +   [`.tokens_to_ids`](#module_tokenizers..WordPieceTokenizer+tokens_to_ids) : `Map.<string, number>`
+            +   `.tokens_to_ids` : `Map.<string, number>`
 
-            +   [`.unk_token_id`](#module_tokenizers..WordPieceTokenizer+unk_token_id) : `number`
+            +   `.unk_token_id` : `number`
 
-            +   [`.unk_token`](#module_tokenizers..WordPieceTokenizer+unk_token) : `string`
+            +   `.unk_token` : `string`
 
-            +   [`.max_input_chars_per_word`](#module_tokenizers..WordPieceTokenizer+max_input_chars_per_word) : `number`
+            +   `.max_input_chars_per_word` : `number`
 
-            +   [`.vocab`](#module_tokenizers..WordPieceTokenizer+vocab) : `Array.<string>`
+            +   `.vocab` : `Array.<string>`
 
-            +   [`.encode(tokens)`](#module_tokenizers..WordPieceTokenizer+encode) ⇒ `Array.<string>`
+            +   `.encode(tokens)` ⇒ `Array.<string>`
 
-        +   [~Unigram](#module_tokenizers..Unigram) ⇐ `TokenizerModel`
+        +   ~Unigram ⇐ `TokenizerModel`
 
-            +   [`new Unigram(config, moreConfig)`](#new_module_tokenizers..Unigram_new)
+            +   `new Unigram(config, moreConfig)`
 
-            +   [`.populateNodes(lattice)`](#module_tokenizers..Unigram+populateNodes)
+            +   `.populateNodes(lattice)`
 
-            +   [`.tokenize(normalized)`](#module_tokenizers..Unigram+tokenize) ⇒ `Array.<string>`
+            +   `.tokenize(normalized)` ⇒ `Array.<string>`
 
-            +   [`.encode(tokens)`](#module_tokenizers..Unigram+encode) ⇒ `Array.<string>`
+            +   `.encode(tokens)` ⇒ `Array.<string>`
 
-        +   [~BPE](#module_tokenizers..BPE) ⇐ `TokenizerModel`
+        +   ~BPE ⇐ `TokenizerModel`
 
-            +   [`new BPE(config)`](#new_module_tokenizers..BPE_new)
+            +   `new BPE(config)`
 
-            +   [`.tokens_to_ids`](#module_tokenizers..BPE+tokens_to_ids) : `Map.<string, number>`
+            +   `.tokens_to_ids` : `Map.<string, number>`
 
-            +   [`.cache`](#module_tokenizers..BPE+cache) : `Map.<string, Array<string>>`
+            +   `.cache` : `Map.<string, Array<string>>`
 
-            +   [`.bpe(token)`](#module_tokenizers..BPE+bpe) ⇒ `Array.<string>`
+            +   `.bpe(token)` ⇒ `Array.<string>`
 
-            +   [`.encode(tokens)`](#module_tokenizers..BPE+encode) ⇒ `Array.<string>`
+            +   `.encode(tokens)` ⇒ `Array.<string>`
 
-        +   [~LegacyTokenizerModel](#module_tokenizers..LegacyTokenizerModel)
+        +   ~LegacyTokenizerModel
 
-            +   [`new LegacyTokenizerModel(config, moreConfig)`](#new_module_tokenizers..LegacyTokenizerModel_new)
+            +   `new LegacyTokenizerModel(config, moreConfig)`
 
-            +   [`.tokens_to_ids`](#module_tokenizers..LegacyTokenizerModel+tokens_to_ids) : `Map.<string, number>`
+            +   `.tokens_to_ids` : `Map.<string, number>`
 
-        +   *[~Normalizer](#module_tokenizers..Normalizer)*
+        +   *~Normalizer*
 
-            +   *[`new Normalizer(config)`](#new_module_tokenizers..Normalizer_new)*
+            +   *`new Normalizer(config)`*
 
             +   *instance*
 
-                +   **[`.normalize(text)`](#module_tokenizers..Normalizer+normalize) ⇒ `string`**
+                +   **`.normalize(text)` ⇒ `string`**
 
-                +   *[`._call(text)`](#module_tokenizers..Normalizer+_call) ⇒ `string`*
+                +   *`._call(text)` ⇒ `string`*
 
             +   *static*
 
-                +   *[`.fromConfig(config)`](#module_tokenizers..Normalizer.fromConfig) ⇒ `Normalizer`*
+                +   *`.fromConfig(config)` ⇒ `Normalizer`*
 
-        +   [~Replace](#module_tokenizers..Replace) ⇐ `Normalizer`
+        +   ~Replace ⇐ `Normalizer`
 
-            +   [`.normalize(text)`](#module_tokenizers..Replace+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~NFC](#module_tokenizers..NFC) ⇐ `Normalizer`
+        +   ~NFC ⇐ `Normalizer`
 
-            +   [`.normalize(text)`](#module_tokenizers..NFC+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~NFKC](#module_tokenizers..NFKC) ⇐ `Normalizer`
+        +   ~NFKC ⇐ `Normalizer`
 
-            +   [`.normalize(text)`](#module_tokenizers..NFKC+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~NFKD](#module_tokenizers..NFKD) ⇐ `Normalizer`
+        +   ~NFKD ⇐ `Normalizer`
 
-            +   [`.normalize(text)`](#module_tokenizers..NFKD+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~StripNormalizer](#module_tokenizers..StripNormalizer)
+        +   ~StripNormalizer
 
-            +   [`.normalize(text)`](#module_tokenizers..StripNormalizer+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~StripAccents](#module_tokenizers..StripAccents) ⇐ `Normalizer`
+        +   ~StripAccents ⇐ `Normalizer`
 
-            +   [`.normalize(text)`](#module_tokenizers..StripAccents+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~Lowercase](#module_tokenizers..Lowercase) ⇐ `Normalizer`
+        +   ~Lowercase ⇐ `Normalizer`
 
-            +   [`.normalize(text)`](#module_tokenizers..Lowercase+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~Prepend](#module_tokenizers..Prepend) ⇐ `Normalizer`
+        +   ~Prepend ⇐ `Normalizer`
 
-            +   [`.normalize(text)`](#module_tokenizers..Prepend+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~NormalizerSequence](#module_tokenizers..NormalizerSequence) ⇐ `Normalizer`
+        +   ~NormalizerSequence ⇐ `Normalizer`
 
-            +   [`new NormalizerSequence(config)`](#new_module_tokenizers..NormalizerSequence_new)
+            +   `new NormalizerSequence(config)`
 
-            +   [`.normalize(text)`](#module_tokenizers..NormalizerSequence+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~BertNormalizer](#module_tokenizers..BertNormalizer) ⇐ `Normalizer`
+        +   ~BertNormalizer ⇐ `Normalizer`
 
-            +   [`._tokenize_chinese_chars(text)`](#module_tokenizers..BertNormalizer+_tokenize_chinese_chars) ⇒ `string`
+            +   `._tokenize_chinese_chars(text)` ⇒ `string`
 
-            +   [`._is_chinese_char(cp)`](#module_tokenizers..BertNormalizer+_is_chinese_char) ⇒ `boolean`
+            +   `._is_chinese_char(cp)` ⇒ `boolean`
 
-            +   [`.stripAccents(text)`](#module_tokenizers..BertNormalizer+stripAccents) ⇒ `string`
+            +   `.stripAccents(text)` ⇒ `string`
 
-            +   [`.normalize(text)`](#module_tokenizers..BertNormalizer+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~PreTokenizer](#module_tokenizers..PreTokenizer) ⇐ `Callable`
+        +   ~PreTokenizer ⇐ `Callable`
 
             +   *instance*
 
@@ -233,289 +233,289 @@ const { input_ids } = await tokenizer('I love transformers!');
 
             +   *static*
 
-                +   [`.fromConfig(config)`](#module_tokenizers..PreTokenizer.fromConfig) ⇒ `PreTokenizer`
+                +   `.fromConfig(config)` ⇒ `PreTokenizer`
 
-        +   [~BertPreTokenizer](#module_tokenizers..BertPreTokenizer) ⇐ `PreTokenizer`
+        +   ~BertPreTokenizer ⇐ `PreTokenizer`
 
-            +   [`new BertPreTokenizer(config)`](#new_module_tokenizers..BertPreTokenizer_new)
+            +   `new BertPreTokenizer(config)`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..BertPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~ByteLevelPreTokenizer](#module_tokenizers..ByteLevelPreTokenizer) ⇐ `PreTokenizer`
+        +   ~ByteLevelPreTokenizer ⇐ `PreTokenizer`
 
-            +   [`new ByteLevelPreTokenizer(config)`](#new_module_tokenizers..ByteLevelPreTokenizer_new)
+            +   `new ByteLevelPreTokenizer(config)`
 
-            +   [`.add_prefix_space`](#module_tokenizers..ByteLevelPreTokenizer+add_prefix_space) : `boolean`
+            +   `.add_prefix_space` : `boolean`
 
-            +   [`.trim_offsets`](#module_tokenizers..ByteLevelPreTokenizer+trim_offsets) : `boolean`
+            +   `.trim_offsets` : `boolean`
 
-            +   [`.use_regex`](#module_tokenizers..ByteLevelPreTokenizer+use_regex) : `boolean`
+            +   `.use_regex` : `boolean`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..ByteLevelPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~SplitPreTokenizer](#module_tokenizers..SplitPreTokenizer) ⇐ `PreTokenizer`
+        +   ~SplitPreTokenizer ⇐ `PreTokenizer`
 
-            +   [`new SplitPreTokenizer(config)`](#new_module_tokenizers..SplitPreTokenizer_new)
+            +   `new SplitPreTokenizer(config)`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..SplitPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~PunctuationPreTokenizer](#module_tokenizers..PunctuationPreTokenizer) ⇐ `PreTokenizer`
+        +   ~PunctuationPreTokenizer ⇐ `PreTokenizer`
 
-            +   [`new PunctuationPreTokenizer(config)`](#new_module_tokenizers..PunctuationPreTokenizer_new)
+            +   `new PunctuationPreTokenizer(config)`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..PunctuationPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~DigitsPreTokenizer](#module_tokenizers..DigitsPreTokenizer) ⇐ `PreTokenizer`
+        +   ~DigitsPreTokenizer ⇐ `PreTokenizer`
 
-            +   [`new DigitsPreTokenizer(config)`](#new_module_tokenizers..DigitsPreTokenizer_new)
+            +   `new DigitsPreTokenizer(config)`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..DigitsPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~PostProcessor](#module_tokenizers..PostProcessor) ⇐ `Callable`
+        +   ~PostProcessor ⇐ `Callable`
 
-            +   [`new PostProcessor(config)`](#new_module_tokenizers..PostProcessor_new)
+            +   `new PostProcessor(config)`
 
             +   *instance*
 
-                +   [`.post_process(tokens, ...args)`](#module_tokenizers..PostProcessor+post_process) ⇒ `PostProcessedOutput`
+                +   `.post_process(tokens, ...args)` ⇒ `PostProcessedOutput`
 
-                +   [`._call(tokens, ...args)`](#module_tokenizers..PostProcessor+_call) ⇒ `PostProcessedOutput`
+                +   `._call(tokens, ...args)` ⇒ `PostProcessedOutput`
 
             +   *static*
 
-                +   [`.fromConfig(config)`](#module_tokenizers..PostProcessor.fromConfig) ⇒ `PostProcessor`
+                +   `.fromConfig(config)` ⇒ `PostProcessor`
 
-        +   [~BertProcessing](#module_tokenizers..BertProcessing)
+        +   ~BertProcessing
 
-            +   [`new BertProcessing(config)`](#new_module_tokenizers..BertProcessing_new)
+            +   `new BertProcessing(config)`
 
             +   [`.post_process(tokens, [tokens_pair])`](#module_tokenizers..BertProcessing+post_process) ⇒ `PostProcessedOutput`
 
-        +   [~TemplateProcessing](#module_tokenizers..TemplateProcessing) ⇐ `PostProcessor`
+        +   ~TemplateProcessing ⇐ `PostProcessor`
 
-            +   [`new TemplateProcessing(config)`](#new_module_tokenizers..TemplateProcessing_new)
+            +   `new TemplateProcessing(config)`
 
             +   [`.post_process(tokens, [tokens_pair])`](#module_tokenizers..TemplateProcessing+post_process) ⇒ `PostProcessedOutput`
 
-        +   [~ByteLevelPostProcessor](#module_tokenizers..ByteLevelPostProcessor) ⇐ `PostProcessor`
+        +   ~ByteLevelPostProcessor ⇐ `PostProcessor`
 
             +   [`.post_process(tokens, [tokens_pair])`](#module_tokenizers..ByteLevelPostProcessor+post_process) ⇒ `PostProcessedOutput`
 
-        +   [~Decoder](#module_tokenizers..Decoder) ⇐ `Callable`
+        +   ~Decoder ⇐ `Callable`
 
-            +   [`new Decoder(config)`](#new_module_tokenizers..Decoder_new)
+            +   `new Decoder(config)`
 
             +   *instance*
 
-                +   [`.added_tokens`](#module_tokenizers..Decoder+added_tokens) : `Array.<AddedToken>`
+                +   `.added_tokens` : `Array.<AddedToken>`
 
-                +   [`._call(tokens)`](#module_tokenizers..Decoder+_call) ⇒ `string`
+                +   `._call(tokens)` ⇒ `string`
 
-                +   [`.decode(tokens)`](#module_tokenizers..Decoder+decode) ⇒ `string`
+                +   `.decode(tokens)` ⇒ `string`
 
-                +   [`.decode_chain(tokens)`](#module_tokenizers..Decoder+decode_chain) ⇒ `Array.<string>`
+                +   `.decode_chain(tokens)` ⇒ `Array.<string>`
 
             +   *static*
 
-                +   [`.fromConfig(config)`](#module_tokenizers..Decoder.fromConfig) ⇒ `Decoder`
+                +   `.fromConfig(config)` ⇒ `Decoder`
 
-        +   [~FuseDecoder](#module_tokenizers..FuseDecoder)
+        +   ~FuseDecoder
 
-            +   [`.decode_chain()`](#module_tokenizers..FuseDecoder+decode_chain) : `*`
+            +   `.decode_chain()` : `*`
 
-        +   [~WordPieceDecoder](#module_tokenizers..WordPieceDecoder) ⇐ `Decoder`
+        +   ~WordPieceDecoder ⇐ `Decoder`
 
-            +   [`new WordPieceDecoder(config)`](#new_module_tokenizers..WordPieceDecoder_new)
+            +   `new WordPieceDecoder(config)`
 
-            +   [`.decode_chain()`](#module_tokenizers..WordPieceDecoder+decode_chain) : `*`
+            +   `.decode_chain()` : `*`
 
-        +   [~ByteLevelDecoder](#module_tokenizers..ByteLevelDecoder) ⇐ `Decoder`
+        +   ~ByteLevelDecoder ⇐ `Decoder`
 
-            +   [`new ByteLevelDecoder(config)`](#new_module_tokenizers..ByteLevelDecoder_new)
+            +   `new ByteLevelDecoder(config)`
 
-            +   [`.convert_tokens_to_string(tokens)`](#module_tokenizers..ByteLevelDecoder+convert_tokens_to_string) ⇒ `string`
+            +   `.convert_tokens_to_string(tokens)` ⇒ `string`
 
-            +   [`.decode_chain()`](#module_tokenizers..ByteLevelDecoder+decode_chain) : `*`
+            +   `.decode_chain()` : `*`
 
-        +   [~CTCDecoder](#module_tokenizers..CTCDecoder)
+        +   ~CTCDecoder
 
-            +   [`.convert_tokens_to_string(tokens)`](#module_tokenizers..CTCDecoder+convert_tokens_to_string) ⇒ `string`
+            +   `.convert_tokens_to_string(tokens)` ⇒ `string`
 
-            +   [`.decode_chain()`](#module_tokenizers..CTCDecoder+decode_chain) : `*`
+            +   `.decode_chain()` : `*`
 
-        +   [~DecoderSequence](#module_tokenizers..DecoderSequence) ⇐ `Decoder`
+        +   ~DecoderSequence ⇐ `Decoder`
 
-            +   [`new DecoderSequence(config)`](#new_module_tokenizers..DecoderSequence_new)
+            +   `new DecoderSequence(config)`
 
-            +   [`.decode_chain()`](#module_tokenizers..DecoderSequence+decode_chain) : `*`
+            +   `.decode_chain()` : `*`
 
-        +   [~MetaspacePreTokenizer](#module_tokenizers..MetaspacePreTokenizer) ⇐ `PreTokenizer`
+        +   ~MetaspacePreTokenizer ⇐ `PreTokenizer`
 
-            +   [`new MetaspacePreTokenizer(config)`](#new_module_tokenizers..MetaspacePreTokenizer_new) : `Object`
+            +   `new MetaspacePreTokenizer(config)` : `Object`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..MetaspacePreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~MetaspaceDecoder](#module_tokenizers..MetaspaceDecoder) ⇐ `Decoder`
+        +   ~MetaspaceDecoder ⇐ `Decoder`
 
-            +   [`new MetaspaceDecoder(config)`](#new_module_tokenizers..MetaspaceDecoder_new)
+            +   `new MetaspaceDecoder(config)`
 
-            +   [`.decode_chain()`](#module_tokenizers..MetaspaceDecoder+decode_chain) : `*`
+            +   `.decode_chain()` : `*`
 
-        +   [~Precompiled](#module_tokenizers..Precompiled) ⇐ `Normalizer`
+        +   ~Precompiled ⇐ `Normalizer`
 
-            +   [`new Precompiled(config)`](#new_module_tokenizers..Precompiled_new)
+            +   `new Precompiled(config)`
 
-            +   [`.normalize(text)`](#module_tokenizers..Precompiled+normalize) ⇒ `string`
+            +   `.normalize(text)` ⇒ `string`
 
-        +   [~PreTokenizerSequence](#module_tokenizers..PreTokenizerSequence) ⇐ `PreTokenizer`
+        +   ~PreTokenizerSequence ⇐ `PreTokenizer`
 
-            +   [`new PreTokenizerSequence(config)`](#new_module_tokenizers..PreTokenizerSequence_new)
+            +   `new PreTokenizerSequence(config)`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..PreTokenizerSequence+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~WhitespacePreTokenizer](#module_tokenizers..WhitespacePreTokenizer)
+        +   ~WhitespacePreTokenizer
 
-            +   [`new WhitespacePreTokenizer(config)`](#new_module_tokenizers..WhitespacePreTokenizer_new)
+            +   `new WhitespacePreTokenizer(config)`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..WhitespacePreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~WhitespaceSplit](#module_tokenizers..WhitespaceSplit) ⇐ `PreTokenizer`
+        +   ~WhitespaceSplit ⇐ `PreTokenizer`
 
-            +   [`new WhitespaceSplit(config)`](#new_module_tokenizers..WhitespaceSplit_new)
+            +   `new WhitespaceSplit(config)`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..WhitespaceSplit+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [~ReplacePreTokenizer](#module_tokenizers..ReplacePreTokenizer)
+        +   ~ReplacePreTokenizer
 
-            +   [`new ReplacePreTokenizer(config)`](#new_module_tokenizers..ReplacePreTokenizer_new)
+            +   `new ReplacePreTokenizer(config)`
 
             +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..ReplacePreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
-        +   [`~BYTES_TO_UNICODE`](#module_tokenizers..BYTES_TO_UNICODE) ⇒ `Object`
+        +   `~BYTES_TO_UNICODE` ⇒ `Object`
 
-        +   [`~loadTokenizer(pretrained_model_name_or_path, options)`](#module_tokenizers..loadTokenizer) ⇒ `Promise.<Array<any>>`
+        +   `~loadTokenizer(pretrained_model_name_or_path, options)` ⇒ `Promise.<Array<any>>`
 
-        +   [`~regexSplit(text, regex)`](#module_tokenizers..regexSplit) ⇒ `Array.<string>`
+        +   `~regexSplit(text, regex)` ⇒ `Array.<string>`
 
-        +   [`~createPattern(pattern, invert)`](#module_tokenizers..createPattern) ⇒ `RegExp` | `null`
+        +   `~createPattern(pattern, invert)` ⇒ `RegExp` | `null`
 
-        +   [`~objectToMap(obj)`](#module_tokenizers..objectToMap) ⇒ `Map.<string, any>`
+        +   `~objectToMap(obj)` ⇒ `Map.<string, any>`
 
-        +   [`~prepareTensorForDecode(tensor)`](#module_tokenizers..prepareTensorForDecode) ⇒ `Array.<number>`
+        +   `~prepareTensorForDecode(tensor)` ⇒ `Array.<number>`
 
-        +   [`~clean_up_tokenization(text)`](#module_tokenizers..clean_up_tokenization) ⇒ `string`
+        +   `~clean_up_tokenization(text)` ⇒ `string`
 
-        +   [`~remove_accents(text)`](#module_tokenizers..remove_accents) ⇒ `string`
+        +   `~remove_accents(text)` ⇒ `string`
 
-        +   [`~lowercase_and_remove_accent(text)`](#module_tokenizers..lowercase_and_remove_accent) ⇒ `string`
+        +   `~lowercase_and_remove_accent(text)` ⇒ `string`
 
-        +   [`~fuse(arr, value, mapping)`](#module_tokenizers..fuse)
+        +   `~fuse(arr, value, mapping)`
 
-        +   [`~whitespace_split(text)`](#module_tokenizers..whitespace_split) ⇒ `Array.<string>`
+        +   `~whitespace_split(text)` ⇒ `Array.<string>`
 
-        +   [`~PretrainedTokenizerOptions`](#module_tokenizers..PretrainedTokenizerOptions) : `Object`
+        +   `~PretrainedTokenizerOptions` : `Object`
 
-        +   [`~BPENode`](#module_tokenizers..BPENode) : `Object`
+        +   `~BPENode` : `Object`
 
-        +   [`~SplitDelimiterBehavior`](#module_tokenizers..SplitDelimiterBehavior)：`’removed’` | `’isolated’` | `’mergedWithPrevious’` | `’mergedWithNext’` | `’contiguous’`
+        +   `~SplitDelimiterBehavior`：`’removed’` | `’isolated’` | `’mergedWithPrevious’` | `’mergedWithNext’` | `’contiguous’`
 
-        +   [`~PostProcessedOutput`](#module_tokenizers..PostProcessedOutput)：`Object`
+        +   `~PostProcessedOutput`：`Object`
 
-        +   [`~EncodingSingle`](#module_tokenizers..EncodingSingle)：`Object`
+        +   `~EncodingSingle`：`Object`
 
-        +   [`~BatchEncoding`](#module_tokenizers..BatchEncoding)：`Array<number>` | `Array<Array<number>>` | `Tensor`
+        +   `~BatchEncoding`：`Array<number>` | `Array<Array<number>>` | `Tensor`
 
-        +   [`~Message`](#module_tokenizers..Message)：`Object`
+        +   `~Message`：`Object`
 
 * * *
 
 ## tokenizers.TokenizerModel ⇐ <code> Callable </code>
 
-tokenizer models的抽象基类。
+tokenizer models 的抽象基类。
 
-**类型**：[`tokenizers`](#module_tokenizers)的静态类
+**类型**：`tokenizers`的静态类
 
 **扩展**：`Callable`
 
-+   [.TokenizerModel](#module_tokenizers.TokenizerModel) ⇐ `Callable`
++   .TokenizerModel ⇐ `Callable`
 
-    +   [`new TokenizerModel(config)`](#new_module_tokenizers.TokenizerModel_new)
+    +   `new TokenizerModel(config)`
 
     +   *实例*
 
-        +   [`.vocab`](#module_tokenizers.TokenizerModel+vocab)：`Array.<string>`
+        +   `.vocab`：`Array.<string>`
 
-        +   [`.tokens_to_ids`](#module_tokenizers.TokenizerModel+tokens_to_ids)：`Map.<string, number>`
+        +   `.tokens_to_ids`：`Map.<string, number>`
 
-        +   [`.fuse_unk`](#module_tokenizers.TokenizerModel+fuse_unk)：`boolean`
+        +   `.fuse_unk`：`boolean`
 
-        +   [`._call(tokens)`](#module_tokenizers.TokenizerModel+_call) ⇒ `Array.<string>`
+        +   `._call(tokens)` ⇒ `Array.<string>`
 
-        +   [`.encode(tokens)`](#module_tokenizers.TokenizerModel+encode) ⇒ `Array.<string>`
+        +   `.encode(tokens)` ⇒ `Array.<string>`
 
-        +   [`.convert_tokens_to_ids(tokens)`](#module_tokenizers.TokenizerModel+convert_tokens_to_ids) ⇒ `Array.<number>`
+        +   `.convert_tokens_to_ids(tokens)` ⇒ `Array.<number>`
 
-        +   [`.convert_ids_to_tokens(ids)`](#module_tokenizers.TokenizerModel+convert_ids_to_tokens) ⇒ `Array.<string>`
+        +   `.convert_ids_to_tokens(ids)` ⇒ `Array.<string>`
 
     +   *静态*
 
-        +   [`.fromConfig(config, ...args)`](#module_tokenizers.TokenizerModel.fromConfig) ⇒ `TokenizerModel`
+        +   `.fromConfig(config, ...args)` ⇒ `TokenizerModel`
 
 * * *
 
 ### new TokenizerModel(config)
 
-创建一个新的TokenizerModel实例。
+创建一个新的 TokenizerModel 实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| config | `Object` | TokenizerModel的配置对象。 |
+| config | `Object` | TokenizerModel 的配置对象。 |
 
 * * *
 
 ### tokenizerModel.vocab：<code> Array. < string > </code>
 
-**类型**：[`TokenizerModel`](#module_tokenizers.TokenizerModel)的实例属性
+**类型**：`TokenizerModel`的实例属性
 
 * * *
 
 ### tokenizerModel.tokens_to_ids：<code> Map. < string, number > </code>
 
-将tokens映射到ids。
+将 tokens 映射到 ids。
 
-**类型**：[`TokenizerModel`](#module_tokenizers.TokenizerModel)的实例属性
+**类型**：`TokenizerModel`的实例属性
 
 * * *
 
 ### tokenizerModel.fuse_unk：<code> boolean </code>
 
-在编码时是否融合未知tokens。默认为false。
+在编码时是否融合未知 tokens。默认为 false。
 
-**类型**：[`TokenizerModel`](#module_tokenizers.TokenizerModel)的实例属性
+**类型**：`TokenizerModel`的实例属性
 
 * * *
 
 ### tokenizerModel._call(tokens) ⇒ <code> Array. < string > </code>
 
-调用TokenizerModel实例的内部函数。
+调用 TokenizerModel 实例的内部函数。
 
-**类型**：[`TokenizerModel`](#module_tokenizers.TokenizerModel)的实例方法
+**类型**：`TokenizerModel`的实例方法
 
-**返回**: `Array.<string>` - 编码后的token IDs。
+**返回**: `Array.<string>` - 编码后的 token IDs。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| tokens | `Array.<string>` | 要编码的tokens。 |
+| tokens | `Array.<string>` | 要编码的 tokens。 |
 
 * * *
 
 ### tokenizerModel.encode(tokens) ⇒ <code> Array. < string > </code>
 
-将一组tokens编码为一组token IDs。
+将一组 tokens 编码为一组 token IDs。
 
-**类型**：[`TokenizerModel`](#module_tokenizers.TokenizerModel)的实例方法
+**类型**：`TokenizerModel`的实例方法
 
-**返回**：`Array.<string>` - 编码后的tokens。
+**返回**：`Array.<string>` - 编码后的 tokens。
 
 **抛出**：
 
@@ -523,109 +523,109 @@ tokenizer models的抽象基类。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| tokens | `Array.<string>` | 要编码的tokens。 |
+| tokens | `Array.<string>` | 要编码的 tokens。 |
 
 * * *
 
 ### tokenizerModel.convert_tokens_to_ids(tokens) ⇒ <code> Array. < number > </code>
 
-将一组tokens转换为一组token IDs。
+将一组 tokens 转换为一组 token IDs。
 
-**类型**：[`TokenizerModel`](#module_tokenizers.TokenizerModel)的实例方法
+**类型**：`TokenizerModel`的实例方法
 
-**返回**：`Array.<number>` - 转换后的token IDs。
+**返回**：`Array.<number>` - 转换后的 token IDs。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| tokens | `Array.<string>` | 要转换的tokens。 |
+| tokens | `Array.<string>` | 要转换的 tokens。 |
 
 * * *
 
 ### tokenizerModel.convert_ids_to_tokens(ids) ⇒ <code> Array. < string > </code>
 
-将一组token IDs转换为一组tokens。
+将一组 token IDs 转换为一组 tokens。
 
-**类型**：[`TokenizerModel`](#module_tokenizers.TokenizerModel)的实例方法
+**类型**：`TokenizerModel`的实例方法
 
-**返回**：`Array.<string>` - 转换后的tokens。
+**返回**：`Array.<string>` - 转换后的 tokens。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| ids | `Array.<number>` | 要转换的token IDs。 |
+| ids | `Array.<number>` | 要转换的 token IDs。 |
 
 * * *
 
 ### TokenizerModel.fromConfig(config, ...args) ⇒ <code> TokenizerModel </code>
 
-根据提供的配置对象实例化一个新的TokenizerModel实例。
+根据提供的配置对象实例化一个新的 TokenizerModel 实例。
 
-**类型**：[`TokenizerModel`](#module_tokenizers.TokenizerModel)的静态方法
+**类型**：`TokenizerModel`的静态方法
 
-**返回**：`TokenizerModel` - 一个TokenizerModel的新实例。
+**返回**：`TokenizerModel` - 一个 TokenizerModel 的新实例。
 
 **抛出**：
 
-+   如果配置中的TokenizerModel类型未被识别，则会抛出错误。
++   如果配置中的 TokenizerModel 类型未被识别，则会抛出错误。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| config | `Object` | TokenizerModel的配置对象。 |
-| ...args | `*` | 传递给特定TokenizerModel构造函数的可选参数。 |
+| config | `Object` | TokenizerModel 的配置对象。 |
+| ...args | `*` | 传递给特定 TokenizerModel 构造函数的可选参数。 |
 
 * * *
 
 ## tokenizers.PreTrainedTokenizer
 
-**类型**：[`tokenizers`](#module_tokenizers)的静态类
+**类型**：`tokenizers`的静态类
 
-+   [.PreTrainedTokenizer](#module_tokenizers.PreTrainedTokenizer)
++   .PreTrainedTokenizer
 
-    +   [`new PreTrainedTokenizer(tokenizerJSON, tokenizerConfig)`](#new_module_tokenizers.PreTrainedTokenizer_new)
+    +   `new PreTrainedTokenizer(tokenizerJSON, tokenizerConfig)`
 
     +   *实例*
 
-        +   [`.added_tokens`](#module_tokenizers.PreTrainedTokenizer+added_tokens)：`Array.<AddedToken>`
+        +   `.added_tokens`：`Array.<AddedToken>`
 
-        +   [`.remove_space`](#module_tokenizers.PreTrainedTokenizer+remove_space)：`boolean`
+        +   `.remove_space`：`boolean`
 
-        +   [`.padding_side`](#module_tokenizers.PreTrainedTokenizer+padding_side)：`’right’` | `’left’`
+        +   `.padding_side`：`’right’` | `’left’`
 
-        +   [`.getToken(...keys)`](#module_tokenizers.PreTrainedTokenizer+getToken)⇒`string` | `null`
+        +   `.getToken(...keys)`⇒`string` | `null`
 
-        +   [`._call(text, options)`](#module_tokenizers.PreTrainedTokenizer+_call)⇒`BatchEncoding`
+        +   `._call(text, options)`⇒`BatchEncoding`
 
-        +   [`._encode_text(text)`](#module_tokenizers.PreTrainedTokenizer+_encode_text)⇒`Array<string>` | `null`
+        +   `._encode_text(text)`⇒`Array<string>` | `null`
 
-        +   [`.encode(text, text_pair, options)`](#module_tokenizers.PreTrainedTokenizer+encode)⇒`Array.<number>`
+        +   `.encode(text, text_pair, options)`⇒`Array.<number>`
 
-        +   [`.batch_decode(batch, decode_args)`](#module_tokenizers.PreTrainedTokenizer+batch_decode)⇒`Array.<string>`
+        +   `.batch_decode(batch, decode_args)`⇒`Array.<string>`
 
         +   [`.decode(token_ids, [decode_args])`](#module_tokenizers.PreTrainedTokenizer+decode)⇒`string`
 
-        +   [`.decode_single(token_ids, decode_args)`](#module_tokenizers.PreTrainedTokenizer+decode_single)⇒`string`
+        +   `.decode_single(token_ids, decode_args)`⇒`string`
 
-        +   [`.apply_chat_template(conversation, options)`](#module_tokenizers.PreTrainedTokenizer+apply_chat_template)⇒`string` | `Tensor` | `Array<number>` | `Array<Array<number>>`
+        +   `.apply_chat_template(conversation, options)`⇒`string` | `Tensor` | `Array<number>` | `Array<Array<number>>`
 
     +   *静态*
 
-        +   [`.from_pretrained(pretrained_model_name_or_path, options)`](#module_tokenizers.PreTrainedTokenizer.from_pretrained)⇒`Promise.<PreTrainedTokenizer>`
+        +   `.from_pretrained(pretrained_model_name_or_path, options)`⇒`Promise.<PreTrainedTokenizer>`
 
 * * *
 
 ### new PreTrainedTokenizer(tokenizerJSON, tokenizerConfig)
 
-创建一个新的PreTrainedTokenizer实例。
+创建一个新的 PreTrainedTokenizer 实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| tokenizerJSON | `Object` | tokenizer的JSON。 |
-| tokenizerConfig | `Object` | tokenizer的配置。 |
+| tokenizerJSON | `Object` | tokenizer 的 JSON。 |
+| tokenizerConfig | `Object` | tokenizer 的配置。 |
 
 * * *
 
 ### preTrainedTokenizer.added_tokens：<code>Array.<AddedToken></code>
 
-**类型**：[`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例属性
+**类型**：`PreTrainedTokenizer`的实例属性
 
 * * *
 
@@ -633,31 +633,31 @@ tokenizer models的抽象基类。
 
 在标记化时是否去除文本（删除字符串前后的多余空格）。
 
-**类型**：[`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例属性
+**类型**：`PreTrainedTokenizer`的实例属性
 
 * * *
 
 ### preTrainedTokenizer.padding_side : <code>’right’</code> | <code>’left’</code>
 
-**类型**：[`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例属性
+**类型**：`PreTrainedTokenizer`的实例属性
 
 * * *
 
 ### preTrainedTokenizer.getToken(...keys)⇒<code>string</code> | <code>null</code>
 
-返回tokenizer配置对象中第一个匹配键的值。
+返回 tokenizer 配置对象中第一个匹配键的值。
 
-**类型**：[`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例方法
+**类型**：`PreTrainedTokenizer`的实例方法
 
-**返回**：`string` | `null` - 与第一个匹配键关联的值，如果找不到匹配项则返回null。
+**返回**：`string` | `null` - 与第一个匹配键关联的值，如果找不到匹配项则返回 null。
 
 **抛出**：
 
-+   `Error` 如果找到匹配键的对象且其__type属性不是"AddedToken"。
++   `Error` 如果找到匹配键的对象且其 __type 属性不是"AddedToken"。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| ...keys | `string` | 要在tokenizer配置对象中搜索的一个或多个键。 |
+| ...keys | `string` | 要在 tokenizer 配置对象中搜索的一个或多个键。 |
 
 * * *
 
@@ -665,7 +665,7 @@ tokenizer models的抽象基类。
 
 对给定的文本进行编码/标记化。
 
-**类型**：[`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例方法
+**类型**：`PreTrainedTokenizer`的实例方法
 
 **返回**：`BatchEncoding` - 传递给模型的对象。
 
@@ -686,7 +686,7 @@ tokenizer models的抽象基类。
 
 使用分词器的预处理流程对单个文本进行编码。
 
-**种类**: [`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例方法
+**种类**: `PreTrainedTokenizer`的实例方法
 
 **返回**: `Array<string>` | `null` - 编码的标记。
 
@@ -700,9 +700,9 @@ tokenizer models的抽象基类。
 
 使用模型的分词器对单个文本或一对文本进行编码。
 
-**种类**: [`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例方法
+**种类**: `PreTrainedTokenizer`的实例方法
 
-**返回**: `Array.<number>` - 代表编码文本的标记ID的数组。
+**返回**: `Array.<number>` - 代表编码文本的标记 ID 的数组。
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
@@ -717,7 +717,7 @@ tokenizer models的抽象基类。
 
 解码一批标记化序列。
 
-**种类**: [`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例方法
+**种类**: `PreTrainedTokenizer`的实例方法
 
 **返回**: `Array.<string>` - 解码序列的列表。
 
@@ -730,9 +730,9 @@ tokenizer models的抽象基类。
 
 ### preTrainedTokenizer.decode(token_ids, [decode_args]) ⇒ <code> string </code>
 
-将一系列标记ID解码回字符串。
+将一系列标记 ID 解码回字符串。
 
-**种类**: [`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例方法
+**种类**: `PreTrainedTokenizer`的实例方法
 
 **返回**: `string` - 解码后的字符串。
 
@@ -742,33 +742,33 @@ tokenizer models的抽象基类。
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
-| token_ids | `Array<number>` &#124; `Tensor` |  | 要解码的标记ID列表/张量。 |
+| token_ids | `Array<number>` &#124; `Tensor` |  | 要解码的标记 ID 列表/张量。 |
 | [decode_args] | `Object` | `{}` |  |
-| [decode_args.skip_special_tokens] | `boolean` | `false` | 如果为true，则从输出字符串中删除特殊标记。 |
-| [decode_args.clean_up_tokenization_spaces] | `boolean` | `true` | 如果为true，则删除标点符号和缩写形式之前的空格。 |
+| [decode_args.skip_special_tokens] | `boolean` | `false` | 如果为 true，则从输出字符串中删除特殊标记。 |
+| [decode_args.clean_up_tokenization_spaces] | `boolean` | `true` | 如果为 true，则删除标点符号和缩写形式之前的空格。 |
 
 * * *
 
 ### preTrainedTokenizer.decode_single(token_ids, decode_args) ⇒ <code> string </code>
 
-将单个标记id列表解码为字符串。
+将单个标记 id 列表解码为字符串。
 
-**种类**: [`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例方法
+**种类**: `PreTrainedTokenizer`的实例方法
 
 **返回**: `string` - 解码后的字符串
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
-| token_ids | `Array.<number>` |  | 要解码的标记id列表 |
+| token_ids | `Array.<number>` |  | 要解码的标记 id 列表 |
 | decode_args | `Object` |  | 解码的可选参数 |
 | [decode_args.skip_special_tokens] | `boolean` | `false` | 解码过程中是否跳过特殊标记 |
-| [decode_args.clean_up_tokenization_spaces] | `boolean` |  | 是否在解码期间清除标记化空格。如果为null，则值将设置为`this.decoder.cleanup`（如果存在），否则将回退到`this.clean_up_tokenization_spaces`（如果存在），最后回退到`true`。 |
+| [decode_args.clean_up_tokenization_spaces] | `boolean` |  | 是否在解码期间清除标记化空格。如果为 null，则值将设置为`this.decoder.cleanup`（如果存在），否则将回退到`this.clean_up_tokenization_spaces`（如果存在），最后回退到`true`。 |
 
 * * *
 
 ### preTrainedTokenizer.apply_chat_template(conversation, options) ⇒ <code> string </code> | <code> Tensor </code> | <code> Array < number > </code> | <code> Array < Array < number > > </code>
 
-将具有``"role"``和``"content"``键的消息对象列表转换为标记ID列表。此方法旨在与聊天模型一起使用，并将读取分词器的`chat_template`属性以确定在转换时要使用的格式和控制标记。当`chat_template`为`None`时，将退回到在类级别指定的`default_chat_template`。
+将具有``"role"``和``"content"``键的消息对象列表转换为标记 ID 列表。此方法旨在与聊天模型一起使用，并将读取分词器的`chat_template`属性以确定在转换时要使用的格式和控制标记。当`chat_template`为`None`时，将退回到在类级别指定的`default_chat_template`。
 
 查看更多信息，请访问[这里](https://huggingface.co/docs/transformers/chat_templating)。
 
@@ -792,7 +792,7 @@ const input_ids = tokenizer.apply_chat_template(chat, { tokenize: true, return_t
 // [1, 733, 16289, 28793, 22557, 28725, 910, 460, 368, 28804, 733, 28748, 16289, 28793, 28737, 28742, 28719, 2548, 1598, 28723, 1602, 541, 315, 1316, 368, 3154, 28804, 2, 28705, 733, 16289, 28793, 315, 28742, 28715, 737, 298, 1347, 805, 910, 10706, 5752, 1077, 3791, 28808, 733, 28748, 16289, 28793]
 ```
 
-**类型**: [`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的实例方法
+**类型**: `PreTrainedTokenizer`的实例方法
 
 **返回**: `string` | `Tensor` | `Array<number>` | `Array<Array<number>>` - 标记化的输出。
 
@@ -800,13 +800,13 @@ const input_ids = tokenizer.apply_chat_template(chat, { tokenize: true, return_t
 | --- | --- | --- | --- |
 | conversation | `Array.<Message>` |  | 具有``"role"``和``"content"``键的消息对象列表。 |
 | options | `Object` |  | 包含以下属性的可选对象: |
-| [options.chat_template] | `string` | `null` | 用于此转换的Jinja模板。如果未传递此参数，则将使用模型的默认聊天模板。 |
+| [options.chat_template] | `string` | `null` | 用于此转换的 Jinja 模板。如果未传递此参数，则将使用模型的默认聊天模板。 |
 | [options.add_generation_prompt] | `boolean` | `false` | 是否以指示助手消息开始的标记结束提示。当您想要从模型生成响应时，这很有用。请注意，此参数将传递给聊天模板，因此模板必须支持此参数才能产生任何效果。 |
-| [options.tokenize] | `boolean` | `true` | 是否对输出进行标记化。如果为false，则输出将是一个字符串。 |
-| [options.padding] | `boolean` | `false` | 是否将序列填充到最大长度。如果tokenize为false，则无效。 |
-| [options.truncation] | `boolean` | `false` | 是否将序列截断到最大长度。如果tokenize为false，则无效。 |
+| [options.tokenize] | `boolean` | `true` | 是否对输出进行标记化。如果为 false，则输出将是一个字符串。 |
+| [options.padding] | `boolean` | `false` | 是否将序列填充到最大长度。如果 tokenize 为 false，则无效。 |
+| [options.truncation] | `boolean` | `false` | 是否将序列截断到最大长度。如果 tokenize 为 false，则无效。 |
 | [options.max_length] | `number` |  | 用于填充或截断的最大长度（以标记为单位）。如果未指定，则将使用分词器的`max_length`属性作为默认值。 |
-| [options.return_tensor] | `boolean` | `true` | 是否将输出作为张量或数组返回。如果tokenize为false，则无效。 |
+| [options.return_tensor] | `boolean` | `true` | 是否将输出作为张量或数组返回。如果 tokenize 为 false，则无效。 |
 
 * * *
 
@@ -814,7 +814,7 @@ const input_ids = tokenizer.apply_chat_template(chat, { tokenize: true, return_t
 
 从给定的`pretrained_model_name_or_path`加载预训练的分词器。
 
-**类型**: [`PreTrainedTokenizer`](#module_tokenizers.PreTrainedTokenizer)的静态方法
+**类型**: `PreTrainedTokenizer`的静态方法
 
 **返回**: `Promise.<PreTrainedTokenizer>` - `PreTrainedTokenizer`类的新实例。
 
@@ -831,9 +831,9 @@ const input_ids = tokenizer.apply_chat_template(chat, { tokenize: true, return_t
 
 ## tokenizers.BertTokenizer ⇐ <code> PreTrainedTokenizer </code>
 
-BertTokenizer是用于为BERT模型标记化文本的类。
+BertTokenizer 是用于为 BERT 模型标记化文本的类。
 
-**类型**: [`tokenizers`](#module_tokenizers)的静态类
+**类型**: `tokenizers`的静态类
 
 **扩展**: `PreTrainedTokenizer`
 
@@ -841,9 +841,9 @@ BertTokenizer是用于为BERT模型标记化文本的类。
 
 ## tokenizers.AlbertTokenizer ⇐ <code> PreTrainedTokenizer </code>
 
-Albert分词器
+Albert 分词器
 
-**类型**: [`tokenizers`](#module_tokenizers)的静态类
+**类型**: `tokenizers`的静态类
 
 **扩展**: `PreTrainedTokenizer`
 
@@ -851,15 +851,15 @@ Albert分词器
 
 ## tokenizers.NllbTokenizer
 
-NllbTokenizer类用于为NLLB（“没有语言被遗忘”）模型对文本进行标记。
+NllbTokenizer 类用于为 NLLB（“没有语言被遗忘”）模型对文本进行标记。
 
-没有语言被遗忘（NLLB）是一项首创性的人工智能项目，开源模型能够直接在200多种语言之间提供高质量的翻译 — 包括Asturian、Luganda、Urdu等低资源语言。它旨在帮助人们与任何人在任何地方进行交流，无论他们的语言偏好如何。有关更多信息，请查看他们的[论文](https://arxiv.org/abs/2207.04672)。
+没有语言被遗忘（NLLB）是一项首创性的人工智能项目，开源模型能够直接在 200 多种语言之间提供高质量的翻译 — 包括 Asturian、Luganda、Urdu 等低资源语言。它旨在帮助人们与任何人在任何地方进行交流，无论他们的语言偏好如何。有关更多信息，请查看他们的[论文](https://arxiv.org/abs/2207.04672)。
 
 有关支持的语言列表（以及它们的语言代码），
 
-**种类**：[`tokenizers`](#module_tokenizers)的静态类
+**种类**：`tokenizers`的静态类
 
-**查看**：[https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200](https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200)
+**查看**：[`github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200`](https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200)
 
 * * *
 
@@ -867,7 +867,7 @@ NllbTokenizer类用于为NLLB（“没有语言被遗忘”）模型对文本进
 
 用于为`NllbTokenizer`构建翻译输入的辅助函数。
 
-**种类**：[`NllbTokenizer`](#module_tokenizers.NllbTokenizer)的实例方法
+**种类**：`NllbTokenizer`的实例方法
 
 **返回**：`Object` - 传递给模型的对象。
 
@@ -881,15 +881,15 @@ NllbTokenizer类用于为NLLB（“没有语言被遗忘”）模型对文本进
 
 ## tokenizers.M2M100Tokenizer
 
-M2M100Tokenizer类用于为M2M100（“多对多”）模型对文本进行标记。
+M2M100Tokenizer 类用于为 M2M100（“多对多”）模型对文本进行标记。
 
-M2M100是一个多语言编码器-解码器（seq-to-seq）模型，用于训练多对多多语言翻译。它在这篇[论文](https://arxiv.org/abs/2010.11125)中介绍，并首次在[此](https://github.com/pytorch/fairseq/tree/master/examples/m2m_100)存储库中发布。
+M2M100 是一个多语言编码器-解码器（seq-to-seq）模型，用于训练多对多多语言翻译。它在这篇[论文](https://arxiv.org/abs/2010.11125)中介绍，并首次在[此](https://github.com/pytorch/fairseq/tree/master/examples/m2m_100)存储库中发布。
 
 有关支持的语言列表（以及它们的语言代码），
 
-**种类**：[`tokenizers`](#module_tokenizers)的静态类
+**种类**：`tokenizers`的静态类
 
-**查看**：[https://huggingface.co/facebook/m2m100_418M#languages-covered](https://huggingface.co/facebook/m2m100_418M#languages-covered)
+**查看**：[`huggingface.co/facebook/m2m100_418M#languages-covered`](https://huggingface.co/facebook/m2m100_418M#languages-covered)
 
 * * *
 
@@ -897,7 +897,7 @@ M2M100是一个多语言编码器-解码器（seq-to-seq）模型，用于训练
 
 用于为`M2M100Tokenizer`构建翻译输入的辅助函数。
 
-**种类**：[`M2M100Tokenizer`](#module_tokenizers.M2M100Tokenizer)的实例方法
+**种类**：`M2M100Tokenizer`的实例方法
 
 **返回**：`Object` - 传递给模型的对象。
 
@@ -911,19 +911,19 @@ M2M100是一个多语言编码器-解码器（seq-to-seq）模型，用于训练
 
 ## tokenizers.WhisperTokenizer ⇐ <code> PreTrainedTokenizer </code>
 
-WhisperTokenizer标记器
+WhisperTokenizer 标记器
 
-**种类**：[`tokenizers`](#module_tokenizers)的静态类
+**种类**：`tokenizers`的静态类
 
 **扩展**：`PreTrainedTokenizer`
 
-+   [.WhisperTokenizer](#module_tokenizers.WhisperTokenizer) ⇐ `PreTrainedTokenizer`
++   .WhisperTokenizer ⇐ `PreTrainedTokenizer`
 
-    +   [`._decode_asr(sequences, options)`](#module_tokenizers.WhisperTokenizer+_decode_asr) ⇒ `*`
+    +   `._decode_asr(sequences, options)` ⇒ `*`
 
-    +   [`.decode()`](#module_tokenizers.WhisperTokenizer+decode) : `*`
+    +   `.decode()` : `*`
 
-    +   [`.get_decoder_prompt_ids(options)`](#module_tokenizers.WhisperTokenizer+get_decoder_prompt_ids) ⇒ `Array.<Array<number>>`
+    +   `.get_decoder_prompt_ids(options)` ⇒ `Array.<Array<number>>`
 
 * * *
 
@@ -931,7 +931,7 @@ WhisperTokenizer标记器
 
 解码自动语音识别（ASR）序列。
 
-**种类**：[`WhisperTokenizer`](#module_tokenizers.WhisperTokenizer)的实例方法
+**种类**：`WhisperTokenizer`的实例方法
 
 **返回**：`*` - 解码后的序列。
 
@@ -944,7 +944,7 @@ WhisperTokenizer标记器
 
 ### whisperTokenizer.decode() : <code> * </code>
 
-**种类**：[`WhisperTokenizer`](#module_tokenizers)的实例方法
+**种类**：`WhisperTokenizer`的实例方法
 
 * * *
 
@@ -954,7 +954,7 @@ WhisperTokenizer标记器
 
 用于覆盖附加到标签序列开头的前缀标记。
 
-**示例：获取语言的id**
+**示例：获取语言的 id**
 
 ```py
 // instantiate the tokenizer and set the prefix token to Spanish
@@ -963,14 +963,14 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 // [(1, 50262), (2, 50363)]
 ```
 
-**类型**: [`WhisperTokenizer`](#module_tokenizers.WhisperTokenizer)的实例方法
+**类型**: `WhisperTokenizer`的实例方法
 
-**返回**: `Array.<Array<number>>` - 解码器提示的id。
+**返回**: `Array.<Array<number>>` - 解码器提示的 id。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 选项 | `Object` | 生成解码器提示的选项。 |
-| [options.language] | `string` | 转录文本的语言。对于多语言语音识别和语音翻译任务，相应的语言id标记会附加到序列的开头，例如对于"西班牙语"，标记"< | es | >"会附加到序列的开头。 |
+| [options.language] | `string` | 转录文本的语言。对于多语言语音识别和语音翻译任务，相应的语言 id 标记会附加到序列的开头，例如对于"西班牙语"，标记"< | es | >"会附加到序列的开头。 |
 | [options.task] | `string` | 要附加到序列开头的任务标识符（如果有）。这应该用于多语言微调，使用"transcribe"进行语音识别和"translate"进行语音翻译。 |
 | [options.no_timestamps] | `boolean` | 是否在序列开头添加< | notimestamps | >标记。 |
 
@@ -978,40 +978,40 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ## tokenizers.MarianTokenizer
 
-**类型**: [`tokenizers`](#module_tokenizers)的静态类
+**类型**: `tokenizers`的静态类
 
 **待办事项**
 
-+   Hugging Face的“快速”分词器库尚不支持此模型（[https://github.com/huggingface/tokenizers](https://github.com/huggingface/tokenizers)）。因此，这个基于快速分词器的实现可能会产生略微不准确的结果。
++   Hugging Face 的“快速”分词器库尚不支持此模型（[`github.com/huggingface/tokenizers`](https://github.com/huggingface/tokenizers)）。因此，这个基于快速分词器的实现可能会产生略微不准确的结果。
 
-+   [MarianTokenizer](#module_tokenizers.MarianTokenizer)
++   MarianTokenizer
 
-    +   [`new MarianTokenizer(tokenizerJSON, tokenizerConfig)`](#new_module_tokenizers.MarianTokenizer_new)
+    +   `new MarianTokenizer(tokenizerJSON, tokenizerConfig)`
 
-    +   [`._encode_text(text)`](#module_tokenizers.MarianTokenizer+_encode_text) ⇒ `Array`
+    +   `._encode_text(text)` ⇒ `Array`
 
 * * *
 
 ### new MarianTokenizer(tokenizerJSON, tokenizerConfig)
 
-创建一个新的MarianTokenizer实例。
+创建一个新的 MarianTokenizer 实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| tokenizerJSON | `Object` | 分词器的JSON。 |
+| tokenizerJSON | `Object` | 分词器的 JSON。 |
 | tokenizerConfig | `Object` | 分词器的配置。 |
 
 * * *
 
 ### marianTokenizer._encode_text(text) ⇒ <code> Array </code>
 
-编码单个文本。必须重写此方法，因为在使用sentencepiece模型进行编码之前必须删除语言代码。
+编码单个文本。必须重写此方法，因为在使用 sentencepiece 模型进行编码之前必须删除语言代码。
 
-**类型**: [`MarianTokenizer`](#module_tokenizers.MarianTokenizer)的实例方法
+**类型**: `MarianTokenizer`的实例方法
 
 **返回**: `Array` - 编码后的标记。
 
-**查看**: [https://github.com/huggingface/transformers/blob/12d51db243a00726a548a43cc333390ebae731e3/src/transformers/models/marian/tokenization_marian.py#L204-L213](https://github.com/huggingface/transformers/blob/12d51db243a00726a548a43cc333390ebae731e3/src/transformers/models/marian/tokenization_marian.py#L204-L213)
+**查看**: [`github.com/huggingface/transformers/blob/12d51db243a00726a548a43cc333390ebae731e3/src/transformers/models/marian/tokenization_marian.py#L204-L213`](https://github.com/huggingface/transformers/blob/12d51db243a00726a548a43cc333390ebae731e3/src/transformers/models/marian/tokenization_marian.py#L204-L213)
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1023,7 +1023,7 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 用于使用`from_pretrained`函数实例化预训练分词器的辅助类。所选的分词器类由分词器配置中指定的类型确定。
 
-**类型**: [`tokenizers`](#module_tokenizers)的静态类
+**类型**: `tokenizers`的静态类
 
 * * *
 
@@ -1033,16 +1033,16 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 要实例化的分词器类是根据配置对象的`tokenizer_class`属性选择的（如果可能，作为参数传递或从`pretrained_model_name_or_path`加载）
 
-**类型**: [`AutoTokenizer`](#module_tokenizers.AutoTokenizer)的静态方法
+**类型**: `AutoTokenizer`的静态方法
 
-**返回**: `Promise.<PreTrainedTokenizer>` - PreTrainedTokenizer类的新实例。
+**返回**: `Promise.<PreTrainedTokenizer>` - PreTrainedTokenizer 类的新实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 
 | pretrained_model_name_or_path | `string` | 预训练模型的名称或路径。可以是：
 
-+   一个字符串，预训练分词器的*模型id*，托管在huggingface.co上的模型仓库中。有效的模型id可以位于根级别，如`bert-base-uncased`，或者在用户或组织名称下命名空间化，如`dbmdz/bert-base-german-cased`。
++   一个字符串，预训练分词器的*模型 id*，托管在 huggingface.co 上的模型仓库中。有效的模型 id 可以位于根级别，如`bert-base-uncased`，或者在用户或组织名称下命名空间化，如`dbmdz/bert-base-german-cased`。
 
 +   一个包含分词器文件的*目录*的路径，例如，`./my_model_directory/`。
 
@@ -1055,56 +1055,56 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ## tokenizers~AddedToken
 
-代表用户在现有模型词汇表之上添加的token。AddedToken可以配置以指定它们在各种情况下应该具有的行为，比如：
+代表用户在现有模型词汇表之上添加的 token。AddedToken 可以配置以指定它们在各种情况下应该具有的行为，比如：
 
 +   它们是否只匹配单词
 
 +   是否在其左侧或右侧包含任何空格
 
-**类型**：[`tokenizers`](#module_tokenizers)的内部类
+**类型**：`tokenizers`的内部类
 
 * * *
 
 ### new AddedToken(config)
 
-创建一个AddedToken的新实例。
+创建一个 AddedToken 的新实例。
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
-| config | `Object` |  | Added token的配置对象。 |
-| config.content | `string` |  | 添加token的内容。 |
-| config.id | `number` |  | 添加token的id。 |
-| [config.single_word] | `boolean` | `false` | 这个token是否必须是一个单词或者可以打断单词。 |
-| [config.lstrip] | `boolean` | `false` | 这个token是否应该去除左侧的空格。 |
-| [config.rstrip] | `boolean` | `false` | 这个token是否应该去除右侧的空格。 |
-| [config.normalized] | `boolean` | `false` | 这个token是否应该被规范化。 |
-| [config.special] | `boolean` | `false` | 这个token是否是特殊的。 |
+| config | `Object` |  | Added token 的配置对象。 |
+| config.content | `string` |  | 添加 token 的内容。 |
+| config.id | `number` |  | 添加 token 的 id。 |
+| [config.single_word] | `boolean` | `false` | 这个 token 是否必须是一个单词或者可以打断单词。 |
+| [config.lstrip] | `boolean` | `false` | 这个 token 是否应该去除左侧的空格。 |
+| [config.rstrip] | `boolean` | `false` | 这个 token 是否应该去除右侧的空格。 |
+| [config.normalized] | `boolean` | `false` | 这个 token 是否应该被规范化。 |
+| [config.special] | `boolean` | `false` | 这个 token 是否是特殊的。 |
 
 * * *
 
 ## tokenizers~WordPieceTokenizer ⇐ <code> TokenizerModel </code>
 
-一个使用WordPiece编码来编码token的TokenizerModel的子类。
+一个使用 WordPiece 编码来编码 token 的 TokenizerModel 的子类。
 
-**类型**：[`tokenizers`](#module_tokenizers)的内部类
+**类型**：`tokenizers`的内部类
 
 **扩展**：`TokenizerModel`
 
-+   [~WordPieceTokenizer](#module_tokenizers..WordPieceTokenizer) ⇐ `TokenizerModel`
++   ~WordPieceTokenizer ⇐ `TokenizerModel`
 
-    +   [`new WordPieceTokenizer(config)`](#new_module_tokenizers..WordPieceTokenizer_new)
+    +   `new WordPieceTokenizer(config)`
 
-    +   [`.tokens_to_ids`](#module_tokenizers..WordPieceTokenizer+tokens_to_ids) : `Map.<string, number>`
+    +   `.tokens_to_ids` : `Map.<string, number>`
 
-    +   [`.unk_token_id`](#module_tokenizers..WordPieceTokenizer+unk_token_id) : `number`
+    +   `.unk_token_id` : `number`
 
-    +   [`.unk_token`](#module_tokenizers..WordPieceTokenizer+unk_token) : `string`
+    +   `.unk_token` : `string`
 
-    +   [`.max_input_chars_per_word`](#module_tokenizers..WordPieceTokenizer+max_input_chars_per_word) : `number`
+    +   `.max_input_chars_per_word` : `number`
 
-    +   [`.vocab`](#module_tokenizers..WordPieceTokenizer+vocab) : `Array.<string>`
+    +   `.vocab` : `Array.<string>`
 
-    +   [`.encode(tokens)`](#module_tokenizers..WordPieceTokenizer+encode) ⇒ `Array.<string>`
+    +   `.encode(tokens)` ⇒ `Array.<string>`
 
 * * *
 
@@ -1113,8 +1113,8 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
 | config | `Object` |  | 配置对象。 |
-| config.vocab | `Object` |  | 一个将token映射到id的映射。 |
-| config.unk_token | `string` |  | 未知token的字符串。 |
+| config.vocab | `Object` |  | 一个将 token 映射到 id 的映射。 |
+| config.unk_token | `string` |  | 未知 token 的字符串。 |
 | config.continuing_subword_prefix | `string` |  | 用于继续子词的前缀。 |
 | [config.max_input_chars_per_word] | `number` | `100` | 每个单词的最大字符数。 |
 
@@ -1122,25 +1122,25 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ### wordPieceTokenizer.tokens_to_ids : <code> Map. < string, number > </code>
 
-一个将token映射到id的映射。
+一个将 token 映射到 id 的映射。
 
-**类型**：[`WordPieceTokenizer`](#module_tokenizers)的实例属性
+**类型**：`WordPieceTokenizer`的实例属性
 
 * * *
 
 ### wordPieceTokenizer.unk_token_id : <code> number </code>
 
-未知token的id。
+未知 token 的 id。
 
-**类型**：[`WordPieceTokenizer`](#module_tokenizers..WordPieceTokenizer)的实例属性
+**类型**：`WordPieceTokenizer`的实例属性
 
 * * *
 
 ### wordPieceTokenizer.unk_token : <code> string </code>
 
-未知token的字符串。
+未知 token 的字符串。
 
-**类型**：[`WordPieceTokenizer`](#module_tokenizers..WordPieceTokenizer)的实例属性
+**类型**：`WordPieceTokenizer`的实例属性
 
 * * *
 
@@ -1148,15 +1148,15 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 每个单词允许的最大字符数。
 
-**类型**：[`WordPieceTokenizer`](#module_tokenizers..WordPieceTokenizer)的实例属性
+**类型**：`WordPieceTokenizer`的实例属性
 
 * * *
 
 ### wordPieceTokenizer.vocab : <code> Array. < string > </code>
 
-一个token数组。
+一个 token 数组。
 
-**类型**：[`WordPieceTokenizer`](#module_tokenizers)的实例属性
+**类型**：`WordPieceTokenizer`的实例属性
 
 * * *
 
@@ -1164,7 +1164,7 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 使用 WordPiece 编码对标记数组进行编码。
 
-**类型**：[`WordPieceTokenizer`](#module_tokenizers..WordPieceTokenizer) 的实例方法
+**类型**：`WordPieceTokenizer` 的实例方法
 
 **返回**：`Array.<string>` - 编码的标记数组。
 
@@ -1178,19 +1178,19 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 表示 Unigram 分词器模型的类。
 
-**类型**：[`tokenizers`](#module_tokenizers) 的内部类
+**类型**：`tokenizers` 的内部类
 
 **扩展**：`TokenizerModel`
 
 +   【~Unigram】(#module_tokenizers..Unigram) ⇐ `TokenizerModel`
 
-    +   [`new Unigram(config, moreConfig)`](#new_module_tokenizers..Unigram_new)
+    +   `new Unigram(config, moreConfig)`
 
-    +   [`.populateNodes(lattice)`](#module_tokenizers..Unigram+populateNodes)
+    +   `.populateNodes(lattice)`
 
-    +   [`.tokenize(normalized)`](#module_tokenizers..Unigram+tokenize) ⇒ `Array.<string>`
+    +   `.tokenize(normalized)` ⇒ `Array.<string>`
 
-    +   [`.encode(tokens)`](#module_tokenizers..Unigram+encode) ⇒ `Array.<string>`
+    +   `.encode(tokens)` ⇒ `Array.<string>`
 
 * * *
 
@@ -1211,7 +1211,7 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 填充格节点。
 
-**类型**：[`Unigram`](#module_tokenizers..Unigram) 的实例方法
+**类型**：`Unigram` 的实例方法
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1223,7 +1223,7 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 使用 unigram 模型将标记数组编码为子标记数组。
 
-**类型**：[`Unigram`](#module_tokenizers..Unigram) 的实例方法
+**类型**：`Unigram` 的实例方法
 
 **返回**：`Array.<string>` - 通过使用 unigram 模型对输入标记进行编码获得的子标记数组。
 
@@ -1237,7 +1237,7 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 使用 Unigram 编码对标记数组进行编码。
 
-**类型**：[`Unigram`](#module_tokenizers..Unigram) 的实例方法
+**类型**：`Unigram` 的实例方法
 
 **返回**：`Array.<string>` - 编码的标记数组。
 
@@ -1251,21 +1251,21 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 用于将文本编码为字节对编码（BPE）标记的 BPE 类。
 
-**类型**：[`tokenizers`](#module_tokenizers) 的内部类
+**类型**：`tokenizers` 的内部类
 
 **扩展**：`TokenizerModel`
 
 +   【~BPE】(#module_tokenizers..BPE) ⇐ `TokenizerModel`
 
-    +   [`new BPE(config)`](#new_module_tokenizers..BPE_new)
+    +   `new BPE(config)`
 
-    +   [`.tokens_to_ids`](#module_tokenizers..BPE+tokens_to_ids) : `Map.<string, number>`
+    +   `.tokens_to_ids` : `Map.<string, number>`
 
-    +   [`.cache`](#module_tokenizers..BPE+cache) : `Map.<string, Array<string>>`
+    +   `.cache` : `Map.<string, Array<string>>`
 
-    +   [`.bpe(token)`](#module_tokenizers..BPE+bpe) ⇒ `Array.<string>`
+    +   `.bpe(token)` ⇒ `Array.<string>`
 
-    +   [`.encode(tokens)`](#module_tokenizers..BPE+encode) ⇒ `Array.<string>`
+    +   `.encode(tokens)` ⇒ `Array.<string>`
 
 * * *
 
@@ -1286,23 +1286,23 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ### bpE.tokens_to_ids : <code> Map. < string, number > </code>
 
-**类型**：[`BPE`](#module_tokenizers..BPE) 的实例属性
+**类型**：`BPE` 的实例属性
 
 * * *
 
 ### bpE.cache : <code> Map. < string, Array < string > > </code>
 
-**类型**：[`BPE`](#module_tokenizers..BPE) 的实例属性
+**类型**：`BPE` 的实例属性
 
 * * *
 
 ### bpE.bpe(token) ⇒ <code> Array. < string > </code>
 
-将字节对编码（BPE）应用于给定的标记。高效的基于堆的优先级队列实现，改编自[https://github.com/belladoreai/llama-tokenizer-js](https://github.com/belladoreai/llama-tokenizer-js)。
+将字节对编码（BPE）应用于给定的标记。高效的基于堆的优先级队列实现，改编自[`github.com/belladoreai/llama-tokenizer-js`](https://github.com/belladoreai/llama-tokenizer-js)。
 
-**种类**：[`BPE`](#module_tokenizers..BPE)的实例方法
+**种类**：`BPE`的实例方法
 
-**返回**：`Array.<string>` - BPE编码的标记。
+**返回**：`Array.<string>` - BPE 编码的标记。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1312,11 +1312,11 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ### bpE.encode(tokens) ⇒ <code> Array. < string > </code>
 
-对输入的标记序列使用BPE算法进行编码，并返回生成的子词标记。
+对输入的标记序列使用 BPE 算法进行编码，并返回生成的子词标记。
 
-**种类**：[`BPE`](#module_tokenizers..BPE)的实例方法
+**种类**：`BPE`的实例方法
 
-**返回**：`Array.<string>` - 对输入的标记序列应用BPE算法后得到的子词标记。
+**返回**：`Array.<string>` - 对输入的标记序列应用 BPE 算法后得到的子词标记。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1328,31 +1328,31 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 用于仅具有词汇表的标记器的传统标记器类。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
-+   [~LegacyTokenizerModel](#module_tokenizers..LegacyTokenizerModel)
++   ~LegacyTokenizerModel
 
-    +   [`new LegacyTokenizerModel(config, moreConfig)`](#new_module_tokenizers..LegacyTokenizerModel_new)
+    +   `new LegacyTokenizerModel(config, moreConfig)`
 
-    +   [`.tokens_to_ids`](#module_tokenizers..LegacyTokenizerModel+tokens_to_ids) : `Map.<string, number>`
+    +   `.tokens_to_ids` : `Map.<string, number>`
 
 * * *
 
-### 新的LegacyTokenizerModel(config, moreConfig)
+### 新的 LegacyTokenizerModel(config, moreConfig)
 
-创建一个LegacyTokenizerModel实例。
+创建一个 LegacyTokenizerModel 实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| config | `Object` | LegacyTokenizerModel的配置对象。 |
-| config.vocab | `Object` | 一个（可能是嵌套的）将标记映射到ID的映射。 |
-| moreConfig | `Object` | 为LegacyTokenizerModel模型提供额外的配置对象。 |
+| config | `Object` | LegacyTokenizerModel 的配置对象。 |
+| config.vocab | `Object` | 一个（可能是嵌套的）将标记映射到 ID 的映射。 |
+| moreConfig | `Object` | 为 LegacyTokenizerModel 模型提供额外的配置对象。 |
 
 * * *
 
 ### legacyTokenizerModel.tokens_to_ids : <code> Map. < string, number > </code>
 
-**种类**：[`LegacyTokenizerModel`](#module_tokenizers..LegacyTokenizerModel)的实例属性
+**种类**：`LegacyTokenizerModel`的实例属性
 
 * * *
 
@@ -1360,25 +1360,25 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 文本规范化的基类。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部抽象类
+**种类**：`tokenizers`的内部抽象类
 
-+   *[~Normalizer](#module_tokenizers..Normalizer)*
++   *~Normalizer*
 
-    +   *[`new Normalizer(config)`](#new_module_tokenizers..Normalizer_new)*
+    +   *`new Normalizer(config)`*
 
     +   *实例*
 
-        +   **[`.normalize(text)`](#module_tokenizers..Normalizer+normalize) ⇒ `string`**
+        +   **`.normalize(text)` ⇒ `string`**
 
-        +   *[`._call(text)`](#module_tokenizers..Normalizer+_call) ⇒ `string`*
+        +   *`._call(text)` ⇒ `string`*
 
     +   *静态*
 
-        +   *[`.fromConfig(config)`](#module_tokenizers..Normalizer.fromConfig) ⇒ `Normalizer`*
+        +   *`.fromConfig(config)` ⇒ `Normalizer`*
 
 * * *
 
-### 新的Normalizer(config)
+### 新的 Normalizer(config)
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1390,7 +1390,7 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 规范化输入文本。
 
-**种类**：[`Normalizer`](#module_tokenizers..Normalizer)的实例抽象方法
+**种类**：`Normalizer`的实例抽象方法
 
 **返回**：`string` - 规范化后的文本。
 
@@ -1406,9 +1406,9 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ### normalizer._call(text) ⇒ <code> string </code>
 
-别名为[Normalizer#normalize](Normalizer#normalize)。
+别名为 Normalizer#normalize。
 
-**种类**：[`Normalizer`](#module_tokenizers..Normalizer)的实例方法
+**种类**：`Normalizer`的实例方法
 
 **返回**：`string` - 规范化后的文本。
 
@@ -1422,9 +1422,9 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 从配置对象创建规范化器的工厂方法。
 
-**种类**：[`Normalizer`](#module_tokenizers..Normalizer)的静态方法
+**种类**：`Normalizer`的静态方法
 
-**返回**：`Normalizer` - 一个Normalizer对象。
+**返回**：`Normalizer` - 一个 Normalizer 对象。
 
 **抛出**：
 
@@ -1440,7 +1440,7 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 替换规范化器，用给定的字符串或正则表达式替换模式的出现。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展**：`Normalizer`
 
@@ -1450,7 +1450,7 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 通过用内容替换模式来规范化输入文本。
 
-**种类**: [`Replace`](#module_tokenizers..Replace)的实例方法
+**种类**: `Replace`的实例方法
 
 **返回**: `string` - 用内容替换模式后的规范化文本。
 
@@ -1462,9 +1462,9 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ## tokenizers~NFC ⇐ <code> Normalizer </code>
 
-一个将输入文本应用Unicode规范化形式C（NFC）的规范化器。
+一个将输入文本应用 Unicode 规范化形式 C（NFC）的规范化器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展**: `Normalizer`
 
@@ -1472,9 +1472,9 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ### nfC.normalize(text) ⇒ <code> string </code>
 
-通过应用Unicode规范化形式C（NFC）来规范化输入文本。
+通过应用 Unicode 规范化形式 C（NFC）来规范化输入文本。
 
-**种类**: [`NFC`](#module_tokenizers..NFC)的实例方法
+**种类**: `NFC`的实例方法
 
 **返回**: `string` - 规范化后的文本。
 
@@ -1486,9 +1486,9 @@ const forced_decoder_ids = tokenizer.get_decoder_prompt_ids({ language: 'spanish
 
 ## tokenizers~NFKC ⇐ <code> Normalizer </code>
 
-NFKC规范化器。
+NFKC 规范化器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展**: `Normalizer`
 
@@ -1496,9 +1496,9 @@ NFKC规范化器。
 
 ### nfkC.normalize(text) ⇒ <code> string </code>
 
-使用NFKC规范化文本。
+使用 NFKC 规范化文本。
 
-**种类**: [`NFKC`](#module_tokenizers..NFKC)的实例方法
+**种类**: `NFKC`的实例方法
 
 **返回**: `string` - 规范化后的文本。
 
@@ -1510,9 +1510,9 @@ NFKC规范化器。
 
 ## tokenizers~NFKD ⇐ <code> Normalizer </code>
 
-NFKD规范化器。
+NFKD 规范化器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展**: `Normalizer`
 
@@ -1520,9 +1520,9 @@ NFKD规范化器。
 
 ### nfkD.normalize(text) ⇒ <code> string </code>
 
-使用NFKD规范化文本。
+使用 NFKD 规范化文本。
 
-**种类**: [`NFKD`](#module_tokenizers..NFKD)的实例方法
+**种类**: `NFKD`的实例方法
 
 **返回**: `string` - 规范化后的文本。
 
@@ -1536,7 +1536,7 @@ NFKD规范化器。
 
 从输入文本中去除前导和/或尾随空格的规范化器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 * * *
 
@@ -1544,7 +1544,7 @@ NFKD规范化器。
 
 从输入文本中去除前导和/或尾随空格。
 
-**种类**: [`StripNormalizer`](#module_tokenizers..StripNormalizer)的实例方法
+**种类**: `StripNormalizer`的实例方法
 
 **返回**: `string` - 规范化后的文本。
 
@@ -1556,9 +1556,9 @@ NFKD规范化器。
 
 ## tokenizers~StripAccents ⇐ <code> Normalizer </code>
 
-StripAccents规范化器从文本中删除所有重音符号。
+StripAccents 规范化器从文本中删除所有重音符号。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展**: `Normalizer`
 
@@ -1568,7 +1568,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 从文本中删除所有重音符号。
 
-**种类**: [`StripAccents`](#module_tokenizers..StripAccents)的实例方法
+**种类**: `StripAccents`的实例方法
 
 **返回**: `string` - 没有重音符号的规范化文本。
 
@@ -1582,7 +1582,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 一个将输入字符串转换为小写的规范化器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展**: `Normalizer`
 
@@ -1592,7 +1592,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 将输入字符串转换为小写。
 
-**种类**: [`Lowercase`](#module_tokenizers..Lowercase)的实例方法
+**种类**: `Lowercase`的实例方法
 
 **返回**: `string` - 规范化后的文本。
 
@@ -1606,7 +1606,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 一个在输入字符串前添加字符串的规范化器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展**: `Normalizer`
 
@@ -1616,7 +1616,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 在输入字符串前添加内容。
 
-**种类**: [`Prepend`](#module_tokenizers..Prepend)的实例方法
+**种类**: `Prepend`的实例方法
 
 **返回**: `string` - 规范化后的文本。
 
@@ -1630,21 +1630,21 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 一个应用一系列规范化器的规范化器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展自**：`Normalizer`
 
-+   [~NormalizerSequence](#module_tokenizers..NormalizerSequence) ⇐ `Normalizer`
++   ~NormalizerSequence ⇐ `Normalizer`
 
-    +   [`new NormalizerSequence(config)`](#new_module_tokenizers..NormalizerSequence_new)
+    +   `new NormalizerSequence(config)`
 
-    +   [`.normalize(text)`](#module_tokenizers..NormalizerSequence+normalize) ⇒ `string`
+    +   `.normalize(text)` ⇒ `string`
 
 * * *
 
-### 新的NormalizerSequence(config)
+### 新的 NormalizerSequence(config)
 
-创建一个新的NormalizerSequence实例。
+创建一个新的 NormalizerSequence 实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1657,7 +1657,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 将一系列规范化器应用于输入文本。
 
-**类型**：[`NormalizerSequence`](#module_tokenizers..NormalizerSequence)的实例方法
+**类型**：`NormalizerSequence`的实例方法
 
 **返回值**：`string` - 规范化后的文本。
 
@@ -1669,31 +1669,31 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ## tokenizers~BertNormalizer ⇐ <code> Normalizer </code>
 
-表示BERT标记化中使用的规范化器的类。
+表示 BERT 标记化中使用的规范化器的类。
 
-**类型**：[`tokenizers`](#module_tokenizers)的内部类
+**类型**：`tokenizers`的内部类
 
 **扩展自**：`Normalizer`
 
-+   [~BertNormalizer](#module_tokenizers..BertNormalizer) ⇐ `Normalizer`
++   ~BertNormalizer ⇐ `Normalizer`
 
-    +   [`._tokenize_chinese_chars(text)`](#module_tokenizers..BertNormalizer+_tokenize_chinese_chars) ⇒ `string`
+    +   `._tokenize_chinese_chars(text)` ⇒ `string`
 
-    +   [`._is_chinese_char(cp)`](#module_tokenizers..BertNormalizer+_is_chinese_char) ⇒ `boolean`
+    +   `._is_chinese_char(cp)` ⇒ `boolean`
 
-    +   [`.stripAccents(text)`](#module_tokenizers..BertNormalizer+stripAccents) ⇒ `string`
+    +   `.stripAccents(text)` ⇒ `string`
 
-    +   [`.normalize(text)`](#module_tokenizers..BertNormalizer+normalize) ⇒ `string`
+    +   `.normalize(text)` ⇒ `string`
 
 * * *
 
 ### bertNormalizer._tokenize_chinese_chars(text) ⇒ <code> string </code>
 
-在输入文本中的任何CJK（中文、日文或韩文）字符周围添加空格。
+在输入文本中的任何 CJK（中文、日文或韩文）字符周围添加空格。
 
-**类型**：[`BertNormalizer`](#module_tokenizers..BertNormalizer)的实例方法
+**类型**：`BertNormalizer`的实例方法
 
-**返回值**：`string` - 在CJK字符周围添加空格的标记文本。
+**返回值**：`string` - 在 CJK 字符周围添加空格的标记文本。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1703,19 +1703,19 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ### bertNormalizer._is_chinese_char(cp) ⇒ <code> boolean </code>
 
-检查给定的Unicode代码点是否表示CJK（中文、日文或韩文）字符。
+检查给定的 Unicode 代码点是否表示 CJK（中文、日文或韩文）字符。
 
-“中文字符”被定义为CJK Unicode块中的任何内容：[https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)](https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block))
+“中文字符”被定义为 CJK Unicode 块中的任何内容：[`en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)`](https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block))
 
-请注意，CJK Unicode块并不是所有日语和韩语字符，尽管其名称如此。现代韩语Hangul字母表是一个不同的块，日语平假名和片假名也是如此。这些字母表用于书写以空格分隔的单词，因此它们不会被特殊处理，而是像其他所有语言一样处理。
+请注意，CJK Unicode 块并不是所有日语和韩语字符，尽管其名称如此。现代韩语 Hangul 字母表是一个不同的块，日语平假名和片假名也是如此。这些字母表用于书写以空格分隔的单词，因此它们不会被特殊处理，而是像其他所有语言一样处理。
 
-**类型**：[`BertNormalizer`](#module_tokenizers..BertNormalizer)的实例方法
+**类型**：`BertNormalizer`的实例方法
 
-**返回值**：`boolean` - 如果代码点表示CJK字符，则为True，否则为False。
+**返回值**：`boolean` - 如果代码点表示 CJK 字符，则为 True，否则为 False。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| cp | `number` | 要检查的Unicode代码点。 |
+| cp | `number` | 要检查的 Unicode 代码点。 |
 
 * * *
 
@@ -1723,7 +1723,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 从给定文本中去除重音符号。
 
-**类型**：[`BertNormalizer`](#module_tokenizers..BertNormalizer)
+**类型**：`BertNormalizer`
 
 **返回值**：`string` - 去除重音符号的文本。
 
@@ -1737,7 +1737,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 根据配置规范化给定的文本。
 
-**类型**：[`BertNormalizer`](#module_tokenizers..BertNormalizer)的实例方法
+**类型**：`BertNormalizer`的实例方法
 
 **返回值**：`string` - 规范化后的文本。
 
@@ -1751,11 +1751,11 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 表示在标记化中使用的预标记器的可调用类。子类应该实现`pre_tokenize_text`方法来定义特定的预标记逻辑。
 
-**类型**：[`tokenizers`](#module_tokenizers)的内部类
+**类型**：`tokenizers`的内部类
 
 **扩展自**：`Callable`
 
-+   [~PreTokenizer](#module_tokenizers..PreTokenizer) ⇐ `Callable`
++   ~PreTokenizer ⇐ `Callable`
 
     +   *实例*
 
@@ -1767,7 +1767,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
     +   *静态*
 
-        +   [`.fromConfig(config)`](#module_tokenizers..PreTokenizer.fromConfig) ⇒ `PreTokenizer`
+        +   `.fromConfig(config)` ⇒ `PreTokenizer`
 
 * * *
 
@@ -1775,7 +1775,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 应该由子类实现的方法来定义特定的预分词逻辑。
 
-**种类**: [`PreTokenizer`](#module_tokenizers..PreTokenizer)的实例抽象方法
+**种类**: `PreTokenizer`的实例抽象方法
 
 **返回**: `Array.<string>` - 预标记的文本。
 
@@ -1794,7 +1794,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 将给定的文本标记为预标记。
 
-**种类**: [`PreTokenizer`](#module_tokenizers..PreTokenizer)的实例方法
+**种类**: `PreTokenizer`的实例方法
 
 **返回**: `Array.<string>` - 预标记的数组。
 
@@ -1807,9 +1807,9 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ### preTokenizer._call(text, [options]) ⇒ <code> Array. < string > </code>
 
-别名为[PreTokenizer#pre_tokenize](PreTokenizer#pre_tokenize)。
+别名为 PreTokenizer#pre_tokenize。
 
-**种类**: [`PreTokenizer`](#module_tokenizers..PreTokenizer)的实例方法
+**种类**: `PreTokenizer`的实例方法
 
 **返回**: `Array.<string>` - 预标记的数组。
 
@@ -1824,7 +1824,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 工厂方法，根据提供的配置返回`PreTokenizer`的子类的实例。
 
-**种类**: [`PreTokenizer`](#module_tokenizers..PreTokenizer)的静态方法
+**种类**: `PreTokenizer`的静态方法
 
 **返回**: `PreTokenizer` - `PreTokenizer`的子类的实例。
 
@@ -1840,13 +1840,13 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ## tokenizers~BertPreTokenizer ⇐ <code> PreTokenizer </code>
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展**: `PreTokenizer`
 
-+   [~BertPreTokenizer](#module_tokenizers..BertPreTokenizer) ⇐ `PreTokenizer`
++   ~BertPreTokenizer ⇐ `PreTokenizer`
 
-    +   [`new BertPreTokenizer(config)`](#new_module_tokenizers..BertPreTokenizer_new)
+    +   `new BertPreTokenizer(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..BertPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -1854,7 +1854,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ### new BertPreTokenizer(config)
 
-一个将文本拆分为单词片段的预分词器，使用类似于BERT原始实现中使用的基本分词方案。
+一个将文本拆分为单词片段的预分词器，使用类似于 BERT 原始实现中使用的基本分词方案。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -1864,9 +1864,9 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ### bertPreTokenizer.pre_tokenize_text(text, [options]) ⇒ <code> Array. < string > </code>
 
-使用BERT预标记方案对单个文本进行标记。
+使用 BERT 预标记方案对单个文本进行标记。
 
-**种类**: [`BertPreTokenizer`](#module_tokenizers..BertPreTokenizer)的实例方法
+**种类**: `BertPreTokenizer`的实例方法
 
 **返回**: `Array.<string>` - 令牌数组。
 
@@ -1881,19 +1881,19 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 一个将文本拆分为字节对编码（BPE）子词的预分词器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部类
+**种类**: `tokenizers`的内部类
 
 **扩展**: `PreTokenizer`
 
-+   [~ByteLevelPreTokenizer](#module_tokenizers..ByteLevelPreTokenizer) ⇐ `PreTokenizer`
++   ~ByteLevelPreTokenizer ⇐ `PreTokenizer`
 
-    +   [`new ByteLevelPreTokenizer(config)`](#new_module_tokenizers..ByteLevelPreTokenizer_new)
+    +   `new ByteLevelPreTokenizer(config)`
 
-    +   [`.add_prefix_space`](#module_tokenizers..ByteLevelPreTokenizer+add_prefix_space) : `boolean`
+    +   `.add_prefix_space` : `boolean`
 
-    +   [`.trim_offsets`](#module_tokenizers..ByteLevelPreTokenizer+trim_offsets) : `boolean`
+    +   `.trim_offsets` : `boolean`
 
-    +   [`.use_regex`](#module_tokenizers..ByteLevelPreTokenizer+use_regex) : `boolean`
+    +   `.use_regex` : `boolean`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..ByteLevelPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -1913,7 +1913,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 是否在第一个单词前添加一个空格。这样可以将第一个单词视为任何其他单词。
 
-**种类**：[`ByteLevelPreTokenizer`](#module_tokenizers..ByteLevelPreTokenizer)的实例属性
+**种类**：`ByteLevelPreTokenizer`的实例属性
 
 * * *
 
@@ -1921,7 +1921,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 是否在后处理步骤中修剪偏移量以避免包含空格。
 
-**种类**：[`ByteLevelPreTokenizer`](#module_tokenizers..ByteLevelPreTokenizer)的实例属性
+**种类**：`ByteLevelPreTokenizer`的实例属性
 
 **待办事项**
 
@@ -1931,9 +1931,9 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ### byteLevelPreTokenizer.use_regex : <code> boolean </code>
 
-是否使用标准的GPT2正则表达式进行空格拆分。如果要使用自己的拆分，请将其设置为False。默认为true。
+是否使用标准的 GPT2 正则表达式进行空格拆分。如果要使用自己的拆分，请将其设置为 False。默认为 true。
 
-**种类**：[`ByteLevelPreTokenizer`](#module_tokenizers..ByteLevelPreTokenizer)的实例属性
+**种类**：`ByteLevelPreTokenizer`的实例属性
 
 * * *
 
@@ -1941,7 +1941,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 使用字节级标记化对单个文本片段进行标记化。
 
-**种类**：[`ByteLevelPreTokenizer`](#module_tokenizers..ByteLevelPreTokenizer)的实例方法
+**种类**：`ByteLevelPreTokenizer`的实例方法
 
 **返回**：`Array.<string>` - 一个标记数组。
 
@@ -1956,13 +1956,13 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 使用给定模式拆分文本。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展**：`PreTokenizer`
 
-+   [~SplitPreTokenizer](#module_tokenizers..SplitPreTokenizer) ⇐ `PreTokenizer`
++   ~SplitPreTokenizer ⇐ `PreTokenizer`
 
-    +   [`new SplitPreTokenizer(config)`](#new_module_tokenizers..SplitPreTokenizer_new)
+    +   `new SplitPreTokenizer(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..SplitPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -1985,7 +1985,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 通过使用给定模式拆分文本进行标记化。
 
-**种类**：[`SplitPreTokenizer`](#module_tokenizers..SplitPreTokenizer)的实例方法
+**种类**：`SplitPreTokenizer`的实例方法
 
 **返回**：`Array.<string>` - 一个标记数组。
 
@@ -2000,13 +2000,13 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 根据标点符号拆分文本。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展**：`PreTokenizer`
 
-+   [~PunctuationPreTokenizer](#module_tokenizers..PunctuationPreTokenizer) ⇐ `PreTokenizer`
++   ~PunctuationPreTokenizer ⇐ `PreTokenizer`
 
-    +   [`new PunctuationPreTokenizer(config)`](#new_module_tokenizers..PunctuationPreTokenizer_new)
+    +   `new PunctuationPreTokenizer(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..PunctuationPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -2025,7 +2025,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 使用给定的模式拆分文本进行标记化。
 
-**类型**: [`PunctuationPreTokenizer`](#module_tokenizers..PunctuationPreTokenizer) 的实例方法
+**类型**: `PunctuationPreTokenizer` 的实例方法
 
 **返回**: `Array.<string>` - 一个标记数组。
 
@@ -2040,13 +2040,13 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 根据数字拆分文本。
 
-**类型**: [`tokenizers`](#module_tokenizers) 的内部类
+**类型**: `tokenizers` 的内部类
 
 **扩展**: `PreTokenizer`
 
-+   [~DigitsPreTokenizer](#module_tokenizers..DigitsPreTokenizer) ⇐ `PreTokenizer`
++   ~DigitsPreTokenizer ⇐ `PreTokenizer`
 
-    +   [`new DigitsPreTokenizer(config)`](#new_module_tokenizers..DigitsPreTokenizer_new)
+    +   `new DigitsPreTokenizer(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..DigitsPreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -2065,7 +2065,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 使用给定的模式拆分文本进行标记化。
 
-**类型**: [`DigitsPreTokenizer`](#module_tokenizers..DigitsPreTokenizer) 的实例方法
+**类型**: `DigitsPreTokenizer` 的实例方法
 
 **返回**: `Array.<string>` - 一个标记数组。
 
@@ -2078,23 +2078,23 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ## tokenizers~PostProcessor ⇐ <code> Callable </code>
 
-**类型**: [`tokenizers`](#module_tokenizers) 的内部类
+**类型**: `tokenizers` 的内部类
 
 **扩展**: `Callable`
 
-+   [~PostProcessor](#module_tokenizers..PostProcessor) ⇐ `Callable`
++   ~PostProcessor ⇐ `Callable`
 
-    +   [`new PostProcessor(config)`](#new_module_tokenizers..PostProcessor_new)
+    +   `new PostProcessor(config)`
 
     +   *实例*
 
-        +   [`.post_process(tokens, ...args)`](#module_tokenizers..PostProcessor+post_process) ⇒ `PostProcessedOutput`
+        +   `.post_process(tokens, ...args)` ⇒ `PostProcessedOutput`
 
-        +   [`._call(tokens, ...args)`](#module_tokenizers..PostProcessor+_call) ⇒ `PostProcessedOutput`
+        +   `._call(tokens, ...args)` ⇒ `PostProcessedOutput`
 
     +   *静态*
 
-        +   [`.fromConfig(config)`](#module_tokenizers..PostProcessor.fromConfig) ⇒ `PostProcessor`
+        +   `.fromConfig(config)` ⇒ `PostProcessor`
 
 * * *
 
@@ -2110,7 +2110,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 要在子类中实现的方法，以在给定的标记上应用后处理。
 
-**类型**: [`PostProcessor`](#module_tokenizers..PostProcessor) 的实例方法
+**类型**: `PostProcessor` 的实例方法
 
 **返回**: `PostProcessedOutput` - 后处理后的标记。
 
@@ -2127,9 +2127,9 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ### postProcessor._call(tokens, ...args) ⇒ <code> PostProcessedOutput </code>
 
-别名为 [PostProcessor#post_process](PostProcessor#post_process)。
+别名为 PostProcessor#post_process。
 
-**类型**: [`PostProcessor`](#module_tokenizers..PostProcessor) 的实例方法
+**类型**: `PostProcessor` 的实例方法
 
 **返回**: `PostProcessedOutput` - 后处理后的标记。
 
@@ -2142,11 +2142,11 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ### PostProcessor.fromConfig(config) ⇒ <code> PostProcessor </code>
 
-从配置对象创建一个PostProcessor对象的工厂方法。
+从配置对象创建一个 PostProcessor 对象的工厂方法。
 
-**种类**：[`PostProcessor`](#module_tokenizers..PostProcessor)的静态方法
+**种类**：`PostProcessor`的静态方法
 
-**返回**：`PostProcessor` - 从给定配置创建的PostProcessor对象。
+**返回**：`PostProcessor` - 从给定配置创建的 PostProcessor 对象。
 
 **抛出**：
 
@@ -2162,11 +2162,11 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 一个后处理器，将特殊标记添加到输入的开头和结尾。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
-+   [~BertProcessing](#module_tokenizers..BertProcessing)
++   ~BertProcessing
 
-    +   [`new BertProcessing(config)`](#new_module_tokenizers..BertProcessing_new)
+    +   `new BertProcessing(config)`
 
     +   [`.post_process(tokens, [tokens_pair])`](#module_tokenizers..BertProcessing+post_process) ⇒ `PostProcessedOutput`
 
@@ -2186,7 +2186,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 将特殊标记添加到输入的开头和结尾。
 
-**种类**：[`BertProcessing`](#module_tokenizers..BertProcessing)的实例方法
+**种类**：`BertProcessing`的实例方法
 
 **返回**：`PostProcessedOutput` - 添加了特殊标记的后处理标记的开头和结尾。
 
@@ -2201,13 +2201,13 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 用实际标记替换模板中的特殊标记的后处理器。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展**：`PostProcessor`
 
-+   [~TemplateProcessing](#module_tokenizers..TemplateProcessing) ⇐ `PostProcessor`
++   ~TemplateProcessing ⇐ `PostProcessor`
 
-    +   [`new TemplateProcessing(config)`](#new_module_tokenizers..TemplateProcessing_new)
+    +   `new TemplateProcessing(config)`
 
     +   [`.post_process(tokens, [tokens_pair])`](#module_tokenizers..TemplateProcessing+post_process) ⇒ `PostProcessedOutput`
 
@@ -2229,7 +2229,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 用实际标记替换模板中的特殊标记。
 
-**种类**：[`TemplateProcessing`](#module_tokenizers..TemplateProcessing)的实例方法
+**种类**：`TemplateProcessing`的实例方法
 
 **返回**：`PostProcessedOutput` - 包含用实际标记替换的特殊标记的标记列表的对象。
 
@@ -2242,9 +2242,9 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ## tokenizers~ByteLevelPostProcessor ⇐ <code> PostProcessor </code>
 
-一个将给定标记原样返回的PostProcessor。
+一个将给定标记原样返回的 PostProcessor。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展**：`PostProcessor`
 
@@ -2254,7 +2254,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 后处理给定的标记。
 
-**种类**：[`ByteLevelPostProcessor`](#module_tokenizers..ByteLevelPostProcessor)的实例方法
+**种类**：`ByteLevelPostProcessor`的实例方法
 
 **返回**：`PostProcessedOutput` - 包含后处理的标记的对象。
 
@@ -2269,31 +2269,31 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 标记解码器的基类。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展**：`Callable`
 
-+   [~Decoder](#module_tokenizers..Decoder) ⇐ `Callable`
++   ~Decoder ⇐ `Callable`
 
-    +   [`new Decoder(config)`](#new_module_tokenizers..Decoder_new)
+    +   `new Decoder(config)`
 
     +   *实例*
 
-        +   [`.added_tokens`](#module_tokenizers..Decoder+added_tokens)：`数组.<AddedToken>`
+        +   `.added_tokens`：`数组.<AddedToken>`
 
-        +   [`._call(tokens)`](#module_tokenizers..Decoder+_call) ⇒ `字符串`
+        +   `._call(tokens)` ⇒ `字符串`
 
-        +   [`.decode(tokens)`](#module_tokenizers..Decoder+decode) ⇒ `字符串`
+        +   `.decode(tokens)` ⇒ `字符串`
 
-        +   [`.decode_chain(tokens)`](#module_tokenizers..Decoder+decode_chain) ⇒ `数组.<字符串>`
+        +   `.decode_chain(tokens)` ⇒ `数组.<字符串>`
 
     +   *静态*
 
-        +   [`.fromConfig(config)`](#module_tokenizers..Decoder.fromConfig) ⇒ `解码器`
+        +   `.fromConfig(config)` ⇒ `解码器`
 
 * * *
 
-### 新的Decoder(config)
+### 新的 Decoder(config)
 
 创建`Decoder`的实例。
 
@@ -2305,7 +2305,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ### decoder.added_tokens： <code>数组.<AddedToken></code>
 
-**种类**：[`Decoder`](#module_tokenizers..Decoder)的实例属性
+**种类**：`Decoder`的实例属性
 
 * * *
 
@@ -2313,7 +2313,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 调用`decode`方法。
 
-**种类**：[`Decoder`](#module_tokenizers..Decoder)的实例方法
+**种类**：`Decoder`的实例方法
 
 **返回**：`字符串` - 解码后的字符串。
 
@@ -2327,7 +2327,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 解码一组标记。
 
-**种类**：[`Decoder`](#module_tokenizers..Decoder)的实例方法
+**种类**：`Decoder`的实例方法
 
 **返回**：`字符串` - 解码后的字符串。
 
@@ -2341,7 +2341,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 将解码器应用于一组标记。
 
-**种类**：[`Decoder`](#module_tokenizers..Decoder)的实例方法
+**种类**：`Decoder`的实例方法
 
 **返回**：`数组.<字符串>` - 解码后的标记列表。
 
@@ -2359,7 +2359,7 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 根据提供的配置创建一个解码器实例。
 
-**种类**：[`Decoder`](#module_tokenizers..Decoder)的静态方法
+**种类**：`Decoder`的静态方法
 
 **返回**：`Decoder` - 一个解码器实例。
 
@@ -2375,49 +2375,49 @@ StripAccents规范化器从文本中删除所有重音符号。
 
 ## 分词器~FuseDecoder
 
-Fuse简单地将所有标记融合成一个大字符串。通常这是最后的解码步骤，但如果在该步骤之后需要进行一些解码器，则存在这个解码器
+Fuse 简单地将所有标记融合成一个大字符串。通常这是最后的解码步骤，但如果在该步骤之后需要进行一些解码器，则存在这个解码器
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 * * *
 
 ### fuseDecoder.decode_chain()： <code>*</code>
 
-**种类**：[`FuseDecoder`](#module_tokenizers..FuseDecoder)的实例方法
+**种类**：`FuseDecoder`的实例方法
 
 * * *
 
 ## tokenizers~WordPieceDecoder ⇐ <code>解码器</code>
 
-一个解码器，将一组WordPiece标记解码为一个字符串。
+一个解码器，将一组 WordPiece 标记解码为一个字符串。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展**：`Decoder`
 
-+   [~WordPieceDecoder](#module_tokenizers..WordPieceDecoder) ⇐ `Decoder`
++   ~WordPieceDecoder ⇐ `Decoder`
 
-    +   [`new WordPieceDecoder(config)`](#new_module_tokenizers..WordPieceDecoder_new)
+    +   `new WordPieceDecoder(config)`
 
-    +   [`.decode_chain()`](#module_tokenizers..WordPieceDecoder+decode_chain)：`*`
+    +   `.decode_chain()`：`*`
 
 * * *
 
-### 新的WordPieceDecoder(config)
+### 新的 WordPieceDecoder(config)
 
-创建一个新的WordPieceDecoder实例。
+创建一个新的 WordPieceDecoder 实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | 配置 | `对象` | 配置对象。 |
-| config.prefix | `字符串` | 用于WordPiece编码的前缀。 |
+| config.prefix | `字符串` | 用于 WordPiece 编码的前缀。 |
 | config.cleanup | `布尔值` | 是否清理解码后的字符串。 |
 
 * * *
 
 ### wordPieceDecoder.decode_chain()： <code>*</code>
 
-**种类**：[`WordPieceDecoder`](#module_tokenizers..WordPieceDecoder)的实例方法
+**种类**：`WordPieceDecoder`的实例方法
 
 * * *
 
@@ -2425,17 +2425,17 @@ Fuse简单地将所有标记融合成一个大字符串。通常这是最后的�
 
 用于标记化输出的字节级解码器。继承自`Decoder`类。
 
-**类型**：[`tokenizers`](#module_tokenizers)的内部类
+**类型**：`tokenizers`的内部类
 
 **扩展**：`Decoder`
 
-+   [~ByteLevelDecoder](#module_tokenizers..ByteLevelDecoder) ⇐ `Decoder`
++   ~ByteLevelDecoder ⇐ `Decoder`
 
-    +   [`new ByteLevelDecoder(config)`](#new_module_tokenizers..ByteLevelDecoder_new)
+    +   `new ByteLevelDecoder(config)`
 
-    +   [`.convert_tokens_to_string(tokens)`](#module_tokenizers..ByteLevelDecoder+convert_tokens_to_string) ⇒ `string`
+    +   `.convert_tokens_to_string(tokens)` ⇒ `string`
 
-    +   [`.decode_chain()`](#module_tokenizers..ByteLevelDecoder+decode_chain)：`*`
+    +   `.decode_chain()`：`*`
 
 * * *
 
@@ -2453,7 +2453,7 @@ Fuse简单地将所有标记融合成一个大字符串。通常这是最后的�
 
 通过解码每个字节将标记数组转换为字符串。
 
-**类型**：[`ByteLevelDecoder`](#module_tokenizers..ByteLevelDecoder)的实例方法
+**类型**：`ByteLevelDecoder`的实例方法
 
 **返回**：`string` - 解码后的字符串。
 
@@ -2465,21 +2465,21 @@ Fuse简单地将所有标记融合成一个大字符串。通常这是最后的�
 
 ### byteLevelDecoder.decode_chain()： <code> * </code>
 
-**类型**：[`ByteLevelDecoder`](#module_tokenizers..ByteLevelDecoder)的实例方法
+**类型**：`ByteLevelDecoder`的实例方法
 
 * * *
 
 ## tokenizers~CTCDecoder
 
-CTC（Connectionist Temporal Classification）解码器。查看[https://github.com/huggingface/tokenizers/blob/bb38f390a61883fc2f29d659af696f428d1cda6b/tokenizers/src/decoders/ctc.rs](https://github.com/huggingface/tokenizers/blob/bb38f390a61883fc2f29d659af696f428d1cda6b/tokenizers/src/decoders/ctc.rs)
+CTC（Connectionist Temporal Classification）解码器。查看[`github.com/huggingface/tokenizers/blob/bb38f390a61883fc2f29d659af696f428d1cda6b/tokenizers/src/decoders/ctc.rs`](https://github.com/huggingface/tokenizers/blob/bb38f390a61883fc2f29d659af696f428d1cda6b/tokenizers/src/decoders/ctc.rs)
 
-**类型**：[`tokenizers`](#module_tokenizers)的内部类
+**类型**：`tokenizers`的内部类
 
-+   [~CTCDecoder](#module_tokenizers..CTCDecoder)
++   ~CTCDecoder
 
-    +   [`.convert_tokens_to_string(tokens)`](#module_tokenizers..CTCDecoder+convert_tokens_to_string) ⇒ `string`
+    +   `.convert_tokens_to_string(tokens)` ⇒ `string`
 
-    +   [`.decode_chain()`](#module_tokenizers..CTCDecoder+decode_chain)：`*`
+    +   `.decode_chain()`：`*`
 
 * * *
 
@@ -2487,7 +2487,7 @@ CTC（Connectionist Temporal Classification）解码器。查看[https://github.
 
 将连接主时间分类（CTC）输出标记转换为单个字符串。
 
-**类型**：[`CTCDecoder`](#module_tokenizers..CTCDecoder)的实例方法
+**类型**：`CTCDecoder`的实例方法
 
 **返回**：`string` - 解码后的字符串。
 
@@ -2499,7 +2499,7 @@ CTC（Connectionist Temporal Classification）解码器。查看[https://github.
 
 ### ctcDecoder.decode_chain()： <code> * </code>
 
-**类型**：[`CTCDecoder`](#module_tokenizers..CTCDecoder)的实例方法
+**类型**：`CTCDecoder`的实例方法
 
 * * *
 
@@ -2507,21 +2507,21 @@ CTC（Connectionist Temporal Classification）解码器。查看[https://github.
 
 应用一系列解码器。
 
-**类型**：[`tokenizers`](#module_tokenizers)的内部类
+**类型**：`tokenizers`的内部类
 
 **扩展**：`Decoder`
 
-+   [~DecoderSequence](#module_tokenizers..DecoderSequence) ⇐ `Decoder`
++   ~DecoderSequence ⇐ `Decoder`
 
-    +   [`new DecoderSequence(config)`](#new_module_tokenizers..DecoderSequence_new)
+    +   `new DecoderSequence(config)`
 
-    +   [`.decode_chain()`](#module_tokenizers..DecoderSequence+decode_chain)：`*`
+    +   `.decode_chain()`：`*`
 
 * * *
 
 ### new DecoderSequence(config)
 
-创建一个新的DecoderSequence实例。
+创建一个新的 DecoderSequence 实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -2532,21 +2532,21 @@ CTC（Connectionist Temporal Classification）解码器。查看[https://github.
 
 ### decoderSequence.decode_chain()： <code> * </code>
 
-**类型**：[`DecoderSequence`](#module_tokenizers..DecoderSequence)的实例方法
+**类型**：`DecoderSequence`的实例方法
 
 * * *
 
 ## tokenizers~MetaspacePreTokenizer ⇐ <code> PreTokenizer </code>
 
-这个PreTokenizer将空格替换为给定的替换字符，如果需要则添加前缀空格，并返回一个标记列表。
+这个 PreTokenizer 将空格替换为给定的替换字符，如果需要则添加前缀空格，并返回一个标记列表。
 
-**类型**：[`tokenizers`](#module_tokenizers)的内部类
+**类型**：`tokenizers`的内部类
 
 **扩展**：`PreTokenizer`
 
-+   [~MetaspacePreTokenizer](#module_tokenizers..MetaspacePreTokenizer) ⇐ `PreTokenizer`
++   ~MetaspacePreTokenizer ⇐ `PreTokenizer`
 
-    +   [`new MetaspacePreTokenizer(config)`](#new_module_tokenizers..MetaspacePreTokenizer_new)
+    +   `new MetaspacePreTokenizer(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..MetaspacePreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -2556,11 +2556,11 @@ CTC（Connectionist Temporal Classification）解码器。查看[https://github.
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
-| config | `Object` |  | MetaspacePreTokenizer的配置对象。 |
+| config | `Object` |  | MetaspacePreTokenizer 的配置对象。 |
 | config.add_prefix_space | `boolean` |  | 是否在第一个标记前添加前缀空格。 |
 | config.replacement | `string` |  | 用来替换空格的字符。 |
 | [config.str_rep] | `string` | `"config.replacement"` | 替换字符的可选字符串表示。 |
-| [config.prepend_scheme] | `'first'` &#124; `'never'` &#124; `'always'` | `'always'` | metaspace前置方案。 |
+| [config.prepend_scheme] | `'first'` &#124; `'never'` &#124; `'always'` | `'always'` | metaspace 前置方案。 |
 
 * * *
 
@@ -2568,7 +2568,7 @@ CTC（Connectionist Temporal Classification）解码器。查看[https://github.
 
 该方法接受一个字符串，用替换字符替换空格，如果需要则添加前缀空格，并返回一个新的标记列表。
 
-**种类**：[`MetaspacePreTokenizer`](#module_tokenizers..MetaspacePreTokenizer)的实例方法
+**种类**：`MetaspacePreTokenizer`的实例方法
 
 **返回**：`Array.<string>` - 一个新的预标记化的标记列表。
 
@@ -2582,27 +2582,27 @@ CTC（Connectionist Temporal Classification）解码器。查看[https://github.
 
 ## tokenizers~MetaspaceDecoder ⇐ <code> Decoder </code>
 
-MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
+MetaspaceDecoder 类扩展了 Decoder 类并解码 Metaspace 标记化。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展自**：`Decoder`
 
-+   [~MetaspaceDecoder](#module_tokenizers..MetaspaceDecoder) ⇐ `Decoder`
++   ~MetaspaceDecoder ⇐ `Decoder`
 
-    +   [`new MetaspaceDecoder(config)`](#new_module_tokenizers..MetaspaceDecoder_new)
+    +   `new MetaspaceDecoder(config)`
 
-    +   [`.decode_chain()`](#module_tokenizers..MetaspaceDecoder+decode_chain) : `*`
+    +   `.decode_chain()` : `*`
 
 * * *
 
 ### new MetaspaceDecoder(config)
 
-构造一个新的MetaspaceDecoder对象。
+构造一个新的 MetaspaceDecoder 对象。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
-| config | `Object` | MetaspaceDecoder的配置对象。 |
+| config | `Object` | MetaspaceDecoder 的配置对象。 |
 | config.add_prefix_space | `boolean` | 是否在解码后的字符串前添加前缀空格。 |
 | config.replacement | `string` | 用来替换空格的字符串。 |
 
@@ -2610,42 +2610,42 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 ### metaspaceDecoder.decode_chain() : <code> * </code>
 
-**种类**：[`MetaspaceDecoder`](#module_tokenizers..MetaspaceDecoder)的实例方法
+**种类**：`MetaspaceDecoder`的实例方法
 
 * * *
 
 ## tokenizers~Precompiled ⇐ <code> Normalizer </code>
 
-一个应用预编译charsmap的规范化器。这对于在C++中应用复杂的规范化并将其暴露给JavaScript非常有用。
+一个应用预编译 charsmap 的规范化器。这对于在 C++中应用复杂的规范化并将其暴露给 JavaScript 非常有用。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展自**：`Normalizer`
 
-+   [~Precompiled](#module_tokenizers..Precompiled) ⇐ `Normalizer`
++   ~Precompiled ⇐ `Normalizer`
 
-    +   [`new Precompiled(config)`](#new_module_tokenizers..Precompiled_new)
+    +   `new Precompiled(config)`
 
-    +   [`.normalize(text)`](#module_tokenizers..Precompiled+normalize) ⇒ `string`
+    +   `.normalize(text)` ⇒ `string`
 
 * * *
 
 ### new Precompiled(config)
 
-创建一个新的Precompiled规范化器的实例。
+创建一个新的 Precompiled 规范化器的实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
 | config | `Object` | 预编译规范化器的配置对象。 |
-| config.precompiled_charsmap | `Object` | 预编译的charsmap对象。 |
+| config.precompiled_charsmap | `Object` | 预编译的 charsmap 对象。 |
 
 * * *
 
 ### precompiled.normalize(text) ⇒ <code> string </code>
 
-通过应用预编译的charsmap对给定文本进行规范化。
+通过应用预编译的 charsmap 对给定文本进行规范化。
 
-**种类**：[`Precompiled`](#module_tokenizers..Precompiled)的实例方法
+**种类**：`Precompiled`的实例方法
 
 **返回**：`string` - 规范化后的文本。
 
@@ -2659,13 +2659,13 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 一个预标记器，将一系列预标记器应用于输入文本。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展自**：`PreTokenizer`
 
-+   [~PreTokenizerSequence](#module_tokenizers..PreTokenizerSequence) ⇐ `PreTokenizer`
++   ~PreTokenizerSequence ⇐ `PreTokenizer`
 
-    +   [`new PreTokenizerSequence(config)`](#new_module_tokenizers..PreTokenizerSequence_new)
+    +   `new PreTokenizerSequence(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..PreTokenizerSequence+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -2673,7 +2673,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 ### new PreTokenizerSequence(config)
 
-创建一个PreTokenizerSequence的实例。
+创建一个 PreTokenizerSequence 的实例。
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -2686,7 +2686,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 将序列中的每个预分词器依次应用于输入文本。
 
-**种类**：[`PreTokenizerSequence`](#module_tokenizers..PreTokenizerSequence)的实例方法
+**种类**：`PreTokenizerSequence`的实例方法
 
 **返回**：`Array.<string>` - 预分词文本。
 
@@ -2701,11 +2701,11 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 通过单词边界拆分（使用以下正则表达式：`\w+|[^\w\s]+`）。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
-+   [〜WhitespacePreTokenizer](#module_tokenizers..WhitespacePreTokenizer)
++   〜WhitespacePreTokenizer
 
-    +   [`new WhitespacePreTokenizer(config)`](#new_module_tokenizers..WhitespacePreTokenizer_new)
+    +   `new WhitespacePreTokenizer(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..WhitespacePreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -2725,7 +2725,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 通过单词边界拆分输入文本的预分词。
 
-**种类**：[`WhitespacePreTokenizer`](#module_tokenizers..WhitespacePreTokenizer)的实例方法
+**种类**：`WhitespacePreTokenizer`的实例方法
 
 **返回**：`Array.<string>` - 通过在空白字符上拆分输入文本生成的令牌数组。
 
@@ -2740,13 +2740,13 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 通过空白字符将文本字符串拆分为单独的令牌。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
 **扩展**：`预分词器`
 
-+   [〜WhitespaceSplit](#module_tokenizers..WhitespaceSplit) ⇐ `PreTokenizer`
++   〜WhitespaceSplit ⇐ `PreTokenizer`
 
-    +   [`new WhitespaceSplit(config)`](#new_module_tokenizers..WhitespaceSplit_new)
+    +   `new WhitespaceSplit(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..WhitespaceSplit+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -2766,7 +2766,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 通过在空白字符上拆分输入文本来预分词。
 
-**种类**：[`WhitespaceSplit`](#module_tokenizers..WhitespaceSplit)的实例方法
+**种类**：`WhitespaceSplit`的实例方法
 
 **返回**：`Array.<string>` - 通过在空白字符上拆分输入文本生成的令牌数组。
 
@@ -2779,11 +2779,11 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 ## tokenizers〜ReplacePreTokenizer
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部类
+**种类**：`tokenizers`的内部类
 
-+   [〜ReplacePreTokenizer](#module_tokenizers..ReplacePreTokenizer)
++   〜ReplacePreTokenizer
 
-    +   [`new ReplacePreTokenizer(config)`](#new_module_tokenizers..ReplacePreTokenizer_new)
+    +   `new ReplacePreTokenizer(config)`
 
     +   [`.pre_tokenize_text(text, [options])`](#module_tokenizers..ReplacePreTokenizer+pre_tokenize_text) ⇒ `Array.<string>`
 
@@ -2803,7 +2803,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 通过替换某些字符对输入文本进行预分词。
 
-**种类**：[`ReplacePreTokenizer`](#module_tokenizers..ReplacePreTokenizer)的实例方法
+**种类**：`ReplacePreTokenizer`的实例方法
 
 **返回**：`Array.<string>` - 通过替换某些字符生成的令牌数组。
 
@@ -2816,11 +2816,11 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 ## tokenizers~BYTES_TO_UNICODE ⇒ <code> 对象 </code>
 
-返回utf-8字节列表和到unicode字符串的映射。特别避免映射到BPE代码无法处理的空格/控制字符。
+返回 utf-8 字节列表和到 unicode 字符串的映射。特别避免映射到 BPE 代码无法处理的空格/控制字符。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部常量
+**种类**: `tokenizers`的内部常量
 
-**返回**: `对象` - 具有utf-8字节键和unicode字符串值的对象。
+**返回**: `对象` - 具有 utf-8 字节键和 unicode 字符串值的对象。
 
 * * *
 
@@ -2828,7 +2828,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 从指定路径加载分词器。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 **返回**: `Promise.<数组<任意>>` - 一个解析为有关加载的分词器信息的承诺。
 
@@ -2841,9 +2841,9 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 ## tokenizers~regexSplit(text, regex) ⇒ <code> 数组. < 字符串 > </code>
 
-将字符串根据正则表达式拆分，但保留分隔符的辅助函数。这是必需的，因为JavaScript的`.split()`方法不会保留分隔符，并且将其包装在捕获组中会导致现有捕获组出现问题（由于嵌套）。
+将字符串根据正则表达式拆分，但保留分隔符的辅助函数。这是必需的，因为 JavaScript 的`.split()`方法不会保留分隔符，并且将其包装在捕获组中会导致现有捕获组出现问题（由于嵌套）。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 **返回**: `Array.<字符串>` - 拆分的字符串。
 
@@ -2858,7 +2858,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 从配置对象构造模式的辅助方法。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 **返回**: `正则表达式` | `null` - 编译后的模式。
 
@@ -2873,7 +2873,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 将对象转换为映射的辅助函数
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 **返回**: `映射.<字符串, 任意>` - 映射。
 
@@ -2887,7 +2887,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 将张量转换为解码前的列表的辅助函数。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 **返回**: `Array.<数字>` - 作为列表的张量。
 
@@ -2901,7 +2901,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 清理简单英语分词工件列表，如标点符号前的空格和缩写形式
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 **返回**: `字符串` - 清理后的文本。
 
@@ -2915,7 +2915,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 从字符串中去除重音符号的辅助函数。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 **返回**: `字符串` - 去除重音符号的文本。
 
@@ -2929,7 +2929,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 将字符串小写并去除重音符号的辅助函数。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 **返回**: `字符串` - 去除重音符号的小写文本。
 
@@ -2943,7 +2943,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 将数组中连续值等于指定值的值合并的辅助函数。
 
-**种类**: [`tokenizers`](#module_tokenizers)的内部方法
+**种类**: `tokenizers`的内部方法
 
 | 参数 | 类型 | 描述 |
 | --- | --- | --- |
@@ -2957,7 +2957,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 在空格上拆分字符串。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部方法
+**种类**：`tokenizers`的内部方法
 
 **返回**：`Array.<string>` - 拆分的字符串。
 
@@ -2971,7 +2971,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 额外的特定于分词器的属性。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部typedef
+**种类**：`tokenizers`的内部 typedef
 
 **属性**
 
@@ -2983,7 +2983,7 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 ## tokenizers~BPENode : <code> Object </code>
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部typedef
+**种类**：`tokenizers`的内部 typedef
 
 **属性**
 
@@ -2999,33 +2999,33 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 ## tokenizers~SplitDelimiterBehavior : <code> ’ removed ’ </code> | <code> ’ isolated ’ </code> | <code> ’ mergedWithPrevious ’ </code> | <code> ’ mergedWithNext ’ </code> | <code> ’ contiguous ’ </code>
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部typedef
+**种类**：`tokenizers`的内部 typedef
 
 * * *
 
 ## tokenizers~PostProcessedOutput : <code> Object </code>
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部typedef
+**种类**：`tokenizers`的内部 typedef
 
 **属性**
 
 | 名称 | 类型 | 描述 |
 | --- | --- | --- |
 | tokens | `Array.<string>` | 后处理器生成的令牌列表。 |
-| [token_type_ids] | `Array.<number>` | 后处理器生成的令牌类型id列表。 |
+| [token_type_ids] | `Array.<number>` | 后处理器生成的令牌类型 id 列表。 |
 
 * * *
 
 ## tokenizers~EncodingSingle : <code> Object </code>
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部typedef
+**种类**：`tokenizers`的内部 typedef
 
 **属性**
 
 | 名称 | 类型 | 描述 |
 | --- | --- | --- |
-| input_ids | `Array.<number>` | 要提供给模型的令牌id列表。 |
-| attention_mask | `Array.<number>` | 要提供给模型的令牌类型id列表 |
+| input_ids | `Array.<number>` | 要提供给模型的令牌 id 列表。 |
+| attention_mask | `Array.<number>` | 要提供给模型的令牌类型 id 列表 |
 | [token_type_ids] | `Array.<number>` | 指定哪些令牌应该被模型关注的索引列表 |
 
 * * *
@@ -3034,21 +3034,21 @@ MetaspaceDecoder类扩展了Decoder类并解码Metaspace标记化。
 
 保存分词器调用函数的输出。
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部typedef
+**种类**：`tokenizers`的内部 typedef
 
 **属性**
 
 | 名称 | 类型 | 描述 |
 | --- | --- | --- |
-| input_ids | `BatchEncodingItem` | 要提供给模型的令牌id列表。 |
+| input_ids | `BatchEncodingItem` | 要提供给模型的令牌 id 列表。 |
 | attention_mask | `BatchEncodingItem` | 指定模型应关注的令牌的索引列表。 |
-| [token_type_ids] | `BatchEncodingItem` | 要提供给模型的令牌类型id列表。 |
+| [token_type_ids] | `BatchEncodingItem` | 要提供给模型的令牌类型 id 列表。 |
 
 * * *
 
 ## tokenizers~Message : <code> Object </code>
 
-**种类**：[`tokenizers`](#module_tokenizers)的内部typedef
+**种类**：`tokenizers`的内部 typedef
 
 **属性**
 

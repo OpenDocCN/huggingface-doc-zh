@@ -1,6 +1,6 @@
 # 文本生成启动器参数
 
-> 原始文本: [https://huggingface.co/docs/text-generation-inference/basic_tutorials/launcher](https://huggingface.co/docs/text-generation-inference/basic_tutorials/launcher)
+> 原始文本: [`huggingface.co/docs/text-generation-inference/basic_tutorials/launcher`](https://huggingface.co/docs/text-generation-inference/basic_tutorials/launcher)
 
 ```py
 Text Generation Launcher
@@ -10,7 +10,7 @@ Usage: text-generation-launcher [OPTIONS]
 Options:
 ```
 
-## 模型ID
+## 模型 ID
 
 ```py
       --model-id <MODEL_ID>
@@ -145,7 +145,7 @@ Options:
 
 ```
 
-## 最大前N个令牌
+## 最大前 N 个令牌
 
 ```py
       --max-top-n-tokens <MAX_TOP_N_TOKENS>
@@ -247,7 +247,7 @@ Options:
 
 ```
 
-## 启用CUDA图形
+## 启用 CUDA 图形
 
 ```py
       --enable-cuda-graphs
@@ -279,7 +279,7 @@ Options:
 
 ```
 
-## 分片UDS路径
+## 分片 UDS 路径
 
 ```py
       --shard-uds-path <SHARD_UDS_PATH>
@@ -312,7 +312,7 @@ Options:
 
 ```
 
-## Hugging Face Hub缓存
+## Hugging Face Hub 缓存
 
 ```py
       --huggingface-hub-cache <HUGGINGFACE_HUB_CACHE>
@@ -342,7 +342,7 @@ Options:
 
 ```
 
-## CUDA内存分数
+## CUDA 内存分数
 
 ```py
       --cuda-memory-fraction <CUDA_MEMORY_FRACTION>
@@ -380,7 +380,7 @@ Options:
 
 ```
 
-## JSON输出
+## JSON 输出
 
 ```py
       --json-output
@@ -390,7 +390,7 @@ Options:
 
 ```
 
-## OTLP端点
+## OTLP 端点
 
 ```py
       --otlp-endpoint <OTLP_ENDPOINT>
@@ -398,7 +398,7 @@ Options:
 
 ```
 
-## CORS允许来源
+## CORS 允许来源
 
 ```py
       --cors-allow-origin <CORS_ALLOW_ORIGIN>
@@ -432,7 +432,7 @@ Options:
 
 ```
 
-## NGROK授权令牌
+## NGROK 授权令牌
 
 ```py
       --ngrok-authtoken <NGROK_AUTHTOKEN>
@@ -442,7 +442,7 @@ Options:
 
 ```
 
-## NGROK边缘
+## NGROK 边缘
 
 ```py
       --ngrok-edge <NGROK_EDGE>

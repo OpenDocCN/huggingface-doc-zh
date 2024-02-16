@@ -1,3 +1,3 @@
 # HF AWS 文档
 
-来源：[https://huggingface.co/docs/optimum-neuron/index](https://huggingface.co/docs/optimum-neuron/index)
+来源：[`huggingface.co/docs/optimum-neuron/index`](https://huggingface.co/docs/optimum-neuron/index)

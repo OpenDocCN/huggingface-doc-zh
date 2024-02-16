@@ -1,16 +1,16 @@
 # 神经元模型推理
 
-> 原文链接：[https://huggingface.co/docs/optimum-neuron/guides/models](https://huggingface.co/docs/optimum-neuron/guides/models)
+> 原文链接：[`huggingface.co/docs/optimum-neuron/guides/models`](https://huggingface.co/docs/optimum-neuron/guides/models)
 
-*以下文档中介绍的API适用于[inf2](https://aws.amazon.com/ec2/instance-types/inf2/)、[trn1](https://aws.amazon.com/ec2/instance-types/trn1/)和[inf1](https://aws.amazon.com/ec2/instance-types/inf1/)上的推理。*
+*以下文档中介绍的 API 适用于[inf2](https://aws.amazon.com/ec2/instance-types/inf2/)、[trn1](https://aws.amazon.com/ec2/instance-types/trn1/)和[inf1](https://aws.amazon.com/ec2/instance-types/inf1/)上的推理。*
 
-`NeuronModelForXXX`类有助于从[Hugging Face Hub](hf.co/models)加载模型并将其编译为针对神经元设备优化的序列化格式。然后，您将能够加载模型并通过AWS Neuron设备提供的加速运行推理。
+`NeuronModelForXXX`类有助于从 Hugging Face Hub 加载模型并将其编译为针对神经元设备优化的序列化格式。然后，您将能够加载模型并通过 AWS Neuron 设备提供的加速运行推理。
 
-## 从Transformers切换到Optimum
+## 从 Transformers 切换到 Optimum
 
-`optimum.neuron.NeuronModelForXXX`模型类是与Hugging Face Transformers模型兼容的API。这意味着与Hugging Face的生态系统无缝集成。您只需在`optimum.neuron`中用相应的`NeuronModelForXXX`类替换您的`AutoModelForXXX`类。
+`optimum.neuron.NeuronModelForXXX`模型类是与 Hugging Face Transformers 模型兼容的 API。这意味着与 Hugging Face 的生态系统无缝集成。您只需在`optimum.neuron`中用相应的`NeuronModelForXXX`类替换您的`AutoModelForXXX`类。
 
-如果您已经使用Transformers，您将能够通过替换模型类来重用您的代码：
+如果您已经使用 Transformers，您将能够通过替换模型类来重用您的代码：
 
 ```py
 from transformers import AutoTokenizer
@@ -24,7 +24,7 @@ from transformers import AutoTokenizer
 +                                                             export=True, **neuron_kwargs)
 ```
 
-如上所示，当您第一次使用`NeuronModelForXXX`时，您需要设置`export=True`将您的模型从PyTorch编译为神经元兼容格式。
+如上所示，当您第一次使用`NeuronModelForXXX`时，您需要设置`export=True`将您的模型从 PyTorch 编译为神经元兼容格式。
 
 您还需要传递神经元特定的参数来配置导出。每个模型架构都有自己的一组参数，如下一段详细说明。
 
@@ -49,11 +49,11 @@ from transformers import AutoTokenizer
 
 正如您所见，无需传递导出期间使用的神经元参数，因为它们保存在`config.json`文件中，并将由`NeuronModelForXXX`类自动恢复。
 
-第一次运行推理时，当您第一次运行管道时会有一个预热阶段。这次运行的延迟比常规运行高3倍至4倍。
+第一次运行推理时，当您第一次运行管道时会有一个预热阶段。这次运行的延迟比常规运行高 3 倍至 4 倍。
 
-## 歧视性NLP模型
+## 歧视性 NLP 模型
 
-如前所述，您只需要对Transformers代码进行少量修改，即可导出和运行NLP模型：
+如前所述，您只需要对 Transformers 代码进行少量修改，即可导出和运行 NLP 模型：
 
 ```py
 from transformers import AutoTokenizer
@@ -78,7 +78,7 @@ print(model.config.id2label[logits.argmax().item()])
 # 'POSITIVE'
 ```
 
-`compiler_args`是编译器的可选参数，这些参数通常控制编译器在推理性能（延迟和吞吐量）和准确性之间做出权衡。在这里，我们使用神经元矩阵乘法引擎将FP32操作转换为BF16。
+`compiler_args`是编译器的可选参数，这些参数通常控制编译器在推理性能（延迟和吞吐量）和准确性之间做出权衡。在这里，我们使用神经元矩阵乘法引擎将 FP32 操作转换为 BF16。
 
 `input_shapes`是您需要发送给神经元编译器的强制静态形状信息。想知道您的模型需要哪些强制形状？使用以下代码查看：
 
@@ -106,23 +106,23 @@ print(model.config.id2label[logits.argmax().item()])
 
 （只需记住：动态性和填充不仅带来了灵活性，还带来了性能下降。够公平！）
 
-## 生成性NLP模型
+## 生成性 NLP 模型
 
-如前所述，您只需要对Transformers代码进行少量修改，即可导出和运行NLP模型：
+如前所述，您只需要对 Transformers 代码进行少量修改，即可导出和运行 NLP 模型：
 
 ### 配置生成模型的导出
 
-对于非生成模型，可以传递两组参数给`from_pretrained()`方法，以配置如何将transformers检查点导出为神经元优化模型：
+对于非生成模型，可以传递两组参数给`from_pretrained()`方法，以配置如何将 transformers 检查点导出为神经元优化模型：
 
 +   `compiler_args = { num_cores, auto_cast_type }`是编译器的可选参数，这些参数通常控制编译器在推理延迟、吞吐量和准确性之间做出权衡。
 
-+   `input_shapes = { batch_size, sequence_length }`对应于模型输入和KV-cache（过去标记的注意力键和值）的静态形状。
++   `input_shapes = { batch_size, sequence_length }`对应于模型输入和 KV-cache（过去标记的注意力键和值）的静态形状。
 
-+   `num_cores`是实例化模型时使用的神经元核心数量。每个神经元核心有16Gb的内存，这意味着更大的模型需要分割到多个核心上。默认为1，
++   `num_cores`是实例化模型时使用的神经元核心数量。每个神经元核心有 16Gb 的内存，这意味着更大的模型需要分割到多个核心上。默认为 1，
 
 +   `auto_cast_type`指定编码权重的格式。可以是`fp32`（`float32`），`fp16`（`float16`）或`bf16`（`bfloat16`）。默认为`fp32`。
 
-+   `batch_size`是模型将接受的输入序列的数量。默认为1，
++   `batch_size`是模型将接受的输入序列的数量。默认为 1，
 
 +   `sequence_length`是输入序列中标记的最大数量。默认为`max_position_embeddings`（旧模型的`n_positions`）。
 
@@ -148,7 +148,7 @@ from transformers import AutoTokenizer
 
 ### 文本生成推理
 
-与原始transformers模型一样，使用`generate()`而不是`forward()`来生成文本序列。
+与原始 transformers 模型一样，使用`generate()`而不是`forward()`来生成文本序列。
 
 ```py
 from transformers import AutoTokenizer
@@ -175,7 +175,7 @@ with torch.inference_mode():
     print(outputs)
 ```
 
-生成是高度可配置的。请参考[https://huggingface.co/docs/transformers/generation_strategies](https://huggingface.co/docs/transformers/generation_strategies)获取详细信息。
+生成是高度可配置的。请参考[`huggingface.co/docs/transformers/generation_strategies`](https://huggingface.co/docs/transformers/generation_strategies)获取详细信息。
 
 请注意：
 
@@ -183,4 +183,4 @@ with torch.inference_mode():
 
 +   生成参数可以存储在`generation_config.json`文件中。当模型目录中存在这样一个文件时，将解析它以设置默认参数（传递给`generate`方法的值仍然优先）。
 
-祝您在Neuron中进行愉快的推理！🚀
+祝您在 Neuron 中进行愉快的推理！🚀

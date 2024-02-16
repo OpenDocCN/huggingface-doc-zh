@@ -1,6 +1,6 @@
 # 接口: AuthInfo
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/hub/interfaces/AuthInfo](https://huggingface.co/docs/huggingface.js/hub/interfaces/AuthInfo)
+> 原文链接: [`huggingface.co/docs/huggingface.js/hub/interfaces/AuthInfo`](https://huggingface.co/docs/huggingface.js/hub/interfaces/AuthInfo)
 
 ## 属性
 
@@ -14,7 +14,7 @@
 | :-- | :-- |
 | `displayName` | `string` |
 | `expiration?` | `Date` |
-| `role` | [`AccessTokenRole`](../modules#accesstokenrole) |
+| `role` | `AccessTokenRole` |
 
 #### 定义在
 
@@ -34,7 +34,7 @@
 
 ### 类型
 
-• `类型`: [`AuthType`](../modules#authtype)
+• `类型`: `AuthType`
 
 #### 定义在
 

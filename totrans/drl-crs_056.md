@@ -1,14 +1,14 @@
 # 动手实践
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unitbonus2/hands-on](https://huggingface.co/learn/deep-rl-course/unitbonus2/hands-on)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unitbonus2/hands-on`](https://huggingface.co/learn/deep-rl-course/unitbonus2/hands-on)
 
-现在您已经学会了如何使用Optuna，这里有一些想法可以应用您所学到的知识：
+现在您已经学会了如何使用 Optuna，这里有一些想法可以应用您所学到的知识：
 
-1️⃣ **超越您的LunarLander-v2代理结果**，通过使用Optuna找到更好的超参数集。您也可以尝试其他环境，如MountainCar-v0和CartPole-v1。
+1️⃣ **超越您的 LunarLander-v2 代理结果**，通过使用 Optuna 找到更好的超参数集。您也可以尝试其他环境，如 MountainCar-v0 和 CartPole-v1。
 
-2️⃣ **超越您的SpaceInvaders代理结果**。
+2️⃣ **超越您的 SpaceInvaders 代理结果**。
 
-通过这样做，您将看到Optuna在训练更好的代理程序中有多么有价值和强大。
+通过这样做，您将看到 Optuna 在训练更好的代理程序中有多么有价值和强大。
 
 玩得开心！
 

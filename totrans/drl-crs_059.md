@@ -1,12 +1,12 @@
 # 什么是基于策略的方法？
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit4/what-are-policy-based-methods](https://huggingface.co/learn/deep-rl-course/unit4/what-are-policy-based-methods)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit4/what-are-policy-based-methods`](https://huggingface.co/learn/deep-rl-course/unit4/what-are-policy-based-methods)
 
 强化学习的主要目标是找到将最大化预期累积奖励的最优策略π∗。因为强化学习基于“奖励假设”：所有目标都可以描述为最大化预期累积奖励。
 
 例如，在足球比赛中（您将在两个单位中训练代理人），目标是赢得比赛。我们可以将这个目标描述为强化学习中最大化进球数（当球越过球门线时）到对手的足球门中，并最小化自己的足球门中的进球数。
 
-![足球](../Images/a9c2200aa04bae4394f998a72fe3492d.png)
+![足球](img/a9c2200aa04bae4394f998a72fe3492d.png)
 
 ## 基于值、基于策略和演员-评论家方法
 
@@ -18,19 +18,19 @@
 
     +   我们的目标是最小化预测值和目标值之间的损失，以逼近真实的动作值函数。
 
-    +   我们有一个政策，但它是隐含的，因为它直接从值函数生成。例如，在Q-Learning中，我们使用了一个（epsilon-）贪婪策略。
+    +   我们有一个政策，但它是隐含的，因为它直接从值函数生成。例如，在 Q-Learning 中，我们使用了一个（epsilon-）贪婪策略。
 
 +   另一方面，在基于策略的方法中，我们直接学习近似π∗，而无需学习值函数。
 
     +   这个想法是对策略进行参数化。例如，使用神经网络πθ，这个策略将输出动作的概率分布（随机策略）。
 
-    +   ![随机策略](../Images/9123df7ebedfa0c5bc669c2d2531968f.png)
+    +   ![随机策略](img/9123df7ebedfa0c5bc669c2d2531968f.png)
 
     +   我们的目标是通过梯度上升来最大化参数化策略的性能。
 
     +   为了做到这一点，我们控制将影响状态上动作分布的参数θ。
 
-![基于策略](../Images/7b4b24746a62f4244cc0e64f74bdaef3.png)
+![基于策略](img/7b4b24746a62f4244cc0e64f74bdaef3.png)
 
 +   下次，我们将学习演员-评论家方法，这是基于值和基于策略方法的结合。
 

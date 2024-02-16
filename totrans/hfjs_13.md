@@ -1,6 +1,6 @@
 # 接口：BaseArgs
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/BaseArgs](https://huggingface.co/docs/huggingface.js/inference/interfaces/BaseArgs)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/BaseArgs`](https://huggingface.co/docs/huggingface.js/inference/interfaces/BaseArgs)
 
 ## 属性
 
@@ -10,7 +10,7 @@
 
 要使用的访问令牌。没有它，您将很快受到速率限制。
 
-可以在hf.co/settings/token免费创建
+可以在 hf.co/settings/token 免费创建
 
 #### 定义在
 
@@ -22,9 +22,9 @@
 
 • `可选` `model`: `字符串`
 
-要使用的模型。可以是专用推理端点的完整URL。
+要使用的模型。可以是专用推理端点的完整 URL。
 
-如果未指定，将调用huggingface.co/api/tasks来获取任务的默认模型。
+如果未指定，将调用 huggingface.co/api/tasks 来获取任务的默认模型。
 
 #### 定义在
 

@@ -1,6 +1,6 @@
 # Numpy API
 
-> 原始文本: [https://huggingface.co/docs/safetensors/api/numpy](https://huggingface.co/docs/safetensors/api/numpy)
+> 原始文本: [`huggingface.co/docs/safetensors/api/numpy`](https://huggingface.co/docs/safetensors/api/numpy)
 
 #### `safetensors.numpy.load_file`
 
@@ -20,7 +20,7 @@
 
 包含名称作为键，值为`np.ndarray`的字典
 
-将一个safetensors文件加载到numpy格式中。
+将一个 safetensors 文件加载到 numpy 格式中。
 
 示例:
 
@@ -41,15 +41,15 @@ loaded = load_file(file_path)
 
 参数
 
-+   `data` (`bytes`) — 一个safetensors文件的内容
++   `data` (`bytes`) — 一个 safetensors 文件的内容
 
 返回
 
 `Dict[str, np.ndarray]`
 
-包含名称作为键，值为`np.ndarray`在CPU上的字典
+包含名称作为键，值为`np.ndarray`在 CPU 上的字典
 
-将一个safetensors文件从纯字节加载到numpy格式中。
+将一个 safetensors 文件从纯字节加载到 numpy 格式中。
 
 示例:
 
@@ -83,7 +83,7 @@ loaded = load(data)
 
 `None`
 
-将一个张量字典保存为safetensors格式的原始字节。
+将一个张量字典保存为 safetensors 格式的原始字节。
 
 示例:
 
@@ -115,7 +115,7 @@ save_file(tensors, "model.safetensors")
 
 表示格式的原始字节
 
-将张量字典保存为safetensors格式的原始字节。
+将张量字典保存为 safetensors 格式的原始字节。
 
 示例:
 

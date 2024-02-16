@@ -1,16 +1,16 @@
 # Hub API 端点
 
-> 原始文本：[https://huggingface.co/docs/hub/api](https://huggingface.co/docs/hub/api)
+> 原始文本：[`huggingface.co/docs/hub/api`](https://huggingface.co/docs/hub/api)
 
-我们有开放的端点，您可以使用它们从 Hub 中检索信息，以及执行某些操作，如创建模型、数据集或 Space 仓库。我们提供一个包装的 Python 库，[`huggingface_hub`](https://github.com/huggingface/huggingface_hub)，可以轻松访问这些端点。我们还提供[webhooks](./webhooks)以接收有关仓库的实时增量信息。享受吧！
+我们有开放的端点，您可以使用它们从 Hub 中检索信息，以及执行某些操作，如创建模型、数据集或 Space 仓库。我们提供一个包装的 Python 库，[`huggingface_hub`](https://github.com/huggingface/huggingface_hub)，可以轻松访问这些端点。我们还提供 webhooks 以接收有关仓库的实时增量信息。享受吧！
 
-以下端点的基本 URL 是`https://huggingface.co`。例如，要构建下面的`/api/models`调用，可以调用 URL [https://huggingface.co/api/models](https://huggingface.co/api/models)。
+以下端点的基本 URL 是`https://huggingface.co`。例如，要构建下面的`/api/models`调用，可以调用 URL [`huggingface.co/api/models`](https://huggingface.co/api/models)。
 
 ## Hub API 游乐场
 
 想尝试我们的 API 吗？现在在我们的[游乐场](https://huggingface.co/spaces/enzostvs/hub-api-playground)上试试吧！
 
-[![](../Images/56ed56cd71a0e3d5dd628b64492ac1cc.png)](https://huggingface.co/spaces/enzostvs/hub-api-playground)
+![](https://huggingface.co/spaces/enzostvs/hub-api-playground)
 
 ## 仓库列表 API
 
@@ -118,21 +118,21 @@ params = {"full": "full"}
 
 ### GET /api/datasets/{repo_id}/parquet
 
-获取自动转换的parquet文件列表。
+获取自动转换的 parquet 文件列表。
 
 ### GET /api/datasets/{repo_id}/parquet/{config}/{split}/{n}.parquet
 
-获取自动转换的parquet文件的第n个分片。
+获取自动转换的 parquet 文件的第 n 个分片。
 
 ### GET /api/datasets-tags-by-type
 
-获取Hub中托管的所有可用数据集标签。
+获取 Hub 中托管的所有可用数据集标签。
 
 这相当于`huggingface_hub.get_dataset_tags()`。
 
 ### GET /api/spaces
 
-从Hub中获取所有空间的信息。响应进行了分页处理，使用[`Link`标头](https://docs.github.com/en/rest/guides/using-pagination-in-the-rest-api?apiVersion=2022-11-28#link-header)获取下一页。您可以指定其他参数以获得更具体的结果。
+从 Hub 中获取所有空间的信息。响应进行了分页处理，使用[`Link`标头](https://docs.github.com/en/rest/guides/using-pagination-in-the-rest-api?apiVersion=2022-11-28#link-header)获取下一页。您可以指定其他参数以获得更具体的结果。
 
 +   `search`：基于存储库和用户名的子字符串进行筛选，例如`resnet`或`microsoft`
 
@@ -171,7 +171,7 @@ params = {
 
 这相当于`huggingface_hub.space_info(repo_id, revision)`。
 
-## 存储库API
+## 存储库 API
 
 以下端点管理存储库设置，如创建和删除存储库。
 
@@ -189,7 +189,7 @@ params = {
 
 +   `private`：存储库是否为私有。
 
-+   `sdk`：当类型为`space`（streamlit、gradio、docker或静态）时。
++   `sdk`：当类型为`space`（streamlit、gradio、docker 或静态）时。
 
 负载：
 
@@ -267,7 +267,7 @@ payload = {
 
 这相当于`huggingface_hub.move_repo()`。
 
-## 用户API
+## 用户 API
 
 以下端点获取有关用户的信息。
 
@@ -283,15 +283,15 @@ headers = { "authorization" :  "Bearer $token" }
 
 这相当于`huggingface_hub.whoami()`。
 
-## 集合API
+## 集合 API
 
-使用集合将Hub上的存储库（模型、数据集、空间和论文）分组到专用页面上。
+使用集合将 Hub 上的存储库（模型、数据集、空间和论文）分组到专用页面上。
 
-您可以在集合[指南](./collections.md)中了解更多信息。集合也可以使用Python客户端进行管理（参见[指南](https://huggingface.co/docs/huggingface_hub/main/en/guides/collections)）。
+您可以在集合指南中了解更多信息。集合也可以使用 Python 客户端进行管理（参见[指南](https://huggingface.co/docs/huggingface_hub/main/en/guides/collections)）。
 
 ### POST /api/collections
 
-在Hub上创建一个新的集合，包括标题、描述（可选）和第一个项目（可选）。项目由类型（`model`、`dataset`、`space`或`paper`）和ID（Hub上的repo_id或paper_id）定义。
+在 Hub 上创建一个新的集合，包括标题、描述（可选）和第一个项目（可选）。项目由类型（`model`、`dataset`、`space`或`paper`）和 ID（Hub 上的 repo_id 或 paper_id）定义。
 
 负载：
 
@@ -319,11 +319,11 @@ payload = {
 
 ### GET /api/collections
 
-根据一些条件从Hub中列出集合。支持的参数包括：
+根据一些条件从 Hub 中列出集合。支持的参数包括：
 
 +   `owner`（字符串）：按特定用户或组织创建的集合进行筛选。
 
-+   `item`（字符串）：过滤包含特定项目的集合。值必须是item_type和item_id连接的。示例：`"models/teknium/OpenHermes-2.5-Mistral-7B"`，`"datasets/squad"`或`"papers/2311.12983"`。
++   `item`（字符串）：过滤包含特定项目的集合。值必须是 item_type 和 item_id 连接的。示例：`"models/teknium/OpenHermes-2.5-Mistral-7B"`，`"datasets/squad"`或`"papers/2311.12983"`。
 
 +   `sort`（字符串）：对返回的集合进行排序。支持的值为`"lastModified"`，`"trending"`（默认）和`"upvotes"`。
 
@@ -335,7 +335,7 @@ payload = {
 
 响应是分页的。要获取所有集合，必须遵循[`Link` header](https://docs.github.com/en/rest/guides/using-pagination-in-the-rest-api?apiVersion=2022-11-28#link-header)。
 
-在列出集合时，每个集合的项目列表被截断为最多4个项目。要检索集合中的所有项目，您需要使用其集合slug进行额外调用。
+在列出集合时，每个集合的项目列表被截断为最多 4 个项目。要检索集合中的所有项目，您需要使用其集合 slug 进行额外调用。
 
 负载：
 
@@ -352,7 +352,7 @@ params = {
 
 ### PATCH /api/collections/{namespace}/{slug}-{id}
 
-更新Hub上集合的元数据。您不能使用此方法添加或修改集合中的项目。负载的所有字段都是可选的。
+更新 Hub 上集合的元数据。您不能使用此方法添加或修改集合中的项目。负载的所有字段都是可选的。
 
 负载：
 
@@ -376,7 +376,7 @@ payload = {
 
 ### POST /api/collections/{namespace}/{slug}-{id}/item
 
-向集合添加项目。项目由类型（`model`，`dataset`，`space`或`paper`）和id（Hub上的repo_id或paper_id）定义。还可以附加一个注释到项目（可选）。
+向集合添加项目。项目由类型（`model`，`dataset`，`space`或`paper`）和 id（Hub 上的 repo_id 或 paper_id）定义。还可以附加一个注释到项目（可选）。
 
 负载：
 
@@ -394,7 +394,7 @@ payload = {
 
 ### PATCH /api/collections/{namespace}/{slug}-{id}/items/{item_id}
 
-更新集合中的项目。您必须知道项目对象的id，该id与将项目添加到集合时提供的repo_id/paper_id不同。`item_id`可以通过获取集合来检索。
+更新集合中的项目。您必须知道项目对象的 id，该 id 与将项目添加到集合时提供的 repo_id/paper_id 不同。`item_id`可以通过获取集合来检索。
 
 您可以更新附加到项目的注释或项目在集合中的位置。这两个字段都是可选的。
 
@@ -409,6 +409,6 @@ payload = {
 
 ### DELETE /api/collections/{namespace}/{slug}-{id}/items/{item_id}
 
-从集合中删除项目。您必须知道项目对象的id，该id与将项目添加到集合时提供的repo_id/paper_id不同。`item_id`可以通过获取集合来检索。
+从集合中删除项目。您必须知道项目对象的 id，该 id 与将项目添加到集合时提供的 repo_id/paper_id 不同。`item_id`可以通过获取集合来检索。
 
 这相当于`huggingface_hub.delete_collection_item()`。

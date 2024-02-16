@@ -1,16 +1,16 @@
 # 解决强化学习问题的两种主要方法
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit1/two-methods](https://huggingface.co/learn/deep-rl-course/unit1/two-methods)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit1/two-methods`](https://huggingface.co/learn/deep-rl-course/unit1/two-methods)
 
-现在我们已经学习了RL框架，我们如何解决RL问题？
+现在我们已经学习了 RL 框架，我们如何解决 RL 问题？
 
-换句话说，我们如何构建一个能够**选择最大化预期累积奖励的动作**的RL代理程序？
+换句话说，我们如何构建一个能够**选择最大化预期累积奖励的动作**的 RL 代理程序？
 
 ## 策略π：代理程序的大脑
 
 策略**π**是我们代理程序的**大脑**，它是告诉我们在给定状态下应该采取什么**动作的函数**。因此，它**定义了代理程序在特定时间的行为**。
 
-![策略](../Images/83518e23a957f171ab1fe3fa7a6bbe35.png)
+![策略](img/83518e23a957f171ab1fe3fa7a6bbe35.png)
 
 将策略视为我们代理程序的大脑，这个函数将告诉我们在给定状态下应该采取的动作
 
@@ -28,7 +28,7 @@
 
 这个函数将为每个状态定义一个映射到最佳对应动作的映射。或者，它可以定义**在该状态时可能动作集合的概率分布**。
 
-![策略](../Images/6758c67029516191953f67721d370c3e.png)
+![策略](img/6758c67029516191953f67721d370c3e.png)
 
 正如我们在这里看到的，策略（确定性）**直接指示每一步应该采取的动作**。
 
@@ -36,25 +36,25 @@
 
 +   *确定性*：在给定状态下，策略**总是返回相同的动作**。
 
-![策略](../Images/ee7b2c571f3d32864167d58a4063e9d3.png)
+![策略](img/ee7b2c571f3d32864167d58a4063e9d3.png)
 
 动作 = 策略(状态)
 
-![策略](../Images/eab138ef553910f3be1dc2fc9a4c1d74.png)
+![策略](img/eab138ef553910f3be1dc2fc9a4c1d74.png)
 
 +   *随机*：输出**动作的概率分布**。
 
-![策略](../Images/651cfd4580146ecc7e4526d3c73cf0a3.png)
+![策略](img/651cfd4580146ecc7e4526d3c73cf0a3.png)
 
 策略(动作 | 状态) = 给定当前状态时动作集合的概率分布
 
-![基于策略的方法](../Images/24f29ab03a77c489ff2e67423152c2f5.png)
+![基于策略的方法](img/24f29ab03a77c489ff2e67423152c2f5.png)
 
 给定一个初始状态，我们的随机策略将输出该状态可能动作的概率分布。
 
 如果我们回顾一下：
 
-![Pbm recap](../Images/ccacb85446b779ce48e2b9c14852ff2b.png) ![Pbm recap](../Images/b65b570d8d5bdf35333f56e519f8ebbe.png)
+![Pbm recap](img/ccacb85446b779ce48e2b9c14852ff2b.png) ![Pbm recap](img/b65b570d8d5bdf35333f56e519f8ebbe.png)
 
 ## 基于值的方法
 
@@ -64,11 +64,11 @@
 
 “根据我们的策略行动”只是意味着我们的策略是**“去到具有最高价值的状态”。**
 
-![基于值的RL](../Images/9f6cecad619e80db36cfe941f6772544.png)
+![基于值的 RL](img/9f6cecad619e80db36cfe941f6772544.png)
 
 在这里我们看到我们的值函数**为每个可能的状态定义了值**。
 
-![基于值的RL](../Images/a083a986fc5a289be300383a0bbc883f.png)
+![基于值的 RL](img/a083a986fc5a289be300383a0bbc883f.png)
 
 由于我们的值函数，在每一步，我们的策略将选择值函数定义的最大值的状态：-7，然后-6，然后-5（以此类推）以达到目标。
 
@@ -76,4 +76,4 @@
 
 如果我们回顾一下：
 
-![Vbm recap](../Images/ea2aeb10b56230f8695a306775324a19.png) ![Vbm recap](../Images/645f2468d4ce43d60dde1ff7d573fe7c.png)
+![Vbm recap](img/ea2aeb10b56230f8695a306775324a19.png) ![Vbm recap](img/645f2468d4ce43d60dde1ff7d573fe7c.png)

@@ -1,6 +1,6 @@
 # 接口：ModelEntry
 
-> 原文链接：[https://huggingface.co/docs/huggingface.js/hub/interfaces/ModelEntry](https://huggingface.co/docs/huggingface.js/hub/interfaces/ModelEntry)
+> 原文链接：[`huggingface.co/docs/huggingface.js/hub/interfaces/ModelEntry`](https://huggingface.co/docs/huggingface.js/hub/interfaces/ModelEntry)
 
 ## 属性
 

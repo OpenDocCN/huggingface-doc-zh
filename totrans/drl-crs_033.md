@@ -1,8 +1,8 @@
 # 中途总结
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit2/mid-way-recap](https://huggingface.co/learn/deep-rl-course/unit2/mid-way-recap)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit2/mid-way-recap`](https://huggingface.co/learn/deep-rl-course/unit2/mid-way-recap)
 
-在深入学习Q学习之前，让我们总结一下我们刚刚学到的内容。
+在深入学习 Q 学习之前，让我们总结一下我们刚刚学到的内容。
 
 我们有两种基于价值的函数：
 
@@ -16,6 +16,6 @@
 
 +   通过*蒙特卡洛方法*，我们从完整的一集中更新价值函数，因此我们**使用该一集的实际折扣回报。**
 
-+   通过*TD学习方法*，我们从一步中更新价值函数，用估计的回报替换未知的<math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">G_t</annotation></semantics></math>Gt​，称为TD目标。
++   通过*TD 学习方法*，我们从一步中更新价值函数，用估计的回报替换未知的<math><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">G_t</annotation></semantics></math>Gt​，称为 TD 目标。
 
-![总结](../Images/2147e50332ca45537a5c052179c783d8.png)
+![总结](img/2147e50332ca45537a5c052179c783d8.png)

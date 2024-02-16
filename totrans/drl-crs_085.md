@@ -1,6 +1,6 @@
 # 额外阅读
 
-> 原文：[https://huggingface.co/learn/deep-rl-course/unit6/additional-readings](https://huggingface.co/learn/deep-rl-course/unit6/additional-readings)
+> 原文：[`huggingface.co/learn/deep-rl-course/unit6/additional-readings`](https://huggingface.co/learn/deep-rl-course/unit6/additional-readings)
 
 ## 在强化学习中的偏差-方差权衡
 
@@ -16,6 +16,6 @@
 
 ## 演员评论者
 
-+   [深度RL基础系列，L3策略梯度和优势估计，Pieter Abbeel](https://www.youtube.com/watch?v=AKbX1Zvo7r8)
++   [深度 RL 基础系列，L3 策略梯度和优势估计，Pieter Abbeel](https://www.youtube.com/watch?v=AKbX1Zvo7r8)
 
-+   [A2C论文：深度强化学习的异步方法](https://arxiv.org/abs/1602.01783v2)
++   [A2C 论文：深度强化学习的异步方法](https://arxiv.org/abs/1602.01783v2)

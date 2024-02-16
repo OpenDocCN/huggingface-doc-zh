@@ -1,54 +1,54 @@
 # @huggingface/hub
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/hub/modules](https://huggingface.co/docs/huggingface.js/hub/modules)
+> 原文链接: [`huggingface.co/docs/huggingface.js/hub/modules`](https://huggingface.co/docs/huggingface.js/hub/modules)
 
 ## 类
 
-+   [HubApiError](classes/HubApiError)
++   HubApiError
 
-+   [InvalidApiResponseFormatError](classes/InvalidApiResponseFormatError)
++   InvalidApiResponseFormatError
 
 ## 接口
 
-+   [AuthInfo](interfaces/AuthInfo)
++   AuthInfo
 
-+   [CommitDeletedEntry](interfaces/CommitDeletedEntry)
++   CommitDeletedEntry
 
-+   [CommitFile](interfaces/CommitFile)
++   CommitFile
 
-+   [CommitOutput](interfaces/CommitOutput)
++   CommitOutput
 
-+   [CommitParams](interfaces/CommitParams)
++   CommitParams
 
-+   [Credentials](interfaces/Credentials)
++   Credentials
 
-+   [DatasetEntry](interfaces/DatasetEntry)
++   DatasetEntry
 
-+   [FileDownloadInfoOutput](interfaces/FileDownloadInfoOutput)
++   FileDownloadInfoOutput
 
-+   [ListFileEntry](interfaces/ListFileEntry)
++   ListFileEntry
 
-+   [ModelEntry](interfaces/ModelEntry)
++   ModelEntry
 
-+   [OAuthResult](interfaces/OAuthResult)
++   OAuthResult
 
-+   [RepoId](interfaces/RepoId)
++   RepoId
 
-+   [SafetensorsIndexJson](interfaces/SafetensorsIndexJson)
++   SafetensorsIndexJson
 
-+   [SpaceResourceConfig](interfaces/SpaceResourceConfig)
++   SpaceResourceConfig
 
-+   [SpaceResourceRequirement](interfaces/SpaceResourceRequirement)
++   SpaceResourceRequirement
 
-+   [SpaceRuntime](interfaces/SpaceRuntime)
++   SpaceRuntime
 
-+   [TensorInfo](interfaces/TensorInfo)
++   TensorInfo
 
-+   [WhoAmIApp](interfaces/WhoAmIApp)
++   WhoAmIApp
 
-+   [WhoAmIOrg](interfaces/WhoAmIOrg)
++   WhoAmIOrg
 
-+   [WhoAmIUser](interfaces/WhoAmIUser)
++   WhoAmIUser
 
 ## 类型别名
 
@@ -86,7 +86,7 @@
 
 ### CommitOperation
 
-Ƭ `CommitOperation`: [`CommitDeletedEntry`](interfaces/CommitDeletedEntry) | [`CommitFile`](interfaces/CommitFile)
+Ƭ `CommitOperation`: `CommitDeletedEntry` | `CommitFile`
 
 #### 定义在
 
@@ -136,7 +136,7 @@ tasks/dist/index.d.ts:444
 
 ### RepoDesignation
 
-Ƭ `RepoDesignation`: [`RepoId`](interfaces/RepoId) | [`RepoFullName`](modules#repofullname)
+Ƭ `RepoDesignation`: `RepoId` | `RepoFullName`
 
 #### 定义在
 
@@ -166,7 +166,7 @@ tasks/dist/index.d.ts:444
 
 ### 安全张量文件头
 
-Ƭ `SafetensorsFileHeader`: `Record`<[`TensorName`](modules#tensorname), [`TensorInfo`](interfaces/TensorInfo)> & { `__metadata__`: `Record`<`string`, `string`> }
+Ƭ `SafetensorsFileHeader`: `Record`<`TensorName`, `TensorInfo`> & { `__metadata__`: `Record`<`string`, `string`> }
 
 #### 定义在
 
@@ -176,7 +176,7 @@ tasks/dist/index.d.ts:444
 
 ### SafetensorsParseFromRepo
 
-Ƭ `SafetensorsParseFromRepo`: { `header`: [`SafetensorsFileHeader`](modules#safetensorsfileheader) ; `parameterCount?`: `Partial`<`Record`<[`Dtype`](modules#dtype), `number`>> ; `sharded`: `false` } | { `headers`: [`SafetensorsShardedHeaders`](modules#safetensorsshardedheaders) ; `index`: [`SafetensorsIndexJson`](interfaces/SafetensorsIndexJson) ; `parameterCount?`: `Partial`<`Record`<[`Dtype`](modules#dtype), `number`>> ; `sharded`: `true` }
+Ƭ `SafetensorsParseFromRepo`: { `header`: `SafetensorsFileHeader` ; `parameterCount?`: `Partial`<`Record`<`Dtype`, `number`>> ; `sharded`: `false` } | { `headers`: `SafetensorsShardedHeaders` ; `index`: `SafetensorsIndexJson` ; `parameterCount?`: `Partial`<`Record`<`Dtype`, `number`>> ; `sharded`: `true` }
 
 #### 定义在
 
@@ -186,7 +186,7 @@ tasks/dist/index.d.ts:444
 
 ### SafetensorsShardedHeaders
 
-Ƭ `SafetensorsShardedHeaders`: `Record`<`FileName`, [`SafetensorsFileHeader`](modules#safetensorsfileheader)>
+Ƭ `SafetensorsShardedHeaders`: `Record`<`FileName`, `SafetensorsFileHeader`>
 
 #### 定义在
 
@@ -196,7 +196,7 @@ tasks/dist/index.d.ts:444
 
 ### SpaceEntry
 
-Ƭ `SpaceEntry`: { `id`: `string` ; `likes`: `number` ; `name`: `string` ; `private`: `boolean` ; `sdk?`: [`SpaceSdk`](modules#spacesdk) ; `updatedAt`: `Date` } & `Partial`<`Omit`<`ApiSpaceInfo`, `"updatedAt"`>>
+Ƭ `SpaceEntry`: { `id`: `string` ; `likes`: `number` ; `name`: `string` ; `private`: `boolean` ; `sdk?`: `SpaceSdk` ; `updatedAt`: `Date` } & `Partial`<`Omit`<`ApiSpaceInfo`, `"updatedAt"`>>
 
 #### 定义在
 
@@ -246,7 +246,7 @@ tasks/dist/index.d.ts:444
 
 ### WhoAmI
 
-Ƭ `WhoAmI`: [`WhoAmIApp`](interfaces/WhoAmIApp) | [`WhoAmIOrg`](interfaces/WhoAmIOrg) | [`WhoAmIUser`](interfaces/WhoAmIUser)
+Ƭ `WhoAmI`: `WhoAmIApp` | `WhoAmIOrg` | `WhoAmIUser`
 
 #### 定义在
 
@@ -256,17 +256,17 @@ tasks/dist/index.d.ts:444
 
 ### 提交
 
-▸ `commit`(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+▸ `commit`(`params`): `Promise`<`CommitOutput`>
 
 #### 参数
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `params` | [`CommitParams`](interfaces/CommitParams) |
+| `params` | `CommitParams` |
 
 #### 返回
 
-`Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+`Promise`<`CommitOutput`>
 
 #### 定义在
 
@@ -276,7 +276,7 @@ tasks/dist/index.d.ts:444
 
 ### commitIter
 
-▸ `commitIter`(`params`): `AsyncGenerator`<[`CommitProgressEvent`](modules#commitprogressevent), [`CommitOutput`](interfaces/CommitOutput)>
+▸ `commitIter`(`params`): `AsyncGenerator`<`CommitProgressEvent`, `CommitOutput`>
 
 目前是内部函数，由提交使用。
 
@@ -286,11 +286,11 @@ tasks/dist/index.d.ts:444
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `params` | [`CommitParams`](interfaces/CommitParams) |
+| `params` | `CommitParams` |
 
 #### 返回
 
-`AsyncGenerator`<[`CommitProgressEvent`](modules#commitprogressevent), [`CommitOutput`](interfaces/CommitOutput)>
+`AsyncGenerator`<`CommitProgressEvent`, `CommitOutput`>
 
 #### 定义在
 
@@ -307,14 +307,14 @@ tasks/dist/index.d.ts:444
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `params` | `Object` | - |
-| `params.credentials` | [`凭证`](interfaces/Credentials) | - |
+| `params.credentials` | `凭证` | - |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义的获取函数，用于替代默认的函数，例如使用代理或编辑标头。 |
 | `params.files?` | { `content`: `ArrayBuffer` &#124; `Blob` ; `path`: `字符串` }[] | 仅支持一些轻量级文件的存储 |
 | `params.hubUrl?` | `字符串` | - |
 | `params.license?` | `字符串` | - |
 | `params.private?` | `布尔值` | - |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
-| `params.sdk?` | [`SpaceSdk`](modules#spacesdk) | **`必需`** 当 repo.type === “space” 时 |
+| `params.repo` | `RepoDesignation` | - |
+| `params.sdk?` | `SpaceSdk` | **`必需`** 当 repo.type === “space” 时 |
 
 #### 返回
 
@@ -328,7 +328,7 @@ tasks/dist/index.d.ts:444
 
 ### deleteFile
 
-▸ `deleteFile`(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+▸ `deleteFile`(`params`): `Promise`<`CommitOutput`>
 
 #### 参数
 
@@ -338,17 +338,17 @@ tasks/dist/index.d.ts:444
 | `params.branch?` | `字符串` |
 | `params.commitDescription?` | `字符串` |
 | `params.commitTitle?` | `字符串` |
-| `params.credentials` | [`凭证`](interfaces/Credentials) |
+| `params.credentials` | `凭证` |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
 | `params.hubUrl?` | `字符串` |
 | `params.isPullRequest?` | `布尔值` |
 | `params.parentCommit?` | `字符串` |
 | `params.path` | `字符串` |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+| `params.repo` | `RepoDesignation` |
 
 #### 返回
 
-`Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+`Promise`<`CommitOutput`>
 
 #### 定义于
 
@@ -358,7 +358,7 @@ tasks/dist/index.d.ts:444
 
 ### deleteFiles
 
-▸ `deleteFiles`(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+▸ `deleteFiles`(`params`): `Promise`<`CommitOutput`>
 
 #### 参数
 
@@ -368,17 +368,17 @@ tasks/dist/index.d.ts:444
 | `params.branch?` | `字符串` |
 | `params.commitDescription?` | `字符串` |
 | `params.commitTitle?` | `字符串` |
-| `params.credentials` | [`凭证`](interfaces/Credentials) |
+| `params.credentials` | `凭证` |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
 | `params.hubUrl?` | `字符串` |
 | `params.isPullRequest?` | `布尔值` |
 | `params.parentCommit?` | `字符串` |
 | `params.paths` | `字符串`[] |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+| `params.repo` | `RepoDesignation` |
 
 #### 返回
 
-`Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+`Promise`<`CommitOutput`>
 
 #### 定义于
 
@@ -395,10 +395,10 @@ tasks/dist/index.d.ts:444
 | 名称 | 类型 |
 | :-- | :-- |
 | `params` | `对象` |
-| `params.credentials` | [`凭证`](interfaces/Credentials) |
+| `params.credentials` | `凭证` |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
 | `params.hubUrl?` | `字符串` |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+| `params.repo` | `RepoDesignation` |
 
 #### 返回
 
@@ -419,20 +419,20 @@ tasks/dist/index.d.ts:444
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `params` | `对象` | - |
-| `params.credentials?` | [`凭证`](interfaces/Credentials) | - |
+| `params.credentials?` | `凭证` | - |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义的获取函数，用于替代默认的函数，例如使用代理或编辑标头。 |
 | `params.hubUrl?` | `字符串` | - |
 | `params.path` | `字符串` | - |
 | `params.range?` | [`数字`, `数字`] | 仅获取文件的特定部分 |
 | `params.raw?` | `布尔值` | 如果为真，将下载原始的 git 文件。例如，当调用存储在 Git LFS 中的文件时，将下载指针文件。 |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
+| `params.repo` | `RepoDesignation` | - |
 | `params.revision?` | `string` | - |
 
 #### 返回
 
 `Promise`<`Response` | `null`>
 
-当文件不存在时为null
+当文件不存在时为 null
 
 #### 定义在
 
@@ -442,27 +442,27 @@ tasks/dist/index.d.ts:444
 
 ### fileDownloadInfo
 
-▸ `fileDownloadInfo`(`params`): `Promise`<[`FileDownloadInfoOutput`](interfaces/FileDownloadInfoOutput) | `null`>
+▸ `fileDownloadInfo`(`params`): `Promise`<`FileDownloadInfoOutput` | `null`>
 
 #### 参数
 
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `params` | `Object` | - |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
-| `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义fetch函数，用于替代默认的fetch函数，例如使用代理或编辑标头。 |
+| `params.credentials?` | `Credentials` | - |
+| `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义 fetch 函数，用于替代默认的 fetch 函数，例如使用代理或编辑标头。 |
 | `params.hubUrl?` | `string` | - |
-| `params.noContentDisposition?` | `boolean` | 避免在LFS文件的`downloadLink`中使用content-disposition标头，以便在浏览器中可以将URL用作iframe的例子 |
+| `params.noContentDisposition?` | `boolean` | 避免在 LFS 文件的`downloadLink`中使用 content-disposition 标头，以便在浏览器中可以将 URL 用作 iframe 的例子 |
 | `params.path` | `string` | - |
-| `params.raw?` | `boolean` | 获取LFS文件背后的原始指针文件 |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
+| `params.raw?` | `boolean` | 获取 LFS 文件背后的原始指针文件 |
+| `params.repo` | `RepoDesignation` | - |
 | `params.revision?` | `string` | - |
 
 #### 返回
 
-`Promise`<[`FileDownloadInfoOutput`](interfaces/FileDownloadInfoOutput) | `null`>
+`Promise`<`FileDownloadInfoOutput` | `null`>
 
-当文件不存在时为null
+当文件不存在时为 null
 
 #### 定义在
 
@@ -479,11 +479,11 @@ tasks/dist/index.d.ts:444
 | 名称 | 类型 |
 | :-- | :-- |
 | `params` | `Object` |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) |
+| `params.credentials?` | `Credentials` |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
 | `params.hubUrl?` | `string` |
 | `params.path` | `string` |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+| `params.repo` | `RepoDesignation` |
 | `params.revision?` | `string` |
 
 #### 返回
@@ -498,14 +498,14 @@ tasks/dist/index.d.ts:444
 
 ### listDatasets
 
-▸ `listDatasets`(`params?`): `AsyncGenerator`<[`DatasetEntry`](interfaces/DatasetEntry)>
+▸ `listDatasets`(`params?`): `AsyncGenerator`<`DatasetEntry`>
 
 #### 参数
 
 | 名称 | 类型 |
 | :-- | :-- |
 | `params?` | `Object` |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) |
+| `params.credentials?` | `Credentials` |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
 | `params.hubUrl?` | `string` |
 | `params.search?` | `Object` |
@@ -513,7 +513,7 @@ tasks/dist/index.d.ts:444
 
 #### 返回
 
-`AsyncGenerator`<[`DatasetEntry`](interfaces/DatasetEntry)>
+`AsyncGenerator`<`DatasetEntry`>
 
 #### 定义在
 
@@ -523,27 +523,27 @@ tasks/dist/index.d.ts:444
 
 ### listFiles
 
-▸ `listFiles`(`params`): `AsyncGenerator`<[`ListFileEntry`](interfaces/ListFileEntry)>
+▸ `listFiles`(`params`): `AsyncGenerator`<`ListFileEntry`>
 
-列出文件夹中的文件。要列出目录中的所有文件，请将params.recursive设置为`true`。
+列出文件夹中的文件。要列出目录中的所有文件，请将 params.recursive 设置为`true`。
 
 #### 参数
 
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `params` | `Object` | - |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
+| `params.credentials?` | `Credentials` | - |
 | `params.expand?` | `boolean` | 获取每个文件的`lastCommit`和`securityStatus`。 |
-| `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义fetch函数，用于替代默认的fetch函数，例如使用代理或编辑标头。 |
+| `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义 fetch 函数，用于替代默认的 fetch 函数，例如使用代理或编辑标头。 |
 | `params.hubUrl?` | `string` | - |
 | `params.path?` | `string` | 例如‘data’表示列出‘data’文件夹中的所有文件。将其留空以列出存储库中的所有文件。 |
 | `params.recursive?` | `boolean` | 我们是否要列出子目录中的文件？ |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
+| `params.repo` | `RepoDesignation` | - |
 | `params.revision?` | `string` | - |
 
 #### 返回
 
-`AsyncGenerator`<[`ListFileEntry`](interfaces/ListFileEntry)>
+`AsyncGenerator`<`ListFileEntry`>
 
 #### 定义在
 
@@ -553,14 +553,14 @@ tasks/dist/index.d.ts:444
 
 ### listModels
 
-▸ `listModels`(`params?`): `AsyncGenerator`<[`ModelEntry`](interfaces/ModelEntry)>
+▸ `listModels`(`params?`): `AsyncGenerator`<`ModelEntry`>
 
 #### 参数
 
 | 名称 | 类型 |
 | :-- | :-- |
 | `params?` | `Object` |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) |
+| `params.credentials?` | `Credentials` |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
 | `params.hubUrl?` | `string` |
 | `params.search?` | `Object` |
@@ -569,7 +569,7 @@ tasks/dist/index.d.ts:444
 
 #### 返回
 
-`AsyncGenerator`<[`ModelEntry`](interfaces/ModelEntry)>
+`AsyncGenerator`<`ModelEntry`>
 
 #### 定义于
 
@@ -579,23 +579,23 @@ tasks/dist/index.d.ts:444
 
 ### listSpaces
 
-▸ `listSpaces`(`params?`): `AsyncGenerator`<[`SpaceEntry`](modules#spaceentry)>
+▸ `listSpaces`(`params?`): `AsyncGenerator`<`SpaceEntry`>
 
 #### 参数
 
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `params?` | `Object` | - |
-| `params.additionalFields?` | keyof `ApiSpaceInfo`[] | 从huggingface.co获取的额外字段。 |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
-| `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义fetch函数，用于替代默认的fetch函数，例如使用代理或编辑标头。 |
+| `params.additionalFields?` | keyof `ApiSpaceInfo`[] | 从 huggingface.co 获取的额外字段。 |
+| `params.credentials?` | `Credentials` | - |
+| `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义 fetch 函数，用于替代默认的 fetch 函数，例如使用代理或编辑标头。 |
 | `params.hubUrl?` | `string` | - |
 | `params.search?` | `Object` | - |
 | `params.search.owner?` | `string` | - |
 
 #### 返回
 
-`AsyncGenerator`<[`SpaceEntry`](modules#spaceentry)>
+`AsyncGenerator`<`SpaceEntry`>
 
 #### 定义于
 
@@ -605,11 +605,11 @@ tasks/dist/index.d.ts:444
 
 ### oauthHandleRedirect
 
-▸ `oauthHandleRedirect`(`opts?`): `Promise`<[`OAuthResult`](interfaces/OAuthResult)>
+▸ `oauthHandleRedirect`(`opts?`): `Promise`<`OAuthResult`>
 
-在OAuth提供程序重定向回应用程序后调用。
+在 OAuth 提供程序重定向回应用程序后调用。
 
-还有一个辅助函数 [oauthHandleRedirectIfPresent](modules#oauthhandleredirectifpresent)，如果URL中包含查询参数中的oauth代码，则调用`oauthHandleRedirect`，否则返回`false`。
+还有一个辅助函数 oauthHandleRedirectIfPresent，如果 URL 中包含查询参数中的 oauth 代码，则调用`oauthHandleRedirect`，否则返回`false`。
 
 #### 参数
 
@@ -620,7 +620,7 @@ tasks/dist/index.d.ts:444
 
 #### 返回
 
-`Promise`<[`OAuthResult`](interfaces/OAuthResult)>
+`Promise`<`OAuthResult`>
 
 #### 定义于
 
@@ -630,13 +630,13 @@ tasks/dist/index.d.ts:444
 
 ### oauthHandleRedirectIfPresent
 
-▸ `oauthHandleRedirectIfPresent`(`opts?`): `Promise`<[`OAuthResult`](interfaces/OAuthResult) | `false`>
+▸ `oauthHandleRedirectIfPresent`(`opts?`): `Promise`<`OAuthResult` | `false`>
 
-在OAuth提供程序重定向回应用程序后调用。
+在 OAuth 提供程序重定向回应用程序后调用。
 
-如果URL不包含查询参数中的oauth代码，则返回false，否则调用[oauthHandleRedirect](modules#oauthhandleredirect)。 
+如果 URL 不包含查询参数中的 oauth 代码，则返回 false，否则调用 oauthHandleRedirect。 
 
-根据您的应用程序，您可能希望直接调用[oauthHandleRedirect](modules#oauthhandleredirect)。
+根据您的应用程序，您可能希望直接调用 oauthHandleRedirect。
 
 #### 参数
 
@@ -647,7 +647,7 @@ tasks/dist/index.d.ts:444
 
 #### 返回
 
-`Promise`<[`OAuthResult`](interfaces/OAuthResult) | `false`>
+`Promise`<`OAuthResult` | `false`>
 
 #### 定义于
 
@@ -659,11 +659,11 @@ tasks/dist/index.d.ts:444
 
 ▸ `oauthLoginUrl`(`opts?`): `Promise`<`string`>
 
-使用“使用Hub登录”来认证用户，并获取oauth用户信息/访问令牌。
+使用“使用 Hub 登录”来认证用户，并获取 oauth 用户信息/访问令牌。
 
-返回一个重定向的URL。用户重定向回您的应用程序后，调用`oauthHandleRedirect`来获取oauth用户信息/访问令牌。
+返回一个重定向的 URL。用户重定向回您的应用程序后，调用`oauthHandleRedirect`来获取 oauth 用户信息/访问令牌。
 
-当从启用OAuth的静态空间内调用时，将从空间加载配置，否则您至少需要指定OAuth应用程序的客户端ID。
+当从启用 OAuth 的静态空间内调用时，将从空间加载配置，否则您至少需要指定 OAuth 应用程序的客户端 ID。
 
 **`示例`**
 
@@ -681,18 +681,18 @@ if (!oauthResult) {
 console.log(oauthResult);
 ```
 
-（理论上，此函数可以用于通过更改`hubUrl`来认证支持PKCE和OpenID Connect的任何OAuth提供程序的用户，但目前仅与Hugging Face Hub进行了测试。）
+（理论上，此函数可以用于通过更改`hubUrl`来认证支持 PKCE 和 OpenID Connect 的任何 OAuth 提供程序的用户，但目前仅与 Hugging Face Hub 进行了测试。）
 
 #### 参数
 
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `opts?` | `Object` | - |
-| `opts.clientId?` | `string` | OAuth客户端ID。对于静态空间，您可以省略这一点，只要README.md的元数据中存在`hf_oauth: true`，它将从空间配置中加载。对于其他空间，只要README.md的元数据中存在`hf_oauth: true`，它就可以在后端的OAUTH_CLIENT_ID环境变量中使用。您还可以在[https://huggingface.co/settings/connected-applications](https://huggingface.co/settings/connected-applications)创建开发者应用程序并使用其客户端ID。 |
+| `opts.clientId?` | `string` | OAuth 客户端 ID。对于静态空间，您可以省略这一点，只要 README.md 的元数据中存在`hf_oauth: true`，它将从空间配置中加载。对于其他空间，只要 README.md 的元数据中存在`hf_oauth: true`，它就可以在后端的 OAUTH_CLIENT_ID 环境变量中使用。您还可以在[`huggingface.co/settings/connected-applications`](https://huggingface.co/settings/connected-applications)创建开发者应用程序并使用其客户端 ID。 |
 | `opts.hubUrl?` | `string` | - |
-| `opts.redirectUrl?` | `string` | 重定向URI，默认为当前URL。对于空间，允许在空间内的任何URL。对于开发者应用程序，您可以在[https://huggingface.co/settings/connected-applications](https://huggingface.co/settings/connected-applications)中将任何URL添加到允许的重定向URI列表中。 |
-| `opts.scopes?` | `string` | OAuth范围，一个以空格分隔的范围列表。对于静态空间，您可以省略这一点，它将从空间配置中加载，只要README.md的元数据中存在`hf_oauth: true`。对于其他空间，只要README.md的元数据中存在`hf_oauth: true`，它就可以在后端的OAUTH_SCOPES环境变量中使用。默认为“openid profile”。您还可以在[https://huggingface.co/settings/connected-applications](https://huggingface.co/settings/connected-applications)创建开发者应用程序并使用其范围。请参阅[https://huggingface.co/docs/hub/oauth](https://huggingface.co/docs/hub/oauth)获取可用范围的列表。 |
-| `opts.state?` | `string` | 传递给OAuth提供程序的状态，在重定向后将在调用`oauthLogin`时返回。 |
+| `opts.redirectUrl?` | `string` | 重定向 URI，默认为当前 URL。对于空间，允许在空间内的任何 URL。对于开发者应用程序，您可以在[`huggingface.co/settings/connected-applications`](https://huggingface.co/settings/connected-applications)中将任何 URL 添加到允许的重定向 URI 列表中。 |
+| `opts.scopes?` | `string` | OAuth 范围，一个以空格分隔的范围列表。对于静态空间，您可以省略这一点，它将从空间配置中加载，只要 README.md 的元数据中存在`hf_oauth: true`。对于其他空间，只要 README.md 的元数据中存在`hf_oauth: true`，它就可以在后端的 OAUTH_SCOPES 环境变量中使用。默认为“openid profile”。您还可以在[`huggingface.co/settings/connected-applications`](https://huggingface.co/settings/connected-applications)创建开发者应用程序并使用其范围。请参阅[`huggingface.co/docs/hub/oauth`](https://huggingface.co/docs/hub/oauth)获取可用范围的列表。 |
+| `opts.state?` | `string` | 传递给 OAuth 提供程序的状态，在重定向后将在调用`oauthLogin`时返回。 |
 
 #### 返回
 
@@ -706,47 +706,47 @@ console.log(oauthResult);
 
 ### parseSafetensorsMetadata
 
-▸ `parseSafetensorsMetadata`(`params`): `Promise`<`SetRequired`<[`SafetensorsParseFromRepo`](modules#safetensorsparsefromrepo), `"parameterCount"`>>
+▸ `parseSafetensorsMetadata`(`params`): `Promise`<`SetRequired`<`SafetensorsParseFromRepo`, `"parameterCount"`>>
 
-使用智能范围请求从Hugging Face托管的模型的model.safetensors.index.json或model.safetensors中提取其元数据。
+使用智能范围请求从 Hugging Face 托管的模型的 model.safetensors.index.json 或 model.safetensors 中提取其元数据。
 
 #### 参数
 
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `params` | `Object` | - |
-| `params.computeParametersCount` | `true` | 将包括SafetensorsParseFromRepo["parameterCount"]，一个包含每种DType参数数量的对象 **`默认`** 为false |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
-| `params.fetch?` | (`input`: `URL` 或 `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义fetch函数，用于替代默认函数，例如使用代理或编辑标头。 |
+| `params.computeParametersCount` | `true` | 将包括 SafetensorsParseFromRepo["parameterCount"]，一个包含每种 DType 参数数量的对象 **`默认`** 为 false |
+| `params.credentials?` | `Credentials` | - |
+| `params.fetch?` | (`input`: `URL` 或 `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义 fetch 函数，用于替代默认函数，例如使用代理或编辑标头。 |
 | `params.hubUrl?` | `string` | - |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) | 仅支持模型 |
+| `params.repo` | `RepoDesignation` | 仅支持模型 |
 | `params.revision?` | `string` | - |
 
 #### 返回
 
-`Promise`<`SetRequired`<[`SafetensorsParseFromRepo`](modules#safetensorsparsefromrepo), `"parameterCount"`>>
+`Promise`<`SetRequired`<`SafetensorsParseFromRepo`, `"parameterCount"`>>
 
 #### 定义于
 
 [hub/src/lib/parse-safetensors-metadata.ts:148](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/parse-safetensors-metadata.ts#L148)
 
-▸ `parseSafetensorsMetadata`(`params`): `Promise`<[`SafetensorsParseFromRepo`](modules#safetensorsparsefromrepo)>
+▸ `parseSafetensorsMetadata`(`params`): `Promise`<`SafetensorsParseFromRepo`>
 
 #### 参数
 
 | 名称 | 类型 | 描述 |
 | :-- | :-- | :-- |
 | `params` | `Object` | - |
-| `params.computeParametersCount?` | `boolean` | 将包括SafetensorsParseFromRepo[“parameterCount”]，一个包含每个DType参数数量的对象 **`默认`** 为false |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
-| `params.fetch?` | (`input`: `URL` 或 `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义fetch函数，用于替代默认函数，例如使用代理或编辑标头。 |
+| `params.computeParametersCount?` | `boolean` | 将包括 SafetensorsParseFromRepo[“parameterCount”]，一个包含每个 DType 参数数量的对象 **`默认`** 为 false |
+| `params.credentials?` | `Credentials` | - |
+| `params.fetch?` | (`input`: `URL` 或 `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> | 自定义 fetch 函数，用于替代默认函数，例如使用代理或编辑标头。 |
 | `params.hubUrl?` | `string` | - |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) | 仅支持模型 |
+| `params.repo` | `RepoDesignation` | 仅支持模型 |
 | `params.revision?` | `string` | - |
 
 #### 返回
 
-`Promise`<[`SafetensorsParseFromRepo`](modules#safetensorsparsefromrepo)>
+`Promise`<`SafetensorsParseFromRepo`>
 
 #### 定义于
 
@@ -756,7 +756,7 @@ console.log(oauthResult);
 
 ### uploadFile
 
-▸ `uploadFile`(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+▸ `uploadFile`(`params`): `Promise`<`CommitOutput`>
 
 #### 参数
 
@@ -767,18 +767,18 @@ console.log(oauthResult);
 | `params.branch?` | `string` |
 | `params.commitDescription?` | `string` |
 | `params.commitTitle?` | `string` |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) |
+| `params.credentials?` | `Credentials` |
 | `params.fetch?` | (`input`: `URL` 或 `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
-| `params.file` | `URL` 或 `File` 或 { `content`: [`ContentSource`](modules#contentsource) ; `path`: `string` } |
+| `params.file` | `URL` 或 `File` 或 { `content`: `ContentSource` ; `path`: `string` } |
 | `params.hubUrl?` | `string` |
 | `params.isPullRequest?` | `boolean` |
 | `params.parentCommit?` | `string` |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+| `params.repo` | `RepoDesignation` |
 | `params.useWebWorkers?` | `boolean` 或 { `minSize?`: `number` ; `poolSize?`: `number` } |
 
 #### 返回
 
-`Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+`Promise`<`CommitOutput`>
 
 #### 定义于
 
@@ -788,7 +788,7 @@ console.log(oauthResult);
 
 ### uploadFiles
 
-▸ `uploadFiles`(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+▸ `uploadFiles`(`params`): `Promise`<`CommitOutput`>
 
 #### 参数
 
@@ -799,18 +799,18 @@ console.log(oauthResult);
 | `params.branch?` | `string` |
 | `params.commitDescription?` | `string` |
 | `params.commitTitle?` | `string` |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) |
+| `params.credentials?` | `Credentials` |
 | `params.fetch?` | (`input`: `URL` 或 `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
-| `params.files` | (`URL` 或 `File` 或 { `content`: [`ContentSource`](modules#contentsource) ; `path`: `string` })[] |
+| `params.files` | (`URL` 或 `File` 或 { `content`: `ContentSource` ; `path`: `string` })[] |
 | `params.hubUrl?` | `string` |
 | `params.isPullRequest?` | `boolean` |
 | `params.parentCommit?` | `string` |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+| `params.repo` | `RepoDesignation` |
 | `params.useWebWorkers?` | `boolean` 或 { `minSize?`: `number` ; `poolSize?`: `number` } |
 
 #### 返回
 
-`Promise`<[`CommitOutput`](interfaces/CommitOutput)>
+`Promise`<`CommitOutput`>
 
 #### 定义于
 
@@ -820,11 +820,11 @@ console.log(oauthResult);
 
 ### uploadFilesWithProgress
 
-▸ `uploadFilesWithProgress`(`params`): `AsyncGenerator`<[`CommitProgressEvent`](modules#commitprogressevent), [`CommitOutput`](interfaces/CommitOutput)>
+▸ `uploadFilesWithProgress`(`params`): `AsyncGenerator`<`CommitProgressEvent`, `CommitOutput`>
 
 上传带有进度
 
-需要XMLHttpRequest可用于上传的进度事件 设置useWebWorkers为true以获得哈希的进度事件
+需要 XMLHttpRequest 可用于上传的进度事件 设置 useWebWorkers 为 true 以获得哈希的进度事件
 
 #### 参数
 
@@ -835,17 +835,17 @@ console.log(oauthResult);
 | `params.branch?` | `string` | - |
 | `params.commitDescription?` | `string` | - |
 | `params.commitTitle?` | `string` | - |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
-| `params.files` | (`URL` &#124; `File` &#124; { `content`: [`ContentSource`](modules#contentsource) ; `path`: `string` })[] | - |
+| `params.credentials?` | `Credentials` | - |
+| `params.files` | (`URL` &#124; `File` &#124; { `content`: `ContentSource` ; `path`: `string` })[] | - |
 | `params.hubUrl?` | `string` | - |
 | `params.isPullRequest?` | `boolean` | - |
 | `params.parentCommit?` | `string` | - |
-| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
-| `params.useWebWorkers?` | `boolean` &#124; { `minSize?`: `number` ; `poolSize?`: `number` } | 将其设置为true以获得哈希进度事件 |
+| `params.repo` | `RepoDesignation` | - |
+| `params.useWebWorkers?` | `boolean` &#124; { `minSize?`: `number` ; `poolSize?`: `number` } | 将其设置为 true 以获得哈希进度事件 |
 
 #### 返回
 
-`AsyncGenerator`<[`CommitProgressEvent`](modules#commitprogressevent), [`CommitOutput`](interfaces/CommitOutput)>
+`AsyncGenerator`<`CommitProgressEvent`, `CommitOutput`>
 
 #### 定义在
 
@@ -855,20 +855,20 @@ console.log(oauthResult);
 
 ### whoAmI
 
-▸ `whoAmI`(`params`): `Promise`<[`WhoAmI`](modules#whoami) & { `auth`: [`AuthInfo`](interfaces/AuthInfo) }>
+▸ `whoAmI`(`params`): `Promise`<`WhoAmI` & { `auth`: `AuthInfo` }>
 
 #### 参数
 
 | 名称 | 类型 |
 | :-- | :-- |
 | `params` | `Object` |
-| `params.credentials` | [`Credentials`](interfaces/Credentials) |
+| `params.credentials` | `Credentials` |
 | `params.fetch?` | (`input`: `URL` &#124; `RequestInfo`, `init?`: `RequestInit`) => `Promise`<`Response`> |
 | `params.hubUrl?` | `string` |
 
 #### 返回
 
-`Promise`<[`WhoAmI`](modules#whoami) & { `auth`: [`AuthInfo`](interfaces/AuthInfo) }>
+`Promise`<`WhoAmI` & { `auth`: `AuthInfo` }>
 
 #### 定义在
 

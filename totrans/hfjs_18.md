@@ -1,6 +1,6 @@
 # 接口：ImageToTextOutput
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageToTextOutput](https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageToTextOutput)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/ImageToTextOutput`](https://huggingface.co/docs/huggingface.js/inference/interfaces/ImageToTextOutput)
 
 ## 属性
 

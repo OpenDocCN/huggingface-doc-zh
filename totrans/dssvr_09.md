@@ -1,12 +1,12 @@
 # 预览数据集
 
-> 原文链接：[https://huggingface.co/docs/datasets-server/first_rows](https://huggingface.co/docs/datasets-server/first_rows)
+> 原文链接：[`huggingface.co/docs/datasets-server/first_rows`](https://huggingface.co/docs/datasets-server/first_rows)
 
-Datasets Server提供了一个`/first-rows`端点，用于可视化数据集的前100行。这将让您对数据集中包含的数据类型和示例数据有一个很好的了解。
+Datasets Server 提供了一个`/first-rows`端点，用于可视化数据集的前 100 行。这将让您对数据集中包含的数据类型和示例数据有一个很好的了解。
 
-![dataset-viewer](../Images/97b9f61671054d67cf8cb0949a1195e9.png)
+![dataset-viewer](img/97b9f61671054d67cf8cb0949a1195e9.png)
 
-本指南向您展示如何使用Datasets Server的`/first-rows`端点预览数据集。也可以尝试使用[Postman](https://www.postman.com/huggingface/workspace/hugging-face-apis/request/23242779-32d6a8be-b800-446a-8cee-f6b5ca1710df)，[RapidAPI](https://rapidapi.com/hugging-face-hugging-face-default/api/hugging-face-datasets-api)，或[ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json#operation/listFirstRows)。
+本指南向您展示如何使用 Datasets Server 的`/first-rows`端点预览数据集。也可以尝试使用[Postman](https://www.postman.com/huggingface/workspace/hugging-face-apis/request/23242779-32d6a8be-b800-446a-8cee-f6b5ca1710df)，[RapidAPI](https://rapidapi.com/hugging-face-hugging-face-default/api/hugging-face-datasets-api)，或[ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json#operation/listFirstRows)。
 
 `/first-rows`端点接受三个查询参数：
 
@@ -28,13 +28,13 @@ def query():
 data = query()
 ```
 
-端点响应是一个包含两个键的JSON：
+端点响应是一个包含两个键的 JSON：
 
 +   数据集的[`features`](https://huggingface.co/docs/datasets/about_dataset_features)，包括列名和数据类型。
 
-+   数据集的前100个`rows`以及特定行中每列包含的内容。
++   数据集的前 100 个`rows`以及特定行中每列包含的内容。
 
-例如，这里是`ibm/duorc`/`SelfRC`训练集分割的`features`和前100个`rows`：
+例如，这里是`ibm/duorc`/`SelfRC`训练集分割的`features`和前 100 个`rows`：
 
 ```py
 {
@@ -118,11 +118,11 @@ data = query()
 
 ## 截断的响应
 
-对于一些数据集，从`/first-rows`的响应大小可能超过1MB，这种情况下响应会被截断，直到大小小于1MB。这意味着您可能无法在响应中获得100行，因为行被截断，这种情况下`truncated`字段将为`true`。
+对于一些数据集，从`/first-rows`的响应大小可能超过 1MB，这种情况下响应会被截断，直到大小小于 1MB。这意味着您可能无法在响应中获得 100 行，因为行被截断，这种情况下`truncated`字段将为`true`。
 
-在某些情况下，即使前几行生成的响应超过1MB，一些列也会被截断并转换为字符串。您将在`truncated_cells`字段中看到这些列。
+在某些情况下，即使前几行生成的响应超过 1MB，一些列也会被截断并转换为字符串。您将在`truncated_cells`字段中看到这些列。
 
-例如，[`ett`](https://datasets-server.huggingface.co/first-rows?dataset=ett&config=m2&split=test)数据集只返回10行，`target`和`feat_dynamic_real`列被截断：
+例如，[`ett`](https://datasets-server.huggingface.co/first-rows?dataset=ett&config=m2&split=test)数据集只返回 10 行，`target`和`feat_dynamic_real`列被截断：
 
 ```py
   ...

@@ -1,12 +1,12 @@
 # 接口：TextGenerationStreamDetails
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamDetails](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamDetails)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamDetails`](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamDetails)
 
 ## 属性
 
 ### 最佳序列
 
-• `可选` `best_of_sequences`: [`TextGenerationStreamBestOfSequence`](TextGenerationStreamBestOfSequence)[]
+• `可选` `best_of_sequences`: `TextGenerationStreamBestOfSequence`[]
 
 在使用 `best_of` 参数时的额外序列
 
@@ -18,7 +18,7 @@
 
 ### 完成原因
 
-• `finish_reason`: [`TextGenerationStreamFinishReason`](../modules#textgenerationstreamfinishreason)
+• `finish_reason`: `TextGenerationStreamFinishReason`
 
 生成完成原因
 
@@ -42,7 +42,7 @@
 
 ### 预填
 
-• `prefill`: [`TextGenerationStreamPrefillToken`](TextGenerationStreamPrefillToken)[]
+• `prefill`: `TextGenerationStreamPrefillToken`[]
 
 提示令牌
 
@@ -66,7 +66,7 @@
 
 ### 令牌
 
-• `tokens`: [`TextGenerationStreamToken`](TextGenerationStreamToken)[]
+• `tokens`: `TextGenerationStreamToken`[]
 
 #### 定义于
 

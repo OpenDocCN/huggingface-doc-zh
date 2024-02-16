@@ -1,26 +1,26 @@
 # 与讨论和拉取请求交互
 
-> 原始文本：[https://huggingface.co/docs/huggingface_hub/package_reference/community](https://huggingface.co/docs/huggingface_hub/package_reference/community)
+> 原始文本：[`huggingface.co/docs/huggingface_hub/package_reference/community`](https://huggingface.co/docs/huggingface_hub/package_reference/community)
 
-查看[HfApi](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi)文档页面，了解与 Hub 上的拉取请求和讨论交互的方法的参考。
+查看 HfApi 文档页面，了解与 Hub 上的拉取请求和讨论交互的方法的参考。
 
-+   [get_repo_discussions()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_repo_discussions)
++   get_repo_discussions()
 
-+   [get_discussion_details()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.get_discussion_details)
++   get_discussion_details()
 
-+   [create_discussion()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_discussion)
++   create_discussion()
 
-+   [create_pull_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_pull_request)
++   create_pull_request()
 
-+   [rename_discussion()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.rename_discussion)
++   rename_discussion()
 
-+   [comment_discussion()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.comment_discussion)
++   comment_discussion()
 
-+   [edit_discussion_comment()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.edit_discussion_comment)
++   edit_discussion_comment()
 
-+   [change_discussion_status()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.change_discussion_status)
++   change_discussion_status()
 
-+   [merge_pull_request()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.merge_pull_request)
++   merge_pull_request()
 
 ## 数据结构
 
@@ -58,7 +58,7 @@
 
 +   `created_at`（`datetime`）— 讨论/拉取请求创建的`datetime`。
 
-+   `endpoint`（`str`）— Hub 的端点。默认为[https://huggingface.co](https://huggingface.co)。
++   `endpoint`（`str`）— Hub 的端点。默认为[`huggingface.co`](https://huggingface.co)。
 
 +   `git_reference`（`str`，*可选*）—（属性）如果这是一个拉取请求，可以推送更改的 Git 引用，否则为`None`。
 
@@ -102,23 +102,23 @@ Hub 上的讨论或拉取请求。
 
 +   `created_at` (`datetime`) — 讨论/拉取请求创建的日期时间。
 
-+   `events` (`list` of [DiscussionEvent](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionEvent)) — 此讨论或拉取请求中的`DiscussionEvents`列表。
++   `events` (`list` of DiscussionEvent) — 此讨论或拉取请求中的`DiscussionEvents`列表。
 
 +   `conflicting_files` (`Union[List[str], bool, None]`, *可选*) — 如果这是一个拉取请求，则是冲突文件的列表。如果`self.is_pull_request`为`False`，则为`None`。如果存在冲突文件但无法检索列表，则为`True`。
 
 +   `target_branch` (`str`, *可选*) — 如果这是一个拉取请求，表示要将更改合并到的分支。如果`self.is_pull_request`为`False`，则为`None`。
 
-+   `merge_commit_oid` (`str`, *可选*) — 如果这是一个已合并的拉取请求，这将设置为合并提交的OID/SHA，否则为`None`。
++   `merge_commit_oid` (`str`, *可选*) — 如果这是一个已合并的拉取请求，这将设置为合并提交的 OID/SHA，否则为`None`。
 
-+   `diff` (`str`, *可选*) — 如果这是一个拉取请求，则是git diff，否则为`None`。
++   `diff` (`str`, *可选*) — 如果这是一个拉取请求，则是 git diff，否则为`None`。
 
-+   `endpoint` (`str`) — Hub的端点。默认为[https://huggingface.co](https://huggingface.co)。
++   `endpoint` (`str`) — Hub 的端点。默认为[`huggingface.co`](https://huggingface.co)。
 
-+   `git_reference` (`str`, *可选*) — (属性) 如果这是一个拉取请求，则表示可以推送更改的git引用，否则为`None`。
++   `git_reference` (`str`, *可选*) — (属性) 如果这是一个拉取请求，则表示可以推送更改的 git 引用，否则为`None`。
 
-+   `url` (`str`) — (属性) Hub上讨论的URL。
++   `url` (`str`) — (属性) Hub 上讨论的 URL。
 
-[Discussion](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.Discussion)的子类。
+Discussion 的子类。
 
 ### `class huggingface_hub.DiscussionEvent`
 
@@ -130,7 +130,7 @@ Hub 上的讨论或拉取请求。
 
 参数
 
-+   `id` (`str`) — 事件的ID。一个十六进制字符串。
++   `id` (`str`) — 事件的 ID。一个十六进制字符串。
 
 +   `type` (`str`) — 事件的类型。
 
@@ -142,13 +142,13 @@ Hub 上的讨论或拉取请求。
 
 使用具体的类：
 
-+   [DiscussionComment](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionComment)
++   DiscussionComment
 
-+   [DiscussionStatusChange](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionStatusChange)
++   DiscussionStatusChange
 
-+   [DiscussionCommit](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionCommit)
++   DiscussionCommit
 
-+   [DiscussionTitleChange](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionTitleChange)
++   DiscussionTitleChange
 
 ### `class huggingface_hub.DiscussionComment`
 
@@ -160,7 +160,7 @@ Hub 上的讨论或拉取请求。
 
 参数
 
-+   `id` (`str`) — 事件的ID。一个十六进制字符串。
++   `id` (`str`) — 事件的 ID。一个十六进制字符串。
 
 +   `type` (`str`) — 事件的类型。
 
@@ -168,7 +168,7 @@ Hub 上的讨论或拉取请求。
 
 +   `author` (`str`) — 讨论/拉取请求作者的用户名。如果用户已被删除，则可以是`"deleted"`。
 
-+   `content` (`str`) — 评论的原始markdown内容。提及、链接和图片不会被渲染。
++   `content` (`str`) — 评论的原始 markdown 内容。提及、链接和图片不会被渲染。
 
 +   `edited` (`bool`) — 评论是否已被编辑。
 
@@ -176,7 +176,7 @@ Hub 上的讨论或拉取请求。
 
 讨论/拉取请求中的评论。
 
-[DiscussionEvent](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionEvent)的子类。
+DiscussionEvent 的子类。
 
 ### `class huggingface_hub.DiscussionStatusChange`
 
@@ -188,7 +188,7 @@ Hub 上的讨论或拉取请求。
 
 参数
 
-+   `id` (`str`) — 事件的ID。一个十六进制字符串。
++   `id` (`str`) — 事件的 ID。一个十六进制字符串。
 
 +   `type` (`str`) — 事件的类型。
 
@@ -206,7 +206,7 @@ Hub 上的讨论或拉取请求。
 
 讨论/拉取请求中状态的更改。
 
-[DiscussionEvent](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionEvent)的子类。
+DiscussionEvent 的子类。
 
 ### `class huggingface_hub.DiscussionCommit`
 
@@ -218,7 +218,7 @@ Hub 上的讨论或拉取请求。
 
 参数
 
-+   `id`（`str`）— 事件的ID。一个十六进制字符串。
++   `id`（`str`）— 事件的 ID。一个十六进制字符串。
 
 +   `type`（`str`）— 事件类型。
 
@@ -228,11 +228,11 @@ Hub 上的讨论或拉取请求。
 
 +   `summary`（`str`）— 提交的摘要。
 
-+   `oid`（`str`）— 提交的OID/SHA，作为十六进制字符串。
++   `oid`（`str`）— 提交的 OID/SHA，作为十六进制字符串。
 
 拉取请求中的提交。
 
-[DiscussionEvent](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionEvent)的子类。
+DiscussionEvent 的子类。
 
 ### `class huggingface_hub.DiscussionTitleChange`
 
@@ -244,7 +244,7 @@ Hub 上的讨论或拉取请求。
 
 参数
 
-+   `id`（`str`）— 事件的ID。一个十六进制字符串。
++   `id`（`str`）— 事件的 ID。一个十六进制字符串。
 
 +   `type`（`str`）— 事件类型。
 
@@ -258,4 +258,4 @@ Hub 上的讨论或拉取请求。
 
 讨论/拉取请求中的重命名事件。
 
-[DiscussionEvent](/docs/huggingface_hub/v0.20.3/en/package_reference/community#huggingface_hub.DiscussionEvent)的子类。
+DiscussionEvent 的子类。

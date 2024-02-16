@@ -1,8 +1,8 @@
 # 缓存系统参考
 
-> 原文：[https://huggingface.co/docs/huggingface_hub/package_reference/cache](https://huggingface.co/docs/huggingface_hub/package_reference/cache)
+> 原文：[`huggingface.co/docs/huggingface_hub/package_reference/cache`](https://huggingface.co/docs/huggingface_hub/package_reference/cache)
 
-缓存系统在v0.8.0中进行了更新，成为依赖于Hub的库之间共享的中央缓存系统。阅读[缓存系统指南](../guides/manage-cache)以详细介绍HF的缓存。
+缓存系统在 v0.8.0 中进行了更新，成为依赖于 Hub 的库之间共享的中央缓存系统。阅读缓存系统指南以详细介绍 HF 的缓存。
 
 ## 助手
 
@@ -20,7 +20,7 @@
 
 +   `cache_dir` (`str`或`os.PathLike`) — 缓存文件所在的文件夹。
 
-+   `repo_id` (`str`) — huggingface.co上存储库的ID。
++   `repo_id` (`str`) — huggingface.co 上存储库的 ID。
 
 +   `filename` (`str`) — 在`repo_id`内查找的文件名。
 
@@ -77,15 +77,15 @@ else:
 
 +   `subfolder` (`str`, *可选*, 默认为"default") — 数据将存储在其中的子文件夹。示例：`extracted`。
 
-+   `assets_dir` (`str`, `Path`, *可选*) — 资产被缓存的文件夹路径。这不应该是Hub文件被缓存的相同文件夹。如果未提供，默认为`HF_HOME / "assets"`。也可以使用`HF_ASSETS_CACHE`环境变量设置。
++   `assets_dir` (`str`, `Path`, *可选*) — 资产被缓存的文件夹路径。这不应该是 Hub 文件被缓存的相同文件夹。如果未提供，默认为`HF_HOME / "assets"`。也可以使用`HF_ASSETS_CACHE`环境变量设置。
 
 返回一个用于缓存任意文件的文件夹路径。
 
 `huggingface_hub`提供了一个规范的文件夹路径来存储资产。这是在下游库中集成缓存的推荐方式，因为它将受益于内置工具来正确扫描和删除缓存。
 
-从Hub缓存的文件和资产之间进行区分。从Hub缓存的文件以git感知方式缓存，并由`huggingface_hub`完全管理。查看[相关文档](https://huggingface.co/docs/huggingface_hub/how-to-cache)。下游库缓存的所有其他文件被视为“资产”（从外部来源下载的文件，从.tar存档中提取的文件，为训练预处理的文件等）。
+从 Hub 缓存的文件和资产之间进行区分。从 Hub 缓存的文件以 git 感知方式缓存，并由`huggingface_hub`完全管理。查看[相关文档](https://huggingface.co/docs/huggingface_hub/how-to-cache)。下游库缓存的所有其他文件被视为“资产”（从外部来源下载的文件，从.tar 存档中提取的文件，为训练预处理的文件等）。
 
-生成文件夹路径后，保证其存在且为目录。路径基于3个深度级别：库名称，命名空间和子文件夹。这3个级别在允许`huggingface_hub`扫描/删除资产缓存部分时提供了灵活性。在库内，预期所有命名空间共享相同的子文件夹名称，但这不是强制性规则。下游库完全控制其缓存中采用的文件结构。命名空间和子文件夹是可选的（默认为`"default/"`子文件夹），但库名称是强制的，因为我们希望每个下游库管理自己的缓存。
+生成文件夹路径后，保证其存在且为目录。路径基于 3 个深度级别：库名称，命名空间和子文件夹。这 3 个级别在允许`huggingface_hub`扫描/删除资产缓存部分时提供了灵活性。在库内，预期所有命名空间共享相同的子文件夹名称，但这不是强制性规则。下游库完全控制其缓存中采用的文件结构。命名空间和子文件夹是可选的（默认为`"default/"`子文件夹），但库名称是强制的，因为我们希望每个下游库管理自己的缓存。
 
 预期树：
 
@@ -160,9 +160,9 @@ Raises
 
 +   [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) — 如果缓存目录是文件而不是目录。
 
-扫描整个 HF 缓存系统并返回一个 [~HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo) 结构。
+扫描整个 HF 缓存系统并返回一个 ~HFCacheInfo 结构。
 
-使用 `scan_cache_dir` 来以编程方式扫描您的缓存系统。缓存将逐个仓库进行扫描。如果一个仓库损坏，将在内部抛出一个 [~CorruptedCacheException](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CorruptedCacheException) 但会被捕获并在 [~HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo) 结构中返回。只有有效的仓库会得到适当的报告。
+使用 `scan_cache_dir` 来以编程方式扫描您的缓存系统。缓存将逐个仓库进行扫描。如果一个仓库损坏，将在内部抛出一个 ~CorruptedCacheException 但会被捕获并在 ~HFCacheInfo 结构中返回。只有有效的仓库会得到适当的报告。
 
 ```py
 >>> from huggingface_hub import scan_cache_dir
@@ -225,11 +225,11 @@ Done in 0.0s. Scanned 6 repo(s) for a total of 3.4G.
 Got 1 warning(s) while scanning. Use -vvv to print details.
 ```
 
-返回：一个 [~HFCacheInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo) 对象。
+返回：一个 ~HFCacheInfo 对象。
 
 ## 数据结构
 
-所有结构都是由 [scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir) 构建并返回的，是不可变的。
+所有结构都是由 scan_cache_dir() 构建并返回的，是不可变的。
 
 ### HFCacheInfo
 
@@ -245,13 +245,13 @@ Parameters
 
 +   `size_on_disk` (`int`) — 缓存系统中所有有效仓库大小的总和。
 
-+   `repos` (`FrozenSet[CachedRepoInfo]`) — 描述在扫描时在缓存系统中找到的所有有效缓存仓库的 [~CachedRepoInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRepoInfo) 集合。
++   `repos` (`FrozenSet[CachedRepoInfo]`) — 描述在扫描时在缓存系统中找到的所有有效缓存仓库的 ~CachedRepoInfo 集合。
 
-+   `warnings` (`List[CorruptedCacheException]`) — 扫描缓存时发生的 [~CorruptedCacheException](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CorruptedCacheException) 列表。这些异常被捕获以便扫描可以继续进行。损坏的仓库将被跳过扫描。
++   `warnings` (`List[CorruptedCacheException]`) — 扫描缓存时发生的 ~CorruptedCacheException 列表。这些异常被捕获以便扫描可以继续进行。损坏的仓库将被跳过扫描。
 
 包含有关整个缓存系统的信息的冻结数据结构。
 
-这个数据结构是由 [scan_cache_dir()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.scan_cache_dir) 返回的，是不可变的。
+这个数据结构是由 scan_cache_dir() 返回的，是不可变的。
 
 这里 `size_on_disk` 等于所有仓库大小的总和（仅包括 blob）。但是如果某些缓存仓库损坏，它们的大小不会被计入。
 
@@ -291,7 +291,7 @@ Cache deletion done. Saved 7.9K.
 Cache deletion done. Saved 8.6G.
 ```
 
-`delete_revisions` 返回一个需要执行的 [DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy) 对象。[DeleteCacheStrategy](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.DeleteCacheStrategy) 不应该被修改，但允许在实际执行删除之前进行干预运行。
+`delete_revisions` 返回一个需要执行的 DeleteCacheStrategy 对象。DeleteCacheStrategy 不应该被修改，但允许在实际执行删除之前进行干预运行。
 
 ### CachedRepoInfo
 
@@ -315,7 +315,7 @@ Parameters
 
 +   `nb_files` (`int`) — 缓存仓库中的 blob 文件总数。
 
-+   `revisions`（`FrozenSet[CachedRevisionInfo]`）- 描述存储库中缓存的所有修订版本的 [~CachedRevisionInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedRevisionInfo) 集合。
++   `revisions`（`FrozenSet[CachedRevisionInfo]`）- 描述存储库中缓存的所有修订版本的 ~CachedRevisionInfo 集合。
 
 +   `last_accessed`（`float`）- 存储库中 blob 文件上次被访问的时间戳。
 
@@ -363,7 +363,7 @@ Parameters
 
 +   `commit_hash`（`str`）- 修订版本的哈希值（唯一）。示例：`"9338f7b671827df886678df2bdd7cc7b4f36dffd"`。
 
-+   `snapshot_path`（`Path`）- `snapshots` 文件夹中修订版本目录的路径。它包含与 Hub 上的存储库完全相同的树结构。files - (`FrozenSet[CachedFileInfo]`): 描述快照中包含的所有文件的 [~CachedFileInfo](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.CachedFileInfo) 集合。
++   `snapshot_path`（`Path`）- `snapshots` 文件夹中修订版本目录的路径。它包含与 Hub 上的存储库完全相同的树结构。files - (`FrozenSet[CachedFileInfo]`): 描述快照中包含的所有文件的 ~CachedFileInfo 集合。
 
 +   `refs`（`FrozenSet[str]`）- 指向此修订版本的 `refs` 集合。如果修订版本没有 `refs`，则被视为分离的。示例：`{"main", "2.4.0"}` 或 `{"refs/pr/1"}`。
 
@@ -465,7 +465,7 @@ Parameters
 
 冻结的数据结构，保存有关删除缓存修订的策略。
 
-此对象不是用于编程实例化的，而是由 [delete_revisions()](/docs/huggingface_hub/v0.20.3/en/package_reference/cache#huggingface_hub.HFCacheInfo.delete_revisions) 返回。请参阅用法示例的文档。
+此对象不是用于编程实例化的，而是由 delete_revisions() 返回。请参阅用法示例的文档。
 
 #### `expected_freed_size_str`
 

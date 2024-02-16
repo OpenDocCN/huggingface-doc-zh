@@ -1,6 +1,6 @@
 # 接口：VisualQuestionAnsweringOutput
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/VisualQuestionAnsweringOutput](https://huggingface.co/docs/huggingface.js/inference/interfaces/VisualQuestionAnsweringOutput)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/VisualQuestionAnsweringOutput`](https://huggingface.co/docs/huggingface.js/inference/interfaces/VisualQuestionAnsweringOutput)
 
 ## 属性
 

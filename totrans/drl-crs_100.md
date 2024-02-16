@@ -1,18 +1,18 @@
 # 实践
 
-> 原始文本：[https://huggingface.co/learn/deep-rl-course/unit8/hands-on-cleanrl](https://huggingface.co/learn/deep-rl-course/unit8/hands-on-cleanrl)
+> 原始文本：[`huggingface.co/learn/deep-rl-course/unit8/hands-on-cleanrl`](https://huggingface.co/learn/deep-rl-course/unit8/hands-on-cleanrl)
 
-[![提问](../Images/255e59f8542cbd6d3f1c72646b2fff13.png)](http://hf.co/join/discord) [![在Colab中打开](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit8/unit8_part1.ipynb)
+![提问](http://hf.co/join/discord) ![在 Colab 中打开](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit8/unit8_part1.ipynb)
 
-现在我们已经研究了PPO背后的理论，理解它的最佳方法**是从头开始实现它**。
+现在我们已经研究了 PPO 背后的理论，理解它的最佳方法**是从头开始实现它**。
 
-从头开始实现架构是理解它的最佳方法，也是一个好习惯。我们已经为基于价值的Q学习方法和基于策略的Reinforce方法做过了。
+从头开始实现架构是理解它的最佳方法，也是一个好习惯。我们已经为基于价值的 Q 学习方法和基于策略的 Reinforce 方法做过了。
 
 因此，为了能够编写代码，我们将使用两个资源：
 
-+   由[Costa Huang](https://github.com/vwxyzjn)制作的教程。Costa是[CleanRL](https://github.com/vwxyzjn/cleanrl)背后的人，这是一个提供高质量单文件实现和研究友好功能的深度强化学习库。
++   由[Costa Huang](https://github.com/vwxyzjn)制作的教程。Costa 是[CleanRL](https://github.com/vwxyzjn/cleanrl)背后的人，这是一个提供高质量单文件实现和研究友好功能的深度强化学习库。
 
-+   除了教程外，为了更深入地了解，您可以阅读13个核心实现细节：[https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/)
++   除了教程外，为了更深入地了解，您可以阅读 13 个核心实现细节：[`iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/`](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/)
 
 然后，为了测试其稳健性，我们将在以下进行训练：
 
@@ -20,65 +20,65 @@
 
 <assets/63_deep_rl_intro/lunarlander.mp4>
 
-最后，我们将把训练好的模型推送到Hub，以评估和可视化您的代理游戏。
+最后，我们将把训练好的模型推送到 Hub，以评估和可视化您的代理游戏。
 
-LunarLander-v2是您开始本课程时使用的第一个环境。那时，您不知道它是如何工作的，现在您可以从头开始编写代码并进行训练。**这是多么令人难以置信的 🤩。**
+LunarLander-v2 是您开始本课程时使用的第一个环境。那时，您不知道它是如何工作的，现在您可以从头开始编写代码并进行训练。**这是多么令人难以置信的 🤩。**
 
-[https://giphy.com/embed/pynZagVcYxVUk](https://giphy.com/embed/pynZagVcYxVUk)
+[`giphy.com/embed/pynZagVcYxVUk`](https://giphy.com/embed/pynZagVcYxVUk)
 
-[通过GIPHY](https://giphy.com/gifs/the-office-michael-heartbreak-pynZagVcYxVUk)
+[通过 GIPHY](https://giphy.com/gifs/the-office-michael-heartbreak-pynZagVcYxVUk)
 
 让我们开始吧！🚀
 
-colab笔记本：
+colab 笔记本：
 
-[![在Colab中打开](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit8/unit8_part1.ipynb)
+![在 Colab 中打开](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit8/unit8_part1.ipynb)
 
-# Unit 8: 使用PyTorch进行Proximal Policy Gradient（PPO）🤖
+# Unit 8: 使用 PyTorch 进行 Proximal Policy Gradient（PPO）🤖
 
-![Unit 8](../Images/99ae9849fcb07d6d32b6cef4d05623c4.png)
+![Unit 8](img/99ae9849fcb07d6d32b6cef4d05623c4.png)
 
-在本笔记本中，您将学习**使用PyTorch从头开始编写您的PPO代理，使用CleanRL实现作为模型**。
+在本笔记本中，您将学习**使用 PyTorch 从头开始编写您的 PPO 代理，使用 CleanRL 实现作为模型**。
 
 为了测试其稳健性，我们将在以下进行训练：
 
 +   [LunarLander-v2 🚀](https://www.gymlibrary.dev/environments/box2d/lunar_lander/)
 
-我们不断努力改进我们的教程，所以**如果您在本笔记本中发现问题**，请在GitHub Repo上[提出问题](https://github.com/huggingface/deep-rl-class/issues)。
+我们不断努力改进我们的教程，所以**如果您在本笔记本中发现问题**，请在 GitHub Repo 上[提出问题](https://github.com/huggingface/deep-rl-class/issues)。
 
 ## 本笔记本的目标 🏆
 
 在笔记本的末尾，您将：
 
-+   能够**使用PyTorch从头开始编写您的PPO代理**。
++   能够**使用 PyTorch 从头开始编写您的 PPO 代理**。
 
-+   能够**将您训练的代理和代码推送到Hub**，并附带一个漂亮的视频回放和评估分数🔥。
++   能够**将您训练的代理和代码推送到 Hub**，并附带一个漂亮的视频回放和评估分数🔥。
 
 ## 先决条件 🏗️
 
 在深入研究笔记本之前，您需要：
 
-🔲 📚 学习[PPO，阅读第8单元](https://huggingface.co/deep-rl-course/unit8/introduction) 🤗
+🔲 📚 学习[PPO，阅读第 8 单元](https://huggingface.co/deep-rl-course/unit8/introduction) 🤗
 
 为了验证这个实践过程的[认证过程](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)，您需要推送一个模型，我们不要求最小结果，但我们**建议您尝试不同的超参数设置以获得更好的结果**。
 
 如果找不到您的模型，**请转到页面底部并单击刷新按钮**
 
-有关认证过程的更多信息，请查看此部分👉[https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+有关认证过程的更多信息，请查看此部分👉[`huggingface.co/deep-rl-course/en/unit0/introduction#certification-process`](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
 
-## 设置GPU 💪
+## 设置 GPU 💪
 
-+   为了**加速代理的训练，我们将使用GPU**。要做到这一点，请转到`运行时 > 更改运行时类型`
++   为了**加速代理的训练，我们将使用 GPU**。要做到这一点，请转到`运行时 > 更改运行时类型`
 
-![GPU Step 1](../Images/5378127c314cdd92729aa31b7e11ca44.png)
+![GPU Step 1](img/5378127c314cdd92729aa31b7e11ca44.png)
 
 +   `硬件加速器 > GPU`
 
-![GPU步骤2](../Images/e0fec252447f98378386ccca8e57a80a.png)
+![GPU 步骤 2](img/e0fec252447f98378386ccca8e57a80a.png)
 
 ## 创建一个虚拟显示 🔽
 
-在笔记本中，我们需要生成一个重播视频。为此，在colab中，**我们需要有一个虚拟屏幕来渲染环境**（从而记录帧）。
+在笔记本中，我们需要生成一个重播视频。为此，在 colab 中，**我们需要有一个虚拟屏幕来渲染环境**（从而记录帧）。
 
 因此，以下单元格将安装库并创建并运行一个虚拟屏幕 🖥
 
@@ -100,7 +100,7 @@ virtual_display.start()
 
 ## 安装依赖 🔽
 
-对于这个练习，我们使用`gym==0.21`，因为视频是用Gym录制的。
+对于这个练习，我们使用`gym==0.21`，因为视频是用 Gym 录制的。
 
 ```py
 pip install gym==0.22
@@ -109,13 +109,13 @@ pip install huggingface_hub
 pip install gym[box2d]==0.22
 ```
 
-## 让我们从头开始用Costa Huang的教程编写PPO
+## 让我们从头开始用 Costa Huang 的教程编写 PPO
 
-+   对于PPO的核心实现，我们将使用优秀的[Costa Huang](https://costa.sh/)教程。
++   对于 PPO 的核心实现，我们将使用优秀的[Costa Huang](https://costa.sh/)教程。
 
-+   除了教程，要深入了解，您可以阅读37个核心实现细节：[https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/)
++   除了教程，要深入了解，您可以阅读 37 个核心实现细节：[`iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/`](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/)
 
-👉 视频教程：[https://youtu.be/MEt6rrxH8W4](https://youtu.be/MEt6rrxH8W4)
+👉 视频教程：[`youtu.be/MEt6rrxH8W4`](https://youtu.be/MEt6rrxH8W4)
 
 ```py
 from IPython.display import HTML
@@ -125,11 +125,11 @@ HTML(
 )
 ```
 
-## 添加Hugging Face集成 🤗
+## 添加 Hugging Face 集成 🤗
 
-+   为了将我们的模型推送到Hub，我们需要定义一个`package_to_hub`函数
++   为了将我们的模型推送到 Hub，我们需要定义一个`package_to_hub`函数
 
-+   添加我们需要将模型推送到Hub的依赖项
++   添加我们需要将模型推送到 Hub 的依赖项
 
 ```py
 from huggingface_hub import HfApi, upload_folder
@@ -147,7 +147,7 @@ from wasabi import Printer
 msg = Printer()
 ```
 
-+   在`parse_args()`函数中添加新参数，以定义我们要推送模型的repo-id。
++   在`parse_args()`函数中添加新参数，以定义我们要推送模型的 repo-id。
 
 ```py
 # Adding HuggingFace argument
@@ -159,7 +159,7 @@ parser.add_argument(
 )
 ```
 
-+   接下来，我们添加推送模型到Hub所需的方法
++   接下来，我们添加推送模型到 Hub 所需的方法
 
 +   这些方法将：
 
@@ -403,7 +403,7 @@ def _add_logdir(local_path: Path, logdir: Path):
         shutil.copytree(logdir, repo_logdir)
 ```
 
-+   最后，在PPO训练结束时调用这个函数
++   最后，在 PPO 训练结束时调用这个函数
 
 ```py
 # Create the evaluation environment
@@ -418,7 +418,7 @@ package_to_hub(
 )
 ```
 
-+   这是最终ppo.py文件的样子：
++   这是最终 ppo.py 文件的样子：
 
 ```py
 # docs and experiment results can be found at https://docs.cleanrl.dev/rl-algorithms/ppo/#ppopy
@@ -1007,13 +1007,13 @@ if __name__ == "__main__":
 
 为了能够与社区分享您的模型，还有三个步骤要遵循：
 
-1️⃣ (如果尚未完成) 创建一个HF帐户 ➡ [https://huggingface.co/join](https://huggingface.co/join)
+1️⃣ (如果尚未完成) 创建一个 HF 帐户 ➡ [`huggingface.co/join`](https://huggingface.co/join)
 
-2️⃣ 登录并从Hugging Face网站获取您的身份验证令牌。
+2️⃣ 登录并从 Hugging Face 网站获取您的身份验证令牌。
 
-+   创建一个新的令牌([https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) **具有写入权限**
++   创建一个新的令牌([`huggingface.co/settings/tokens`](https://huggingface.co/settings/tokens)) **具有写入权限**
 
-![创建HF令牌](../Images/d21a97c736edaab9119d2d1c1da9deac.png)
+![创建 HF 令牌](img/d21a97c736edaab9119d2d1c1da9deac.png)
 
 +   复制令牌
 
@@ -1025,19 +1025,19 @@ notebook_login()
 !git config --global credential.helper store
 ```
 
-如果您不想使用Google Colab或Jupyter Notebook，您需要使用这个命令：`huggingface-cli login`
+如果您不想使用 Google Colab 或 Jupyter Notebook，您需要使用这个命令：`huggingface-cli login`
 
 ## 让我们开始训练 🔥
 
-⚠️ ⚠️ ⚠️ 不要使用**与您在第1单元中使用的相同的repo id**
+⚠️ ⚠️ ⚠️ 不要使用**与您在第 1 单元中使用的相同的 repo id**
 
-+   现在您已经从头开始编写了PPO并添加了Hugging Face集成，我们准备开始训练 🔥
++   现在您已经从头开始编写了 PPO 并添加了 Hugging Face 集成，我们准备开始训练 🔥
 
 +   首先，您需要将所有代码复制到一个名为`ppo.py`的文件中
 
-![PPO](../Images/c6a57155d0c4da38fd607c740b13277e.png) ![PPO](../Images/2fd5c967c9514b78a4b2bbbefa476afd.png)
+![PPO](img/c6a57155d0c4da38fd607c740b13277e.png) ![PPO](img/2fd5c967c9514b78a4b2bbbefa476afd.png)
 
-+   现在我们只需要使用`python <name-of-python-script>.py`运行这个python脚本，使用我们定义的额外参数`argparse`
++   现在我们只需要使用`python <name-of-python-script>.py`运行这个 python 脚本，使用我们定义的额外参数`argparse`
 
 +   您应该修改更多超参数，否则训练将不会很稳定。
 
@@ -1049,6 +1049,6 @@ notebook_login()
 
 学习的最佳方式**是自己尝试**！为什么不尝试另一个环境？或者为什么不尝试修改实现以适用于体育馆？
 
-我们在第8单元的第2部分见，那里我们将训练代理玩毁灭 🔥
+我们在第 8 单元的第 2 部分见，那里我们将训练代理玩毁灭 🔥
 
 ## 继续学习，保持出色 🤗

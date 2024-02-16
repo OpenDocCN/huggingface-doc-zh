@@ -1,10 +1,10 @@
 # @huggingface/agents
 
-> 原始文本: [https://huggingface.co/docs/huggingface.js/agents/modules](https://huggingface.co/docs/huggingface.js/agents/modules)
+> 原始文本: [`huggingface.co/docs/huggingface.js/agents/modules`](https://huggingface.co/docs/huggingface.js/agents/modules)
 
 ## 类
 
-+   [HfAgent](classes/HfAgent)
++   HfAgent
 
 ## 变量
 

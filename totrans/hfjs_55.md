@@ -1,6 +1,6 @@
 # 接口: SpaceResourceConfig
 
-> 原文: [https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceResourceConfig](https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceResourceConfig)
+> 原文: [`huggingface.co/docs/huggingface.js/hub/interfaces/SpaceResourceConfig`](https://huggingface.co/docs/huggingface.js/hub/interfaces/SpaceResourceConfig)
 
 ## 属性
 
@@ -16,7 +16,7 @@
 
 ### 限制
 
-• `限制`: [`SpaceResourceRequirement`](SpaceResourceRequirement)
+• `限制`: `SpaceResourceRequirement`
 
 #### 定义在
 
@@ -36,7 +36,7 @@
 
 ### 请求
 
-• `请求`: [`SpaceResourceRequirement`](SpaceResourceRequirement)
+• `请求`: `SpaceResourceRequirement`
 
 #### 定义在
 

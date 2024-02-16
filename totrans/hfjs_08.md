@@ -1,6 +1,6 @@
 # 类：InferenceOutputError
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/classes/InferenceOutputError](https://huggingface.co/docs/huggingface.js/inference/classes/InferenceOutputError)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/classes/InferenceOutputError`](https://huggingface.co/docs/huggingface.js/inference/classes/InferenceOutputError)
 
 ## 层次结构
 
@@ -40,7 +40,7 @@ TypeError.cause
 
 #### 在以下位置定义
 
-doc-internal/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node_modules/typescript/lib/lib.es2022.error.d.ts:26
+doc-internal/node_modules/.pnpm/typescript@4.9.5/node_modules/typescript/lib/lib.es2022.error.d.ts:26
 
 * * *
 
@@ -54,7 +54,7 @@ TypeError.message
 
 #### 在以下位置定义
 
-doc-internal/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node_modules/typescript/lib/lib.es5.d.ts:1054
+doc-internal/node_modules/.pnpm/typescript@4.9.5/node_modules/typescript/lib/lib.es5.d.ts:1054
 
 * * *
 
@@ -68,7 +68,7 @@ TypeError.name
 
 #### 在以下位置定义
 
-doc-internal/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node_modules/typescript/lib/lib.es5.d.ts:1053
+doc-internal/node_modules/.pnpm/typescript@4.9.5/node_modules/typescript/lib/lib.es5.d.ts:1053
 
 * * *
 
@@ -82,7 +82,7 @@ TypeError.stack
 
 #### 在以下位置定义
 
-doc-internal/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node_modules/typescript/lib/lib.es5.d.ts:1055
+doc-internal/node_modules/.pnpm/typescript@4.9.5/node_modules/typescript/lib/lib.es5.d.ts:1055
 
 * * *
 
@@ -98,7 +98,7 @@ doc-internal/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node
 
 **`查看`**
 
-[https://v8.dev/docs/stack-trace-api#customizing-stack-traces](https://v8.dev/docs/stack-trace-api#customizing-stack-traces)
+[`v8.dev/docs/stack-trace-api#customizing-stack-traces`](https://v8.dev/docs/stack-trace-api#customizing-stack-traces)
 
 ##### 参数
 
@@ -117,7 +117,7 @@ TypeError.prepareStackTrace
 
 #### 在以下位置定义
 
-推断/ node_modules/.pnpm/@[types+node@18.13.0](mailto:types+node@18.13.0)/node_modules/@types/node/globals.d.ts:11
+推断/ node_modules/.pnpm/@types+node@18.13.0/node_modules/@types/node/globals.d.ts:11
 
 * * *
 
@@ -131,7 +131,7 @@ TypeError.stackTraceLimit
 
 #### 在以下位置定义
 
-推断/ node_modules/.pnpm/@[types+node@18.13.0](mailto:types+node@18.13.0)/node_modules/@types/node/globals.d.ts:13
+推断/ node_modules/.pnpm/@types+node@18.13.0/node_modules/@types/node/globals.d.ts:13
 
 ## 方法
 
@@ -158,4 +158,4 @@ TypeError.captureStackTrace
 
 #### 在以下位置定义
 
-推断/ node_modules/.pnpm/@[types+node@18.13.0](mailto:types+node@18.13.0)/node_modules/@types/node/globals.d.ts:4
+推断/ node_modules/.pnpm/@types+node@18.13.0/node_modules/@types/node/globals.d.ts:4

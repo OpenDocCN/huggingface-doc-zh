@@ -1,10 +1,10 @@
 # 在拆分数据上探索统计数据
 
-> 原始文本：[https://huggingface.co/docs/datasets-server/statistics](https://huggingface.co/docs/datasets-server/statistics)
+> 原始文本：[`huggingface.co/docs/datasets-server/statistics`](https://huggingface.co/docs/datasets-server/statistics)
 
-Datasets Server提供了一个`/statistics`端点，用于获取请求数据集的一些基本预先计算的统计信息。这将让您快速了解数据的分布情况。
+Datasets Server 提供了一个`/statistics`端点，用于获取请求数据集的一些基本预先计算的统计信息。这将让您快速了解数据的分布情况。
 
-目前，仅为[具有Parquet导出的数据集](./parquet)计算统计数据。
+目前，仅为具有 Parquet 导出的数据集计算统计数据。
 
 `/statistics`端点需要三个查询参数：
 
@@ -28,11 +28,11 @@ def query():
 data = query()
 ```
 
-响应JSON包含两个键：
+响应 JSON 包含两个键：
 
 +   `num_examples` - 拆分中的样本数量
 
-+   `statistics` - 每列的统计信息字典列表，每个字典有三个键：`column_name`、`column_type`和`column_statistics`。`column_statistics`的内容取决于列类型，请参阅[数据类型的响应结构](./statistics#response-structure-by-data-type)以获取更多详细信息
++   `statistics` - 每列的统计信息字典列表，每个字典有三个键：`column_name`、`column_type`和`column_statistics`。`column_statistics`的内容取决于列类型，请参阅数据类型的响应结构以获取更多详细信息
 
 ```py
 {
@@ -151,9 +151,9 @@ data = query()
 
 +   `bool` - 用于布尔数据类型
 
-+   `string_label` - 用于字符串数据类型，如果在给定拆分中的字符串列中有小于或等于30个唯一值
++   `string_label` - 用于字符串数据类型，如果在给定拆分中的字符串列中有小于或等于 30 个唯一值
 
-+   `string_text` - 用于字符串数据类型，如果在给定拆分中的字符串列中有超过30个唯一值
++   `string_text` - 用于字符串数据类型，如果在给定拆分中的字符串列中有超过 30 个唯一值
 
 ### class_label
 
@@ -195,7 +195,7 @@ data = query()
 
 +   `null`值的数量和比例
 
-+   具有10个bin的直方图
++   具有 10 个 bin 的直方图
 
 <details><summary data-svelte-h="svelte-vpylii">示例</summary>
 
@@ -250,7 +250,7 @@ data = query()
 
 +   `null`值的数量和比例
 
-+   具有小于或等于10个bin的直方图
++   具有小于或等于 10 个 bin 的直方图
 
 <details><summary data-svelte-h="svelte-vpylii">示例</summary>
 
@@ -309,7 +309,7 @@ data = query()
 
 ### string_label
 
-如果请求的拆分中的字符串列具有小于或等于30个唯一值，则被视为类别。返回以下度量值：
+如果请求的拆分中的字符串列具有小于或等于 30 个唯一值，则被视为类别。返回以下度量值：
 
 +   `null`值的数量和比例
 
@@ -340,13 +340,13 @@ data = query()
 
 ### string_text
 
-如果请求的拆分中的字符串列具有超过30个唯一值，则被视为包含文本的列，并且响应包含文本长度的统计信息。计算以下度量值：
+如果请求的拆分中的字符串列具有超过 30 个唯一值，则被视为包含文本的列，并且响应包含文本长度的统计信息。计算以下度量值：
 
 +   文本长度的最小值、最大值、均值和标准差
 
 +   `null`值的数量和比例
 
-+   具有10个bin的文本长度直方图
++   具有 10 个 bin 的文本长度直方图
 
 <details><summary data-svelte-h="svelte-vpylii">示例</summary>
 

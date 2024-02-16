@@ -1,6 +1,6 @@
 # 类：HubApiError
 
-> 原文: [https://huggingface.co/docs/huggingface.js/hub/classes/HubApiError](https://huggingface.co/docs/huggingface.js/hub/classes/HubApiError)
+> 原文: [`huggingface.co/docs/huggingface.js/hub/classes/HubApiError`](https://huggingface.co/docs/huggingface.js/hub/classes/HubApiError)
 
 当调用 Hugging Face Hub 失败时抛出的错误。
 
@@ -45,7 +45,7 @@ Error.cause
 
 #### 定义于
 
-文档内部/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node_modules/typescript/lib/lib.es2022.error.d.ts:26
+文档内部/node_modules/.pnpm/typescript@4.9.5/node_modules/typescript/lib/lib.es2022.error.d.ts:26
 
 * * *
 
@@ -69,7 +69,7 @@ Error.message
 
 #### 定义于
 
-文档内部/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node_modules/typescript/lib/lib.es5.d.ts:1054
+文档内部/node_modules/.pnpm/typescript@4.9.5/node_modules/typescript/lib/lib.es5.d.ts:1054
 
 * * *
 
@@ -83,13 +83,13 @@ Error.name
 
 #### 定义于
 
-文档内部/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node_modules/typescript/lib/lib.es5.d.ts:1053
+文档内部/node_modules/.pnpm/typescript@4.9.5/node_modules/typescript/lib/lib.es5.d.ts:1053
 
 * * *
 
-### 请求ID
+### 请求 ID
 
-• `可选` `请求ID`: `字符串`
+• `可选` `请求 ID`: `字符串`
 
 #### 定义于
 
@@ -107,7 +107,7 @@ Error.stack
 
 #### 定义于
 
-文档内部/node_modules/.pnpm/[typescript@4.9.5](mailto:typescript@4.9.5)/node_modules/typescript/lib/lib.es5.d.ts:1055
+文档内部/node_modules/.pnpm/typescript@4.9.5/node_modules/typescript/lib/lib.es5.d.ts:1055
 
 * * *
 
@@ -143,7 +143,7 @@ Error.stack
 
 **`查看`**
 
-[https://v8.dev/docs/stack-trace-api#customizing-stack-traces](https://v8.dev/docs/stack-trace-api#customizing-stack-traces)
+[`v8.dev/docs/stack-trace-api#customizing-stack-traces`](https://v8.dev/docs/stack-trace-api#customizing-stack-traces)
 
 ##### 参数
 
@@ -162,7 +162,7 @@ Error.prepareStackTrace
 
 #### 定义于
 
-hub/node_modules/.pnpm/@[types+node@18.13.0](mailto:types+node@18.13.0)/node_modules/@types/node/globals.d.ts:11
+hub/node_modules/.pnpm/@types+node@18.13.0/node_modules/@types/node/globals.d.ts:11
 
 * * *
 
@@ -176,7 +176,7 @@ Error.stackTraceLimit
 
 #### 定义于
 
-hub/node_modules/.pnpm/@[types+node@18.13.0](mailto:types+node@18.13.0)/node_modules/@types/node/globals.d.ts:13
+hub/node_modules/.pnpm/@types+node@18.13.0/node_modules/@types/node/globals.d.ts:13
 
 ## 方法
 
@@ -203,4 +203,4 @@ Error.captureStackTrace
 
 #### 定义于
 
-hub/node_modules/.pnpm/@[types+node@18.13.0](mailto:types+node@18.13.0)/node_modules/@types/node/globals.d.ts:4
+hub/node_modules/.pnpm/@types+node@18.13.0/node_modules/@types/node/globals.d.ts:4

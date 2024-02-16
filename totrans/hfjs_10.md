@@ -1,6 +1,6 @@
 # 接口：AudioClassificationOutputValue
 
-> 原文：[https://huggingface.co/docs/huggingface.js/inference/interfaces/AudioClassificationOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/AudioClassificationOutputValue)
+> 原文：[`huggingface.co/docs/huggingface.js/inference/interfaces/AudioClassificationOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/AudioClassificationOutputValue)
 
 ## 属性
 

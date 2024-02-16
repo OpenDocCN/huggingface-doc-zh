@@ -1,8 +1,8 @@
 # 支持的变压器和扩散器任务
 
-> 原始文本: [https://huggingface.co/docs/inference-endpoints/supported_tasks](https://huggingface.co/docs/inference-endpoints/supported_tasks)
+> 原始文本: [`huggingface.co/docs/inference-endpoints/supported_tasks`](https://huggingface.co/docs/inference-endpoints/supported_tasks)
 
-推理端点为来自变压器、句子变压器和扩散器库的机器学习任务提供开箱即用的支持。以下是Hugging Face管理的推理端点支持的任务表。这些任务不需要任何形式的代码或[“自定义容器”](/docs/inference-endpoints/guides/docs/guides/custom_container)来部署端点。如果您想要自定义以下任何任务，或者想要编写自己的自定义任务，请查看[“创建自己的推理处理程序”](/docs/inference-endpoints/guides/custom_handler)部分以获取更多信息。
+推理端点为来自变压器、句子变压器和扩散器库的机器学习任务提供开箱即用的支持。以下是 Hugging Face 管理的推理端点支持的任务表。这些任务不需要任何形式的代码或“自定义容器”来部署端点。如果您想要自定义以下任何任务，或者想要编写自己的自定义任务，请查看“创建自己的推理处理程序”部分以获取更多信息。
 
 | 任务 | 框架 | 开箱即用支持 |
 | --- | --- | --- |
@@ -312,7 +312,7 @@ curl --request POST \
 
 ### 附加参数
 
-您可以添加由变压器的`pipelines` api支持的附加参数。
+您可以添加由变压器的`pipelines` api 支持的附加参数。
 
 例如，如果您有一个`文本生成`流水线，您可以为`重复惩罚`或`最大长度`提供`generation_kwargs`
 

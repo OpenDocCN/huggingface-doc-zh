@@ -1,6 +1,6 @@
 # TensorBoard 记录器
 
-> 原文链接：[https://huggingface.co/docs/huggingface_hub/package_reference/tensorboard](https://huggingface.co/docs/huggingface_hub/package_reference/tensorboard)
+> 原文链接：[`huggingface.co/docs/huggingface_hub/package_reference/tensorboard`](https://huggingface.co/docs/huggingface_hub/package_reference/tensorboard)
 
 TensorBoard 是一个用于机器学习实验的可视化工具包。TensorBoard 允许跟踪和可视化指标，如损失和准确性，可视化模型图，查看直方图，显示图像等等。TensorBoard 与 Hugging Face Hub 集成良好。当推送到 Hub 时，Hub 会自动检测 TensorBoard 跟踪（如 `tfevents`），并启动一个实例来可视化它们。要获取有关 Hub 上的 TensorBoard 集成的更多信息，请查看[此指南](https://huggingface.co/docs/hub/tensorboard)。
 
@@ -38,7 +38,7 @@ TensorBoard 是一个用于机器学习实验的可视化工具包。TensorBoard
 
 +   `repo_ignore_patterns` (`List[str]` or `str`, *optional*) — 要在上传中排除的模式列表。查看[上传指南](https://huggingface.co/docs/huggingface_hub/guides/upload#upload-a-folder)获取更多详细信息。
 
-+   `token` (`str`, *optional*) — 认证令牌。将默认使用存储的令牌。有关更多详细信息，请参阅[https://huggingface.co/settings/token](https://huggingface.co/settings/token) kwargs — 传递给 `SummaryWriter` 的额外关键字参数。
++   `token` (`str`, *optional*) — 认证令牌。将默认使用存储的令牌。有关更多详细信息，请参阅[`huggingface.co/settings/token`](https://huggingface.co/settings/token) kwargs — 传递给 `SummaryWriter` 的额外关键字参数。
 
 将训练日志推送到 Hub 的 tensorboard 的 `SummaryWriter` 包装器。
 

@@ -1,6 +1,6 @@
 # 接口: WhoAmIApp
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIApp](https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIApp)
+> 原文链接: [`huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIApp`](https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIApp)
 
 ## 属性
 

@@ -1,18 +1,18 @@
-# 🤗 Hub客户端库
+# 🤗 Hub 客户端库
 
-> 原文：[https://huggingface.co/docs/huggingface_hub/index](https://huggingface.co/docs/huggingface_hub/index)
+> 原文：[`huggingface.co/docs/huggingface_hub/index`](https://huggingface.co/docs/huggingface_hub/index)
 
-`huggingface_hub`库允许您与[Hugging Face Hub](https://hf.co)互动，这是一个为创作者和合作者提供的机器学习平台。发现为您的项目提供预训练模型和数据集，或者尝试在Hub上托管的数百个机器学习应用程序。您还可以创建并与社区共享自己的模型和数据集。`huggingface_hub`库提供了一种简单的方法，使用Python完成所有这些事情。
+`huggingface_hub`库允许您与[Hugging Face Hub](https://hf.co)互动，这是一个为创作者和合作者提供的机器学习平台。发现为您的项目提供预训练模型和数据集，或者尝试在 Hub 上托管的数百个机器学习应用程序。您还可以创建并与社区共享自己的模型和数据集。`huggingface_hub`库提供了一种简单的方法，使用 Python 完成所有这些事情。
 
-阅读[快速入门指南](quick-start)，开始使用`huggingface_hub`库。您将学习如何从Hub下载文件，创建存储库，并将文件上传到Hub。继续阅读，了解如何在🤗 Hub上管理存储库，如何参与讨论，甚至如何访问推理API。
+阅读快速入门指南，开始使用`huggingface_hub`库。您将学习如何从 Hub 下载文件，创建存储库，并将文件上传到 Hub。继续阅读，了解如何在🤗 Hub 上管理存储库，如何参与讨论，甚至如何访问推理 API。
 
-[如何指南
+如何指南
 
-实用指南，帮助您实现特定目标。查看这些指南，了解如何使用huggingface_hub解决现实世界的问题。](./guides/overview) [参考
+实用指南，帮助您实现特定目标。查看这些指南，了解如何使用 huggingface_hub 解决现实世界的问题。 参考
 
-huggingface_hub类和方法的详尽技术描述。](./package_reference/overview) [概念指南
+huggingface_hub 类和方法的详尽技术描述。 概念指南
 
-高层次解释，帮助您更好地理解huggingface_hub的理念。](./concepts/git_vs_http)
+高层次解释，帮助您更好地理解 huggingface_hub 的理念。
 
 ## 贡献
 

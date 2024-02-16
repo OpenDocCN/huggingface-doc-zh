@@ -1,6 +1,6 @@
 # 什么是强化学习？
 
-> 原文：[https://huggingface.co/learn/deep-rl-course/unit1/what-is-rl](https://huggingface.co/learn/deep-rl-course/unit1/what-is-rl)
+> 原文：[`huggingface.co/learn/deep-rl-course/unit1/what-is-rl`](https://huggingface.co/learn/deep-rl-course/unit1/what-is-rl)
 
 要理解强化学习，让我们从大局观开始。
 
@@ -12,15 +12,15 @@
 
 例如，想象把你的小兄弟放在一个他从未玩过的视频游戏前，给他一个控制器，然后让他独自玩。
 
-![Illustration_1](../Images/9364e180b04d674532eee45c034ac4ee.png)
+![Illustration_1](img/9364e180b04d674532eee45c034ac4ee.png)
 
-你的兄弟将通过按下右按钮（动作）与环境（视频游戏）进行互动。他得到了一个硬币，这是+1的奖励。这是积极的，他刚刚明白在这个游戏中**他必须得到硬币**。
+你的兄弟将通过按下右按钮（动作）与环境（视频游戏）进行互动。他得到了一个硬币，这是+1 的奖励。这是积极的，他刚刚明白在这个游戏中**他必须得到硬币**。
 
-![Illustration_2](../Images/5562329039f2c9ffb88cd349a43284db.png)
+![Illustration_2](img/5562329039f2c9ffb88cd349a43284db.png)
 
-但是，**他再次按下右按钮**，碰到了一个敌人。他刚刚死了，所以这是-1的奖励。
+但是，**他再次按下右按钮**，碰到了一个敌人。他刚刚死了，所以这是-1 的奖励。
 
-![Illustration_3](../Images/e8c6f22edd90a929d3b1e10fbb488589.png)
+![Illustration_3](img/e8c6f22edd90a929d3b1e10fbb488589.png)
 
 通过试错地与环境互动，你的小兄弟明白了**他需要在这个环境中获得硬币，但要避开敌人**。
 

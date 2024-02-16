@@ -1,8 +1,8 @@
 # 创建自定义推理处理程序
 
-> 原文：[https://huggingface.co/docs/inference-endpoints/guides/custom_handler](https://huggingface.co/docs/inference-endpoints/guides/custom_handler)
+> 原文：[`huggingface.co/docs/inference-endpoints/guides/custom_handler`](https://huggingface.co/docs/inference-endpoints/guides/custom_handler)
 
-Hugging Face Endpoints支持所有Transformers和Sentence-Transformers任务，并且可以支持自定义任务，包括自定义预处理和后处理。定制可以通过Hugging Face Hub上模型存储库中的[handler.py](https://huggingface.co/philschmid/distilbert-onnx-banking77/blob/main/handler.py)文件完成。
+Hugging Face Endpoints 支持所有 Transformers 和 Sentence-Transformers 任务，并且可以支持自定义任务，包括自定义预处理和后处理。定制可以通过 Hugging Face Hub 上模型存储库中的[handler.py](https://huggingface.co/philschmid/distilbert-onnx-banking77/blob/main/handler.py)文件完成。
 
 [handler.py](https://huggingface.co/philschmid/distilbert-onnx-banking77/blob/main/handler.py)需要实现[EndpointHandler](https://huggingface.co/philschmid/distilbert-onnx-banking77/blob/main/handler.py)类，其中包含`__init__`和`__call__`方法。
 
@@ -14,35 +14,35 @@ Hugging Face Endpoints支持所有Transformers和Sentence-Transformers任务，�
 
 包含的示例有：
 
-+   [Optimum和ONNX Runtime](https://huggingface.co/philschmid/distilbert-onnx-banking77)
++   [Optimum 和 ONNX Runtime](https://huggingface.co/philschmid/distilbert-onnx-banking77)
 
-+   [BLIP图像嵌入](https://huggingface.co/florentgbelidji/blip_image_embeddings)
++   [BLIP 图像嵌入](https://huggingface.co/florentgbelidji/blip_image_embeddings)
 
-+   [TrOCR用于OCR检测](https://huggingface.co/philschmid/trocr-base-printed)
++   [TrOCR 用于 OCR 检测](https://huggingface.co/philschmid/trocr-base-printed)
 
-+   [优化的句子转换器与Optimum](https://huggingface.co/philschmid/all-MiniLM-L6-v2-optimum-embeddings)
++   [优化的句子转换器与 Optimum](https://huggingface.co/philschmid/all-MiniLM-L6-v2-optimum-embeddings)
 
-+   [Pyannote说话人分割](https://huggingface.co/philschmid/pyannote-speaker-diarization-endpoint)
++   [Pyannote 说话人分割](https://huggingface.co/philschmid/pyannote-speaker-diarization-endpoint)
 
 +   [LayoutLM](https://huggingface.co/philschmid/layoutlm-funsd)
 
 +   [Flair NER](https://huggingface.co/philschmid/flair-ner-english-ontonotes-large)
 
-+   [GPT-J 6B单GPU](https://huggingface.co/philschmid/gpt-j-6B-fp16-sharded)
++   [GPT-J 6B 单 GPU](https://huggingface.co/philschmid/gpt-j-6B-fp16-sharded)
 
-+   [Donut文档理解](https://huggingface.co/philschmid/donut-base-finetuned-cord-v2)
++   [Donut 文档理解](https://huggingface.co/philschmid/donut-base-finetuned-cord-v2)
 
-+   [SetFit分类器](https://huggingface.co/philschmid/setfit-ag-news-endpoint)
++   [SetFit 分类器](https://huggingface.co/philschmid/setfit-ag-news-endpoint)
 
 ## 教程
 
-在创建自定义处理程序之前，您需要一个带有模型权重的Hugging Face模型存储库，并且需要一个具有对存储库的*写*访问权限的访问令牌。要查找、创建和管理访问令牌，请单击[此处](https://huggingface.co/settings/tokens)。
+在创建自定义处理程序之前，您需要一个带有模型权重的 Hugging Face 模型存储库，并且需要一个具有对存储库的*写*访问权限的访问令牌。要查找、创建和管理访问令牌，请单击[此处](https://huggingface.co/settings/tokens)。
 
 如果您想为社区中现有模型编写自定义处理程序，可以使用[repo_duplicator](https://huggingface.co/spaces/osanseviero/repo_duplicator)创建存储库分支。
 
 代码也可以在此[笔记本](https://colab.research.google.com/drive/1hANJeRa1PK1gZaUorobnQGu4bFj4_4Rf?usp=sharing)中找到。
 
-您还可以在此处搜索已存在的自定义处理程序：[https://huggingface.co/models?other=endpoints-template](https://huggingface.co/models?other=endpoints-template)
+您还可以在此处搜索已存在的自定义处理程序：[`huggingface.co/models?other=endpoints-template`](https://huggingface.co/models?other=endpoints-template)
 
 ### 1. 设置开发环境
 
@@ -65,9 +65,9 @@ git lfs install
 git clone https://huggingface.co/philschmid/distilbert-base-uncased-emotion
 ```
 
-要能够稍后推送我们的CP，您需要登录到我们的HF帐户。这可以通过使用`huggingface-cli`来完成。
+要能够稍后推送我们的 CP，您需要登录到我们的 HF 帐户。这可以通过使用`huggingface-cli`来完成。
 
-*注意：确保配置git config。*
+*注意：确保配置 git config。*
 
 ```py
 # setup cli with token
@@ -75,13 +75,13 @@ huggingface-cli login
 git config --global credential.helper store
 ```
 
-### 2. 创建EndpointHandler（CP）
+### 2. 创建 EndpointHandler（CP）
 
-在设置环境后，我们可以开始创建您的自定义处理程序。自定义处理程序是存储库中的`handler.py`文件中的Python类（`EndpointHandler`）。`EndpointHandler`需要实现一个`__init__`和一个`__call__`方法。
+在设置环境后，我们可以开始创建您的自定义处理程序。自定义处理程序是存储库中的`handler.py`文件中的 Python 类（`EndpointHandler`）。`EndpointHandler`需要实现一个`__init__`和一个`__call__`方法。
 
-+   `__init__`方法将在启动端点时调用，并接收1个参数，一个带有模型权重路径的字符串。这使您可以正确加载您的模型。
++   `__init__`方法将在启动端点时调用，并接收 1 个参数，一个带有模型权重路径的字符串。这使您可以正确加载您的模型。
 
-+   `__call__`方法将在每个请求上调用，并接收一个包含您的请求正文的字典作为Python字典。它将始终包含`inputs`键。
++   `__call__`方法将在每个请求上调用，并接收一个包含您的请求正文的字典作为 Python 字典。它将始终包含`inputs`键。
 
 第一步是在存储库的本地克隆中创建我们的`handler.py`。
 
@@ -113,9 +113,9 @@ class EndpointHandler():
         # self.model(input)
 ```
 
-### 3\. 自定义EndpointHandler
+### 3\. 自定义 EndpointHandler
 
-现在，您可以将您想要在初始化或推理期间使用的所有自定义逻辑添加到您的CP中。如果需要一些灵感，您可以在Hub上找到多个[自定义处理程序](https://huggingface.co/models?other=endpoints-template)。在我们的示例中，我们将根据额外的负载信息添加自定义条件。
+现在，您可以将您想要在初始化或推理期间使用的所有自定义逻辑添加到您的 CP 中。如果需要一些灵感，您可以在 Hub 上找到多个[自定义处理程序](https://huggingface.co/models?other=endpoints-template)。在我们的示例中，我们将根据额外的负载信息添加自定义条件。
 
 *我们在教程中使用的模型经过微调以检测情绪。我们将为日期添加一个额外的负载字段，并使用外部包来检查是否是假期，以添加一个条件，即当输入日期是假期时，模型返回“快乐” - 因为每个人在假期时都很快乐* 🌴🎉😆
 
@@ -159,9 +159,9 @@ class EndpointHandler():
         return prediction
 ```
 
-### 4\. 测试EndpointHandler
+### 4\. 测试 EndpointHandler
 
-为了测试我们的EndpointHandler，我们可以简化导入，初始化和测试。因此，我们只需要准备一个示例负载。
+为了测试我们的 EndpointHandler，我们可以简化导入，初始化和测试。因此，我们只需要准备一个示例负载。
 
 ```py
 from handler import EndpointHandler
@@ -191,7 +191,7 @@ print("holiday_payload", holiday_payload)
 
 ### 5\. 将自定义处理程序推送到您的存储库
 
-在本地成功测试处理程序后，您可以通过简单使用基本的git命令将其推送到存储库。
+在本地成功测试处理程序后，您可以通过简单使用基本的 git 命令将其推送到存储库。
 
 ```py
 # add all our new files

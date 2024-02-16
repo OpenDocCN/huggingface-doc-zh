@@ -1,8 +1,8 @@
 # 创建和管理存储库
 
-> 原始文本：[https://huggingface.co/docs/huggingface_hub/guides/repository](https://huggingface.co/docs/huggingface_hub/guides/repository)
+> 原始文本：[`huggingface.co/docs/huggingface_hub/guides/repository`](https://huggingface.co/docs/huggingface_hub/guides/repository)
 
-Hugging Face Hub是一组git存储库。[Git](https://git-scm.com/)是软件开发中广泛使用的工具，可在协作工作时轻松对项目进行版本控制。本指南将向您展示如何与Hub上的存储库进行交互，特别是：
+Hugging Face Hub 是一组 git 存储库。[Git](https://git-scm.com/)是软件开发中广泛使用的工具，可在协作工作时轻松对项目进行版本控制。本指南将向您展示如何与 Hub 上的存储库进行交互，特别是：
 
 +   创建和删除存储库。
 
@@ -14,9 +14,9 @@ Hugging Face Hub是一组git存储库。[Git](https://git-scm.com/)是软件开�
 
 +   管理您的存储库的本地副本。
 
-如果您习惯于使用GitLab/GitHub/Bitbucket等平台，您的第一反应可能是使用`git` CLI克隆您的存储库（`git clone`），提交更改（`git add, git commit`）并推送它们（`git push`）。在使用Hugging Face Hub时，这是有效的。然而，软件工程和机器学习并不具有相同的要求和工作流程。模型存储库可能会维护不同框架和工具的大型模型权重文件，因此克隆存储库可能导致您维护大型本地文件夹并具有巨大大小。因此，使用我们的自定义HTTP方法可能更有效。您可以阅读我们的[Git vs HTTP范式](../concepts/git_vs_http)解释页面以获取更多详细信息。
+如果您习惯于使用 GitLab/GitHub/Bitbucket 等平台，您的第一反应可能是使用`git` CLI 克隆您的存储库（`git clone`），提交更改（`git add, git commit`）并推送它们（`git push`）。在使用 Hugging Face Hub 时，这是有效的。然而，软件工程和机器学习并不具有相同的要求和工作流程。模型存储库可能会维护不同框架和工具的大型模型权重文件，因此克隆存储库可能导致您维护大型本地文件夹并具有巨大大小。因此，使用我们的自定义 HTTP 方法可能更有效。您可以阅读我们的 Git vs HTTP 范式解释页面以获取更多详细信息。
 
-如果您想在Hub上创建和管理存储库，您的计算机必须已登录。如果没有，请参考[此部分](../quick-start#authentication)。在本指南的其余部分，我们将假设您的计算机已登录。
+如果您想在 Hub 上创建和管理存储库，您的计算机必须已登录。如果没有，请参考此部分。在本指南的其余部分，我们将假设您的计算机已登录。
 
 ## 存储库创建和删除
 
@@ -24,7 +24,7 @@ Hugging Face Hub是一组git存储库。[Git](https://git-scm.com/)是软件开�
 
 ### 创建一个存储库
 
-使用[create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo)创建一个空存储库，并使用`repo_id`参数为其命名。`repo_id`是您的命名空间，后跟存储库名称：`username_or_org/repo_name`。
+使用 create_repo()创建一个空存储库，并使用`repo_id`参数为其命名。`repo_id`是您的命名空间，后跟存储库名称：`username_or_org/repo_name`。
 
 ```py
 >>> from huggingface_hub import create_repo
@@ -32,7 +32,7 @@ Hugging Face Hub是一组git存储库。[Git](https://git-scm.com/)是软件开�
 'https://huggingface.co/lysandre/test-model'
 ```
 
-默认情况下，[create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo) 创建一个模型存储库。但是您可以使用`repo_type`参数来指定另一种存储库类型。例如，如果您想创建一个数据集存储库：
+默认情况下，create_repo() 创建一个模型存储库。但是您可以使用`repo_type`参数来指定另一种存储库类型。例如，如果您想创建一个数据集存储库：
 
 ```py
 >>> from huggingface_hub import create_repo
@@ -47,11 +47,11 @@ Hugging Face Hub是一组git存储库。[Git](https://git-scm.com/)是软件开�
 >>> create_repo("lysandre/test-private", private=True)
 ```
 
-如果您希望以后更改存储库的可见性，可以使用[update_repo_visibility()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.update_repo_visibility)函数。
+如果您希望以后更改存储库的可见性，可以使用 update_repo_visibility()函数。
 
 ### 删除存储库
 
-使用[delete_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.delete_repo)删除存储库。请确保您要删除存储库，因为这是一个不可逆的过程！
+使用 delete_repo()删除存储库。请确保您要删除存储库，因为这是一个不可逆的过程！
 
 指定要删除的存储库的`repo_id`：
 
@@ -59,9 +59,9 @@ Hugging Face Hub是一组git存储库。[Git](https://git-scm.com/)是软件开�
 >>> delete_repo(repo_id="lysandre/my-corrupted-dataset", repo_type="dataset")
 ```
 
-### 复制存储库（仅适用于Spaces）
+### 复制存储库（仅适用于 Spaces）
 
-在某些情况下，您可能希望复制他人的存储库以适应您的用例。对于Spaces，可以使用[duplicate_space()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.duplicate_space)方法实现。它将复制整个存储库。您仍需要配置自己的设置（硬件、睡眠时间、存储、变量和秘密）。查看我们的[管理您的Space](./manage-spaces)指南以获取更多详细信息。
+在某些情况下，您可能希望复制他人的存储库以适应您的用例。对于 Spaces，可以使用 duplicate_space()方法实现。它将复制整个存储库。您仍需要配置自己的设置（硬件、睡眠时间、存储、变量和秘密）。查看我们的管理您的 Space 指南以获取更多详细信息。
 
 ```py
 >>> from huggingface_hub import duplicate_space
@@ -73,7 +73,7 @@ RepoUrl('https://huggingface.co/spaces/nateraw/dreambooth-training',...)
 
 现在您已经创建了您的存储库，您有兴趣将更改推送到它并从中下载文件。
 
-这两个主题值得拥有自己的指南。请参考[上传](./upload)和[下载](./download)指南，了解如何使用您的存储库。
+这两个主题值得拥有自己的指南。请参考上传和下载指南，了解如何使用您的存储库。
 
 ## 分支和标签
 
@@ -81,7 +81,7 @@ Git 存储库通常使用分支来存储同一存储库的不同版本。标签�
 
 ### 创建分支和标签
 
-您可以使用 [create_branch()](/docs/huggingface_hub/v0.20.3/zh/package_reference/hf_api#huggingface_hub.HfApi.create_branch) 和 [create_tag()](/docs/huggingface_hub/v0.20.3/zh/package_reference/hf_api#huggingface_hub.HfApi.create_tag) 创建新的分支和标签：
+您可以使用 create_branch() 和 create_tag() 创建新的分支和标签：
 
 ```py
 >>> from huggingface_hub import create_branch, create_tag
@@ -93,11 +93,11 @@ Git 存储库通常使用分支来存储同一存储库的不同版本。标签�
 >>> create_branch("bigcode/the-stack", repo_type="dataset", revision="v0.1-release", tag="v0.1.1", tag_message="Bump release version.")
 ```
 
-您可以使用 [delete_branch()](/docs/huggingface_hub/v0.20.3/zh/package_reference/hf_api#huggingface_hub.HfApi.delete_branch) 和 [delete_tag()](/docs/huggingface_hub/v0.20.3/zh/package_reference/hf_api#huggingface_hub.HfApi.delete_tag) 函数以相同的方式删除分支或标签。
+您可以使用 delete_branch() 和 delete_tag() 函数以相同的方式删除分支或标签。
 
 ### 列出所有分支和标签
 
-您还可以使用 [list_repo_refs()](/docs/huggingface_hub/v0.20.3/zh/package_reference/hf_api#huggingface_hub.HfApi.list_repo_refs) 列出存储库中现有的 git 引用：
+您还可以使用 list_repo_refs() 列出存储库中现有的 git 引用：
 
 ```py
 >>> from huggingface_hub import list_repo_refs
@@ -118,7 +118,7 @@ GitRefs(
 
 存储库带有一些您可以配置的设置。大多数情况下，您将希望在浏览器中的存储库设置页面中手动进行配置。您必须对存储库具有写入访问权限才能对其进行配置（拥有它或是组织的一部分）。在本节中，我们将看到您还可以使用 `huggingface_hub` 以编程方式配置的设置。
 
-一些设置特定于 Spaces（硬件、环境变量等）。要配置这些设置，请参考我们的[管理您的 Spaces](../guides/manage-spaces)指南。
+一些设置特定于 Spaces（硬件、环境变量等）。要配置这些设置，请参考我们的管理您的 Spaces 指南。
 
 ### 更新可见性
 
@@ -131,7 +131,7 @@ GitRefs(
 
 ### 重命名您的存储库
 
-您可以使用 [move_repo()](/docs/huggingface_hub/v0.20.3/zh/package_reference/hf_api#huggingface_hub.HfApi.move_repo) 在 Hub 上重命名您的存储库。使用此方法，您还可以将存储库从用户移动到组织。在这样做时，有一些[限制](https://hf.co/docs/hub/repositories-settings#renaming-or-transferring-a-repo)您应该注意。例如，您无法将存储库转移到另一个用户。
+您可以使用 move_repo() 在 Hub 上重命名您的存储库。使用此方法，您还可以将存储库从用户移动到组织。在这样做时，有一些[限制](https://hf.co/docs/hub/repositories-settings#renaming-or-transferring-a-repo)您应该注意。例如，您无法将存储库转移到另一个用户。
 
 ```py
 >>> from huggingface_hub import move_repo
@@ -142,13 +142,13 @@ GitRefs(
 
 上述所有操作都可以使用 HTTP 请求完成。但是，在某些情况下，您可能有兴趣拥有存储库的本地副本，并使用您熟悉的 Git 命令与其交互。
 
-[Repository](/docs/huggingface_hub/v0.20.3/zh/package_reference/repository#huggingface_hub.Repository) 类允许您与 Hub 上的文件和存储库进行交互，其功能类似于 Git 命令。它是对 Git 和 Git-LFS 方法的封装，以便您可以使用您已经熟悉和喜爱的 Git 命令。在开始之前，请确保您已安装了 Git-LFS（请参阅[此处](https://git-lfs.github.com/)获取安装说明）。
+Repository 类允许您与 Hub 上的文件和存储库进行交互，其功能类似于 Git 命令。它是对 Git 和 Git-LFS 方法的封装，以便您可以使用您已经熟悉和喜爱的 Git 命令。在开始之前，请确保您已安装了 Git-LFS（请参阅[此处](https://git-lfs.github.com/)获取安装说明）。
 
-[Repository](/docs/huggingface_hub/v0.20.3/zh/package_reference/repository#huggingface_hub.Repository) 已被弃用，推荐使用 [HfApi](/docs/huggingface_hub/v0.20.3/zh/package_reference/hf_api#huggingface_hub.HfApi) 中实现的基于 http 的替代方法。鉴于其在传统代码中的广泛应用，[Repository](/docs/huggingface_hub/v0.20.3/zh/package_reference/repository#huggingface_hub.Repository) 的完全移除将仅在版本 `v1.0` 中发生。有关更多详细信息，请阅读[此解释页面](./concepts/git_vs_http)。
+Repository 已被弃用，推荐使用 HfApi 中实现的基于 http 的替代方法。鉴于其在传统代码中的广泛应用，Repository 的完全移除将仅在版本 `v1.0` 中发生。有关更多详细信息，请阅读此解释页面。
 
 ### 使用本地存储库
 
-使用指向本地存储库的路径实例化一个[Repository](/docs/huggingface_hub/v0.20.3/zh/package_reference/repository#huggingface_hub.Repository)对象：
+使用指向本地存储库的路径实例化一个 Repository 对象：
 
 ```py
 >>> from huggingface_hub import Repository
@@ -164,20 +164,20 @@ GitRefs(
 >>> repo = Repository(local_dir="w2v2", clone_from="facebook/wav2vec2-large-960h-lv60")
 ```
 
-`clone_from`也可以使用URL克隆存储库：
+`clone_from`也可以使用 URL 克隆存储库：
 
 ```py
 >>> repo = Repository(local_dir="huggingface-hub", clone_from="https://huggingface.co/facebook/wav2vec2-large-960h-lv60")
 ```
 
-您可以将`clone_from`参数与[create_repo()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.create_repo)结合使用来创建和克隆存储库：
+您可以将`clone_from`参数与 create_repo()结合使用来创建和克隆存储库：
 
 ```py
 >>> repo_url = create_repo(repo_id="repo_name")
 >>> repo = Repository(local_dir="repo_local_path", clone_from=repo_url)
 ```
 
-您还可以在克隆存储库时通过指定`git_user`和`git_email`参数来配置Git用户名和电子邮件。当用户提交到该存储库时，Git将知道提交作者。
+您还可以在克隆存储库时通过指定`git_user`和`git_email`参数来配置 Git 用户名和电子邮件。当用户提交到该存储库时，Git 将知道提交作者。
 
 ```py
 >>> repo = Repository(
@@ -192,7 +192,7 @@ GitRefs(
 
 ### 分支
 
-分支对于协作和实验非常重要，而不会影响您当前的文件和代码。使用[git_checkout()](/docs/huggingface_hub/v0.20.3/en/package_reference/repository#huggingface_hub.Repository.git_checkout)在分支之间切换。例如，如果您想从`branch1`切换到`branch2`：
+分支对于协作和实验非常重要，而不会影响您当前的文件和代码。使用 git_checkout()在分支之间切换。例如，如果您想从`branch1`切换到`branch2`：
 
 ```py
 >>> from huggingface_hub import Repository
@@ -202,7 +202,7 @@ GitRefs(
 
 ### 拉取
 
-[git_pull()](/docs/huggingface_hub/v0.20.3/en/package_reference/repository#huggingface_hub.Repository.git_pull)允许您从远程存储库更新当前本地分支的更改：
+git_pull()允许您从远程存储库更新当前本地分支的更改：
 
 ```py
 >>> from huggingface_hub import Repository

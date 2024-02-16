@@ -1,10 +1,10 @@
 # 下载行切片
 
-> 原文链接：[https://huggingface.co/docs/datasets-server/rows](https://huggingface.co/docs/datasets-server/rows)
+> 原文链接：[`huggingface.co/docs/datasets-server/rows`](https://huggingface.co/docs/datasets-server/rows)
 
 数据集服务器提供了一个`/rows`端点，用于可视化数据集的任何行切片。这将让您浏览和检查数据集中包含的数据。
 
-![](../Images/817acecac0ec0079c57229725f548f41.png) ![](../Images/8b90f071ee1cd7eb9c519d9f3cd7eb7f.png)目前，仅支持[具有parquet导出的数据集](./parquet)，因此数据集服务器可以提取任何行切片而无需下载整个数据集。
+![](img/817acecac0ec0079c57229725f548f41.png) ![](img/8b90f071ee1cd7eb9c519d9f3cd7eb7f.png)目前，仅支持具有 parquet 导出的数据集，因此数据集服务器可以提取任何行切片而无需下载整个数据集。
 
 本指南向您展示如何使用数据集服务器的`/rows`端点下载数据集的切片。也可以尝试使用[Postman](https://www.postman.com/huggingface/workspace/hugging-face-apis/request/23242779-32d6a8be-b800-446a-8cee-f6b5ca1710df)，[RapidAPI](https://rapidapi.com/hugging-face-hugging-face-default/api/hugging-face-datasets-api)，或[ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json#operation/listFirstRows)。
 
@@ -32,13 +32,13 @@ def query():
 data = query()
 ```
 
-端点响应是一个包含两个键的JSON：
+端点响应是一个包含两个键的 JSON：
 
 +   数据集的[`features`](https://huggingface.co/docs/datasets/about_dataset_features)，包括列名和数据类型。
 
 +   数据集的`rows`切片和特定行每列中包含的内容。
 
-例如，这里是`ibm/duorc`/`SelfRC`训练拆分的`features`和`rows`切片，从150到151：
+例如，这里是`ibm/duorc`/`SelfRC`训练拆分的`features`和`rows`切片，从 150 到 151：
 
 ```py
 // https://datasets-server.huggingface.co/rows?dataset=ibm/duorc&config=SelfRC&split=train&offset=150&length=2
@@ -119,19 +119,19 @@ data = query()
 
 ## 图像和音频样本
 
-图像和音频由指向文件的URL表示。
+图像和音频由指向文件的 URL 表示。
 
 ### 图像
 
-图像表示为具有三个字段的JSON对象：
+图像表示为具有三个字段的 JSON 对象：
 
-+   `src`：图像文件的URL
++   `src`：图像文件的 URL
 
 +   `height`：图像的高度（以像素为单位）
 
 +   `width`：图像的宽度（以像素为单位）
 
-这是cifar100数据集的第一行的图像示例：
+这是 cifar100 数据集的第一行的图像示例：
 
 ```py
 // https://datasets-server.huggingface.co/rows?dataset=cifar100&config=cifar100&split=train&offset=0&length=1

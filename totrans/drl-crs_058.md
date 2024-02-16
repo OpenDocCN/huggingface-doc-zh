@@ -1,14 +1,14 @@
 # 介绍
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit4/introduction](https://huggingface.co/learn/deep-rl-course/unit4/introduction)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit4/introduction`](https://huggingface.co/learn/deep-rl-course/unit4/introduction)
 
-![缩略图](../Images/207886028f30a9a8c43010256f915e88.png)
+![缩略图](img/207886028f30a9a8c43010256f915e88.png)
 
 在上一个单元中，我们学习了深度 Q 学习。在这种基于价值的深度强化学习算法中，我们使用深度神经网络来近似每个可能动作的不同 Q 值。
 
 自课程开始以来，我们只研究了基于价值的方法，其中我们估计一个值函数作为找到最优策略的中间步骤。
 
-![链接价值策略](../Images/06e7785cc764e6109bfc6c89005a4d92.png)
+![链接价值策略](img/06e7785cc764e6109bfc6c89005a4d92.png)
 
 在基于价值的方法中，策略（π）仅存在是因为动作价值的估计，因为策略只是一个函数（例如，贪婪策略），它将在给定状态时选择价值最高的动作。
 
@@ -18,6 +18,6 @@
 
 然后，您将能够迭代并改进此实现，以适用于更高级的环境。
 
-![环境](../Images/3b1f63eab47a364ef05dcdca4df7bf08.png)
+![环境](img/3b1f63eab47a364ef05dcdca4df7bf08.png)
 
 让我们开始吧！

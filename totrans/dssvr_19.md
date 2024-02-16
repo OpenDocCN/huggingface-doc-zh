@@ -1,6 +1,6 @@
 # DuckDB
 
-> 原文链接：[https://huggingface.co/docs/datasets-server/duckdb](https://huggingface.co/docs/datasets-server/duckdb)
+> 原文链接：[`huggingface.co/docs/datasets-server/duckdb`](https://huggingface.co/docs/datasets-server/duckdb)
 
 [DuckDB](https://duckdb.org/docs/) 是一个支持快速读取和查询 Parquet 文件的数据库。首先创建一个连接到 DuckDB，然后安装并加载 [`httpfs`](https://duckdb.org/docs/extensions/httpfs.html) 扩展来读取和写入远程文件：
 

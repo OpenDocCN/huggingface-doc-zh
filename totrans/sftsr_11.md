@@ -1,6 +1,6 @@
 # Flax API
 
-> 原始文本：[https://huggingface.co/docs/safetensors/api/flax](https://huggingface.co/docs/safetensors/api/flax)
+> 原始文本：[`huggingface.co/docs/safetensors/api/flax`](https://huggingface.co/docs/safetensors/api/flax)
 
 #### `safetensors.flax.load_file`
 

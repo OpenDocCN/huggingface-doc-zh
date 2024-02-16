@@ -1,72 +1,72 @@
 # @huggingface/inference
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/inference/modules](https://huggingface.co/docs/huggingface.js/inference/modules)
+> 原文链接: [`huggingface.co/docs/huggingface.js/inference/modules`](https://huggingface.co/docs/huggingface.js/inference/modules)
 
 ## Classes
 
-+   [HfInference](classes/HfInference)
++   HfInference
 
-+   [HfInferenceEndpoint](classes/HfInferenceEndpoint)
++   HfInferenceEndpoint
 
-+   [InferenceOutputError](classes/InferenceOutputError)
++   InferenceOutputError
 
 ## Interfaces
 
-+   [AudioClassificationOutputValue](interfaces/AudioClassificationOutputValue)
++   AudioClassificationOutputValue
 
-+   [AudioToAudioOutputValue](interfaces/AudioToAudioOutputValue)
++   AudioToAudioOutputValue
 
-+   [AutomaticSpeechRecognitionOutput](interfaces/AutomaticSpeechRecognitionOutput)
++   AutomaticSpeechRecognitionOutput
 
-+   [BaseArgs](interfaces/BaseArgs)
++   BaseArgs
 
-+   [ConversationalOutput](interfaces/ConversationalOutput)
++   ConversationalOutput
 
-+   [DocumentQuestionAnsweringOutput](interfaces/DocumentQuestionAnsweringOutput)
++   DocumentQuestionAnsweringOutput
 
-+   [ImageClassificationOutputValue](interfaces/ImageClassificationOutputValue)
++   ImageClassificationOutputValue
 
-+   [ImageSegmentationOutputValue](interfaces/ImageSegmentationOutputValue)
++   ImageSegmentationOutputValue
 
-+   [ImageToTextOutput](interfaces/ImageToTextOutput)
++   ImageToTextOutput
 
-+   [ObjectDetectionOutputValue](interfaces/ObjectDetectionOutputValue)
++   ObjectDetectionOutputValue
 
-+   [Options](interfaces/Options)
++   Options
 
-+   [QuestionAnsweringOutput](interfaces/QuestionAnsweringOutput)
++   QuestionAnsweringOutput
 
-+   [SummarizationOutput](interfaces/SummarizationOutput)
++   SummarizationOutput
 
-+   [TableQuestionAnsweringOutput](interfaces/TableQuestionAnsweringOutput)
++   TableQuestionAnsweringOutput
 
-+   [TextGenerationOutput](interfaces/TextGenerationOutput)
++   TextGenerationOutput
 
-+   [TextGenerationStreamBestOfSequence](interfaces/TextGenerationStreamBestOfSequence)
++   TextGenerationStreamBestOfSequence
 
-+   [TextGenerationStreamDetails](interfaces/TextGenerationStreamDetails)
++   TextGenerationStreamDetails
 
-+   [TextGenerationStreamOutput](interfaces/TextGenerationStreamOutput)
++   TextGenerationStreamOutput
 
-+   [TextGenerationStreamPrefillToken](interfaces/TextGenerationStreamPrefillToken)
++   TextGenerationStreamPrefillToken
 
-+   [TextGenerationStreamToken](interfaces/TextGenerationStreamToken)
++   TextGenerationStreamToken
 
-+   [TokenClassificationOutputValue](interfaces/TokenClassificationOutputValue)
++   TokenClassificationOutputValue
 
-+   [TranslationOutputValue](interfaces/TranslationOutputValue)
++   TranslationOutputValue
 
-+   [VisualQuestionAnsweringOutput](interfaces/VisualQuestionAnsweringOutput)
++   VisualQuestionAnsweringOutput
 
-+   [ZeroShotClassificationOutputValue](interfaces/ZeroShotClassificationOutputValue)
++   ZeroShotClassificationOutputValue
 
-+   [ZeroShotImageClassificationOutputValue](interfaces/ZeroShotImageClassificationOutputValue)
++   ZeroShotImageClassificationOutputValue
 
 ## Type Aliases
 
 ### AudioClassificationArgs
 
-Ƭ `AudioClassificationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` | `ArrayBuffer` }
+Ƭ `AudioClassificationArgs`: `BaseArgs` & { `data`: `Blob` | `ArrayBuffer` }
 
 #### Defined in
 
@@ -76,7 +76,7 @@
 
 ### AudioClassificationReturn
 
-Ƭ `AudioClassificationReturn`: [`AudioClassificationOutputValue`](interfaces/AudioClassificationOutputValue)[]
+Ƭ `AudioClassificationReturn`: `AudioClassificationOutputValue`[]
 
 #### Defined in
 
@@ -86,7 +86,7 @@
 
 ### AudioToAudioArgs
 
-Ƭ `AudioToAudioArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` | `ArrayBuffer` }
+Ƭ `AudioToAudioArgs`: `BaseArgs` & { `data`: `Blob` | `ArrayBuffer` }
 
 #### Defined in
 
@@ -96,7 +96,7 @@
 
 ### AudioToAudioReturn
 
-Ƭ `AudioToAudioReturn`: [`AudioToAudioOutputValue`](interfaces/AudioToAudioOutputValue)[]
+Ƭ `AudioToAudioReturn`: `AudioToAudioOutputValue`[]
 
 #### Defined in
 
@@ -106,7 +106,7 @@
 
 ### AutomaticSpeechRecognitionArgs
 
-Ƭ `AutomaticSpeechRecognitionArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` | `ArrayBuffer` }
+Ƭ `AutomaticSpeechRecognitionArgs`: `BaseArgs` & { `data`: `Blob` | `ArrayBuffer` }
 
 #### Defined in
 
@@ -116,7 +116,7 @@
 
 ### ConversationalArgs
 
-Ƭ `ConversationalArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string` } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` } }
+Ƭ `ConversationalArgs`: `BaseArgs` & { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string` } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` } }
 
 #### Defined in
 
@@ -126,7 +126,7 @@
 
 ### DocumentQuestionAnsweringArgs
 
-Ƭ `DocumentQuestionAnsweringArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `image`: `Blob` | `ArrayBuffer` ; `question`: `string` } }
+Ƭ `DocumentQuestionAnsweringArgs`: `BaseArgs` & { `inputs`: { `image`: `Blob` | `ArrayBuffer` ; `question`: `string` } }
 
 #### 定义在
 
@@ -136,7 +136,7 @@
 
 ### FeatureExtractionArgs
 
-Ƭ `FeatureExtractionArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` | `string`[] }
+Ƭ `FeatureExtractionArgs`: `BaseArgs` & { `inputs`: `string` | `string`[] }
 
 #### Defined in
 
@@ -158,7 +158,7 @@
 
 ### FillMaskArgs
 
-Ƭ `FillMaskArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` }
+Ƭ `FillMaskArgs`: `BaseArgs` & { `inputs`: `string` }
 
 #### 定义在
 
@@ -178,7 +178,7 @@
 
 ### ImageClassificationArgs
 
-Ƭ `ImageClassificationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` | `ArrayBuffer` }
+Ƭ `ImageClassificationArgs`: `BaseArgs` & { `data`: `Blob` | `ArrayBuffer` }
 
 #### 定义在
 
@@ -188,7 +188,7 @@
 
 ### ImageClassificationOutput
 
-Ƭ `ImageClassificationOutput`: [`ImageClassificationOutputValue`](interfaces/ImageClassificationOutputValue)[]
+Ƭ `ImageClassificationOutput`: `ImageClassificationOutputValue`[]
 
 #### 定义在
 
@@ -198,7 +198,7 @@
 
 ### ImageSegmentationArgs
 
-Ƭ `ImageSegmentationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` | `ArrayBuffer` }
+Ƭ `ImageSegmentationArgs`: `BaseArgs` & { `data`: `Blob` | `ArrayBuffer` }
 
 #### 定义在
 
@@ -208,7 +208,7 @@
 
 ### ImageSegmentationOutput
 
-Ƭ `ImageSegmentationOutput`: [`ImageSegmentationOutputValue`](interfaces/ImageSegmentationOutputValue)[]
+Ƭ `ImageSegmentationOutput`: `ImageSegmentationOutputValue`[]
 
 #### 定义在
 
@@ -218,7 +218,7 @@
 
 ### ImageToImageArgs
 
-Ƭ `ImageToImageArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `Blob` | `ArrayBuffer` ; `parameters?`: { `guess_mode?`: `boolean` ; `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `prompt?`: `string` ; `strength?`: `number` ; `width?`: `number` } }
+Ƭ `ImageToImageArgs`: `BaseArgs` & { `inputs`: `Blob` | `ArrayBuffer` ; `parameters?`: { `guess_mode?`: `boolean` ; `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `prompt?`: `string` ; `strength?`: `number` ; `width?`: `number` } }
 
 #### 定义在
 
@@ -238,7 +238,7 @@
 
 ### ImageToTextArgs
 
-Ƭ `ImageToTextArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` | `ArrayBuffer` }
+Ƭ `ImageToTextArgs`: `BaseArgs` & { `data`: `Blob` | `ArrayBuffer` }
 
 #### 在以下位置定义：
 
@@ -258,7 +258,7 @@
 
 ### ObjectDetectionArgs
 
-`ObjectDetectionArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` | `ArrayBuffer` }
+`ObjectDetectionArgs`: `BaseArgs` & { `data`: `Blob` | `ArrayBuffer` }
 
 #### 在以下位置定义：
 
@@ -268,7 +268,7 @@
 
 ### ObjectDetectionOutput
 
-`ObjectDetectionOutput`: [`ObjectDetectionOutputValue`](interfaces/ObjectDetectionOutputValue)[]
+`ObjectDetectionOutput`: `ObjectDetectionOutputValue`[]
 
 #### 在以下位置定义：
 
@@ -278,7 +278,7 @@
 
 ### QuestionAnsweringArgs
 
-`QuestionAnsweringArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `context`: `string` ; `question`: `string` } }
+`QuestionAnsweringArgs`: `BaseArgs` & { `inputs`: { `context`: `string` ; `question`: `string` } }
 
 #### 在以下位置定义：
 
@@ -288,7 +288,7 @@
 
 ### RequestArgs
 
-`RequestArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` | `ArrayBuffer` } | { `inputs`: `unknown` } & { `accessToken?`: `string` ; `parameters?`: `Record`<`string`, `unknown`> }
+`RequestArgs`: `BaseArgs` & { `data`: `Blob` | `ArrayBuffer` } | { `inputs`: `unknown` } & { `accessToken?`: `string` ; `parameters?`: `Record`<`string`, `unknown`> }
 
 #### 在以下位置定义：
 
@@ -298,7 +298,7 @@
 
 ### SentenceSimilarityArgs
 
-`SentenceSimilarityArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `Record`<`string`, `unknown`> | `Record`<`string`, `unknown`>[] }
+`SentenceSimilarityArgs`: `BaseArgs` & { `inputs`: `Record`<`string`, `unknown`> | `Record`<`string`, `unknown`>[] }
 
 #### 在以下位置定义：
 
@@ -320,7 +320,7 @@
 
 ### SummarizationArgs
 
-`SummarizationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` } }
+`SummarizationArgs`: `BaseArgs` & { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` } }
 
 #### 在以下位置定义：
 
@@ -330,7 +330,7 @@
 
 ### TableQuestionAnsweringArgs
 
-`TableQuestionAnsweringArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]> } }
+`TableQuestionAnsweringArgs`: `BaseArgs` & { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]> } }
 
 #### 在以下位置定义：
 
@@ -340,7 +340,7 @@
 
 ### TabularClassificationArgs
 
-`TabularClassificationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `data`: `Record`<`string`, `string`[]> } }
+`TabularClassificationArgs`: `BaseArgs` & { `inputs`: { `data`: `Record`<`string`, `string`[]> } }
 
 #### 在以下位置定义：
 
@@ -362,7 +362,7 @@
 
 ### TabularRegressionArgs
 
-`TabularRegressionArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `data`: `Record`<`string`, `string`[]> } }
+`TabularRegressionArgs`: `BaseArgs` & { `inputs`: { `data`: `Record`<`string`, `string`[]> } }
 
 #### 在以下位置定义：
 
@@ -384,7 +384,7 @@
 
 ### TextClassificationArgs
 
-Ƭ `TextClassificationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` }
+Ƭ `TextClassificationArgs`: `BaseArgs` & { `inputs`: `string` }
 
 #### 定义在
 
@@ -404,7 +404,7 @@
 
 ### TextGenerationArgs
 
-Ƭ `TextGenerationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `stop_sequences?`: `string`[] ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` ; `truncate?`: `number` }
+Ƭ `TextGenerationArgs`: `BaseArgs` & { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `stop_sequences?`: `string`[] ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number` ; `truncate?`: `number` }
 
 #### 定义在
 
@@ -424,7 +424,7 @@
 
 ### TextToImageArgs
 
-Ƭ `TextToImageArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` ; `parameters?`: { `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `width?`: `number` } }
+Ƭ `TextToImageArgs`: `BaseArgs` & { `inputs`: `string` ; `parameters?`: { `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `width?`: `number` } }
 
 #### 定义在
 
@@ -444,7 +444,7 @@
 
 ### TextToSpeechArgs
 
-Ƭ `TextToSpeechArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` }
+Ƭ `TextToSpeechArgs`: `BaseArgs` & { `inputs`: `string` }
 
 #### 定义在
 
@@ -464,7 +464,7 @@
 
 ### TokenClassificationArgs
 
-Ƭ `TokenClassificationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: `"none"` | `"simple"` | `"first"` | `"average"` | `"max"` } }
+Ƭ `TokenClassificationArgs`: `BaseArgs` & { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: `"none"` | `"simple"` | `"first"` | `"average"` | `"max"` } }
 
 #### 定义在
 
@@ -474,7 +474,7 @@
 
 ### TokenClassificationOutput
 
-Ƭ `TokenClassificationOutput`: [`TokenClassificationOutputValue`](interfaces/TokenClassificationOutputValue)[]
+Ƭ `TokenClassificationOutput`: `TokenClassificationOutputValue`[]
 
 #### 定义在
 
@@ -484,7 +484,7 @@
 
 ### TranslationArgs
 
-Ƭ `TranslationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` | `string`[] }
+Ƭ `TranslationArgs`: `BaseArgs` & { `inputs`: `string` | `string`[] }
 
 #### 定义在
 
@@ -494,7 +494,7 @@
 
 ### 翻译输出
 
-Ƭ `TranslationOutput`: [`TranslationOutputValue`](interfaces/TranslationOutputValue) | [`TranslationOutputValue`](interfaces/TranslationOutputValue)[]
+Ƭ `TranslationOutput`: `TranslationOutputValue` | `TranslationOutputValue`[]
 
 #### 定义于
 
@@ -504,7 +504,7 @@
 
 ### VisualQuestionAnsweringArgs
 
-Ƭ `VisualQuestionAnsweringArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `image`: `Blob` | `ArrayBuffer` ; `question`: `string` } }
+Ƭ `VisualQuestionAnsweringArgs`: `BaseArgs` & { `inputs`: { `image`: `Blob` | `ArrayBuffer` ; `question`: `string` } }
 
 #### 定义于
 
@@ -514,7 +514,7 @@
 
 ### ZeroShotClassificationArgs
 
-Ƭ `ZeroShotClassificationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` | `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean` } }
+Ƭ `ZeroShotClassificationArgs`: `BaseArgs` & { `inputs`: `string` | `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean` } }
 
 #### 定义于
 
@@ -524,7 +524,7 @@
 
 ### 零样本分类输出
 
-Ƭ `ZeroShotClassificationOutput`: [`ZeroShotClassificationOutputValue`](interfaces/ZeroShotClassificationOutputValue)[]
+Ƭ `ZeroShotClassificationOutput`: `ZeroShotClassificationOutputValue`[]
 
 #### 定义于
 
@@ -534,7 +534,7 @@
 
 ### ZeroShotImageClassificationArgs
 
-Ƭ `ZeroShotImageClassificationArgs`: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `image`: `Blob` | `ArrayBuffer` } ; `parameters`: { `candidate_labels`: `string`[] } }
+Ƭ `ZeroShotImageClassificationArgs`: `BaseArgs` & { `inputs`: { `image`: `Blob` | `ArrayBuffer` } ; `parameters`: { `candidate_labels`: `string`[] } }
 
 #### 定义于
 
@@ -544,7 +544,7 @@
 
 ### ZeroShotImageClassificationOutput
 
-Ƭ `ZeroShotImageClassificationOutput`: [`ZeroShotImageClassificationOutputValue`](interfaces/ZeroShotImageClassificationOutputValue)[]
+Ƭ `ZeroShotImageClassificationOutput`: `ZeroShotImageClassificationOutputValue`[]
 
 #### 定义于
 
@@ -554,7 +554,7 @@
 
 ### 音频分类
 
-▸ `audioClassification`(`args`, `options?`): `Promise`<[`AudioClassificationReturn`](modules#audioclassificationreturn)>
+▸ `audioClassification`(`args`, `options?`): `Promise`<`AudioClassificationReturn`>
 
 此任务读取一些音频输入并输出类别的可能性。推荐模型：superb/hubert-large-superb-er
 
@@ -562,12 +562,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`AudioClassificationArgs`](modules#audioclassificationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `AudioClassificationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`AudioClassificationReturn`](modules#audioclassificationreturn)>
+`Promise`<`AudioClassificationReturn`>
 
 #### 定义于
 
@@ -577,7 +577,7 @@
 
 ### 音频到音频
 
-▸ `audioToAudio`(`args`, `options?`): `Promise`<[`AudioToAudioReturn`](modules#audiotoaudioreturn)>
+▸ `audioToAudio`(`args`, `options?`): `Promise`<`AudioToAudioReturn`>
 
 此任务读取一些音频输入并输出一个或多个音频文件。示例模型：speechbrain/sepformer-wham 用于音频源分离。
 
@@ -585,12 +585,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`AudioToAudioArgs`](modules#audiotoaudioargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `AudioToAudioArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`AudioToAudioReturn`](modules#audiotoaudioreturn)>
+`Promise`<`AudioToAudioReturn`>
 
 #### 定义于
 
@@ -600,7 +600,7 @@
 
 ### 自动语音识别
 
-▸ `automaticSpeechRecognition`(`args`, `options?`): `Promise`<[`AutomaticSpeechRecognitionOutput`](interfaces/AutomaticSpeechRecognitionOutput)>
+▸ `automaticSpeechRecognition`(`args`, `options?`): `Promise`<`AutomaticSpeechRecognitionOutput`>
 
 这项任务读取一些音频输入，并输出音频文件中的文字。推荐模型（英语语言）：facebook/wav2vec2-large-960h-lv60-self
 
@@ -608,12 +608,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`AutomaticSpeechRecognitionArgs`](modules#automaticspeechrecognitionargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `AutomaticSpeechRecognitionArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`AutomaticSpeechRecognitionOutput`](interfaces/AutomaticSpeechRecognitionOutput)>
+`Promise`<`AutomaticSpeechRecognitionOutput`>
 
 #### 定义在
 
@@ -623,20 +623,20 @@
 
 ### 对话
 
-▸ `conversational`(`args`, `options?`): `Promise`<[`ConversationalOutput`](interfaces/ConversationalOutput)>
+▸ `conversational`(`args`, `options?`): `Promise`<`ConversationalOutput`>
 
-这项任务对应于任何类似聊天机器人的结构。模型往往具有较短的max_length，因此在使用给定模型时，请谨慎检查是否需要长距离依赖。推荐模型：microsoft/DialoGPT-large。
+这项任务对应于任何类似聊天机器人的结构。模型往往具有较短的 max_length，因此在使用给定模型时，请谨慎检查是否需要长距离依赖。推荐模型：microsoft/DialoGPT-large。
 
 #### 参数
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`ConversationalArgs`](modules#conversationalargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `ConversationalArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`ConversationalOutput`](interfaces/ConversationalOutput)>
+`Promise`<`ConversationalOutput`>
 
 #### 定义在
 
@@ -646,7 +646,7 @@
 
 ### 文档问答
 
-▸ `documentQuestionAnswering`(`args`, `options?`): `Promise`<[`DocumentQuestionAnsweringOutput`](interfaces/DocumentQuestionAnsweringOutput)>
+▸ `documentQuestionAnswering`(`args`, `options?`): `Promise`<`DocumentQuestionAnsweringOutput`>
 
 回答文档图像上的问题。推荐模型：impira/layoutlm-document-qa。
 
@@ -654,12 +654,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`DocumentQuestionAnsweringArgs`](modules#documentquestionansweringargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `DocumentQuestionAnsweringArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`DocumentQuestionAnsweringOutput`](interfaces/DocumentQuestionAnsweringOutput)>
+`Promise`<`DocumentQuestionAnsweringOutput`>
 
 #### 定义在
 
@@ -669,7 +669,7 @@
 
 ### 特征提取
 
-▸ `featureExtraction`(`args`, `options?`): `Promise`<[`FeatureExtractionOutput`](modules#featureextractionoutput)>
+▸ `featureExtraction`(`args`, `options?`): `Promise`<`FeatureExtractionOutput`>
 
 这项任务读取一些文本，并输出原始浮点值，通常作为语义数据库/语义搜索的一部分。
 
@@ -677,12 +677,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`FeatureExtractionArgs`](modules#featureextractionargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `FeatureExtractionArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`FeatureExtractionOutput`](modules#featureextractionoutput)>
+`Promise`<`FeatureExtractionOutput`>
 
 #### 定义在
 
@@ -692,20 +692,20 @@
 
 ### 填充掩码
 
-▸ `fillMask`(`args`, `options?`): `Promise`<[`FillMaskOutput`](modules#fillmaskoutput)>
+▸ `fillMask`(`args`, `options?`): `Promise`<`FillMaskOutput`>
 
-尝试用缺失的单词（确切地说是标记）填补一个空洞。这是BERT模型的基本任务。
+尝试用缺失的单词（确切地说是标记）填补一个空洞。这是 BERT 模型的基本任务。
 
 #### 参数
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`FillMaskArgs`](modules#fillmaskargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `FillMaskArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`FillMaskOutput`](modules#fillmaskoutput)>
+`Promise`<`FillMaskOutput`>
 
 #### 定义在
 
@@ -715,7 +715,7 @@
 
 ### 图像分类
 
-▸ `imageClassification`(`args`, `options?`): `Promise`<[`ImageClassificationOutput`](modules#imageclassificationoutput)>
+▸ `imageClassification`(`args`, `options?`): `Promise`<`ImageClassificationOutput`>
 
 这项任务读取一些图像输入，并输出类别的可能性。推荐模型：google/vit-base-patch16-224
 
@@ -723,12 +723,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`ImageClassificationArgs`](modules#imageclassificationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `ImageClassificationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`ImageClassificationOutput`](modules#imageclassificationoutput)>
+`Promise`<`ImageClassificationOutput`>
 
 #### 定义在
 
@@ -738,7 +738,7 @@
 
 ### imageSegmentation
 
-▸ `imageSegmentation`(`args`, `options?`): `Promise`<[`ImageSegmentationOutput`](modules#imagesegmentationoutput)>
+▸ `imageSegmentation`(`args`, `options?`): `Promise`<`ImageSegmentationOutput`>
 
 这个任务读取一些图像输入并输出检测到的对象的类别和边界框的可能性。推荐模型：facebook/detr-resnet-50-panoptic
 
@@ -746,12 +746,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`ImageSegmentationArgs`](modules#imagesegmentationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `ImageSegmentationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`ImageSegmentationOutput`](modules#imagesegmentationoutput)>
+`Promise`<`ImageSegmentationOutput`>
 
 #### 定义在
 
@@ -761,7 +761,7 @@
 
 ### imageToImage
 
-▸ `imageToImage`(`args`, `options?`): `Promise`<[`ImageToImageOutput`](modules#imagetoimageoutput)>
+▸ `imageToImage`(`args`, `options?`): `Promise`<`ImageToImageOutput`>
 
 这个任务读取一些文本输入并输出图像。推荐模型：lllyasviel/sd-controlnet-depth
 
@@ -769,12 +769,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`ImageToImageArgs`](modules#imagetoimageargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `ImageToImageArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`ImageToImageOutput`](modules#imagetoimageoutput)>
+`Promise`<`ImageToImageOutput`>
 
 #### 定义在
 
@@ -784,7 +784,7 @@
 
 ### imageToText
 
-▸ `imageToText`(`args`, `options?`): `Promise`<[`ImageToTextOutput`](interfaces/ImageToTextOutput)>
+▸ `imageToText`(`args`, `options?`): `Promise`<`ImageToTextOutput`>
 
 这个任务读取一些图像输入并输出文本标题。
 
@@ -792,12 +792,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`ImageToTextArgs`](modules#imagetotextargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `ImageToTextArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`ImageToTextOutput`](interfaces/ImageToTextOutput)>
+`Promise`<`ImageToTextOutput`>
 
 #### 定义在
 
@@ -807,7 +807,7 @@
 
 ### objectDetection
 
-▸ `objectDetection`(`args`, `options?`): `Promise`<[`ObjectDetectionOutput`](modules#objectdetectionoutput)>
+▸ `objectDetection`(`args`, `options?`): `Promise`<`ObjectDetectionOutput`>
 
 这个任务读取一些图像输入并输出检测到的对象的类别和边界框的可能性。推荐模型：facebook/detr-resnet-50
 
@@ -815,12 +815,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`ObjectDetectionArgs`](modules#objectdetectionargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `ObjectDetectionArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`ObjectDetectionOutput`](modules#objectdetectionoutput)>
+`Promise`<`ObjectDetectionOutput`>
 
 #### 定义在
 
@@ -830,7 +830,7 @@
 
 ### questionAnswering
 
-▸ `questionAnswering`(`args`, `options?`): `Promise`<[`QuestionAnsweringOutput`](interfaces/QuestionAnsweringOutput)>
+▸ `questionAnswering`(`args`, `options?`): `Promise`<`QuestionAnsweringOutput`>
 
 想要一个可以回答任何问题的聪明全知机器人吗？推荐模型：deepset/roberta-base-squad2
 
@@ -838,12 +838,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`QuestionAnsweringArgs`](modules#questionansweringargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `QuestionAnsweringArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`QuestionAnsweringOutput`](interfaces/QuestionAnsweringOutput)>
+`Promise`<`QuestionAnsweringOutput`>
 
 #### 定义在
 
@@ -867,8 +867,8 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`RequestArgs`](modules#requestargs) |
-| `options?` | [`Options`](interfaces/Options) & { `task?`: `string` ; `taskHint?`: [`InferenceTask`](modules#inferencetask) } |
+| `args` | `RequestArgs` |
+| `options?` | `Options` & { `task?`: `string` ; `taskHint?`: `InferenceTask` } |
 
 #### 返回
 
@@ -882,7 +882,7 @@
 
 ### 句子相似度
 
-▸ `sentenceSimilarity`(`args`, `options?`): `Promise`<[`SentenceSimilarityOutput`](modules#sentencesimilarityoutput)>
+▸ `sentenceSimilarity`(`args`, `options?`): `Promise`<`SentenceSimilarityOutput`>
 
 通过比较它们的嵌入，计算一个文本与一系列其他句子之间的语义相似度。
 
@@ -890,12 +890,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`SentenceSimilarityArgs`](modules#sentencesimilarityargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `SentenceSimilarityArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`SentenceSimilarityOutput`](modules#sentencesimilarityoutput)>
+`Promise`<`SentenceSimilarityOutput`>
 
 #### 定义于
 
@@ -919,8 +919,8 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`RequestArgs`](modules#requestargs) |
-| `options?` | [`Options`](interfaces/Options) & { `task?`: `string` ; `taskHint?`: [`InferenceTask`](modules#inferencetask) } |
+| `args` | `RequestArgs` |
+| `options?` | `Options` & { `task?`: `string` ; `taskHint?`: `InferenceTask` } |
 
 #### 返回
 
@@ -934,7 +934,7 @@
 
 ### 摘要
 
-▸ `summarization`(`args`, `options?`): `Promise`<[`SummarizationOutput`](interfaces/SummarizationOutput)>
+▸ `summarization`(`args`, `options?`): `Promise`<`SummarizationOutput`>
 
 这个任务被广泛用于将较长的文本总结为较短的文本。请注意，一些模型有输入的最大长度。这意味着摘要不能处理完整的书籍等。在选择模型时要小心。
 
@@ -942,12 +942,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`SummarizationArgs`](modules#summarizationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `SummarizationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`SummarizationOutput`](interfaces/SummarizationOutput)>
+`Promise`<`SummarizationOutput`>
 
 #### 定义于
 
@@ -957,20 +957,20 @@
 
 ### 表格问答
 
-▸ `tableQuestionAnswering`(`args`, `options?`): `Promise`<[`TableQuestionAnsweringOutput`](interfaces/TableQuestionAnsweringOutput)>
+▸ `tableQuestionAnswering`(`args`, `options?`): `Promise`<`TableQuestionAnsweringOutput`>
 
-不懂SQL？不想深入研究大型电子表格？用简单的英语提问！推荐模型：google/tapas-base-finetuned-wtq。
+不懂 SQL？不想深入研究大型电子表格？用简单的英语提问！推荐模型：google/tapas-base-finetuned-wtq。
 
 #### 参数
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TableQuestionAnsweringArgs`](modules#tablequestionansweringargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TableQuestionAnsweringArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TableQuestionAnsweringOutput`](interfaces/TableQuestionAnsweringOutput)>
+`Promise`<`TableQuestionAnsweringOutput`>
 
 #### 定义于
 
@@ -980,7 +980,7 @@
 
 ### 表格分类
 
-▸ `tabularClassification`(`args`, `options?`): `Promise`<[`TabularClassificationOutput`](modules#tabularclassificationoutput)>
+▸ `tabularClassification`(`args`, `options?`): `Promise`<`TabularClassificationOutput`>
 
 预测表格形式中给定特征集的目标标签。通常，您会希望在训练数据上训练分类模型，并在具有相同格式的新数据上使用它。示例模型：vvmnnnkv/wine-quality
 
@@ -988,12 +988,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TabularClassificationArgs`](modules#tabularclassificationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TabularClassificationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TabularClassificationOutput`](modules#tabularclassificationoutput)>
+`Promise`<`TabularClassificationOutput`>
 
 #### 定义于
 
@@ -1003,7 +1003,7 @@
 
 ### 表格回归
 
-▸ `tabularRegression`(`args`, `options?`): `Promise`<[`TabularRegressionOutput`](modules#tabularregressionoutput)>
+▸ `tabularRegression`(`args`, `options?`): `Promise`<`TabularRegressionOutput`>
 
 对给定特征集的目标值进行预测。通常，您会想要在训练数据上训练回归模型，并将其与相同格式的新数据一起使用。示例模型：scikit-learn/Fish-Weight
 
@@ -1011,12 +1011,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TabularRegressionArgs`](modules#tabularregressionargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TabularRegressionArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TabularRegressionOutput`](modules#tabularregressionoutput)>
+`Promise`<`TabularRegressionOutput`>
 
 #### 定义在
 
@@ -1026,7 +1026,7 @@
 
 ### 文本分类
 
-▸ `textClassification`(`args`, `options?`): `Promise`<[`TextClassificationOutput`](modules#textclassificationoutput)>
+▸ `textClassification`(`args`, `options?`): `Promise`<`TextClassificationOutput`>
 
 通常用于情感分析，这将输出输入类别的可能性。推荐模型：distilbert-base-uncased-finetuned-sst-2-english
 
@@ -1034,12 +1034,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TextClassificationArgs`](modules#textclassificationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TextClassificationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TextClassificationOutput`](modules#textclassificationoutput)>
+`Promise`<`TextClassificationOutput`>
 
 #### 定义在
 
@@ -1049,7 +1049,7 @@
 
 ### 文本生成
 
-▸ `textGeneration`(`args`, `options?`): `Promise`<[`TextGenerationOutput`](interfaces/TextGenerationOutput)>
+▸ `textGeneration`(`args`, `options?`): `Promise`<`TextGenerationOutput`>
 
 用于从提示中继续文本。这是一个非常通用的任务。推荐模型：gpt2（这是一个简单的模型，但很有趣玩）。
 
@@ -1057,12 +1057,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TextGenerationArgs`](modules#textgenerationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TextGenerationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TextGenerationOutput`](interfaces/TextGenerationOutput)>
+`Promise`<`TextGenerationOutput`>
 
 #### 定义在
 
@@ -1072,7 +1072,7 @@
 
 ### 文本生成流
 
-▸ `textGenerationStream`(`args`, `options?`): `AsyncGenerator`<[`TextGenerationStreamOutput`](interfaces/TextGenerationStreamOutput)>
+▸ `textGenerationStream`(`args`, `options?`): `AsyncGenerator`<`TextGenerationStreamOutput`>
 
 用于从提示中继续文本。与`textGeneration`相同，但返回一个可以逐个读取标记的生成器
 
@@ -1080,12 +1080,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TextGenerationArgs`](modules#textgenerationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TextGenerationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`AsyncGenerator`<[`TextGenerationStreamOutput`](interfaces/TextGenerationStreamOutput)>
+`AsyncGenerator`<`TextGenerationStreamOutput`>
 
 #### 定义在
 
@@ -1095,7 +1095,7 @@
 
 ### 文本转图像
 
-▸ `textToImage`(`args`, `options?`): `Promise`<[`TextToImageOutput`](modules#texttoimageoutput)>
+▸ `textToImage`(`args`, `options?`): `Promise`<`TextToImageOutput`>
 
 这个任务读取一些文本输入并输出一幅图像。推荐模型：stabilityai/stable-diffusion-2
 
@@ -1103,12 +1103,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TextToImageArgs`](modules#texttoimageargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TextToImageArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TextToImageOutput`](modules#texttoimageoutput)>
+`Promise`<`TextToImageOutput`>
 
 #### 定义在
 
@@ -1118,7 +1118,7 @@
 
 ### 文本转语音
 
-▸ `textToSpeech`(`args`, `options?`): `Promise`<[`TextToSpeechOutput`](modules#texttospeechoutput)>
+▸ `textToSpeech`(`args`, `options?`): `Promise`<`TextToSpeechOutput`>
 
 这个任务合成一个发音给定文本的声音。推荐模型：espnet/kan-bayashi_ljspeech_vits
 
@@ -1126,12 +1126,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TextToSpeechArgs`](modules#texttospeechargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TextToSpeechArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TextToSpeechOutput`](modules#texttospeechoutput)>
+`Promise`<`TextToSpeechOutput`>
 
 #### 定义在
 
@@ -1141,7 +1141,7 @@
 
 ### 标记分类
 
-▸ `tokenClassification`(`args`, `options?`): `Promise`<[`TokenClassificationOutput`](modules#tokenclassificationoutput)>
+▸ `tokenClassification`(`args`, `options?`): `Promise`<`TokenClassificationOutput`>
 
 通常用于句子解析，无论是语法还是命名实体识别（NER），以理解文本中包含的关键字。推荐模型：dbmdz/bert-large-cased-finetuned-conll03-english
 
@@ -1149,12 +1149,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TokenClassificationArgs`](modules#tokenclassificationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TokenClassificationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TokenClassificationOutput`](modules#tokenclassificationoutput)>
+`Promise`<`TokenClassificationOutput`>
 
 #### 定义在
 
@@ -1164,7 +1164,7 @@
 
 ### 翻译
 
-▸ `翻译`(`args`, `options?`): `Promise`<[`TranslationOutput`](modules#translationoutput)>
+▸ `翻译`(`args`, `options?`): `Promise`<`TranslationOutput`>
 
 这个任务被广泛用于将文本从一种语言翻译成另一种语言。推荐模型：Helsinki-NLP/opus-mt-ru-en。
 
@@ -1172,12 +1172,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`TranslationArgs`](modules#translationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `TranslationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`TranslationOutput`](modules#translationoutput)>
+`Promise`<`TranslationOutput`>
 
 #### 定义在
 
@@ -1187,7 +1187,7 @@
 
 ### 视觉问答
 
-▸ `visualQuestionAnswering`(`args`, `options?`): `Promise`<[`VisualQuestionAnsweringOutput`](interfaces/VisualQuestionAnsweringOutput)>
+▸ `visualQuestionAnswering`(`args`, `options?`): `Promise`<`VisualQuestionAnsweringOutput`>
 
 回答图像上的问题。推荐模型：dandelin/vilt-b32-finetuned-vqa。
 
@@ -1195,12 +1195,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`VisualQuestionAnsweringArgs`](modules#visualquestionansweringargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `VisualQuestionAnsweringArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`VisualQuestionAnsweringOutput`](interfaces/VisualQuestionAnsweringOutput)>
+`Promise`<`VisualQuestionAnsweringOutput`>
 
 #### 定义在
 
@@ -1210,7 +1210,7 @@
 
 ### zeroShotClassification
 
-▸ `zeroShotClassification`(`args`, `options?`): `Promise`<[`ZeroShotClassificationOutput`](modules#zeroshotclassificationoutput)>
+▸ `zeroShotClassification`(`args`, `options?`): `Promise`<`ZeroShotClassificationOutput`>
 
 这个任务非常有用，可以尝试使用零代码进行分类，只需传递一个句子/段落和该句子的可能标签，就可以得到结果。推荐模型：facebook/bart-large-mnli。
 
@@ -1218,12 +1218,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`ZeroShotClassificationArgs`](modules#zeroshotclassificationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `ZeroShotClassificationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`ZeroShotClassificationOutput`](modules#zeroshotclassificationoutput)>
+`Promise`<`ZeroShotClassificationOutput`>
 
 #### 定义在
 
@@ -1233,7 +1233,7 @@
 
 ### zeroShotImageClassification
 
-▸ `zeroShotImageClassification`(`args`, `options?`): `Promise`<[`ZeroShotImageClassificationOutput`](modules#zeroshotimageclassificationoutput)>
+▸ `zeroShotImageClassification`(`args`, `options?`): `Promise`<`ZeroShotImageClassificationOutput`>
 
 将图像分类到指定的类别。推荐模型：openai/clip-vit-large-patch14-336
 
@@ -1241,12 +1241,12 @@
 
 | 名称 | 类型 |
 | :-- | :-- |
-| `args` | [`ZeroShotImageClassificationArgs`](modules#zeroshotimageclassificationargs) |
-| `options?` | [`Options`](interfaces/Options) |
+| `args` | `ZeroShotImageClassificationArgs` |
+| `options?` | `Options` |
 
 #### 返回
 
-`Promise`<[`ZeroShotImageClassificationOutput`](modules#zeroshotimageclassificationoutput)>
+`Promise`<`ZeroShotImageClassificationOutput`>
 
 #### 定义在
 

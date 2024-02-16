@@ -1,10 +1,10 @@
-# 使用AWS Neuron（Inf2/Trn1）进行推理管道
+# 使用 AWS Neuron（Inf2/Trn1）进行推理管道
 
-> 原文链接：[https://huggingface.co/docs/optimum-neuron/guides/pipelines](https://huggingface.co/docs/optimum-neuron/guides/pipelines)
+> 原文链接：[`huggingface.co/docs/optimum-neuron/guides/pipelines`](https://huggingface.co/docs/optimum-neuron/guides/pipelines)
 
 `pipeline()`函数使得在各种任务上使用[Model Hub](https://huggingface.co/models)中的模型进行加速推理变得简单，例如文本分类、问答和图像分类。
 
-您还可以使用Transformers中的[pipeline()](https://huggingface.co/docs/transformers/main/en/main_classes/pipelines#pipelines)函数，并提供您的NeurModel模型类。
+您还可以使用 Transformers 中的[pipeline()](https://huggingface.co/docs/transformers/main/en/main_classes/pipelines#pipelines)函数，并提供您的 NeurModel 模型类。
 
 目前支持的任务有：
 
@@ -22,9 +22,9 @@
 
 ## 最佳管道使用
 
-虽然每个任务都有一个相关的pipeline类，但使用通用的`pipeline()`函数更简单，它将所有特定任务的pipeline封装在一个对象中。`pipeline()`函数会自动加载一个默认模型和能够执行任务推理的分词器/特征提取器。
+虽然每个任务都有一个相关的 pipeline 类，但使用通用的`pipeline()`函数更简单，它将所有特定任务的 pipeline 封装在一个对象中。`pipeline()`函数会自动加载一个默认模型和能够执行任务推理的分词器/特征提取器。
 
-1.  通过指定推理任务来创建一个pipeline：
+1.  通过指定推理任务来创建一个 pipeline：
 
 ```py
 >>> from optimum.neuron.pipelines import pipeline
@@ -39,15 +39,15 @@
 [{'label': 'POSITIVE', 'score': 0.9998838901519775}]
 ```
 
-*注意：`pipeline()`函数中使用的默认模型未经过优化或量化，因此与它们的PyTorch对应物相比不会有性能提升。*
+*注意：`pipeline()`函数中使用的默认模型未经过优化或量化，因此与它们的 PyTorch 对应物相比不会有性能提升。*
 
-### 使用原始Transformers模型并转换为AWS Neuron
+### 使用原始 Transformers 模型并转换为 AWS Neuron
 
-`pipeline()`函数接受来自[Hugging Face Hub](https://huggingface.co/models)的任何支持的模型。在Model Hub上有标签，可以用来筛选您想要用于任务的模型。
+`pipeline()`函数接受来自[Hugging Face Hub](https://huggingface.co/models)的任何支持的模型。在 Model Hub 上有标签，可以用来筛选您想要用于任务的模型。
 
-为了能够使用Neuron Runtime加载模型，需要支持将模型导出到neuron以考虑的架构。
+为了能够使用 Neuron Runtime 加载模型，需要支持将模型导出到 neuron 以考虑的架构。
 
-您可以在[这里](../package_reference/configuration#supported-architectures)查看支持的架构列表。
+您可以在这里查看支持的架构列表。
 
 一旦选择了合适的模型，可以通过指定模型存储库来创建`pipeline()`：
 
@@ -87,7 +87,7 @@
 
 ### 定义输入形状
 
-NeuronModels目前需要静态的`input_shapes`来运行推理。如果在提供`export=True`参数时没有提供输入形状，则将使用默认输入形状。以下是如何指定序列长度和批量大小的输入形状的示例。
+NeuronModels 目前需要静态的`input_shapes`来运行推理。如果在提供`export=True`参数时没有提供输入形状，则将使用默认输入形状。以下是如何指定序列长度和批量大小的输入形状的示例。
 
 ```py
 >>> from optimum.neuron.pipelines import pipeline

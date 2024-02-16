@@ -1,6 +1,6 @@
 # 接口: CommitParams
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitParams](https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitParams)
+> 原文链接: [`huggingface.co/docs/huggingface.js/hub/interfaces/CommitParams`](https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitParams)
 
 ## 属性
 
@@ -30,7 +30,7 @@
 
 ### 凭证
 
-• `可选` `credentials`: [`凭证`](Credentials)
+• `可选` `credentials`: `凭证`
 
 #### 定义在
 
@@ -97,7 +97,7 @@
 
 ### 操作
 
-• `操作`: [`CommitOperation`](../modules#commitoperation)[]
+• `操作`: `CommitOperation`[]
 
 #### 定义在
 
@@ -123,7 +123,7 @@
 
 ### 仓库
 
-• `repo`: [`RepoDesignation`](../modules#repodesignation)
+• `repo`: `RepoDesignation`
 
 #### 定义在
 

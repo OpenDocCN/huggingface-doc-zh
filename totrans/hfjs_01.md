@@ -1,8 +1,8 @@
-# Hugging Face JS库
+# Hugging Face JS 库
 
-> 原文：[https://huggingface.co/docs/huggingface.js/index](https://huggingface.co/docs/huggingface.js/index)
+> 原文：[`huggingface.co/docs/huggingface.js/index`](https://huggingface.co/docs/huggingface.js/index)
 
-<picture>![huggingface javascript library logo](../Images/e8baa957d442bb16c916903538c80a40.png)</picture>
+<picture>![huggingface javascript library logo](img/e8baa957d442bb16c916903538c80a40.png)</picture>
 
 ```py
 await inference.translation({
@@ -28,13 +28,13 @@ await inference.textToImage({
 })
 ```
 
-这是一组与Hugging Face API交互的JS库，包含TS类型。
+这是一组与 Hugging Face API 交互的 JS 库，包含 TS 类型。
 
-+   [@huggingface/inference](inference/README)：使用推理端点（无服务器）调用100,000多个机器学习模型
++   @huggingface/inference：使用推理端点（无服务器）调用 100,000 多个机器学习模型
 
-+   [@huggingface/hub](hub/README)：与huggingface.co交互以创建或删除存储库并提交/下载文件
++   @huggingface/hub：与 huggingface.co 交互以创建或删除存储库并提交/下载文件
 
-+   [@huggingface/agents](agents/README)：通过自然语言界面与HF模型交互
++   @huggingface/agents：通过自然语言界面与 HF 模型交互
 
 我们使用现代功能来避免填充和依赖关系，因此这些库仅适用于现代浏览器/Node.js >= 18 / Bun / Deno。
 
@@ -42,9 +42,9 @@ await inference.textToImage({
 
 ## 安装
 
-### 从NPM
+### 从 NPM
 
-要通过NPM安装，您可以根据需要下载库：
+要通过 NPM 安装，您可以根据需要下载库：
 
 ```py
 npm install @huggingface/inference
@@ -61,9 +61,9 @@ import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
 import type { RepoId, Credentials } from "@huggingface/hub";
 ```
 
-### 从CDN或静态主机
+### 从 CDN 或静态主机
 
-您可以在不使用任何捆绑器的情况下使用纯净的JS运行我们的软件包，通过使用CDN或静态主机。使用[ES模块](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)，即`<script type="module">`，您可以在您的代码中导入库：
+您可以在不使用任何捆绑器的情况下使用纯净的 JS 运行我们的软件包，通过使用 CDN 或静态主机。使用[ES 模块](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)，即`<script type="module">`，您可以在您的代码中导入库：
 
 ```py
 <script type="module"> import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.6.4/+esm';
@@ -87,9 +87,9 @@ import { createRepo, commit, deleteRepo, listFiles } from "npm:@huggingface/hub"
 
 ## 使用示例
 
-在您的[帐户设置](https://huggingface.co/settings/tokens)中获取您的HF访问令牌。
+在您的[帐户设置](https://huggingface.co/settings/tokens)中获取您的 HF 访问令牌。
 
-### @huggingface/inference示例
+### @huggingface/inference 示例
 
 ```py
 import { HfInference } from "@huggingface/inference";
@@ -122,7 +122,7 @@ const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```
 
-### @huggingface/agents示例
+### @huggingface/agents 示例
 
 ```py
 import {HfAgent, LLMFromHub, defaultTools} from '@huggingface/agents';
@@ -146,7 +146,7 @@ const messages = await agent.run("Draw a picture of a cat wearing a top hat. The
 console.log(messages); 
 ```
 
-### @huggingface/hub示例
+### @huggingface/hub 示例
 
 ```py
 import { createRepo, uploadFile, deleteFiles } from "@huggingface/hub";
@@ -175,7 +175,7 @@ await deleteFiles({
 });
 ```
 
-当然还有更多功能，请查看每个库的README！
+当然还有更多功能，请查看每个库的 README！
 
 ## 格式化和测试
 
@@ -194,4 +194,4 @@ pnpm -r test
 pnpm -r build
 ```
 
-这将在`packages/*/dist`中生成ESM和CJS javascript文件，例如`packages/inference/dist/index.mjs`。
+这将在`packages/*/dist`中生成 ESM 和 CJS javascript 文件，例如`packages/inference/dist/index.mjs`。

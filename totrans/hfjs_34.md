@@ -1,6 +1,6 @@
 # 接口：ZeroShotImageClassificationOutputValue
 
-> 原文：[https://huggingface.co/docs/huggingface.js/inference/interfaces/ZeroShotImageClassificationOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/ZeroShotImageClassificationOutputValue)
+> 原文：[`huggingface.co/docs/huggingface.js/inference/interfaces/ZeroShotImageClassificationOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/ZeroShotImageClassificationOutputValue)
 
 ## 属性
 

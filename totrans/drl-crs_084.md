@@ -1,6 +1,6 @@
 # 结论
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unit6/conclusion](https://huggingface.co/learn/deep-rl-course/unit6/conclusion)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unit6/conclusion`](https://huggingface.co/learn/deep-rl-course/unit6/conclusion)
 
 恭喜您完成了本单元和教程。您刚刚训练了您的第一个虚拟机器人🥳。
 

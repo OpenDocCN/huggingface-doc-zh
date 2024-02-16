@@ -1,6 +1,6 @@
 # 接口：Options
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/Options](https://huggingface.co/docs/huggingface.js/inference/interfaces/Options)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/Options`](https://huggingface.co/docs/huggingface.js/inference/interfaces/Options)
 
 ## 属性
 

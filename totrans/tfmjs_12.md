@@ -1,16 +1,16 @@
-# Node.js中的服务器端推断
+# Node.js 中的服务器端推断
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/tutorials/node](https://huggingface.co/docs/transformers.js/tutorials/node)
+> 原始文本：[`huggingface.co/docs/transformers.js/tutorials/node`](https://huggingface.co/docs/transformers.js/tutorials/node)
 
-尽管Transformers.js最初设计用于在浏览器中使用，但它也能够在服务器上运行推断。在本教程中，我们将设计一个简单的Node.js API，该API使用Transformers.js进行情感分析。
+尽管 Transformers.js 最初设计用于在浏览器中使用，但它也能够在服务器上运行推断。在本教程中，我们将设计一个简单的 Node.js API，该 API 使用 Transformers.js 进行情感分析。
 
-我们还将向您展示如何在CommonJS和ECMAScript模块中使用该库，因此您可以选择最适合您项目的模块系统：
+我们还将向您展示如何在 CommonJS 和 ECMAScript 模块中使用该库，因此您可以选择最适合您项目的模块系统：
 
-+   [ECMAScript模块（ESM）](#ecmascript-modules-esm) - 用于打包JavaScript代码以供重用的官方标准格式。这是现代浏览器中的默认模块系统，使用`import`导入模块并使用`export`导出模块。幸运的是，从版本13.2.0开始，Node.js稳定支持ES模块。
++   ECMAScript 模块（ESM） - 用于打包 JavaScript 代码以供重用的官方标准格式。这是现代浏览器中的默认模块系统，使用`import`导入模块并使用`export`导出模块。幸运的是，从版本 13.2.0 开始，Node.js 稳定支持 ES 模块。
 
-+   [CommonJS](#commonjs) - Node.js中的默认模块系统。在此系统中，使用`require()`导入模块，并使用`module.exports`导出模块。
++   CommonJS - Node.js 中的默认模块系统。在此系统中，使用`require()`导入模块，并使用`module.exports`导出模块。
 
-尽管您始终可以使用[Python库](https://github.com/huggingface/transformers)进行服务器端推断，但使用Transformers.js意味着您可以将所有代码都写在JavaScript中（而不必设置和与单独的Python进程通信）。
+尽管您始终可以使用[Python 库](https://github.com/huggingface/transformers)进行服务器端推断，但使用 Transformers.js 意味着您可以将所有代码都写在 JavaScript 中（而不必设置和与单独的 Python 进程通信）。
 
 **有用的链接：**
 
@@ -20,26 +20,26 @@
 
 ## 先决条件
 
-+   [Node.js](https://nodejs.org/en/)版本18+
++   [Node.js](https://nodejs.org/en/)版本 18+
 
-+   [npm](https://www.npmjs.com/)版本9+
++   [npm](https://www.npmjs.com/)版本 9+
 
 ## 入门指南
 
-让我们首先创建一个新的Node.js项目，并通过[NPM](https://www.npmjs.com/package/@xenova/transformers)安装Transformers.js：
+让我们首先创建一个新的 Node.js 项目，并通过[NPM](https://www.npmjs.com/package/@xenova/transformers)安装 Transformers.js：
 
 ```py
 npm init -y
 npm i @xenova/transformers
 ```
 
-接下来，创建一个名为`app.js`的新文件，这将是我们应用程序的入口点。根据您是使用[ECMAScript模块](#ecmascript-modules-esm)还是[CommonJS](#commonjs)，您需要做一些不同的事情（见下文）。
+接下来，创建一个名为`app.js`的新文件，这将是我们应用程序的入口点。根据您是使用 ECMAScript 模块还是 CommonJS，您需要做一些不同的事情（见下文）。
 
 我们还将创建一个名为`MyClassificationPipeline`的辅助类来控制管道的加载。它使用[单例模式](https://en.wikipedia.org/wiki/Singleton_pattern)来在首次调用`getInstance`时懒惰地创建管道的单个实例，并在随后的所有调用中使用此管道：
 
-### ECMAScript模块（ESM）
+### ECMAScript 模块（ESM）
 
-为了指示您的项目使用ECMAScript模块，您需要将`"type": "module"`添加到您的`package.json`中：
+为了指示您的项目使用 ECMAScript 模块，您需要将`"type": "module"`添加到您的`package.json`中：
 
 ```py
 {
@@ -57,7 +57,7 @@ import querystring from 'querystring';
 import url from 'url';
 ```
 
-接下来，让我们导入Transformers.js并定义`MyClassificationPipeline`类。
+接下来，让我们导入 Transformers.js 并定义`MyClassificationPipeline`类。
 
 ```py
 import { pipeline, env } from '@xenova/transformers';
@@ -90,7 +90,7 @@ const querystring = require('querystring');
 const url = require('url');
 ```
 
-接下来，让我们导入Transformers.js并定义`MyClassificationPipeline`类。由于Transformers.js是一个ESM模块，我们将需要使用[`import()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import)函数动态导入库：
+接下来，让我们导入 Transformers.js 并定义`MyClassificationPipeline`类。由于 Transformers.js 是一个 ESM 模块，我们将需要使用[`import()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import)函数动态导入库：
 
 ```py
 class MyClassificationPipeline {
@@ -114,7 +114,7 @@ class MyClassificationPipeline {
 }
 ```
 
-## 创建一个基本的HTTP服务器
+## 创建一个基本的 HTTP 服务器
 
 接下来，让我们使用内置的[HTTP](https://nodejs.org/api/http.html#http)模块创建一个基本服务器。我们将监听发送到服务器的请求（使用`/classify`端点），提取`text`查询参数，并通过管道运行此参数。
 
@@ -167,19 +167,19 @@ MyClassificationPipeline.getInstance();
 node app.js
 ```
 
-服务器应该在[http://127.0.0.1:3000/](http://127.0.0.1:3000/)上运行，您可以在Web浏览器中访问。您应该看到以下消息：
+服务器应该在[`127.0.0.1:3000/`](http://127.0.0.1:3000/)上运行，您可以在 Web 浏览器中访问。您应该看到以下消息：
 
 ```py
 {"error":"Bad request"}
 ```
 
-这是因为我们没有使用有效的`text`查询参数来定位`/classify`端点。让我们再试一次，这次使用有效的请求。例如，您可以访问[http://127.0.0.1:3000/classify?text=I%20love%20Transformers.js](http://127.0.0.1:3000/classify?text=I%20love%20Transformers.js)，您应该会看到：
+这是因为我们没有使用有效的`text`查询参数来定位`/classify`端点。让我们再试一次，这次使用有效的请求。例如，您可以访问[`127.0.0.1:3000/classify?text=I%20love%20Transformers.js`](http://127.0.0.1:3000/classify?text=I%20love%20Transformers.js)，您应该会看到：
 
 ```py
 [{"label":"POSITIVE","score":0.9996721148490906}]
 ```
 
-太棒了！我们已成功创建了一个使用Transformers.js对文本进行分类的基本HTTP服务器。
+太棒了！我们已成功创建了一个使用 Transformers.js 对文本进行分类的基本 HTTP 服务器。
 
 ## （可选）自定义
 

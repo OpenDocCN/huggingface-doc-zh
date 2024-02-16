@@ -1,6 +1,6 @@
 # 接口：TextGenerationOutput
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationOutput](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationOutput)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationOutput`](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationOutput)
 
 ## 属性
 

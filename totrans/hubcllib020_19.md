@@ -1,14 +1,14 @@
 # 管理您的空间
 
-> 原始文本：[https://huggingface.co/docs/huggingface_hub/guides/manage-spaces](https://huggingface.co/docs/huggingface_hub/guides/manage-spaces)
+> 原始文本：[`huggingface.co/docs/huggingface_hub/guides/manage-spaces`](https://huggingface.co/docs/huggingface_hub/guides/manage-spaces)
 
 在本指南中，我们将看到如何使用`huggingface_hub`管理您的空间运行时（[秘密](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)、[硬件](https://huggingface.co/docs/hub/spaces-gpus)和[存储](https://huggingface.co/docs/hub/spaces-storage#persistent-storage)）。
 
 ## 一个简单的例子：配置秘密和硬件。
 
-以下是一个端到端的示例，用于在Hub上创建和设置一个空间。
+以下是一个端到端的示例，用于在 Hub 上创建和设置一个空间。
 
-**1\. 在Hub上创建一个空间。**
+**1\. 在 Hub 上创建一个空间。**
 
 ```py
 >>> from huggingface_hub import HfApi
@@ -21,7 +21,7 @@
 
 **1\. （bis）复制一个空间。**
 
-如果您想要从现有空间构建而不是从头开始，这可能会很有用。如果您想要控制公共空间的配置/设置，这也很有用。有关更多详细信息，请参阅[duplicate_space()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.duplicate_space)。
+如果您想要从现有空间构建而不是从头开始，这可能会很有用。如果您想要控制公共空间的配置/设置，这也很有用。有关更多详细信息，请参阅 duplicate_space()。
 
 ```py
 >>> api.duplicate_space("multimodalart/dreambooth-training")
@@ -35,11 +35,11 @@
 >>> api.upload_folder(repo_id=repo_id, repo_type="space", folder_path="src/")
 ```
 
-在这一步，您的应用程序应该已经在Hub上免费运行！但是，您可能希望进一步配置它，使用秘密和升级后的硬件。
+在这一步，您的应用程序应该已经在 Hub 上免费运行！但是，您可能希望进一步配置它，使用秘密和升级后的硬件。
 
 **3\. 配置秘密和变量**
 
-您的空间可能需要一些秘密密钥、令牌或变量才能正常工作。有关更多详细信息，请参阅[文档](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。例如，一次生成HF令牌后，将图像数据集上传到Hub。
+您的空间可能需要一些秘密密钥、令牌或变量才能正常工作。有关更多详细信息，请参阅[文档](https://huggingface.co/docs/hub/spaces-overview#managing-secrets)。例如，一次生成 HF 令牌后，将图像数据集上传到 Hub。
 
 ```py
 >>> api.add_space_secret(repo_id=repo_id, key="HF_TOKEN", value="hf_api_***")
@@ -53,7 +53,7 @@
 >>> api.delete_space_variable(repo_id=repo_id, key="MODEL_REPO_ID")
 ```
 
-在您的空间内，秘密作为环境变量可用（如果使用Streamlit，则为Streamlit Secrets Management）。无需通过API获取它们！对空间配置（秘密或硬件）的任何更改都将触发应用程序的重新启动。
+在您的空间内，秘密作为环境变量可用（如果使用 Streamlit，则为 Streamlit Secrets Management）。无需通过 API 获取它们！对空间配置（秘密或硬件）的任何更改都将触发应用程序的重新启动。
 
 **奖励：在创建或复制空间时设置秘密和变量！**
 
@@ -79,7 +79,7 @@
 
 **4\. 配置硬件**
 
-默认情况下，您的空间将免费在CPU环境上运行。您可以升级硬件以在GPU上运行。访问升级您的空间需要支付卡或社区资助。有关更多详细信息，请参阅[文档](https://huggingface.co/docs/hub/spaces-gpus)。
+默认情况下，您的空间将免费在 CPU 环境上运行。您可以升级硬件以在 GPU 上运行。访问升级您的空间需要支付卡或社区资助。有关更多详细信息，请参阅[文档](https://huggingface.co/docs/hub/spaces-gpus)。
 
 ```py
 # Use `SpaceHardware` enum
@@ -130,7 +130,7 @@
 
 **5\. 暂停和重新启动您的空间**
 
-默认情况下，如果您的空间正在升级的硬件上运行，它将永远不会停止。但是为了避免计费，当您不使用它时，您可能希望将其暂停。这可以使用[pause_space()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.pause_space)来实现。暂停的空间将在空间所有者重新启动它之前处于非活动状态，可以使用UI或通过API使用[restart_space()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.restart_space)重新启动。有关暂停模式的更多详细信息，请参考[此部分](https://huggingface.co/docs/hub/spaces-gpus#pause)
+默认情况下，如果您的空间正在升级的硬件上运行，它将永远不会停止。但是为了避免计费，当您不使用它时，您可能希望将其暂停。这可以使用 pause_space()来实现。暂停的空间将在空间所有者重新启动它之前处于非活动状态，可以使用 UI 或通过 API 使用 restart_space()重新启动。有关暂停模式的更多详细信息，请参考[此部分](https://huggingface.co/docs/hub/spaces-gpus#pause)
 
 ```py
 # Pause your Space to avoid getting billed
@@ -140,14 +140,14 @@
 >>> api.restart_space(repo_id=repo_id)
 ```
 
-另一种可能性是为您的空间设置超时。如果您的空间在超时持续时间内处于非活动状态，它将进入睡眠状态。任何访问您的空间的访客都将重新启动它。您可以使用[set_space_sleep_time()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.set_space_sleep_time)设置超时。有关睡眠模式的更多详细信息，请参考[此部分](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
+另一种可能性是为您的空间设置超时。如果您的空间在超时持续时间内处于非活动状态，它将进入睡眠状态。任何访问您的空间的访客都将重新启动它。您可以使用 set_space_sleep_time()设置超时。有关睡眠模式的更多详细信息，请参考[此部分](https://huggingface.co/docs/hub/spaces-gpus#sleep-time)。
 
 ```py
 # Put your Space to sleep after 1h of inactivity
 >>> api.set_space_sleep_time(repo_id=repo_id, sleep_time=3600)
 ```
 
-注意：如果您使用的是“cpu-basic”硬件，则无法配置自定义睡眠时间。您的空间将在48小时不活动后自动暂停。
+注意：如果您使用的是“cpu-basic”硬件，则无法配置自定义睡眠时间。您的空间将在 48 小时不活动后自动暂停。
 
 **奖励：在请求硬件时设置睡眠时间**
 
@@ -216,23 +216,23 @@
 
 空间允许进行许多不同的用例。有时，您可能希望在特定硬件上临时运行一个空间，执行某些操作，然后关闭它。在本节中，我们将探讨如何利用空间根据需要微调模型。这只是解决这个特定问题的一种方式。必须将其视为建议并根据您的用例进行调整。
 
-假设我们有一个用于微调模型的空间。这是一个Gradio应用程序，它以模型ID和数据集ID作为输入。工作流程如下：
+假设我们有一个用于微调模型的空间。这是一个 Gradio 应用程序，它以模型 ID 和数据集 ID 作为输入。工作流程如下：
 
 1.  （提示用户输入模型和数据集）
 
-1.  从Hub加载模型。
+1.  从 Hub 加载模型。
 
-1.  从Hub加载数据集。
+1.  从 Hub 加载数据集。
 
 1.  在数据集上微调模型。
 
-1.  将新模型上传到Hub。
+1.  将新模型上传到 Hub。
 
-第3步需要自定义硬件，但您不希望您的空间一直在付费GPU上运行。一个解决方案是动态请求训练硬件，然后在训练后关闭它。由于请求硬件会重新启动您的空间，因此您的应用程序必须以某种方式“记住”它正在执行的当前任务。有多种方法可以做到这一点。在本指南中，我们将看到一种使用数据集作为“任务调度器”的解决方案。
+第 3 步需要自定义硬件，但您不希望您的空间一直在付费 GPU 上运行。一个解决方案是动态请求训练硬件，然后在训练后关闭它。由于请求硬件会重新启动您的空间，因此您的应用程序必须以某种方式“记住”它正在执行的当前任务。有多种方法可以做到这一点。在本指南中，我们将看到一种使用数据集作为“任务调度器”的解决方案。
 
 ### 应用程序骨架
 
-这是您的应用程序的外观。在启动时，检查是否已安排任务，如果是，则在正确的硬件上运行它。完成后，将硬件设置回免费计划的CPU，并提示用户进行新任务。
+这是您的应用程序的外观。在启动时，检查是否已安排任务，如果是，则在正确的硬件上运行它。完成后，将硬件设置回免费计划的 CPU，并提示用户进行新任务。
 
 这样的工作流程不支持像正常演示那样的并发访问。特别是在进行训练时，界面将被禁用。最好将您的存储库设置为私有，以确保您是唯一的用户。
 
@@ -275,7 +275,7 @@ else:
 
 ### 任务调度器
 
-可以通过许多方式进行任务调度。以下是使用简单的CSV存储为数据集执行此操作的示例。
+可以通过许多方式进行任务调度。以下是使用简单的 CSV 存储为数据集执行此操作的示例。
 
 ```py
 # Dataset ID in which a `tasks.csv` file contains the tasks to perform.

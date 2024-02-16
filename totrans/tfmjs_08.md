@@ -1,10 +1,10 @@
 # 构建一个 React 应用程序
 
-> 原始文本：[https://huggingface.co/docs/transformers.js/tutorials/react](https://huggingface.co/docs/transformers.js/tutorials/react)
+> 原始文本：[`huggingface.co/docs/transformers.js/tutorials/react`](https://huggingface.co/docs/transformers.js/tutorials/react)
 
 在本教程中，我们将构建一个简单的 React 应用程序，使用 Transformers.js 执行多语言翻译！最终产品将类似于这样：
 
-![演示](../Images/04732e5c65a2c2502d231cc7491291d4.png)
+![演示](img/04732e5c65a2c2502d231cc7491291d4.png)
 
 有用的链接：
 
@@ -41,7 +41,7 @@ npm install
 npm run dev
 ```
 
-访问终端中显示的 URL（例如，[http://localhost:5173/](http://localhost:5173/)）应该显示默认的“React + Vite”欢迎页面。您可以通过在终端中按 `Ctrl` + `C` 来停止开发服务器。
+访问终端中显示的 URL（例如，[`localhost:5173/`](http://localhost:5173/)）应该显示默认的“React + Vite”欢迎页面。您可以通过在终端中按 `Ctrl` + `C` 来停止开发服务器。
 
 ## 第 2 步：安装和配置 Transformers.js
 
@@ -498,7 +498,7 @@ const onMessageReceived = (e) => {
 
 对于这个演示，我们将将我们的应用程序部署为静态 [Hugging Face Space](https://huggingface.co/docs/hub/spaces)，但您可以将其部署到任何您喜欢的地方！如果您还没有，您可以在[这里](https://huggingface.co/join)创建一个免费的 Hugging Face 账户。
 
-1.  访问 [https://huggingface.co/new-space](https://huggingface.co/new-space) 并填写表格。记得选择“Static”作为空间类型。
+1.  访问 [`huggingface.co/new-space`](https://huggingface.co/new-space) 并填写表格。记得选择“Static”作为空间类型。
 
 1.  转到“文件” → “添加文件” → “上传文件”。将 `dist` 文件夹中的 `index.html` 文件和 `public/` 文件夹拖到上传框中，然后点击“上传”。上传完成后，滚动到按钮下方，点击“提交更改到主分支”。
 

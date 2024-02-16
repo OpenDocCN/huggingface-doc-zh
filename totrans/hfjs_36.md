@@ -1,6 +1,6 @@
 # 🤗 Hugging Face Hub API
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/hub/README](https://huggingface.co/docs/huggingface.js/hub/README)
+> 原始文本：[`huggingface.co/docs/huggingface.js/hub/README`](https://huggingface.co/docs/huggingface.js/hub/README)
 
 官方实用程序用于使用 Hugging Face hub API，仍然非常实验性。
 
@@ -109,7 +109,7 @@ if (!oauthResult) {
 console.log(oauthResult);
 ```
 
-查看演示：[https://huggingface.co/spaces/huggingfacejs/client-side-oauth](https://huggingface.co/spaces/huggingfacejs/client-side-oauth)
+查看演示：[`huggingface.co/spaces/huggingfacejs/client-side-oauth`](https://huggingface.co/spaces/huggingfacejs/client-side-oauth)
 
 ## 性能考虑
 

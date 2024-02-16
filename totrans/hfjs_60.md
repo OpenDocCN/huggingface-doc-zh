@@ -1,6 +1,6 @@
 # 接口：WhoAmIOrg
 
-> 原文：[https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIOrg](https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIOrg)
+> 原文：[`huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIOrg`](https://huggingface.co/docs/huggingface.js/hub/interfaces/WhoAmIOrg)
 
 ## 属性
 

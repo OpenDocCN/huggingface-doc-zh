@@ -1,6 +1,6 @@
 # 离线与在线强化学习
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unitbonus3/offline-online](https://huggingface.co/learn/deep-rl-course/unitbonus3/offline-online)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unitbonus3/offline-online`](https://huggingface.co/learn/deep-rl-course/unitbonus3/offline-online)
 
 深度强化学习（RL）是一个**构建决策代理的框架**。这些代理通过**试错交互并接收奖励作为唯一反馈**来学习最佳行为（策略）。
 
@@ -8,7 +8,7 @@
 
 深度强化学习代理**通过经验批次学习**。问题是，它们如何收集经验？：
 
-![单元奖励3缩略图](../Images/88ecc42f5b64e1f4b4d04c4ba4639ae7.png)
+![单元奖励 3 缩略图](img/88ecc42f5b64e1f4b4d04c4ba4639ae7.png)
 
 强化学习在在线和离线环境中的比较，图表取自[这篇文章](https://offline-rl.github.io/)
 
@@ -32,7 +32,7 @@
 
 有关更多信息，我们建议您查看以下资源：
 
-+   [离线强化学习，Sergei Levine的演讲](https://www.youtube.com/watch?v=qgZPZREor5I)
++   [离线强化学习，Sergei Levine 的演讲](https://www.youtube.com/watch?v=qgZPZREor5I)
 
 +   [离线强化学习：教程，评论和对开放问题的展望](https://arxiv.org/abs/2005.01643)
 

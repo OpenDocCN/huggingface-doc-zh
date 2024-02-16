@@ -1,6 +1,6 @@
 # 模型
 
-> 原始文本：[https://huggingface.co/docs/optimum-neuron/package_reference/modeling](https://huggingface.co/docs/optimum-neuron/package_reference/modeling)
+> 原始文本：[`huggingface.co/docs/optimum-neuron/package_reference/modeling`](https://huggingface.co/docs/optimum-neuron/package_reference/modeling)
 
 ## 通用模型类
 
@@ -108,9 +108,9 @@
 
 ## 自然语言处理
 
-以下Neuron模型类适用于自然语言处理任务。
+以下 Neuron 模型类适用于自然语言处理任务。
 
-### 用于特征提取的NeuronModelForFeatureExtraction
+### 用于特征提取的 NeuronModelForFeatureExtraction
 
 ### `class optimum.neuron.NeuronModelForFeatureExtraction`
 
@@ -124,13 +124,13 @@
 
 +   `config`（`transformers.PretrainedConfig`）— [PretrainedConfig](https://huggingface.co/docs/transformers/main_classes/configuration#transformers.PretrainedConfig)是具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看`optimum.neuron.modeling.NeuronBaseModel.from_pretrained`方法以加载模型权重。
 
-+   `model`（`torch.jit._script.ScriptModule`）— [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)是由neuron(x)编译器编译的嵌入NEFF（Neuron Executable File Format）的TorchScript模块。
++   `model`（`torch.jit._script.ScriptModule`）— [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)是由 neuron(x)编译器编译的嵌入 NEFF（Neuron Executable File Format）的 TorchScript 模块。
 
-用于特征提取任务的带有BaseModelOutput的Neuron模型。
+用于特征提取任务的带有 BaseModelOutput 的 Neuron 模型。
 
 此模型继承自`~neuron.modeling.NeuronBaseModel`。查看超类文档以了解库为所有模型实现的通用方法（如下载或保存）
 
-Neuron设备上的特征提取模型。
+Neuron 设备上的特征提取模型。
 
 #### `forward`
 
@@ -142,7 +142,7 @@ Neuron设备上的特征提取模型。
 
 参数
 
-+   `input_ids`（形状为`(batch_size, sequence_length)`的`torch.Tensor`）— 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
++   `input_ids`（形状为`(batch_size, sequence_length)`的`torch.Tensor`）— 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入 ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
 
 +   `attention_mask`（形状为`(batch_size, sequence_length)`的`Union[torch.Tensor, None]`，默认为`None`）— 避免在填充标记索引上执行注意力的掩码。掩码值在`[0, 1]`中选择：
 
@@ -152,15 +152,15 @@ Neuron设备上的特征提取模型。
 
 +   `token_type_ids`（形状为`(batch_size, sequence_length)`的`Union[torch.Tensor, None]`，默认为`None`）— 分段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：
 
-    +   1 用于“句子A”的标记，
+    +   1 用于“句子 A”的标记，
 
-    +   0 用于“句子B”的标记。[什么是标记类型ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
+    +   0 用于“句子 B”的标记。[什么是标记类型 ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
 
-[NeuronModelForFeatureExtraction](/docs/optimum.neuron/main/en/package_reference/modeling#optimum.neuron.NeuronModelForFeatureExtraction)的前向方法覆盖了`__call__`特殊方法。
+NeuronModelForFeatureExtraction 的前向方法覆盖了`__call__`特殊方法。
 
 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此处调用，因为前者负责运行预处理和后处理步骤，而后者会默默地忽略它们。
 
-特征提取示例：*(以下模型使用neuronx编译器编译，只能在INF2上运行。如果您使用INF1，请将“neuronx”替换为“neuron”)*
+特征提取示例：*(以下模型使用 neuronx 编译器编译，只能在 INF2 上运行。如果您使用 INF1，请将“neuronx”替换为“neuron”)*
 
 ```py
 >>> from transformers import AutoTokenizer
@@ -223,7 +223,7 @@ Neuron 设备上的句子转换模型。
 
     +   对于`句子 B`的标记为 0。[什么是标记类型 ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
 
-[NeuronModelForSentenceTransformers](/docs/optimum.neuron/main/en/package_reference/modeling#optimum.neuron.NeuronModelForSentenceTransformers) 的前向方法覆盖了 `__call__` 特殊方法。
+NeuronModelForSentenceTransformers 的前向方法覆盖了 `__call__` 特殊方法。
 
 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用 `Module` 实例，而不是在此处调用，因为前者会负责运行前后处理步骤，而后者会默默地忽略它们。
 
@@ -275,25 +275,25 @@ Neuron 设备上的句子转换模型。
 
 参数
 
-+   `input_ids` (`torch.Tensor`，形状为`(batch_size, sequence_length)`) — 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。查看[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)以获取详细信息。[什么是输入ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
++   `input_ids` (`torch.Tensor`，形状为`(batch_size, sequence_length)`) — 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。查看[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)以获取详细信息。[什么是输入 ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
 
 +   `attention_mask` (`Union[torch.Tensor, None]`，形状为`(batch_size, sequence_length)`，默认为`None`) — 用于避免在填充标记索引上执行注意力的掩码。选择的掩码值在`[0, 1]`中：
 
-    +   对于被“未掩码”的标记为1，
+    +   对于被“未掩码”的标记为 1，
 
-    +   对于被“掩码”的标记为0。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
+    +   对于被“掩码”的标记为 0。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
 
 +   `token_type_ids` (`Union[torch.Tensor, None]`，形状为`(batch_size, sequence_length)`，默认为`None`) — 段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：
 
-    +   对于被“句子A”的标记为1，
+    +   对于被“句子 A”的标记为 1，
 
-    +   对于被“句子B”的标记为0。[什么是标记类型ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
+    +   对于被“句子 B”的标记为 0。[什么是标记类型 ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
 
-[NeuronModelForMaskedLM](/docs/optimum.neuron/main/en/package_reference/modeling#optimum.neuron.NeuronModelForMaskedLM)的前向方法，覆盖了`__call__`特殊方法。
+NeuronModelForMaskedLM 的前向方法，覆盖了`__call__`特殊方法。
 
 尽管前向传递的方法需要在这个函数内定义，但应该在此之后调用`Module`实例，而不是这个，因为前者负责运行前处理和后处理步骤，而后者则默默地忽略它们。
 
-填充掩码的示例：*(以下模型使用neuronx编译器编译，并且只能在INF2上运行。如果您使用INF1，请将“neuronx”替换为“neuron”)*
+填充掩码的示例：*(以下模型使用 neuronx 编译器编译，并且只能在 INF2 上运行。如果您使用 INF1，请将“neuronx”替换为“neuron”)*
 
 ```py
 >>> from transformers import AutoTokenizer
@@ -325,9 +325,9 @@ Neuron 设备上的句子转换模型。
 
 +   `config` (`transformers.PretrainedConfig`) — [PretrainedConfig](https://huggingface.co/docs/transformers/main_classes/configuration#transformers.PretrainedConfig) 是具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型相关的权重，只加载配置。查看`optimum.neuron.modeling.NeuronBaseModel.from_pretrained`方法以加载模型权重。
 
-+   `model` (`torch.jit._script.ScriptModule`) — [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html) 是带有由neuron(x)编译器编译的嵌入式NEFF（Neuron Executable File Format）的TorchScript模块。
++   `model` (`torch.jit._script.ScriptModule`) — [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html) 是带有由 neuron(x)编译器编译的嵌入式 NEFF（Neuron Executable File Format）的 TorchScript 模块。
 
-在顶部带有序列分类/回归头部的神经元模型（在汇总输出的顶部有一个线性层），例如用于GLUE任务。
+在顶部带有序列分类/回归头部的神经元模型（在汇总输出的顶部有一个线性层），例如用于 GLUE 任务。
 
 此模型继承自`~neuron.modeling.NeuronBaseModel`。查看超类文档以了解库为所有模型实现的通用方法（如下载或保存）
 
@@ -343,25 +343,25 @@ Neuron 设备上的句子转换模型。
 
 参数
 
-+   `input_ids`（形状为`(batch_size, sequence_length)`的`torch.Tensor`）- 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
++   `input_ids`（形状为`(batch_size, sequence_length)`的`torch.Tensor`）- 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入 ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
 
 +   `attention_mask`（形状为`(batch_size, sequence_length)`的`Union[torch.Tensor, None]`，默认为`None`）- 避免在填充标记索引上执行注意力的掩码。掩码值选在`[0, 1]`之间：
 
-    +   对于未被`masked`的标记为1，
+    +   对于未被`masked`的标记为 1，
 
-    +   对于被`masked`的标记为0。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
+    +   对于被`masked`的标记为 0。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
 
 +   `token_type_ids`（形状为`(batch_size, sequence_length)`的`Union[torch.Tensor, None]`，默认为`None`）- 段标记索引，指示输入的第一部分和第二部分。索引选在`[0, 1]`之间：
 
-    +   对于被`sentence A`的标记为1。
+    +   对于被`sentence A`的标记为 1。
 
-    +   对于被`sentence B`的标记为0。[什么是标记类型ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
+    +   对于被`sentence B`的标记为 0。[什么是标记类型 ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
 
-[NeuronModelForSequenceClassification](/docs/optimum.neuron/main/en/package_reference/modeling#optimum.neuron.NeuronModelForSequenceClassification)的前向方法，覆盖了`__call__`特殊方法。
+NeuronModelForSequenceClassification 的前向方法，覆盖了`__call__`特殊方法。
 
 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此处调用，因为前者会负责运行前后处理步骤，而后者会默默地忽略它们。
 
-单标签分类示例：*(以下模型使用neuronx编译器编译，并且只能在INF2上运行。)*
+单标签分类示例：*(以下模型使用 neuronx 编译器编译，并且只能在 INF2 上运行。)*
 
 ```py
 >>> from transformers import AutoTokenizer
@@ -392,13 +392,13 @@ Neuron 设备上的句子转换模型。
 
 +   `config`（`transformers.PretrainedConfig`）- [PretrainedConfig](https://huggingface.co/docs/transformers/main_classes/configuration#transformers.PretrainedConfig)是具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看`optimum.neuron.modeling.NeuronBaseModel.from_pretrained`方法以加载模型权重。
 
-+   `model`（`torch.jit._script.ScriptModule`）- [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)是由neuron(x)编译器编译的嵌入NEFF（Neuron Executable File Format）的TorchScript模块。
++   `model`（`torch.jit._script.ScriptModule`）- [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)是由 neuron(x)编译器编译的嵌入 NEFF（Neuron Executable File Format）的 TorchScript 模块。
 
-具有用于提取式问答任务（如SQuAD）的QuestionAnsweringModelOutput的Neuron模型。
+具有用于提取式问答任务（如 SQuAD）的 QuestionAnsweringModelOutput 的 Neuron 模型。
 
 此模型继承自`~neuron.modeling.NeuronBaseModel`。查看超类文档以了解库为所有模型实现的通用方法（如下载或保存）
 
-Neuron设备上的问答模型。
+Neuron 设备上的问答模型。
 
 #### `forward`
 
@@ -410,25 +410,25 @@ Neuron设备上的问答模型。
 
 参数
 
-+   `input_ids`（形状为`(batch_size, sequence_length)`的`torch.Tensor`）- 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
++   `input_ids`（形状为`(batch_size, sequence_length)`的`torch.Tensor`）- 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入 ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
 
 +   `attention_mask`（`Union[torch.Tensor, None]`，形状为`(batch_size, sequence_length)`，默认为`None`）— 用于避免在填充标记索引上执行注意力的掩码。选择的掩码值在`[0, 1]`范围内：
 
-    +   对于未被`masked`的标记为1，
+    +   对于未被`masked`的标记为 1，
 
-    +   对于被`masked`的标记为0。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
+    +   对于被`masked`的标记为 0。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
 
 +   `token_type_ids`（`Union[torch.Tensor, None]`，形状为`(batch_size, sequence_length)`，默认为`None`）— 段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`范围内选择：
 
-    +   对于被`sentence A`的标记为1，
+    +   对于被`sentence A`的标记为 1，
 
-    +   对于被`sentence B`的标记为0。[什么是标记类型ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
+    +   对于被`sentence B`的标记为 0。[什么是标记类型 ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
 
-[NeuronModelForQuestionAnswering](/docs/optimum.neuron/main/en/package_reference/modeling#optimum.neuron.NeuronModelForQuestionAnswering)的前向方法覆盖了`__call__`特殊方法。
+NeuronModelForQuestionAnswering 的前向方法覆盖了`__call__`特殊方法。
 
 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此处调用，因为前者会负责运行前处理和后处理步骤，而后者会默默地忽略它们。
 
-问答示例：*(以下模型使用neuronx编译器编译，只能在INF2上运行。)*
+问答示例：*(以下模型使用 neuronx 编译器编译，只能在 INF2 上运行。)*
 
 ```py
 >>> import torch
@@ -462,7 +462,7 @@ Neuron设备上的问答模型。
 
 +   `config`（`transformers.PretrainedConfig`）— [PretrainedConfig](https://huggingface.co/docs/transformers/main_classes/configuration#transformers.PretrainedConfig)是具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看`optimum.neuron.modeling.NeuronBaseModel.from_pretrained`方法以加载模型权重。
 
-+   `model`（`torch.jit._script.ScriptModule`）— [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)是由neuron(x)编译器编译的带有嵌入NEFF（Neuron Executable File Format）的TorchScript模块。
++   `model`（`torch.jit._script.ScriptModule`）— [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)是由 neuron(x)编译器编译的带有嵌入 NEFF（Neuron Executable File Format）的 TorchScript 模块。
 
 神经元模型，顶部带有一个标记分类头（隐藏状态输出顶部的线性层），例如用于命名实体识别（NER）任务。
 
@@ -480,25 +480,25 @@ Neuron设备上的问答模型。
 
 参数
 
-+   `input_ids`（形状为`(batch_size, sequence_length)`的`torch.Tensor`）— 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
++   `input_ids`（形状为`(batch_size, sequence_length)`的`torch.Tensor`）— 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入 ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
 
 +   `attention_mask`（`Union[torch.Tensor, None]`，形状为`(batch_size, sequence_length)`，默认为`None`）— 用于避免在填充标记索引上执行注意力的掩码。选择的掩码值在`[0, 1]`范围内：
 
-    +   对于未被`masked`的标记为1，
+    +   对于未被`masked`的标记为 1，
 
-    +   对于被`masked`的标记为0。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
+    +   对于被`masked`的标记为 0。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
 
 +   `token_type_ids`（`Union[torch.Tensor, None]`，形状为`(batch_size, sequence_length)`，默认为`None`）— 段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`范围内选择：
 
-    +   1表示“句子A”,
+    +   1 表示“句子 A”,
 
-    +   0表示“句子B”的标记。[什么是标记类型ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
+    +   0 表示“句子 B”的标记。[什么是标记类型 ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
 
-[NeuronModelForTokenClassification](/docs/optimum.neuron/main/en/package_reference/modeling#optimum.neuron.NeuronModelForTokenClassification)的前向方法，覆盖了`__call__`特殊方法。
+NeuronModelForTokenClassification 的前向方法，覆盖了`__call__`特殊方法。
 
 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此处调用，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
 
-标记分类示例：*(以下模型使用neuronx编译器编译，只能在INF2上运行。)*
+标记分类示例：*(以下模型使用 neuronx 编译器编译，只能在 INF2 上运行。)*
 
 ```py
 >>> from transformers import AutoTokenizer
@@ -529,9 +529,9 @@ Neuron设备上的问答模型。
 
 +   `config`（`transformers.PretrainedConfig`）- [PretrainedConfig](https://huggingface.co/docs/transformers/main_classes/configuration#transformers.PretrainedConfig)是具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看`optimum.neuron.modeling.NeuronBaseModel.from_pretrained`方法以加载模型权重。
 
-+   `model`（`torch.jit._script.ScriptModule`）- [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)是由neuron(x)编译器编译的嵌入NEFF（Neuron Executable File Format）的TorchScript模块。
++   `model`（`torch.jit._script.ScriptModule`）- [torch.jit._script.ScriptModule](https://pytorch.org/docs/stable/generated/torch.jit.ScriptModule.html)是由 neuron(x)编译器编译的嵌入 NEFF（Neuron Executable File Format）的 TorchScript 模块。
 
-带有多选分类头部的神经元模型（池化输出顶部的线性层和softmax），例如用于RocStories/SWAG任务。
+带有多选分类头部的神经元模型（池化输出顶部的线性层和 softmax），例如用于 RocStories/SWAG 任务。
 
 此模型继承自`~neuron.modeling.NeuronBaseModel`。查看超类文档以了解库为所有模型实现的通用方法（如下载或保存）
 
@@ -547,25 +547,25 @@ Neuron设备上的问答模型。
 
 参数
 
-+   `input_ids`（形状为`(batch_size, num_choices, sequence_length)`的`torch.Tensor`）- 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
++   `input_ids`（形状为`(batch_size, num_choices, sequence_length)`的`torch.Tensor`）- 词汇表中输入序列标记的索引。可以使用[`AutoTokenizer`](https://huggingface.co/docs/transformers/autoclass_tutorial#autotokenizer)获取索引。有关详细信息，请参阅[`PreTrainedTokenizer.encode`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.encode)和[`PreTrainedTokenizer.__call__`](https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入 ID？](https://huggingface.co/docs/transformers/glossary#input-ids)
 
 +   `attention_mask`（形状为`(batch_size, num_choices, sequence_length)`的`Union[torch.Tensor, None]`，默认为`None`）- 用于避免在填充标记索引上执行注意力的掩码。掩码值在`[0, 1]`中选择：
 
-    +   1表示“未被掩盖”的标记，
+    +   1 表示“未被掩盖”的标记，
 
-    +   0表示“被掩盖”的标记。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
+    +   0 表示“被掩盖”的标记。[什么是注意力掩码？](https://huggingface.co/docs/transformers/glossary#attention-mask)
 
 +   `token_type_ids`（形状为`(batch_size, num_choices, sequence_length)`的`Union[torch.Tensor, None]`，默认为`None`）- 段标记索引，指示输入的第一部分和第二部分。索引在`[0, 1]`中选择：
 
-    +   1表示“句子A”,
+    +   1 表示“句子 A”,
 
-    +   0表示“句子B”的标记。[什么是标记类型ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
+    +   0 表示“句子 B”的标记。[什么是标记类型 ID？](https://huggingface.co/docs/transformers/glossary#token-type-ids)
 
-[NeuronModelForMultipleChoice](/docs/optimum.neuron/main/en/package_reference/modeling#optimum.neuron.NeuronModelForMultipleChoice)的前向方法，覆盖了`__call__`特殊方法。
+NeuronModelForMultipleChoice 的前向方法，覆盖了`__call__`特殊方法。
 
 虽然前向传递的配方需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此之后调用，因为前者负责运行前处理和后处理步骤，而后者会默默地忽略它们。
 
-多项选择示例：*(以下模型使用神经元编译器编译，只能在INF2上运行。)*
+多项选择示例：*(以下模型使用神经元编译器编译，只能在 INF2 上运行。)*
 
 ```py
 >>> from transformers import AutoTokenizer
@@ -626,7 +626,7 @@ Neuron设备上的问答模型。
 ( )
 ```
 
-返回True以验证在`GenerationMixin.generate()`中进行的检查。
+返回 True 以验证在`GenerationMixin.generate()`中进行的检查。
 
 #### `forward`
 
@@ -644,7 +644,7 @@ Neuron设备上的问答模型。
 
 +   `start_ids` (`torch.LongTensor`) — 要处理的第一个标记的索引，从注意力掩码中推断出。
 
-[NeuronModelForCausalLM](/docs/optimum.neuron/main/en/package_reference/modeling#optimum.neuron.NeuronModelForCausalLM) 的前向方法重写了`__call__`特殊方法。
+NeuronModelForCausalLM 的前向方法重写了`__call__`特殊方法。
 
 虽然前向传递的配方需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此之后调用，因为前者负责运行前处理和后处理步骤，而后者会默默地忽略它们。
 
@@ -688,13 +688,13 @@ Neuron设备上的问答模型。
 
 一个`torch.FloatTensor`。
 
-一个简化的generate()方法，覆盖了transformers.GenerationMixin.generate()方法。
+一个简化的 generate()方法，覆盖了 transformers.GenerationMixin.generate()方法。
 
-该方法使用与transformers库`generate()`方法相同的logits处理器/变形器和停止标准，但将生成限制为贪婪搜索和抽样。
+该方法使用与 transformers 库`generate()`方法相同的 logits 处理器/变形器和停止标准，但将生成限制为贪婪搜索和抽样。
 
-它不支持transformers `generate()` 的高级选项。
+它不支持 transformers `generate()` 的高级选项。
 
-有关生成配置的详细信息，请参阅[https://huggingface.co/docs/transformers/en/main_classes/text_generation#transformers.GenerationMixin.generate](https://huggingface.co/docs/transformers/en/main_classes/text_generation#transformers.GenerationMixin.generate)。
+有关生成配置的详细信息，请参阅[`huggingface.co/docs/transformers/en/main_classes/text_generation#transformers.GenerationMixin.generate`](https://huggingface.co/docs/transformers/en/main_classes/text_generation#transformers.GenerationMixin.generate)。
 
 #### `generate_tokens`
 
@@ -708,11 +708,11 @@ Neuron设备上的问答模型。
 
 +   `input_ids` (`torch.LongTensor`，形状为`(batch_size, sequence_length)`) — 用作生成提示的序列。
 
-+   `selector` (`TokenSelector`) — 基于transformers处理器和停止标准实现生成逻辑的对象。
++   `selector` (`TokenSelector`) — 基于 transformers 处理器和停止标准实现生成逻辑的对象。
 
 +   `batch_size` (`int`) — 实际输入批处理大小。用于避免为填充输入生成标记。
 
-+   `attention_mask` (`torch.Tensor`，形状为`(batch_size, sequence_length)`，*可选*) — 用于避免在填充标记索引上执行注意力的掩码。model_kwargs — 额外的模型特定kwargs将被转发到模型的`forward`函数。
++   `attention_mask` (`torch.Tensor`，形状为`(batch_size, sequence_length)`，*可选*) — 用于避免在填充标记索引上执行注意力的掩码。model_kwargs — 额外的模型特定 kwargs 将被转发到模型的`forward`函数。
 
 返回
 
@@ -744,21 +744,21 @@ Neuron设备上的问答模型。
 
 参数
 
-+   `data_parallel_mode` (`Optional[str]`) — 决定将哪些组件加载到Neuron设备的两个NeuronCores中的模式。可以是“none”（无数据并行），“unet”（仅将unet加载到每个设备的两个核心中），“all”（将整个管道加载到两个核心中）。
++   `data_parallel_mode` (`Optional[str]`) — 决定将哪些组件加载到 Neuron 设备的两个 NeuronCores 中的模式。可以是“none”（无数据并行），“unet”（仅将 unet 加载到每个设备的两个核心中），“all”（将整个管道加载到两个核心中）。
 
 +   `text_encoder_path` (`Union[str, Path]`) — 编译后的文本编码器路径。
 
-+   `unet_path` (`Union[str, Path]`) — 编译后的U-NET路径。
++   `unet_path` (`Union[str, Path]`) — 编译后的 U-NET 路径。
 
-+   `vae_decoder_path` (`Optional[Union[str, Path]]`，默认为`None`) — 编译后的VAE解码器路径。
++   `vae_decoder_path` (`Optional[Union[str, Path]]`，默认为`None`) — 编译后的 VAE 解码器路径。
 
-+   `vae_encoder_path` (`Optional[Union[str, Path]]`，默认为`None`) — 编译后的VAE编码器路径。这是可选的，仅用于接受图像作为输入的任务。
++   `vae_encoder_path` (`Optional[Union[str, Path]]`，默认为`None`) — 编译后的 VAE 编码器路径。这是可选的，仅用于接受图像作为输入的任务。
 
-+   `text_encoder_2_path` (`Optional[Union[str, Path]]`，默认为`None`) — 编译后的第二个冻结文本编码器的路径。仅适用于SDXL。
++   `text_encoder_2_path` (`Optional[Union[str, Path]]`，默认为`None`) — 编译后的第二个冻结文本编码器的路径。仅适用于 SDXL。
 
 +   `dynamic_batch_size` (`bool`，默认为`False`) — 是否为神经元编译模型启用动态批处理大小。如果为`True`，输入批处理大小可以是编译期间批处理大小的倍数。
 
-加载由neuron(x)-cc编译器编译的稳定扩散TorchScript模块。首先加载到CPU，然后移动到一个或多个[NeuronCore](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/neuroncores-arch.html)。
+加载由 neuron(x)-cc 编译器编译的稳定扩散 TorchScript 模块。首先加载到 CPU，然后移动到一个或多个[NeuronCore](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/neuroncores-arch.html)。
 
 ### NeuronStableDiffusionPipeline
 
@@ -859,9 +859,9 @@ Neuron设备上的问答模型。
 
 +   `prompt` (`Optional[Union[str, List[str]]]`, 默认为 `None`) — 用于指导图像生成的提示或提示。如果未定义，则需要传递`prompt_embeds`。
 
-+   `image` (`Optional["PipelineImageInput"]`, 默认为 `None`) — 代表要用作起始点的图像批处理的`Image`、numpy数组或张量。对于numpy数组和pytorch张量，期望值范围在`[0, 1]`之间。如果是张量或张量列表，期望形状应为`(B, C, H, W)`或`(C, H, W)`。如果是numpy数组或数组列表，期望形状应为`(B, H, W, C)`或`(H, W, C)`。它还可以接受图像潜变量作为`image`，但如果直接传递潜变量，则不会再次编码。
++   `image` (`Optional["PipelineImageInput"]`, 默认为 `None`) — 代表要用作起始点的图像批处理的`Image`、numpy 数组或张量。对于 numpy 数组和 pytorch 张量，期望值范围在`[0, 1]`之间。如果是张量或张量列表，期望形状应为`(B, C, H, W)`或`(C, H, W)`。如果是 numpy 数组或数组列表，期望形状应为`(B, H, W, C)`或`(H, W, C)`。它还可以接受图像潜变量作为`image`，但如果直接传递潜变量，则不会再次编码。
 
-+   `strength` (`float`, 默认为 0.8) — 表示转换参考`image`的程度。必须在0和1之间。`image`用作起始点，随着`strength`的增加，添加的噪音越多。降噪步骤的数量取决于最初添加的噪音量。当`strength`为1时，添加的噪音最大，降噪过程将运行指定的`num_inference_steps`次迭代。值为1基本上忽略`image`。
++   `strength` (`float`, 默认为 0.8) — 表示转换参考`image`的程度。必须在 0 和 1 之间。`image`用作起始点，随着`strength`的增加，添加的噪音越多。降噪步骤的数量取决于最初添加的噪音量。当`strength`为 1 时，添加的噪音最大，降噪过程将运行指定的`num_inference_steps`次迭代。值为 1 基本上忽略`image`。
 
 +   `num_inference_steps` (`int`, 默认为 50) — 降噪步骤的数量。更多的降噪步骤通常会导致更高质量的图像，但会降低推理速度。此参数由`strength`调节。
 
@@ -885,9 +885,9 @@ Neuron设备上的问答模型。
 
 +   `callback` (`Optional[Callable]`, 默认为`None`) — 在推理过程中每隔`callback_steps`步调用的函数。该函数将使用以下参数调用：`callback(step: int, timestep: int, latents: torch.FloatTensor)`。
 
-+   `callback_steps` (`int`, 默认为1) — 调用`callback`函数的频率。如果未指定，将在每一步调用回调。
++   `callback_steps` (`int`, 默认为 1) — 调用`callback`函数的频率。如果未指定，将在每一步调用回调。
 
-+   `cross_attention_kwargs` (`dict`, 默认为`None`) — 如果指定，将传递给`AttentionProcessor`的kwargs字典，如[`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py)中定义的。
++   `cross_attention_kwargs` (`dict`, 默认为`None`) — 如果指定，将传递给`AttentionProcessor`的 kwargs 字典，如[`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py)中定义的。
 
 返回
 
@@ -939,15 +939,15 @@ Neuron设备上的问答模型。
 
 +   `prompt` (`Optional[Union[str, List[str]]]`, 默认为`None`) — 用于指导图像生成的提示或提示。如果未定义，则需要传递`prompt_embeds`。
 
-+   `image` (`Optional["PipelineImageInput"]`, 默认为`None`) — 代表要修复的图像批次的图像、numpy数组或张量（使用`mask_image`遮罩和根据`prompt`重新绘制图像的部分）。对于numpy数组和pytorch张量，期望值范围在`[0, 1]`之间。如果是张量或张量列表，期望形状应为`(B, C, H, W)`或`(C, H, W)`。如果是numpy数组或数组列表，期望形状应为`(B, H, W, C)`或`(H, W, C)`。它还可以接受图像潜变量作为`image`，但如果直接传递潜变量，则不会再次编码。
++   `image` (`Optional["PipelineImageInput"]`, 默认为`None`) — 代表要修复的图像批次的图像、numpy 数组或张量（使用`mask_image`遮罩和根据`prompt`重新绘制图像的部分）。对于 numpy 数组和 pytorch 张量，期望值范围在`[0, 1]`之间。如果是张量或张量列表，期望形状应为`(B, C, H, W)`或`(C, H, W)`。如果是 numpy 数组或数组列表，期望形状应为`(B, H, W, C)`或`(H, W, C)`。它还可以接受图像潜变量作为`image`，但如果直接传递潜变量，则不会再次编码。
 
-+   `mask_image` (`Optional["PipelineImageInput"]`, 默认为`None`) — 代表要遮罩`image`的图像、numpy数组或张量。遮罩中的白色像素被重新绘制，而黑色像素被保留。如果`mask_image`是PIL图像，则在使用之前将其转换为单通道（亮度）。如果是numpy数组或pytorch张量，则应包含一个颜色通道（L）而不是3个，因此pytorch张量的预期形状为`(B, 1, H, W)`、`(B, H, W)`、`(1, H, W)`、`(H, W)`。对于numpy数组，预期形状为`(B, H, W, 1)`、`(B, H, W)`、`(H, W, 1)`或`(H, W)`。
++   `mask_image` (`Optional["PipelineImageInput"]`, 默认为`None`) — 代表要遮罩`image`的图像、numpy 数组或张量。遮罩中的白色像素被重新绘制，而黑色像素被保留。如果`mask_image`是 PIL 图像，则在使用之前将其转换为单通道（亮度）。如果是 numpy 数组或 pytorch 张量，则应包含一个颜色通道（L）而不是 3 个，因此 pytorch 张量的预期形状为`(B, 1, H, W)`、`(B, H, W)`、`(1, H, W)`、`(H, W)`。对于 numpy 数组，预期形状为`(B, H, W, 1)`、`(B, H, W)`、`(H, W, 1)`或`(H, W)`。
 
-+   `strength` (`float`, 默认为1.0) — 表示转换参考`image`的程度。必须在0和1之间。`image`被用作起点，`strength`越高，添加的噪音就越多。降噪步骤的数量取决于最初添加的噪音量。当`strength`为1时，添加的噪音最大，降噪过程将运行指定的`num_inference_steps`的全部迭代次数。值为1实际上忽略了`image`。
++   `strength` (`float`, 默认为 1.0) — 表示转换参考`image`的程度。必须在 0 和 1 之间。`image`被用作起点，`strength`越高，添加的噪音就越多。降噪步骤的数量取决于最初添加的噪音量。当`strength`为 1 时，添加的噪音最大，降噪过程将运行指定的`num_inference_steps`的全部迭代次数。值为 1 实际上忽略了`image`。
 
-+   `num_inference_steps` (`int`, 默认为50) — 降噪步骤的数量。更多的降噪步骤通常会导致图像质量更高，但推理速度较慢。此参数由`strength`调节。
++   `num_inference_steps` (`int`, 默认为 50) — 降噪步骤的数量。更多的降噪步骤通常会导致图像质量更高，但推理速度较慢。此参数由`strength`调节。
 
-+   `guidance_scale` (`float`, 默认为7.5) — 更高的引导比例值鼓励模型生成与文本`prompt`密切相关的图像，但会降低图像质量。当`guidance_scale > 1`时启用引导比例。
++   `guidance_scale` (`float`, 默认为 7.5) — 更高的引导比例值鼓励模型生成与文本`prompt`密切相关的图像，但会降低图像质量。当`guidance_scale > 1`时启用引导比例。
 
 +   `negative_prompt` (`Optional[Union[str, List[str]`, 默认为 `None`) — 用于指导图像生成中不包含的提示或提示。如果未定义，则需要传递 `negative_prompt_embeds`。在不使用指导时被忽略 (`guidance_scale < 1`)。
 
@@ -1028,13 +1028,13 @@ Neuron设备上的问答模型。
 
 +   `prompt`（`Optional[Union[str, List[str]]]`，默认为`None`） - 用于指导图像生成的提示或提示。如果未定义，则需要传递`prompt_embeds`。
 
-+   `num_inference_steps`（`int`，默认为50） - 去噪步骤的数量。更多的去噪步骤通常会导致更高质量的图像，但会降低推理速度。
++   `num_inference_steps`（`int`，默认为 50） - 去噪步骤的数量。更多的去噪步骤通常会导致更高质量的图像，但会降低推理速度。
 
-+   `original_inference_steps`（`Optional[int]`，默认为`None`） - 用于生成线性间隔时间步骤表的原始推理步骤数，从中我们将均匀间隔地从中抽取`num_inference_steps`个时间步骤作为我们的最终时间步骤表，遵循论文中的Skipping-Step方法（参见第4.3节）。如果未设置，这将默认为调度器的`original_inference_steps`属性。
++   `original_inference_steps`（`Optional[int]`，默认为`None`） - 用于生成线性间隔时间步骤表的原始推理步骤数，从中我们将均匀间隔地从中抽取`num_inference_steps`个时间步骤作为我们的最终时间步骤表，遵循论文中的 Skipping-Step 方法（参见第 4.3 节）。如果未设置，这将默认为调度器的`original_inference_steps`属性。
 
-+   `guidance_scale`（`float`，默认为8.5） - 更高的引导比例值鼓励模型生成与文本`prompt`密切相关的图像，但会降低图像质量。当`guidance_scale > 1`时启用引导比例。请注意，原始的潜变量一致性模型论文使用了不同的CFG公式，其中引导比例减1（因此在论文公式中，当`guidance_scale > 0`时启用CFG）。
++   `guidance_scale`（`float`，默认为 8.5） - 更高的引导比例值鼓励模型生成与文本`prompt`密切相关的图像，但会降低图像质量。当`guidance_scale > 1`时启用引导比例。请注意，原始的潜变量一致性模型论文使用了不同的 CFG 公式，其中引导比例减 1（因此在论文公式中，当`guidance_scale > 0`时启用 CFG）。
 
-+   `num_images_per_prompt`（`int`，默认为1） - 每个提示生成的图像数量。
++   `num_images_per_prompt`（`int`，默认为 1） - 每个提示生成的图像数量。
 
 +   `generator`（`Optional[Union[torch.Generator, List[torch.Generator]]]`，默认为`None`） - 用于使生成过程确定性的[`torch.Generator`](https://pytorch.org/docs/stable/generated/torch.Generator.html)。
 
@@ -1046,9 +1046,9 @@ Neuron设备上的问答模型。
 
 +   `return_dict`（`bool`，默认为`True`） - 是否返回`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`而不是普通元组。
 
-+   `cross_attention_kwargs`（`Optional[Dict[str, Any]]`，默认为`None`） - 如果指定了kwargs字典，则将其传递给[`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py)中定义的`AttentionProcessor`。
++   `cross_attention_kwargs`（`Optional[Dict[str, Any]]`，默认为`None`） - 如果指定了 kwargs 字典，则将其传递给[`self.processor`](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py)中定义的`AttentionProcessor`。
 
-+   `clip_skip`（`Optional[int]`，默认为`None`） - 在计算提示嵌入时要跳过的CLIP层数。值为1意味着将使用预最终层的输出来计算提示嵌入。
++   `clip_skip`（`Optional[int]`，默认为`None`） - 在计算提示嵌入时要跳过的 CLIP 层数。值为 1 意味着将使用预最终层的输出来计算提示嵌入。
 
 +   `callback_on_step_end`（`Optional[Callable]`，默认为`None`） - 在推理过程中每个去噪步骤结束时调用的函数。该函数将使用以下参数调用：`callback_on_step_end(self: DiffusionPipeline, step: int, timestep: int, callback_kwargs: Dict)`。`callback_kwargs`将包括由`callback_on_step_end_tensor_inputs`指定的所有张量的列表。
 
@@ -1064,7 +1064,7 @@ Neuron设备上的问答模型。
 
 示例：
 
-### 神经元稳定扩散XL管道
+### 神经元稳定扩散 XL 管道
 
 ### `class optimum.neuron.NeuronStableDiffusionXLPipeline`
 
@@ -1088,21 +1088,21 @@ Neuron设备上的问答模型。
 
 +   `prompt_2` (`Optional[Union[str, List[str]]]`, 默认为`None`) — 发送到`tokenizer_2`和`text_encoder_2`的提示或提示。如果未定义，则在两个文本编码器中使用`prompt`。
 
-+   `num_inference_steps` (`int`, 默认为50) — 去噪步数。更多的去噪步骤通常会导致更高质量的图像，但会降低推理速度。
++   `num_inference_steps` (`int`, 默认为 50) — 去噪步数。更多的去噪步骤通常会导致更高质量的图像，但会降低推理速度。
 
-+   `denoising_end` (`Optional[float]`, 默认为`None`) — 当指定时，确定在故意提前终止之前完成的去噪过程的比例（介于0.0和1.0之间）。因此，返回的样本仍将保留由调度程序选择的离散时间步确定的大量噪声。当此管道作为“去噪器混合”多管道设置的一部分时，应理想地利用`denoising_end`参数，如[`精细调整图像输出`](https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/stable_diffusion_xl#refining-the-image-output)中所详细阐述
++   `denoising_end` (`Optional[float]`, 默认为`None`) — 当指定时，确定在故意提前终止之前完成的去噪过程的比例（介于 0.0 和 1.0 之间）。因此，返回的样本仍将保留由调度程序选择的离散时间步确定的大量噪声。当此管道作为“去噪器混合”多管道设置的一部分时，应理想地利用`denoising_end`参数，如[`精细调整图像输出`](https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/stable_diffusion_xl#refining-the-image-output)中所详细阐述
 
-+   `guidance_scale` (`float`, 默认为5.0`) — 在[无分类器扩散指导](https://arxiv.org/abs/2207.12598)中定义的指导比例。`guidance_scale`被定义为[Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf)中方程2的`w`。通过设置`guidance_scale > 1`启用指导比例。更高的指导比例鼓励生成与文本`prompt`密切相关的图像，通常以降低图像质量为代价。
++   `guidance_scale` (`float`, 默认为 5.0`) — 在[无分类器扩散指导](https://arxiv.org/abs/2207.12598)中定义的指导比例。`guidance_scale`被定义为[Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf)中方程 2 的`w`。通过设置`guidance_scale > 1`启用指导比例。更高的指导比例鼓励生成与文本`prompt`密切相关的图像，通常以降低图像质量为代价。
 
 +   `negative_prompt` (`Optional[Union[str, List[str]]]`, 默认为`None`) — 不指导图像生成的提示或提示。如果未定义，则必须传递`negative_prompt_embeds`。当不使用指导时（即，如果`guidance_scale`小于`1`，则会被忽略）。
 
 +   `negative_prompt_2` (`Optional[Union[str, List[str]]]`, 默认为`None`) — 不指导图像生成的提示或提示，将发送到`tokenizer_2`和`text_encoder_2`。如果未定义，则在两个文本编码器中使用`negative_prompt`。
 
-+   `num_images_per_prompt` (`int`, 默认为1`) — 每个提示生成的图像数量。如果与用于编译的批处理大小不同，则将被神经元的静态批处理大小覆盖（除了动态批处理）。
++   `num_images_per_prompt` (`int`, 默认为 1`) — 每个提示生成的图像数量。如果与用于编译的批处理大小不同，则将被神经元的静态批处理大小覆盖（除了动态批处理）。
 
-+   `eta` (`float`, 默认为0.0`) — 对应于DDIM论文中的参数eta（η）：[https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502)。仅适用于`schedulers.DDIMScheduler`，对其他情况将被忽略。
++   `eta` (`float`, 默认为 0.0`) — 对应于 DDIM 论文中的参数 eta（η）：[`arxiv.org/abs/2010.02502`](https://arxiv.org/abs/2010.02502)。仅适用于`schedulers.DDIMScheduler`，对其他情况将被忽略。
 
-+   `generator` (`Optional[Union[torch.Generator, List[torch.Generator]]]`, 默认为`None`) — 一个或多个[torch生成器](https://pytorch.org/docs/stable/generated/torch.Generator.html)用于使生成过程确定性。
++   `generator` (`Optional[Union[torch.Generator, List[torch.Generator]]]`, 默认为`None`) — 一个或多个[torch 生成器](https://pytorch.org/docs/stable/generated/torch.Generator.html)用于使生成过程确定性。
 
 +   `latents` (`Optional[torch.FloatTensor]`, 默认为 `None`) — 预生成的噪声潜变量，从高斯分布中采样，用作图像生成的输入。可用于使用不同提示调整相同生成。如果未提供，将使用提供的随机 `generator` 进行采样生成潜变量张量。
 
@@ -1126,17 +1126,17 @@ Neuron设备上的问答模型。
 
 +   `guidance_rescale` (`float`, *可选*, 默认为 0.0) — [Common Diffusion Noise Schedules and Sample Steps are Flawed](https://arxiv.org/pdf/2305.08891.pdf) 提出的指导重缩放因子。`guidance_scale` 在 [Common Diffusion Noise Schedules and Sample Steps are Flawed](https://arxiv.org/pdf/2305.08891.pdf) 的方程式 16 中定义。指导重缩放因子应该在使用零终端 SNR 时修复过曝光问题。
 
-+   `original_size` (`Optional[Tuple[int, int]]`, 默认为 (1024, 1024)) — 如果 `original_size` 与 `target_size` 不同，图像将会被缩小或放大。如果未指定，`original_size` 默认为 `(width, height)`。这是 SDXL 微调的一部分，详见 [https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952) 第2.2节。
++   `original_size` (`Optional[Tuple[int, int]]`, 默认为 (1024, 1024)) — 如果 `original_size` 与 `target_size` 不同，图像将会被缩小或放大。如果未指定，`original_size` 默认为 `(width, height)`。这是 SDXL 微调的一部分，详见 [`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952) 第 2.2 节。
 
-+   `crops_coords_top_left` (`Tuple[int]`, 默认为 (0, 0)) — `crops_coords_top_left` 可用于生成一个看起来被从位置 `crops_coords_top_left` 向下“裁剪”的图像。通常通过将 `crops_coords_top_left` 设置为 (0, 0) 来获得令人满意、居中的图像。这是 SDXL 微调的一部分，详见 [https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952) 第2.2节。
++   `crops_coords_top_left` (`Tuple[int]`, 默认为 (0, 0)) — `crops_coords_top_left` 可用于生成一个看起来被从位置 `crops_coords_top_left` 向下“裁剪”的图像。通常通过将 `crops_coords_top_left` 设置为 (0, 0) 来获得令人满意、居中的图像。这是 SDXL 微调的一部分，详见 [`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952) 第 2.2 节。
 
-+   `target_size` (`Tuple[int]`, 默认为 (1024, 1024)) — 对于大多数情况，`target_size` 应设置为生成图像的期望高度和宽度。如果未指定，将默认为 `(width, height)`。作为 SDXL 的微调节的一部分，详见 [https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952) 的第 2.2 节。
++   `target_size` (`Tuple[int]`, 默认为 (1024, 1024)) — 对于大多数情况，`target_size` 应设置为生成图像的期望高度和宽度。如果未指定，将默认为 `(width, height)`。作为 SDXL 的微调节的一部分，详见 [`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952) 的第 2.2 节。
 
-+   `negative_original_size` (`Tuple[int]`, 默认为 (1024, 1024)) — 根据特定图像分辨率对生成过程进行负面条件。作为 SDXL 的微调节的一部分，详见 [https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952) 的第 2.2 节。更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_original_size` (`Tuple[int]`, 默认为 (1024, 1024)) — 根据特定图像分辨率对生成过程进行负面条件。作为 SDXL 的微调节的一部分，详见 [`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952) 的第 2.2 节。更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
-+   `negative_crops_coords_top_left` (`Tuple[int]`, 默认为 (0, 0)) — 根据特定的裁剪坐标对生成过程进行负面条件。作为 SDXL 的微调节的一部分，详见 [https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952) 的第 2.2 节。更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_crops_coords_top_left` (`Tuple[int]`, 默认为 (0, 0)) — 根据特定的裁剪坐标对生成过程进行负面条件。作为 SDXL 的微调节的一部分，详见 [`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952) 的第 2.2 节。更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
-+   `negative_target_size` (`Tuple[int]`, 默认为 (1024, 1024)) — 根据目标图像分辨率对生成过程进行负面条件。对于大多数情况，它应与 `target_size` 相同。作为 SDXL 的微调节的一部分，详见 [https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952) 的第 2.2 节。更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_target_size` (`Tuple[int]`, 默认为 (1024, 1024)) — 根据目标图像分辨率对生成过程进行负面条件。对于大多数情况，它应与 `target_size` 相同。作为 SDXL 的微调节的一部分，详见 [`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952) 的第 2.2 节。更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
 +   `clip_skip` (`Optional[int]`, 默认为 `None`) — 在计算提示嵌入时，要从 CLIP 中跳过的层数。值为 1 表示将使用预终层的输出来计算提示嵌入。
 
@@ -1207,7 +1207,7 @@ Neuron设备上的问答模型。
 
 +   `num_images_per_prompt` (`int`, 默认为 1) — 每个提示生成的图像数量。如果与用于编译的批处理大小不同，则将被神经元的静态批处理大小覆盖（除了动态批处理）。
 
-+   `eta` (`float`, 默认为 0.0) — 对应于 DDIM 论文中的参数 eta (η)：[https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502)。仅适用于 `schedulers.DDIMScheduler`，对于其他情况将被忽略。
++   `eta` (`float`, 默认为 0.0) — 对应于 DDIM 论文中的参数 eta (η)：[`arxiv.org/abs/2010.02502`](https://arxiv.org/abs/2010.02502)。仅适用于 `schedulers.DDIMScheduler`，对于其他情况将被忽略。
 
 +   `generator` (`Optional[Union[torch.Generator, List[torch.Generator]]]`, 默认为 `None`) — 一个或多个 [torch 生成器](https://pytorch.org/docs/stable/generated/torch.Generator.html) 的列表，用于使生成过程确定性。
 
@@ -1227,35 +1227,35 @@ Neuron设备上的问答模型。
 
 +   `callback` (`Optional[Callable]`，默认为`None`) — 在推断过程中，每`callback_steps`步调用一次的函数。该函数将使用以下参数进行调用：`callback(step: int, timestep: int, latents: torch.FloatTensor)`。
 
-+   `callback_stcallback_steps` (`int`，默认为1) — `callback`函数将被调用的频率。如果未指定，将在每一步调用回调。
++   `callback_stcallback_steps` (`int`，默认为 1) — `callback`函数将被调用的频率。如果未指定，将在每一步调用回调。
 
-+   `cross_attention_kwargs` (`Optional[Dict[str, Any]]`，默认为`None`) — 如果指定，将传递给`AttentionProcessor`中的`self.processor`定义的kwargs字典，在[diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py)中有详细定义。
++   `cross_attention_kwargs` (`Optional[Dict[str, Any]]`，默认为`None`) — 如果指定，将传递给`AttentionProcessor`中的`self.processor`定义的 kwargs 字典，在[diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py)中有详细定义。
 
-+   `guidance_rescale` (`float`，默认为0.0）— [Common Diffusion Noise Schedules and Sample Steps are Flawed](https://arxiv.org/pdf/2305.08891.pdf) 提出的指导重缩放因子，`guidance_scale` 在方程式16中被定义为`φ`。当使用零终端信噪比时，指导重缩放因子应该修复过曝光问题。
++   `guidance_rescale` (`float`，默认为 0.0）— [Common Diffusion Noise Schedules and Sample Steps are Flawed](https://arxiv.org/pdf/2305.08891.pdf) 提出的指导重缩放因子，`guidance_scale` 在方程式 16 中被定义为`φ`。当使用零终端信噪比时，指导重缩放因子应该修复过曝光问题。
 
-+   `original_size` (`Optional[Tuple[int, int]`，默认为(1024, 1024)) — 如果`original_size`与`target_size`不同，图像将呈现为缩小或放大。如果未指定，`original_size`默认为`(width, height)`。作为SDXL微调的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。
++   `original_size` (`Optional[Tuple[int, int]`，默认为(1024, 1024)) — 如果`original_size`与`target_size`不同，图像将呈现为缩小或放大。如果未指定，`original_size`默认为`(width, height)`。作为 SDXL 微调的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。
 
-+   `crops_coords_top_left` (`Tuple[int]`，默认为(0, 0)) — `crops_coords_top_left` 可用于生成一个看起来被“裁剪”到`crops_coords_top_left`位置以下的图像。通常通过将`crops_coords_top_left`设置为(0, 0)来实现有利的、居中的图像。作为SDXL微调的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。
++   `crops_coords_top_left` (`Tuple[int]`，默认为(0, 0)) — `crops_coords_top_left` 可用于生成一个看起来被“裁剪”到`crops_coords_top_left`位置以下的图像。通常通过将`crops_coords_top_left`设置为(0, 0)来实现有利的、居中的图像。作为 SDXL 微调的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。
 
-+   `target_size` (`Tuple[int]`，默认为(1024, 1024)) — 对于大多数情况，`target_size` 应设置为生成图像的期望高度和宽度。如果未指定，将默认为`(width, height)`。作为SDXL微调的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。
++   `target_size` (`Tuple[int]`，默认为(1024, 1024)) — 对于大多数情况，`target_size` 应设置为生成图像的期望高度和宽度。如果未指定，将默认为`(width, height)`。作为 SDXL 微调的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。
 
-+   `negative_original_size` (`Tuple[int]`, 默认为(1024, 1024)) — 基于特定图像分辨率对生成过程进行负面调节。SDXL的微调条件的一部分，如[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节所述。有关更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_original_size` (`Tuple[int]`, 默认为(1024, 1024)) — 基于特定图像分辨率对生成过程进行负面调节。SDXL 的微调条件的一部分，如[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节所述。有关更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
-+   `negative_crops_coords_top_left` (`Tuple[int]`, 默认为(0, 0)) — 基于特定裁剪坐标对生成过程进行负面调节。SDXL的微调条件的一部分，如[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节所述。有关更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_crops_coords_top_left` (`Tuple[int]`, 默认为(0, 0)) — 基于特定裁剪坐标对生成过程进行负面调节。SDXL 的微调条件的一部分，如[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节所述。有关更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
-+   `negative_target_size` (`Tuple[int]`, 默认为(1024, 1024)) — 基于目标图像分辨率对生成过程进行负面调节。对于大多数情况，它应与`target_size`相同。SDXL的微调条件的一部分，如[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节所述。有关更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_target_size` (`Tuple[int]`, 默认为(1024, 1024)) — 基于目标图像分辨率对生成过程进行负面调节。对于大多数情况，它应与`target_size`相同。SDXL 的微调条件的一部分，如[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节所述。有关更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
-+   `aesthetic_score` (`float`, 默认为6.0) — 用于通过影响正文条件来模拟生成图像的美学评分。SDXL的微调条件的一部分，如[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节所述。
++   `aesthetic_score` (`float`, 默认为 6.0) — 用于通过影响正文条件来模拟生成图像的美学评分。SDXL 的微调条件的一部分，如[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节所述。
 
-+   `negative_aesthetic_score` (`float`, 默认为2.5) — SDXL的微调条件的一部分，如[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节所述。可用于通过影响负面文本条件来模拟生成图像的美学评分。
++   `negative_aesthetic_score` (`float`, 默认为 2.5) — SDXL 的微调条件的一部分，如[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节所述。可用于通过影响负面文本条件来模拟生成图像的美学评分。
 
-+   `clip_skip` (`Optional[int]`, 默认为`None`) — 在计算提示嵌入时要从CLIP中跳过的层数。值为1意味着将使用预最终层的输出来计算提示嵌入。
++   `clip_skip` (`Optional[int]`, 默认为`None`) — 在计算提示嵌入时要从 CLIP 中跳过的层数。值为 1 意味着将使用预最终层的输出来计算提示嵌入。
 
 返回
 
 `diffusers.pipelines.stable_diffusion.StableDiffusionXLPipelineOutput`或`tuple`
 
-`diffusers.pipelines.stable_diffusion.StableDiffusionXLPipelineOutput`如果`return_dict`为True，否则为一个元组。当返回一个元组时，第一个元素是包含生成图像的列表。
+`diffusers.pipelines.stable_diffusion.StableDiffusionXLPipelineOutput`如果`return_dict`为 True，否则为一个元组。当返回一个元组时，第一个元素是包含生成图像的列表。
 
 调用管道进行生成时调用的函数。
 
@@ -1305,21 +1305,21 @@ Neuron设备上的问答模型。
 
 +   `image` (`Optional["PipelineImageInput"]`, 默认为`None`) — `Image`，或表示将被修复的图像批次的张量，即图像的部分将被`mask_image`遮盖并根据`prompt`重新绘制。
 
-+   `mask_image` (`Optional["PipelineImageInput"]`, defaults to `None`) — 用于遮罩`image`的`Image`或表示图像批次的张量。遮罩中的白色像素将被重新绘制，而黑色像素将被保留。如果`mask_image`是PIL图像，它将在使用之前转换为单通道（亮度）。如果它是张量，则应包含一个颜色通道（L）而不是3，因此预期形状将是`(B, H, W, 1)`。
++   `mask_image` (`Optional["PipelineImageInput"]`, defaults to `None`) — 用于遮罩`image`的`Image`或表示图像批次的张量。遮罩中的白色像素将被重新绘制，而黑色像素将被保留。如果`mask_image`是 PIL 图像，它将在使用之前转换为单通道（亮度）。如果它是张量，则应包含一个颜色通道（L）而不是 3，因此预期形状将是`(B, H, W, 1)`。
 
-+   `padding_mask_crop` (`Optional[int]`, defaults to `None`) — 要应用于图像和遮罩的裁剪边距大小。如果为`None`，则不对图像和mask_image进行裁剪。如果`padding_mask_crop`不是`None`，它将首先找到一个具有与图像相同纵横比且包含所有遮罩区域的矩形区域，然后根据`padding_mask_crop`扩展该区域。然后将根据扩展的区域对图像和mask_image进行裁剪，然后将其调整为原始图像大小以进行修复。当遮罩区域较小而图像较大且包含与修复无关的信息（例如背景）时，这是有用的。
++   `padding_mask_crop` (`Optional[int]`, defaults to `None`) — 要应用于图像和遮罩的裁剪边距大小。如果为`None`，则不对图像和 mask_image 进行裁剪。如果`padding_mask_crop`不是`None`，它将首先找到一个具有与图像相同纵横比且包含所有遮罩区域的矩形区域，然后根据`padding_mask_crop`扩展该区域。然后将根据扩展的区域对图像和 mask_image 进行裁剪，然后将其调整为原始图像大小以进行修复。当遮罩区域较小而图像较大且包含与修复无关的信息（例如背景）时，这是有用的。
 
-+   `strength` (`float`, defaults to 0.9999) — 在概念上，指示要如何转换参考`image`的遮罩部分的程度。必须介于0和1之间。`image`将被用作起点，添加的噪声越大，`strength`越大。去噪步骤的数量取决于最初添加的噪声量。当`strength`为1时，添加的噪声将达到最大，并且去噪过程将运行指定的`num_inference_steps`的完整迭代次数。因此，值为1基本上忽略了参考`image`的遮罩部分。请注意，在将`denoising_start`声明为整数的情况下，将忽略`strength`的值。
++   `strength` (`float`, defaults to 0.9999) — 在概念上，指示要如何转换参考`image`的遮罩部分的程度。必须介于 0 和 1 之间。`image`将被用作起点，添加的噪声越大，`strength`越大。去噪步骤的数量取决于最初添加的噪声量。当`strength`为 1 时，添加的噪声将达到最大，并且去噪过程将运行指定的`num_inference_steps`的完整迭代次数。因此，值为 1 基本上忽略了参考`image`的遮罩部分。请注意，在将`denoising_start`声明为整数的情况下，将忽略`strength`的值。
 
 +   `num_inference_steps` (`int`, defaults to 50) — 去噪步骤的数量。更多的去噪步骤通常会导致图像质量更高，但推理速度较慢。
 
 +   `timesteps` (`Optional[List[int]]`, defaults to `None`) — 用于具有支持`timesteps`参数的调度程序的去噪过程的自定义时间步。如果未定义，则将使用传递`num_inference_steps`时的默认行为。必须按降序排列。
 
-+   `denoising_start` (`Optional[float]`, defaults to `None`) — 当指定时，指示在启动之前要绕过的总去噪过程的比例（介于0.0和1.0之间）。因此，将跳过去噪过程的初始部分，并假定传递的`image`是部分去噪的图像。请注意，当指定此参数时，将忽略强度。当此流水线集成到“去噪器混合”多流水线设置中时，`denoising_start`参数特别有益，如[`精炼图像输出`](https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/stable_diffusion_xl#refining-the-image-output)中详细说明。
++   `denoising_start` (`Optional[float]`, defaults to `None`) — 当指定时，指示在启动之前要绕过的总去噪过程的比例（介于 0.0 和 1.0 之间）。因此，将跳过去噪过程的初始部分，并假定传递的`image`是部分去噪的图像。请注意，当指定此参数时，将忽略强度。当此流水线集成到“去噪器混合”多流水线设置中时，`denoising_start`参数特别有益，如[`精炼图像输出`](https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/stable_diffusion_xl#refining-the-image-output)中详细说明。
 
-+   `denoising_end` (`Optional[float]`, defaults to `None`) — 当指定时，确定在有意提前终止之前完成的总去噪过程的比例（介于0.0和1.0之间）。因此，返回的样本仍将保留相当多的噪声（大约还需要最后20%的时间步），应由具有`denoising_start`设置为0.8的后续流水线进行去噪，以便仅对调度程序的最后20%进行去噪。当此流水线形成“去噪器混合”多流水线设置的一部分时，应理想地利用`denoising_end`参数，如[`精炼图像输出`](https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/stable_diffusion_xl#refining-the-image-output)中所述。
++   `denoising_end` (`Optional[float]`, defaults to `None`) — 当指定时，确定在有意提前终止之前完成的总去噪过程的比例（介于 0.0 和 1.0 之间）。因此，返回的样本仍将保留相当多的噪声（大约还需要最后 20%的时间步），应由具有`denoising_start`设置为 0.8 的后续流水线进行去噪，以便仅对调度程序的最后 20%进行去噪。当此流水线形成“去噪器混合”多流水线设置的一部分时，应理想地利用`denoising_end`参数，如[`精炼图像输出`](https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/stable_diffusion_xl#refining-the-image-output)中所述。
 
-+   `guidance_scale` (`float`, defaults to 7.5) — 在[Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598)中定义的指导比例。`guidance_scale`定义为[Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf)中方程2的`w`。通过设置`guidance_scale > 1`启用指导比例。更高的指导比例鼓励生成与文本`prompt`密切相关的图像，通常以降低图像质量为代价。
++   `guidance_scale` (`float`, defaults to 7.5) — 在[Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598)中定义的指导比例。`guidance_scale`定义为[Imagen Paper](https://arxiv.org/pdf/2205.11487.pdf)中方程 2 的`w`。通过设置`guidance_scale > 1`启用指导比例。更高的指导比例鼓励生成与文本`prompt`密切相关的图像，通常以降低图像质量为代价。
 
 +   `negative_prompt` (`Optional[Union[str, List[str]]]`, defaults to `None`) — 不指导图像生成的提示或提示。如果未定义，则必须传递`negative_prompt_embeds`。在不使用指导时将被忽略（即，如果`guidance_scale`小于`1`，则将被忽略）。
 
@@ -1327,17 +1327,17 @@ Neuron设备上的问答模型。
 
 +   `prompt_embeds` (`Optional[torch.FloatTensor]`, defaults to `None`) — 预生成的文本嵌入。可用于轻松调整文本输入，例如提示加权。如果未提供，将从`prompt`输入参数生成文本嵌入。
 
-+   `negative_prompt_embeds` (`Optional[torch.FloatTensor]`, defaults to `None`) — 预生成的负文本嵌入。可用于轻松调整文本输入，例如提示加权。如果未提供，将从`negative_prompt`输入参数生成negative_prompt_embeds。
++   `negative_prompt_embeds` (`Optional[torch.FloatTensor]`, defaults to `None`) — 预生成的负文本嵌入。可用于轻松调整文本输入，例如提示加权。如果未提供，将从`negative_prompt`输入参数生成 negative_prompt_embeds。
 
 +   `pooled_prompt_embeds` (`Optional[torch.FloatTensor]`, defaults to `None`) — 预生成的汇集文本嵌入。可用于轻松调整文本输入，例如提示加权。如果未提供，将从`prompt`输入参数生成汇集文本嵌入。
 
-+   `negative_pooled_prompt_embeds` (`Optional[torch.FloatTensor]`, defaults to `None`) — 预生成的负汇集文本嵌入。可用于轻松调整文本输入，例如提示加权。如果未提供，将从`negative_prompt`输入参数生成负汇集文本嵌入。ip_adapter_image — (`Optional[PipelineImageInput]`, defaults to `None`): 可选的图像输入以与IP适配器一起使用。
++   `negative_pooled_prompt_embeds` (`Optional[torch.FloatTensor]`, defaults to `None`) — 预生成的负汇集文本嵌入。可用于轻松调整文本输入，例如提示加权。如果未提供，将从`negative_prompt`输入参数生成负汇集文本嵌入。ip_adapter_image — (`Optional[PipelineImageInput]`, defaults to `None`): 可选的图像输入以与 IP 适配器一起使用。
 
 +   `num_images_per_prompt` (`int`, defaults to 1) — 每个提示生成的图像数量。
 
-+   `eta` (`float`, defaults to 0.0) — 对应于DDIM论文中参数eta (η)：[https://arxiv.org/abs/2010.02502](https://arxiv.org/abs/2010.02502)。仅适用于`schedulers.DDIMScheduler`，对其他情况将被忽略。
++   `eta` (`float`, defaults to 0.0) — 对应于 DDIM 论文中参数 eta (η)：[`arxiv.org/abs/2010.02502`](https://arxiv.org/abs/2010.02502)。仅适用于`schedulers.DDIMScheduler`，对其他情况将被忽略。
 
-+   `generator` (`Optional[Union[torch.Generator, List[torch.Generator]]]`, defaults to `None`) — 一个或多个[torch生成器](https://pytorch.org/docs/stable/generated/torch.Generator.html)，用于使生成过程确定性。
++   `generator` (`Optional[Union[torch.Generator, List[torch.Generator]]]`, defaults to `None`) — 一个或多个[torch 生成器](https://pytorch.org/docs/stable/generated/torch.Generator.html)，用于使生成过程确定性。
 
 +   `latents` (`Optional[torch.FloatTensor]`, defaults to `None`) — 预生成的嘈杂潜变量，从高斯分布中采样，用作图像生成的输入。可用于使用不同提示调整相同生成。如果未提供，将使用提供的随机`generator`进行采样生成一个潜变量张量。
 
@@ -1345,25 +1345,25 @@ Neuron设备上的问答模型。
 
 +   `return_dict` (`bool`, defaults to `True`) — 是否返回`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`而不是普通元组。
 
-+   `cross_attention_kwargs` (`Optional[Dict[str, Any]]`, defaults to `None`) — 如果指定，将传递给`AttentionProcessor`的kwargs字典，如在[diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py)中所定义。
++   `cross_attention_kwargs` (`Optional[Dict[str, Any]]`, defaults to `None`) — 如果指定，将传递给`AttentionProcessor`的 kwargs 字典，如在[diffusers.models.attention_processor](https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/attention_processor.py)中所定义。
 
-+   `original_size` (`Tuple[int]`, 默认值为(1024, 1024)) — 如果`original_size`与`target_size`不同，图像将呈现为缩小或放大。如果未指定，`original_size`默认为`(height, width)`。作为SDXL微调节的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。
++   `original_size` (`Tuple[int]`, 默认值为(1024, 1024)) — 如果`original_size`与`target_size`不同，图像将呈现为缩小或放大。如果未指定，`original_size`默认为`(height, width)`。作为 SDXL 微调节的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。
 
-+   `crops_coords_top_left` (`Tuple[int]`, 默认值为(0, 0)) — `crops_coords_top_left` 可用于生成一个看起来被从位置`crops_coords_top_left`向下“裁剪”的图像。通常通过将`crops_coords_top_left`设置为(0, 0)来实现令人满意、居中的图像。作为SDXL微调节的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。
++   `crops_coords_top_left` (`Tuple[int]`, 默认值为(0, 0)) — `crops_coords_top_left` 可用于生成一个看起来被从位置`crops_coords_top_left`向下“裁剪”的图像。通常通过将`crops_coords_top_left`设置为(0, 0)来实现令人满意、居中的图像。作为 SDXL 微调节的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。
 
-+   `target_size` (`Tuple[int]`, 默认值为(1024, 1024)) — 在大多数情况下，`target_size`应设置为生成图像的期望高度和宽度。如果未指定，将默认为`(height, width)`。作为SDXL微调节的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。
++   `target_size` (`Tuple[int]`, 默认值为(1024, 1024)) — 在大多数情况下，`target_size`应设置为生成图像的期望高度和宽度。如果未指定，将默认为`(height, width)`。作为 SDXL 微调节的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。
 
-+   `negative_original_size` (`Tuple[int]`, 默认值为(1024, 1024)) — 基于特定图像分辨率负向调节生成过程。作为SDXL微调节的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_original_size` (`Tuple[int]`, 默认值为(1024, 1024)) — 基于特定图像分辨率负向调节生成过程。作为 SDXL 微调节的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
-+   `negative_crops_coords_top_left` (`Tuple[int]`, 默认值为(0, 0)) — 基于特定裁剪坐标来负向调节生成过程。作为SDXL微调节的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_crops_coords_top_left` (`Tuple[int]`, 默认值为(0, 0)) — 基于特定裁剪坐标来负向调节生成过程。作为 SDXL 微调节的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
-+   `negative_target_size` (`Tuple[int]`, 默认值为(1024, 1024)) — 基于目标图像分辨率负向调节生成过程。在大多数情况下，应与`target_size`相同。作为SDXL微调节的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。更多信息，请参考此问题线程：[https://github.com/huggingface/diffusers/issues/4208](https://github.com/huggingface/diffusers/issues/4208)。
++   `negative_target_size` (`Tuple[int]`, 默认值为(1024, 1024)) — 基于目标图像分辨率负向调节生成过程。在大多数情况下，应与`target_size`相同。作为 SDXL 微调节的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。更多信息，请参考此问题线程：[`github.com/huggingface/diffusers/issues/4208`](https://github.com/huggingface/diffusers/issues/4208)。
 
-+   `aesthetic_score` (`float`, 默认值为6.0）— 用于通过影响正文条件来模拟生成图像的审美评分。作为SDXL微调节的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。
++   `aesthetic_score` (`float`, 默认值为 6.0）— 用于通过影响正文条件来模拟生成图像的审美评分。作为 SDXL 微调节的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。
 
-+   `negative_aesthetic_score` (`float`, 默认值为2.5) — 作为SDXL微调节的一部分，详见[https://huggingface.co/papers/2307.01952](https://huggingface.co/papers/2307.01952)第2.2节。可用于通过影响负文本条件来模拟生成图像的审美评分。
++   `negative_aesthetic_score` (`float`, 默认值为 2.5) — 作为 SDXL 微调节的一部分，详见[`huggingface.co/papers/2307.01952`](https://huggingface.co/papers/2307.01952)第 2.2 节。可用于通过影响负文本条件来模拟生成图像的审美评分。
 
-+   `clip_skip` (`Optional[int]`, 默认值为`None`) — 在计算提示嵌入时，要从CLIP中跳过的层数。值为1表示将使用前一层的输出来计算提示嵌入。
++   `clip_skip` (`Optional[int]`, 默认值为`None`) — 在计算提示嵌入时，要从 CLIP 中跳过的层数。值为 1 表示将使用前一层的输出来计算提示嵌入。
 
 +   `callback_on_step_end` (`Optional[Callable[[int, int, Dict], None]]`, 默认值为`None`) — 在推断过程中每个去噪步骤结束时调用的函数。该函数将使用以下参数调用：`callback_on_step_end(self: DiffusionPipeline, step: int, timestep: int, callback_kwargs: Dict)`。`callback_kwargs`将包括由`callback_on_step_end_tensor_inputs`指定的所有张量的列表。
 

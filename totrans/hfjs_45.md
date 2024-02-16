@@ -1,6 +1,6 @@
 # 接口：CommitOutput
 
-> 原文：[https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitOutput](https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitOutput)
+> 原文：[`huggingface.co/docs/huggingface.js/hub/interfaces/CommitOutput`](https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitOutput)
 
 ## 属性
 

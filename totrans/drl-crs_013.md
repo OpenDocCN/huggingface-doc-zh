@@ -1,6 +1,6 @@
 # 总结
 
-> 原文：[https://huggingface.co/learn/deep-rl-course/unit1/summary](https://huggingface.co/learn/deep-rl-course/unit1/summary)
+> 原文：[`huggingface.co/learn/deep-rl-course/unit1/summary`](https://huggingface.co/learn/deep-rl-course/unit1/summary)
 
 这是很多信息！让我们总结一下：
 

@@ -1,6 +1,6 @@
 # 接口: ObjectDetectionOutputValue
 
-> 原文链接: [https://huggingface.co/docs/huggingface.js/inference/interfaces/ObjectDetectionOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/ObjectDetectionOutputValue)
+> 原文链接: [`huggingface.co/docs/huggingface.js/inference/interfaces/ObjectDetectionOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/ObjectDetectionOutputValue)
 
 ## 属性
 

@@ -1,10 +1,10 @@
 # 拆分和配置
 
-> 原文链接：[https://huggingface.co/docs/datasets-server/configs_and_splits](https://huggingface.co/docs/datasets-server/configs_and_splits)
+> 原文链接：[`huggingface.co/docs/datasets-server/configs_and_splits`](https://huggingface.co/docs/datasets-server/configs_and_splits)
 
 机器学习数据集通常以*拆分*的形式组织，它们也可能有*配置*。这些内部结构为构建数据集提供了支撑，并确定了数据集应如何拆分和组织。了解数据集的结构可以帮助您创建自己的数据集，并知道在模型训练和评估过程中应使用哪个数据子集。
 
-![split-configs-server](../Images/688577f4daf8a4f28f06e2fe8b399ab5.png)
+![split-configs-server](img/688577f4daf8a4f28f06e2fe8b399ab5.png)
 
 ## 拆分
 

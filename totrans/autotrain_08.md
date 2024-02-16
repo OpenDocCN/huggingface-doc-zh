@@ -1,10 +1,10 @@
-# LLM微调
+# LLM 微调
 
-> 原始文本：[https://huggingface.co/docs/autotrain/llm_finetuning](https://huggingface.co/docs/autotrain/llm_finetuning)
+> 原始文本：[`huggingface.co/docs/autotrain/llm_finetuning`](https://huggingface.co/docs/autotrain/llm_finetuning)
 
-通过AutoTrain，您可以轻松地在自己的数据上微调大型语言模型（LLMs）！
+通过 AutoTrain，您可以轻松地在自己的数据上微调大型语言模型（LLMs）！
 
-AutoTrain支持以下类型的LLM微调：
+AutoTrain 支持以下类型的 LLM 微调：
 
 +   因果语言建模（CLM）
 
@@ -12,11 +12,11 @@ AutoTrain支持以下类型的LLM微调：
 
 ## 数据准备
 
-LLM微调接受CSV格式的数据。
+LLM 微调接受 CSV 格式的数据。
 
 ### SFT / 通用训练器的数据格式
 
-对于SFT / 通用训练器，数据应该采用以下格式：
+对于 SFT / 通用训练器，数据应该采用以下格式：
 
 | 文本 |
 | --- |
@@ -25,9 +25,9 @@ LLM微调接受CSV格式的数据。
 | 人类：你叫什么名字？ \n 机器人：我叫玛丽 |
 | 人类：哪种是最好的编程语言？ \n 机器人：Python |
 
-可以在这里找到符合此格式的示例数据集：[https://huggingface.co/datasets/timdettmers/openassistant-guanaco](https://huggingface.co/datasets/timdettmers/openassistant-guanaco)
+可以在这里找到符合此格式的示例数据集：[`huggingface.co/datasets/timdettmers/openassistant-guanaco`](https://huggingface.co/datasets/timdettmers/openassistant-guanaco)
 
-对于SFT / 通用训练，您的数据集必须有一个`text`列
+对于 SFT / 通用训练，您的数据集必须有一个`text`列
 
 ### 奖励训练器的数据格式
 
@@ -42,9 +42,9 @@ LLM微调接受CSV格式的数据。
 
 对于奖励训练器，您的数据集必须有一个`text`列（也称为选择的文本）和一个`rejected_text`列。
 
-### DPO训练器的数据格式
+### DPO 训练器的数据格式
 
-对于DPO训练器，数据应该采用以下格式：
+对于 DPO 训练器，数据应该采用以下格式：
 
 | 提示 | 文本 | 被拒绝的文本 |
 | --- | --- | --- |
@@ -56,4 +56,4 @@ LLM微调接受CSV格式的数据。
 | 哪种是最好的编程语言？ | Python | C++ |
 | 哪种是最好的编程语言？ | Java | C++ |
 
-对于DPO训练器，您的数据集必须有一个`prompt`列，一个`text`列（也称为选择的文本）和一个`rejected_text`列。
+对于 DPO 训练器，您的数据集必须有一个`prompt`列，一个`text`列（也称为选择的文本）和一个`rejected_text`列。

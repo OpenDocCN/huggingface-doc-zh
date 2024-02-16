@@ -1,6 +1,6 @@
 # 自动缩放
 
-> 原文链接：[https://huggingface.co/docs/inference-endpoints/autoscaling](https://huggingface.co/docs/inference-endpoints/autoscaling)
+> 原文链接：[`huggingface.co/docs/inference-endpoints/autoscaling`](https://huggingface.co/docs/inference-endpoints/autoscaling)
 
 自动缩放允许您根据流量和加速器利用率动态调整运行模型的端点副本数量。通过利用自动缩放，您可以无缝处理不同的工作负载，同时优化成本并确保高可用性。
 

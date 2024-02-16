@@ -1,6 +1,6 @@
 # Llama 在 AWS Inferentia2 上的性能（延迟和吞吐量）
 
-> 原文：[https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2](https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2)
+> 原文：[`huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2`](https://huggingface.co/docs/optimum-neuron/benchmarks/inferentia-llama2)
 
 Llama 在 Inferentia2 上有多快？让我们来看看！
 
@@ -13,7 +13,7 @@ Llama 在 Inferentia2 上有多快？让我们来看看！
 | Llama2 13B - L（延迟） | 24 | 1 |
 | Llama2 13B - T（吞吐量） | 24 | 4 |
 
-*注意：所有模型都编译为最大序列长度为2048。*
+*注意：所有模型都编译为最大序列长度为 2048。*
 
 所有模型都经过编译，以充分利用`inf2.48xlarge`实例上可用的核心。
 
@@ -21,29 +21,29 @@ Llama 在 Inferentia2 上有多快？让我们来看看！
 
 我们为`llama2 7B`和`llama2 13B`模型创建了两种“延迟”导向的配置，每次只能处理一个请求，但速度全开，以及两种“吞吐量”导向的配置，可以同时处理最多四个请求。
 
-为了评估模型，我们生成标记，直到总序列长度达到1024，从256个输入标记开始（即我们生成256、512和768个标记）。
+为了评估模型，我们生成标记，直到总序列长度达到 1024，从 256 个输入标记开始（即我们生成 256、512 和 768 个标记）。
 
 ## 编码时间（第一个标记的时间）
 
 编码时间或第一个标记的时间是处理输入标记并生成第一个输出标记所需的时间。这是一个非常重要的指标，因为它对应于用户在流式生成标记时直接感知到的延迟。
 
-我们测试了不断增加上下文大小的编码时间，256个输入标记大致对应于典型的问答用途，而768个标记更典型于检索增强生成（RAG）用例。
+我们测试了不断增加上下文大小的编码时间，256 个输入标记大致对应于典型的问答用途，而 768 个标记更典型于检索增强生成（RAG）用例。
 
 编码时间以**秒**表示。
 
-![Llama2 inferentia2 编码时间](../Images/4a24344393cd32610767dc0c18991f14.png "编码时间")
+![Llama2 inferentia2 编码时间](img/4a24344393cd32610767dc0c18991f14.png "编码时间")
 
 我们可以看到所有部署的模型都表现出优秀的响应时间，即使是对于长上下文也是如此。
 
 ## 端到端延迟
 
-端到端延迟对应于达到1024个标记的总时间。
+端到端延迟对应于达到 1024 个标记的总时间。
 
 因此，它包括编码和生成时间。
 
 延迟以**秒**表示。
 
-![Llama2 inferentia2 端到端延迟](../Images/aef10229af949f79c57b7cb6231c4b64.png "延迟")
+![Llama2 inferentia2 端到端延迟](img/aef10229af949f79c57b7cb6231c4b64.png "延迟")
 
 在高端实例上部署的所有模型都表现出良好的延迟，即使那些实际上配置为优化吞吐量的模型也是如此。
 
@@ -53,6 +53,6 @@ Llama 在 Inferentia2 上有多快？让我们来看看！
 
 吞吐量以**标记/秒**表示。
 
-![Llama2 inferentia2 吞吐量](../Images/fb110c43ea808abcf0c0d28995cfb244.png "吞吐量")
+![Llama2 inferentia2 吞吐量](img/fb110c43ea808abcf0c0d28995cfb244.png "吞吐量")
 
 在高端实例上部署的模型具有非常好的吞吐量，即使是为延迟进行优化的模型也是如此。

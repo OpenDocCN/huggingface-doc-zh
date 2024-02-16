@@ -1,6 +1,6 @@
 # Tensorflow API
 
-> 原文链接：[https://huggingface.co/docs/safetensors/api/tensorflow](https://huggingface.co/docs/safetensors/api/tensorflow)
+> 原文链接：[`huggingface.co/docs/safetensors/api/tensorflow`](https://huggingface.co/docs/safetensors/api/tensorflow)
 
 #### `safetensors.tensorflow.load_file`
 

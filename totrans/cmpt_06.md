@@ -1,6 +1,6 @@
 # 竞赛仓库
 
-> 原始文本：[https://huggingface.co/docs/competitions/competition_repo](https://huggingface.co/docs/competitions/competition_repo)
+> 原始文本：[`huggingface.co/docs/competitions/competition_repo`](https://huggingface.co/docs/competitions/competition_repo)
 
 NOTE: 竞赛仓库必须始终保持私密。不要公开！
 
@@ -22,15 +22,15 @@ NOTE: 竞赛仓库必须始终保持私密。不要公开！
 
 ### COMPETITION_DESC.md
 
-这个文件包含了竞赛的描述。这是一个markdown文件。您可以使用markdown语法格式化文本，并根据您的需求修改文件。竞赛描述显示在竞赛的首页上。
+这个文件包含了竞赛的描述。这是一个 markdown 文件。您可以使用 markdown 语法格式化文本，并根据您的需求修改文件。竞赛描述显示在竞赛的首页上。
 
 ### DATASET_DESC.md
 
-这个文件包含了数据集的描述。这又是一个markdown文件。这个文件用于描述数据集，并显示在数据集页面上。在这个文件中，您可以提及数据集中存在哪些列，每列的含义是什么，数据集的格式是什么等等。
+这个文件包含了数据集的描述。这又是一个 markdown 文件。这个文件用于描述数据集，并显示在数据集页面上。在这个文件中，您可以提及数据集中存在哪些列，每列的含义是什么，数据集的格式是什么等等。
 
 ### conf.json
 
-conf.json是竞赛的配置文件。下面显示了一个示例conf.json：
+conf.json 是竞赛的配置文件。下面显示了一个示例 conf.json：
 
 ```py
 {
@@ -56,9 +56,9 @@ conf.json是竞赛的配置文件。下面显示了一个示例conf.json：
 
 +   COMPETITION_TYPE: 该字段用于指定竞赛的类型。目前，我们支持两种类型的竞赛：“通用”和`script`。
 
-    +   “通用”竞赛是一种用户可以提交csv文件（或其他格式）并使用指标进行评估的竞赛。
+    +   “通用”竞赛是一种用户可以提交 csv 文件（或其他格式）并使用指标进行评估的竞赛。
 
-    +   `script`竞赛是一种用户可以提交包含script.py的huggingface模型仓库的竞赛。script.py被运行以生成submission.csv，然后使用指标进行评估。
+    +   `script`竞赛是一种用户可以提交包含 script.py 的 huggingface 模型仓库的竞赛。script.py 被运行以生成 submission.csv，然后使用指标进行评估。
 
 +   SUBMISSION_LIMIT: 该字段用于指定用户每天可以提交的次数。
 
@@ -70,17 +70,17 @@ conf.json是竞赛的配置文件。下面显示了一个示例conf.json：
 
 +   END_DATE: 该字段用于指定竞赛的结束日期。竞赛将在结束日期自动关闭。私密排行榜将在结束日期上提供。
 
-+   EVAL_HIGHER_IS_BETTER: 该字段用于指定评估指标是越高越好还是越低越好。如果值为1，则越高越好。如果值为0，则越低越好。
++   EVAL_HIGHER_IS_BETTER: 该字段用于指定评估指标是越高越好还是越低越好。如果值为 1，则越高越好。如果值为 0，则越低越好。
 
-+   SUBMISSION_ID_COLUMN: 该字段用于指定提交文件中id列的名称。
++   SUBMISSION_ID_COLUMN: 该字段用于指定提交文件中 id 列的名称。
 
 +   SUBMISSION_COLUMNS: 该字段用于指定提交文件中列的名称。名称必须用逗号分隔，不能有空格。
 
 +   SUBMISSION_ROWS: 该字段用于指定提交文件中不包括标题的行数。
 
-+   EVAL_METRIC: 该字段用于指定评估指标。我们支持所有scikit-learn指标甚至自定义指标。
++   EVAL_METRIC: 该字段用于指定评估指标。我们支持所有 scikit-learn 指标甚至自定义指标。
 
-+   LOGO: 该字段用于指定竞赛的logo。logo必须是一个png文件。logo显示在竞赛的所有页面上。
++   LOGO: 该字段用于指定竞赛的 logo。logo 必须是一个 png 文件。logo 显示在竞赛的所有页面上。
 
 +   DATASET: 该字段用于指定竞赛中使用的私密数据集。数据集仅在脚本运行期间对用户可用。仅用于脚本竞赛。
 
@@ -90,7 +90,7 @@ conf.json是竞赛的配置文件。下面显示了一个示例conf.json：
 
 ### solution.csv
 
-这个文件包含了竞赛的解决方案。这是一个csv文件。下面显示了一个示例：
+这个文件包含了竞赛的解决方案。这是一个 csv 文件。下面显示了一个示例：
 
 ```py
 id,pred,split
@@ -111,17 +111,17 @@ id,pred,split
 14,1,public
 ```
 
-解决方案文件用于评估提交。解决方案文件必须始终具有id列和split列。split列用于将解决方案分为公共部分和私有部分。split列可以有两个值：`public`和`private`。您可以在解决方案文件中有多个列。但是，评估指标必须支持多个列。
+解决方案文件用于评估提交。解决方案文件必须始终具有 id 列和 split 列。split 列用于将解决方案分为公共部分和私有部分。split 列可以有两个值：`public`和`private`。您可以在解决方案文件中有多个列。但是，评估指标必须支持多个列。
 
-例如，如果评估指标是`roc_auc_score`，则解决方案文件必须有两列：`id`和`pred`。id和pred列的名称可以是任意的。名称将从`conf.json`文件中获取。请确保在`conf.json`文件中有适当的列名，并且在解决方案文件中同时具有公共和私有拆分。
+例如，如果评估指标是`roc_auc_score`，则解决方案文件必须有两列：`id`和`pred`。id 和 pred 列的名称可以是任意的。名称将从`conf.json`文件中获取。请确保在`conf.json`文件中有适当的列名，并且在解决方案文件中同时具有公共和私有拆分。
 
 ### SUBMISSION_DESC.md
 
-这个文件包含提交的描述。这是一个markdown文件。您可以使用markdown语法来格式化文本并根据需要修改文件。提交描述显示在提交页面上。
+这个文件包含提交的描述。这是一个 markdown 文件。您可以使用 markdown 语法来格式化文本并根据需要修改文件。提交描述显示在提交页面上。
 
 在这里，您可以提及提交文件的格式，提交文件中需要哪些列等。
 
-对于上面显示的示例解决方案文件，提交文件必须有两列：`id`和`pred`。示例sample_submission.csv如下所示：
+对于上面显示的示例解决方案文件，提交文件必须有两列：`id`和`pred`。示例 sample_submission.csv 如下所示：
 
 ```py
 id,pred
@@ -148,12 +148,12 @@ id,pred
 
 ### 提交信息
 
-这个文件夹包含提交信息文件。每个提交信息文件包含有关提交的信息。当第一次提交时，将创建此文件夹。提交信息文件是json文件。
+这个文件夹包含提交信息文件。每个提交信息文件包含有关提交的信息。当第一次提交时，将创建此文件夹。提交信息文件是 json 文件。
 
 ### 提交
 
-这个文件夹包含用户提交的提交。每个提交是一个csv文件（或其他格式）。当第一次提交时，将创建此文件夹。
+这个文件夹包含用户提交的提交。每个提交是一个 csv 文件（或其他格式）。当第一次提交时，将创建此文件夹。
 
 ### 其他文件
 
-其他文件teams.json和user_team.json用于存储有关团队的信息。
+其他文件 teams.json 和 user_team.json 用于存储有关团队的信息。

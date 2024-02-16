@@ -1,6 +1,6 @@
 # Optimum Neuron Distributed
 
-> 原始文本：[https://huggingface.co/docs/optimum-neuron/package_reference/distributed](https://huggingface.co/docs/optimum-neuron/package_reference/distributed)
+> 原始文本：[`huggingface.co/docs/optimum-neuron/package_reference/distributed`](https://huggingface.co/docs/optimum-neuron/package_reference/distributed)
 
 `optimum.neuron.distributed`模块提供了一组工具来执行分布式训练和推理。
 
@@ -36,7 +36,7 @@
 
 +   `device` (`Optional[torch.device]`，默认为`None`) — 新并行层应该放置的设备。
 
-+   `parallelize_embeddings` (`bool`，默认为`True`) — 是否应该并行化嵌入。当TP大小不能整除词汇量大小时，可以禁用此选项。
++   `parallelize_embeddings` (`bool`，默认为`True`) — 是否应该并行化嵌入。当 TP 大小不能整除词汇量大小时，可以禁用此选项。
 
 +   `sequence_parallel_enabled` (`bool`，默认为`False`) — 是否启用序列并行性。
 
@@ -62,13 +62,13 @@
 
 +   `device` (`Optional[torch.device]`，默认为`None`) — 新并行层应该放置的设备。
 
-+   `parallelize_embeddings` (`bool`，默认为`True`) — 是否应该并行化嵌入。当TP大小不能整除词汇量大小时，可以禁用此选项。
++   `parallelize_embeddings` (`bool`，默认为`True`) — 是否应该并行化嵌入。当 TP 大小不能整除词汇量大小时，可以禁用此选项。
 
 +   `sequence_parallel_enabled` (`bool`，默认为`False`) — 是否启用序列并行性。
 
-+   `pipeline_parallel_num_microbatches` (`int`，默认为1) — 用于管道执行的微批次数。
++   `pipeline_parallel_num_microbatches` (`int`，默认为 1) — 用于管道执行的微批次数。
 
-+   `pipeline_parallel_use_zero1_optimizer` (`bool`，默认为`False`) — 当使用zero-1优化器时，将此选项设置为True，这样PP模型将了解zero-1优化器将处理数据并行梯度平均。
++   `pipeline_parallel_use_zero1_optimizer` (`bool`，默认为`False`) — 当使用 zero-1 优化器时，将此选项设置为 True，这样 PP 模型将了解 zero-1 优化器将处理数据并行梯度平均。
 
 +   `checkpoint_dir` (`Optional[Union[str, Path]]`) — 分片检查点的路径。如果指定，检查点权重将被加载到并行化模型中。
 
@@ -94,7 +94,7 @@
 
 +   `optimizer` (`torch.optim.Optimizer`) — 原始优化器。
 
-+   `orig_param_to_parallel_param_on_xla` (`Mapping[int, torch.nn.Parameter]`) — 将`optimizer`中参数的ID映射到其在XLA设备上的并行化对应项的映射（例如类似于字典）。
++   `orig_param_to_parallel_param_on_xla` (`Mapping[int, torch.nn.Parameter]`) — 将`optimizer`中参数的 ID 映射到其在 XLA 设备上的并行化对应项的映射（例如类似于字典）。
 
 返回
 
@@ -192,9 +192,9 @@
 
 参数
 
-+   `tensor_parallel_size` (`int`，默认为1）— 考虑的张量并行大小。
++   `tensor_parallel_size` (`int`，默认为 1）— 考虑的张量并行大小。
 
-+   `pipeline_parallel_size` (`int`，默认为1）— 考虑的管道并行大小。
++   `pipeline_parallel_size` (`int`，默认为 1）— 考虑的管道并行大小。
 
 上下文管理器，使模型加载变为延迟加载，用于模型并行性：
 
@@ -204,7 +204,7 @@
 
 +   实际上并未加载状态字典，而是创建了一个权重映射并附加到模型上。有关更多信息，请阅读 `optimum.neuron.distributed.utils.from_pretrained_for_mp` 的文档字符串。
 
-如果 `tensor_parallel_size` 和 `pipeline_parallel_size` 都设置为1，则不执行延迟加载。
+如果 `tensor_parallel_size` 和 `pipeline_parallel_size` 都设置为 1，则不执行延迟加载。
 
 `optimum.neuron.distributed.make_optimizer_constructor_lazy`
 

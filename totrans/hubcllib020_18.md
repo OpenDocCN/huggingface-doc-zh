@@ -1,14 +1,14 @@
 # 创建和分享模型卡
 
-> 原始文本：[https://huggingface.co/docs/huggingface_hub/guides/model-cards](https://huggingface.co/docs/huggingface_hub/guides/model-cards)
+> 原始文本：[`huggingface.co/docs/huggingface_hub/guides/model-cards`](https://huggingface.co/docs/huggingface_hub/guides/model-cards)
 
-`huggingface_hub`库提供了一个Python接口，用于创建、分享和更新模型卡。访问[专门的文档页面](https://huggingface.co/docs/hub/models-cards)以深入了解Hub上的模型卡是什么，以及它们在幕后是如何工作的。
+`huggingface_hub`库提供了一个 Python 接口，用于创建、分享和更新模型卡。访问[专门的文档页面](https://huggingface.co/docs/hub/models-cards)以深入了解 Hub 上的模型卡是什么，以及它们在幕后是如何工作的。
 
 [新（测试版）！尝试我们的实验性模型卡创建应用](https://huggingface.co/spaces/huggingface/Model_Cards_Writing_Tool)
 
-## 从Hub加载一个模型卡
+## 从 Hub 加载一个模型卡
 
-要从Hub加载现有卡片，您可以使用[ModelCard.load()](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.RepoCard.load)函数。在这里，我们将从[`nateraw/vit-base-beans`](https://huggingface.co/nateraw/vit-base-beans)加载卡片。
+要从 Hub 加载现有卡片，您可以使用 ModelCard.load()函数。在这里，我们将从[`nateraw/vit-base-beans`](https://huggingface.co/nateraw/vit-base-beans)加载卡片。
 
 ```py
 from huggingface_hub import ModelCard
@@ -18,7 +18,7 @@ card = ModelCard.load('nateraw/vit-base-beans')
 
 这张卡片有一些有用的属性，您可能希望访问/利用：
 
-+   `card.data`：返回一个[ModelCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.ModelCardData)实例，其中包含模型卡的元数据。在此实例上调用`.to_dict()`以获得表示为字典的表示。
++   `card.data`：返回一个 ModelCardData 实例，其中包含模型卡的元数据。在此实例上调用`.to_dict()`以获得表示为字典的表示。
 
 +   `card.text`：返回卡片的文本，*不包括元数据头*。
 
@@ -28,7 +28,7 @@ card = ModelCard.load('nateraw/vit-base-beans')
 
 ### 从文本
 
-要从文本初始化一个模型卡，只需将卡片的文本内容传递给`ModelCard`的init。
+要从文本初始化一个模型卡，只需将卡片的文本内容传递给`ModelCard`的 init。
 
 ```py
 content = """
@@ -44,11 +44,11 @@ card = ModelCard(content)
 card.data.to_dict() == {'language': 'en', 'license': 'mit'}  # True
 ```
 
-您可能想要以f-strings的方式来做这件事。在以下示例中，我们：
+您可能想要以 f-strings 的方式来做这件事。在以下示例中，我们：
 
-+   使用[ModelCardData.to_yaml()](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.CardData.to_yaml)将我们定义的元数据转换为YAML，以便我们可以将其用于在模型卡中插入YAML块。
++   使用 ModelCardData.to_yaml()将我们定义的元数据转换为 YAML，以便我们可以将其用于在模型卡中插入 YAML 块。
 
-+   展示了如何通过Python f-strings使用模板变量。
++   展示了如何通过 Python f-strings 使用模板变量。
 
 ```py
 card_data = ModelCardData(language='en', license='mit', library='timm')
@@ -81,9 +81,9 @@ library: timm
 This model created by [@nateraw](https://github.com/nateraw)
 ```
 
-### 从Jinja模板
+### 从 Jinja 模板
 
-如果您已安装`Jinja2`，您可以从一个Jinja模板文件创建模型卡。让我们看一个基本示例：
+如果您已安装`Jinja2`，您可以从一个 Jinja 模板文件创建模型卡。让我们看一个基本示例：
 
 ```py
 from pathlib import Path
@@ -116,7 +116,7 @@ card.save('my_model_card_1.md')
 print(card)
 ```
 
-生成的卡片的markdown如下：
+生成的卡片的 markdown 如下：
 
 ```py
 ---
@@ -131,7 +131,7 @@ This model does this and that.
 This model was created by [@nateraw](https://hf.co/nateraw).
 ```
 
-如果您更新任何card.data，它将反映在卡片本身上。
+如果您更新任何 card.data，它将反映在卡片本身上。
 
 ```py
 card.data.library_name = 'timm'
@@ -155,13 +155,13 @@ This model does this and that.
 This model was created by [@nateraw](https://hf.co/nateraw).
 ```
 
-当您更新卡片数据时，您可以通过调用[ModelCard.validate()](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.RepoCard.validate)来验证卡片仍然有效，并且符合在Hugging Face Hub上设置的任何验证规则。
+当您更新卡片数据时，您可以通过调用 ModelCard.validate()来验证卡片仍然有效，并且符合在 Hugging Face Hub 上设置的任何验证规则。
 
 ### 从默认模板
 
 而不是使用您自己的模板，您也可以使用[默认模板](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/modelcard_template.md)，这是一个功能齐全的模型卡，有很多部分您可能想要填写。在幕后，它使用[Jinja2](https://jinja.palletsprojects.com/en/3.1.x/)来填写模板文件。
 
-请注意，您必须安装Jinja2才能使用`from_template`。您可以使用`pip install Jinja2`来安装。
+请注意，您必须安装 Jinja2 才能使用`from_template`。您可以使用`pip install Jinja2`来安装。
 
 ```py
 card_data = ModelCardData(language='en', license='mit', library_name='keras')
@@ -178,7 +178,7 @@ print(card)
 
 ## 分享模型卡
 
-如果您已经通过`huggingface-cli login`或[login()](/docs/huggingface_hub/v0.20.3/en/package_reference/login#huggingface_hub.login)进行了Hugging Face Hub的身份验证，您可以通过简单调用[ModelCard.push_to_hub()](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.RepoCard.push_to_hub)将卡片推送到Hub。让我们看看如何做到这一点...
+如果您已经通过`huggingface-cli login`或 login()进行了 Hugging Face Hub 的身份验证，您可以通过简单调用 ModelCard.push_to_hub()将卡片推送到 Hub。让我们看看如何做到这一点...
 
 首先，我们将在经过身份验证的用户命名空间下创建一个名为‘hf-hub-modelcards-pr-test’的新存储库：
 
@@ -203,7 +203,7 @@ card = ModelCard.from_template(
 )
 ```
 
-最后，我们将把它推送到hub
+最后，我们将把它推送到 hub
 
 ```py
 card.push_to_hub(repo_id)
@@ -217,13 +217,13 @@ card.push_to_hub(repo_id)
 card.push_to_hub(repo_id, create_pr=True)
 ```
 
-从此命令创建的结果PR可以在[这里](https://huggingface.co/nateraw/hf-hub-modelcards-pr-test/discussions/3)看到。
+从此命令创建的结果 PR 可以在[这里](https://huggingface.co/nateraw/hf-hub-modelcards-pr-test/discussions/3)看到。
 
 ## 更新元数据
 
 在本节中，我们将看到存储库卡片中的元数据以及如何更新它们。
 
-`metadata`指的是一个哈希映射（或键值）上下文，提供有关模型、数据集或空间的一些高级信息。这些信息可以包括模型的`pipeline类型`、`model_id`或`model_description`等详细信息。有关更多详细信息，您可以查看这些指南：[模型卡片](https://huggingface.co/docs/hub/model-cards#model-card-metadata)、[数据集卡片](https://huggingface.co/docs/hub/datasets-cards#dataset-card-metadata)和[空间设置](https://huggingface.co/docs/hub/spaces-settings#spaces-settings)。现在让我们看一些关于如何更新这些元数据的示例。
+`metadata`指的是一个哈希映射（或键值）上下文，提供有关模型、数据集或空间的一些高级信息。这些信息可以包括模型的`pipeline 类型`、`model_id`或`model_description`等详细信息。有关更多详细信息，您可以查看这些指南：[模型卡片](https://huggingface.co/docs/hub/model-cards#model-card-metadata)、[数据集卡片](https://huggingface.co/docs/hub/datasets-cards#dataset-card-metadata)和[空间设置](https://huggingface.co/docs/hub/spaces-settings#spaces-settings)。现在让我们看一些关于如何更新这些元数据的示例。
 
 让我们从第一个示例开始：
 
@@ -241,7 +241,7 @@ card.push_to_hub(repo_id, create_pr=True)
 >>> metadata_update("username/my-cool-model", {"pipeline_tag": "text-generation"}, overwrite=True)
 ```
 
-经常发生的情况是，您想要对一个您没有写入权限的存储库提出一些更改建议。您可以通过在该存储库上创建一个PR来实现这一点，这将允许所有者审查并合并您的建议。
+经常发生的情况是，您想要对一个您没有写入权限的存储库提出一些更改建议。您可以通过在该存储库上创建一个 PR 来实现这一点，这将允许所有者审查并合并您的建议。
 
 ```py
 >>> from huggingface_hub import metadata_update
@@ -250,9 +250,9 @@ card.push_to_hub(repo_id, create_pr=True)
 
 ## 包括评估结果
 
-要在元数据`model-index`中包含评估结果，可以传递一个[EvalResult](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.EvalResult)或一个带有相关评估结果的`EvalResult`列表。在调用`card.data.to_dict()`时，它将创建`model-index`。有关此操作原理的更多信息，请查看[Hub文档的此部分](https://huggingface.co/docs/hub/models-cards#evaluation-results)。
+要在元数据`model-index`中包含评估结果，可以传递一个 EvalResult 或一个带有相关评估结果的`EvalResult`列表。在调用`card.data.to_dict()`时，它将创建`model-index`。有关此操作原理的更多信息，请查看[Hub 文档的此部分](https://huggingface.co/docs/hub/models-cards#evaluation-results)。
 
-请注意，使用此函数需要在[ModelCardData](/docs/huggingface_hub/v0.20.3/en/package_reference/cards#huggingface_hub.ModelCardData)中包含`model_name`属性。
+请注意，使用此函数需要在 ModelCardData 中包含`model_name`属性。
 
 ```py
 card_data = ModelCardData(

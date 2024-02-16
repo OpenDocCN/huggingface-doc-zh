@@ -1,14 +1,14 @@
 # 量化
 
-> 原文链接：[https://huggingface.co/docs/optimum/concept_guides/quantization](https://huggingface.co/docs/optimum/concept_guides/quantization)
+> 原文链接：[`huggingface.co/docs/optimum/concept_guides/quantization`](https://huggingface.co/docs/optimum/concept_guides/quantization)
 
-量化是一种通过使用低精度数据类型（如8位整数（`int8`））代替通常的32位浮点数（`float32`）来表示权重和激活来减少运行推断的计算和内存成本的技术。
+量化是一种通过使用低精度数据类型（如 8 位整数（`int8`））代替通常的 32 位浮点数（`float32`）来表示权重和激活来减少运行推断的计算和内存成本的技术。
 
 减少位数意味着结果模型需要更少的内存存储，消耗更少的能量（理论上），并且像矩阵乘法这样的操作可以通过整数运算更快地执行。它还允许在嵌入式设备上运行模型，有时这些设备只支持整数数据类型。
 
 ## 理论
 
-量化的基本思想非常简单：从高精度表示（通常是常规的32位浮点数）转换为较低精度数据类型，权重和激活。最常见的较低精度数据类型是：
+量化的基本思想非常简单：从高精度表示（通常是常规的 32 位浮点数）转换为较低精度数据类型，权重和激活。最常见的较低精度数据类型是：
 
 +   `float16`，累积数据类型`float16`
 
@@ -30,19 +30,19 @@ C = A + B
 
 最常见的量化情况是`float32 -> float16`和`float32 -> int8`。
 
-### 量化为float16
+### 量化为 float16
 
 将`float32`转换为`float16`的量化是非常简单的，因为这两种数据类型遵循相同的表示方案。在将操作量化为`float16`时，要问自己的问题是：
 
 +   我的操作是否有`float16`实现？
 
-+   我的硬件是否支持`float16`？例如，英特尔CPU[一直支持`float16`作为存储类型，但是计算是在转换为`float32`之后进行的](https://scicomp.stackexchange.com/a/35193)。完全支持将在Cooper Lake和Sapphire Rapids中实现。
++   我的硬件是否支持`float16`？例如，英特尔 CPU[一直支持`float16`作为存储类型，但是计算是在转换为`float32`之后进行的](https://scicomp.stackexchange.com/a/35193)。完全支持将在 Cooper Lake 和 Sapphire Rapids 中实现。
 
-+   我的操作对较低精度敏感吗？例如，在`LayerNorm`中epsilon的值通常非常小（~ `1e-12`），但在`float16`中最小的可表示值为~ `6e-5`，这可能会导致`NaN`问题。对于大值也是一样。
++   我的操作对较低精度敏感吗？例如，在`LayerNorm`中 epsilon 的值通常非常小（~ `1e-12`），但在`float16`中最小的可表示值为~ `6e-5`，这可能会导致`NaN`问题。对于大值也是一样。
 
-### 量化为int8
+### 量化为 int8
 
-将`float32`转换为`int8`的量化更加棘手。在`int8`中只能表示256个值，而`float32`可以表示非常广泛的值。关键是找到将我们的`float32`值范围`[a, b]`投影到`int8`空间的最佳方法。
+将`float32`转换为`int8`的量化更加棘手。在`int8`中只能表示 256 个值，而`float32`可以表示非常广泛的值。关键是找到将我们的`float32`值范围`[a, b]`投影到`int8`空间的最佳方法。
 
 让我们考虑一个在`[a, b]`中的浮点数`x`，然后我们可以编写以下量化方案，也称为*仿射量化方案*：
 
@@ -79,9 +79,9 @@ x_q = clip(round(x/S + Z), round(a/S + Z), round(b/S + Z))
 
 上面的方程被称为*仿射量化方案*，因为从`[a, b]`到`int8`的映射是仿射的。
 
-这个方案的一个常见特例是*对称量化方案*，其中我们考虑浮点值的对称范围`[-a, a]`。在这种情况下，整数空间通常是`[-127, 127]`，这意味着`-128`被排除在常规的`[-128, 127]`有符号`int8`范围之外。原因是两个范围都对称允许有`Z = 0`。虽然失去了256个可表示值中的一个，但它可以提供加速，因为很多加法操作可以被跳过。
+这个方案的一个常见特例是*对称量化方案*，其中我们考虑浮点值的对称范围`[-a, a]`。在这种情况下，整数空间通常是`[-127, 127]`，这意味着`-128`被排除在常规的`[-128, 127]`有符号`int8`范围之外。原因是两个范围都对称允许有`Z = 0`。虽然失去了 256 个可表示值中的一个，但它可以提供加速，因为很多加法操作可以被跳过。
 
-**注意**：要了解量化参数`S`和`Z`是如何计算的，可以阅读[用于高效整数运算推断的神经网络量化和训练](https://arxiv.org/abs/1712.05877)论文，或者关于这个主题的[Lei Mao的博客文章](https://leimao.github.io/article/Neural-Networks-Quantization)。
+**注意**：要了解量化参数`S`和`Z`是如何计算的，可以阅读[用于高效整数运算推断的神经网络量化和训练](https://arxiv.org/abs/1712.05877)论文，或者关于这个主题的[Lei Mao 的博客文章](https://leimao.github.io/article/Neural-Networks-Quantization)。
 
 ### 每个张量和每个通道的量化
 
@@ -121,15 +121,15 @@ x_q = clip(round(x/S + Z), round(a/S + Z), round(b/S + Z))
 
     +   均方误差：范围是通过最小化全精度和量化数据之间的均方误差来计算的。
 
-    +   百分位数：使用给定的百分位数值`p`在观察值上计算范围。其思想是尝试使计算范围中有`p%`的观察值。在进行仿射量化时，这是可能的，但在进行对称量化时，不总是可能完全匹配。您可以查看[ONNX Runtime中的实现方式](https://github.com/microsoft/onnxruntime/blob/2cb12caf9317f1ded37f6db125cb03ba99320c40/onnxruntime/python/tools/quantization/calibrate.py#L698)以获取更多详细信息。
+    +   百分位数：使用给定的百分位数值`p`在观察值上计算范围。其思想是尝试使计算范围中有`p%`的观察值。在进行仿射量化时，这是可能的，但在进行对称量化时，不总是可能完全匹配。您可以查看[ONNX Runtime 中的实现方式](https://github.com/microsoft/onnxruntime/blob/2cb12caf9317f1ded37f6db125cb03ba99320c40/onnxruntime/python/tools/quantization/calibrate.py#L698)以获取更多详细信息。
 
-### 将模型量化为int8的实用步骤
+### 将模型量化为 int8 的实用步骤
 
 要有效地将模型量化为`int8`，需要遵循以下步骤：
 
 1.  选择要量化的运算符。好的运算符是在计算时间方面占主导地位的运算符，例如线性投影和矩阵乘法。
 
-1.  尝试后训练动态量化，如果足够快则在此停止，否则继续到第3步。
+1.  尝试后训练动态量化，如果足够快则在此停止，否则继续到第 3 步。
 
 1.  尝试后训练静态量化，这可能比动态量化更快，但通常会导致精度下降。在希望量化的模型中应用观察器。
 
@@ -137,19 +137,19 @@ x_q = clip(round(x/S + Z), round(a/S + Z), round(b/S + Z))
 
 1.  将模型转换为其量化形式：观察器被移除，`float32`运算符被转换为它们的`int8`对应项。
 
-1.  评估量化模型：精度是否足够好？如果是，就在这里停止，否则从第3步重新开始，但这次进行量化感知训练。
+1.  评估量化模型：精度是否足够好？如果是，就在这里停止，否则从第 3 步重新开始，但这次进行量化感知训练。
 
-## 支持在🤗 Optimum中执行量化的工具
+## 支持在🤗 Optimum 中执行量化的工具
 
-🤗 Optimum提供了使用不同工具为不同目标执行量化的API。
+🤗 Optimum 提供了使用不同工具为不同目标执行量化的 API。
 
-+   `optimum.onnxruntime`包允许[量化和运行ONNX模型](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/quantization)使用ONNX Runtime工具。
++   `optimum.onnxruntime`包允许[量化和运行 ONNX 模型](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/quantization)使用 ONNX Runtime 工具。
 
-+   `optimum.intel`包使得可以在尊重精度和延迟约束的情况下[量化](https://huggingface.co/docs/optimum/intel/optimization_inc)🤗 Transformers模型。
++   `optimum.intel`包使得可以在尊重精度和延迟约束的情况下[量化](https://huggingface.co/docs/optimum/intel/optimization_inc)🤗 Transformers 模型。
 
-+   `optimum.fx`包提供了对[PyTorch量化函数](https://pytorch.org/docs/stable/quantization-support.html#torch-quantization-quantize-fx)的包装，以允许在PyTorch中以图模式量化🤗 Transformers模型。与上述两种方法相比，这是一个更低级别的API，提供更多灵活性，但需要您做更多工作。
++   `optimum.fx`包提供了对[PyTorch 量化函数](https://pytorch.org/docs/stable/quantization-support.html#torch-quantization-quantize-fx)的包装，以允许在 PyTorch 中以图模式量化🤗 Transformers 模型。与上述两种方法相比，这是一个更低级别的 API，提供更多灵活性，但需要您做更多工作。
 
-+   `optimum.gptq`包允许使用GPTQ[量化和运行LLM模型](../llm_quantization/usage_guides/quantization)。
++   `optimum.gptq`包允许使用 GPTQ 量化和运行 LLM 模型。
 
 ## 进一步了解：机器如何表示数字？
 
@@ -163,13 +163,13 @@ x_q = clip(round(x/S + Z), round(a/S + Z), round(b/S + Z))
 
 1.  无符号（正）整数：它们简单地表示为一系列位。每个位对应于二的幂（从`0`到`n-1`，其中`n`是位长度），结果数字是这些二的幂的和。
 
-示例：`19`表示为无符号int8为`00010011`，因为：
+示例：`19`表示为无符号 int8 为`00010011`，因为：
 
 ```py
-19 = 0 x 2^7 + 0 x 2^6 + 0 x 2^5 + 1 x 2^4 + 0 x 2^3 + 0 x 2^2 + 1 x 2^1 + 1 x 2^0
+19 = 0 x 2⁷ + 0 x 2⁶ + 0 x 2⁵ + 1 x 2⁴ + 0 x 2³ + 0 x 2² + 1 x 2¹ + 1 x 2⁰
 ```
 
-1.  有符号整数：表示有符号整数不那么直接，存在多种方法，最常见的是*二进制补码*。有关更多信息，您可以查看有关该主题的[Wikipedia页面](https://en.wikipedia.org/wiki/Signed_number_representations)。
+1.  有符号整数：表示有符号整数不那么直接，存在多种方法，最常见的是*二进制补码*。有关更多信息，您可以查看有关该主题的[Wikipedia 页面](https://en.wikipedia.org/wiki/Signed_number_representations)。
 
 #### 实数表示
 
@@ -185,25 +185,25 @@ x_q = clip(round(x/S + Z), round(a/S + Z), round(b/S + Z))
 
 1.  指数部分
 
-+   在`float16`中有5位
++   在`float16`中有 5 位
 
-+   在`bfloat16`中有8位
++   在`bfloat16`中有 8 位
 
-+   在`float32`中有8位
++   在`float32`中有 8 位
 
-+   在`float64`中有11位
++   在`float64`中有 11 位
 
 1.  尾数
 
-+   在`float16`中有11位（10位明确存储）
++   在`float16`中有 11 位（10 位明确存储）
 
-+   在`bfloat16`中有8位（7位明确存储）
++   在`bfloat16`中有 8 位（7 位明确存储）
 
-+   在`float32`中有24位（23位明确存储）
++   在`float32`中有 24 位（23 位明确存储）
 
-+   在`float64`中有53位（52位明确存储）
++   在`float64`中有 53 位（52 位明确存储）
 
-有关每种数据类型的位分配的更多信息，请查看维基百科页面上关于[bfloat16浮点格式](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)的漂亮插图。
+有关每种数据类型的位分配的更多信息，请查看维基百科页面上关于[bfloat16 浮点格式](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)的漂亮插图。
 
 对于实数`x`，我们有：
 
@@ -223,7 +223,7 @@ x = sign x mantissa x (2^exponent)
 
 +   关于维基百科页面
 
-    +   [bfloat16浮点格式](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)
+    +   [bfloat16 浮点格式](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)
 
     +   [半精度浮点格式](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
 

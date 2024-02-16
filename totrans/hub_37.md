@@ -1,18 +1,18 @@
 # 空间上的磁盘使用
 
-> 原文链接：[https://huggingface.co/docs/hub/spaces-storage](https://huggingface.co/docs/hub/spaces-storage)
+> 原文链接：[`huggingface.co/docs/hub/spaces-storage`](https://huggingface.co/docs/hub/spaces-storage)
 
 每个空间都配备了一小部分磁盘存储空间。这个磁盘空间是临时的，这意味着如果您的空间重新启动或停止，其内容将丢失。如果您需要将数据保留比空间本身寿命更长的时间，您可以：
 
-+   [订阅持久性存储升级](#persistent-storage)
++   订阅持久性存储升级
 
-+   [将数据集用作数据存储](#dataset-storage)
++   将数据集用作数据存储
 
 ## 持久性存储
 
 您可以通过**设置**选项卡将您的空间升级以访问持久性磁盘空间。
 
-![](../Images/023331a1d708e8029ceb67fd856bf25a.png) ![](../Images/9ca4c896a5340cb7000e3726eccfb651.png)
+![](img/023331a1d708e8029ceb67fd856bf25a.png) ![](img/9ca4c896a5340cb7000e3726eccfb651.png)
 
 您可以选择您喜欢的存储级别，以访问在您的空间重新启动时保持不变的磁盘空间。
 
@@ -43,11 +43,11 @@
 
 持久性存储升级将在删除之前计费，即使空间未运行，也不管空间状态或运行状态如何。
 
-有关计费的其他信息可以在[专用 Hub 全局部分](./billing)中找到。
+有关计费的其他信息可以在专用 Hub 全局部分中找到。
 
 ## 数据集存储
 
-如果您需要持久化比您的空间寿命更长的数据，您可以使用[数据集仓库](./datasets)。
+如果您需要持久化比您的空间寿命更长的数据，您可以使用数据集仓库。
 
 您可以在[这里](https://huggingface.co/spaces/Wauplin/space_to_dataset_saver)找到一个持久性的示例，该示例使用[`huggingface_hub`库](https://huggingface.co/docs/huggingface_hub/index)来以编程方式将文件上传到数据集存储库。这个空间示例以及[这个指南](https://huggingface.co/docs/huggingface_hub/main/en/guides/upload#scheduled-uploads)将帮助您确定哪种解决方案最适合您的数据类型。
 

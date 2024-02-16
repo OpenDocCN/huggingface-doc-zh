@@ -1,12 +1,12 @@
 # 接口：CommitFile
 
-> 原文：[https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitFile](https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitFile)
+> 原文：[`huggingface.co/docs/huggingface.js/hub/interfaces/CommitFile`](https://huggingface.co/docs/huggingface.js/hub/interfaces/CommitFile)
 
 ## 属性
 
 ### 内容
 
-• `content`: [`ContentSource`](../modules#contentsource)
+• `content`: `ContentSource`
 
 #### 定义在
 

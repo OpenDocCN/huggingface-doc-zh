@@ -1,28 +1,28 @@
-# 消息API
+# 消息 API
 
-> 原始文本：[https://huggingface.co/docs/text-generation-inference/messages_api](https://huggingface.co/docs/text-generation-inference/messages_api)
+> 原始文本：[`huggingface.co/docs/text-generation-inference/messages_api`](https://huggingface.co/docs/text-generation-inference/messages_api)
 
-文本生成推理（TGI）现在支持消息API，与OpenAI聊天完成API完全兼容。此功能从版本1.4.0开始提供。您可以使用OpenAI的客户端库或期望OpenAI模式的第三方库与TGI的消息API进行交互。以下是一些如何利用此兼容性的示例。
+文本生成推理（TGI）现在支持消息 API，与 OpenAI 聊天完成 API 完全兼容。此功能从版本 1.4.0 开始提供。您可以使用 OpenAI 的客户端库或期望 OpenAI 模式的第三方库与 TGI 的消息 API 进行交互。以下是一些如何利用此兼容性的示例。
 
-> **注意：**消息API支持TGI版本1.4.0及以上。确保您使用兼容版本以访问此功能。
+> **注意：**消息 API 支持 TGI 版本 1.4.0 及以上。确保您使用兼容版本以访问此功能。
 
 #### 目录
 
-+   [发出请求](#making-a-request)
++   发出请求
 
-+   [流式传输](#streaming)
++   流式传输
 
-+   [同步](#synchronous)
++   同步
 
-+   [拥抱脸推理端点](#hugging-face-inference-endpoints)
++   拥抱脸推理端点
 
-+   [云服务提供商](#cloud-providers)
++   云服务提供商
 
-    +   [亚马逊SageMaker](#amazon-sagemaker)
+    +   亚马逊 SageMaker
 
 ## 发出请求
 
-您可以使用`curl`向TGI的消息API发出请求。以下是一个示例：
+您可以使用`curl`向 TGI 的消息 API 发出请求。以下是一个示例：
 
 ```py
 curl localhost:3000/v1/chat/completions \
@@ -47,7 +47,7 @@ curl localhost:3000/v1/chat/completions \
 
 ## 流式传输
 
-您还可以使用OpenAI的Python客户端库发出流式请求。以下是如何操作的示例：
+您还可以使用 OpenAI 的 Python 客户端库发出流式请求。以下是如何操作的示例：
 
 ```py
 from openai import OpenAI
@@ -99,11 +99,11 @@ print(chat_completion)
 
 ## 拥抱脸推理端点
 
-消息API已与[推理端点](https://huggingface.co/inference-endpoints/dedicated)集成。
+消息 API 已与[推理端点](https://huggingface.co/inference-endpoints/dedicated)集成。
 
-现在可以使用具有聊天模板的LLM的“文本生成推理”来使用每个端点。以下是如何使用OpenAI的Python客户端库与TGI一起使用IE的示例：
+现在可以使用具有聊天模板的 LLM 的“文本生成推理”来使用每个端点。以下是如何使用 OpenAI 的 Python 客户端库与 TGI 一起使用 IE 的示例：
 
-> **注意：**确保将`base_url`替换为您的端点URL，并在URL末尾包含`v1/`。`api_key`应替换为您的拥抱脸API密钥。
+> **注意：**确保将`base_url`替换为您的端点 URL，并在 URL 末尾包含`v1/`。`api_key`应替换为您的拥抱脸 API 密钥。
 
 ```py
 from openai import OpenAI
@@ -132,13 +132,13 @@ for message in chat_completion:
 
 ## 云服务提供商
 
-TGI可以部署在各种云提供商上，用于可扩展和强大的文本生成。亚马逊SageMaker是其中之一，最近已添加对TGI的支持。以下是如何在亚马逊SageMaker上部署TGI的方法：
+TGI 可以部署在各种云提供商上，用于可扩展和强大的文本生成。亚马逊 SageMaker 是其中之一，最近已添加对 TGI 的支持。以下是如何在亚马逊 SageMaker 上部署 TGI 的方法：
 
-## 亚马逊SageMaker
+## 亚马逊 SageMaker
 
-要在亚马逊SageMaker中启用消息API，您需要设置环境变量`MESSAGES_API_ENABLED=true`。
+要在亚马逊 SageMaker 中启用消息 API，您需要设置环境变量`MESSAGES_API_ENABLED=true`。
 
-这将修改`/invocations`路由以接受由角色和内容组成的消息字典。请参考下面的示例，了解如何使用新的消息API部署Llama。
+这将修改`/invocations`路由以接受由角色和内容组成的消息字典。请参考下面的示例，了解如何使用新的消息 API 部署 Llama。
 
 ```py
 import json

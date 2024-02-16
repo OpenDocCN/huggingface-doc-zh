@@ -1,6 +1,6 @@
-# RL文档简介
+# RL 文档简介
 
-> 原文链接：[https://huggingface.co/learn/deep-rl-course/unitbonus3/rl-documentation](https://huggingface.co/learn/deep-rl-course/unitbonus3/rl-documentation)
+> 原文链接：[`huggingface.co/learn/deep-rl-course/unitbonus3/rl-documentation`](https://huggingface.co/learn/deep-rl-course/unitbonus3/rl-documentation)
 
 在这个高级主题中，我们探讨一个问题：**我们应该如何监控和跟踪我们在现实世界中训练并与人类交互的强化学习代理？**
 
@@ -8,9 +8,9 @@
 
 这样的文档可以涵盖诸如使用的训练数据 - 存储位置、收集时间、参与者等 - 或模型优化框架 - 架构、评估指标、相关论文等 - 等方面。
 
-如今，模型卡片和数据表格越来越普遍。例如，在Hub上（查看文档[这里](https://huggingface.co/docs/hub/model-cards)）。
+如今，模型卡片和数据表格越来越普遍。例如，在 Hub 上（查看文档[这里](https://huggingface.co/docs/hub/model-cards)）。
 
-如果您点击[Hub上的热门模型](https://huggingface.co/models)，您可以了解其创建过程。
+如果您点击[Hub 上的热门模型](https://huggingface.co/models)，您可以了解其创建过程。
 
 这些特定于模型和数据的日志被设计为在创建模型或数据集时完成，当这些模型被构建到未来的演变系统中时，它们将不再更新。​
 
@@ -20,23 +20,23 @@
 
 为此，作者们介绍了《强化学习奖励报告》（简洁的命名旨在模仿流行论文《模型报告的模型卡片》和《数据集的数据表格》）。目标是提出一种关注**奖励的人类因素**和**时变反馈系统**的文档类型。
 
-在Mitchell等人和Gebru等人提出的[模型卡片](https://arxiv.org/abs/1810.03993)和[数据表格](https://arxiv.org/abs/1803.09010)的文档框架基础上，我们认为AI系统需要奖励报告。
+在 Mitchell 等人和 Gebru 等人提出的[模型卡片](https://arxiv.org/abs/1810.03993)和[数据表格](https://arxiv.org/abs/1803.09010)的文档框架基础上，我们认为 AI 系统需要奖励报告。
 
-**奖励报告**是为拟议的RL部署而设计的活动文档，标明设计选择。
+**奖励报告**是为拟议的 RL 部署而设计的活动文档，标明设计选择。
 
-然而，关于这种框架在不同RL应用中的适用性、系统可解释性的障碍以及部署的监督机器学习系统与RL中使用的顺序决策之间的共鸣仍有许多问题。
+然而，关于这种框架在不同 RL 应用中的适用性、系统可解释性的障碍以及部署的监督机器学习系统与 RL 中使用的顺序决策之间的共鸣仍有许多问题。
 
-至少，奖励报告是供RL从业者思考这些问题并开始决定如何在实践中解决它们的机会。​
+至少，奖励报告是供 RL 从业者思考这些问题并开始决定如何在实践中解决它们的机会。​
 
 ## 通过文档捕捉时间行为
 
-为RL和反馈驱动的ML系统设计的文档的核心部分是*变更日志*。变更日志更新了设计者的信息（更改的训练参数、数据等）以及用户的注意到的变化（有害行为、意外响应等）。
+为 RL 和反馈驱动的 ML 系统设计的文档的核心部分是*变更日志*。变更日志更新了设计者的信息（更改的训练参数、数据等）以及用户的注意到的变化（有害行为、意外响应等）。
 
 变更日志伴随着更新触发器，鼓励监控这些影响。
 
 ## 贡献
 
-一些最有影响力的RL驱动系统是多利益相关者性质的，并且在私营公司的闭门之后。这些公司大多没有监管，因此文档的负担落在公众身上。
+一些最有影响力的 RL 驱动系统是多利益相关者性质的，并且在私营公司的闭门之后。这些公司大多没有监管，因此文档的负担落在公众身上。
 
 如果您有兴趣贡献，我们正在为流行的机器学习系统在[GitHub](https://github.com/RewardReports/reward-reports)上建立奖励报告的公开记录。更多阅读，请访问奖励报告[论文](https://arxiv.org/abs/2204.10817)或查看[示例报告](https://github.com/RewardReports/reward-reports/tree/main/examples)。
 

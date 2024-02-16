@@ -1,12 +1,12 @@
 # 接口：TextGenerationStreamOutput
 
-> 原始文本：[https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamOutput](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamOutput)
+> 原始文本：[`huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamOutput`](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamOutput)
 
 ## 属性
 
 ### 细节
 
-• `details`: `null` | [`TextGenerationStreamDetails`](TextGenerationStreamDetails)
+• `details`: `null` | `TextGenerationStreamDetails`
 
 生成细节 仅在生成完成时可用
 
@@ -30,7 +30,7 @@
 
 ### 令牌
 
-• `token`: [`TextGenerationStreamToken`](TextGenerationStreamToken)
+• `token`: `TextGenerationStreamToken`
 
 逐个生成的令牌
 

@@ -1,10 +1,10 @@
-# 管道API
+# 管道 API
 
-> 原文：[https://huggingface.co/docs/transformers.js/pipelines](https://huggingface.co/docs/transformers.js/pipelines)
+> 原文：[`huggingface.co/docs/transformers.js/pipelines`](https://huggingface.co/docs/transformers.js/pipelines)
 
-就像[transformers Python库](https://github.com/huggingface/transformers)一样，Transformers.js为用户提供了一个简单的方式来利用transformers的强大功能。`pipeline()`函数是使用预训练模型进行推断的最简单最快的方式。
+就像[transformers Python 库](https://github.com/huggingface/transformers)一样，Transformers.js 为用户提供了一个简单的方式来利用 transformers 的强大功能。`pipeline()`函数是使用预训练模型进行推断的最简单最快的方式。
 
-要查看可用任务/管道的完整列表，请查看[此表](#available-tasks)。
+要查看可用任务/管道的完整列表，请查看此表。
 
 ## 基础知识
 
@@ -18,7 +18,7 @@ let classifier = await pipeline('sentiment-analysis');
 
 第一次运行时，`pipeline`将下载并缓存与任务相关的默认预训练模型。这可能需要一些时间，但后续调用将快得多。
 
-默认情况下，模型将从[Hugging Face Hub](https://huggingface.co/models)下载并存储在[浏览器缓存](https://developer.mozilla.org/en-US/docs/Web/API/Cache)中，但也有方法可以指定自定义模型和缓存位置。有关更多信息，请参见[这里](./custom_usage)。
+默认情况下，模型将从[Hugging Face Hub](https://huggingface.co/models)下载并存储在[浏览器缓存](https://developer.mozilla.org/en-US/docs/Web/API/Cache)中，但也有方法可以指定自定义模型和缓存位置。有关更多信息，请参见这里。
 
 现在，您可以通过将其作为函数调用来在目标文本上使用分类器：
 
@@ -34,7 +34,7 @@ let result = await classifier(['I love transformers!', 'I hate transformers!']);
 // [{'label': 'POSITIVE', 'score': 0.9998}, {'label': 'NEGATIVE', 'score': 0.9982}]
 ```
 
-您还可以通过将其作为`pipeline()`函数的第二个参数传递来指定要用于管道的不同模型。例如，要为情感分析使用不同的模型（例如训练为预测评论情感的模型，评分为1到5颗星），您可以这样做：
+您还可以通过将其作为`pipeline()`函数的第二个参数传递来指定要用于管道的不同模型。例如，要为情感分析使用不同的模型（例如训练为预测评论情感的模型，评分为 1 到 5 颗星），您可以这样做：
 
 ```py
 let reviewer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
@@ -43,9 +43,9 @@ let result = await reviewer('The Shawshank Redemption is a true masterpiece of c
 // [{label: '5 stars', score: 0.8167929649353027}]
 ```
 
-Transformers.js支持加载托管在Hugging Face Hub上的任何模型，前提是它具有ONNX权重（位于名为`onnx`的子文件夹中）。有关如何将您的PyTorch、TensorFlow或JAX模型转换为ONNX的更多信息，请参见[转换部分](./custom_usage#convert-your-models-to-onnx)。
+Transformers.js 支持加载托管在 Hugging Face Hub 上的任何模型，前提是它具有 ONNX 权重（位于名为`onnx`的子文件夹中）。有关如何将您的 PyTorch、TensorFlow 或 JAX 模型转换为 ONNX 的更多信息，请参见转换部分。
 
-`pipeline()`函数是快速使用预训练模型进行推断的好方法，因为它会为您处理所有的预处理和后处理。例如，如果您想使用OpenAI的Whisper模型进行自动语音识别（ASR），您可以这样做：
+`pipeline()`函数是快速使用预训练模型进行推断的好方法，因为它会为您处理所有的预处理和后处理。例如，如果您想使用 OpenAI 的 Whisper 模型进行自动语音识别（ASR），您可以这样做：
 
 ```py
 // Allocate a pipeline for Automatic Speech Recognition
@@ -60,7 +60,7 @@ let result = await transcriber('https://huggingface.co/datasets/Narsil/asr_dummy
 
 ### 加载
 
-我们提供了各种选项来控制如何从Hugging Face Hub（或本地）加载模型。默认情况下，使用模型的*量化*版本，这个版本更小更快，但通常不太准确。要覆盖此行为（即使用未量化的模型），您可以将自定义的`PretrainedOptions`对象作为`pipeline`函数的第三个参数：
+我们提供了各种选项来控制如何从 Hugging Face Hub（或本地）加载模型。默认情况下，使用模型的*量化*版本，这个版本更小更快，但通常不太准确。要覆盖此行为（即使用未量化的模型），您可以将自定义的`PretrainedOptions`对象作为`pipeline`函数的第三个参数：
 
 ```py
 // Allocation a pipeline for feature extraction, using the unquantized model
@@ -69,7 +69,7 @@ const pipe = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
 });
 ```
 
-您还可以通过传递`revision`参数来指定要使用的模型的修订版。由于Hugging Face Hub使用基于git的版本控制系统，您可以使用任何有效的git修订说明符（例如分支名称或提交哈希）
+您还可以通过传递`revision`参数来指定要使用的模型的修订版。由于 Hugging Face Hub 使用基于 git 的版本控制系统，您可以使用任何有效的 git 修订说明符（例如分支名称或提交哈希）
 
 ```py
 let transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en', {
@@ -77,7 +77,7 @@ let transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper
 });
 ```
 
-要查看完整的选项列表，请查看[PretrainedOptions](./api/utils/hub#module_utils/hub..PretrainedOptions)文档。
+要查看完整的选项列表，请查看 PretrainedOptions 文档。
 
 ### 运行
 
@@ -102,7 +102,7 @@ let result2 = await translator(result[0].translation_text, {
 // [ { translation_text: 'I like to walk my dog.' } ]
 ```
 
-当使用支持自回归生成的模型时，您可以指定生成参数，如新标记的数量、采样方法、温度、重复惩罚等。有关可用参数的完整列表，请参见[GenerationConfig](./api/utils/generation#module_utils/generation.GenerationConfig)类。
+当使用支持自回归生成的模型时，您可以指定生成参数，如新标记的数量、采样方法、温度、重复惩罚等。有关可用参数的完整列表，请参见 GenerationConfig 类。
 
 例如，要使用`LaMini-Flan-T5-783M`生成一首诗，您可以这样做：
 
@@ -131,7 +131,7 @@ Cheddar is my go-to for any occasion or mood;
 It adds depth and richness without being overpowering its taste buds alone
 ```
 
-有关每个管道可用选项的更多信息，请参阅[API参考](./api/pipelines)。如果您想对推断过程有更多控制，可以使用[`AutoModel`](./api/models)、[`AutoTokenizer`](./api/tokenizers)或[`AutoProcessor`](./api/processors)类。
+有关每个管道可用选项的更多信息，请参阅 API 参考。如果您想对推断过程有更多控制，可以使用`AutoModel`、`AutoTokenizer`或`AutoProcessor`类。
 
 ## 可用任务
 

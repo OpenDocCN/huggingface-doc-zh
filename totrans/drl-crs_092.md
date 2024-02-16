@@ -1,6 +1,6 @@
 # 测验
 
-> 原文：[https://huggingface.co/learn/deep-rl-course/unit7/quiz](https://huggingface.co/learn/deep-rl-course/unit7/quiz)
+> 原文：[`huggingface.co/learn/deep-rl-course/unit7/quiz`](https://huggingface.co/learn/deep-rl-course/unit7/quiz)
 
 学习和[避免能力错觉](https://www.coursera.org/lecture/learning-how-to-learn/illusions-of-competence-BuFzf)的最佳方法**是测试自己**。这将帮助您找到**需要加强知识的地方**。
 
@@ -30,6 +30,6 @@
 
 +   对手更换率
 
-### Q6: 使用ELO评分的主要动机是什么？
+### Q6: 使用 ELO 评分的主要动机是什么？
 
 恭喜您完成了这个测验🥳，如果您错过了一些元素，请花时间再次阅读章节，以加强（😏）您的知识。

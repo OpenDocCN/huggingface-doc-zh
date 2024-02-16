@@ -1,10 +1,10 @@
 # ClickHouse
 
-> 原始文本：[https://huggingface.co/docs/datasets-server/clickhouse](https://huggingface.co/docs/datasets-server/clickhouse)
+> 原始文本：[`huggingface.co/docs/datasets-server/clickhouse`](https://huggingface.co/docs/datasets-server/clickhouse)
 
-[ClickHouse](https://clickhouse.com/docs/en/intro)是一个用于分析工作负载的快速高效的列式数据库，使用SQL轻松分析Hub托管的数据集。要快速开始，请使用[`clickhouse-local`](https://clickhouse.com/docs/en/operations/utilities/clickhouse-local)在命令行中运行SQL查询，避免完全安装ClickHouse的需要。
+[ClickHouse](https://clickhouse.com/docs/en/intro)是一个用于分析工作负载的快速高效的列式数据库，使用 SQL 轻松分析 Hub 托管的数据集。要快速开始，请使用[`clickhouse-local`](https://clickhouse.com/docs/en/operations/utilities/clickhouse-local)在命令行中运行 SQL 查询，避免完全安装 ClickHouse 的需要。
 
-查看这篇[博客](https://clickhouse.com/blog/query-analyze-hugging-face-datasets-with-clickhouse)了解如何使用ClickHouse分析Hub上的数据集的更多细节。
+查看这篇[博客](https://clickhouse.com/blog/query-analyze-hugging-face-datasets-with-clickhouse)了解如何使用 ClickHouse 分析 Hub 上的数据集的更多细节。
 
 首先，下载并安装`clickhouse-local`：
 
@@ -12,7 +12,7 @@
 curl https://clickhouse.com/ | sh
 ```
 
-在这个例子中，您将分析包含有关Spotify歌曲信息的[maharshipandya/spotify-tracks-dataset](https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset)。Hub上的数据集存储为Parquet文件，您可以使用[`/parquet`](parquet)端点访问它：
+在这个例子中，您将分析包含有关 Spotify 歌曲信息的[maharshipandya/spotify-tracks-dataset](https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset)。Hub 上的数据集存储为 Parquet 文件，您可以使用`/parquet`端点访问它：
 
 ```py
 import requests
@@ -26,9 +26,9 @@ url
 
 ## 聚合函数
 
-现在您可以开始分析数据集了。使用`-q`参数指定要执行的查询，并使用[`url`](https://clickhouse.com/docs/en/sql-reference/table-functions/url)函数从Parquet文件中的数据创建表。
+现在您可以开始分析数据集了。使用`-q`参数指定要执行的查询，并使用[`url`](https://clickhouse.com/docs/en/sql-reference/table-functions/url)函数从 Parquet 文件中的数据创建表。
 
-您应该将`enable_url_encoding`设置为0，以确保URL中的转义字符按预期保留，并将`max_https_get_redirects`设置为1，以便重定向到Parquet文件的路径。
+您应该将`enable_url_encoding`设置为 0，以确保 URL 中的转义字符按预期保留，并将`max_https_get_redirects`设置为 1，以便重定向到 Parquet 文件的路径。
 
 让我们从识别最受欢迎的艺术家开始：
 
@@ -50,7 +50,7 @@ url
 └─────┴─────────────────┘
 ```
 
-ClickHouse还提供了用于可视化查询的函数。例如，您可以使用[`bar`](https://clickhouse.com/docs/en/sql-reference/functions/other-functions#bar)函数创建歌曲舞蹈性的柱状图：
+ClickHouse 还提供了用于可视化查询的函数。例如，您可以使用[`bar`](https://clickhouse.com/docs/en/sql-reference/functions/other-functions#bar)函数创建歌曲舞蹈性的柱状图：
 
 ```py
 ./clickhouse local -q "
@@ -77,25 +77,25 @@ ClickHouse还提供了用于可视化查询的函数。例如，您可以使用[
 └──────────────┴──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-为了更深入地了解数据集，ClickHouse提供了用于确定数据相关性、计算统计假设检验等的统计分析函数。查看ClickHouse的[聚合函数列表](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference)获取可用聚合函数的完整列表。
+为了更深入地了解数据集，ClickHouse 提供了用于确定数据相关性、计算统计假设检验等的统计分析函数。查看 ClickHouse 的[聚合函数列表](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference)获取可用聚合函数的完整列表。
 
 ## 用户定义函数（UDFs）
 
-用户定义函数（UDF）允许您重用自定义逻辑。许多Hub数据集通常被分片成多个Parquet文件，因此创建一个UDF来列出并查询给定数据集的所有Parquet文件可能更容易和更高效，只需使用数据集名称即可。
+用户定义函数（UDF）允许您重用自定义逻辑。许多 Hub 数据集通常被分片成多个 Parquet 文件，因此创建一个 UDF 来列出并查询给定数据集的所有 Parquet 文件可能更容易和更高效，只需使用数据集名称即可。
 
-在这个例子中，您需要在控制台模式下运行`clickhouse-local`，这样UDF在查询之间可以持久存在：
+在这个例子中，您需要在控制台模式下运行`clickhouse-local`，这样 UDF 在查询之间可以持久存在：
 
 ```py
 ./clickhouse local
 ```
 
-记得将`enable_url_encoding`设置为0，将`max_https_get_redirects`设置为1，以便重定向到Parquet文件的路径：
+记得将`enable_url_encoding`设置为 0，将`max_https_get_redirects`设置为 1，以便重定向到 Parquet 文件的路径：
 
 ```py
 SET max_http_get_redirects = 1, enable_url_encoding = 0
 ```
 
-让我们创建一个函数，返回[`blog_authorship_corpus`](https://huggingface.co/datasets/blog_authorship_corpus)中的Parquet文件列表：
+让我们创建一个函数，返回[`blog_authorship_corpus`](https://huggingface.co/datasets/blog_authorship_corpus)中的 Parquet 文件列表：
 
 ```py
 CREATE OR REPLACE FUNCTION hugging_paths AS dataset -> (

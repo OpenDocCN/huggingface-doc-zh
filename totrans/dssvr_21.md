@@ -1,12 +1,12 @@
 # Polars
 
-> 原文链接：[https://huggingface.co/docs/datasets-server/polars](https://huggingface.co/docs/datasets-server/polars)
+> 原文链接：[`huggingface.co/docs/datasets-server/polars`](https://huggingface.co/docs/datasets-server/polars)
 
-[Polars](https://pola-rs.github.io/polars-book/user-guide/)是一个快速的DataFrame库，用Rust编写，以Arrow为基础。
+[Polars](https://pola-rs.github.io/polars-book/user-guide/)是一个快速的 DataFrame 库，用 Rust 编写，以 Arrow 为基础。
 
-💡 了解如何在[List Parquet files](parquet)指南中获取数据集URL的更多信息。
+💡 了解如何在 List Parquet files 指南中获取数据集 URL 的更多信息。
 
-让我们从数据集服务器中获取[`blog_authorship_corpus`](https://huggingface.co/datasets/blog_authorship_corpus)数据集的`train`拆分的URL：
+让我们从数据集服务器中获取[`blog_authorship_corpus`](https://huggingface.co/datasets/blog_authorship_corpus)数据集的`train`拆分的 URL：
 
 ```py
 r = requests.get("https://datasets-server.huggingface.co/parquet?dataset=blog_authorship_corpus")
@@ -17,7 +17,7 @@ urls
  'https://huggingface.co/datasets/blog_authorship_corpus/resolve/refs%2Fconvert%2Fparquet/blog_authorship_corpus/train/0001.parquet']
 ```
 
-要从单个Parquet文件中读取，请使用[`read_parquet`](https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.read_parquet.html)函数将其读入DataFrame，然后执行您的查询：
+要从单个 Parquet 文件中读取，请使用[`read_parquet`](https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.read_parquet.html)函数将其读入 DataFrame，然后执行您的查询：
 
 ```py
 import polars as pl
@@ -49,7 +49,7 @@ shape: (5, 3)
 └───────────┴───────┴─────────────────┘
 ```
 
-要读取多个Parquet文件 - 例如，如果数据集被分片 - 您需要使用[`concat`](https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.concat.html)函数将文件连接成单个DataFrame：
+要读取多个 Parquet 文件 - 例如，如果数据集被分片 - 您需要使用[`concat`](https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.concat.html)函数将文件连接成单个 DataFrame：
 
 ```py
 import polars as pl
@@ -80,11 +80,11 @@ shape: (5, 3)
 └─────────────┴───────┴─────────────────┘
 ```
 
-## 懒惰的API
+## 懒惰的 API
 
-Polars提供了一个[懒惰的API](https://pola-rs.github.io/polars-book/user-guide/lazy/using/)，对于大型Parquet文件来说更高效和节省内存。LazyFrame API会跟踪您想要做的事情，只有在您准备好时才会执行整个查询。这样，懒惰的API不会预先将所有内容加载到RAM中，它允许您处理比可用RAM更大的数据集。
+Polars 提供了一个[懒惰的 API](https://pola-rs.github.io/polars-book/user-guide/lazy/using/)，对于大型 Parquet 文件来说更高效和节省内存。LazyFrame API 会跟踪您想要做的事情，只有在您准备好时才会执行整个查询。这样，懒惰的 API 不会预先将所有内容加载到 RAM 中，它允许您处理比可用 RAM 更大的数据集。
 
-要惰性地读取Parquet文件，请改用[`scan_parquet`](https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.scan_parquet.html)函数。然后，使用[`collect`](https://pola-rs.github.io/polars/py-polars/html/reference/lazyframe/api/polars.LazyFrame.collect.html)函数执行整个查询：
+要惰性地读取 Parquet 文件，请改用[`scan_parquet`](https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.scan_parquet.html)函数。然后，使用[`collect`](https://pola-rs.github.io/polars/py-polars/html/reference/lazyframe/api/polars.LazyFrame.collect.html)函数执行整个查询：
 
 ```py
 import polars as pl

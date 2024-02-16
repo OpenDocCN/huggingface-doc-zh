@@ -1,8 +1,8 @@
 # 使用 Panda-Gym 进行机器人模拟的 Advantage Actor Critic (A2C) 🤖
 
-> 原始文本：[https://huggingface.co/learn/deep-rl-course/unit6/hands-on](https://huggingface.co/learn/deep-rl-course/unit6/hands-on)
+> 原始文本：[`huggingface.co/learn/deep-rl-course/unit6/hands-on`](https://huggingface.co/learn/deep-rl-course/unit6/hands-on)
 
-[![提问](../Images/255e59f8542cbd6d3f1c72646b2fff13.png)](http://hf.co/join/discord) [![在 Colab 中打开](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit6/unit6.ipynb)
+![提问](http://hf.co/join/discord) ![在 Colab 中打开](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/main/notebooks/unit6/unit6.ipynb)
 
 现在您已经学习了 Advantage Actor Critic (A2C) 的理论，**您已经准备好训练您的 A2C 代理**，使用 Stable-Baselines3 在一个机器人环境中进行训练。并训练一个：
 
@@ -12,17 +12,17 @@
 
 +   [panda-gym](https://github.com/qgallouedec/panda-gym)
 
-为了验证这个实践过程的认证，您需要将您的两个训练模型推送到Hub并获得以下结果：
+为了验证这个实践过程的认证，您需要将您的两个训练模型推送到 Hub 并获得以下结果：
 
 +   `PandaReachDense-v3` 获得结果 >= -3.5。
 
 要找到您的结果，请[转到排行榜](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)并找到您的模型，**结果 = 平均奖励 - 奖励的标准差**
 
-有关认证过程的更多信息，请查看此部分👉[https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
+有关认证过程的更多信息，请查看此部分👉[`huggingface.co/deep-rl-course/en/unit0/introduction#certification-process`](https://huggingface.co/deep-rl-course/en/unit0/introduction#certification-process)
 
 **点击“在 Colab 中打开”按钮开始实践**👇：
 
-[![在 Colab 中打开](../Images/7e2db436150c38a00650f96925aa5581.png)](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit6/unit6.ipynb)
+![在 Colab 中打开](https://colab.research.google.com/github/huggingface/deep-rl-class/blob/master/notebooks/unit6/unit6.ipynb)
 
 # 第 6 单元：使用 Panda-Gym 进行机器人模拟的 Advantage Actor Critic (A2C) 🤖
 
@@ -46,7 +46,7 @@
 
 +   了解为什么**我们需要对输入进行归一化**。
 
-+   能够**将您训练好的代理和代码推送到Hub**，并附带一个漂亮的视频回放和评估分数🔥。
++   能够**将您训练好的代理和代码推送到 Hub**，并附带一个漂亮的视频回放和评估分数🔥。
 
 ## 先决条件🏗️
 
@@ -60,11 +60,11 @@
 
 +   为了**加速代理的训练，我们将使用 GPU**。为此，请转到 `运行时 > 更改运行时类型`
 
-![GPU 步骤 1](../Images/5378127c314cdd92729aa31b7e11ca44.png)
+![GPU 步骤 1](img/5378127c314cdd92729aa31b7e11ca44.png)
 
 +   `硬件加速器 > GPU`
 
-![GPU 步骤 2](../Images/e0fec252447f98378386ccca8e57a80a.png)
+![GPU 步骤 2](img/e0fec252447f98378386ccca8e57a80a.png)
 
 ## 创建一个虚拟显示🔽
 
@@ -100,7 +100,7 @@ virtual_display.start()
 
 +   `huggingface_sb3`：用于 Stable-baselines3 的额外代码，用于从 Hugging Face 🤗 Hub 加载和上传模型。
 
-+   `huggingface_hub`：允许任何人使用Hub存储库。
++   `huggingface_hub`：允许任何人使用 Hub 存储库。
 
 ```py
 !pip install stable-baselines3[extra]
@@ -140,7 +140,7 @@ from huggingface_hub import notebook_login
 
 此外，我们将使用 *末端执行器位移控制*，这意味着**动作对应于末端执行器的位移**。我们不控制每个关节的单独运动 (关节控制)。
 
-![机器人技术](../Images/d79d62b53f91999defb0b4eae0db003d.png)
+![机器人技术](img/d79d62b53f91999defb0b4eae0db003d.png)
 
 这样**训练将更容易**。
 
@@ -214,7 +214,7 @@ env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.)
 
 ### 创建 A2C 模型 🤖
 
-有关使用 StableBaselines3 实现 A2C 的更多信息，请查看：[https://stable-baselines3.readthedocs.io/en/master/modules/a2c.html#notes](https://stable-baselines3.readthedocs.io/en/master/modules/a2c.html#notes)
+有关使用 StableBaselines3 实现 A2C 的更多信息，请查看：[`stable-baselines3.readthedocs.io/en/master/modules/a2c.html#notes`](https://stable-baselines3.readthedocs.io/en/master/modules/a2c.html#notes)
 
 为了找到最佳参数，我检查了[由 Stable-Baselines3 团队官方训练的代理](https://huggingface.co/sb3)。
 
@@ -277,7 +277,7 @@ print(f"Mean reward = {mean_reward:.2f} +/- {std_reward:.2f}")
 
 现在我们看到训练后取得了良好的结果，我们可以用一行代码将我们训练好的模型发布到 Hub 上。
 
-📚 图书馆文档 👉 [https://github.com/huggingface/huggingface_sb3/tree/main#hugging-face—x-stable-baselines3-v20](https://github.com/huggingface/huggingface_sb3/tree/main#hugging-face--x-stable-baselines3-v20)
+📚 图书馆文档 👉 [`github.com/huggingface/huggingface_sb3/tree/main#hugging-face—x-stable-baselines3-v20`](https://github.com/huggingface/huggingface_sb3/tree/main#hugging-face--x-stable-baselines3-v20)
 
 通过使用 `package_to_hub`，正如我们在前面的单元中已经提到的，**您可以评估、记录重播、生成代理的模型卡并将其推送到 Hub**。
 
@@ -289,17 +289,17 @@ print(f"Mean reward = {mean_reward:.2f} +/- {std_reward:.2f}")
 
 +   您可以 **与社区分享其他人可以使用的代理** 💾
 
-+   您可以 **访问排行榜 🏆 查看您的代理相对于同学表现如何** 👉 [https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
++   您可以 **访问排行榜 🏆 查看您的代理相对于同学表现如何** 👉 [`huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard`](https://huggingface.co/spaces/huggingface-projects/Deep-Reinforcement-Learning-Leaderboard)
 
 要能够与社区分享您的模型，还需要遵循三个步骤：
 
-1️⃣ (如果尚未完成) 创建一个 HF 帐户 ➡ [https://huggingface.co/join](https://huggingface.co/join)
+1️⃣ (如果尚未完成) 创建一个 HF 帐户 ➡ [`huggingface.co/join`](https://huggingface.co/join)
 
 2️⃣ 登录，然后，您需要从 Hugging Face 网站存储您的身份验证令牌。
 
-+   创建一个新的令牌 ([https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) **具有写入权限**
++   创建一个新的令牌 ([`huggingface.co/settings/tokens`](https://huggingface.co/settings/tokens)) **具有写入权限**
 
-![创建 HF 令牌](../Images/d21a97c736edaab9119d2d1c1da9deac.png)
+![创建 HF 令牌](img/d21a97c736edaab9119d2d1c1da9deac.png)
 
 +   复制令牌
 
@@ -334,9 +334,9 @@ package_to_hub(
 
 如果您想尝试更高级的任务，您需要检查使用 **TQC 或 SAC**（适用于机器人任务的更高效的算法）完成了什么。在真实的机器人技术中，您将使用更高效的算法，一个简单的原因是：与模拟相反，**如果您移动机器人手臂太多，您有破坏的风险**。
 
-PandaPickAndPlace-v1（此模型使用环境的 v1 版本）：[https://huggingface.co/sb3/tqc-PandaPickAndPlace-v1](https://huggingface.co/sb3/tqc-PandaPickAndPlace-v1)
+PandaPickAndPlace-v1（此模型使用环境的 v1 版本）：[`huggingface.co/sb3/tqc-PandaPickAndPlace-v1`](https://huggingface.co/sb3/tqc-PandaPickAndPlace-v1)
 
-并且不要犹豫查看 panda-gym 文档：[https://panda-gym.readthedocs.io/en/latest/usage/train_with_sb3.html](https://panda-gym.readthedocs.io/en/latest/usage/train_with_sb3.html)
+并且不要犹豫查看 panda-gym 文档：[`panda-gym.readthedocs.io/en/latest/usage/train_with_sb3.html`](https://panda-gym.readthedocs.io/en/latest/usage/train_with_sb3.html)
 
 我们为您提供了训练另一个 agent 的步骤（可选）：
 

@@ -1,6 +1,6 @@
 # 命令行界面（CLI）
 
-> [https://huggingface.co/docs/huggingface_hub/guides/cli](https://huggingface.co/docs/huggingface_hub/guides/cli)
+> [`huggingface.co/docs/huggingface_hub/guides/cli`](https://huggingface.co/docs/huggingface_hub/guides/cli)
 
 `huggingface_hub` Python 包带有一个名为 `huggingface-cli` 的内置 CLI。此工具允许您直接从终端与 Hugging Face Hub 交互。例如，您可以登录到您的帐户，创建存储库，上传和下载文件等。它还提供方便的功能来配置您的机器或管理缓存。在本指南中，我们将查看 CLI 的主要功能以及如何使用它们。
 
@@ -39,7 +39,7 @@ options:
   -h, --help            show this help message and exit
 ```
 
-如果 CLI 正确安装，您应该看到 CLI 中所有可用选项的列表。如果您收到错误消息，例如 `command not found: huggingface-cli`，请参考[安装](../installation)指南。
+如果 CLI 正确安装，您应该看到 CLI 中所有可用选项的列表。如果您收到错误消息，例如 `command not found: huggingface-cli`，请参考安装指南。
 
 `--help` 选项非常方便，可用于获取有关命令的更多详细信息。您可以随时使用它来列出所有可用选项及其详细信息。例如，`huggingface-cli upload --help` 提供有关如何使用 CLI 上传文件的更多信息。
 
@@ -82,7 +82,7 @@ Your token has been saved to /home/wauplin/.cache/huggingface/token
 Login successful
 ```
 
-有关身份验证的更多详细信息，请查看[此部分](../quick-start#authentication)。
+有关身份验证的更多详细信息，请查看此部分。
 
 ## huggingface-cli whoami
 
@@ -100,11 +100,11 @@ orgs:  huggingface,eu-test,OAuthTesters,hf-accelerate,HFSmolCluster
 
 此命令将注销您。实际上，它将删除保存在您的机器上的令牌。
 
-如果您使用 `HF_TOKEN` 环境变量登录，则此命令不会注销您（请参阅[参考](../package_reference/environment_variables#hftoken)）。如果是这种情况，您必须在您的机器配置中取消设置环境变量。
+如果您使用 `HF_TOKEN` 环境变量登录，则此命令不会注销您（请参阅参考）。如果是这种情况，您必须在您的机器配置中取消设置环境变量。
 
 ## huggingface-cli download
 
-使用 `huggingface-cli download` 命令直接从 Hub 下载文件。在内部，它使用与[Download](./download)指南中描述的相同的[hf_hub_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.hf_hub_download)和[snapshot_download()](/docs/huggingface_hub/v0.20.3/en/package_reference/file_download#huggingface_hub.snapshot_download)助手，并将返回的路径打印到终端。在下面的示例中，我们将介绍最常见的用例。要查看所有可用选项的完整列表，您可以运行：
+使用 `huggingface-cli download` 命令直接从 Hub 下载文件。在内部，它使用与 Download 指南中描述的相同的 hf_hub_download()和 snapshot_download()助手，并将返回的路径打印到终端。在下面的示例中，我们将介绍最常见的用例。要查看所有可用选项的完整列表，您可以运行：
 
 ```py
 huggingface-cli download --help
@@ -125,7 +125,7 @@ downloading https://huggingface.co/gpt2/resolve/main/config.json to /home/waupli
 
 ### 下载整个存储库
 
-在某些情况下，您可能只想从存储库下载所有文件。只需指定存储库ID即可完成：
+在某些情况下，您可能只想从存储库下载所有文件。只需指定存储库 ID 即可完成：
 
 ```py
 >>> huggingface-cli download HuggingFaceH4/zephyr-7b-beta
@@ -148,7 +148,7 @@ Fetching 2 files: 100%|███████████████████
 /home/wauplin/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10
 ```
 
-另一种方法是提供模式来过滤您想要下载的文件，使用`--include`和`--exclude`。例如，如果您想要从[stabilityai/stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)下载所有safetensors文件，除了FP16精度的文件：
+另一种方法是提供模式来过滤您想要下载的文件，使用`--include`和`--exclude`。例如，如果您想要从[stabilityai/stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)下载所有 safetensors 文件，除了 FP16 精度的文件：
 
 ```py
 >>> huggingface-cli download stabilityai/stable-diffusion-xl-base-1.0 --include "*.safetensors" --exclude "*.fp16.*"*
@@ -184,9 +184,9 @@ Fetching 8 files: 100%|███████████████████
 
 ### 下载到本地文件夹
 
-从Hub下载文件的推荐（也是默认）方式是使用缓存系统。但是，在某些情况下，您可能希望下载文件并将其移动到特定文件夹。这对于获得与git命令提供的工作流程更接近的工作流程很有用。您可以使用`--local_dir`选项来实现这一点。
+从 Hub 下载文件的推荐（也是默认）方式是使用缓存系统。但是，在某些情况下，您可能希望下载文件并将其移动到特定文件夹。这对于获得与 git 命令提供的工作流程更接近的工作流程很有用。您可以使用`--local_dir`选项来实现这一点。
 
-将文件下载到本地目录会带来一些缺点。在使用`--local-dir`之前，请查看[Download](./download#download-files-to-local-folder)指南中的限制。
+将文件下载到本地目录会带来一些缺点。在使用`--local-dir`之前，请查看 Download 指南中的限制。
 
 ```py
 >>> huggingface-cli download adept/fuyu-8b model-00001-of-00002.safetensors --local-dir .
@@ -196,7 +196,7 @@ Fetching 8 files: 100%|███████████████████
 
 ### 指定缓存目录
 
-默认情况下，所有文件将下载到由`HF_HOME`[环境变量](../package_reference/environment_variables#hfhome)定义的缓存目录中。您还可以使用`--cache-dir`指定自定义缓存：
+默认情况下，所有文件将下载到由`HF_HOME`环境变量定义的缓存目录中。您还可以使用`--cache-dir`指定自定义缓存：
 
 ```py
 >>> huggingface-cli download adept/fuyu-8b --cache-dir ./path/to/cache
@@ -224,7 +224,7 @@ Fetching 8 files: 100%|███████████████████
 
 ## huggingface-cli upload
 
-使用`huggingface-cli upload`命令直接将文件上传到Hub。在内部，它使用了与[Upload](./upload)指南中描述的相同的[upload_file()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_file)和[upload_folder()](/docs/huggingface_hub/v0.20.3/en/package_reference/hf_api#huggingface_hub.HfApi.upload_folder)辅助函数。在下面的示例中，我们将介绍最常见的用例。要查看所有可用选项的完整列表，可以运行：
+使用`huggingface-cli upload`命令直接将文件上传到 Hub。在内部，它使用了与 Upload 指南中描述的相同的 upload_file()和 upload_folder()辅助函数。在下面的示例中，我们将介绍最常见的用例。要查看所有可用选项的完整列表，可以运行：
 
 ```py
 >>> huggingface-cli upload --help
@@ -329,7 +329,7 @@ https://huggingface.co/datasets/bigcode/the-stack/blob/refs%2Fpr%2F104/
 
 ### 定期间隔上传
 
-在某些情况下，您可能希望定期更新存储库。例如，如果您正在训练模型并希望每隔10分钟上传日志文件夹，则可以使用`--every`选项：
+在某些情况下，您可能希望定期更新存储库。例如，如果您正在训练模型并希望每隔 10 分钟上传日志文件夹，则可以使用`--every`选项：
 
 ```py
 # Upload new logs every 10 minutes
@@ -384,11 +384,11 @@ Done in 0.0s. Scanned 6 repo(s) for a total of 3.4G.
 Got 1 warning(s) while scanning. Use -vvv to print details.
 ```
 
-有关如何扫描缓存目录的更多详细信息，请参考[管理您的缓存](./manage-cache#scan-cache-from-the-terminal)指南。
+有关如何扫描缓存目录的更多详细信息，请参考管理您的缓存指南。
 
 ## huggingface-cli 删除缓存
 
-`huggingface-cli delete-cache`是一个帮助您删除不再使用的缓存部分的工具。这对于节省和释放磁盘空间很有用。要了解有关使用此命令的更多信息，请参考[管理您的缓存](./manage-cache#clean-cache-from-the-terminal)指南。
+`huggingface-cli delete-cache`是一个帮助您删除不再使用的缓存部分的工具。这对于节省和释放磁盘空间很有用。要了解有关使用此命令的更多信息，请参考管理您的缓存指南。
 
 ## huggingface-cli 环境
 

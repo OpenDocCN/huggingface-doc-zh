@@ -1,6 +1,6 @@
 # 接口：AudioToAudioOutputValue
 
-> 原文：[https://huggingface.co/docs/huggingface.js/inference/interfaces/AudioToAudioOutputValue](https://huggingface.co/docs/huggingface.js/inference/interfaces/AudioToAudioOutputValue)
+> 原文：[`huggingface.co/docs/huggingface.js/inference/interfaces/AudioToAudioOutputValue`](https://huggingface.co/docs/huggingface.js/inference/interfaces/AudioToAudioOutputValue)
 
 ## 属性
 
@@ -8,7 +8,7 @@
 
 • `blob`: `string`
 
-Base64编码的音频输出。
+Base64 编码的音频输出。
 
 #### 定义在
 
@@ -20,7 +20,7 @@ Base64编码的音频输出。
 
 • `content-type`: `string`
 
-blob的内容类型，例如音频/flac
+blob 的内容类型，例如音频/flac
 
 #### 定义在
 

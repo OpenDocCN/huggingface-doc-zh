@@ -1,10 +1,10 @@
 # 在数据集中搜索文本
 
-> 原始文本：[https://huggingface.co/docs/datasets-server/search](https://huggingface.co/docs/datasets-server/search)
+> 原始文本：[`huggingface.co/docs/datasets-server/search`](https://huggingface.co/docs/datasets-server/search)
 
 数据集服务器提供了用于在数据集中搜索单词的`/search`端点。
 
-目前，仅支持具有Parquet导出的数据集，因此数据集服务器可以索引内容并在不下载整个数据集的情况下运行搜索。
+目前，仅支持具有 Parquet 导出的数据集，因此数据集服务器可以索引内容并在不下载整个数据集的情况下运行搜索。
 
 本指南向您展示如何使用数据集服务器的`/search`端点来搜索查询字符串。也可以尝试使用[ReDoc](https://redocly.github.io/redoc/?url=https://datasets-server.huggingface.co/openapi.json#operation/searchRows)。
 
@@ -24,7 +24,7 @@
 
 +   `length`：切片的长度，例如`10`（最大值：`100`）
 
-例如，让我们在`ibm/duorc`数据集的`SelfRC`配置的`train`拆分中搜索文本`"dog"`，将结果限制为切片150-151：
+例如，让我们在`ibm/duorc`数据集的`SelfRC`配置的`train`拆分中搜索文本`"dog"`，将结果限制为切片 150-151：
 
 PythonJavaScriptcURL
 
@@ -38,7 +38,7 @@ def query():
 data = query()
 ```
 
-端点响应是一个包含两个键的JSON（与[`/rows`](./rows)的格式相同）：
+端点响应是一个包含两个键的 JSON（与`/rows`的格式相同）：
 
 +   数据集的[`features`](https://huggingface.co/docs/datasets/about_dataset_features)，包括列名和数据类型。
 
@@ -46,7 +46,7 @@ data = query()
 
 行按行索引排序，与查询匹配的文本字符串未突出显示。
 
-例如，这里是匹配查询`dog`的`duorc`/`SelfRC`训练拆分的`features`和切片150-151的`rows`：
+例如，这里是匹配查询`dog`的`duorc`/`SelfRC`训练拆分的`features`和切片 150-151 的`rows`：
 
 ```py
 {
@@ -126,7 +126,7 @@ data = query()
 
 如果结果为`partial: true`，意味着搜索无法在完整数据集上运行，因为数据集太大。
 
-实际上，如果数据集大于5GB，则`/search`的索引可以是部分的。在这种情况下，它仅使用前5GB。
+实际上，如果数据集大于 5GB，则`/search`的索引可以是部分的。在这种情况下，它仅使用前 5GB。
 
 ## 截断响应
 

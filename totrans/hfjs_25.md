@@ -1,12 +1,12 @@
 # 接口: TextGenerationStreamBestOfSequence
 
-> 原始文本: [https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamBestOfSequence](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamBestOfSequence)
+> 原始文本: [`huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamBestOfSequence`](https://huggingface.co/docs/huggingface.js/inference/interfaces/TextGenerationStreamBestOfSequence)
 
 ## 属性
 
-### 完成_原因
+### 完成 _ 原因
 
-• `finish_reason`: [`TextGenerationStreamFinishReason`](../modules#textgenerationstreamfinishreason)
+• `finish_reason`: `TextGenerationStreamFinishReason`
 
 生成完成原因
 
@@ -28,7 +28,7 @@
 
 * * *
 
-### 生成的_标记
+### 生成的 _ 标记
 
 • `generated_tokens`: `number`
 
@@ -42,7 +42,7 @@
 
 ### 预填
 
-• `prefill`: [`TextGenerationStreamPrefillToken`](TextGenerationStreamPrefillToken)[]
+• `prefill`: `TextGenerationStreamPrefillToken`[]
 
 提示标记
 
@@ -66,7 +66,7 @@
 
 ### 标记
 
-• `tokens`: [`TextGenerationStreamToken`](TextGenerationStreamToken)[]
+• `tokens`: `TextGenerationStreamToken`[]
 
 生成的标记
 

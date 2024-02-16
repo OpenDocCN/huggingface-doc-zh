@@ -1,6 +1,6 @@
 # 测验
 
-> 原始文本：[https://huggingface.co/learn/deep-rl-course/unit3/quiz](https://huggingface.co/learn/deep-rl-course/unit3/quiz)
+> 原始文本：[`huggingface.co/learn/deep-rl-course/unit3/quiz`](https://huggingface.co/learn/deep-rl-course/unit3/quiz)
 
 学习和[避免自以为是的错觉](https://www.coursera.org/lecture/learning-how-to-learn/illusions-of-competence-BuFzf)的最佳方法**是测试自己**。这将帮助您找到**需要加强知识的地方**。
 
@@ -18,7 +18,7 @@
 
 我们将帧堆叠在一起，因为这有助于我们**处理时间限制的问题**：一个帧不足以捕捉时间信息。例如，在乒乓球中，如果我们只有一个帧，我们的代理**将无法知道球的方向**。
 
-![时间限制](../Images/916225d18ad696514245f8c4e88a5a56.png) ![时间限制](../Images/e35a3e3cfeefe6f7a16b681ab91dfa7b.png)</details>
+![时间限制](img/916225d18ad696514245f8c4e88a5a56.png) ![时间限制](img/e35a3e3cfeefe6f7a16b681ab91dfa7b.png)</details>
 
 ### Q4: 深度 Q 学习的两个阶段是什么？
 
