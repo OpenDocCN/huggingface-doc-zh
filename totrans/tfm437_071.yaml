@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 完全分片数据并行
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/fsdp](https://huggingface.co/docs/transformers/v4.37.2/en/fsdp)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/fsdp](https://huggingface.co/docs/transformers/v4.37.2/en/fsdp)
 - en: null
   id: totrans-2
   prefs: []
@@ -24,11 +26,13 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: '[完全分片数据并行（FSDP）](https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/)是一种数据并行方法，它将模型的参数、梯度和优化器状态分片到可用GPU（也称为工作器或*rank*）的数量上。与[分布式数据并行（DDP）](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html)不同，FSDP减少了内存使用，因为模型在每个GPU上都有副本。这提高了GPU内存效率，并允许您在较少的GPU上训练更大的模型。FSDP与Accelerate集成，Accelerate是一个用于轻松管理分布式环境中训练的库，这意味着可以从[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)类中使用它。'
 - en: Before you start, make sure Accelerate is installed and at least PyTorch 2.1.0
     or newer.
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始之前，请确保已安装Accelerate，并且至少安装了PyTorch 2.1.0或更新版本。
 - en: '[PRE0]'
   id: totrans-5
   prefs: []
@@ -39,6 +43,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FSDP配置
 - en: To start, run the [`accelerate config`](https://huggingface.co/docs/accelerate/package_reference/cli#accelerate-config)
     command to create a configuration file for your training environment. Accelerate
     uses this configuration file to automatically setup the correct training environment
@@ -46,6 +51,8 @@
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，运行[`accelerate config`](https://huggingface.co/docs/accelerate/package_reference/cli#accelerate-config)命令，为您的训练环境创建一个配置文件。Accelerate使用此配置文件根据您在`accelerate
+    config`中选择的训练选项自动设置正确的训练环境。
 - en: '[PRE1]'
   id: totrans-8
   prefs: []
@@ -59,54 +66,64 @@
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您运行`accelerate config`时，您将被提示一系列选项来配置您的训练环境。本节涵盖了一些最重要的FSDP选项。要了解更多关于其他可用的FSDP选项，请查看[fsdp_config](https://huggingface.co/docs/transformers/main_classes/trainer#transformers.TrainingArguments.fsdp_config)参数。
 - en: Sharding strategy
   id: totrans-10
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 分片策略
 - en: 'FSDP offers a number of sharding strategies to select from:'
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: FSDP提供了许多分片策略可供选择：
 - en: '`FULL_SHARD` - shards model parameters, gradients and optimizer states across
     workers; select `1` for this option'
   id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`FULL_SHARD` - 在工作器之间对模型参数、梯度和优化器状态进行分片；选择`1`作为此选项'
 - en: '`SHARD_GRAD_OP`- shard gradients and optimizer states across workers; select
     `2` for this option'
   id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`SHARD_GRAD_OP`- 在工作器之间对梯度和优化器状态进行分片；选择`2`作为此选项'
 - en: '`NO_SHARD` - don’t shard anything (this is equivalent to DDP); select `3` for
     this option'
   id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`NO_SHARD` - 不对任何内容进行分片（相当于DDP）；选择`3`作为此选项'
 - en: '`HYBRID_SHARD` - shard model parameters, gradients and optimizer states within
     each worker where each worker also has a full copy; select `4` for this option'
   id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`HYBRID_SHARD` - 在每个工作器内对模型参数、梯度和优化器状态进行分片，每个工作器也有完整副本；选择`4`作为此选项'
 - en: '`HYBRID_SHARD_ZERO2` - shard gradients and optimizer states within each worker
     where each worker also has a full copy; select `5` for this option'
   id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`HYBRID_SHARD_ZERO2` - 在每个工作器内对梯度和优化器状态进行分片，每个工作器也有完整副本；选择`5`作为此选项'
 - en: This is enabled by the `fsdp_sharding_strategy` flag.
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是通过`fsdp_sharding_strategy`标志启用的。
 - en: CPU offload
   id: totrans-18
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: CPU卸载
 - en: 'You could also offload parameters and gradients when they are not in use to
     the CPU to save even more GPU memory and help you fit large models where even
     FSDP may not be sufficient. This is enabled by setting `fsdp_offload_params: true`
@@ -114,11 +131,14 @@
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '当参数和梯度不在使用时，您还可以将它们卸载到CPU以节省更多GPU内存，并帮助您适应大型模型，即使FSDP可能不足。这可以通过在运行`accelerate
+    config`时设置`fsdp_offload_params: true`来启用。'
 - en: Wrapping policy
   id: totrans-20
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 包装策略
 - en: 'FSDP is applied by wrapping each layer in the network. The wrapping is usually
     applied in a nested way where the full weights are discarded after each forward
     pass to save memory for use in the next layer. The *auto wrapping* policy is the
@@ -129,17 +149,21 @@
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 'FSDP通过包装网络中的每一层来应用。包装通常以嵌套方式应用，其中完整权重在每次前向传递后被丢弃，以节省内存供下一层使用。*自动包装*策略是实现这一点的最简单方法，您无需更改任何代码。您应该选择`fsdp_auto_wrap_policy:
+    TRANSFORMER_BASED_WRAP`来包装一个Transformer层，并选择`fsdp_transformer_layer_cls_to_wrap`来指定要包装的层（例如`BertLayer`）。'
 - en: 'Otherwise, you can choose a size-based wrapping policy where FSDP is applied
     to a layer if it exceeds a certain number of parameters. This is enabled by setting
     `fsdp_wrap_policy: SIZE_BASED_WRAP` and `min_num_param` to the desired size threshold.'
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '否则，您可以选择基于大小的包装策略，如果某一层的参数超过一定数量，则应用FSDP。这可以通过将`fsdp_wrap_policy: SIZE_BASED_WRAP`和`min_num_param`设置为所需的大小阈值来启用。'
 - en: Checkpointing
   id: totrans-23
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 检查点
 - en: 'Intermediate checkpoints should be saved with `fsdp_state_dict_type: SHARDED_STATE_DICT`
     because saving the full state dict with CPU offloading on rank 0 takes a lot of
     time and often results in `NCCL Timeout` errors due to indefinite hanging during

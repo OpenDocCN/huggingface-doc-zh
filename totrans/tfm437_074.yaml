@@ -1,31 +1,24 @@
 - en: Training on TPU with TensorFlow
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_tpu_tf](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_tpu_tf)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: If you don’t need long explanations and just want TPU code samples to get started
     with, check out [our TPU example notebook!](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: What is a TPU?
+  id: totrans-4
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -34,6 +27,7 @@
     much like GPUs. They can be used for both network training and inference. They
     are generally accessed through Google’s cloud services, but small TPUs can also
     be accessed directly for free through Google Colab and Kaggle Kernels.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: Because [all TensorFlow models in 🤗 Transformers are Keras models](https://huggingface.co/blog/tensorflow-philosophy),
@@ -41,21 +35,25 @@
     for any Keras model! However, there are a few points that are specific to the
     HuggingFace ecosystem (hug-o-system?) of Transformers and Datasets, and we’ll
     make sure to flag them up when we get to them.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: What kinds of TPU are available?
+  id: totrans-7
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: New users are often very confused by the range of TPUs, and the different ways
     to access them. The first key distinction to understand is the difference between
     **TPU Nodes** and **TPU VMs.**
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: When you use a **TPU Node**, you are effectively indirectly accessing a remote
     TPU. You will need a separate VM, which will initialize your network and data
     pipeline and then forward them to the remote node. When you use a TPU on Google
     Colab, you are accessing it in the **TPU Node** style.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: Using TPU Nodes can have some quite unexpected behaviour for people who aren’t
@@ -65,11 +63,13 @@
     storage will totally fail! Instead, data must be stored in Google Cloud Storage
     where your data pipeline can still access it, even when the pipeline is running
     on the remote TPU node.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
 - en: If you can fit all your data in memory as `np.ndarray` or `tf.Tensor`, then
     you can `fit()` on that data even when using Colab or a TPU Node, without needing
     to upload it to Google Cloud Storage.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: '**🤗Specific Hugging Face Tip🤗:** The methods `Dataset.to_tf_dataset()` and
@@ -80,12 +80,14 @@
     the underlying HuggingFace `Dataset`. This HuggingFace `Dataset` is backed by
     data that is on a local disc and which the remote TPU Node will not be able to
     read.'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
 - en: The second way to access a TPU is via a **TPU VM.** When using a TPU VM, you
     connect directly to the machine that the TPU is attached to, much like training
     on a GPU VM. TPU VMs are generally easier to work with, particularly when it comes
     to your data pipeline. All of the above warnings do not apply to TPU VMs!
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
 - en: 'This is an opinionated document, so here’s our opinion: **Avoid using TPU Node
@@ -96,9 +98,11 @@
     TPU access is on Colab and Kaggle Kernels, which uses TPU Node - so we’ll try
     to explain how to handle it if you have to! Check the [TPU example notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)
     for code samples that explain this in more detail.'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: What sizes of TPU are available?
+  id: totrans-15
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -106,12 +110,15 @@
     can run hundreds or thousands of replicas simultaneously. When you use more than
     a single TPU but less than a whole pod (for example, a v3-32), your TPU fleet
     is referred to as a **pod slice.**
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: When you access a free TPU via Colab, you generally get a single v2-8 TPU.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: I keep hearing about this XLA thing. What’s XLA, and how does it relate to TPUs?
+  id: totrans-18
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -120,17 +127,20 @@
     The easiest way to enable it when training a Keras model is to pass the argument
     `jit_compile=True` to `model.compile()`. If you don’t get any errors and performance
     is good, that’s a great sign that you’re ready to move to TPU!
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: Debugging on TPU is generally a bit harder than on CPU/GPU, so we recommend
     getting your code running on CPU/GPU with XLA first before trying it on TPU. You
     don’t have to train for long, of course - just for a few steps to make sure that
     your model and data pipeline are working like you expect them to.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: XLA compiled code is usually faster - so even if you’re not planning to run
     on TPU, adding `jit_compile=True` can improve your performance. Be sure to note
     the caveats below about XLA compatibility, though!
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: '**Tip born of painful experience:** Although using `jit_compile=True` is a
@@ -138,15 +148,18 @@
     it can actually cause a lot of problems if you leave it in when actually training
     on TPU. XLA compilation will happen implicitly on TPU, so remember to remove that
     line before actually running your code on a TPU!'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: How do I make my model XLA compatible?
+  id: totrans-23
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'In many cases, your code is probably XLA-compatible already! However, there
     are a few things that work in normal TensorFlow that don’t work in XLA. We’ve
     distilled them into three core rules below:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '**🤗Specific HuggingFace Tip🤗:** We’ve put a lot of effort into rewriting our
@@ -154,34 +167,44 @@
     functions generally obey rule #1 and #2 by default, so you can skip over them
     if you’re using `transformers` models. Don’t forget about these rules when writing
     your own models and loss functions, though!'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: 'XLA Rule #1: Your code cannot have “data-dependent conditionals”'
+  id: totrans-26
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
 - en: What that means is that any `if` statement cannot depend on values inside a
     `tf.Tensor`. For example, this code block cannot be compiled with XLA!
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'This might seem very restrictive at first, but most neural net code doesn’t
     need to do this. You can often get around this restriction by using `tf.cond`
     (see the documentation [here](https://www.tensorflow.org/api_docs/python/tf/cond))
     or by removing the conditional and finding a clever math trick with indicator
     variables instead, like so:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: This code has exactly the same effect as the code above, but by avoiding a conditional,
     we ensure it will compile with XLA without problems!
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: 'XLA Rule #2: Your code cannot have “data-dependent shapes”'
+  id: totrans-32
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
@@ -191,6 +214,7 @@
     each unique value in the input. The shape of this output will obviously be different
     depending on how repetitive the input `Tensor` was, and so XLA refuses to handle
     it!
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: 'In general, most neural network code obeys rule #2 by default. However, there
@@ -199,21 +223,27 @@
     that those positions should be ignored when computing the loss. If you look at
     NumPy or PyTorch loss functions that support label masking, you will often see
     code like this that uses [boolean indexing](https://numpy.org/doc/stable/user/basics.indexing.html#boolean-array-indexing):'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'This code is totally fine in NumPy or PyTorch, but it breaks in XLA! Why? Because
     the shape of `masked_outputs` and `masked_labels` depends on how many positions
     are masked - that makes it a **data-dependent shape.** However, just like for
     rule #1, we can often rewrite this code to yield exactly the same output without
     any data-dependent shapes.'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Here, we avoid data-dependent shapes by computing the loss for every position,
     but zeroing out the masked positions in both the numerator and denominator when
     we calculate the mean, which yields exactly the same result as the first block
@@ -221,10 +251,12 @@
     #1 - converting a `tf.bool` to `tf.float32` and using it as an indicator variable.
     This is a really useful trick, so remember it if you need to convert your own
     code to XLA!'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
 - en: 'XLA Rule #3: XLA will need to recompile your model for every different input
     shape it sees'
+  id: totrans-39
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
@@ -233,6 +265,7 @@
     problems. This commonly arises in NLP models, where input texts have variable
     lengths after tokenization. In other modalities, static shapes are more common
     and this rule is much less of a problem.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
 - en: 'How can you get around rule #3? The key is **padding** - if you pad all your
@@ -241,6 +274,7 @@
     excessive padding can cause severe slowdown too - if you pad all your samples
     to the maximum length in the whole dataset, you might end up with batches consisting
     endless padding tokens, which will waste a lot of compute and memory!'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: There isn’t a perfect solution to this problem. However, you can try some tricks.
@@ -249,6 +283,7 @@
     amount, but it hugely reduces the number of unique input shapes, because every
     input shape now has to be a multiple of 32 or 64\. Fewer unique input shapes means
     fewer XLA compilations!
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
 - en: '**🤗Specific HuggingFace Tip🤗:** Our tokenizers and data collators have methods
@@ -256,9 +291,11 @@
     when calling tokenizers to get them to output padded data. Our tokenizers and
     data collators also have a `pad_to_multiple_of` argument that you can use to reduce
     the number of unique input shapes you see!'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
 - en: How do I actually train my model on TPU?
+  id: totrans-44
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -268,57 +305,83 @@
     your TPU, and to ensure that your model and dataset are created inside a `TPUStrategy`
     scope. Take a look at [our TPU example notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)
     to see this in action!
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您的训练是XLA兼容的，并且（如果您正在使用TPU节点/Colab）您的数据集已经准备就绪，那么在TPU上运行实际上非常容易！您真正需要在代码中做的改变只是添加几行代码来初始化您的TPU，并确保您的模型和数据集都在`TPUStrategy`范围内创建。查看[我们的TPU示例笔记本](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)以查看实际操作！
 - en: Summary
+  id: totrans-46
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 总结
 - en: 'There was a lot in here, so let’s summarize with a quick checklist you can
     follow when you want to get your model ready for TPU training:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里有很多内容，让我们用一个快速的清单来总结，当您想要准备好您的模型进行TPU训练时可以遵循：
 - en: Make sure your code follows the three rules of XLA
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 确保您的代码遵循XLA的三条规则
 - en: Compile your model with `jit_compile=True` on CPU/GPU and confirm that you can
     train it with XLA
+  id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在CPU/GPU上使用`jit_compile=True`编译您的模型，并确认您可以使用XLA进行训练
 - en: Either load your dataset into memory or use a TPU-compatible dataset loading
     approach (see [notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb))
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 要么将数据集加载到内存中，要么使用兼容TPU的数据集加载方法（请参阅[notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)）
 - en: Migrate your code either to Colab (with accelerator set to “TPU”) or a TPU VM
     on Google Cloud
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将您的代码迁移到Colab（加速器设置为“TPU”）或Google Cloud上的TPU VM
 - en: Add TPU initializer code (see [notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb))
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 添加TPU初始化代码（请参阅[notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)）
 - en: Create your `TPUStrategy` and make sure dataset loading and model creation are
     inside the `strategy.scope()` (see [notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb))
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 创建您的`TPUStrategy`，并确保数据集加载和模型创建在`strategy.scope()`内（请参阅[notebook](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)）
 - en: Don’t forget to take `jit_compile=True` out again when you move to TPU!
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当您转移到TPU时，不要忘记再次将`jit_compile=True`去掉！
 - en: 🙏🙏🙏🥺🥺🥺
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 🙏🙏🙏🥺🥺🥺
 - en: Call model.fit()
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 调用model.fit()
 - en: You did it!
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你做到了！

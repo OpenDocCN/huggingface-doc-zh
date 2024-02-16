@@ -1,276 +1,397 @@
 - en: Efficient Training on Multiple CPUs
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 多CPU高效训练
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_cpu_many](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_cpu_many)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_cpu_many](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_cpu_many)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: When training on a single CPU is too slow, we can use multiple CPUs. This guide
     focuses on PyTorch-based DDP enabling distributed CPU training efficiently on
     [bare metal](#usage-in-trainer) and [Kubernetes](#usage-with-kubernetes).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 当在单个CPU上训练速度太慢时，我们可以使用多个CPU。本指南侧重于基于PyTorch的DDP，可以在[bare metal](#usage-in-trainer)和[Kubernetes](#usage-with-kubernetes)上有效地启用分布式CPU训练。
 - en: Intel® oneCCL Bindings for PyTorch
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Intel® oneCCL绑定的PyTorch
 - en: '[Intel® oneCCL](https://github.com/oneapi-src/oneCCL) (collective communications
     library) is a library for efficient distributed deep learning training implementing
     such collectives like allreduce, allgather, alltoall. For more information on
     oneCCL, please refer to the [oneCCL documentation](https://spec.oneapi.com/versions/latest/elements/oneCCL/source/index.html)
     and [oneCCL specification](https://spec.oneapi.com/versions/latest/elements/oneCCL/source/index.html).'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Intel® oneCCL](https://github.com/oneapi-src/oneCCL)（集体通信库）是一个用于实现allreduce、allgather、alltoall等集体通信的高效分布式深度学习训练的库。有关oneCCL的更多信息，请参考[oneCCL文档](https://spec.oneapi.com/versions/latest/elements/oneCCL/source/index.html)和[oneCCL规范](https://spec.oneapi.com/versions/latest/elements/oneCCL/source/index.html)。'
 - en: Module `oneccl_bindings_for_pytorch` (`torch_ccl` before version 1.12) implements
     PyTorch C10D ProcessGroup API and can be dynamically loaded as external ProcessGroup
     and only works on Linux platform now
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 模块`oneccl_bindings_for_pytorch`（在1.12版本之前为`torch_ccl`）实现了PyTorch C10D ProcessGroup
+    API，并且可以作为外部ProcessGroup动态加载，目前仅在Linux平台上可用。
 - en: Check more detailed information for [oneccl_bind_pt](https://github.com/intel/torch-ccl).
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看更多关于[oneccl_bind_pt](https://github.com/intel/torch-ccl)的详细信息。
 - en: Intel® oneCCL Bindings for PyTorch installation
+  id: totrans-8
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Intel® oneCCL绑定的PyTorch安装
 - en: 'Wheel files are available for the following Python versions:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下Python版本的Wheel文件可用：
 - en: '| Extension Version | Python 3.6 | Python 3.7 | Python 3.8 | Python 3.9 | Python
     3.10 |'
+  id: totrans-10
   prefs: []
   type: TYPE_TB
+  zh: '| 扩展版本 | Python 3.6 | Python 3.7 | Python 3.8 | Python 3.9 | Python 3.10 |'
 - en: '| :-: | :-: | :-: | :-: | :-: | :-: |'
+  id: totrans-11
   prefs: []
   type: TYPE_TB
+  zh: '| :-: | :-: | :-: | :-: | :-: | :-: |'
 - en: '| 2.1.0 |  | √ | √ | √ | √ |'
+  id: totrans-12
   prefs: []
   type: TYPE_TB
+  zh: '| 2.1.0 |  | √ | √ | √ | √ |'
 - en: '| 2.0.0 |  | √ | √ | √ | √ |'
+  id: totrans-13
   prefs: []
   type: TYPE_TB
+  zh: '| 2.0.0 |  | √ | √ | √ | √ |'
 - en: '| 1.13.0 |  | √ | √ | √ | √ |'
+  id: totrans-14
   prefs: []
   type: TYPE_TB
+  zh: '| 1.13.0 |  | √ | √ | √ | √ |'
 - en: '| 1.12.100 |  | √ | √ | √ | √ |'
+  id: totrans-15
   prefs: []
   type: TYPE_TB
+  zh: '| 1.12.100 |  | √ | √ | √ | √ |'
 - en: '| 1.12.0 |  | √ | √ | √ | √ |'
+  id: totrans-16
   prefs: []
   type: TYPE_TB
+  zh: '| 1.12.0 |  | √ | √ | √ | √ |'
 - en: Please run `pip list | grep torch` to get your `pytorch_version`.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 请运行`pip list | grep torch`以获取您的`pytorch_version`。
 - en: '[PRE0]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: where `{pytorch_version}` should be your PyTorch version, for instance 2.1.0.
     Check more approaches for [oneccl_bind_pt installation](https://github.com/intel/torch-ccl).
     Versions of oneCCL and PyTorch must match.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 其中`{pytorch_version}`应该是您的PyTorch版本，例如2.1.0。查看更多关于[oneccl_bind_pt安装](https://github.com/intel/torch-ccl)的方法。oneCCL和PyTorch的版本必须匹配。
 - en: oneccl_bindings_for_pytorch 1.12.0 prebuilt wheel does not work with PyTorch
     1.12.1 (it is for PyTorch 1.12.0) PyTorch 1.12.1 should work with oneccl_bindings_for_pytorch
     1.12.100
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: oneccl_bindings_for_pytorch 1.12.0预构建的Wheel文件与PyTorch 1.12.1不兼容（适用于PyTorch 1.12.0）。PyTorch
+    1.12.1应该与oneccl_bindings_for_pytorch 1.12.100兼容。
 - en: Intel® MPI library
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Intel® MPI库
 - en: Use this standards-based MPI implementation to deliver flexible, efficient,
     scalable cluster messaging on Intel® architecture. This component is part of the
     Intel® oneAPI HPC Toolkit.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用这个基于标准的MPI实现来在Intel®架构上提供灵活、高效、可扩展的集群消息传递。这个组件是Intel® oneAPI HPC Toolkit的一部分。
 - en: oneccl_bindings_for_pytorch is installed along with the MPI tool set. Need to
     source the environment before using it.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: oneccl_bindings_for_pytorch是与MPI工具集一起安装的。在使用之前需要设置环境。
 - en: for Intel® oneCCL >= 1.12.0
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于Intel® oneCCL >= 1.12.0
 - en: '[PRE1]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: for Intel® oneCCL whose version < 1.12.0
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于版本< 1.12.0的Intel® oneCCL
 - en: '[PRE2]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Intel® Extension for PyTorch installation
+  id: totrans-28
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: Intel® PyTorch扩展安装
 - en: Intel Extension for PyTorch (IPEX) provides performance optimizations for CPU
     training with both Float32 and BFloat16 (refer to the [single CPU section](./perf_train_cpu)
     to learn more).
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: Intel PyTorch扩展（IPEX）为使用Float32和BFloat16进行CPU训练提供了性能优化（请参考[单CPU部分](./perf_train_cpu)以了解更多信息）。
 - en: The following “Usage in Trainer” takes mpirun in Intel® MPI library as an example.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下“Trainer中的用法”以Intel® MPI库中的mpirun为例。
 - en: Usage in Trainer
+  id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在Trainer中的用法
 - en: To enable multi CPU distributed training in the Trainer with the ccl backend,
     users should add **`--ddp_backend ccl`** in the command arguments.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在Trainer中使用ccl后端启用多CPU分布式训练，用户应在命令参数中添加**`--ddp_backend ccl`**。
 - en: Let’s see an example with the [question-answering example](https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering)
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一个例子，使用[问答示例](https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering)
 - en: The following command enables training with 2 processes on one Xeon node, with
     one process running per one socket. The variables OMP_NUM_THREADS/CCL_WORKER_COUNT
     can be tuned for optimal performance.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下命令在一个Xeon节点上启用了使用2个进程进行训练，每个进程在一个插槽上运行。OMP_NUM_THREADS/CCL_WORKER_COUNT变量可以调整以获得最佳性能。
 - en: '[PRE3]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: The following command enables training with a total of four processes on two
     Xeons (node0 and node1, taking node0 as the main process), ppn (processes per
     node) is set to 2, with one process running per one socket. The variables OMP_NUM_THREADS/CCL_WORKER_COUNT
     can be tuned for optimal performance.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下命令在两个Xeon上（node0和node1，以node0为主进程）启用了总共四个进程的训练，ppn（每个节点的进程数）设置为2，每个插槽上运行一个进程。OMP_NUM_THREADS/CCL_WORKER_COUNT变量可以调整以获得最佳性能。
 - en: In node0, you need to create a configuration file which contains the IP addresses
     of each node (for example hostfile) and pass that configuration file path as an
     argument.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 在node0中，您需要创建一个包含每个节点的IP地址的配置文件（例如hostfile），并将该配置文件路径作为参数传递。
 - en: '[PRE4]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Now, run the following command in node0 and **4DDP** will be enabled in node0
     and node1 with BF16 auto mixed precision:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，在node0中运行以下命令，将在node0和node1中启用4DDP，并使用BF16自动混合精度：
 - en: '[PRE5]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Usage with Kubernetes
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在Kubernetes中的用法
 - en: The same distributed training job from the previous section can be deployed
     to a Kubernetes cluster using the [Kubeflow PyTorchJob training operator](https://www.kubeflow.org/docs/components/training/pytorch/).
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以使用[Kubeflow PyTorchJob训练操作符](https://www.kubeflow.org/docs/components/training/pytorch/)将前一节中的相同分布式训练作业部署到Kubernetes集群。
 - en: Setup
+  id: totrans-43
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 设置
 - en: 'This example assumes that you have:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 此示例假定您已经：
 - en: Access to a Kubernetes cluster with [Kubeflow installed](https://www.kubeflow.org/docs/started/installing-kubeflow/)
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 访问已安装[Kubeflow的Kubernetes集群](https://www.kubeflow.org/docs/started/installing-kubeflow/)
 - en: '[`kubectl`](https://kubernetes.io/docs/tasks/tools/) installed and configured
     to access the Kubernetes cluster'
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 已安装并配置[`kubectl`](https://kubernetes.io/docs/tasks/tools/)以访问Kubernetes集群
 - en: A [Persistent Volume Claim (PVC)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
     that can be used to store datasets and model files. There are multiple options
     for setting up the PVC including using an NFS [storage class](https://kubernetes.io/docs/concepts/storage/storage-classes/)
     or a cloud storage bucket.
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可以用于存储数据集和模型文件的[Persistent Volume Claim (PVC)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)。设置PVC的多种选项，包括使用NFS
+    [storage class](https://kubernetes.io/docs/concepts/storage/storage-classes/)或云存储桶。
 - en: A Docker container that includes your model training script and all the dependencies
     needed to run the script. For distributed CPU training jobs, this typically includes
     PyTorch, Transformers, Intel Extension for PyTorch, Intel oneCCL Bindings for
     PyTorch, and OpenSSH to communicate between the containers.
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个包含您的模型训练脚本和运行脚本所需的所有依赖项的Docker容器。对于分布式CPU训练作业，这通常包括PyTorch、Transformers、Intel
+    Extension for PyTorch、Intel oneCCL Bindings for PyTorch和OpenSSH以在容器之间进行通信。
 - en: 'The snippet below is an example of a Dockerfile that uses a base image that
     supports distributed CPU training and then extracts a Transformers release to
     the `/workspace` directory, so that the example scripts are included in the image:'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的片段是一个使用支持分布式CPU训练的基础镜像的Dockerfile示例，然后将Transformers发布提取到`/workspace`目录中，以便示例脚本包含在镜像中：
 - en: '[PRE6]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: The image needs to be built and copied to the cluster’s nodes or pushed to a
     container registry prior to deploying the PyTorchJob to the cluster.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 在将PyTorchJob部署到集群之前，需要构建并将镜像复制到集群的节点或推送到容器注册表。
 - en: PyTorchJob Specification File
+  id: totrans-52
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: PyTorchJob规范文件
 - en: 'The [Kubeflow PyTorchJob](https://www.kubeflow.org/docs/components/training/pytorch/)
     is used to run the distributed training job on the cluster. The yaml file for
     the PyTorchJob defines parameters such as:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Kubeflow PyTorchJob](https://www.kubeflow.org/docs/components/training/pytorch/)用于在集群上运行分布式训练作业。PyTorchJob的yaml文件定义了参数，例如：'
 - en: The name of the PyTorchJob
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: PyTorchJob的名称
 - en: The number of replicas (workers)
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 副本数（workers）的数量
 - en: The python script and it’s parameters that will be used to run the training
     job
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将用于运行训练作业的Python脚本及其参数
 - en: The types of resources (node selector, memory, and CPU) needed for each worker
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 每个worker所需的资源类型（节点选择器、内存和CPU）
 - en: The image/tag for the Docker container to use
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Docker容器使用的图像/标签
 - en: Environment variables
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 环境变量
 - en: A volume mount for the PVC
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: PVC的卷挂载
 - en: The volume mount defines a path where the PVC will be mounted in the container
     for each worker pod. This location can be used for the dataset, checkpoint files,
     and the saved model after training completes.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 卷挂载定义了PVC将在每个worker pod的容器中挂载的路径。此位置可用于数据集、检查点文件以及训练完成后保存的模型。
 - en: The snippet below is an example of a yaml file for a PyTorchJob with 4 workers
     running the [question-answering example](https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering).
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的片段是一个PyTorchJob的yaml文件示例，其中有4个worker运行[问答示例](https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering)。
 - en: '[PRE7]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: To run this example, update the yaml based on your training script and the nodes
     in your cluster.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 要运行此示例，请根据您的训练脚本和集群中的节点更新yaml。
 - en: The CPU resource limits/requests in the yaml are defined in [cpu units](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu)
     where 1 CPU unit is equivalent to 1 physical CPU core or 1 virtual core (depending
     on whether the node is a physical host or a VM). The amount of CPU and memory
@@ -281,47 +402,73 @@
     [quality of service](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
     for the worker pods, set the same CPU and memory amounts for both the resource
     limits and requests.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: yaml中的CPU资源限制/请求是以[CPU单位](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu)定义的，其中1个CPU单位等同于1个物理CPU核心或1个虚拟核心（取决于节点是物理主机还是虚拟机）。在yaml中定义的CPU和内存限制/请求量应小于单台机器上可用CPU/内存容量的量。通常最好不要使用整个机器的容量，以便为kubelet和操作系统留下一些资源。为了为worker
+    pods获得[“guaranteed”](https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#guaranteed)[服务质量](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)，请为资源限制和请求设置相同的CPU和内存量。
 - en: Deploy
+  id: totrans-66
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 部署
 - en: 'After the PyTorchJob spec has been updated with values appropriate for your
     cluster and training job, it can be deployed to the cluster using:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 在为您的集群和训练作业更新了适当的值后，可以使用以下命令将PyTorchJob部署到集群中：
 - en: '[PRE8]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The `kubectl get pods -n kubeflow` command can then be used to list the pods
     in the `kubeflow` namespace. You should see the worker pods for the PyTorchJob
     that was just deployed. At first, they will probably have a status of “Pending”
     as the containers get pulled and created, then the status should change to “Running”.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后可以使用`kubectl get pods -n kubeflow`命令来列出`kubeflow`命名空间中的pod。您应该看到刚刚部署的PyTorchJob的worker
+    pods。起初，它们可能会显示“Pending”状态，因为容器正在被拉取和创建，然后状态应该会变为“Running”。
 - en: '[PRE9]'
+  id: totrans-70
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'The logs for worker can be viewed using `kubectl logs -n kubeflow <pod name>`.
     Add `-f` to stream the logs, for example:'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以使用 `kubectl logs -n kubeflow <pod name>` 查看工作节点的日志。添加 `-f` 来实时查看日志，例如：
 - en: '[PRE10]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: After the training job completes, the trained model can be copied from the PVC
     or storage location. When you are done with the job, the PyTorchJob resource can
     be deleted from the cluster using `kubectl delete -f pytorchjob.yaml`.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 训练作业完成后，训练好的模型可以从PVC或存储位置复制。当作业完成后，可以使用 `kubectl delete -f pytorchjob.yaml`
+    命令从集群中删除 PyTorchJob 资源。
 - en: Summary
+  id: totrans-74
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 摘要
 - en: This guide covered running distributed PyTorch training jobs using multiple
     CPUs on bare metal and on a Kubernetes cluster. Both cases utilize Intel Extension
     for PyTorch and Intel oneCCL Bindings for PyTorch for optimal training performance,
     and can be used as a template to run your own workload on multiple nodes.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南涵盖了在裸金属和 Kubernetes 集群上使用多个 CPU 运行分布式 PyTorch 训练作业。这两种情况都利用了 Intel Extension
+    for PyTorch 和 Intel oneCCL Bindings for PyTorch 来实现最佳的训练性能，并可以作为在多个节点上运行自己工作负载的模板。
