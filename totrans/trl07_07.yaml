@@ -1,189 +1,269 @@
 - en: Training customization
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 训练定制
 - en: 'Original text: [https://huggingface.co/docs/trl/customization](https://huggingface.co/docs/trl/customization)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/trl/customization](https://huggingface.co/docs/trl/customization)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: TRL is designed with modularity in mind so that users to be able to efficiently
     customize the training loop for their needs. Below are some examples on how you
     can apply and test different techniques.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: TRL旨在具有模块化的设计，以便用户能够有效地为其需求定制训练循环。以下是一些关于如何应用和测试不同技术的示例。
 - en: Train on multiple GPUs / nodes
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在多个GPU/节点上训练
 - en: The trainers in TRL use 🤗 Accelerate to enable distributed training across multiple
     GPUs or nodes. To do so, first create an 🤗 Accelerate config file by running
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: TRL中的训练器使用🤗 Accelerate来实现跨多个GPU或节点的分布式训练。要做到这一点，首先通过运行创建一个🤗 Accelerate配置文件
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'and answering the questions according to your multi-gpu / multi-node setup.
     You can then launch distributed training by running:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 并根据您的多GPU/多节点设置回答问题。然后通过运行启动分布式训练：
 - en: '[PRE1]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'We also provide config files in the [examples folder](https://github.com/huggingface/trl/tree/main/examples/accelerate_configs)
     that can be used as templates. To use these templates, simply pass the path to
     the config file when launching a job, e.g.:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还在[示例文件夹](https://github.com/huggingface/trl/tree/main/examples/accelerate_configs)中提供配置文件，可用作模板。要使用这些模板，只需在启动作业时传递配置文件的路径，例如：
 - en: '[PRE2]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Refer to the [examples page](https://github.com/huggingface/trl/tree/main/examples)
     for more details.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关更多详细信息，请参考[示例页面](https://github.com/huggingface/trl/tree/main/examples)。
 - en: Distributed training with DeepSpeed
+  id: totrans-12
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用DeepSpeed进行分布式训练
 - en: 'All of the trainers in TRL can be run on multiple GPUs together with DeepSpeed
     ZeRO-{1,2,3} for efficient sharding of the optimizer states, gradients, and model
     weights. To do so, run:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: TRL中的所有训练器都可以与DeepSpeed ZeRO-{1,2,3}一起在多个GPU上运行，以实现优化器状态、梯度和模型权重的有效分片。要这样做，请运行：
 - en: '[PRE3]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Note that for ZeRO-3, a small tweak is needed to initialize your reward model
     on the correct device via the `zero3_init_context_manager()` context manager.
     In particular, this is needed to avoid DeepSpeed hanging after a fixed number
     of training steps. Here is a snippet of what is involved from the [`sentiment_tuning`](https://github.com/huggingface/trl/blob/main/examples/scripts/ppo.py)
     example:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，对于ZeRO-3，需要通过`zero3_init_context_manager()`上下文管理器在正确的设备上初始化您的奖励模型进行一些小调整。特别是，这是为了避免DeepSpeed在固定数量的训练步骤后挂起。以下是从[`sentiment_tuning`](https://github.com/huggingface/trl/blob/main/examples/scripts/ppo.py)示例中涉及的部分内容：
 - en: '[PRE4]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Consult the 🤗 Accelerate [documentation](https://huggingface.co/docs/accelerate/usage_guides/deepspeed)
     for more information about the DeepSpeed plugin.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关DeepSpeed插件的更多信息，请参考🤗 Accelerate[文档](https://huggingface.co/docs/accelerate/usage_guides/deepspeed)。
 - en: Use different optimizers
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用不同的优化器
 - en: 'By default, the `PPOTrainer` creates a `torch.optim.Adam` optimizer. You can
     create and define a different optimizer and pass it to `PPOTrainer`:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，`PPOTrainer`会创建一个`torch.optim.Adam`优化器。您可以创建并定义一个不同的优化器，并将其传递给`PPOTrainer`：
 - en: '[PRE5]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'For memory efficient fine-tuning, you can also pass `Adam8bit` optimizer from
     `bitsandbytes`:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了更节省内存的微调，您还可以从`bitsandbytes`传递`Adam8bit`优化器：
 - en: '[PRE6]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Use LION optimizer
+  id: totrans-23
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用LION优化器
 - en: 'You can use the new [LION optimizer from Google](https://arxiv.org/abs/2302.06675)
     as well, first take the source code of the optimizer definition [here](https://github.com/lucidrains/lion-pytorch/blob/main/lion_pytorch/lion_pytorch.py),
     and copy it so that you can import the optimizer. Make sure to initialize the
     optimizer by considering the trainable parameters only for a more memory efficient
     training:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用来自Google的新[LION优化器](https://arxiv.org/abs/2302.06675)，首先获取优化器定义的源代码[此处](https://github.com/lucidrains/lion-pytorch/blob/main/lion_pytorch/lion_pytorch.py)，并复制它以便可以导入优化器。确保通过仅考虑可训练参数来初始化优化器，以实现更节省内存的训练：
 - en: '[PRE7]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'We advise you to use the learning rate that you would use for `Adam` divided
     by 3 as pointed out [here](https://github.com/lucidrains/lion-pytorch#lion---pytorch).
     We observed an improvement when using this optimizer compared to classic Adam
     (check the full logs [here](https://wandb.ai/distill-bloom/trl/runs/lj4bheke?workspace=user-younesbelkada)):'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们建议您使用`Adam`的学习率除以3，如[此处](https://github.com/lucidrains/lion-pytorch#lion---pytorch)所指出。与经典的Adam相比，我们观察到使用此优化器时有所改善（查看完整日志[此处](https://wandb.ai/distill-bloom/trl/runs/lj4bheke?workspace=user-younesbelkada)）：
 - en: '![](../Images/df158f76e736e28cb11b4474cc879ebe.png)'
+  id: totrans-27
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/df158f76e736e28cb11b4474cc879ebe.png)'
 - en: Add a learning rate scheduler
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 添加学习率调度器
 - en: You can also play with your training by adding learning rate schedulers!
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以通过添加学习率调度器来调整训练！
 - en: '[PRE8]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Memory efficient fine-tuning by sharing layers
+  id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 通过共享层进行内存高效微调
 - en: Another tool you can use for more memory efficient fine-tuning is to share layers
     between the reference model and the model you want to train.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个可以用于更节省内存的微调的工具是在参考模型和您想要训练的模型之间共享层。
 - en: '[PRE9]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Pass 8-bit reference models
+  id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 传递8位参考模型
 - en: Since `trl` supports all key word arguments when loading a model from `transformers`
     using `from_pretrained`, you can also leverage `load_in_8bit` from `transformers`
     for more memory efficient fine-tuning.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于`trl`在使用`from_pretrained`从`transformers`加载模型时支持所有关键字参数，您还可以利用`transformers`中的`load_in_8bit`进行更节省内存的微调。
 - en: Read more about 8-bit model loading in `transformers` [here](https://huggingface.co/docs/transformers/perf_infer_gpu_one#bitsandbytes-integration-for-int8-mixedprecision-matrix-decomposition).
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 在`transformers`中阅读有关8位模型加载的更多信息[此处](https://huggingface.co/docs/transformers/perf_infer_gpu_one#bitsandbytes-integration-for-int8-mixedprecision-matrix-decomposition)。
 - en: '[PRE10]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Use the CUDA cache optimizer
+  id: totrans-38
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用CUDA缓存优化器
 - en: 'When training large models, you should better handle the CUDA cache by iteratively
     clearing it. Do do so, simply pass `optimize_cuda_cache=True` to `PPOConfig`:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 在训练大型模型时，最好通过迭代清除CUDA缓存来处理CUDA缓存。要这样做，只需将`optimize_cuda_cache=True`传递给`PPOConfig`：
 - en: '[PRE11]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Use score scaling/normalization/clipping
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用分数缩放/归一化/裁剪
 - en: 'As suggested by [Secrets of RLHF in Large Language Models Part I: PPO](https://arxiv.org/abs/2307.04964),
     we support score (aka reward) scaling/normalization/clipping to improve training
     stability via `PPOConfig`:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如[大型语言模型RLHF的秘密第一部分：PPO](https://arxiv.org/abs/2307.04964)所建议的，我们支持通过`PPOConfig`进行分数（又名奖励）缩放/归一化/剪切，以改善训练稳定性。
 - en: '[PRE12]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'To run `ppo.py`, you can use the following command:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 要运行`ppo.py`，您可以使用以下命令：
 - en: '[PRE13]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
