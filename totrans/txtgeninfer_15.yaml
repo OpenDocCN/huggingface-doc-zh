@@ -1,166 +1,226 @@
 - en: Streaming
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 流式
 - en: 'Original text: [https://huggingface.co/docs/text-generation-inference/conceptual/streaming](https://huggingface.co/docs/text-generation-inference/conceptual/streaming)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/text-generation-inference/conceptual/streaming](https://huggingface.co/docs/text-generation-inference/conceptual/streaming)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: What is Streaming?
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 什么是流式？
 - en: Token streaming is the mode in which the server returns the tokens one by one
     as the model generates them. This enables showing progressive generations to the
     user rather than waiting for the whole generation. Streaming is an essential aspect
     of the end-user experience as it reduces latency, one of the most critical aspects
     of a smooth experience.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 令牌流是服务器逐个返回令牌的模式，当模型生成它们时。这使得用户可以逐步看到生成的结果，而不必等待整个生成。流式是端用户体验的一个重要方面，因为它减少了延迟，这是流畅体验中最关键的方面之一。
 - en: '![](../Images/da4a03ca9d5a29fb32448f9771ddb359.png) ![](../Images/e9e351d288d9a7be620080222481534f.png)'
+  id: totrans-5
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/da4a03ca9d5a29fb32448f9771ddb359.png) ![](../Images/e9e351d288d9a7be620080222481534f.png)'
 - en: 'With token streaming, the server can start returning the tokens one by one
     before having to generate the whole response. Users can have a sense of the generation’s
     quality earlier than the end of the generation. This has different positive effects:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用令牌流，服务器可以在生成整个响应之前逐个返回令牌。用户可以在生成结束之前更早地感知到生成的质量。这具有不同的积极影响：
 - en: Users can get results orders of magnitude earlier for extremely long queries.
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用户可以更早地获得数量级更高的结果，用于极长的查询。
 - en: Seeing something in progress allows users to stop the generation if it’s not
     going in the direction they expect.
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在进行中看到某些内容使用户可以停止生成，如果生成不符合他们的期望。
 - en: Perceived latency is lower when results are shown in the early stages.
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当在早期阶段显示结果时，感知延迟较低。
 - en: When used in conversational UIs, the experience feels more natural.
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在对话式用户界面中使用时，体验感觉更加自然。
 - en: For example, a system can generate 100 tokens per second. If the system generates
     1000 tokens, with the non-streaming setup, users need to wait 10 seconds to get
     results. On the other hand, with the streaming setup, users get initial results
     immediately, and although end-to-end latency will be the same, they can see half
     of the generation after five seconds. Below you can see an interactive demo that
     shows non-streaming vs streaming side-by-side. Click **generate** below.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，系统每秒可以生成100个令牌。如果系统生成1000个令牌，使用非流式设置，用户需要等待10秒才能获得结果。另一方面，使用流式设置，用户立即获得初始结果，尽管端到端延迟将是相同的，但他们可以在五秒后看到一半的生成。下面您可以看到一个交互式演示，显示非流式与流式并排。点击下面的**generate**。
 - en: '[https://osanseviero-streaming-vs-non-streaming.hf.space?__theme=light](https://osanseviero-streaming-vs-non-streaming.hf.space?__theme=light)'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://osanseviero-streaming-vs-non-streaming.hf.space?__theme=light](https://osanseviero-streaming-vs-non-streaming.hf.space?__theme=light)'
 - en: '[https://osanseviero-streaming-vs-non-streaming.hf.space?__theme=dark](https://osanseviero-streaming-vs-non-streaming.hf.space?__theme=dark)'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://osanseviero-streaming-vs-non-streaming.hf.space?__theme=dark](https://osanseviero-streaming-vs-non-streaming.hf.space?__theme=dark)'
 - en: How to use Streaming?
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 如何使用流式传输？
 - en: Streaming with Python
+  id: totrans-15
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用Python进行流式传输
 - en: To stream tokens with `InferenceClient`, simply pass `stream=True` and iterate
     over the response.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用`InferenceClient`流式传输令牌，只需传递`stream=True`并迭代响应。
 - en: '[PRE0]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: If you want additional details, you can add `details=True`. In this case, you
     get a `TextGenerationStreamResponse` which contains additional information such
     as the probabilities and the tokens. For the final response in the stream, it
     also returns the full generated text.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要更多详细信息，可以添加`details=True`。在这种情况下，您将获得一个包含额外信息（如概率和令牌）的`TextGenerationStreamResponse`。对于流中的最终响应，它还会返回完整生成的文本。
 - en: '[PRE1]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: The `huggingface_hub` library also comes with an `AsyncInferenceClient` in case
     you need to handle the requests concurrently.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '`huggingface_hub`库还提供了`AsyncInferenceClient`，以便您可以同时处理请求。'
 - en: '[PRE2]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Streaming with cURL
+  id: totrans-22
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用cURL进行流式传输
 - en: To use the `generate_stream` endpoint with curl, you can add the `-N` flag,
     which disables curl default buffering and shows data as it arrives from the server
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`generate_stream`端点与curl一起使用时，您可以添加`-N`标志，该标志禁用curl的默认缓冲并在数据从服务器到达时显示数据
 - en: '[PRE3]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Streaming with JavaScript
+  id: totrans-25
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用JavaScript进行流式传输
 - en: First, we need to install the `@huggingface/inference` library. `npm install
     @huggingface/inference`
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，我们需要安装`@huggingface/inference`库。`npm install @huggingface/inference`
 - en: If you’re using the free Inference API, you can use `HfInference`. If you’re
     using inference endpoints, you can use `HfInferenceEndpoint`. Let’s
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在使用免费的推理API，您可以使用`HfInference`。如果您正在使用推理端点，您可以使用`HfInferenceEndpoint`。让我们
 - en: We can create a `HfInferenceEndpoint` providing our endpoint URL and credential.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以创建一个提供我们端点URL和凭据的`HfInferenceEndpoint`。
 - en: '[PRE4]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: How does Streaming work under the hood?
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 流式工作原理是什么？
 - en: Under the hood, TGI uses Server-Sent Events (SSE). In an SSE Setup, a client
     sends a request with the data, opening an HTTP connection and subscribing to updates.
     Afterward, the server sends data to the client. There is no need for further requests;
     the server will keep sending the data. SSEs are unidirectional, meaning the client
     does not send other requests to the server. SSE sends data over HTTP, making it
     easy to use.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 在幕后，TGI使用服务器发送事件（SSE）。在SSE设置中，客户端发送带有数据的请求，打开HTTP连接并订阅更新。之后，服务器将数据发送给客户端。不需要进一步的请求；服务器将继续发送数据。SSE是单向的，这意味着客户端不会向服务器发送其他请求。SSE通过HTTP发送数据，使用起来很容易。
 - en: 'SSEs are different than:'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: SSE与以下内容不同：
 - en: 'Polling: where the client keeps calling the server to get data. This means
     that the server might return empty responses and cause overhead.'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 轮询：客户端不断调用服务器以获取数据。这意味着服务器可能会返回空响应并导致开销。
 - en: 'Webhooks: where there is a bi-directional connection. The server can send information
     to the client, but the client can also send data to the server after the first
     request. Webhooks are more complex to operate as they don’t only use HTTP.'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Webhooks：其中存在双向连接。服务器可以向客户端发送信息，但客户端也可以在第一次请求后向服务器发送数据。Webhooks的操作更复杂，因为它们不仅使用HTTP。
 - en: If there are too many requests at the same time, TGI returns an HTTP Error with
     an `overloaded` error type (`huggingface_hub` returns `OverloadedError`). This
     allows the client to manage the overloaded server (e.g., it could display a busy
     error to the user or retry with a new request). To configure the maximum number
     of concurrent requests, you can specify `--max_concurrent_requests`, allowing
     clients to handle backpressure.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果同时有太多请求，TGI会返回一个带有`overloaded`错误类型的HTTP错误（`huggingface_hub`返回`OverloadedError`）。这允许客户端管理过载的服务器（例如，它可以向用户显示繁忙错误或使用新请求重试）。要配置最大并发请求数，可以指定`--max_concurrent_requests`，允许客户端处理背压。
