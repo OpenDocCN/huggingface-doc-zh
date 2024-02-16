@@ -1,33 +1,25 @@
 - en: OWL-ViT
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: OWL-ViT
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/owlvit](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/owlvit)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/owlvit](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/owlvit)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Overview
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 概述
 - en: The OWL-ViT (short for Vision Transformer for Open-World Localization) was proposed
     in [Simple Open-Vocabulary Object Detection with Vision Transformers](https://arxiv.org/abs/2205.06230)
     by Matthias Minderer, Alexey Gritsenko, Austin Stone, Maxim Neumann, Dirk Weissenborn,
@@ -36,11 +28,18 @@
     object detection network trained on a variety of (image, text) pairs. It can be
     used to query an image with one or multiple text queries to search for and detect
     target objects described in text.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: OWL-ViT（Vision Transformer for Open-World Localization）是由Matthias Minderer、Alexey
+    Gritsenko、Austin Stone、Maxim Neumann、Dirk Weissenborn、Alexey Dosovitskiy、Aravindh
+    Mahendran、Anurag Arnab、Mostafa Dehghani、Zhuoran Shen、Xiao Wang、Xiaohua Zhai、Thomas
+    Kipf和Neil Houlsby在[Simple Open-Vocabulary Object Detection with Vision Transformers](https://arxiv.org/abs/2205.06230)中提出的。OWL-ViT是一个在各种（图像，文本）对上训练的开放词汇目标检测网络。它可以用于使用一个或多个文本查询查询图像，以搜索和检测文本中描述的目标对象。
 - en: 'The abstract from the paper is the following:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 来自论文的摘要如下：
 - en: '*Combining simple architectures with large-scale pre-training has led to massive
     improvements in image classification. For object detection, pre-training and scaling
     approaches are less well established, especially in the long-tailed and open-vocabulary
@@ -53,20 +52,29 @@
     task. We provide the adaptation strategies and regularizations needed to attain
     very strong performance on zero-shot text-conditioned and one-shot image-conditioned
     object detection. Code and models are available on GitHub.*'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '*将简单的架构与大规模预训练相结合，已经在图像分类方面取得了巨大的改进。对于目标检测，预训练和扩展方法尚未建立良好的基础，特别是在长尾和开放词汇设置中，训练数据相对稀缺的情况下。在本文中，我们提出了一个强大的配方，将图像文本模型转移到开放词汇的目标检测中。我们使用标准的Vision
+    Transformer架构进行最小修改，对比图像文本预训练，并进行端到端的检测微调。我们对这一设置的扩展属性进行了分析，结果表明增加图像级别的预训练和模型大小可以在下游检测任务中获得一致的改进。我们提供了适应策略和规范化，以实现零样本文本条件和一次样本图像条件的目标检测的非常强大的性能。代码和模型可在GitHub上获得。*'
 - en: '![drawing](../Images/7088942c2120476db885ea27155f090f.png) OWL-ViT architecture.
     Taken from the [original paper](https://arxiv.org/abs/2205.06230).'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '![drawing](../Images/7088942c2120476db885ea27155f090f.png) OWL-ViT架构。摘自[原始论文](https://arxiv.org/abs/2205.06230)。'
 - en: This model was contributed by [adirik](https://huggingface.co/adirik). The original
     code can be found [here](https://github.com/google-research/scenic/tree/main/scenic/projects/owl_vit).
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 此模型由[adirik](https://huggingface.co/adirik)贡献。原始代码可在[此处](https://github.com/google-research/scenic/tree/main/scenic/projects/owl_vit)找到。
 - en: Usage tips
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用提示
 - en: OWL-ViT is a zero-shot text-conditioned object detection model. OWL-ViT uses
     [CLIP](clip) as its multi-modal backbone, with a ViT-like Transformer to get visual
     features and a causal language model to get the text features. To use CLIP for
@@ -78,8 +86,10 @@
     and box heads on standard detection datasets using a bipartite matching loss.
     One or multiple text queries per image can be used to perform zero-shot text-conditioned
     object detection.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: OWL-ViT是一个零样本文本条件的目标检测模型。OWL-ViT使用[CLIP](clip)作为其多模态骨干，具有类似ViT的Transformer来获取视觉特征和因果语言模型来获取文本特征。为了使用CLIP进行检测，OWL-ViT移除了视觉模型的最终令牌池化层，并将轻量级分类和框头附加到每个Transformer输出令牌上。通过用从文本模型获得的类名嵌入替换固定的分类层权重，实现了开放词汇分类。作者首先从头开始训练CLIP，然后在标准检测数据集上使用二部匹配损失对其进行端到端的微调，包括分类和框头。可以使用一个或多个文本查询来执行零样本文本条件的目标检测。
 - en: '[OwlViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor)
     can be used to resize (or rescale) and normalize images for the model and [CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)
     is used to encode the text. [OwlViTProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTProcessor)
@@ -88,887 +98,1333 @@
     into a single instance to both encode the text and prepare the images. The following
     example shows how to perform object detection using [OwlViTProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTProcessor)
     and [OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection).'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '[OwlViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor)可用于调整（或重新缩放）和规范化模型的图像，而[CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)用于对文本进行编码。[OwlViTProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTProcessor)将[OwlViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor)和[CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)包装成一个单一实例，用于同时对文本进行编码和准备图像。以下示例展示了如何使用[OwlViTProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTProcessor)和[OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection)执行目标检测。'
 - en: '[PRE0]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Resources
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 资源
 - en: A demo notebook on using OWL-ViT for zero- and one-shot (image-guided) object
     detection can be found [here](https://github.com/huggingface/notebooks/blob/main/examples/zeroshot_object_detection_with_owlvit.ipynb).
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以在[这里](https://github.com/huggingface/notebooks/blob/main/examples/zeroshot_object_detection_with_owlvit.ipynb)找到使用
+    OWL-ViT 进行零样本和一样本（图像引导）目标检测的演示笔记本。
 - en: OwlViTConfig
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: OwlViTConfig
 - en: '### `class transformers.OwlViTConfig`'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.OwlViTConfig`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/configuration_owlvit.py#L258)'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/configuration_owlvit.py#L258)'
 - en: '[PRE1]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Parameters
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`text_config` (`dict`, *optional*) — Dictionary of configuration options used
     to initialize [OwlViTTextConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextConfig).'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`text_config` (`dict`, *optional*) — 用于初始化 [OwlViTTextConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextConfig)
+    的配置选项字典。'
 - en: '`vision_config` (`dict`, *optional*) — Dictionary of configuration options
     used to initialize [OwlViTVisionConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionConfig).'
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`vision_config` (`dict`, *optional*) — 用于初始化 [OwlViTVisionConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionConfig)
+    的配置选项字典。'
 - en: '`projection_dim` (`int`, *optional*, defaults to 512) — Dimensionality of text
     and vision projection layers.'
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`projection_dim` (`int`, *optional*, 默认为512) — 文本和视觉投影层的维度。'
 - en: '`logit_scale_init_value` (`float`, *optional*, defaults to 2.6592) — The inital
     value of the *logit_scale* parameter. Default is used as per the original OWL-ViT
     implementation.'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logit_scale_init_value` (`float`, *optional*, 默认为2.6592) — *logit_scale* 参数的初始值。默认值根据原始的
+    OWL-ViT 实现而定。'
 - en: '`return_dict` (`bool`, *optional*, defaults to `True`) — Whether or not the
     model should return a dictionary. If `False`, returns a tuple.'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *optional*, 默认为 `True`) — 模型是否应返回一个字典。如果为 `False`，则返回一个元组。'
 - en: '`kwargs` (*optional*) — Dictionary of keyword arguments.'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`kwargs` (*optional*) — 关键字参数的字典。'
 - en: '[OwlViTConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTConfig)
     is the configuration class to store the configuration of an [OwlViTModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTModel).
     It is used to instantiate an OWL-ViT model according to the specified arguments,
     defining the text model and vision model configs. Instantiating a configuration
     with the defaults will yield a similar configuration to that of the OWL-ViT [google/owlvit-base-patch32](https://huggingface.co/google/owlvit-base-patch32)
     architecture.'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '[OwlViTConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTConfig)
+    是用于存储 [OwlViTModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTModel)
+    配置的配置类。根据指定的参数实例化 OWL-ViT 模型，定义文本模型和视觉模型配置。使用默认值实例化配置将产生类似于 OWL-ViT [google/owlvit-base-patch32](https://huggingface.co/google/owlvit-base-patch32)
+    架构的配置。'
 - en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     for more information.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置对象继承自 [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)，可用于控制模型输出。阅读来自
+    [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    的文档以获取更多信息。
 - en: '#### `from_text_vision_configs`'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `from_text_vision_configs`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/configuration_owlvit.py#L327)'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/configuration_owlvit.py#L327)'
 - en: '[PRE2]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Returns
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[OwlViTConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTConfig)'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: '[OwlViTConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTConfig)'
 - en: An instance of a configuration object
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置对象的一个实例
 - en: Instantiate a [OwlViTConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTConfig)
     (or a derived class) from owlvit text model configuration and owlvit vision model
     configuration.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 从 owlvit 文本模型配置和 owlvit 视觉模型配置实例化一个 [OwlViTConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTConfig)（或派生类）。
 - en: OwlViTTextConfig
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: OwlViTTextConfig
 - en: '### `class transformers.OwlViTTextConfig`'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.OwlViTTextConfig`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/configuration_owlvit.py#L40)'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/configuration_owlvit.py#L40)'
 - en: '[PRE3]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Parameters
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`vocab_size` (`int`, *optional*, defaults to 49408) — Vocabulary size of the
     OWL-ViT text model. Defines the number of different tokens that can be represented
     by the `inputs_ids` passed when calling [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel).'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`vocab_size` (`int`, *optional*, 默认为49408) — OWL-ViT 文本模型的词汇量。定义了在调用 [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel)
+    时可以表示的不同标记数量。'
 - en: '`hidden_size` (`int`, *optional*, defaults to 512) — Dimensionality of the
     encoder layers and the pooler layer.'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_size` (`int`, *optional*, 默认为512) — 编码器层和池化层的维度。'
 - en: '`intermediate_size` (`int`, *optional*, defaults to 2048) — Dimensionality
     of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`intermediate_size` (`int`, *optional*, 默认为2048) — Transformer 编码器中“中间”（即前馈）层的维度。'
 - en: '`num_hidden_layers` (`int`, *optional*, defaults to 12) — Number of hidden
     layers in the Transformer encoder.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_hidden_layers` (`int`, *optional*, 默认为12) — Transformer 编码器中的隐藏层数量。'
 - en: '`num_attention_heads` (`int`, *optional*, defaults to 8) — Number of attention
     heads for each attention layer in the Transformer encoder.'
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_attention_heads` (`int`, *optional*, 默认为8) — Transformer 编码器中每个注意力层的注意力头数。'
 - en: '`max_position_embeddings` (`int`, *optional*, defaults to 16) — The maximum
     sequence length that this model might ever be used with. Typically set this to
     something large just in case (e.g., 512 or 1024 or 2048).'
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_position_embeddings` (`int`, *optional*, 默认为16) — 该模型可能使用的最大序列长度。通常设置为一个较大的值（例如512、1024或2048）以防万一。'
 - en: '`hidden_act` (`str` or `function`, *optional*, defaults to `"quick_gelu"`)
     — The non-linear activation function (function or string) in the encoder and pooler.
     If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` ``"quick_gelu"` are supported.'
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_act` (`str` or `function`, *optional*, defaults to `"quick_gelu"`)
+    — 编码器和池化器中的非线性激活函数（函数或字符串）。如果是字符串，则支持`"gelu"`、`"relu"`、`"selu"`和`"gelu_new"`以及`"quick_gelu"`。'
 - en: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-05) — The epsilon used
     by the layer normalization layers.'
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-05) — 层归一化层使用的 epsilon。'
 - en: '`attention_dropout` (`float`, *optional*, defaults to 0.0) — The dropout ratio
     for the attention probabilities.'
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_dropout` (`float`, *optional*, defaults to 0.0) — 注意力概率的丢失比率。'
 - en: '`initializer_range` (`float`, *optional*, defaults to 0.02) — The standard
     deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`initializer_range` (`float`, *optional*, defaults to 0.02) — 用于初始化所有权重矩阵的截断正态初始化器的标准差。'
 - en: '`initializer_factor` (`float`, *optional*, defaults to 1.0) — A factor for
     initializing all weight matrices (should be kept to 1, used internally for initialization
     testing).'
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`initializer_factor` (`float`, *optional*, defaults to 1.0) — 用于初始化所有权重矩阵的因子（应保持为1，用于内部初始化测试）。'
 - en: '`pad_token_id` (`int`, *optional*, defaults to 0) — The id of the padding token
     in the input sequences.'
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pad_token_id` (`int`, *optional*, defaults to 0) — 输入序列中填充标记的 id。'
 - en: '`bos_token_id` (`int`, *optional*, defaults to 49406) — The id of the beginning-of-sequence
     token in the input sequences.'
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`bos_token_id` (`int`, *optional*, defaults to 49406) — 输入序列中起始标记的 id。'
 - en: '`eos_token_id` (`int`, *optional*, defaults to 49407) — The id of the end-of-sequence
     token in the input sequences.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`eos_token_id` (`int`, *optional*, defaults to 49407) — 输入序列中终止标记的 id。'
 - en: This is the configuration class to store the configuration of an [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel).
     It is used to instantiate an OwlViT text encoder according to the specified arguments,
     defining the model architecture. Instantiating a configuration with the defaults
     will yield a similar configuration to that of the OwlViT [google/owlvit-base-patch32](https://huggingface.co/google/owlvit-base-patch32)
     architecture.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是用于存储[OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel)配置的配置类。根据指定的参数实例化一个OwlViT文本编码器，定义模型架构。使用默认值实例化配置将产生与OwlViT
+    [google/owlvit-base-patch32](https://huggingface.co/google/owlvit-base-patch32)架构类似的配置。
 - en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     for more information.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置对象继承自[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)，可用于控制模型输出。阅读[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)的文档以获取更多信息。
 - en: 'Example:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE4]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: OwlViTVisionConfig
+  id: totrans-58
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: OwlViTVisionConfig
 - en: '### `class transformers.OwlViTVisionConfig`'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.OwlViTVisionConfig`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/configuration_owlvit.py#L153)'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/configuration_owlvit.py#L153)'
 - en: '[PRE5]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Parameters
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`hidden_size` (`int`, *optional*, defaults to 768) — Dimensionality of the
     encoder layers and the pooler layer.'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_size` (`int`, *optional*, defaults to 768) — 编码器层和池化器层的维度。'
 - en: '`intermediate_size` (`int`, *optional*, defaults to 3072) — Dimensionality
     of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`intermediate_size` (`int`, *optional*, defaults to 3072) — Transformer 编码器中“中间”（即前馈）层的维度。'
 - en: '`num_hidden_layers` (`int`, *optional*, defaults to 12) — Number of hidden
     layers in the Transformer encoder.'
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_hidden_layers` (`int`, *optional*, defaults to 12) — Transformer 编码器中的隐藏层数量。'
 - en: '`num_attention_heads` (`int`, *optional*, defaults to 12) — Number of attention
     heads for each attention layer in the Transformer encoder.'
+  id: totrans-66
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_attention_heads` (`int`, *optional*, defaults to 12) — Transformer 编码器中每个注意力层的注意力头数量。'
 - en: '`num_channels` (`int`, *optional*, defaults to 3) — Number of channels in the
     input images.'
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_channels` (`int`, *optional*, defaults to 3) — 输入图像中的通道数。'
 - en: '`image_size` (`int`, *optional*, defaults to 768) — The size (resolution) of
     each image.'
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_size` (`int`, *optional*, defaults to 768) — 每个图像的大小（分辨率）。'
 - en: '`patch_size` (`int`, *optional*, defaults to 32) — The size (resolution) of
     each patch.'
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`patch_size` (`int`, *optional*, defaults to 32) — 每个补丁的大小（分辨率）。'
 - en: '`hidden_act` (`str` or `function`, *optional*, defaults to `"quick_gelu"`)
     — The non-linear activation function (function or string) in the encoder and pooler.
     If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` ``"quick_gelu"` are supported.'
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_act` (`str` or `function`, *optional*, defaults to `"quick_gelu"`)
+    — 编码器和池化器中的非线性激活函数（函数或字符串）。如果是字符串，则支持`"gelu"`、`"relu"`、`"selu"`和`"gelu_new"`以及`"quick_gelu"`。'
 - en: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-05) — The epsilon used
     by the layer normalization layers.'
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-05) — 层归一化层使用的 epsilon。'
 - en: '`attention_dropout` (`float`, *optional*, defaults to 0.0) — The dropout ratio
     for the attention probabilities.'
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_dropout` (`float`, *optional*, defaults to 0.0) — 注意力概率的丢失比率。'
 - en: '`initializer_range` (`float`, *optional*, defaults to 0.02) — The standard
     deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`initializer_range` (`float`, *optional*, defaults to 0.02) — 用于初始化所有权重矩阵的截断正态初始化器的标准差。'
 - en: '`initializer_factor` (`float`, *optional*, defaults to 1.0) — A factor for
     initializing all weight matrices (should be kept to 1, used internally for initialization
     testing).'
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`initializer_factor` (`float`, *optional*, defaults to 1.0) — 用于初始化所有权重矩阵的因子（应保持为1，用于内部初始化测试）。'
 - en: This is the configuration class to store the configuration of an [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).
     It is used to instantiate an OWL-ViT image encoder according to the specified
     arguments, defining the model architecture. Instantiating a configuration with
     the defaults will yield a similar configuration to that of the OWL-ViT [google/owlvit-base-patch32](https://huggingface.co/google/owlvit-base-patch32)
     architecture.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个配置类，用于存储[OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel)的配置。它用于根据指定的参数实例化一个OWL-ViT图像编码器，定义模型架构。使用默认值实例化配置将产生与OWL-ViT
+    [google/owlvit-base-patch32](https://huggingface.co/google/owlvit-base-patch32)架构类似的配置。
 - en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     for more information.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置对象继承自[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)，可用于控制模型输出。阅读[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)的文档以获取更多信息。
 - en: 'Example:'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE6]'
+  id: totrans-78
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: OwlViTImageProcessor
+  id: totrans-79
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: OwlViTImageProcessor
 - en: '### `class transformers.OwlViTImageProcessor`'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.OwlViTImageProcessor`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L91)'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L91)'
 - en: '[PRE7]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Parameters
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`do_resize` (`bool`, *optional*, defaults to `True`) — Whether to resize the
     shorter edge of the input to a certain `size`.'
+  id: totrans-84
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_resize` (`bool`，*可选*，默认为`True`) — 是否将输入的较短边调整为特定的`size`。'
 - en: '`size` (`Dict[str, int]`, *optional*, defaults to {“height” — 768, “width”:
     768}): The size to use for resizing the image. Only has an effect if `do_resize`
     is set to `True`. If `size` is a sequence like (h, w), output size will be matched
     to this. If `size` is an int, then image will be resized to (size, size).'
+  id: totrans-85
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`size` (`Dict[str, int]`，*可选*，默认为{“height” — 768, “width”: 768})：用于调整图像大小的大小。仅在`do_resize`设置为`True`时有效。如果`size`是一个类似(h,
+    w)的序列，输出大小将与之匹配。如果`size`是一个整数，则图像将被调整为(size, size)。'
 - en: '`resample` (`int`, *optional*, defaults to `Resampling.BICUBIC`) — An optional
     resampling filter. This can be one of `PIL.Image.Resampling.NEAREST`, `PIL.Image.Resampling.BOX`,
     `PIL.Image.Resampling.BILINEAR`, `PIL.Image.Resampling.HAMMING`, `PIL.Image.Resampling.BICUBIC`
     or `PIL.Image.Resampling.LANCZOS`. Only has an effect if `do_resize` is set to
     `True`.'
+  id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`resample` (`int`，*可选*，默认为`Resampling.BICUBIC`) — 可选的重采样滤波器。可以是`PIL.Image.Resampling.NEAREST`、`PIL.Image.Resampling.BOX`、`PIL.Image.Resampling.BILINEAR`、`PIL.Image.Resampling.HAMMING`、`PIL.Image.Resampling.BICUBIC`或`PIL.Image.Resampling.LANCZOS`之一。仅在`do_resize`设置为`True`时有效。'
 - en: '`do_center_crop` (`bool`, *optional*, defaults to `False`) — Whether to crop
     the input at the center. If the input size is smaller than `crop_size` along any
     edge, the image is padded with 0’s and then center cropped.'
+  id: totrans-87
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_center_crop` (`bool`，*可选*，默认为`False`) — 是否在中心裁剪输入。如果输入大小在任何边缘上小于`crop_size`，则图像将填充0，然后进行中心裁剪。'
 - en: '`crop_size` (`int`, *optional*, defaults to {“height” — 768, “width”: 768}):
     The size to use for center cropping the image. Only has an effect if `do_center_crop`
     is set to `True`.'
+  id: totrans-88
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`crop_size` (`int`，*可选*，默认为{“height” — 768, “width”: 768})：用于中心裁剪图像的大小。仅在`do_center_crop`设置为`True`时有效。'
 - en: '`do_rescale` (`bool`, *optional*, defaults to `True`) — Whether to rescale
     the input by a certain factor.'
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_rescale` (`bool`，*可选*，默认为`True`) — 是否按一定因子重新缩放输入。'
 - en: '`rescale_factor` (`float`, *optional*, defaults to `1/255`) — The factor to
     use for rescaling the image. Only has an effect if `do_rescale` is set to `True`.'
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`rescale_factor` (`float`，*可选*，默认为`1/255`) — 用于重新缩放图像的因子。仅在`do_rescale`设置为`True`时有效。'
 - en: '`do_normalize` (`bool`, *optional*, defaults to `True`) — Whether or not to
     normalize the input with `image_mean` and `image_std`. Desired output size when
     applying center-cropping. Only has an effect if `do_center_crop` is set to `True`.'
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_normalize` (`bool`，*可选*，默认为`True`) — 是否使用`image_mean`和`image_std`对输入进行归一化。在应用中心裁剪时的期望输出大小。仅在`do_center_crop`设置为`True`时有效。'
 - en: '`image_mean` (`List[int]`, *optional*, defaults to `[0.48145466, 0.4578275,
     0.40821073]`) — The sequence of means for each channel, to be used when normalizing
     images.'
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_mean` (`List[int]`，*可选*，默认为`[0.48145466, 0.4578275, 0.40821073]`) —
+    每个通道的均值序列，用于归一化图像时使用。'
 - en: '`image_std` (`List[int]`, *optional*, defaults to `[0.26862954, 0.26130258,
     0.27577711]`) — The sequence of standard deviations for each channel, to be used
     when normalizing images.'
+  id: totrans-93
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_std` (`List[int]`，*可选*，默认为`[0.26862954, 0.26130258, 0.27577711]`) —
+    每个通道的标准差序列，用于归一化图像时使用。'
 - en: Constructs an OWL-ViT image processor.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建一个OWL-ViT图像处理器。
 - en: This image processor inherits from [ImageProcessingMixin](/docs/transformers/v4.37.2/en/internal/image_processing_utils#transformers.ImageProcessingMixin)
     which contains most of the main methods. Users should refer to this superclass
     for more information regarding those methods.
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个图像处理器继承自[ImageProcessingMixin](/docs/transformers/v4.37.2/en/internal/image_processing_utils#transformers.ImageProcessingMixin)，其中包含大部分主要方法。用户应参考这个超类以获取有关这些方法的更多信息。
 - en: '#### `preprocess`'
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `preprocess`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L270)'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L270)'
 - en: '[PRE8]'
+  id: totrans-98
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Parameters
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`images` (`ImageInput`) — The image or batch of images to be prepared. Expects
     a single or batch of images with pixel values ranging from 0 to 255\. If passing
     in images with pixel values between 0 and 1, set `do_rescale=False`.'
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`images` (`ImageInput`) — 要准备的图像或图像批次。期望单个或批量像素值范围为0到255。如果传入像素值在0到1之间的图像，请设置`do_rescale=False`。'
 - en: '`do_resize` (`bool`, *optional*, defaults to `self.do_resize`) — Whether or
     not to resize the input. If `True`, will resize the input to the size specified
     by `size`.'
+  id: totrans-101
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_resize` (`bool`，*可选*，默认为`self.do_resize`) — 是否调整输入大小。如果为`True`，将输入调整为`size`指定的大小。'
 - en: '`size` (`Dict[str, int]`, *optional*, defaults to `self.size`) — The size to
     resize the input to. Only has an effect if `do_resize` is set to `True`.'
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`size` (`Dict[str, int]`, *可选*, 默认为 `self.size`) — 调整输入大小的大小。仅在 `do_resize`
+    设置为 `True` 时有效。'
 - en: '`resample` (`PILImageResampling`, *optional*, defaults to `self.resample`)
     — The resampling filter to use when resizing the input. Only has an effect if
     `do_resize` is set to `True`.'
+  id: totrans-103
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`resample` (`PILImageResampling`, *可选*, 默认为 `self.resample`) — 调整输入大小时使用的重采样滤波器。仅在
+    `do_resize` 设置为 `True` 时有效。'
 - en: '`do_center_crop` (`bool`, *optional*, defaults to `self.do_center_crop`) —
     Whether or not to center crop the input. If `True`, will center crop the input
     to the size specified by `crop_size`.'
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_center_crop` (`bool`, *可选*, 默认为 `self.do_center_crop`) — 是否对输入进行中心裁剪。如果为
+    `True`，将对输入进行中心裁剪，裁剪到由 `crop_size` 指定的大小。'
 - en: '`crop_size` (`Dict[str, int]`, *optional*, defaults to `self.crop_size`) —
     The size to center crop the input to. Only has an effect if `do_center_crop` is
     set to `True`.'
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`crop_size` (`Dict[str, int]`, *可选*, 默认为 `self.crop_size`) — 中心裁剪输入的大小。仅在 `do_center_crop`
+    设置为 `True` 时有效。'
 - en: '`do_rescale` (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
     or not to rescale the input. If `True`, will rescale the input by dividing it
     by `rescale_factor`.'
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_rescale` (`bool`, *可选*, 默认为 `self.do_rescale`) — 是否对输入进行重新缩放。如果为 `True`，将通过除以
+    `rescale_factor` 对输入进行重新缩放。'
 - en: '`rescale_factor` (`float`, *optional*, defaults to `self.rescale_factor`) —
     The factor to rescale the input by. Only has an effect if `do_rescale` is set
     to `True`.'
+  id: totrans-107
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`rescale_factor` (`float`, *可选*, 默认为 `self.rescale_factor`) — 重新缩放输入的因子。仅在
+    `do_rescale` 设置为 `True` 时有效。'
 - en: '`do_normalize` (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
     or not to normalize the input. If `True`, will normalize the input by subtracting
     `image_mean` and dividing by `image_std`.'
+  id: totrans-108
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_normalize` (`bool`, *可选*, 默认为 `self.do_normalize`) — 是否对输入进行归一化。如果为 `True`，将通过减去
+    `image_mean` 并除以 `image_std` 对输入进行归一化。'
 - en: '`image_mean` (`Union[float, List[float]]`, *optional*, defaults to `self.image_mean`)
     — The mean to subtract from the input when normalizing. Only has an effect if
     `do_normalize` is set to `True`.'
+  id: totrans-109
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_mean` (`Union[float, List[float]]`, *可选*, 默认为 `self.image_mean`) — 在归一化时从输入中减去的均值。仅在
+    `do_normalize` 设置为 `True` 时有效。'
 - en: '`image_std` (`Union[float, List[float]]`, *optional*, defaults to `self.image_std`)
     — The standard deviation to divide the input by when normalizing. Only has an
     effect if `do_normalize` is set to `True`.'
+  id: totrans-110
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_std` (`Union[float, List[float]]`, *可选*, 默认为 `self.image_std`) — 在归一化时除以输入的标准差。仅在
+    `do_normalize` 设置为 `True` 时有效。'
 - en: '`return_tensors` (`str` or `TensorType`, *optional*) — The type of tensors
     to return. Can be one of:'
+  id: totrans-111
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_tensors` (`str` 或 `TensorType`, *可选*) — 要返回的张量类型。可以是以下之一：'
 - en: 'Unset: Return a list of `np.ndarray`.'
+  id: totrans-112
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 未设置：返回一个 `np.ndarray` 列表。
 - en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  id: totrans-113
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TensorType.TENSORFLOW` 或 `''tf''`：返回类型为 `tf.Tensor` 的批处理。'
 - en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  id: totrans-114
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TensorType.PYTORCH` 或 `''pt''`：返回类型为 `torch.Tensor` 的批处理。'
 - en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  id: totrans-115
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TensorType.NUMPY` 或 `''np''`：返回类型为 `np.ndarray` 的批处理。'
 - en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  id: totrans-116
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TensorType.JAX` 或 `''jax''`：返回类型为 `jax.numpy.ndarray` 的批处理。'
 - en: '`data_format` (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
     — The channel dimension format for the output image. Can be one of:'
+  id: totrans-117
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`data_format` (`ChannelDimension` 或 `str`, *可选*, 默认为 `ChannelDimension.FIRST`)
+    — 输出图像的通道维度格式。可以是以下之一：'
 - en: '`ChannelDimension.FIRST`: image in (num_channels, height, width) format.'
+  id: totrans-118
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`ChannelDimension.FIRST`：图像以 (通道数, 高度, 宽度) 格式。'
 - en: '`ChannelDimension.LAST`: image in (height, width, num_channels) format.'
+  id: totrans-119
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`ChannelDimension.LAST`：图像以 (高度, 宽度, 通道数) 格式。'
 - en: 'Unset: defaults to the channel dimension format of the input image.'
+  id: totrans-120
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 未设置：默认为输入图像的通道维度格式。
 - en: '`input_data_format` (`ChannelDimension` or `str`, *optional*) — The channel
     dimension format for the input image. If unset, the channel dimension format is
     inferred from the input image. Can be one of:'
+  id: totrans-121
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_data_format` (`ChannelDimension` 或 `str`, *可选*) — 输入图像的通道维度格式。如果未设置，则从输入图像中推断通道维度格式。可以是以下之一：'
 - en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
     width) format.'
+  id: totrans-122
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"channels_first"` 或 `ChannelDimension.FIRST`：图像以 (通道数, 高度, 宽度) 格式。'
 - en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
     format.'
+  id: totrans-123
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"channels_last"` 或 `ChannelDimension.LAST`：图像以 (高度, 宽度, 通道数) 格式。'
 - en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  id: totrans-124
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"none"` 或 `ChannelDimension.NONE`：图像以 (高度, 宽度) 格式。'
 - en: Prepares an image or batch of images for the model.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 为模型准备一张图像或一批图像。
 - en: '#### `post_process_object_detection`'
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `post_process_object_detection`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L459)'
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L459)'
 - en: '[PRE9]'
+  id: totrans-128
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Parameters
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`outputs` (`OwlViTObjectDetectionOutput`) — Raw outputs of the model.'
+  id: totrans-130
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`outputs` (`OwlViTObjectDetectionOutput`) — 模型的原始输出。'
 - en: '`threshold` (`float`, *optional*) — Score threshold to keep object detection
     predictions.'
+  id: totrans-131
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`threshold` (`float`, *可选*) — 保留对象检测预测的分数阈值。'
 - en: '`target_sizes` (`torch.Tensor` or `List[Tuple[int, int]]`, *optional*) — Tensor
     of shape `(batch_size, 2)` or list of tuples (`Tuple[int, int]`) containing the
     target size `(height, width)` of each image in the batch. If unset, predictions
     will not be resized.'
+  id: totrans-132
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`target_sizes` (`torch.Tensor` 或 `List[Tuple[int, int]]`, *可选*) — 形状为 `(batch_size,
+    2)` 的张量或包含每个图像批次中目标大小 `(高度, 宽度)` 的元组列表 (`Tuple[int, int]`)。如果未设置，预测将不会被调整大小。'
 - en: Returns
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`List[Dict]`'
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: '`List[Dict]`'
 - en: A list of dictionaries, each dictionary containing the scores, labels and boxes
     for an image in the batch as predicted by the model.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个字典列表，每个字典包含模型预测的图像批次中每个图像的分数、标签和框。
 - en: Converts the raw output of [OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection)
     into final bounding boxes in (top_left_x, top_left_y, bottom_right_x, bottom_right_y)
     format.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 将 [OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection)
+    的原始输出转换为最终边界框，格式为 (左上角 x 坐标, 左上角 y 坐标, 右下角 x 坐标, 右下角 y 坐标)。
 - en: '#### `post_process_image_guided_detection`'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `post_process_image_guided_detection`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L515)'
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L515)'
 - en: '[PRE10]'
+  id: totrans-139
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Parameters
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`outputs` (`OwlViTImageGuidedObjectDetectionOutput`) — Raw outputs of the model.'
+  id: totrans-141
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`outputs` (`OwlViTImageGuidedObjectDetectionOutput`) — 模型的原始输出。'
 - en: '`threshold` (`float`, *optional*, defaults to 0.0) — Minimum confidence threshold
     to use to filter out predicted boxes.'
+  id: totrans-142
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`threshold` (`float`, *可选*, 默认为0.0) — 用于过滤预测框的最小置信度阈值。'
 - en: '`nms_threshold` (`float`, *optional*, defaults to 0.3) — IoU threshold for
     non-maximum suppression of overlapping boxes.'
+  id: totrans-143
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`nms_threshold` (`float`, *可选*, 默认为0.3) — 用于非极大值抑制重叠框的IoU阈值。'
 - en: '`target_sizes` (`torch.Tensor`, *optional*) — Tensor of shape (batch_size,
     2) where each entry is the (height, width) of the corresponding image in the batch.
     If set, predicted normalized bounding boxes are rescaled to the target sizes.
     If left to None, predictions will not be unnormalized.'
+  id: totrans-144
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`target_sizes` (`torch.Tensor`, *可选*) — 形状为(batch_size, 2)的张量，其中每个条目是批次中相应图像的(高度，宽度)。如果设置，预测的归一化边界框将重新缩放为目标大小。如果保持为None，则预测不会被取消归一化。'
 - en: Returns
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`List[Dict]`'
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: '`List[Dict]`'
 - en: A list of dictionaries, each dictionary containing the scores, labels and boxes
     for an image in the batch as predicted by the model. All labels are set to None
     as `OwlViTForObjectDetection.image_guided_detection` perform one-shot object detection.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个字典列表，每个字典包含模型预测的批次中每张图像的分数、标签和框。所有标签都设置为None，因为`OwlViTForObjectDetection.image_guided_detection`执行一次性目标检测。
 - en: Converts the output of [OwlViTForObjectDetection.image_guided_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection.image_guided_detection)
     into the format expected by the COCO api.
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 将[OwlViTForObjectDetection.image_guided_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection.image_guided_detection)的输出转换为COCO
+    api所期望的格式。
 - en: OwlViTFeatureExtractor
+  id: totrans-149
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: OwlViTFeatureExtractor
 - en: '### `class transformers.OwlViTFeatureExtractor`'
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.OwlViTFeatureExtractor`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/feature_extraction_owlvit.py#L26)'
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/feature_extraction_owlvit.py#L26)'
 - en: '[PRE11]'
+  id: totrans-152
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '#### `__call__`'
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `__call__`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
 - en: '[PRE12]'
+  id: totrans-155
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Preprocess an image or a batch of images.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 预处理一张图像或一批图像。
 - en: '#### `post_process`'
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `post_process`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L413)'
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L413)'
 - en: '[PRE13]'
+  id: totrans-159
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Parameters
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`outputs` (`OwlViTObjectDetectionOutput`) — Raw outputs of the model.'
+  id: totrans-161
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`outputs` (`OwlViTObjectDetectionOutput`) — 模型的原始输出。'
 - en: '`target_sizes` (`torch.Tensor` of shape `(batch_size, 2)`) — Tensor containing
     the size (h, w) of each image of the batch. For evaluation, this must be the original
     image size (before any data augmentation). For visualization, this should be the
     image size after data augment, but before padding.'
+  id: totrans-162
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`target_sizes` (`torch.Tensor`的形状为`(batch_size, 2)`) — 包含批次中每个图像的大小(h, w)的张量。对于评估，这必须是原始图像大小(在任何数据增强之前)。对于可视化，这应该是数据增强后的图像大小，但在填充之前。'
 - en: Returns
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`List[Dict]`'
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: '`List[Dict]`'
 - en: A list of dictionaries, each dictionary containing the scores, labels and boxes
     for an image in the batch as predicted by the model.
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个字典列表，每个字典包含模型预测的批次中每张图像的分数、标签和框。
 - en: Converts the raw output of [OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection)
     into final bounding boxes in (top_left_x, top_left_y, bottom_right_x, bottom_right_y)
     format.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 将[OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection)的原始输出转换为最终的边界框格式为(top_left_x,
+    top_left_y, bottom_right_x, bottom_right_y)。
 - en: '#### `post_process_image_guided_detection`'
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `post_process_image_guided_detection`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L515)'
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/image_processing_owlvit.py#L515)'
 - en: '[PRE14]'
+  id: totrans-169
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Parameters
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`outputs` (`OwlViTImageGuidedObjectDetectionOutput`) — Raw outputs of the model.'
+  id: totrans-171
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`outputs` (`OwlViTImageGuidedObjectDetectionOutput`) — 模型的原始输出。'
 - en: '`threshold` (`float`, *optional*, defaults to 0.0) — Minimum confidence threshold
     to use to filter out predicted boxes.'
+  id: totrans-172
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`threshold` (`float`, *可选*, 默认为0.0) — 用于过滤预测框的最小置信度阈值。'
 - en: '`nms_threshold` (`float`, *optional*, defaults to 0.3) — IoU threshold for
     non-maximum suppression of overlapping boxes.'
+  id: totrans-173
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`nms_threshold` (`float`, *可选*, 默认为0.3) — 用于非极大值抑制重叠框的IoU阈值。'
 - en: '`target_sizes` (`torch.Tensor`, *optional*) — Tensor of shape (batch_size,
     2) where each entry is the (height, width) of the corresponding image in the batch.
     If set, predicted normalized bounding boxes are rescaled to the target sizes.
     If left to None, predictions will not be unnormalized.'
+  id: totrans-174
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`target_sizes` (`torch.Tensor`, *可选*) — 形状为(batch_size, 2)的张量，其中每个条目是批次中相应图像的(高度，宽度)。如果设置，预测的归一化边界框将重新缩放为目标大小。如果保持为None，则预测不会被取消归一化。'
 - en: Returns
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`List[Dict]`'
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: '`List[Dict]`'
 - en: A list of dictionaries, each dictionary containing the scores, labels and boxes
     for an image in the batch as predicted by the model. All labels are set to None
     as `OwlViTForObjectDetection.image_guided_detection` perform one-shot object detection.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个字典列表，每个字典包含模型预测的批次中每张图像的分数、标签和框。所有标签都设置为None，因为`OwlViTForObjectDetection.image_guided_detection`执行一次性目标检测。
 - en: Converts the output of [OwlViTForObjectDetection.image_guided_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection.image_guided_detection)
     into the format expected by the COCO api.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 将[OwlViTForObjectDetection.image_guided_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection.image_guided_detection)的输出转换为COCO
+    api所期望的格式。
 - en: OwlViTProcessor
+  id: totrans-179
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: OwlViTProcessor
 - en: '### `class transformers.OwlViTProcessor`'
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.OwlViTProcessor`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L29)'
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L29)'
 - en: '[PRE15]'
+  id: totrans-182
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Parameters
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`image_processor` ([OwlViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor),
     *optional*) — The image processor is a required input.'
+  id: totrans-184
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_processor`（[OwlViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor)，*可选*）—
+    图像处理器是必需的输入。'
 - en: '`tokenizer` ([`CLIPTokenizer`, `CLIPTokenizerFast`], *optional*) — The tokenizer
     is a required input.'
+  id: totrans-185
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`tokenizer`（[`CLIPTokenizer`, `CLIPTokenizerFast`]，*可选*）— 分词器是必需的输入。'
 - en: Constructs an OWL-ViT processor which wraps [OwlViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor)
     and [CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)/[CLIPTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizerFast)
     into a single processor that interits both the image processor and tokenizer functionalities.
     See the `__call__()` and [decode()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTProcessor.decode)
     for more information.
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建一个OWL-ViT处理器，将[OwlViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor)和[CLIPTokenizer](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizer)/[CLIPTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/clip#transformers.CLIPTokenizerFast)包装成一个单一处理器，继承了图像处理器和分词器的功能。查看`__call__()`和[decode()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTProcessor.decode)以获取更多信息。
 - en: '#### `batch_decode`'
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `batch_decode`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L197)'
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L197)'
 - en: '[PRE16]'
+  id: totrans-189
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: This method forwards all its arguments to CLIPTokenizerFast’s [batch_decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.batch_decode).
     Please refer to the docstring of this method for more information.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 该方法将其所有参数转发到CLIPTokenizerFast的[batch_decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.batch_decode)。有关更多信息，请参考此方法的文档字符串。
 - en: '#### `decode`'
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `decode`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L204)'
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L204)'
 - en: '[PRE17]'
+  id: totrans-193
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: This method forwards all its arguments to CLIPTokenizerFast’s [decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.decode).
     Please refer to the docstring of this method for more information.
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 该方法将其所有参数转发到CLIPTokenizerFast的[decode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.decode)。有关更多信息，请参考此方法的文档字符串。
 - en: '#### `post_process`'
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `post_process`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L176)'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L176)'
 - en: '[PRE18]'
+  id: totrans-197
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: This method forwards all its arguments to [OwlViTImageProcessor.post_process()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTFeatureExtractor.post_process).
     Please refer to the docstring of this method for more information.
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: 该方法将其所有参数转发到[OwlViTImageProcessor.post_process()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTFeatureExtractor.post_process)。有关更多信息，请参考此方法的文档字符串。
 - en: '#### `post_process_image_guided_detection`'
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `post_process_image_guided_detection`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L190)'
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L190)'
 - en: '[PRE19]'
+  id: totrans-201
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: This method forwards all its arguments to `OwlViTImageProcessor.post_process_one_shot_object_detection`.
     Please refer to the docstring of this method for more information.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 该方法将其所有参数转发到`OwlViTImageProcessor.post_process_one_shot_object_detection`。有关更多信息，请参考此方法的文档字符串。
 - en: '#### `post_process_object_detection`'
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `post_process_object_detection`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L183)'
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/processing_owlvit.py#L183)'
 - en: '[PRE20]'
+  id: totrans-205
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: This method forwards all its arguments to [OwlViTImageProcessor.post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor.post_process_object_detection).
     Please refer to the docstring of this method for more information.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 该方法将其所有参数转发到[OwlViTImageProcessor.post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor.post_process_object_detection)。有关更多信息，请参考此方法的文档字符串。
 - en: OwlViTModel
+  id: totrans-207
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: OwlViTModel
 - en: '### `class transformers.OwlViTModel`'
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.OwlViTModel`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L999)'
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L999)'
 - en: '[PRE21]'
+  id: totrans-210
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Parameters
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([OwlViTConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-212
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config`（[OwlViTConfig](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTConfig)）—
+    模型配置类，包含模型的所有参数。使用配置文件初始化不会加载与模型关联的权重，只会加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: This model inherits from [PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel).
     Check the superclass documentation for the generic methods the library implements
     for all its model (such as downloading or saving, resizing the input embeddings,
     pruning heads etc.)
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型继承自[PreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel)。查看超类文档以获取库为所有模型实现的通用方法（如下载或保存、调整输入嵌入、修剪头等）。
 - en: This model is also a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
 - en: '#### `forward`'
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L1115)'
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE22]'
+  id: totrans-217
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Parameters
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
@@ -977,128 +1433,157 @@
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
     for details. [What are input IDs?](../glossary#input-ids)'
+  id: totrans-219
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.Tensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-220
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-221
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`. [What are attention masks?](../glossary#attention-mask)
+  id: totrans-222
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
     width)`) — Pixel values.'
+  id: totrans-223
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_loss` (`bool`, *optional*) — Whether or not to return the contrastive
     loss.'
+  id: totrans-224
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-225
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-226
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-227
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
 - en: '`transformers.models.owlvit.modeling_owlvit.OwlViTOutput` or `tuple(torch.FloatTensor)`'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
 - en: A `transformers.models.owlvit.modeling_owlvit.OwlViTOutput` or a tuple of `torch.FloatTensor`
     (if `return_dict=False` is passed or when `config.return_dict=False`) comprising
     various elements depending on the configuration (`<class 'transformers.models.owlvit.configuration_owlvit.OwlViTConfig'>`)
     and inputs.
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `return_loss`
     is `True`) — Contrastive loss for image-text similarity.'
+  id: totrans-231
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits_per_image` (`torch.FloatTensor` of shape `(image_batch_size, text_batch_size)`)
     — The scaled dot product scores between `image_embeds` and `text_embeds`. This
     represents the image-text similarity scores.'
+  id: totrans-232
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits_per_text` (`torch.FloatTensor` of shape `(text_batch_size, image_batch_size)`)
     — The scaled dot product scores between `text_embeds` and `image_embeds`. This
     represents the text-image similarity scores.'
+  id: totrans-233
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`text_embeds` (`torch.FloatTensor` of shape `(batch_size * num_max_text_queries,
     output_dim`) — The text embeddings obtained by applying the projection layer to
     the pooled output of [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel).'
+  id: totrans-234
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`image_embeds` (`torch.FloatTensor` of shape `(batch_size, output_dim`) — The
     image embeddings obtained by applying the projection layer to the pooled output
     of [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).'
+  id: totrans-235
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`text_model_output` (Tuple`BaseModelOutputWithPooling`) — The output of the
     [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel).'
+  id: totrans-236
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`vision_model_output` (`BaseModelOutputWithPooling`) — The output of the [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).'
+  id: totrans-237
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [OwlViTModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTModel)
     forward method, overrides the `__call__` special method.
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE23]'
+  id: totrans-241
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: '#### `get_text_features`'
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L1035)'
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE24]'
+  id: totrans-244
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: Parameters
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size * num_max_text_queries,
@@ -1107,21 +1592,25 @@
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
     for details. [What are input IDs?](../glossary#input-ids)'
+  id: totrans-246
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.Tensor` of shape `(batch_size, num_max_text_queries,
     sequence_length)`, *optional*) — Mask to avoid performing attention on padding
     token indices. Mask values selected in `[0, 1]`:'
+  id: totrans-247
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-248
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`. [What are attention masks?](../glossary#attention-mask)
+  id: totrans-249
   prefs:
   - PREF_IND
   - PREF_UL
@@ -1129,129 +1618,167 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-250
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-251
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-252
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
 - en: text_features (`torch.FloatTensor` of shape `(batch_size, output_dim`)
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
 - en: The text embeddings obtained by applying the projection layer to the pooled
     output of [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel).
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
 - en: The [OwlViTModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTModel)
     forward method, overrides the `__call__` special method.
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE25]'
+  id: totrans-259
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: '#### `get_image_features`'
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L1070)'
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE26]'
+  id: totrans-262
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Parameters
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
     width)`) — Pixel values.'
+  id: totrans-264
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-265
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-266
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-267
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
 - en: image_features (`torch.FloatTensor` of shape `(batch_size, output_dim`)
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
 - en: The image embeddings obtained by applying the projection layer to the pooled
     output of [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
 - en: The [OwlViTModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTModel)
     forward method, overrides the `__call__` special method.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE27]'
+  id: totrans-274
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: OwlViTTextModel
+  id: totrans-275
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.OwlViTTextModel`'
+  id: totrans-276
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L839)'
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE28]'
+  id: totrans-278
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: '#### `forward`'
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L854)'
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE29]'
+  id: totrans-281
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: Parameters
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size * num_max_text_queries,
@@ -1260,21 +1787,25 @@
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
     for details. [What are input IDs?](../glossary#input-ids)'
+  id: totrans-283
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.Tensor` of shape `(batch_size, num_max_text_queries,
     sequence_length)`, *optional*) — Mask to avoid performing attention on padding
     token indices. Mask values selected in `[0, 1]`:'
+  id: totrans-284
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-285
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`. [What are attention masks?](../glossary#attention-mask)
+  id: totrans-286
   prefs:
   - PREF_IND
   - PREF_UL
@@ -1282,36 +1813,43 @@
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-287
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-288
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-289
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-290
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration (`<class 'transformers.models.owlvit.configuration_owlvit.OwlViTTextConfig'>`)
     and inputs.
+  id: totrans-292
   prefs: []
   type: TYPE_NORMAL
 - en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`) — Sequence of hidden-states at the output of the last layer of
     the model.'
+  id: totrans-293
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1322,6 +1860,7 @@
     processing through a linear layer and a tanh activation function. The linear layer
     weights are trained from the next sentence prediction (classification) objective
     during pretraining.'
+  id: totrans-294
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1329,104 +1868,131 @@
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
     one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  id: totrans-295
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
+  id: totrans-296
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-297
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
+  id: totrans-298
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: The [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel)
     forward method, overrides the `__call__` special method.
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE30]'
+  id: totrans-302
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: OwlViTVisionModel
+  id: totrans-303
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.OwlViTVisionModel`'
+  id: totrans-304
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L949)'
+  id: totrans-305
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE31]'
+  id: totrans-306
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: '#### `forward`'
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L962)'
+  id: totrans-308
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE32]'
+  id: totrans-309
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: Parameters
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
     width)`) — Pixel values.'
+  id: totrans-311
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-312
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-313
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-314
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-315
   prefs: []
   type: TYPE_NORMAL
 - en: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
 - en: A [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration (`<class 'transformers.models.owlvit.configuration_owlvit.OwlViTVisionConfig'>`)
     and inputs.
+  id: totrans-317
   prefs: []
   type: TYPE_NORMAL
 - en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`) — Sequence of hidden-states at the output of the last layer of
     the model.'
+  id: totrans-318
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1437,6 +2003,7 @@
     processing through a linear layer and a tanh activation function. The linear layer
     weights are trained from the next sentence prediction (classification) objective
     during pretraining.'
+  id: totrans-319
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1444,68 +2011,88 @@
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
     one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  id: totrans-320
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
+  id: totrans-321
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-322
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
+  id: totrans-323
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
 - en: The [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel)
     forward method, overrides the `__call__` special method.
+  id: totrans-324
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-325
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE33]'
+  id: totrans-327
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: OwlViTForObjectDetection
+  id: totrans-328
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: '### `class transformers.OwlViTForObjectDetection`'
+  id: totrans-329
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L1282)'
+  id: totrans-330
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE34]'
+  id: totrans-331
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: '#### `forward`'
+  id: totrans-332
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L1584)'
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE35]'
+  id: totrans-334
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: Parameters
+  id: totrans-335
   prefs: []
   type: TYPE_NORMAL
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
     width)`) — Pixel values.'
+  id: totrans-336
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1515,21 +2102,25 @@
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
     for details. [What are input IDs?](../glossary#input-ids).'
+  id: totrans-337
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`attention_mask` (`torch.Tensor` of shape `(batch_size, num_max_text_queries,
     sequence_length)`, *optional*) — Mask to avoid performing attention on padding
     token indices. Mask values selected in `[0, 1]`:'
+  id: totrans-338
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 1 for tokens that are `not masked`,
+  id: totrans-339
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 0 for tokens that are `masked`. [What are attention masks?](../glossary#attention-mask)
+  id: totrans-340
   prefs:
   - PREF_IND
   - PREF_UL
@@ -1537,25 +2128,30 @@
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     last hidden state. See `text_model_last_hidden_state` and `vision_model_last_hidden_state`
     under returned tensors for more detail.'
+  id: totrans-341
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-342
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-343
   prefs: []
   type: TYPE_NORMAL
 - en: '`transformers.models.owlvit.modeling_owlvit.OwlViTObjectDetectionOutput` or
     `tuple(torch.FloatTensor)`'
+  id: totrans-344
   prefs: []
   type: TYPE_NORMAL
 - en: A `transformers.models.owlvit.modeling_owlvit.OwlViTObjectDetectionOutput` or
     a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration (`<class 'transformers.models.owlvit.configuration_owlvit.OwlViTConfig'>`)
     and inputs.
+  id: totrans-345
   prefs: []
   type: TYPE_NORMAL
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
@@ -1563,16 +2159,19 @@
     (cross-entropy) for class prediction and a bounding box loss. The latter is defined
     as a linear combination of the L1 loss and the generalized scale-invariant IoU
     loss.'
+  id: totrans-346
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`loss_dict` (`Dict`, *optional*) — A dictionary containing the individual losses.
     Useful for logging.'
+  id: totrans-347
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, num_patches, num_queries)`)
     — Classification logits (including no-object) for all queries.'
+  id: totrans-348
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1582,12 +2181,14 @@
     each individual image in the batch (disregarding possible padding). You can use
     [post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor.post_process_object_detection)
     to retrieve the unnormalized bounding boxes.'
+  id: totrans-349
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`text_embeds` (`torch.FloatTensor` of shape `(batch_size, num_max_text_queries,
     output_dim`) — The text embeddings obtained by applying the projection layer to
     the pooled output of [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel).'
+  id: totrans-350
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1595,95 +2196,118 @@
     output_dim`) — Pooled output of [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).
     OWL-ViT represents images as a set of image patches and computes image embeddings
     for each patch.'
+  id: totrans-351
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`class_embeds` (`torch.FloatTensor` of shape `(batch_size, num_patches, hidden_size)`)
     — Class embeddings of all image patches. OWL-ViT represents images as a set of
     image patches where the total number of patches is (image_size / patch_size)**2.'
+  id: totrans-352
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`text_model_output` (Tuple`BaseModelOutputWithPooling`) — The output of the
     [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel).'
+  id: totrans-353
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`vision_model_output` (`BaseModelOutputWithPooling`) — The output of the [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).'
+  id: totrans-354
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection)
     forward method, overrides the `__call__` special method.
+  id: totrans-355
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-356
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-357
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE36]'
+  id: totrans-358
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: '#### `image_guided_detection`'
+  id: totrans-359
   prefs: []
   type: TYPE_NORMAL
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/owlvit/modeling_owlvit.py#L1489)'
+  id: totrans-360
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE37]'
+  id: totrans-361
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Parameters
+  id: totrans-362
   prefs: []
   type: TYPE_NORMAL
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
     width)`) — Pixel values.'
+  id: totrans-363
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`query_pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels,
     height, width)`) — Pixel values of query image(s) to be detected. Pass in one
     query image per target image.'
+  id: totrans-364
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-365
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-366
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-367
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Returns
+  id: totrans-368
   prefs: []
   type: TYPE_NORMAL
 - en: '`transformers.models.owlvit.modeling_owlvit.OwlViTImageGuidedObjectDetectionOutput`
     or `tuple(torch.FloatTensor)`'
+  id: totrans-369
   prefs: []
   type: TYPE_NORMAL
 - en: A `transformers.models.owlvit.modeling_owlvit.OwlViTImageGuidedObjectDetectionOutput`
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration (`<class 'transformers.models.owlvit.configuration_owlvit.OwlViTConfig'>`)
     and inputs.
+  id: totrans-370
   prefs: []
   type: TYPE_NORMAL
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, num_patches, num_queries)`)
     — Classification logits (including no-object) for all queries.'
+  id: totrans-371
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1693,6 +2317,7 @@
     size of each individual target image in the batch (disregarding possible padding).
     You can use [post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor.post_process_object_detection)
     to retrieve the unnormalized bounding boxes.'
+  id: totrans-372
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1702,6 +2327,7 @@
     size of each individual query image in the batch (disregarding possible padding).
     You can use [post_process_object_detection()](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTImageProcessor.post_process_object_detection)
     to retrieve the unnormalized bounding boxes.'
+  id: totrans-373
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1709,6 +2335,7 @@
     output_dim`) — Pooled output of [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).
     OWL-ViT represents images as a set of image patches and computes image embeddings
     for each patch.'
+  id: totrans-374
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1716,37 +2343,46 @@
     patch_size, output_dim`) — Pooled output of [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).
     OWL-ViT represents images as a set of image patches and computes image embeddings
     for each patch.'
+  id: totrans-375
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`class_embeds` (`torch.FloatTensor` of shape `(batch_size, num_patches, hidden_size)`)
     — Class embeddings of all image patches. OWL-ViT represents images as a set of
     image patches where the total number of patches is (image_size / patch_size)**2.'
+  id: totrans-376
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`text_model_output` (Tuple`BaseModelOutputWithPooling`) — The output of the
     [OwlViTTextModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTTextModel).'
+  id: totrans-377
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`vision_model_output` (`BaseModelOutputWithPooling`) — The output of the [OwlViTVisionModel](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTVisionModel).'
+  id: totrans-378
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The [OwlViTForObjectDetection](/docs/transformers/v4.37.2/en/model_doc/owlvit#transformers.OwlViTForObjectDetection)
     forward method, overrides the `__call__` special method.
+  id: totrans-379
   prefs: []
   type: TYPE_NORMAL
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-380
   prefs: []
   type: TYPE_NORMAL
 - en: 'Examples:'
+  id: totrans-381
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE38]'
+  id: totrans-382
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
