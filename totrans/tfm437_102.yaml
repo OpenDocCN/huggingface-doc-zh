@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 固定长度模型的困惑度
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perplexity](https://huggingface.co/docs/transformers/v4.37.2/en/perplexity)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/perplexity](https://huggingface.co/docs/transformers/v4.37.2/en/perplexity)
 - en: null
   id: totrans-2
   prefs: []
@@ -20,6 +22,7 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 困惑度（PPL）是评估语言模型最常见的指标之一。在深入讨论之前，我们应该注意，该指标特别适用于传统语言模型（有时称为自回归或因果语言模型），对于像BERT这样的掩码语言模型，该指标并不明确定义（请参阅[模型摘要](model_summary)）。
 - en: Perplexity is defined as the exponentiated average negative log-likelihood of
     a sequence. If we have a tokenized sequence<math><semantics><mrow><mi>X</mi><mo>=</mo><mo
     stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo separator="true">,</mo><msub><mi>x</mi><mn>1</mn></msub><mo
@@ -36,6 +39,18 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 困惑度被定义为序列的指数化平均负对数似然。如果我们有一个标记化的序列<math><semantics><mrow><mi>X</mi><mo>=</mo><mo
+    stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo separator="true">,</mo><msub><mi>x</mi><mn>1</mn></msub><mo
+    separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>x</mi><mi>t</mi></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">X = (x_0,
+    x_1, \dots, x_t)</annotation></semantics></math>X=(x0​,x1​,…,xt​)，那么<math><semantics><mrow><mi>X</mi></mrow><annotation
+    encoding="application/x-tex">X</annotation></semantics></math>X的困惑度为，<math display="block"><semantics><mrow><mtext>PPL</mtext><mo
+    stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo>=</mo><mi>exp</mi><mo>⁡</mo><mrow><mo
+    fence="true">{</mo><mrow><mo>−</mo><mfrac><mn>1</mn><mi>t</mi></mfrac><munderover><mo>∑</mo><mi>i</mi><mi>t</mi></munderover><mi>log</mi><mo>⁡</mo><msub><mi>p</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><msub><mi>x</mi><mrow><mo><</mo><mi>i</mi></mrow></msub><mo
+    stretchy="false">)</mo></mrow><mo fence="true">}</mo></mrow></mrow><annotation
+    encoding="application/x-tex">\text{PPL}(X) = \exp \left\{ {-\frac{1}{t}\sum_i^t
+    \log p_\theta (x_i|x_{<i}) } \right\}</annotation></semantics></math>PPL(X)=exp{−t1​i∑t​logpθ​(xi​∣x<i​)}
 - en: where<math><semantics><mrow><mi>log</mi><mo>⁡</mo><msub><mi>p</mi><mi>θ</mi></msub><mo
     stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><msub><mi>x</mi><mrow><mo><</mo><mi>i</mi></mrow></msub><mo
     stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log p_\theta
@@ -49,6 +64,11 @@
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 其中<math><semantics><mrow><mi>log</mi><mo>⁡</mo><msub><mi>p</mi><mi>θ</mi></msub><mo
+    stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><msub><mi>x</mi><mrow><mo><</mo><mi>i</mi></mrow></msub><mo
+    stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log p_\theta
+    (x_i|x_{<i})</annotation></semantics></math>是第i个标记在我们模型的先前标记<math><semantics><mrow><msub><mi>x</mi><mrow><mo><</mo><mi>i</mi></mrow></msub></mrow><annotation
+    encoding="application/x-tex">x_{<i}</annotation></semantics></math>的对数似然。直观地，它可以被视为模型在语料库中一组指定标记中均匀预测的评估。重要的是，这意味着标记化过程对模型的困惑度有直接影响，比较不同模型时应始终考虑这一点。
 - en: This is also equivalent to the exponentiation of the cross-entropy between the
     data and model predictions. For more intuition about perplexity and its relationship
     to Bits Per Character (BPC) and data compression, check out this [fantastic blog
@@ -56,21 +76,25 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 这也等同于数据和模型预测之间交叉熵的指数。关于困惑度及其与每字符比特（BPC）和数据压缩的关系的更多直觉，请查看[The Gradient](https://thegradient.pub/understanding-evaluation-metrics-for-language-models)上的这篇[精彩博客文章](https://thegradient.pub/understanding-evaluation-metrics-for-language-models/)。
 - en: Calculating PPL with fixed-length models
   id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用固定长度模型计算PPL
 - en: If we weren’t limited by a model’s context size, we would evaluate the model’s
     perplexity by autoregressively factorizing a sequence and conditioning on the
     entire preceding subsequence at each step, as shown below.
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们不受模型上下文大小的限制，我们将通过自回归地分解序列并在每一步上都对整个先前子序列进行条件评估模型的困惑度，如下所示。
 - en: '![Full decomposition of a sequence with unlimited context length](../Images/c3c9c9f2fa6dbedcb4e30aa153057b06.png)'
   id: totrans-9
   prefs: []
   type: TYPE_IMG
+  zh: '![具有无限上下文长度的序列的完全分解](../Images/c3c9c9f2fa6dbedcb4e30aa153057b06.png)'
 - en: When working with approximate models, however, we typically have a constraint
     on the number of tokens the model can process. The largest version of [GPT-2](model_doc/gpt2),
     for example, has a fixed length of 1024 tokens, so we cannot calculate<math><semantics><mrow><msub><mi>p</mi><mi>θ</mi></msub><mo
@@ -81,6 +105,7 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，在使用近似模型时，通常会对模型可以处理的标记数量有限制。例如，[GPT-2](model_doc/gpt2)的最大版本具有固定长度的1024个标记，因此当t大于1024时，我们无法直接计算pθ​(xt​∣x<t​)。
 - en: Instead, the sequence is typically broken into subsequences equal to the model’s
     maximum input size. If a model’s max input size is<math><semantics><mrow><mi>k</mi></mrow><annotation
     encoding="application/x-tex">k</annotation></semantics></math>k, we then approximate
@@ -94,10 +119,12 @@
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 相反，序列通常被分成与模型最大输入大小相等的子序列。如果模型的最大输入大小为k，那么我们通过仅在之前的k-1个标记上进行条件化来近似标记xt​的可能性，而不是整个上下文。在评估序列的模型困惑度时，一种诱人但次优的方法是将序列分成不相交的块，并独立地将每个段的分解对数似然相加。
 - en: '![Suboptimal PPL not taking advantage of full available context](../Images/a231ea5a2c820c729fc5f3842f0db183.png)'
   id: totrans-12
   prefs: []
   type: TYPE_IMG
+  zh: 不利用完全可用上下文的次优PPL
 - en: This is quick to compute since the perplexity of each segment can be computed
     in one forward pass, but serves as a poor approximation of the fully-factorized
     perplexity and will typically yield a higher (worse) PPL because the model will
@@ -105,16 +132,19 @@
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种方法计算快速，因为每个段的困惑度可以在一个前向传递中计算，但作为完全因子化困惑度的一个很差的近似，并且通常会产生更高（更差）的PPL，因为模型在大多数预测步骤中将具有更少的上下文。
 - en: Instead, the PPL of fixed-length models should be evaluated with a sliding-window
     strategy. This involves repeatedly sliding the context window so that the model
     has more context when making each prediction.
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 相反，应该使用滑动窗口策略评估固定长度模型的PPL。这涉及反复滑动上下文窗口，以便模型在进行每个预测时具有更多上下文。
 - en: '![Sliding window PPL taking advantage of all available context](../Images/0a3c903fc4e391fe3b97c4c5c986742c.png)'
   id: totrans-15
   prefs: []
   type: TYPE_IMG
+  zh: 利用所有可用上下文的滑动窗口PPL
 - en: This is a closer approximation to the true decomposition of the sequence probability
     and will typically yield a more favorable score. The downside is that it requires
     a separate forward pass for each token in the corpus. A good practical compromise
@@ -124,15 +154,18 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是对序列概率的真实分解的更接近近似，并且通常会产生更有利的分数。缺点是它需要为语料库中的每个标记进行单独的前向传递。一个很好的实际折衷方案是使用跨度滑动窗口，通过更大的跨度移动上下文，而不是每次滑动一个标记。这样可以使计算速度更快，同时仍然使模型在每一步中具有更大的上下文来进行预测。
 - en: 'Example: Calculating perplexity with GPT-2 in 🤗 Transformers'
   id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 示例：在🤗 Transformers中使用GPT-2计算困惑度
 - en: Let’s demonstrate this process with GPT-2.
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们用GPT-2演示这个过程。
 - en: '[PRE0]'
   id: totrans-19
   prefs: []
@@ -145,6 +178,7 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将加载WikiText-2数据集，并使用几种不同的滑动窗口策略评估困惑度。由于这个数据集很小，我们只需对整个数据集进行一次前向传递，因此可以将整个数据集加载和编码到内存中。
 - en: '[PRE1]'
   id: totrans-21
   prefs: []
@@ -163,6 +197,7 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用🤗 Transformers，我们可以简单地将`input_ids`作为`labels`传递给我们的模型，每个标记的平均负对数似然将作为损失返回。然而，使用我们的滑动窗口方法，在每次迭代中传递给模型的标记存在重叠。我们不希望将我们只将其视为上下文的标记的对数似然包括在我们的损失中，因此我们可以将这些目标设置为`-100`，以便忽略它们。以下是我们如何使用步幅为`512`的示例。这意味着在计算任何一个标记的条件概率时，模型将至少有512个标记的上下文（前提是有512个先前的标记可用于条件）。
 - en: '[PRE2]'
   id: totrans-23
   prefs: []
