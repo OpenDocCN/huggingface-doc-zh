@@ -657,11 +657,14 @@
   id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 但请注意，性能增益的数量是*数据集相关*的，特别是在合成数据集（如[UltraChat](https://huggingface.co/datasets/stingning/ultrachat)）上应用
+    NEFTune 通常会产生较小的增益。
 - en: Accelerate fine-tuning 2x using unsloth
   id: totrans-105
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用 unsloth 加速微调 2 倍
 - en: 'You can further accelerate QLoRA / LoRA (2x faster, 60% less memory) using
     the [`unsloth`](https://github.com/unslothai/unsloth) library that is fully compatible
     with `SFTTrainer`. Currently `unsloth` supports only Llama (Yi, TinyLlama, Qwen,
@@ -669,31 +672,40 @@
   id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用完全兼容`SFTTrainer`的[`unsloth`](https://github.com/unslothai/unsloth)库进一步加速
+    QLoRA / LoRA（速度提高 2 倍，内存减少 60%）。目前，`unsloth`仅支持 Llama（Yi、TinyLlama、Qwen、Deepseek
+    等）和 Mistral 架构。以下是 1x A100 的一些基准测试：
 - en: '| 1 A100 40GB | Dataset | 🤗 | 🤗 + Flash Attention 2 | 🦥 Unsloth | 🦥 VRAM saved
     |'
   id: totrans-107
   prefs: []
   type: TYPE_TB
+  zh: '| 1 A100 40GB | 数据集 | 🤗 | 🤗 + 闪存注意力 2 | 🦥 Unsloth | 🦥 VRAM 已保存 |'
 - en: '| --- | --- | --- | --- | --- | --- |'
   id: totrans-108
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- |'
 - en: '| Code Llama 34b | Slim Orca | 1x | 1.01x | **1.94x** | -22.7% |'
   id: totrans-109
   prefs: []
   type: TYPE_TB
+  zh: '| Code Llama 34b | 瘦鲸鱼 | 1x | 1.01x | **1.94x** | -22.7% |'
 - en: '| Llama-2 7b | Slim Orca | 1x | 0.96x | **1.87x** | -39.3% |'
   id: totrans-110
   prefs: []
   type: TYPE_TB
+  zh: '| Llama-2 7b | 瘦鲸鱼 | 1x | 0.96x | **1.87x** | -39.3% |'
 - en: '| Mistral 7b | Slim Orca | 1x | 1.17x | **1.88x** | -65.9% |'
   id: totrans-111
   prefs: []
   type: TYPE_TB
+  zh: '| Mistral 7b | 瘦鲸鱼 | 1x | 1.17x | **1.88x** | -65.9% |'
 - en: '| Tiny Llama 1.1b | Alpaca | 1x | 1.55x | **2.74x** | -57.8% |'
   id: totrans-112
   prefs: []
   type: TYPE_TB
+  zh: '| Tiny Llama 1.1b | 羊驼 | 1x | 1.55x | **2.74x** | -57.8% |'
 - en: 'First install `unsloth` according to the [official documentation](https://github.com/unslothai/unsloth).
     Once installed, you can incorporate unsloth into your workflow in a very simple
     manner; instead of loading `AutoModelForCausalLM`, you just need to load a `FastLanguageModel`
@@ -701,6 +713,8 @@
   id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先根据[官方文档](https://github.com/unslothai/unsloth)安装`unsloth`。安装完成后，您可以非常简单地将
+    unsloth 整合到您的工作流程中；只需加载`FastLanguageModel`，而不是加载`AutoModelForCausalLM`，如下所示：
 - en: '[PRE25]'
   id: totrans-114
   prefs: []
@@ -711,16 +725,20 @@
   id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 保存的模型与 Hugging Face 的 transformers 库完全兼容。在他们的[官方存储库](https://github.com/unslothai/unsloth)中了解更多关于
+    unsloth 的信息。
 - en: Best practices
   id: totrans-116
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 最佳实践
 - en: 'Pay attention to the following best practices when training a model with that
     trainer:'
   id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用该训练器训练模型时，请注意以下最佳实践：
 - en: '[SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer) always pads by default
     the sequences to the `max_seq_length` argument of the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer).
     If none is passed, the trainer will retrieve that value from the tokenizer. Some
@@ -730,6 +748,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer) 默认情况下总是将序列填充到[SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)的`max_seq_length`参数。如果没有传递值，训练器将从分词器中检索该值。一些分词器不提供默认值，因此有一个检查以检索
+    2048 和该值之间的最小值。在训练之前，请务必检查。'
 - en: For training adapters in 8bit, you might need to tweak the arguments of the
     `prepare_model_for_kbit_training` method from PEFT, hence we advise users to use
     `prepare_in_int8_kwargs` field, or create the `PeftModel` outside the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)
@@ -738,6 +758,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于在 8 位中训练适配器，您可能需要调整 PEFT 的`prepare_model_for_kbit_training`方法的参数，因此我们建议用户使用`prepare_in_int8_kwargs`字段，或在[SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)之外创建`PeftModel`并传递它。
 - en: For a more memory-efficient training using adapters, you can load the base model
     in 8bit, for that simply add `load_in_8bit` argument when creating the [SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer),
     or create a base model in 8bit outside the trainer and pass it.
@@ -745,36 +766,45 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 为了更节省内存地使用适配器进行训练，您可以在 8 位中加载基础模型，只需在创建[SFTTrainer](/docs/trl/v0.7.10/en/trainer#trl.SFTTrainer)时添加`load_in_8bit`参数，或在训练器之外创建一个
+    8 位的基础模型并传递它。
 - en: If you create a model outside the trainer, make sure to not pass to the trainer
     any additional keyword arguments that are relative to `from_pretrained()` method.
   id: totrans-121
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果您在训练器之外创建模型，请确保不要向训练器传递相对于`from_pretrained()`方法的任何额外关键字参数。
 - en: GPTQ Conversion
   id: totrans-122
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: GPTQ 转换
 - en: You may experience some issues with GPTQ Quantization after completing training.
     Lowering `gradient_accumulation_steps` to `4` will resolve most issues during
     the quantization process to GPTQ format.
   id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 在完成训练后，您可能会遇到一些 GPTQ 量化的问题。将`gradient_accumulation_steps`降低到`4`将解决大部分在量化过程中到
+    GPTQ 格式的问题。
 - en: SFTTrainer
   id: totrans-124
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: SFTTrainer
 - en: '### `class trl.SFTTrainer`'
   id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class trl.SFTTrainer`'
 - en: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/sft_trainer.py#L54)'
   id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/trl/blob/v0.7.10/trl/trainer/sft_trainer.py#L54)'
 - en: '[PRE26]'
   id: totrans-127
   prefs: []
@@ -784,6 +814,7 @@
   id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`model` (Union[`transformers.PreTrainedModel`, `nn.Module`, `str`]) — The model
     to train, can be a `PreTrainedModel`, a `torch.nn.Module` or a string with the
     model name to load from cache or download. The model can be also converted to
@@ -792,6 +823,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`model`（Union[`transformers.PreTrainedModel`, `nn.Module`, `str`）— 要训练的模型，可以是`PreTrainedModel`，`torch.nn.Module`或包含要从缓存加载或下载的模型名称的字符串。如果将`PeftConfig`对象传递给`peft_config`参数，则模型也可以转换为`PeftModel`。'
 - en: '`args` (Optional[transformers.TrainingArguments](https://huggingface.co/docs/transformers/v4.36.2/en/main_classes/trainer#transformers.TrainingArguments))
     — The arguments to tweak for training. Please refer to the official documentation
     of `transformers.TrainingArguments` for more information.'
@@ -799,12 +831,15 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`args`（Optional[transformers.TrainingArguments](https://huggingface.co/docs/transformers/v4.36.2/en/main_classes/trainer#transformers.TrainingArguments)）—
+    用于调整训练的参数。请参考`transformers.TrainingArguments`的官方文档以获取更多信息。'
 - en: '`data_collator` (Optional`transformers.DataCollator`) — The data collator to
     use for training.'
   id: totrans-131
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`data_collator`（可选`transformers.DataCollator`）— 用于训练的数据整理器。'
 - en: '`train_dataset` (Optional[datasets.Dataset](https://huggingface.co/docs/datasets/v2.16.1/en/package_reference/main_classes#datasets.Dataset))
     — The dataset to use for training. We recommend users to use `trl.trainer.ConstantLengthDataset`
     to create their dataset.'
