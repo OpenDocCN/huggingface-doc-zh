@@ -1,128 +1,172 @@
 - en: Export to ONNX
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 导出为ONNX
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/serialization](https://huggingface.co/docs/transformers/v4.37.2/en/serialization)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/serialization](https://huggingface.co/docs/transformers/v4.37.2/en/serialization)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Deploying 🤗 Transformers models in production environments often requires, or
     can benefit from exporting the models into a serialized format that can be loaded
     and executed on specialized runtimes and hardware.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在生产环境中部署🤗 Transformers模型通常需要将模型导出为可以在专用运行时和硬件上加载和执行的序列化格式。
 - en: 🤗 Optimum is an extension of Transformers that enables exporting models from
     PyTorch or TensorFlow to serialized formats such as ONNX and TFLite through its
     `exporters` module. 🤗 Optimum also provides a set of performance optimization
     tools to train and run models on targeted hardware with maximum efficiency.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Optimum是Transformers的扩展，通过其`exporters`模块使得可以将模型从PyTorch或TensorFlow导出为ONNX和TFLite等序列化格式。🤗
+    Optimum还提供了一套性能优化工具，以在目标硬件上以最大效率训练和运行模型。
 - en: This guide demonstrates how you can export 🤗 Transformers models to ONNX with
     🤗 Optimum, for the guide on exporting models to TFLite, please refer to the [Export
     to TFLite page](tflite).
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南演示了如何使用🤗 Optimum将🤗 Transformers模型导出为ONNX，有关将模型导出为TFLite的指南，请参考[导出到TFLite页面](tflite)。
 - en: Export to ONNX
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 导出为ONNX
 - en: '[ONNX (Open Neural Network eXchange)](http://onnx.ai) is an open standard that
     defines a common set of operators and a common file format to represent deep learning
     models in a wide variety of frameworks, including PyTorch and TensorFlow. When
     a model is exported to the ONNX format, these operators are used to construct
     a computational graph (often called an *intermediate representation*) which represents
     the flow of data through the neural network.'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '[ONNX（Open Neural Network eXchange）](http://onnx.ai)是一个开放标准，定义了一组通用操作符和一种通用文件格式，用于在各种框架中表示深度学习模型，包括PyTorch和TensorFlow。当模型导出为ONNX格式时，这些操作符用于构建计算图（通常称为*中间表示*），表示数据通过神经网络的流动。'
 - en: By exposing a graph with standardized operators and data types, ONNX makes it
     easy to switch between frameworks. For example, a model trained in PyTorch can
     be exported to ONNX format and then imported in TensorFlow (and vice versa).
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过公开具有标准化操作符和数据类型的图，ONNX使得在不同框架之间轻松切换变得容易。例如，在PyTorch中训练的模型可以导出为ONNX格式，然后在TensorFlow中导入（反之亦然）。
 - en: 'Once exported to ONNX format, a model can be:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 将模型导出为ONNX格式后，可以：
 - en: optimized for inference via techniques such as [graph optimization](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/optimization)
     and [quantization](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/quantization).
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过诸如[图优化](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/optimization)和[量化](https://huggingface.co/docs/optimum/onnxruntime/usage_guides/quantization)等技术进行推理优化。
 - en: run with ONNX Runtime via [`ORTModelForXXX` classes](https://huggingface.co/docs/optimum/onnxruntime/package_reference/modeling_ort),
     which follow the same `AutoModel` API as the one you are used to in 🤗 Transformers.
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用ONNX Runtime运行，通过[`ORTModelForXXX`类](https://huggingface.co/docs/optimum/onnxruntime/package_reference/modeling_ort)，其遵循与🤗
+    Transformers中您习惯的`AutoModel` API相同。
 - en: run with [optimized inference pipelines](https://huggingface.co/docs/optimum/main/en/onnxruntime/usage_guides/pipelines),
     which has the same API as the [pipeline()](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.pipeline)
     function in 🤗 Transformers.
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用[优化推理流水线](https://huggingface.co/docs/optimum/main/en/onnxruntime/usage_guides/pipelines)运行，其API与🤗
+    Transformers中的[pipeline()](/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.pipeline)函数相同。
 - en: 🤗 Optimum provides support for the ONNX export by leveraging configuration objects.
     These configuration objects come ready-made for a number of model architectures,
     and are designed to be easily extendable to other architectures.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Optimum通过利用配置对象提供对ONNX导出的支持。这些配置对象已经为许多模型架构准备好，并且设计为易于扩展到其他架构。
 - en: For the list of ready-made configurations, please refer to [🤗 Optimum documentation](https://huggingface.co/docs/optimum/exporters/onnx/overview).
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关现成配置列表，请参阅[🤗 Optimum文档](https://huggingface.co/docs/optimum/exporters/onnx/overview)。
 - en: 'There are two ways to export a 🤗 Transformers model to ONNX, here we show both:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两种将🤗 Transformers模型导出为ONNX的方法，这里我们展示两种：
 - en: export with 🤗 Optimum via CLI.
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过CLI使用🤗 Optimum导出。
 - en: export with 🤗 Optimum with `optimum.onnxruntime`.
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用`optimum.onnxruntime`与🤗 Optimum导出。
 - en: Exporting a 🤗 Transformers model to ONNX with CLI
+  id: totrans-18
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用CLI将🤗 Transformers模型导出为ONNX
 - en: 'To export a 🤗 Transformers model to ONNX, first install an extra dependency:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将🤗 Transformers模型导出为ONNX，首先安装额外的依赖项：
 - en: '[PRE0]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'To check out all available arguments, refer to the [🤗 Optimum docs](https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/export_a_model#exporting-a-model-to-onnx-using-the-cli),
     or view help in command line:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看所有可用参数，请参考[🤗 Optimum文档](https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/export_a_model#exporting-a-model-to-onnx-using-the-cli)，或在命令行中查看帮助：
 - en: '[PRE1]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'To export a model’s checkpoint from the 🤗 Hub, for example, `distilbert-base-uncased-distilled-squad`,
     run the following command:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 要从🤗 Hub导出模型的检查点，例如`distilbert-base-uncased-distilled-squad`，请运行以下命令：
 - en: '[PRE2]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'You should see the logs indicating progress and showing where the resulting
     `model.onnx` is saved, like this:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应该看到指示进度并显示结果`model.onnx`保存位置的日志，如下所示：
 - en: '[PRE3]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: The example above illustrates exporting a checkpoint from 🤗 Hub. When exporting
     a local model, first make sure that you saved both the model’s weights and tokenizer
     files in the same directory (`local_path`). When using CLI, pass the `local_path`
@@ -131,99 +175,157 @@
     documentation](https://huggingface.co/docs/optimum/exporters/task_manager). If
     `task` argument is not provided, it will default to the model architecture without
     any task specific head.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 上面的示例说明了从 🤗 Hub 导出检查点。在导出本地模型时，首先确保您将模型的权重和分词器文件保存在同一个目录中（`local_path`）。在使用
+    CLI 时，将 `local_path` 传递给 `model` 参数，而不是在 🤗 Hub 上提供检查点名称，并提供 `--task` 参数。您可以在 [🤗
+    Optimum 文档](https://huggingface.co/docs/optimum/exporters/task_manager) 中查看支持的任务列表。如果未提供
+    `task` 参数，它将默认为没有任何特定任务头的模型架构。
 - en: '[PRE4]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'The resulting `model.onnx` file can then be run on one of the [many accelerators](https://onnx.ai/supported-tools.html#deployModel)
     that support the ONNX standard. For example, we can load and run the model with
     [ONNX Runtime](https://onnxruntime.ai/) as follows:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 导出的 `model.onnx` 文件可以在支持ONNX标准的 [许多加速器](https://onnx.ai/supported-tools.html#deployModel)
+    中运行。例如，我们可以使用 [ONNX Runtime](https://onnxruntime.ai/) 加载和运行模型如下：
 - en: '[PRE5]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'The process is identical for TensorFlow checkpoints on the Hub. For instance,
     here’s how you would export a pure TensorFlow checkpoint from the [Keras organization](https://huggingface.co/keras-io):'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个过程对于 Hub 上的 TensorFlow 检查点是相同的。例如，这里是如何从 [Keras 组织](https://huggingface.co/keras-io)
+    导出一个纯 TensorFlow 检查点的：
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Exporting a 🤗 Transformers model to ONNX with optimum.onnxruntime
+  id: totrans-33
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用 optimum.onnxruntime 将 🤗 Transformers 模型导出到 ONNX
 - en: 'Alternative to CLI, you can export a 🤗 Transformers model to ONNX programmatically
     like so:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 与 CLI 的替代方法是，您可以像这样以编程方式将 🤗 Transformers 模型导出到 ONNX：
 - en: '[PRE7]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Exporting a model for an unsupported architecture
+  id: totrans-36
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 将模型导出到不受支持的架构
 - en: If you wish to contribute by adding support for a model that cannot be currently
     exported, you should first check if it is supported in [`optimum.exporters.onnx`](https://huggingface.co/docs/optimum/exporters/onnx/overview),
     and if it is not, [contribute to 🤗 Optimum](https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/contribute)
     directly.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望通过为当前无法导出的模型添加支持来做出贡献，您应该首先检查它是否在 [`optimum.exporters.onnx`](https://huggingface.co/docs/optimum/exporters/onnx/overview)
+    中受支持，如果不是，可以直接 [为 🤗 Optimum 做出贡献](https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/contribute)。
 - en: Exporting a model with transformers.onnx
+  id: totrans-38
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用 transformers.onnx 导出模型
 - en: '`tranformers.onnx` is no longer maintained, please export models with 🤗 Optimum
     as described above. This section will be removed in the future versions.'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '`tranformers.onnx` 不再维护，请按照上述使用 🤗 Optimum 导出模型的方法。这一部分将在未来版本中被移除。'
 - en: 'To export a 🤗 Transformers model to ONNX with `tranformers.onnx`, install extra
     dependencies:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用 `transformers.onnx` 将 🤗 Transformers 模型导出到 ONNX，需要安装额外的依赖：
 - en: '[PRE8]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Use `transformers.onnx` package as a Python module to export a checkpoint using
     a ready-made configuration:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `transformers.onnx` 包作为 Python 模块，使用现成的配置导出检查点：
 - en: '[PRE9]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'This exports an ONNX graph of the checkpoint defined by the `--model` argument.
     Pass any checkpoint on the 🤗 Hub or one that’s stored locally. The resulting `model.onnx`
     file can then be run on one of the many accelerators that support the ONNX standard.
     For example, load and run the model with ONNX Runtime as follows:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将导出由 `--model` 参数定义的检查点的 ONNX 图。传递任何在 🤗 Hub 上或本地存储的检查点。导出的 `model.onnx` 文件可以在支持ONNX标准的许多加速器中运行。例如，加载并使用
+    ONNX Runtime 运行模型如下：
 - en: '[PRE10]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'The required output names (like `["last_hidden_state"]`) can be obtained by
     taking a look at the ONNX configuration of each model. For example, for DistilBERT
     we have:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 所需的输出名称（如 `["last_hidden_state"]`）可以通过查看每个模型的 ONNX 配置来获得。例如，对于 DistilBERT，我们有：
 - en: '[PRE11]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'The process is identical for TensorFlow checkpoints on the Hub. For example,
     export a pure TensorFlow checkpoint like so:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个过程对于 Hub 上的 TensorFlow 检查点是相同的。例如，像这样导出一个纯 TensorFlow 检查点：
 - en: '[PRE12]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'To export a model that’s stored locally, save the model’s weights and tokenizer
     files in the same directory (e.g. `local-pt-checkpoint`), then export it to ONNX
     by pointing the `--model` argument of the `transformers.onnx` package to the desired
     directory:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 要导出存储在本地的模型，请将模型的权重和分词器文件保存在同一个目录中（例如 `local-pt-checkpoint`），然后通过将 `transformers.onnx`
+    包的 `--model` 参数指向所需目录来将其导出到 ONNX：
 - en: '[PRE13]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
