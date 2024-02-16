@@ -1,31 +1,25 @@
 - en: Using LLaMA models with TRL
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/trl/using_llama_models](https://huggingface.co/docs/trl/using_llama_models)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: We’ve begun rolling out examples to use Meta’s LLaMA models in `trl` (see [Meta’s
     LLaMA release](https://ai.facebook.com/blog/large-language-model-llama-meta-ai/)
     for the original LLaMA model).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: Efficient training strategies
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -38,12 +32,14 @@
     80GB A100 like that. You can use some tricks, like more efficient optimizers of
     half-precision training, to squeeze a bit more into memory, but you’ll run out
     sooner or later.'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
 - en: Another option is to use Parameter-Efficient Fine-Tuning (PEFT) techniques,
     such as the [`peft`](https://github.com/huggingface/peft) library, which can perform
     low-rank adaptation (LoRA) on a model loaded in 8-bit. For more on `peft` + `trl`,
     see the [docs](https://huggingface.co/docs/trl/sentiment_tuning_peft).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
 - en: Loading the model in 8bit reduces the memory footprint drastically since you
@@ -51,12 +47,14 @@
     Instead of training the original weights directly, LoRA adds small adapter layers
     on top of some specific layers (usually the attention layers); thus, the number
     of trainable parameters is drastically reduced.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: In this scenario, a rule of thumb is to allocate ~1.2-1.4GB per billion parameters
     (depending on the batch size and sequence length) to fit the entire fine-tuning
     setup. This enables fine-tuning larger models (up to 50-60B scale models on a
     NVIDIA A100 80GB) at low cost.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
 - en: 'Now we can fit very large models into a single GPU, but the training might
@@ -64,21 +62,27 @@
     we replicate the same training setup into separate GPUs and pass different batches
     to each GPU. With this, you can parallelize the forward/backward passes of the
     model and scale with the number of GPUs.'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: '![chapter10_ddp.png](../Images/f281f3d2b69eb8ef7952621def3f8b06.png)'
+  id: totrans-10
   prefs: []
   type: TYPE_IMG
 - en: We use either the `transformers.Trainer` or `accelerate`, which both support
     data parallelism without any code changes, by simply passing arguments when calling
     the scripts with `torchrun` or `accelerate launch`. The following runs a training
     script with 8 GPUs on a single machine with `accelerate` and `torchrun`, respectively.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Supervised fine-tuning
+  id: totrans-13
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -90,6 +94,7 @@
     modeling objective on texts from the domain or task. The [StackExchange dataset](https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences)
     is enormous (over 10 million instructions), so we can easily train the language
     model on a subset of it.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: 'There is nothing special about fine-tuning the model before doing RLHF - it’s
@@ -98,9 +103,11 @@
     one text per sample in the batch and then padding to either the longest text or
     the maximal context of the model, we concatenate a lot of texts with a EOS token
     in between and cut chunks of the context size to fill the batch without any padding.'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: '![chapter10_preprocessing-clm.png](../Images/b6a16749788aead5596b057282494855.png)'
+  id: totrans-16
   prefs: []
   type: TYPE_IMG
 - en: With this approach the training is much more efficient as each token that is
@@ -108,19 +115,24 @@
     usually masked from the loss. If you don’t have much data and are more concerned
     about occasionally cutting off some tokens that are overflowing the context you
     can also use a classical data loader.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: The packing is handled by the `ConstantLengthDataset` and we can then use the
     `Trainer` after loading the model with `peft`. First, we load the model in int8,
     prepare it for training, and then add the LoRA adapters.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: We train the model for a few thousand steps with the causal language modeling
     objective and save the model. Since we will tune the model again with different
     objectives, we merge the adapter weights with the original model weights.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: '**Disclaimer:** due to LLaMA’s license, we release only the adapter weights
@@ -129,13 +141,16 @@
     and then converting them to the 🤗 Transformers format by running this [script](https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/convert_llama_weights_to_hf.py).
     Note that you’ll also need to install 🤗 Transformers from source until the `v4.28`
     is released.'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: Now that we have fine-tuned the model for the task, we are ready to train a
     reward model.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: Reward modeling and human preferences
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -144,6 +159,7 @@
     rating after each optimization iteration. This is expensive and slow due to the
     number of training samples needed for convergence and the inherent latency of
     human reading and annotator speed.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: 'A trick that works well instead of direct feedback is training a reward model
@@ -154,67 +170,89 @@
     what works better is to predict the ranking of two examples, where the reward
     model is presented with two candidates `(y_k, y_j)` for a given prompt `x` and
     has to predict which one would be rated higher by a human annotator.'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: With the StackExchange dataset, we can infer which of the two answers was preferred
     by the users based on the score. With that information and the loss defined above,
     we can then modify the `transformers.Trainer` by adding a custom loss function.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'We utilize a subset of a 100,000 pair of candidates and evaluate on a held-out
     set of 50,000\. With a modest training batch size of 4, we train the Llama model
     using the LoRA `peft` adapter for a single epoch using the Adam optimizer with
     BF16 precision. Our LoRA configuration is:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: As detailed in the next section, the resulting adapter can be merged into the
     frozen model and saved for further downstream use.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
 - en: Reinforcement Learning from Human Feedback
+  id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'With the fine-tuned language model and the reward model at hand, we are now
     ready to run the RL loop. It follows roughly three steps:'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
 - en: Generate responses from prompts,
+  id: totrans-33
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Rate the responses with the reward model,
+  id: totrans-34
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Run a reinforcement learning policy-optimization step with the ratings.
+  id: totrans-35
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: 'The Query and Response prompts are templated as follows before being tokenized
     and passed to the model:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: The same template was used for SFT, RM and RLHF stages. Once more, we utilize
     `peft` for memory-efficient training, which offers an extra advantage in the RLHF
     context. Here, the reference model and policy share the same base, the SFT model,
     which we load in 8-bit and freeze during training. We exclusively optimize the
     policy’s LoRA weights using PPO while sharing the base model’s weights.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: SFT、RM和RLHF阶段都使用了相同的模板。再次，我们利用`peft`进行内存高效训练，在RLHF环境中提供了额外的优势。在这里，参考模型和策略共享相同的基础，即SFT模型，在训练过程中以8位加载并冻结。我们专门使用PPO优化策略的LoRA权重，同时共享基础模型的权重。
 - en: '[PRE5]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: For the rest of the details and evaluation, please refer to our [blog post on
     StackLLaMA](https://huggingface.co/blog/stackllama).
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关其余细节和评估，请参考我们在StackLLaMA上的博客帖子。

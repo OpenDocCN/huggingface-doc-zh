@@ -1,74 +1,95 @@
 - en: Detoxifying a Language Model using PPO
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用PPO解毒语言模型
 - en: 'Original text: [https://huggingface.co/docs/trl/detoxifying_a_lm](https://huggingface.co/docs/trl/detoxifying_a_lm)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文：[https://huggingface.co/docs/trl/detoxifying_a_lm](https://huggingface.co/docs/trl/detoxifying_a_lm)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Language models (LMs) are known to sometimes generate toxic outputs. In this
     example, we will show how to “detoxify” a LM by feeding it toxic prompts and then
     using [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl/index)
     and Proximal Policy Optimization (PPO) to “detoxify” it.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 语言模型（LMs）有时会生成有毒的输出。在这个例子中，我们将展示如何通过提供有毒提示来“解毒”一个LM，然后使用[Transformer Reinforcement
+    Learning (TRL)](https://huggingface.co/docs/trl/index)和Proximal Policy Optimization
+    (PPO)来“解毒”它。
 - en: Read this section to follow our investigation on how we can reduce toxicity
     in a wide range of LMs, from 125m parameters to 6B parameters!
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 阅读本节，跟随我们的调查，了解如何减少从125m参数到6B参数的各种LM的有毒性！
 - en: 'Here’s an overview of the notebooks and scripts in the [TRL toxicity repository](https://github.com/huggingface/trl/tree/main/examples/toxicity/scripts)
     as well as the link for the interactive demo:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是[TRL有毒性存储库](https://github.com/huggingface/trl/tree/main/examples/toxicity/scripts)中的笔记本和脚本概述，以及交互式演示的链接：
 - en: '| File | Description | Colab link |'
+  id: totrans-6
   prefs: []
   type: TYPE_TB
+  zh: '| 文件 | 描述 | Colab链接 |'
 - en: '| --- | --- | --- |'
+  id: totrans-7
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| [`gpt-j-6b-toxicity.py`](https://github.com/huggingface/trl/blob/main/examples/research_projects/toxicity/scripts/gpt-j-6b-toxicity.py)
     | Detoxify `GPT-J-6B` using PPO | x |'
+  id: totrans-8
   prefs: []
   type: TYPE_TB
+  zh: '| [`gpt-j-6b-toxicity.py`](https://github.com/huggingface/trl/blob/main/examples/research_projects/toxicity/scripts/gpt-j-6b-toxicity.py)
+    | 使用PPO解毒`GPT-J-6B` | x |'
 - en: '| [`evaluate-toxicity.py`](https://github.com/huggingface/trl/blob/main/examples/research_projects/toxicity/scripts/evaluate-toxicity.py)
     | Evaluate de-toxified models using `evaluate` | x |'
+  id: totrans-9
   prefs: []
   type: TYPE_TB
+  zh: '| [`evaluate-toxicity.py`](https://github.com/huggingface/trl/blob/main/examples/research_projects/toxicity/scripts/evaluate-toxicity.py)
+    | 使用`evaluate`评估解毒模型 | x |'
 - en: '| [Interactive Space](https://huggingface.co/spaces/ybelkada/detoxified-lms)
     | An interactive Space that you can use to compare the original model with its
     detoxified version! | x |'
+  id: totrans-10
   prefs: []
   type: TYPE_TB
+  zh: '| [交互空间](https://huggingface.co/spaces/ybelkada/detoxified-lms) | 一个交互式空间，您可以使用它来比较原始模型与其解毒版本！
+    | x |'
 - en: Context
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 背景
 - en: Language models are trained on large volumes of text from the internet which
     also includes a lot of toxic content. Naturally, language models pick up the toxic
     patterns during training. Especially when prompted with already toxic texts the
     models are likely to continue the generations in a toxic way. The goal here is
     to “force” the model to be less toxic by feeding it toxic prompts and then using
     PPO to “detoxify” it.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 语言模型是在互联网上大量文本的基础上训练的，其中也包括许多有毒内容。自然地，语言模型在训练过程中会学习到有毒模式。特别是当提示已经是有毒文本时，模型很可能会继续以有毒的方式生成。这里的目标是通过提供有毒提示来“迫使”模型变得不那么有毒，然后使用PPO来“解毒”它。
 - en: Computing toxicity scores
+  id: totrans-13
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 计算有毒性分数
 - en: In order to optimize a model with PPO we need to define a reward. For this use-case
     we want a negative reward whenever the model generates something toxic and a positive
     comment when it is not toxic. Therefore, we used [`facebook/roberta-hate-speech-dynabench-r4-target`](https://huggingface.co/facebook/roberta-hate-speech-dynabench-r4-target),
@@ -76,309 +97,460 @@
     text as our toxic prompts classifier. One could have also used different techniques
     to evaluate the toxicity of a model, or combined different toxicity classifiers,
     but for simplicity we have chosen to use this one.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了优化一个使用PPO的模型，我们需要定义一个奖励。对于这个用例，当模型生成有毒内容时，我们希望得到一个负奖励，当它不是有毒时，我们希望得到一个正面评论。因此，我们使用了[`facebook/roberta-hate-speech-dynabench-r4-target`](https://huggingface.co/facebook/roberta-hate-speech-dynabench-r4-target)，这是一个RoBERTa模型，经过微调，可以对“中性”和“有毒”文本进行分类，作为我们的有毒提示分类器。也可以使用不同的技术来评估模型的有毒性，或者结合不同的有毒性分类器，但为了简单起见，我们选择了使用这个。
 - en: Selection of models
+  id: totrans-15
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 模型选择
 - en: 'We selected the following models for our experiments to show that TRL can be
     easily scaled to 10B parameters models:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们选择了以下模型进行实验，以展示TRL可以轻松扩展到10B参数模型：
 - en: '[`EleutherAI/gpt-neo-125M`](https://huggingface.co/EleutherAI/gpt-neo-125M)
     (125 million parameters)'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[`EleutherAI/gpt-neo-125M`](https://huggingface.co/EleutherAI/gpt-neo-125M)（1.25亿参数）'
 - en: '[`EleutherAI/gpt-neo-2.7B`](https://huggingface.co/EleutherAI/gpt-neo-2.7B)
     (2.7 billion parameters)'
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[`EleutherAI/gpt-neo-2.7B`](https://huggingface.co/EleutherAI/gpt-neo-2.7B)（27亿参数）'
 - en: '[`EleutherAI/gpt-j-6B`](https://huggingface.co/EleutherAI/gpt-j-6B) (6 billion
     parameters)'
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[`EleutherAI/gpt-j-6B`](https://huggingface.co/EleutherAI/gpt-j-6B)（60亿参数）'
 - en: For the selection of the smallest model, we have chosen `EleutherAI/gpt-neo-125M`
     because it has shown to be a model that was the “most toxic” compared to other
     models. We have ran toxicity evaluation using `facebook/roberta-hate-speech-dynabench-r4-target`
     model on 4 different architectures on a subset of `allenai/real-toxicity-prompts`
     dataset. Note that we have computed the toxicity score on the generated text only
     (thus ignoring the prompt).
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于选择最小的模型，我们选择了`EleutherAI/gpt-neo-125M`，因为与其他模型相比，它被证明是一个“最有毒”的模型。我们使用`facebook/roberta-hate-speech-dynabench-r4-target`模型在4种不同的架构上对`allenai/real-toxicity-prompts`数据集的子集进行了有毒性评估。请注意，我们仅对生成的文本计算了有毒性分数（因此忽略了提示）。
 - en: '| Model | Mean toxicity score |'
+  id: totrans-21
   prefs: []
   type: TYPE_TB
+  zh: '| 模型 | 平均有毒性分数 |'
 - en: '| --- | --- |'
+  id: totrans-22
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `gpt2` | 0.01602 |'
+  id: totrans-23
   prefs: []
   type: TYPE_TB
+  zh: '| `gpt2` | 0.01602 |'
 - en: '| `facebook/opt-350m` | 0.01628 |'
+  id: totrans-24
   prefs: []
   type: TYPE_TB
+  zh: '| `facebook/opt-350m` | 0.01628 |'
 - en: '| `bigscience/bloom-560m` | 0.00767 |'
+  id: totrans-25
   prefs: []
   type: TYPE_TB
+  zh: '| `bigscience/bloom-560m` | 0.00767 |'
 - en: '| `EleutherAI/gpt-neo-125M` | **0.02016** |'
+  id: totrans-26
   prefs: []
   type: TYPE_TB
+  zh: '| `EleutherAI/gpt-neo-125M` | **0.02016** |'
 - en: Designing the problem
+  id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 设计问题
 - en: When doing PPO, it is very important to design the problem efficiently so that
     the model can learn to solve it. Let’s cover the topics that were important for
     the model to converge.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 在进行PPO时，非常重要的是要高效地设计问题，以便模型能够学会解决它。让我们讨论对模型收敛至关重要的主题。
 - en: Pre-processing the dataset
+  id: totrans-29
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 预处理数据集
 - en: The dataset consist of prompts and their continuations, and each of them has
     an associated `toxicity` score.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 数据集包括提示及其延续，每个提示及其延续都有一个相关的`有毒性`分数。
 - en: 'A `prompt` example:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个`提示`示例：
 - en: '[PRE0]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'And its `continuation` value:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 以及它的`continuation`值：
 - en: '[PRE1]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'We want to increase the chance for the model to generate toxic prompts so we
     get more learning signal. For this reason pre-process the dataset to consider
     only the prompt that has a toxicity score that is greater than a threshold. We
     can do this in a few lines of code:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们希望增加模型生成有毒提示的机会，以便获得更多的学习信号。出于这个原因，预处理数据集，只考虑具有大于阈值的毒性分数的提示。我们可以用几行代码来做到这一点：
 - en: '[PRE2]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Reward function
+  id: totrans-37
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 奖励函数
 - en: The reward function is one of the most important part of training a model with
     reinforcement learning. It is the function that will tell the model if it is doing
     well or not. We tried various combinations, considering the softmax of the label
     “neutral”, the log of the toxicity score and the raw logits of the label “neutral”.
     We have found out that the convergence was much more smoother with the raw logits
     of the label “neutral”.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 奖励函数是用强化学习训练模型中最重要的部分之一。这个函数将告诉模型它的表现如何。我们尝试了各种组合，考虑了“中性”标签的softmax、毒性分数的对数以及“中性”标签的原始logits。我们发现使用“中性”标签的原始logits时，收敛更加平滑。
 - en: '[PRE3]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Impact of input prompts length
+  id: totrans-40
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 输入提示长度的影响
 - en: We have found out that training a model with small or long context (from 5 to
     8 tokens for the small context and from 15 to 20 tokens for the long context)
     does not have any impact on the convergence of the model, however, when training
     the model with longer prompts, the model will tend to generate more toxic prompts.
     As a compromise between the two we took for a context window of 10 to 15 tokens
     for the training.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们发现，使用小或长上下文（小上下文为5到8个标记，长上下文为15到20个标记）训练模型对模型的收敛没有任何影响，然而，当使用更长的提示训练模型时，模型会倾向于生成更多有毒提示。为了在两者之间取得平衡，我们选择了一个包含10到15个标记的上下文窗口进行训练。
 - en: '![](../Images/fec82719b3655a9458052e3112d36c51.png)'
+  id: totrans-42
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/fec82719b3655a9458052e3112d36c51.png)'
 - en: How to deal with OOM issues
+  id: totrans-43
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 如何处理OOM问题
 - en: 'Our goal is to train models up to 6B parameters, which is about 24GB in float32!
     Here two tricks we use to be able to train a 6B model on a single 40GB-RAM GPU:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们的目标是训练具有6B参数的模型，这大约是24GB的float32！以下是我们用来在单个40GB-RAM GPU上训练6B模型的两个技巧：
 - en: 'Use `bfloat16` precision: Simply load your model in `bfloat16` when calling
     `from_pretrained` and you can reduce the size of the model by 2:'
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用`bfloat16`精度：只需在调用`from_pretrained`时将模型加载为`bfloat16`，即可将模型大小减小一半：
 - en: '[PRE4]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: and the optimizer will take care of computing the gradients in `bfloat16` precision.
     Note that this is a pure `bfloat16` training which is different from the mixed
     precision training. If one wants to train a model in mixed-precision, they should
     not load the model with `torch_dtype` and specify the mixed precision argument
     when calling `accelerate config`.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 优化器将负责在`bfloat16`精度下计算梯度。请注意，这是一种纯`bfloat16`训练，与混合精度训练不同。如果想要进行混合精度训练，应该不使用`torch_dtype`加载模型，并在调用`accelerate
+    config`时指定混合精度参数。
 - en: 'Use shared layers: Since PPO algorithm requires to have both the active and
     reference model to be on the same device, we have decided to use shared layers
     to reduce the memory footprint of the model. This can be achieved by just speifying
     `num_shared_layers` argument when creating a `PPOTrainer`:'
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用共享层：由于PPO算法要求活动模型和参考模型在同一设备上，我们决定使用共享层来减少模型的内存占用。只需在创建`PPOTrainer`时指定`num_shared_layers`参数即可实现：
 - en: '![](../Images/4215e6a434fb11164c991104519460a0.png)'
+  id: totrans-49
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/4215e6a434fb11164c991104519460a0.png)'
 - en: '[PRE5]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: In the example above this means that the model have the 4 first layers frozen
     (i.e. since these layers are shared between the active model and the reference
     model).
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 在上面的示例中，这意味着模型的前4层被冻结（即这些层在活动模型和参考模型之间是共享的）。
 - en: One could have also applied gradient checkpointing to reduce the memory footprint
     of the model by calling `model.pretrained_model.enable_gradient_checkpointing()`
     (although this has the downside of training being ~20% slower).
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 也可以通过调用`model.pretrained_model.enable_gradient_checkpointing()`来应用梯度检查点，以减少模型的内存占用（尽管这会使训练速度变慢约20%）。
 - en: Training the model!
+  id: totrans-53
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 训练模型！
 - en: 'We have decided to keep 3 models in total that correspond to our best models:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们决定总共保留3个模型，对应我们的最佳模型：
 - en: '[`ybelkada/gpt-neo-125m-detox`](https://huggingface.co/ybelkada/gpt-neo-125m-detox)'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[`ybelkada/gpt-neo-125m-detox`](https://huggingface.co/ybelkada/gpt-neo-125m-detox)'
 - en: '[`ybelkada/gpt-neo-2.7B-detox`](https://huggingface.co/ybelkada/gpt-neo-2.7B-detox)'
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[`ybelkada/gpt-neo-2.7B-detox`](https://huggingface.co/ybelkada/gpt-neo-2.7B-detox)'
 - en: '[`ybelkada/gpt-j-6b-detox`](https://huggingface.co/ybelkada/gpt-j-6b-detox)'
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[`ybelkada/gpt-j-6b-detox`](https://huggingface.co/ybelkada/gpt-j-6b-detox)'
 - en: 'We have used different learning rates for each model, and have found out that
     the largest models were quite hard to train and can easily lead to collapse mode
     if the learning rate is not chosen correctly (i.e. if the learning rate is too
     high):'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们为每个模型使用了不同的学习率，并发现最大的模型很难训练，如果学习率选择不正确（即学习率过高），很容易导致崩溃模式：
 - en: '![](../Images/6fa27abd7fdafef846196967c795d891.png)'
+  id: totrans-59
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/6fa27abd7fdafef846196967c795d891.png)'
 - en: 'The final training run of `ybelkada/gpt-j-6b-detoxified-20shdl` looks like
     this:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ybelkada/gpt-j-6b-detoxified-20shdl`的最终训练运行如下：'
 - en: '![](../Images/b0aa51106bd217bceabdfc183fce3c44.png)'
+  id: totrans-61
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/b0aa51106bd217bceabdfc183fce3c44.png)'
 - en: As you can see the model converges nicely, but obviously we don’t observe a
     very large improvement from the first step, as the original model is not trained
     to generate toxic contents.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，模型收敛得很好，但显然我们并没有从第一步中观察到非常大的改进，因为原始模型并没有经过训练以生成有毒内容。
 - en: 'Also we have observed that training with larger `mini_batch_size` leads to
     smoother convergence and better results on the test set:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还观察到，使用更大的`mini_batch_size`进行训练会导致更平滑的收敛和更好的测试集结果：
 - en: '![](../Images/473bb6a247337f8423d24950b65e95f5.png)'
+  id: totrans-64
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/473bb6a247337f8423d24950b65e95f5.png)'
 - en: Results
+  id: totrans-65
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 结果
 - en: 'We tested our models on a new dataset, the [`OxAISH-AL-LLM/wiki_toxic`](https://huggingface.co/datasets/OxAISH-AL-LLM/wiki_toxic)
     dataset. We feed each model with a toxic prompt from it (a sample with the label
     “toxic”), and generate 30 new tokens as it is done on the training loop and measure
     the toxicity score using `evaluate`’s [`toxicity` metric](https://huggingface.co/spaces/ybelkada/toxicity).
     We report the toxicity score of 400 sampled examples, compute its mean and standard
     deviation and report the results in the table below:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在一个新数据集上测试了我们的模型，即[`OxAISH-AL-LLM/wiki_toxic`](https://huggingface.co/datasets/OxAISH-AL-LLM/wiki_toxic)数据集。我们用其中的一个有毒提示（带有“toxic”标签的样本）来喂给每个模型，并生成30个新的标记，就像在训练循环中一样，并使用`evaluate`的[`toxicity`指标](https://huggingface.co/spaces/ybelkada/toxicity)来测量毒性分数。我们报告了400个样本示例的毒性分数，计算其平均值和标准差，并在下表中报告结果：
 - en: '| Model | Mean toxicity score | Std toxicity score |'
+  id: totrans-67
   prefs: []
   type: TYPE_TB
+  zh: '| 模型 | 平均毒性分数 | 标准毒性分数 |'
 - en: '| --- | --- | --- |'
+  id: totrans-68
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| `EleutherAI/gpt-neo-125m` | 0.1627 | 0.2997 |'
+  id: totrans-69
   prefs: []
   type: TYPE_TB
+  zh: '| `EleutherAI/gpt-neo-125m` | 0.1627 | 0.2997 |'
 - en: '| `ybelkada/gpt-neo-125m-detox` | **0.1148** | **0.2506** |'
+  id: totrans-70
   prefs: []
   type: TYPE_TB
+  zh: '| `ybelkada/gpt-neo-125m-detox` | **0.1148** | **0.2506** |'
 - en: '| --- | --- | --- |'
+  id: totrans-71
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| `EleutherAI/gpt-neo-2.7B` | 0.1884 | ,0.3178 |'
+  id: totrans-72
   prefs: []
   type: TYPE_TB
+  zh: '| `EleutherAI/gpt-neo-2.7B` | 0.1884 | 0.3178 |'
 - en: '| `ybelkada/gpt-neo-2.7B-detox` | **0.0916** | **0.2104** |'
+  id: totrans-73
   prefs: []
   type: TYPE_TB
+  zh: '| `ybelkada/gpt-neo-2.7B-detox` | **0.0916** | **0.2104** |'
 - en: '| --- | --- | --- |'
+  id: totrans-74
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| `EleutherAI/gpt-j-6B` | 0.1699 | 0.3033 |'
+  id: totrans-75
   prefs: []
   type: TYPE_TB
+  zh: '| `EleutherAI/gpt-j-6B` | 0.1699 | 0.3033 |'
 - en: '| `ybelkada/gpt-j-6b-detox` | **0.1510** | **0.2798** |'
+  id: totrans-76
   prefs: []
   type: TYPE_TB
+  zh: '| `ybelkada/gpt-j-6b-detox` | **0.1510** | **0.2798** |'
 - en: '![](../Images/e121f4ce8e0693d912efaa854c62bea5.png)'
+  id: totrans-77
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/e121f4ce8e0693d912efaa854c62bea5.png)'
 - en: Toxicity score with respect to the size of the model.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 与模型大小相关的毒性评分。
 - en: 'Below are few generation examples of `gpt-j-6b-detox` model:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是`gpt-j-6b-detox`模型的一些生成示例：
 - en: '![](../Images/fa972843f0dc3596c33670ee2af1af10.png)'
+  id: totrans-80
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/fa972843f0dc3596c33670ee2af1af10.png)'
 - en: The evaluation script can be found [here](https://github.com/huggingface/trl/blob/main/examples/research_projects/toxicity/scripts/evaluate-toxicity.py).
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 评估脚本可以在[这里](https://github.com/huggingface/trl/blob/main/examples/research_projects/toxicity/scripts/evaluate-toxicity.py)找到。
 - en: Discussions
+  id: totrans-82
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The results are quite promising, as we can see that the models are able to reduce
     the toxicity score of the generated text by an interesting margin. The gap is
     clear for `gpt-neo-2B` model but we less so for the `gpt-j-6B` model. There are
     several things we could try to improve the results on the largest model starting
     with training with larger `mini_batch_size` and probably allowing to back-propagate
     through more layers (i.e. use less shared layers).
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 结果相当令人鼓舞，因为我们可以看到模型能够将生成文本的毒性分数降低一个有趣的幅度。对于`gpt-neo-2B`模型，差距是明显的，但对于`gpt-j-6B`模型来说则不太明显。我们可以尝试几种方法来改进最大模型上的结果，首先是使用更大的`mini_batch_size`进行训练，可能允许更多层次的反向传播（即使用更少的共享层）。
 - en: To sum up, in addition to human feedback this could be a useful additional signal
     when training large language models to ensure there outputs are less toxic as
     well as useful.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 总之，除了人类反馈外，这可能是在训练大型语言模型时确保它们的输出更少毒性且更有用的一个有用的额外信号。
 - en: Limitations
+  id: totrans-85
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 限制
 - en: We are also aware of consistent bias issues reported with toxicity classifiers,
     and of work evaluating the negative impact of toxicity reduction on the diversity
     of outcomes. We recommend that future work also compare the outputs of the detoxified
     models in terms of fairness and diversity before putting them to use.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们也意识到毒性分类器存在一致的偏见问题，并且有关评估毒性减少对结果多样性的负面影响的工作。我们建议未来的工作还应该比较去毒模型的输出在公平性和多样性方面的差异，然后再将其投入使用。
 - en: What is next?
+  id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 接下来是什么？
 - en: You can download the model and use it out of the box with `transformers`, or
     play with the Spaces that compares the output of the models before and after detoxification
     [here](https://huggingface.co/spaces/ybelkada/detoxified-lms).
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过`transformers`下载模型并立即使用，或者在[这里](https://huggingface.co/spaces/ybelkada/detoxified-lms)玩转比较去毒模型输出前后的Spaces。
