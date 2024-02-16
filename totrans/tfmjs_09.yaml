@@ -1,21 +1,17 @@
 - en: Building a Next.js application
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 构建Next.js应用程序
 - en: 'Original text: [https://huggingface.co/docs/transformers.js/tutorials/next](https://huggingface.co/docs/transformers.js/tutorials/next)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers.js/tutorials/next](https://huggingface.co/docs/transformers.js/tutorials/next)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'In this tutorial, we’ll build a simple Next.js application that performs sentiment
@@ -24,288 +20,442 @@
     or [server-side](#server-side-inference) (we’ll show you how to do both). In either
     case, we will be developing with the new [App Router](https://nextjs.org/docs/app)
     paradigm. The final product will look something like this:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本教程中，我们将构建一个简单的Next.js应用程序，使用Transformers.js执行情感分析！由于Transformers.js可以在浏览器或Node.js中运行，您可以选择是在[客户端](#client-side-inference)还是[服务器端](#server-side-inference)执行推理（我们将向您展示如何执行两者）。在任何情况下，我们将使用新的[App
+    Router](https://nextjs.org/docs/app)范式进行开发。最终产品将如下所示：
 - en: '![Demo](../Images/263f9827f1a37479fa322dad0df05303.png)'
+  id: totrans-4
   prefs: []
   type: TYPE_IMG
+  zh: '![演示](../Images/263f9827f1a37479fa322dad0df05303.png)'
 - en: 'Useful links:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 有用链接：
 - en: 'Demo site: [client-side](https://huggingface.co/spaces/Xenova/next-example-app)
     or [server-side](https://huggingface.co/spaces/Xenova/next-server-example-app)'
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 演示站点：[客户端](https://huggingface.co/spaces/Xenova/next-example-app) 或 [服务器端](https://huggingface.co/spaces/Xenova/next-server-example-app)
 - en: 'Source code: [client-side](https://github.com/xenova/transformers.js/tree/main/examples/next-client)
     or [server-side](https://github.com/xenova/transformers.js/tree/main/examples/next-server)'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 源代码：[客户端](https://github.com/xenova/transformers.js/tree/main/examples/next-client)
+    或 [服务器端](https://github.com/xenova/transformers.js/tree/main/examples/next-server)
 - en: Prerequisites
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 先决条件
 - en: '[Node.js](https://nodejs.org/en/) version 18+'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Node.js](https://nodejs.org/en/) 版本 18+'
 - en: '[npm](https://www.npmjs.com/) version 9+'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[npm](https://www.npmjs.com/) 版本 9+'
 - en: Client-side inference
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 客户端推理
 - en: 'Step 1: Initialise the project'
+  id: totrans-12
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 步骤1：初始化项目
 - en: 'Start by creating a new Next.js application using `create-next-app`:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先使用`create-next-app`创建一个新的Next.js应用程序：
 - en: '[PRE0]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'On installation, you’ll see various prompts. For this demo, we’ll be selecting
     those shown below in bold:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装时，您将看到各种提示。对于此演示，我们将选择下面显示的那些内容：
 - en: '[PRE1]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Step 2: Install and configure Transformers.js'
+  id: totrans-17
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 步骤2：安装和配置Transformers.js
 - en: 'You can install Transformers.js from [NPM](https://www.npmjs.com/package/@xenova/transformers)
     with the following command:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用以下命令从[NPM](https://www.npmjs.com/package/@xenova/transformers)安装Transformers.js：
 - en: '[PRE2]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'We also need to update the `next.config.js` file to ignore node-specific modules
     when bundling for the browser:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还需要更新`next.config.js`文件，以在为浏览器打包时忽略特定于节点的模块：
 - en: '[PRE3]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Next, we’ll create a new [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
     script where we’ll place all ML-related code. This is to ensure that the main
     thread is not blocked while the model is loading and performing inference. For
     this application, we’ll be using [`Xenova/distilbert-base-uncased-finetuned-sst-2-english`](https://huggingface.co/Xenova/distilbert-base-uncased-finetuned-sst-2-english),
     a ~67M parameter model finetuned on the [Stanford Sentiment Treebank](https://huggingface.co/datasets/sst)
     dataset. Add the following code to `./src/app/worker.js`:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们将创建一个新的[Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)脚本，我们将在其中放置所有与ML相关的代码。这是为了确保在模型加载和执行推理时不会阻塞主线程。对于此应用程序，我们将使用[`Xenova/distilbert-base-uncased-finetuned-sst-2-english`](https://huggingface.co/Xenova/distilbert-base-uncased-finetuned-sst-2-english)，这是一个在[Stanford
+    Sentiment Treebank](https://huggingface.co/datasets/sst)数据集上微调的约67M参数模型。将以下代码添加到`./src/app/worker.js`中：
 - en: '[PRE4]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Step 3: Design the user interface'
+  id: totrans-24
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 步骤3：设计用户界面
 - en: We’ll now modify the default `./src/app/page.js` file so that it connects to
     our worker thread. Since we’ll only be performing in-browser inference, we can
     opt-in to Client components using the [`'use client'` directive](https://nextjs.org/docs/getting-started/react-essentials#the-use-client-directive).
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们将修改默认的`./src/app/page.js`文件，以便连接到我们的工作线程。由于我们将只在浏览器中执行推理，我们可以选择使用[`'use
+    client'`指令](https://nextjs.org/docs/getting-started/react-essentials#the-use-client-directive)来使用客户端组件。
 - en: '[PRE5]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Initialise the following state variables at the beginning of the `Home` component:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 在`Home`组件的开头初始化以下状态变量：
 - en: '[PRE6]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'and fill in the `onMessageReceived` function to update these variables when
     the worker thread sends a message:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 并填写`onMessageReceived`函数，以在工作线程发送消息时更新这些变量：
 - en: '[PRE7]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Finally, we can add a simple UI to the `Home` component, consisting of an input
     textbox and a preformatted text element to display the classification result:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，我们可以向`Home`组件添加一个简单的UI，包括一个输入文本框和一个预格式化文本元素，用于显示分类结果：
 - en: '[PRE8]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'You can now run your application using the following command:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您可以使用以下命令运行应用程序：
 - en: '[PRE9]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Visit the URL shown in the terminal (e.g., [http://localhost:3000/](http://localhost:3000/))
     to see your application in action!
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 访问终端中显示的URL（例如，[http://localhost:3000/](http://localhost:3000/)）以查看应用程序的运行情况！
 - en: '(Optional) Step 4: Build and deploy'
+  id: totrans-36
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: （可选）步骤4：构建和部署
 - en: 'To build your application, simply run:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 要构建您的应用程序，只需运行：
 - en: '[PRE10]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: This will bundle your application and output the static files to the `out` folder.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将打包您的应用程序并将静态文件输出到`out`文件夹。
 - en: For this demo, we will deploy our application as a static [Hugging Face Space](https://huggingface.co/docs/hub/spaces),
     but you can deploy it anywhere you like! If you haven’t already, you can create
     a free Hugging Face account [here](https://huggingface.co/join).
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于此演示，我们将将应用程序部署为静态[Hugging Face Space](https://huggingface.co/docs/hub/spaces)，但您可以将其部署到任何您喜欢的地方！如果尚未创建免费的Hugging
+    Face帐户，您可以在[此处](https://huggingface.co/join)创建。
 - en: Visit [https://huggingface.co/new-space](https://huggingface.co/new-space) and
     fill in the form. Remember to select “Static” as the space type.
+  id: totrans-41
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 访问[https://huggingface.co/new-space](https://huggingface.co/new-space)并填写表格。记得选择“静态”作为空间类型。
 - en: Click the “Create space” button at the bottom of the page.
+  id: totrans-42
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 点击页面底部的“创建空间”按钮。
 - en: Go to “Files” → “Add file” → “Upload files”. Drag the files from the `out` folder
     into the upload box and click “Upload”. After they have uploaded, scroll down
     to the button and click “Commit changes to main”.
+  id: totrans-43
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 转到“文件”→“添加文件”→“上传文件”。将`out`文件夹中的文件拖到上传框中，然后点击“上传”。上传完成后，向下滚动到按钮处，然后点击“提交更改到主分支”。
 - en: '**That’s it!** Your application should now be live at `https://huggingface.co/spaces/<your-username>/<your-space-name>`!'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '**就是这样！**您的应用现在应该在`https://huggingface.co/spaces/<your-username>/<your-space-name>`上运行！'
 - en: Server-side inference
+  id: totrans-45
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 服务器端推断
 - en: While there are many different ways to perform server-side inference, the simplest
     (which we will discuss in this tutorial) is using the new [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)
     feature.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然有许多不同的方法可以执行服务器端推断，但最简单的方法（我们将在本教程中讨论）是使用新的[路由处理程序](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)功能。
 - en: 'Step 1: Initialise the project'
+  id: totrans-47
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 步骤1：初始化项目
 - en: 'Start by creating a new Next.js application using `create-next-app`:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先使用`create-next-app`创建一个新的Next.js应用程序：
 - en: '[PRE11]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'On installation, you’ll see various prompts. For this demo, we’ll be selecting
     those shown below in bold:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装时，您会看到各种提示。对于此演示，我们将选择下面显示的那些加粗的选项：
 - en: '[PRE12]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'Step 2: Install and configure Transformers.js'
+  id: totrans-52
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 步骤2：安装和配置Transformers.js
 - en: 'You can install Transformers.js from [NPM](https://www.npmjs.com/package/@xenova/transformers)
     with the following command:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用以下命令从[NPM](https://www.npmjs.com/package/@xenova/transformers)安装Transformers.js：
 - en: '[PRE13]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'We also need to update the `next.config.js` file to prevent Webpack from bundling
     certain packages:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还需要更新`next.config.js`文件，以防止Webpack捆绑某些包：
 - en: '[PRE14]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Next, let’s set up our Route Handler. We can do this by creating two files
     in a new `./src/app/classify/` directory:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们设置我们的路由处理程序。我们可以通过在新的`./src/app/classify/`目录中创建两个文件来实现这一点：
 - en: '`pipeline.js` - to handle the construction of our pipeline.'
+  id: totrans-58
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`pipeline.js` - 用于处理我们的流水线构建。'
 - en: '[PRE15]'
+  id: totrans-59
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: '`route.js` - to process requests made to the `/classify` route.'
+  id: totrans-60
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`route.js` - 用于处理发送到`/classify`路由的请求。'
 - en: '[PRE16]'
+  id: totrans-61
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'Step 3: Design the user interface'
+  id: totrans-62
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 步骤3：设计用户界面
 - en: We’ll now modify the default `./src/app/page.js` file to make requests to our
     newly-created Route Handler.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们现在将修改默认的`./src/app/page.js`文件，以向我们新创建的路由处理程序发出请求。
 - en: '[PRE17]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'You can now run your application using the following command:'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 您现在可以使用以下命令运行您的应用程序：
 - en: '[PRE18]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Visit the URL shown in the terminal (e.g., [http://localhost:3000/](http://localhost:3000/))
     to see your application in action!
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 访问终端中显示的URL（例如，[http://localhost:3000/](http://localhost:3000/)）以查看您的应用程序运行情况！
 - en: '(Optional) Step 4: Build and deploy'
+  id: totrans-68
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: （可选）步骤4：构建和部署
 - en: For this demo, we will build and deploy our application to [Hugging Face Spaces](https://huggingface.co/docs/hub/spaces).
     If you haven’t already, you can create a free Hugging Face account [here](https://huggingface.co/join).
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于此演示，我们将构建并部署我们的应用程序到[Hugging Face Spaces](https://huggingface.co/docs/hub/spaces)。如果您还没有，可以在[此处](https://huggingface.co/join)创建一个免费的Hugging
+    Face帐户。
 - en: Create a new `Dockerfile` in your project’s root folder. You can use our [example
     Dockerfile](https://github.com/xenova/transformers.js/blob/main/examples/next-server/Dockerfile)
     as a template.
+  id: totrans-70
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在项目的根目录中创建一个新的`Dockerfile`。您可以使用我们的[示例Dockerfile](https://github.com/xenova/transformers.js/blob/main/examples/next-server/Dockerfile)作为模板。
 - en: Visit [https://huggingface.co/new-space](https://huggingface.co/new-space) and
     fill in the form. Remember to select “Docker” as the space type (you can choose
     the “Blank” Docker template).
+  id: totrans-71
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 访问[https://huggingface.co/new-space](https://huggingface.co/new-space)并填写表格。记得选择“Docker”作为空间类型（您可以选择“空白”Docker模板）。
 - en: Click the “Create space” button at the bottom of the page.
+  id: totrans-72
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 点击页面底部的“创建空间”按钮。
 - en: Go to “Files” → “Add file” → “Upload files”. Drag the files from your project
     folder (excluding `node_modules` and `.next`, if present) into the upload box
     and click “Upload”. After they have uploaded, scroll down to the button and click
     “Commit changes to main”.
+  id: totrans-73
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 转到“文件”→“添加文件”→“上传文件”。将项目文件夹中的文件（如果存在，则不包括`node_modules`和`.next`）拖到上传框中，然后点击“上传”。上传完成后，向下滚动到按钮处，然后点击“提交更改到主分支”。
 - en: 'Add the following lines to the top of your `README.md`:'
+  id: totrans-74
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将以下行添加到您的`README.md`的顶部：
 - en: '[PRE19]'
+  id: totrans-75
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: '**That’s it!** Your application should now be live at `https://huggingface.co/spaces/<your-username>/<your-space-name>`!'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: '**就是这样！**您的应用现在应该在`https://huggingface.co/spaces/<your-username>/<your-space-name>`上运行！'

@@ -1,219 +1,312 @@
 - en: Server-side Inference in Node.js
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Node.js中的服务器端推断
 - en: 'Original text: [https://huggingface.co/docs/transformers.js/tutorials/node](https://huggingface.co/docs/transformers.js/tutorials/node)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers.js/tutorials/node](https://huggingface.co/docs/transformers.js/tutorials/node)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Although Transformers.js was originally designed to be used in the browser,
     it’s also able to run inference on the server. In this tutorial, we will design
     a simple Node.js API that uses Transformers.js for sentiment analysis.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管Transformers.js最初设计用于在浏览器中使用，但它也能够在服务器上运行推断。在本教程中，我们将设计一个简单的Node.js API，该API使用Transformers.js进行情感分析。
 - en: 'We’ll also show you how to use the library in both CommonJS and ECMAScript
     modules, so you can choose the module system that works best for your project:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还将向您展示如何在CommonJS和ECMAScript模块中使用该库，因此您可以选择最适合您项目的模块系统：
 - en: '[ECMAScript modules (ESM)](#ecmascript-modules-esm) - The official standard
     format to package JavaScript code for reuse. It’s the default module system in
     modern browsers, with modules imported using `import` and exported using `export`.
     Fortunately, starting with version 13.2.0, Node.js has stable support of ES modules.'
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[ECMAScript模块（ESM）](#ecmascript-modules-esm) - 用于打包JavaScript代码以供重用的官方标准格式。这是现代浏览器中的默认模块系统，使用`import`导入模块并使用`export`导出模块。幸运的是，从版本13.2.0开始，Node.js稳定支持ES模块。'
 - en: '[CommonJS](#commonjs) - The default module system in Node.js. In this system,
     modules are imported using `require()` and exported using `module.exports`.'
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[CommonJS](#commonjs) - Node.js中的默认模块系统。在此系统中，使用`require()`导入模块，并使用`module.exports`导出模块。'
 - en: Although you can always use the [Python library](https://github.com/huggingface/transformers)
     for server-side inference, using Transformers.js means that you can write all
     of your code in JavaScript (instead of having to set up and communicate with a
     separate Python process).
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管您始终可以使用[Python库](https://github.com/huggingface/transformers)进行服务器端推断，但使用Transformers.js意味着您可以将所有代码都写在JavaScript中（而不必设置和与单独的Python进程通信）。
 - en: '**Useful links:**'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '**有用的链接：**'
 - en: Source code ([ESM](https://github.com/xenova/transformers.js/tree/main/examples/node/esm/app.js)
     or [CommonJS](https://github.com/xenova/transformers.js/tree/main/examples/node/commonjs/app.js))
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 源代码（[ESM](https://github.com/xenova/transformers.js/tree/main/examples/node/esm/app.js)或[CommonJS](https://github.com/xenova/transformers.js/tree/main/examples/node/commonjs/app.js)）
 - en: '[Documentation](https://huggingface.co/docs/transformers.js)'
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[文档](https://huggingface.co/docs/transformers.js)'
 - en: Prerequisites
+  id: totrans-11
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 先决条件
 - en: '[Node.js](https://nodejs.org/en/) version 18+'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Node.js](https://nodejs.org/en/)版本18+'
 - en: '[npm](https://www.npmjs.com/) version 9+'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[npm](https://www.npmjs.com/)版本9+'
 - en: Getting started
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 入门指南
 - en: 'Let’s start by creating a new Node.js project and installing Transformers.js
     via [NPM](https://www.npmjs.com/package/@xenova/transformers):'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们首先创建一个新的Node.js项目，并通过[NPM](https://www.npmjs.com/package/@xenova/transformers)安装Transformers.js：
 - en: '[PRE0]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Next, create a new file called `app.js`, which will be the entry point for our
     application. Depending on whether you’re using [ECMAScript modules](#ecmascript-modules-esm)
     or [CommonJS](#commonjs), you will need to do some things differently (see below).
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，创建一个名为`app.js`的新文件，这将是我们应用程序的入口点。根据您是使用[ECMAScript模块](#ecmascript-modules-esm)还是[CommonJS](#commonjs)，您需要做一些不同的事情（见下文）。
 - en: 'We’ll also create a helper class called `MyClassificationPipeline` control
     the loading of the pipeline. It uses the [singleton pattern](https://en.wikipedia.org/wiki/Singleton_pattern)
     to lazily create a single instance of the pipeline when `getInstance` is first
     called, and uses this pipeline for all subsequent calls:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还将创建一个名为`MyClassificationPipeline`的辅助类来控制管道的加载。它使用[单例模式](https://en.wikipedia.org/wiki/Singleton_pattern)来在首次调用`getInstance`时懒惰地创建管道的单个实例，并在随后的所有调用中使用此管道：
 - en: ECMAScript modules (ESM)
+  id: totrans-19
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: ECMAScript模块（ESM）
 - en: 'To indicate that your project uses ECMAScript modules, you need to add `"type":
     "module"` to your `package.json`:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '为了指示您的项目使用ECMAScript模块，您需要将`"type": "module"`添加到您的`package.json`中：'
 - en: '[PRE1]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Next, you will need to add the following imports to the top of `app.js`:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您需要将以下导入添加到`app.js`的顶部：
 - en: '[PRE2]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Following that, let’s import Transformers.js and define the `MyClassificationPipeline`
     class.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们导入Transformers.js并定义`MyClassificationPipeline`类。
 - en: '[PRE3]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: CommonJS
+  id: totrans-26
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: CommonJS
 - en: 'Start by adding the following imports to the top of `app.js`:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，在`app.js`的顶部添加以下导入：
 - en: '[PRE4]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Following that, let’s import Transformers.js and define the `MyClassificationPipeline`
     class. Since Transformers.js is an ESM module, we will need to dynamically import
     the library using the [`import()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import)
     function:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们导入Transformers.js并定义`MyClassificationPipeline`类。由于Transformers.js是一个ESM模块，我们将需要使用[`import()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import)函数动态导入库：
 - en: '[PRE5]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Creating a basic HTTP server
+  id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建一个基本的HTTP服务器
 - en: Next, let’s create a basic server with the built-in [HTTP](https://nodejs.org/api/http.html#http)
     module. We will listen for requests made to the server (using the `/classify`
     endpoint), extract the `text` query parameter, and run this through the pipeline.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们使用内置的[HTTP](https://nodejs.org/api/http.html#http)模块创建一个基本服务器。我们将监听发送到服务器的请求（使用`/classify`端点），提取`text`查询参数，并通过管道运行此参数。
 - en: '[PRE6]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Since we use lazy loading, the first request made to the server will also be
     responsible for loading the pipeline. If you would like to begin loading the pipeline
     as soon as the server starts running, you can add the following line of code after
     defining `MyClassificationPipeline`:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于我们使用延迟加载，第一次向服务器发出的请求也将负责加载管道。如果您希望在服务器启动运行时立即开始加载管道，可以在定义`MyClassificationPipeline`后添加以下代码行：
 - en: '[PRE7]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'To start the server, run the following command:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 要启动服务器，请运行以下命令：
 - en: '[PRE8]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'The server should be live at [http://127.0.0.1:3000/](http://127.0.0.1:3000/),
     which you can visit in your web browser. You should see the following message:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 服务器应该在[http://127.0.0.1:3000/](http://127.0.0.1:3000/)上运行，您可以在Web浏览器中访问。您应该看到以下消息：
 - en: '[PRE9]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'This is because we aren’t targeting the `/classify` endpoint with a valid `text`
     query parameter. Let’s try again, this time with a valid request. For example,
     you can visit [http://127.0.0.1:3000/classify?text=I%20love%20Transformers.js](http://127.0.0.1:3000/classify?text=I%20love%20Transformers.js)
     and you should see:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是因为我们没有使用有效的`text`查询参数来定位`/classify`端点。让我们再试一次，这次使用有效的请求。例如，您可以访问[http://127.0.0.1:3000/classify?text=I%20love%20Transformers.js](http://127.0.0.1:3000/classify?text=I%20love%20Transformers.js)，您应该会看到：
 - en: '[PRE10]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Great! We’ve successfully created a basic HTTP server that uses Transformers.js
     to classify text.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 太棒了！我们已成功创建了一个使用Transformers.js对文本进行分类的基本HTTP服务器。
 - en: (Optional) Customization
+  id: totrans-43
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: （可选）自定义
 - en: Model caching
+  id: totrans-44
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 模型缓存
 - en: 'By default, the first time you run the application, it will download the model
     files and cache them on your file system (in `./node_modules/@xenova/transformers/.cache/`).
     All subsequent requests will then use this model. You can change the location
     of the cache by setting `env.cacheDir`. For example, to cache the model in the
     `.cache` directory in the current working directory, you can add:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，第一次运行应用程序时，它将下载模型文件并将它们缓存在您的文件系统上（在`./node_modules/@xenova/transformers/.cache/`中）。然后所有后续请求将使用这个模型。您可以通过设置`env.cacheDir`来更改缓存位置。例如，要在当前工作目录中的`.cache`目录中缓存模型，您可以添加：
 - en: '[PRE11]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Use local models
+  id: totrans-47
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用本地模型
 - en: 'If you want to use local model files, you can set `env.localModelPath` as follows:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想使用本地模型文件，可以设置`env.localModelPath`如下：
 - en: '[PRE12]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'You can also disable loading of remote models by setting `env.allowRemoteModels`
     to `false`:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以通过将`env.allowRemoteModels`设置为`false`来禁用加载远程模型：
 - en: '[PRE13]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
