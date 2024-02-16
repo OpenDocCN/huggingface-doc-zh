@@ -1,221 +1,310 @@
 - en: Debugging
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 调试
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/debugging](https://huggingface.co/docs/transformers/v4.37.2/en/debugging)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/debugging](https://huggingface.co/docs/transformers/v4.37.2/en/debugging)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Training on multiple GPUs can be a tricky endeavor whether you’re running into
     installation issues or communication problems between your GPUs. This debugging
     guide covers some issues you may run into and how to resolve them.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在多个GPU上进行训练可能是一个棘手的任务，无论是遇到安装问题还是GPU之间的通信问题。这个调试指南涵盖了一些可能遇到的问题以及如何解决它们。
 - en: DeepSpeed CUDA installation
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DeepSpeed CUDA安装
 - en: If you’re using DeepSpeed, you’ve probably already installed it with the following
     command.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在使用DeepSpeed，您可能已经使用以下命令安装了它。
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: DeepSpeed compiles CUDA C++ code and it can be a potential source of errors
     when building PyTorch extensions that require CUDA. These errors depend on how
     CUDA is installed on your system, and this section focuses on PyTorch built with
     *CUDA 10.2*.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: DeepSpeed编译CUDA C++代码，当构建需要CUDA的PyTorch扩展时，这可能是错误的潜在来源。这些错误取决于CUDA在您的系统上的安装方式，本节重点介绍了使用*
+    CUDA 10.2 *构建的PyTorch。
 - en: For any other installation issues, please [open an issue](https://github.com/microsoft/DeepSpeed/issues)
     with the DeepSpeed team.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于任何其他安装问题，请[提出问题](https://github.com/microsoft/DeepSpeed/issues)给DeepSpeed团队。
 - en: Non-identical CUDA toolkits
+  id: totrans-9
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 不同的CUDA工具包
 - en: PyTorch comes with its own CUDA toolkit, but to use DeepSpeed with PyTorch,
     you need to have an identical version of CUDA installed system-wide. For example,
     if you installed PyTorch with `cudatoolkit==10.2` in your Python environment,
     then you’ll also need to have CUDA 10.2 installed system-wide. If you don’t have
     CUDA installed system-wide, you should install it first.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: PyTorch自带其自己的CUDA工具包，但要使用DeepSpeed与PyTorch，您需要在整个系统中安装相同版本的CUDA。例如，如果您在Python环境中安装了`cudatoolkit==10.2`的PyTorch，则您还需要在整个系统中安装CUDA
+    10.2。如果您的系统中没有安装CUDA，则应首先安装它。
 - en: 'The exact location may vary from system to system, but `usr/local/cuda-10.2`
     is the most common location on many Unix systems. When CUDA is correctly setup
     and added to your `PATH` environment variable, you can find the installation location
     with the following command:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 确切的位置可能因系统而异，但在许多Unix系统上，`usr/local/cuda-10.2`是最常见的位置。当CUDA正确设置并添加到您的`PATH`环境变量时，您可以使用以下命令找到安装位置：
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Multiple CUDA toolkits
+  id: totrans-13
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 多个CUDA工具包
 - en: You may also have more than one CUDA toolkit installed system-wide.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 您的系统中可能安装了多个CUDA工具包。
 - en: '[PRE2]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Typically, package installers set the paths to whatever the last version was
     installed. If the package build fails because it can’t find the right CUDA version
     (despite it being installed system-wide already), then you need to configure the
     `PATH` and `LD_LIBRARY_PATH` environment variables to point to the correct path.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，软件包安装程序会将路径设置为最后安装的版本。如果软件包构建失败，因为找不到正确的CUDA版本（尽管它已经在整个系统中安装），则需要配置`PATH`和`LD_LIBRARY_PATH`环境变量以指向正确的路径。
 - en: 'Take a look at the contents of these environment variables first:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先查看这些环境变量的内容：
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '`PATH` lists the locations of the executables and `LD_LIBRARY_PATH` lists where
     to look for shared libraries. Earlier entries are prioritized over later ones,
     and `:` is used to separate multiple entries. To tell the build program where
     to find the specific CUDA toolkit you want, insert the correct path to list first.
     This command prepends rather than overwrites the existing values.'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PATH`列出了可执行文件的位置，`LD_LIBRARY_PATH`列出了共享库的查找位置。较早的条目优先于后续的条目，`:`用于分隔多个条目。为了告诉构建程序要找到您想要的特定CUDA工具包，插入正确的路径以首先列出。此命令在现有值之前而不是覆盖现有值。'
 - en: '[PRE4]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: In addition, you should also check the directories you assign actually exist.
     The `lib64` sub-directory contains various CUDA `.so` objects (like `libcudart.so`)
     and while it is unlikely your system names them differently, you should check
     the actual names and change them accordingly.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，您还应检查您分配的目录是否实际存在。`lib64`子目录包含各种CUDA`.so`对象（如`libcudart.so`），虽然您的系统不太可能以不同的名称命名它们，但您应检查实际名称并相应更改。
 - en: Older CUDA versions
+  id: totrans-22
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 较旧的CUDA版本
 - en: Sometimes, older CUDA versions may refuse to build with newer compilers. For
     example, if you have `gcc-9` but CUDA wants `gcc-7`. Usually, installing the latest
     CUDA toolkit enables support for the newer compiler.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时，较旧的CUDA版本可能拒绝与更新的编译器一起构建。例如，如果您有`gcc-9`但CUDA需要`gcc-7`。通常，安装最新的CUDA工具包可以支持更新的编译器。
 - en: You could also install an older version of the compiler in addition to the one
     you’re currently using (or it may already be installed but it’s not used by default
     and the build system can’t see it). To resolve this, you can create a symlink
     to give the build system visibility to the older compiler.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以安装一个较旧版本的编译器，以及您当前使用的一个（或者可能已经安装，但默认情况下未使用，构建系统无法看到）。要解决此问题，您可以创建一个符号链接，以便构建系统能够看到较旧的编译器。
 - en: '[PRE5]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Multi-GPU Network Issues Debug
+  id: totrans-26
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 多GPU网络问题调试
 - en: When training or inferencing with `DistributedDataParallel` and multiple GPU,
     if you run into issue of inter-communication between processes and/or nodes, you
     can use the following script to diagnose network issues.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 当使用`DistributedDataParallel`和多个GPU进行训练或推理时，如果遇到进程和/或节点之间的互通问题，您可以使用以下脚本来诊断网络问题。
 - en: '[PRE6]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'For example to test how 2 GPUs interact do:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要测试2个GPU如何交互，请执行：
 - en: '[PRE7]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: If both processes can talk to each and allocate GPU memory each will print an
     OK status.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果两个进程都可以相互通信并分配GPU内存，每个进程都将打印OK状态。
 - en: For more GPUs or nodes adjust the arguments in the script.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于更多的GPU或节点，请调整脚本中的参数。
 - en: You will find a lot more details inside the diagnostics script and even a recipe
     to how you could run it in a SLURM environment.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将在诊断脚本中找到更多详细信息，甚至可以了解如何在SLURM环境中运行它的方法。
 - en: 'An additional level of debug is to add `NCCL_DEBUG=INFO` environment variable
     as follows:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个调试级别是添加`NCCL_DEBUG=INFO`环境变量如下：
 - en: '[PRE8]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: This will dump a lot of NCCL-related debug information, which you can then search
     online if you find that some problems are reported. Or if you’re not sure how
     to interpret the output you can share the log file in an Issue.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将输出大量与NCCL相关的调试信息，如果发现有问题报告，您可以在网上搜索。或者如果您不确定如何解释输出，可以在Issue中分享日志文件。
 - en: Underflow and Overflow Detection
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下溢和溢出检测
 - en: This feature is currently available for PyTorch-only.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 此功能目前仅适用于PyTorch。
 - en: For multi-GPU training it requires DDP (`torch.distributed.launch`).
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于多GPU训练，需要DDP（`torch.distributed.launch`）。
 - en: This feature can be used with any `nn.Module`-based model.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 此功能可与任何基于`nn.Module`的模型一起使用。
 - en: If you start getting `loss=NaN` or the model inhibits some other abnormal behavior
     due to `inf` or `nan` in activations or weights one needs to discover where the
     first underflow or overflow happens and what led to it. Luckily you can accomplish
     that easily by activating a special module that will do the detection automatically.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果开始出现`loss=NaN`或模型由于激活或权重中的`inf`或`nan`而表现出其他异常行为，需要找出第一个下溢或溢出发生的位置以及导致其发生的原因。幸运的是，您可以通过激活一个特殊模块来轻松实现自动检测。
 - en: 'If you’re using [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer),
     you just need to add:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在使用[Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)，您只需要添加：
 - en: '[PRE9]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: to the normal command line arguments, or pass `debug="underflow_overflow"` when
     creating the [TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)
     object.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了正常的命令行参数外，在创建[TrainingArguments](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.TrainingArguments)对象时，也可以传递`debug="underflow_overflow"`。
 - en: 'If you’re using your own training loop or another Trainer you can accomplish
     the same with:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在使用自己的训练循环或另一个Trainer，可以通过以下方式实现相同的效果：
 - en: '[PRE10]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '[DebugUnderflowOverflow](/docs/transformers/v4.37.2/en/internal/trainer_utils#transformers.debug_utils.DebugUnderflowOverflow)
     inserts hooks into the model that immediately after each forward call will test
     input and output variables and also the corresponding module’s weights. As soon
     as `inf` or `nan` is detected in at least one element of the activations or weights,
     the program will assert and print a report like this (this was caught with `google/mt5-small`
     under fp16 mixed precision):'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DebugUnderflowOverflow](/docs/transformers/v4.37.2/en/internal/trainer_utils#transformers.debug_utils.DebugUnderflowOverflow)会在模型中插入钩子，每次前向调用后立即测试输入和输出变量以及相应模块的权重。一旦在激活或权重的至少一个元素中检测到`inf`或`nan`，程序将断言并打印类似于这样的报告（这是在fp16混合精度下使用`google/mt5-small`捕获的）。'
 - en: '[PRE11]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: The example output has been trimmed in the middle for brevity.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例输出已经为简洁起见进行了修剪。
 - en: The second column shows the value of the absolute largest element, so if you
     have a closer look at the last few frames, the inputs and outputs were in the
     range of `1e4`. So when this training was done under fp16 mixed precision the
@@ -223,140 +312,207 @@
     is `64e3`). To avoid overflows under `fp16` the activations must remain way below
     `1e4`, because `1e4 * 1e4 = 1e8` so any matrix multiplication with large activations
     is going to lead to a numerical overflow condition.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二列显示了绝对最大元素的值，因此如果您仔细查看最后几个帧，输入和输出的范围在`1e4`。因此，当此训练在fp16混合精度下进行时，最后一步发生了溢出（因为在`fp16`下，在`inf`之前的最大数字是`64e3`）。为了避免在`fp16`下发生溢出，激活必须保持远低于`1e4`，因为`1e4
+    * 1e4 = 1e8`，因此任何具有大激活的矩阵乘法都将导致数值溢出条件。
 - en: At the very start of the trace you can discover at which batch number the problem
     occurred (here `Detected inf/nan during batch_number=0` means the problem occurred
     on the first batch).
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 在跟踪的最开始，您可以发现问题发生在哪个批次号（这里`Detected inf/nan during batch_number=0`表示问题发生在第一个批次）。
 - en: 'Each reported frame starts by declaring the fully qualified entry for the corresponding
     module this frame is reporting for. If we look just at this frame:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个报告的帧都以声明相应模块的完全限定条目开头。如果我们只看这个帧：
 - en: '[PRE12]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Here, `encoder.block.2.layer.1.layer_norm` indicates that it was a layer norm
     for the first layer, of the second block of the encoder. And the specific calls
     of the `forward` is `T5LayerNorm`.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，`encoder.block.2.layer.1.layer_norm`表示它是编码器第二块的第一层的层归一化。而`forward`的具体调用是`T5LayerNorm`。
 - en: 'Let’s look at the last few frames of that report:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一下报告的最后几个帧：
 - en: '[PRE13]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: The last frame reports for `Dropout.forward` function with the first entry for
     the only input and the second for the only output. You can see that it was called
     from an attribute `dropout` inside `DenseReluDense` class. We can see that it
     happened during the first layer, of the 2nd block, during the very first batch.
     Finally, the absolute largest input elements was `6.27e+04` and same for the output
     was `inf`.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后一个帧报告了`Dropout.forward`函数，第一个条目是唯一输入，第二个是唯一输出。您可以看到它是从`DenseReluDense`类内部的`dropout`属性调用的。我们可以看到它发生在第二块的第一层，在第一个批次期间。最后，绝对最大的输入元素是`6.27e+04`，输出也是`inf`。
 - en: You can see here, that `T5DenseGatedGeluDense.forward` resulted in output activations,
     whose absolute max value was around 62.7K, which is very close to fp16’s top limit
     of 64K. In the next frame we have `Dropout` which renormalizes the weights, after
     it zeroed some of the elements, which pushes the absolute max value to more than
     64K, and we get an overflow (`inf`).
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在这里看到，`T5DenseGatedGeluDense.forward`的输出激活结果，其绝对最大值约为62.7K，非常接近fp16的64K顶限。在下一个帧中，我们有`Dropout`，它在将一些元素归零后重新归一化权重，将绝对最大值推到超过64K，导致溢出（`inf`）。
 - en: As you can see it’s the previous frames that we need to look into when the numbers
     start going into very large for fp16 numbers.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，当数字开始变得非常大时，我们需要查看前面的帧以了解情况。
 - en: 'Let’s match the report to the code from `models/t5/modeling_t5.py`:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们将报告与`models/t5/modeling_t5.py`中的代码进行匹配：
 - en: '[PRE14]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Now it’s easy to see the `dropout` call, and all the previous calls as well.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在很容易看到`dropout`调用以及所有先前的调用。
 - en: Since the detection is happening in a forward hook, these reports are printed
     immediately after each `forward` returns.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于检测发生在前向挂钩中，这些报告将在每个`forward`返回后立即打印。
 - en: 'Going back to the full report, to act on it and to fix the problem, we need
     to go a few frames up where the numbers started to go up and most likely switch
     to the `fp32` mode here, so that the numbers don’t overflow when multiplied or
     summed up. Of course, there might be other solutions. For example, we could turn
     off `amp` temporarily if it’s enabled, after moving the original `forward` into
     a helper wrapper, like so:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 回到完整报告，要对其进行操作并解决问题，我们需要向上移动几帧，找到数字开始增加的地方，并且很可能在这里切换到`fp32`模式，以便在乘法或求和时数字不会溢出。当然，可能还有其他解决方案。例如，我们可以在将原始`forward`移入辅助包装器后，暂时关闭`amp`，如下所示：
 - en: '[PRE15]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'Since the automatic detector only reports on inputs and outputs of full frames,
     once you know where to look, you may want to analyse the intermediary stages of
     any specific `forward` function as well. In such a case you can use the `detect_overflow`
     helper function to inject the detector where you want it, for example:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于自动检测器仅报告完整帧的输入和输出，一旦您知道要查找的位置，您可能还想分析任何特定`forward`函数的中间阶段。在这种情况下，您可以使用`detect_overflow`辅助函数将检测器注入到您想要的位置，例如：
 - en: '[PRE16]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: You can see that we added 2 of these and now we track if `inf` or `nan` for
     `forwarded_states` was detected somewhere in between.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以看到我们添加了2个这样的内容，现在我们跟踪`forwarded_states`中是否在中间某处检测到了`inf`或`nan`。
 - en: Actually, the detector already reports these because each of the calls in the
     example above is a `nn.Module`, but let’s say if you had some local direct calculations
     this is how you’d do that.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 实际上，检测器已经报告了这些，因为上面示例中的每个调用都是一个`nn.Module`，但是假设如果您有一些本地直接计算，这就是您将如何执行的方式。
 - en: 'Additionally, if you’re instantiating the debugger in your own code, you can
     adjust the number of frames printed from its default, e.g.:'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，如果您在自己的代码中实例化调试器，您可以调整从默认值打印的帧数，例如：
 - en: '[PRE17]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Specific batch absolute min and max value tracing
+  id: totrans-72
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 特定批次的绝对最小值和最大值跟踪
 - en: The same debugging class can be used for per-batch tracing with the underflow/overflow
     detection feature turned off.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 相同的调试类可以用于关闭下溢/溢出检测功能的每批次跟踪。
 - en: 'Let’s say you want to watch the absolute min and max values for all the ingredients
     of each `forward` call of a given batch, and only do that for batches 1 and 3\.
     Then you instantiate this class as:'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您想要观察给定批次的每个`forward`调用的所有成分的绝对最小值和最大值，并且仅对批次1和3执行此操作。然后，您可以将此类实例化为：
 - en: '[PRE18]'
+  id: totrans-75
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: And now full batches 1 and 3 will be traced using the same format as the underflow/overflow
     detector does.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，完整的批次1和3将使用与下溢/溢出检测器相同的格式进行跟踪。
 - en: Batches are 0-indexed.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 批次是从0开始索引的。
 - en: 'This is helpful if you know that the program starts misbehaving after a certain
     batch number, so you can fast-forward right to that area. Here is a sample truncated
     output for such configuration:'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您知道程序在某个特定批次号之后开始表现不当，那么您可以直接快进到该区域。以下是这种配置的示例截断输出：
 - en: '[PRE19]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Here you will get a huge number of frames dumped - as many as there were forward
     calls in your model, so it may or may not what you want, but sometimes it can
     be easier to use for debugging purposes than a normal debugger. For example, if
     a problem starts happening at batch number 150\. So you can dump traces for batches
     149 and 150 and compare where numbers started to diverge.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，您将获得大量的帧转储 - 与您模型中的前向调用数量一样多，因此可能或可能不是您想要的，但有时它可能比普通调试器更容易用于调试目的。例如，如果问题开始在批次号为150时发生。因此，您可以为批次149和150转储跟踪，并比较数字开始发散的地方。
 - en: 'You can also specify the batch number after which to stop the training, with:'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以指定在哪个批次号之后停止训练，例如：
 - en: '[PRE20]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'

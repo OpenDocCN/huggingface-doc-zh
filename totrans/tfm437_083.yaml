@@ -1,205 +1,279 @@
 - en: XLA Integration for TensorFlow Models
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: TensorFlow模型的XLA集成
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/tf_xla](https://huggingface.co/docs/transformers/v4.37.2/en/tf_xla)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/tf_xla](https://huggingface.co/docs/transformers/v4.37.2/en/tf_xla)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'Accelerated Linear Algebra, dubbed XLA, is a compiler for accelerating the
     runtime of TensorFlow Models. From the [official documentation](https://www.tensorflow.org/xla):'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 加速线性代数，简称XLA，是用于加速TensorFlow模型运行时的编译器。来自[官方文档](https://www.tensorflow.org/xla)：
 - en: XLA (Accelerated Linear Algebra) is a domain-specific compiler for linear algebra
     that can accelerate TensorFlow models with potentially no source code changes.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: XLA（加速线性代数）是一个专门用于线性代数的编译器，可以加速TensorFlow模型，可能不需要源代码更改。
 - en: Using XLA in TensorFlow is simple – it comes packaged inside the `tensorflow`
     library, and it can be triggered with the `jit_compile` argument in any graph-creating
     function such as [`tf.function`](https://www.tensorflow.org/guide/intro_to_graphs).
     When using Keras methods like `fit()` and `predict()`, you can enable XLA simply
     by passing the `jit_compile` argument to `model.compile()`. However, XLA is not
     limited to these methods - it can also be used to accelerate any arbitrary `tf.function`.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 在TensorFlow中使用XLA很简单 - 它已经打包在`tensorflow`库中，并且可以通过任何创建图形函数（例如[`tf.function`](https://www.tensorflow.org/guide/intro_to_graphs)）中的`jit_compile`参数触发。当使用Keras方法如`fit()`和`predict()`时，您可以通过将`jit_compile`参数传递给`model.compile()`来简单启用XLA。但是，XLA不仅限于这些方法
+    - 它还可以用于加速任何任意的`tf.function`。
 - en: Several TensorFlow methods in 🤗 Transformers have been rewritten to be XLA-compatible,
     including text generation for models such as [GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2),
     [T5](https://huggingface.co/docs/transformers/model_doc/t5) and [OPT](https://huggingface.co/docs/transformers/model_doc/opt),
     as well as speech processing for models such as [Whisper](https://huggingface.co/docs/transformers/model_doc/whisper).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Transformers中的几个TensorFlow方法已经重写为与XLA兼容，包括用于模型的文本生成，如[GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2)、[T5](https://huggingface.co/docs/transformers/model_doc/t5)和[OPT](https://huggingface.co/docs/transformers/model_doc/opt)，以及用于语音处理的模型，如[Whisper](https://huggingface.co/docs/transformers/model_doc/whisper)。
 - en: While the exact amount of speed-up is very much model-dependent, for TensorFlow
     text generation models inside 🤗 Transformers, we noticed a speed-up of ~100x.
     This document will explain how you can use XLA for these models to get the maximum
     amount of performance. We’ll also provide links to additional resources if you’re
     interested to learn more about the benchmarks and our design philosophy behind
     the XLA integration.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在🤗 Transformers内部的TensorFlow文本生成模型中，加速的确切数量非常依赖于模型，我们注意到速度提升了约100倍。本文将解释如何在这些模型中使用XLA来获得最大的性能。我们还将提供额外资源的链接，如果您有兴趣了解更多关于基准测试和我们在XLA集成背后的设计理念。
 - en: Running TF functions with XLA
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用XLA运行TF函数
 - en: 'Let us consider the following model in TensorFlow:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们考虑以下TensorFlow模型：
 - en: '[PRE0]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'The above model accepts inputs having a dimension of `(10, )`. We can use the
     model for running a forward pass like so:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述模型接受维度为`(10, )`的输入。我们可以使用该模型来运行前向传递，如下所示：
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'In order to run the forward pass with an XLA-compiled function, we’d need to
     do:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了使用XLA编译函数运行前向传递，我们需要执行以下操作：
 - en: '[PRE2]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'The default `call()` function of the `model` is used for compiling the XLA
     graph. But if there’s any other model function you want to compile into XLA that’s
     also possible with:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '`model`的默认`call()`函数用于编译XLA图。但是，如果有任何其他模型函数您想要编译成XLA，也是可能的，例如：'
 - en: '[PRE3]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Running a TF text generation model with XLA from 🤗 Transformers
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用🤗 Transformers中的XLA运行TF文本生成模型
 - en: 'To enable XLA-accelerated generation within 🤗 Transformers, you need to have
     a recent version of `transformers` installed. You can install it by running:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在🤗 Transformers内启用XLA加速生成，您需要安装最新版本的`transformers`。您可以通过运行以下命令来安装：
 - en: '[PRE4]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'And then you can run the following code:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后您可以运行以下代码：
 - en: '[PRE5]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: As you can notice, enabling XLA on `generate()` is just a single line of code.
     The rest of the code remains unchanged. However, there are a couple of gotchas
     in the above code snippet that are specific to XLA. You need to be aware of those
     to realize the speed-ups that XLA can bring in. We discuss these in the following
     section.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您可以注意到的，在`generate()`上启用XLA只是一行代码。其余代码保持不变。但是，上面代码片段中有一些特定于XLA的注意事项。您需要注意这些才能实现XLA带来的加速。我们将在下一节中讨论这些。
 - en: Gotchas to be aware of
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 需要注意的事项
 - en: When you are executing an XLA-enabled function (like `xla_generate()` above)
     for the first time, it will internally try to infer the computation graph, which
     is time-consuming. This process is known as [“tracing”](https://www.tensorflow.org/guide/intro_to_graphs#when_is_a_function_tracing).
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您首次执行启用XLA的函数（如上面的`xla_generate()`）时，它将内部尝试推断计算图，这是耗时的。这个过程被称为[“跟踪”](https://www.tensorflow.org/guide/intro_to_graphs#when_is_a_function_tracing)。
 - en: You might notice that the generation time is not fast. Successive calls of `xla_generate()`
     (or any other XLA-enabled function) won’t have to infer the computation graph,
     given the inputs to the function follow the same shape with which the computation
     graph was initially built. While this is not a problem for modalities with fixed
     input shapes (e.g., images), you must pay attention if you are working with variable
     input shape modalities (e.g., text).
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能会注意到生成时间不够快。连续调用`xla_generate()`（或任何其他启用XLA的函数）不需要推断计算图，只要函数的输入遵循最初构建计算图时的相同形状。虽然对于具有固定输入形状的模态（例如图像）这不是问题，但如果您正在处理具有可变输入形状的模态（例如文本），则必须注意。
 - en: To ensure `xla_generate()` always operates with the same input shapes, you can
     specify the `padding` arguments when calling the tokenizer.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了确保`xla_generate()`始终使用相同的输入形状，您可以在调用分词器时指定`padding`参数。
 - en: '[PRE6]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'This way, you can ensure that the inputs to `xla_generate()` will always receive
     inputs with the shape it was traced with and thus leading to speed-ups in the
     generation time. You can verify this with the code below:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样，您可以确保`xla_generate()`的输入始终接收与其跟踪时相同形状的输入，从而加快生成时间。您可以使用下面的代码进行验证：
 - en: '[PRE7]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'On a Tesla T4 GPU, you can expect the outputs like so:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Tesla T4 GPU上，您可以期望输出如下：
 - en: '[PRE8]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The first call to `xla_generate()` is time-consuming because of tracing, but
     the successive calls are orders of magnitude faster. Keep in mind that any change
     in the generation options at any point with trigger re-tracing and thus leading
     to slow-downs in the generation time.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一次调用`xla_generate()`由于跟踪而耗时，但后续调用速度快得多。请记住，任何时候对生成选项进行更改都会触发重新跟踪，从而导致生成时间变慢。
 - en: We didn’t cover all the text generation options 🤗 Transformers provides in this
     document. We encourage you to read the documentation for advanced use cases.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们没有在本文档中涵盖🤗 Transformers提供的所有文本生成选项。我们鼓励您阅读高级用例的文档。
 - en: Additional Resources
+  id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 额外资源
 - en: Here, we leave you with some additional resources if you want to delve deeper
     into XLA in 🤗 Transformers and in general.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，如果您想深入了解🤗 Transformers中的XLA和一般情况下的XLA，我们为您提供了一些额外资源。
 - en: '[This Colab Notebook](https://colab.research.google.com/github/huggingface/blog/blob/main/notebooks/91_tf_xla_generate.ipynb)
     provides an interactive demonstration if you want to fiddle with the XLA-compatible
     encoder-decoder (like [T5](https://huggingface.co/docs/transformers/model_doc/t5))
     and decoder-only (like [GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2))
     text generation models.'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[这个Colab笔记本](https://colab.research.google.com/github/huggingface/blog/blob/main/notebooks/91_tf_xla_generate.ipynb)提供了一个交互式演示，如果您想要尝试XLA兼容的编码器-解码器（如[T5](https://huggingface.co/docs/transformers/model_doc/t5)）和仅解码器（如[GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2)）文本生成模型。'
 - en: '[This blog post](https://huggingface.co/blog/tf-xla-generate) provides an overview
     of the comparison benchmarks for XLA-compatible models along with a friendly introduction
     to XLA in TensorFlow.'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[这篇博客文章](https://huggingface.co/blog/tf-xla-generate)提供了XLA兼容模型的比较基准概述，以及对TensorFlow中XLA的友好介绍。'
 - en: '[This blog post](https://blog.tensorflow.org/2022/11/how-hugging-face-improved-text-generation-performance-with-xla.html)
     discusses our design philosophy behind adding XLA support to the TensorFlow models
     in 🤗 Transformers.'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[这篇博客文章](https://blog.tensorflow.org/2022/11/how-hugging-face-improved-text-generation-performance-with-xla.html)讨论了我们在🤗
+    Transformers中为TensorFlow模型添加XLA支持的设计理念。'
 - en: 'Recommended posts for learning more about XLA and TensorFlow graphs in general:'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 学习更多关于XLA和TensorFlow图的推荐帖子：
 - en: '[XLA: Optimizing Compiler for Machine Learning](https://www.tensorflow.org/xla)'
+  id: totrans-40
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[XLA：用于机器学习的优化编译器](https://www.tensorflow.org/xla)'
 - en: '[Introduction to graphs and tf.function](https://www.tensorflow.org/guide/intro_to_graphs)'
+  id: totrans-41
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[图形和tf.function简介](https://www.tensorflow.org/guide/intro_to_graphs)'
 - en: '[Better performance with tf.function](https://www.tensorflow.org/guide/function)'
+  id: totrans-42
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[使用tf.function获得更好的性能](https://www.tensorflow.org/guide/function)'
