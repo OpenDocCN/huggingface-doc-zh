@@ -1414,6 +1414,9 @@
   id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Transformers 实现和原始模型实现很可能不会在第一次给出完全相同的输出，或者前向传递会出错。不要失望 - 这是预期的！首先，您应该确保前向传递不会出错。经常发生使用了错误的维度导致
+    *维度不匹配* 错误，或者使用了错误的数据类型对象，例如 `torch.long` 而不是 `torch.float32`。如果您无法解决某些错误，请毫不犹豫地向
+    Hugging Face 团队寻求帮助。
 - en: 'The final part to make sure the 🤗 Transformers implementation works correctly
     is to ensure that the outputs are equivalent to a precision of `1e-3`. First,
     you should ensure that the output shapes are identical, *i.e.* `outputs.shape`
@@ -1424,23 +1427,28 @@
   id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保 🤗 Transformers 实现正确工作的最后一部分是确保输出精度达到 `1e-3`。首先，您应该确保输出形状相同，即脚本的 `outputs.shape`
+    应该对 🤗 Transformers 实现和原始实现产生相同的值。接下来，您应该确保输出值也相同。这是添加新模型中最困难的部分之一。输出不相同的常见错误包括：
 - en: Some layers were not added, *i.e.* an *activation* layer was not added, or the
     residual connection was forgotten
   id: totrans-200
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 某些层未添加，即未添加 *激活* 层，或者遗忘了残差连接。
 - en: The word embedding matrix was not tied
   id: totrans-201
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 单词嵌入矩阵未绑定
 - en: The wrong positional embeddings are used because the original implementation
     uses on offset
   id: totrans-202
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用了错误的位置嵌入，因为原始实现使用了偏移
 - en: Dropout is applied during the forward pass. To fix this make sure *model.training
     is False* and that no dropout layer is falsely activated during the forward pass,
     *i.e.* pass *self.training* to [PyTorch’s functional dropout](https://pytorch.org/docs/stable/nn.functional.html?highlight=dropout#torch.nn.functional.dropout)
@@ -1448,6 +1456,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在前向传递期间应用了辍学。要修复此问题，请确保 *model.training 为 False*，并且在前向传递期间不会误激活任何辍学层，即将 *self.training*
+    传递给 [PyTorch 的功能性辍学](https://pytorch.org/docs/stable/nn.functional.html?highlight=dropout#torch.nn.functional.dropout)
 - en: The best way to fix the problem is usually to look at the forward pass of the
     original implementation and the 🤗 Transformers implementation side-by-side and
     check if there are any differences. Ideally, you should debug/print out intermediate
@@ -1466,6 +1476,10 @@
   id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常修复问题的最佳方法是同时查看原始实现和 🤗 Transformers 实现的前向传递，并检查是否有任何差异。理想情况下，您应该调试/打印出两个实现的前向传递的中间输出，以找到
+    🤗 Transformers 实现显示与原始实现不同输出的网络中的确切位置。首先，确保两个脚本中硬编码的 `input_ids` 是相同的。接下来，验证 `input_ids`
+    的第一个转换的输出（通常是单词嵌入）是否相同。然后逐层向网络的最后一层工作。在某个时候，您会注意到两个实现之间的差异，这应该指向 🤗 Transformers
+    实现中的错误。根据我们的经验，一个简单而有效的方法是在原始实现和 🤗 Transformers 实现中的相同位置分别添加许多打印语句，并逐步删除显示中间表示值相同的打印语句。
 - en: When you’re confident that both implementations yield the same output, verify
     the outputs with `torch.allclose(original_output, output, atol=1e-3)`, you’re
     done with the most difficult part! Congratulations - the work left to be done
@@ -1473,10 +1487,13 @@
   id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您确信两个实现产生相同输出时，使用 `torch.allclose(original_output, output, atol=1e-3)` 验证输出，您已经完成了最困难的部分！恭喜
+    - 剩下的工作应该很轻松 😊。
 - en: '**8\. Adding all necessary model tests**'
   id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: '**8\. 添加所有必要的模型测试**'
 - en: 'At this point, you have successfully added a new model. However, it is very
     much possible that the model does not yet fully comply with the required design.
     To make sure, the implementation is fully compatible with 🤗 Transformers, all
@@ -1486,6 +1503,9 @@
   id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这一点上，您已成功添加了一个新模型。但是，很可能该模型尚未完全符合所需的设计。为确保实现与 🤗 Transformers 完全兼容，所有常见测试都应该通过。Cookiecutter
+    应该已自动为您的模型添加了一个测试文件，可能位于相同的 `tests/models/brand_new_bert/test_modeling_brand_new_bert.py`
+    下。运行此测试文件以验证所有常见测试是否通过：
 - en: '[PRE27]'
   id: totrans-208
   prefs: []
@@ -1496,18 +1516,21 @@
   id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 在修复所有常见测试后，现在至关重要的是确保您所做的所有工作都经过了充分测试，以便
 - en: a) The community can easily understand your work by looking at specific tests
     of *brand_new_bert*
   id: totrans-210
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: a) 社区可以通过查看 *brand_new_bert* 的特定测试轻松理解您的工作
 - en: b) Future changes to your model will not break any important feature of the
     model.
   id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: b) 对模型的未来更改不会破坏模型的任何重要功能。
 - en: At first, integration tests should be added. Those integration tests essentially
     do the same as the debugging scripts you used earlier to implement the model to
     🤗 Transformers. A template of those model tests has already added by the Cookiecutter,

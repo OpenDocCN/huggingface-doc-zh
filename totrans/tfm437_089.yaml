@@ -1,210 +1,289 @@
 - en: How to create a custom pipeline?
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 如何创建自定义管道？
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/add_new_pipeline](https://huggingface.co/docs/transformers/v4.37.2/en/add_new_pipeline)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/add_new_pipeline](https://huggingface.co/docs/transformers/v4.37.2/en/add_new_pipeline)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: In this guide, we will see how to create a custom pipeline and share it on the
     [Hub](https://hf.co/models) or add it to the 🤗 Transformers library.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，我们将看到如何创建自定义管道并在[Hub](https://hf.co/models)上共享它或将其添加到🤗 Transformers库中。
 - en: First and foremost, you need to decide the raw entries the pipeline will be
     able to take. It can be strings, raw bytes, dictionaries or whatever seems to
     be the most likely desired input. Try to keep these inputs as pure Python as possible
     as it makes compatibility easier (even through other languages via JSON). Those
     will be the `inputs` of the pipeline (`preprocess`).
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，您需要决定管道将能够接受的原始条目。它可以是字符串、原始字节、字典或任何看起来最有可能的期望输入。尽量保持这些输入尽可能纯粹的Python，因为这样可以使兼容性更容易（甚至通过JSON通过其他语言）。这些将是管道的`inputs`（`preprocess`）。
 - en: Then define the `outputs`. Same policy as the `inputs`. The simpler, the better.
     Those will be the outputs of `postprocess` method.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后定义`outputs`。与`inputs`相同的策略。越简单越好。这些将是`postprocess`方法的输出。
 - en: Start by inheriting the base class `Pipeline` with the 4 methods needed to implement
     `preprocess`, `_forward`, `postprocess`, and `_sanitize_parameters`.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先通过继承基类`Pipeline`，具有实现`preprocess`、`_forward`、`postprocess`和`_sanitize_parameters`所需的4个方法。
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: The structure of this breakdown is to support relatively seamless support for
     CPU/GPU, while supporting doing pre/postprocessing on the CPU on different threads
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种分解的结构支持相对无缝地支持CPU/GPU，同时支持在不同线程上在CPU上进行预处理/后处理
 - en: '`preprocess` will take the originally defined inputs, and turn them into something
     feedable to the model. It might contain more information and is usually a `Dict`.'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: '`preprocess`将获取最初定义的输入，并将其转换为可供模型使用的内容。它可能包含更多信息，通常是一个`Dict`。'
 - en: '`_forward` is the implementation detail and is not meant to be called directly.
     `forward` is the preferred called method as it contains safeguards to make sure
     everything is working on the expected device. If anything is linked to a real
     model it belongs in the `_forward` method, anything else is in the preprocess/postprocess.'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '`_forward`是实现细节，不应直接调用。`forward`是首选的调用方法，因为它包含了确保一切在预期设备上工作的保障措施。如果任何内容与真实模型相关，则应该放在`_forward`方法中，其他内容应该放在预处理/后处理中。'
 - en: '`postprocess` methods will take the output of `_forward` and turn it into the
     final output that was decided earlier.'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '`postprocess`方法将获取`_forward`的输出并将其转换为之前决定的最终输出。'
 - en: '`_sanitize_parameters` exists to allow users to pass any parameters whenever
     they wish, be it at initialization time `pipeline(...., maybe_arg=4)` or at call
     time `pipe = pipeline(...); output = pipe(...., maybe_arg=4)`.'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '`_sanitize_parameters`存在是为了允许用户在任何时候传递任何参数，无论是在初始化时`pipeline(...., maybe_arg=4)`还是在调用时`pipe
+    = pipeline(...); output = pipe(...., maybe_arg=4)`。'
 - en: The returns of `_sanitize_parameters` are the 3 dicts of kwargs that will be
     passed directly to `preprocess`, `_forward`, and `postprocess`. Don’t fill anything
     if the caller didn’t call with any extra parameter. That allows to keep the default
     arguments in the function definition which is always more “natural”.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '`_sanitize_parameters`的返回值是将直接传递给`preprocess`、`_forward`和`postprocess`的3个kwargs字典。如果调用者没有使用任何额外参数，则不要填写任何内容。这样可以保持函数定义中的默认参数，这总是更“自然”的。'
 - en: A classic example would be a `top_k` argument in the post processing in classification
     tasks.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个经典的例子是在分类任务的后处理中添加一个`top_k`参数。
 - en: '[PRE1]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: In order to achieve that, we’ll update our `postprocess` method with a default
     parameter to `5`. and edit `_sanitize_parameters` to allow this new parameter.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了实现这一点，我们将使用一个默认参数`5`来更新我们的`postprocess`方法，并编辑`_sanitize_parameters`以允许这个新参数。
 - en: '[PRE2]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Try to keep the inputs/outputs very simple and ideally JSON-serializable as
     it makes the pipeline usage very easy without requiring users to understand new
     kinds of objects. It’s also relatively common to support many different types
     of arguments for ease of use (audio files, which can be filenames, URLs or pure
     bytes)
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽量保持输入/输出非常简单，最好是可JSON序列化的，因为这样可以使管道的使用非常简单，而不需要用户理解新类型的对象。通常也支持许多不同类型的参数，以便于使用（例如音频文件，可以是文件名、URL或纯字节）
 - en: Adding it to the list of supported tasks
+  id: totrans-19
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将其添加到支持任务列表中
 - en: 'To register your `new-task` to the list of supported tasks, you have to add
     it to the `PIPELINE_REGISTRY`:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将您的`new-task`注册到支持任务列表中，您必须将其添加到`PIPELINE_REGISTRY`中：
 - en: '[PRE3]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'You can specify a default model if you want, in which case it should come with
     a specific revision (which can be the name of a branch or a commit hash, here
     we took `"abcdef"`) as well as the type:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果需要，您可以指定一个默认模型，此时应该附带一个特定的修订版（可以是分支名称或提交哈希，这里我们取`"abcdef"`）以及类型：
 - en: '[PRE4]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Share your pipeline on the Hub
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在Hub上共享您的管道
 - en: 'To share your custom pipeline on the Hub, you just have to save the custom
     code of your `Pipeline` subclass in a python file. For instance, let’s say we
     want to use a custom pipeline for sentence pair classification like this:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在Hub上共享您的自定义管道，只需将`Pipeline`子类的自定义代码保存在一个python文件中。例如，假设我们想要像这样为句对分类使用自定义管道：
 - en: '[PRE5]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'The implementation is framework agnostic, and will work for PyTorch and TensorFlow
     models. If we have saved this in a file named `pair_classification.py`, we can
     then import it and register it like this:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个实现是与框架无关的，将适用于PyTorch和TensorFlow模型。如果我们将其保存在一个名为`pair_classification.py`的文件中，然后可以像这样导入并注册它：
 - en: '[PRE6]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Once this is done, we can use it with a pretrained model. For instance `sgugger/finetuned-bert-mrpc`
     has been fine-tuned on the MRPC dataset, which classifies pairs of sentences as
     paraphrases or not.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 完成后，我们可以使用预训练模型。例如`sgugger/finetuned-bert-mrpc`已在MRPC数据集上进行了微调，用于将句子对分类为释义或非释义。
 - en: '[PRE7]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Then we can share it on the Hub by using the `save_pretrained` method in a
     `Repository`:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后我们可以通过在`Repository`中使用`save_pretrained`方法在Hub上共享它：
 - en: '[PRE8]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'This will copy the file where you defined `PairClassificationPipeline` inside
     the folder `"test-dynamic-pipeline"`, along with saving the model and tokenizer
     of the pipeline, before pushing everything into the repository `{your_username}/test-dynamic-pipeline`.
     After that, anyone can use it as long as they provide the option `trust_remote_code=True`:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将复制您在文件中定义`PairClassificationPipeline`的文件夹`"test-dynamic-pipeline"`中，同时保存管道的模型和分词器，然后将所有内容推送到存储库`{your_username}/test-dynamic-pipeline`中。之后，任何人只要提供选项`trust_remote_code=True`就可以使用它：
 - en: '[PRE9]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Add the pipeline to 🤗 Transformers
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将管道添加到🤗 Transformers
 - en: If you want to contribute your pipeline to 🤗 Transformers, you will need to
     add a new module in the `pipelines` submodule with the code of your pipeline,
     then add it to the list of tasks defined in `pipelines/__init__.py`.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想将您的管道贡献给🤗 Transformers，您需要在`pipelines`子模块中添加一个新模块，其中包含您的管道的代码，然后将其添加到`pipelines/__init__.py`中定义的任务列表中。
 - en: Then you will need to add tests. Create a new file `tests/test_pipelines_MY_PIPELINE.py`
     with examples of the other tests.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，您需要添加测试。创建一个新文件`tests/test_pipelines_MY_PIPELINE.py`，其中包含其他测试的示例。
 - en: The `run_pipeline_test` function will be very generic and run on small random
     models on every possible architecture as defined by `model_mapping` and `tf_model_mapping`.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '`run_pipeline_test`函数将非常通用，并在由`model_mapping`和`tf_model_mapping`定义的每种可能的架构上运行小型随机模型。'
 - en: This is very important to test future compatibility, meaning if someone adds
     a new model for `XXXForQuestionAnswering` then the pipeline test will attempt
     to run on it. Because the models are random it’s impossible to check for actual
     values, that’s why there is a helper `ANY` that will simply attempt to match the
     output of the pipeline TYPE.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 这对于测试未来的兼容性非常重要，这意味着如果有人为`XXXForQuestionAnswering`添加了一个新模型，那么管道测试将尝试在其上运行。由于模型是随机的，无法检查实际值，这就是为什么有一个辅助`ANY`，它将简单地尝试匹配管道类型的输出。
 - en: You also *need* to implement 2 (ideally 4) tests.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还*需要*实现2（理想情况下4）个测试。
 - en: '`test_small_model_pt` : Define 1 small model for this pipeline (doesn’t matter
     if the results don’t make sense) and test the pipeline outputs. The results should
     be the same as `test_small_model_tf`.'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`test_small_model_pt`：为这个管道定义一个小模型（结果是否有意义并不重要），并测试管道的输出。结果应该与`test_small_model_tf`相同。'
 - en: '`test_small_model_tf` : Define 1 small model for this pipeline (doesn’t matter
     if the results don’t make sense) and test the pipeline outputs. The results should
     be the same as `test_small_model_pt`.'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`test_small_model_tf`：为这个管道定义一个小模型（结果是否有意义并不重要），并测试管道的输出。结果应该与`test_small_model_pt`相同。'
 - en: '`test_large_model_pt` (`optional`): Tests the pipeline on a real pipeline where
     the results are supposed to make sense. These tests are slow and should be marked
     as such. Here the goal is to showcase the pipeline and to make sure there is no
     drift in future releases.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`test_large_model_pt` (`optional`): 在一个真实的管道上测试管道，结果应该是有意义的。这些测试很慢，应该标记为这样。这里的目标是展示管道，并确保将来的发布中没有漂移。'
 - en: '`test_large_model_tf` (`optional`): Tests the pipeline on a real pipeline where
     the results are supposed to make sense. These tests are slow and should be marked
     as such. Here the goal is to showcase the pipeline and to make sure there is no
     drift in future releases.'
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`test_large_model_tf` (`optional`): 在一个真实的管道上测试管道，结果应该是有意义的。这些测试很慢，应该标记为这样。这里的目标是展示管道，并确保将来的发布中没有漂移。'
