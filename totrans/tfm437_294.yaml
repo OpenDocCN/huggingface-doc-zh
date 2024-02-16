@@ -1,0 +1,2212 @@
+- en: Vision Transformer (ViT)
+  id: totrans-0
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+  zh: Vision Transformer（ViT）
+- en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/vit](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/vit)'
+  id: totrans-1
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/vit](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/vit)
+- en: null
+  id: totrans-2
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overview
+  id: totrans-3
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 概述
+- en: 'The Vision Transformer (ViT) model was proposed in [An Image is Worth 16x16
+    Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)
+    by Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua
+    Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold,
+    Sylvain Gelly, Jakob Uszkoreit, Neil Houlsby. It’s the first paper that successfully
+    trains a Transformer encoder on ImageNet, attaining very good results compared
+    to familiar convolutional architectures.'
+  id: totrans-4
+  prefs: []
+  type: TYPE_NORMAL
+  zh: Vision Transformer（ViT）模型是由Alexey Dosovitskiy、Lucas Beyer、Alexander Kolesnikov、Dirk
+    Weissenborn、Xiaohua Zhai、Thomas Unterthiner、Mostafa Dehghani、Matthias Minderer、Georg
+    Heigold、Sylvain Gelly、Jakob Uszkoreit、Neil Houlsby在[一张图值16x16个词：用于大规模图像识别的Transformer](https://arxiv.org/abs/2010.11929)中提出的。这是第一篇成功在ImageNet上训练Transformer编码器的论文，与熟悉的卷积架构相比取得了非常好的结果。
+- en: 'The abstract from the paper is the following:'
+  id: totrans-5
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 论文的摘要如下：
+- en: '*While the Transformer architecture has become the de-facto standard for natural
+    language processing tasks, its applications to computer vision remain limited.
+    In vision, attention is either applied in conjunction with convolutional networks,
+    or used to replace certain components of convolutional networks while keeping
+    their overall structure in place. We show that this reliance on CNNs is not necessary
+    and a pure transformer applied directly to sequences of image patches can perform
+    very well on image classification tasks. When pre-trained on large amounts of
+    data and transferred to multiple mid-sized or small image recognition benchmarks
+    (ImageNet, CIFAR-100, VTAB, etc.), Vision Transformer (ViT) attains excellent
+    results compared to state-of-the-art convolutional networks while requiring substantially
+    fewer computational resources to train.*'
+  id: totrans-6
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '*尽管Transformer架构已经成为自然语言处理任务的事实标准，但它在计算机视觉中的应用仍然有限。在视觉中，注意力要么与卷积网络一起应用，要么用来替换卷积网络的某些组件，同时保持它们的整体结构。我们表明，在图像分类任务中，这种对CNN的依赖是不必要的，直接应用于图像块序列的纯Transformer可以在大量数据上进行预训练，并转移到多个中等或小型图像识别基准（ImageNet、CIFAR-100、VTAB等）时，Vision
+    Transformer（ViT）取得了与最先进的卷积网络相比的优异结果，同时需要较少的计算资源来训练。*'
+- en: '![drawing](../Images/603d60786d4fe02e975af3e3e9553816.png) ViT architecture.
+    Taken from the [original paper.](https://arxiv.org/abs/2010.11929)'
+  id: totrans-7
+  prefs: []
+  type: TYPE_IMG
+  zh: '![drawing](../Images/603d60786d4fe02e975af3e3e9553816.png) ViT架构。摘自[原始论文](https://arxiv.org/abs/2010.11929)。'
+- en: 'Following the original Vision Transformer, some follow-up works have been made:'
+  id: totrans-8
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 在原始Vision Transformer之后，已经进行了一些后续工作：
+- en: '[DeiT](deit) (Data-efficient Image Transformers) by Facebook AI. DeiT models
+    are distilled vision transformers. The authors of DeiT also released more efficiently
+    trained ViT models, which you can directly plug into [ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel)
+    or [ViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForImageClassification).
+    There are 4 variants available (in 3 different sizes): *facebook/deit-tiny-patch16-224*,
+    *facebook/deit-small-patch16-224*, *facebook/deit-base-patch16-224* and *facebook/deit-base-patch16-384*.
+    Note that one should use [DeiTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/deit#transformers.DeiTImageProcessor)
+    in order to prepare images for the model.'
+  id: totrans-9
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[DeiT](deit)（高效数据图像Transformer）由Facebook AI提出。DeiT模型是经过蒸馏的视觉Transformer。DeiT的作者还发布了更高效训练的ViT模型，您可以直接将其插入[ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel)或[ViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForImageClassification)。有4个变体可用（3种不同大小）：*facebook/deit-tiny-patch16-224*、*facebook/deit-small-patch16-224*、*facebook/deit-base-patch16-224*和*facebook/deit-base-patch16-384*。请注意，应使用[DeiTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/deit#transformers.DeiTImageProcessor)来为模型准备图像。'
+- en: '[BEiT](beit) (BERT pre-training of Image Transformers) by Microsoft Research.
+    BEiT models outperform supervised pre-trained vision transformers using a self-supervised
+    method inspired by BERT (masked image modeling) and based on a VQ-VAE.'
+  id: totrans-10
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[BEiT](beit)（图像Transformer的BERT预训练）由微软研究院。BEiT模型通过受BERT启发的自监督方法（遮蔽图像建模）和基于VQ-VAE的方法，优于使用监督预训练的视觉Transformer。'
+- en: DINO (a method for self-supervised training of Vision Transformers) by Facebook
+    AI. Vision Transformers trained using the DINO method show very interesting properties
+    not seen with convolutional models. They are capable of segmenting objects, without
+    having ever been trained to do so. DINO checkpoints can be found on the [hub](https://huggingface.co/models?other=dino).
+  id: totrans-11
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: DINO（一种用于自监督训练的Vision Transformer方法）由Facebook AI提出。使用DINO方法训练的Vision Transformer展现出与卷积模型不同的非常有趣的特性。它们能够分割对象，而无需经过训练。可以在[hub](https://huggingface.co/models?other=dino)上找到DINO的检查点。
+- en: '[MAE](vit_mae) (Masked Autoencoders) by Facebook AI. By pre-training Vision
+    Transformers to reconstruct pixel values for a high portion (75%) of masked patches
+    (using an asymmetric encoder-decoder architecture), the authors show that this
+    simple method outperforms supervised pre-training after fine-tuning.'
+  id: totrans-12
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '[MAE](vit_mae)（遮蔽自动编码器）由Facebook AI提出。通过预训练Vision Transformer来重建75%的遮蔽补丁的像素值（使用不对称的编码器-解码器架构），作者表明，这种简单方法在微调后优于监督预训练。'
+- en: This model was contributed by [nielsr](https://huggingface.co/nielsr). The original
+    code (written in JAX) can be found [here](https://github.com/google-research/vision_transformer).
+  id: totrans-13
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此模型由[nielsr](https://huggingface.co/nielsr)贡献。原始代码（使用JAX编写）可在[此处](https://github.com/google-research/vision_transformer)找到。
+- en: Note that we converted the weights from Ross Wightman’s [timm library](https://github.com/rwightman/pytorch-image-models),
+    who already converted the weights from JAX to PyTorch. Credits go to him!
+  id: totrans-14
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，我们从Ross Wightman的[timm库](https://github.com/rwightman/pytorch-image-models)中转换了权重，他已经将权重从JAX转换为PyTorch。感谢他！
+- en: Usage tips
+  id: totrans-15
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 使用提示
+- en: To feed images to the Transformer encoder, each image is split into a sequence
+    of fixed-size non-overlapping patches, which are then linearly embedded. A [CLS]
+    token is added to serve as representation of an entire image, which can be used
+    for classification. The authors also add absolute position embeddings, and feed
+    the resulting sequence of vectors to a standard Transformer encoder.
+  id: totrans-16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 为了将图像馈送到Transformer编码器中，每个图像被分割成一系列固定大小且不重叠的补丁，然后进行线性嵌入。添加了一个[CLS]标记，用作整个图像的表示，可用于分类。作者还添加了绝对位置嵌入，并将结果向量序列馈送到标准Transformer编码器。
+- en: As the Vision Transformer expects each image to be of the same size (resolution),
+    one can use [ViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTImageProcessor)
+    to resize (or rescale) and normalize images for the model.
+  id: totrans-17
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 由于Vision Transformer期望每个图像具有相同的大小（分辨率），因此可以使用[ViTImageProcessor](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTImageProcessor)来调整（或重新缩放）和规范化图像以供模型使用。
+- en: Both the patch resolution and image resolution used during pre-training or fine-tuning
+    are reflected in the name of each checkpoint. For example, `google/vit-base-patch16-224`
+    refers to a base-sized architecture with patch resolution of 16x16 and fine-tuning
+    resolution of 224x224\. All checkpoints can be found on the [hub](https://huggingface.co/models?search=vit).
+  id: totrans-18
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 在预训练或微调期间使用的补丁分辨率和图像分辨率反映在每个检查点的名称中。例如，`google/vit-base-patch16-224`指的是一个基本大小的架构，补丁分辨率为16x16，微调分辨率为224x224。所有检查点都可以在[hub](https://huggingface.co/models?search=vit)上找到。
+- en: The available checkpoints are either (1) pre-trained on [ImageNet-21k](http://www.image-net.org/)
+    (a collection of 14 million images and 21k classes) only, or (2) also fine-tuned
+    on [ImageNet](http://www.image-net.org/challenges/LSVRC/2012/) (also referred
+    to as ILSVRC 2012, a collection of 1.3 million images and 1,000 classes).
+  id: totrans-19
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 可用的检查点要么（1）仅在[ImageNet-21k](http://www.image-net.org/)（一个包含1400万图像和21k类别的集合）上进行了预训练，要么（2）还在[ImageNet](http://www.image-net.org/challenges/LSVRC/2012/)（也称为ILSVRC
+    2012，一个包含130万图像和1000类别的集合）上进行了微调。
+- en: The Vision Transformer was pre-trained using a resolution of 224x224\. During
+    fine-tuning, it is often beneficial to use a higher resolution than pre-training
+    [(Touvron et al., 2019)](https://arxiv.org/abs/1906.06423), [(Kolesnikov et al.,
+    2020)](https://arxiv.org/abs/1912.11370). In order to fine-tune at higher resolution,
+    the authors perform 2D interpolation of the pre-trained position embeddings, according
+    to their location in the original image.
+  id: totrans-20
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: Vision Transformer是使用分辨率为224x224进行预训练的。在微调期间，通常比预训练使用更高的分辨率有益[(Touvron等人，2019)](https://arxiv.org/abs/1906.06423)，[(Kolesnikov等人，2020)](https://arxiv.org/abs/1912.11370)。为了在更高分辨率下微调，作者对预训练的位置嵌入进行了2D插值，根据它们在原始图像中的位置。
+- en: The best results are obtained with supervised pre-training, which is not the
+    case in NLP. The authors also performed an experiment with a self-supervised pre-training
+    objective, namely masked patched prediction (inspired by masked language modeling).
+    With this approach, the smaller ViT-B/16 model achieves 79.9% accuracy on ImageNet,
+    a significant improvement of 2% to training from scratch, but still 4% behind
+    supervised pre-training.
+  id: totrans-21
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 最佳结果是通过监督预训练获得的，这在NLP中并非如此。作者还进行了一个实验，使用自监督预训练目标，即掩码补丁预测（受到掩码语言建模的启发）。通过这种方法，较小的ViT-B/16模型在ImageNet上实现了79.9%的准确率，比从头开始训练提高了2%，但仍然落后于监督预训练4%。
+- en: Resources
+  id: totrans-22
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: 资源
+- en: Demo notebooks regarding inference as well as fine-tuning ViT on custom data
+    can be found [here](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/VisionTransformer).
+    A list of official Hugging Face and community (indicated by 🌎) resources to help
+    you get started with ViT. If you’re interested in submitting a resource to be
+    included here, please feel free to open a Pull Request and we’ll review it! The
+    resource should ideally demonstrate something new instead of duplicating an existing
+    resource.
+  id: totrans-23
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 关于推理以及在自定义数据上微调ViT的演示笔记本可以在[这里](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/VisionTransformer)找到。这里列出了官方Hugging
+    Face和社区（由🌎表示）资源的列表，以帮助您开始使用ViT。如果您有兴趣提交资源以包含在此处，请随时打开一个Pull Request，我们将对其进行审查！资源应该理想地展示一些新东西，而不是重复现有资源。
+- en: '`ViTForImageClassification` is supported by:'
+  id: totrans-24
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`ViTForImageClassification`由以下支持：'
+- en: Image Classification
+  id: totrans-25
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 图像分类
+- en: A blog post on how to [Fine-Tune ViT for Image Classification with Hugging Face
+    Transformers](https://huggingface.co/blog/fine-tune-vit)
+  id: totrans-26
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 关于如何使用Hugging Face Transformers对图像分类进行微调的博客文章
+- en: A blog post on [Image Classification with Hugging Face Transformers and `Keras`](https://www.philschmid.de/image-classification-huggingface-transformers-keras)
+  id: totrans-27
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 关于使用Hugging Face Transformers和`Keras`进行图像分类的博客文章
+- en: A notebook on [Fine-tuning for Image Classification with Hugging Face Transformers](https://github.com/huggingface/notebooks/blob/main/examples/image_classification.ipynb)
+  id: totrans-28
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 关于使用Hugging Face Transformers进行图像分类的微调的笔记
+- en: A notebook on how to [Fine-tune the Vision Transformer on CIFAR-10 with the
+    Hugging Face Trainer](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/VisionTransformer/Fine_tuning_the_Vision_Transformer_on_CIFAR_10_with_the_%F0%9F%A4%97_Trainer.ipynb)
+  id: totrans-29
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 关于如何使用Hugging Face Trainer在CIFAR-10上微调Vision Transformer的笔记
+- en: A notebook on how to [Fine-tune the Vision Transformer on CIFAR-10 with PyTorch
+    Lightning](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/VisionTransformer/Fine_tuning_the_Vision_Transformer_on_CIFAR_10_with_PyTorch_Lightning.ipynb)
+  id: totrans-30
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 关于如何在CIFAR-10上使用PyTorch Lightning对Vision Transformer进行微调的笔记
+- en: ⚗️ Optimization
+  id: totrans-31
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ⚗️ 优化
+- en: A blog post on how to [Accelerate Vision Transformer (ViT) with Quantization
+    using Optimum](https://www.philschmid.de/optimizing-vision-transformer)
+  id: totrans-32
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 关于如何使用Optimum对Vision Transformer（ViT）进行量化加速的博客文章
+- en: ⚡️ Inference
+  id: totrans-33
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ⚡️ 推理
+- en: 'A notebook on [Quick demo: Vision Transformer (ViT) by Google Brain](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/VisionTransformer/Quick_demo_of_HuggingFace_version_of_Vision_Transformer_inference.ipynb)'
+  id: totrans-34
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一个关于[快速演示：Google Brain 的 Vision Transformer（ViT）](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/VisionTransformer/Quick_demo_of_HuggingFace_version_of_Vision_Transformer_inference.ipynb)的笔记本
+- en: 🚀 Deploy
+  id: totrans-35
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 🚀 部署
+- en: A blog post on [Deploying Tensorflow Vision Models in Hugging Face with TF Serving](https://huggingface.co/blog/tf-serving-vision)
+  id: totrans-36
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一篇关于[在 Hugging Face 中使用 TF Serving 部署 Tensorflow 视觉模型](https://huggingface.co/blog/tf-serving-vision)的博客文章
+- en: A blog post on [Deploying Hugging Face ViT on Vertex AI](https://huggingface.co/blog/deploy-vertex-ai)
+  id: totrans-37
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一篇关于[在 Vertex AI 上部署 Hugging Face ViT](https://huggingface.co/blog/deploy-vertex-ai)的博客文章
+- en: A blog post on [Deploying Hugging Face ViT on Kubernetes with TF Serving](https://huggingface.co/blog/deploy-tfserving-kubernetes)
+  id: totrans-38
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一篇关于[在 Kubernetes 上使用 TF Serving 部署 Hugging Face ViT](https://huggingface.co/blog/deploy-tfserving-kubernetes)的博客文章
+- en: ViTConfig
+  id: totrans-39
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ViTConfig
+- en: '### `class transformers.ViTConfig`'
+  id: totrans-40
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.ViTConfig`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/configuration_vit.py#L35)'
+  id: totrans-41
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/configuration_vit.py#L35)'
+- en: '[PRE0]'
+  id: totrans-42
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE0]'
+- en: Parameters
+  id: totrans-43
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`hidden_size` (`int`, *optional*, defaults to 768) — Dimensionality of the
+    encoder layers and the pooler layer.'
+  id: totrans-44
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`hidden_size` (`int`，*可选*，默认为 768) — 编码器层和池化器层的维度。'
+- en: '`num_hidden_layers` (`int`, *optional*, defaults to 12) — Number of hidden
+    layers in the Transformer encoder.'
+  id: totrans-45
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`num_hidden_layers` (`int`，*可选*，默认为 12) — Transformer 编码器中的隐藏层数量。'
+- en: '`num_attention_heads` (`int`, *optional*, defaults to 12) — Number of attention
+    heads for each attention layer in the Transformer encoder.'
+  id: totrans-46
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`num_attention_heads` (`int`，*可选*，默认为 12) — Transformer 编码器中每个注意力层的注意力头数。'
+- en: '`intermediate_size` (`int`, *optional*, defaults to 3072) — Dimensionality
+    of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  id: totrans-47
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`intermediate_size` (`int`，*可选*，默认为 3072) — Transformer 编码器中“中间”（即前馈）层的维度。'
+- en: '`hidden_act` (`str` or `function`, *optional*, defaults to `"gelu"`) — The
+    non-linear activation function (function or string) in the encoder and pooler.
+    If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` are supported.'
+  id: totrans-48
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`hidden_act` (`str` 或 `function`，*可选*，默认为 `"gelu"`) — 编码器和池化器中的非线性激活函数（函数或字符串）。如果是字符串，支持
+    `"gelu"`, `"relu"`, `"selu"` 和 `"gelu_new"`。'
+- en: '`hidden_dropout_prob` (`float`, *optional*, defaults to 0.0) — The dropout
+    probability for all fully connected layers in the embeddings, encoder, and pooler.'
+  id: totrans-49
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`hidden_dropout_prob` (`float`，*可选*，默认为 0.0) — 嵌入层、编码器和池化器中所有全连接层的丢失概率。'
+- en: '`attention_probs_dropout_prob` (`float`, *optional*, defaults to 0.0) — The
+    dropout ratio for the attention probabilities.'
+  id: totrans-50
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`attention_probs_dropout_prob` (`float`，*可选*，默认为 0.0) — 注意力概率的丢失比率。'
+- en: '`initializer_range` (`float`, *optional*, defaults to 0.02) — The standard
+    deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  id: totrans-51
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`initializer_range` (`float`，*可选*，默认为 0.02) — 用于初始化所有权重矩阵的截断正态初始化器的标准差。'
+- en: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-12) — The epsilon used
+    by the layer normalization layers.'
+  id: totrans-52
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`layer_norm_eps` (`float`，*可选*，默认为 1e-12) — 层归一化层使用的 epsilon。'
+- en: '`image_size` (`int`, *optional*, defaults to 224) — The size (resolution) of
+    each image.'
+  id: totrans-53
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`image_size` (`int`，*可选*，默认为 224) — 每个图像的大小（分辨率）。'
+- en: '`patch_size` (`int`, *optional*, defaults to 16) — The size (resolution) of
+    each patch.'
+  id: totrans-54
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`patch_size` (`int`，*可选*，默认为 16) — 每个补丁的大小（分辨率）。'
+- en: '`num_channels` (`int`, *optional*, defaults to 3) — The number of input channels.'
+  id: totrans-55
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`num_channels` (`int`，*可选*，默认为 3) — 输入通道数。'
+- en: '`qkv_bias` (`bool`, *optional*, defaults to `True`) — Whether to add a bias
+    to the queries, keys and values.'
+  id: totrans-56
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`qkv_bias` (`bool`，*可选*，默认为 `True`) — 是否为查询、键和值添加偏置。'
+- en: '`encoder_stride` (`int`, *optional*, defaults to 16) — Factor to increase the
+    spatial resolution by in the decoder head for masked image modeling.'
+  id: totrans-57
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`encoder_stride` (`int`，*可选*，默认为 16) — 用于在解码器头部增加空间分辨率的因子，用于遮蔽图像建模。'
+- en: This is the configuration class to store the configuration of a [ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel).
+    It is used to instantiate an ViT model according to the specified arguments, defining
+    the model architecture. Instantiating a configuration with the defaults will yield
+    a similar configuration to that of the ViT [google/vit-base-patch16-224](https://huggingface.co/google/vit-base-patch16-224)
+    architecture.
+  id: totrans-58
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这是用于存储[ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel)配置的配置类。它用于根据指定的参数实例化
+    ViT 模型，定义模型架构。使用默认值实例化配置将产生类似于 ViT [google/vit-base-patch16-224](https://huggingface.co/google/vit-base-patch16-224)
+    架构的配置。
+- en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
+    for more information.
+  id: totrans-59
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 配置对象继承自[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)，可用于控制模型输出。阅读[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)的文档以获取更多信息。
+- en: 'Example:'
+  id: totrans-60
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '示例:'
+- en: '[PRE1]'
+  id: totrans-61
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE1]'
+- en: ViTFeatureExtractor
+  id: totrans-62
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ViTFeatureExtractor
+- en: '### `class transformers.ViTFeatureExtractor`'
+  id: totrans-63
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.ViTFeatureExtractor`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/feature_extraction_vit.py#L26)'
+  id: totrans-64
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/feature_extraction_vit.py#L26)'
+- en: '[PRE2]'
+  id: totrans-65
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE2]'
+- en: '#### `__call__`'
+  id: totrans-66
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '#### `__call__`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
+  id: totrans-67
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/image_processing_utils.py#L550)'
+- en: '[PRE3]'
+  id: totrans-68
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE3]'
+- en: Preprocess an image or a batch of images.
+  id: totrans-69
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 预处理一张图像或一批图像。
+- en: ViTImageProcessor
+  id: totrans-70
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ViTImageProcessor
+- en: '### `class transformers.ViTImageProcessor`'
+  id: totrans-71
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.ViTImageProcessor`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/image_processing_vit.py#L41)'
+  id: totrans-72
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/image_processing_vit.py#L41)'
+- en: '[PRE4]'
+  id: totrans-73
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE4]'
+- en: Parameters
+  id: totrans-74
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`do_resize` (`bool`, *optional*, defaults to `True`) — Whether to resize the
+    image’s (height, width) dimensions to the specified `(size["height"], size["width"])`.
+    Can be overridden by the `do_resize` parameter in the `preprocess` method.'
+  id: totrans-75
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`do_resize` (`bool`，*可选*，默认为 `True`) — 是否将图像的（高度、宽度）尺寸调整为指定的 `(size["height"],
+    size["width"])`。可以被 `preprocess` 方法中的 `do_resize` 参数覆盖。'
+- en: '`size` (`dict`, *optional*, defaults to `{"height" -- 224, "width": 224}`):
+    Size of the output image after resizing. Can be overridden by the `size` parameter
+    in the `preprocess` method.'
+  id: totrans-76
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`size` (`dict`，*可选*，默认为 `{"height" -- 224, "width": 224}`): 调整大小后输出图像的尺寸。可以被
+    `preprocess` 方法中的 `size` 参数覆盖。'
+- en: '`resample` (`PILImageResampling`, *optional*, defaults to `Resampling.BILINEAR`)
+    — Resampling filter to use if resizing the image. Can be overridden by the `resample`
+    parameter in the `preprocess` method.'
+  id: totrans-77
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`resample` (`PILImageResampling`，*可选*，默认为 `Resampling.BILINEAR`) — 如果调整图像大小，则要使用的重采样滤波器。可以被
+    `preprocess` 方法中的 `resample` 参数覆盖。'
+- en: '`do_rescale` (`bool`, *optional*, defaults to `True`) — Whether to rescale
+    the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
+    parameter in the `preprocess` method.'
+  id: totrans-78
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`do_rescale` (`bool`，*可选*，默认为 `True`) — 是否按指定比例 `rescale_factor` 重新缩放图像。可以被
+    `preprocess` 方法中的 `do_rescale` 参数覆盖。'
+- en: '`rescale_factor` (`int` or `float`, *optional*, defaults to `1/255`) — Scale
+    factor to use if rescaling the image. Can be overridden by the `rescale_factor`
+    parameter in the `preprocess` method.'
+  id: totrans-79
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`rescale_factor` (`int` 或 `float`，*可选*，默认为 `1/255`) — 如果重新缩放图像，则使用的比例因子。可以被
+    `preprocess` 方法中的 `rescale_factor` 参数覆盖。'
+- en: '`do_normalize` (`bool`, *optional*, defaults to `True`) — Whether to normalize
+    the image. Can be overridden by the `do_normalize` parameter in the `preprocess`
+    method.'
+  id: totrans-80
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`do_normalize` (`bool`，*可选*，默认为 `True`) — 是否对图像进行归一化。可以被 `preprocess` 方法中的
+    `do_normalize` 参数覆盖。'
+- en: '`image_mean` (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_MEAN`)
+    — Mean to use if normalizing the image. This is a float or list of floats the
+    length of the number of channels in the image. Can be overridden by the `image_mean`
+    parameter in the `preprocess` method.'
+  id: totrans-81
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`image_mean` (`float` 或 `List[float]`，*可选*，默认为 `IMAGENET_STANDARD_MEAN`) —
+    如果对图像进行归一化，要使用的均值。这是一个浮点数或与图像通道数相同长度的浮点数列表。可以被 `preprocess` 方法中的 `image_mean`
+    参数覆盖。'
+- en: '`image_std` (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_STD`)
+    — Standard deviation to use if normalizing the image. This is a float or list
+    of floats the length of the number of channels in the image. Can be overridden
+    by the `image_std` parameter in the `preprocess` method.'
+  id: totrans-82
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`image_std` (`float` 或 `List[float]`，*可选*，默认为 `IMAGENET_STANDARD_STD`) — 如果对图像进行归一化，要使用的标准差。这是一个浮点数或与图像通道数相同长度的浮点数列表。可以被
+    `preprocess` 方法中的 `image_std` 参数覆盖。'
+- en: Constructs a ViT image processor.
+  id: totrans-83
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 构建一个 ViT 图像处理器。
+- en: '#### `preprocess`'
+  id: totrans-84
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '#### `preprocess`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/image_processing_vit.py#L146)'
+  id: totrans-85
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/image_processing_vit.py#L146)'
+- en: '[PRE5]'
+  id: totrans-86
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE5]'
+- en: Parameters
+  id: totrans-87
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`images` (`ImageInput`) — Image to preprocess. Expects a single or batch of
+    images with pixel values ranging from 0 to 255\. If passing in images with pixel
+    values between 0 and 1, set `do_rescale=False`.'
+  id: totrans-88
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`images` (`ImageInput`) — 要预处理的图像。期望单个图像或批量图像，像素值范围为 0 到 255。如果传入像素值在 0 到 1
+    之间的图像，请设置 `do_rescale=False`。'
+- en: '`do_resize` (`bool`, *optional*, defaults to `self.do_resize`) — Whether to
+    resize the image.'
+  id: totrans-89
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`do_resize` (`bool`，*可选*，默认为 `self.do_resize`) — 是否调整图像大小。'
+- en: '`size` (`Dict[str, int]`, *optional*, defaults to `self.size`) — Dictionary
+    in the format `{"height": h, "width": w}` specifying the size of the output image
+    after resizing.'
+  id: totrans-90
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`size` (`Dict[str, int]`，*可选*，默认为 `self.size`) — 格式为 `{"height": h, "width":
+    w}` 的字典，指定调整大小后输出图像的尺寸。'
+- en: '`resample` (`PILImageResampling` filter, *optional*, defaults to `self.resample`)
+    — `PILImageResampling` filter to use if resizing the image e.g. `PILImageResampling.BILINEAR`.
+    Only has an effect if `do_resize` is set to `True`.'
+  id: totrans-91
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`resample` (`PILImageResampling` 滤波器，*可选*，默认为 `self.resample`) — 如果调整图像大小，则要使用的
+    `PILImageResampling` 滤波器，例如 `PILImageResampling.BILINEAR`。仅在 `do_resize` 设置为 `True`
+    时有效。'
+- en: '`do_rescale` (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
+    to rescale the image values between [0 - 1].'
+  id: totrans-92
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`do_rescale` (`bool`，*可选*，默认为 `self.do_rescale`) — 是否将图像值重新缩放在 [0 - 1] 之间。'
+- en: '`rescale_factor` (`float`, *optional*, defaults to `self.rescale_factor`) —
+    Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  id: totrans-93
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`rescale_factor` (`float`，*可选*，默认为 `self.rescale_factor`) — 如果 `do_rescale`
+    设置为 `True`，则重新缩放图像的重新缩放因子。'
+- en: '`do_normalize` (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
+    to normalize the image.'
+  id: totrans-94
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`do_normalize` (`bool`，*可选*，默认为 `self.do_normalize`) — 是否对图像进行归一化。'
+- en: '`image_mean` (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
+    — Image mean to use if `do_normalize` is set to `True`.'
+  id: totrans-95
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`image_mean` (`float` 或 `List[float]`，*可选*，默认为 `self.image_mean`) — 如果 `do_normalize`
+    设置为 `True`，要使用的图像均值。'
+- en: '`image_std` (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
+    — Image standard deviation to use if `do_normalize` is set to `True`.'
+  id: totrans-96
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`image_std` (`float` 或 `List[float]`，*可选*，默认为 `self.image_std`) — 如果 `do_normalize`
+    设置为 `True`，要使用的图像标准差。'
+- en: '`return_tensors` (`str` or `TensorType`, *optional*) — The type of tensors
+    to return. Can be one of:'
+  id: totrans-97
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`return_tensors` (`str` 或 `TensorType`，*可选*) — 要返回的张量类型。可以是以下之一：'
+- en: 'Unset: Return a list of `np.ndarray`.'
+  id: totrans-98
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '未设置: 返回一个 `np.ndarray` 列表。'
+- en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  id: totrans-99
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`TensorType.TENSORFLOW` 或 `''tf''`: 返回一个类型为 `tf.Tensor` 的批量。'
+- en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  id: totrans-100
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`TensorType.PYTORCH` 或 `''pt''`: 返回一个类型为 `torch.Tensor` 的批量。'
+- en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  id: totrans-101
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`TensorType.NUMPY` 或 `''np''`: 返回一个类型为 `np.ndarray` 的批量。'
+- en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  id: totrans-102
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`TensorType.JAX` 或 `''jax''`: 返回一个类型为 `jax.numpy.ndarray` 的批量。'
+- en: '`data_format` (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
+    — The channel dimension format for the output image. Can be one of:'
+  id: totrans-103
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`data_format` (`ChannelDimension` 或 `str`，*可选*，默认为 `ChannelDimension.FIRST`)
+    — 输出图像的通道维度格式。可以是以下之一：'
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  id: totrans-104
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`"channels_first"`或`ChannelDimension.FIRST`：图像以（通道数，高度，宽度）格式。'
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  id: totrans-105
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`"channels_last"`或`ChannelDimension.LAST`：图像以（高度，宽度，通道数）格式。'
+- en: 'Unset: Use the channel dimension format of the input image.'
+  id: totrans-106
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 未设置：使用输入图像的通道维度格式。
+- en: '`input_data_format` (`ChannelDimension` or `str`, *optional*) — The channel
+    dimension format for the input image. If unset, the channel dimension format is
+    inferred from the input image. Can be one of:'
+  id: totrans-107
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`input_data_format` (`ChannelDimension`或`str`, *可选*) — 输入图像的通道维度格式。如果未设置，则从输入图像中推断通道维度格式。可以是以下之一：'
+- en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
+    width) format.'
+  id: totrans-108
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`"channels_first"`或`ChannelDimension.FIRST`：图像以（通道数，高度，宽度）格式。'
+- en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
+    format.'
+  id: totrans-109
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`"channels_last"`或`ChannelDimension.LAST`：图像以（高度，宽度，通道数）格式。'
+- en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  id: totrans-110
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`"none"`或`ChannelDimension.NONE`：图像以（高度，宽度）格式。'
+- en: Preprocess an image or batch of images.
+  id: totrans-111
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 预处理一张图像或一批图像。
+- en: PytorchHide Pytorch content
+  id: totrans-112
+  prefs: []
+  type: TYPE_NORMAL
+  zh: PytorchHide Pytorch内容
+- en: ViTModel
+  id: totrans-113
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ViTModel
+- en: '### `class transformers.ViTModel`'
+  id: totrans-114
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.ViTModel`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L501)'
+  id: totrans-115
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L501)'
+- en: '[PRE6]'
+  id: totrans-116
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE6]'
+- en: Parameters
+  id: totrans-117
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`config` ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  id: totrans-118
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`config`（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）
+    — 具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
+- en: The bare ViT Model transformer outputting raw hidden-states without any specific
+    head on top. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  id: totrans-119
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 裸ViT模型变压器输出原始隐藏状态，没有特定的头部。此模型是PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)子类。将其用作常规PyTorch模块，并参考PyTorch文档以获取有关一般用法和行为的所有相关信息。
+- en: '#### `forward`'
+  id: totrans-120
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '#### `forward`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L530)'
+  id: totrans-121
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L530)'
+- en: '[PRE7]'
+  id: totrans-122
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE7]'
+- en: Parameters
+  id: totrans-123
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
+    width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  id: totrans-124
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pixel_values` (`torch.FloatTensor`，形状为`(batch_size, num_channels, height,
+    width)`) — 像素值。可以使用[AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)获取像素值。有关详细信息，请参阅[ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
+- en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  id: totrans-125
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`head_mask` (`torch.FloatTensor`，形状为`(num_heads,)`或`(num_layers, num_heads)`，*可选*)
+    — 用于使自注意力模块中选择的头部失效的掩码。掩码值选在`[0, 1]`之间：'
+- en: 1 indicates the head is `not masked`,
+  id: totrans-126
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1表示头部未被屏蔽，
+- en: 0 indicates the head is `masked`.
+  id: totrans-127
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 0表示头部被屏蔽。
+- en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  id: totrans-128
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_attentions` (`bool`, *可选*) — 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量下的`attentions`。'
+- en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  id: totrans-129
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_hidden_states` (`bool`, *可选*) — 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量下的`hidden_states`。'
+- en: '`interpolate_pos_encoding` (`bool`, *optional*) — Whether to interpolate the
+    pre-trained position encodings.'
+  id: totrans-130
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`interpolate_pos_encoding` (`bool`, *可选*) — 是否插值预训练位置编码。'
+- en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  id: totrans-131
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *可选*) — 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
+- en: '`bool_masked_pos` (`torch.BoolTensor` of shape `(batch_size, num_patches)`,
+    *optional*) — Boolean masked positions. Indicates which patches are masked (1)
+    and which aren’t (0).'
+  id: totrans-132
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`bool_masked_pos` (`torch.BoolTensor`，形状为`(batch_size, num_patches)`，*可选*)
+    — 布尔掩码位置。指示哪些补丁被屏蔽（1）哪些没有（0）。'
+- en: Returns
+  id: totrans-133
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 返回
+- en: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or `tuple(torch.FloatTensor)`'
+  id: totrans-134
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)或`tuple(torch.FloatTensor)`'
+- en: A [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  id: totrans-135
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)或一个`torch.FloatTensor`元组（如果传递了`return_dict=False`或`config.return_dict=False`时）包含各种元素，具体取决于配置（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）和输入。
+- en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
+    hidden_size)`) — Sequence of hidden-states at the output of the last layer of
+    the model.'
+  id: totrans-136
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`last_hidden_state`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`）—
+    模型最后一层的隐藏状态序列。'
+- en: '`pooler_output` (`torch.FloatTensor` of shape `(batch_size, hidden_size)`)
+    — Last layer hidden-state of the first token of the sequence (classification token)
+    after further processing through the layers used for the auxiliary pretraining
+    task. E.g. for BERT-family of models, this returns the classification token after
+    processing through a linear layer and a tanh activation function. The linear layer
+    weights are trained from the next sentence prediction (classification) objective
+    during pretraining.'
+  id: totrans-137
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pooler_output`（形状为`(batch_size, hidden_size)`的`torch.FloatTensor`）— 序列的第一个标记（分类标记）的最后一层隐藏状态，在通过用于辅助预训练任务的层进一步处理后。例如，对于BERT系列模型，这将返回经过线性层和tanh激活函数处理后的分类标记。线性层的权重是在预训练期间从下一个句子预测（分类）目标中训练的。'
+- en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  id: totrans-138
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）—
+    形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（如果模型有嵌入层，则为嵌入输出的一个+每层输出的一个）。'
+- en: Hidden-states of the model at the output of each layer plus the optional initial
+    embedding outputs.
+  id: totrans-139
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 模型的每一层输出的隐藏状态以及可选的初始嵌入输出。
+- en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-140
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）—
+    形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。'
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  id: totrans-141
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 在自注意力头中使用的注意力softmax之后的注意力权重，用于计算加权平均值。
+- en: The [ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel)
+    forward method, overrides the `__call__` special method.
+  id: totrans-142
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[ViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTModel)的前向方法，覆盖了`__call__`特殊方法。'
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  id: totrans-143
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管前向传递的步骤需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此处调用，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
+- en: 'Example:'
+  id: totrans-144
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例：
+- en: '[PRE8]'
+  id: totrans-145
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE8]'
+- en: ViTForMaskedImageModeling
+  id: totrans-146
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ViTForMaskedImageModeling
+- en: '### `class transformers.ViTForMaskedImageModeling`'
+  id: totrans-147
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.ViTForMaskedImageModeling`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L615)'
+  id: totrans-148
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L615)'
+- en: '[PRE9]'
+  id: totrans-149
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE9]'
+- en: Parameters
+  id: totrans-150
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`config` ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  id: totrans-151
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`config`（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）—
+    具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
+- en: ViT Model with a decoder on top for masked image modeling, as proposed in [SimMIM](https://arxiv.org/abs/2111.09886).
+  id: totrans-152
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ViT模型在顶部带有解码器，用于遮罩图像建模，如[SimMIM](https://arxiv.org/abs/2111.09886)中提出的。
+- en: Note that we provide a script to pre-train this model on custom data in our
+    [examples directory](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-pretraining).
+  id: totrans-153
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，我们在我们的[示例目录](https://github.com/huggingface/transformers/tree/main/examples/pytorch/image-pretraining)中提供了一个脚本，用于在自定义数据上预训练此模型。
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  id: totrans-154
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此模型是PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)子类。将其用作常规PyTorch模块，并参考PyTorch文档以获取与一般用法和行为相关的所有事项。
+- en: '#### `forward`'
+  id: totrans-155
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '#### `forward`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L645)'
+  id: totrans-156
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L645)'
+- en: '[PRE10]'
+  id: totrans-157
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE10]'
+- en: Parameters
+  id: totrans-158
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
+    width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  id: totrans-159
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pixel_values`（形状为`(batch_size, num_channels, height, width)`的`torch.FloatTensor`）—
+    像素值。像素值可以使用[AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)获取。有关详细信息，请参阅[ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
+- en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  id: totrans-160
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`head_mask`（形状为`(num_heads,)`或`(num_layers, num_heads)`的`torch.FloatTensor`，*可选*）—
+    用于使自注意力模块中选择的头部失效的掩码。掩码值选择在`[0, 1]`中：'
+- en: 1 indicates the head is `not masked`,
+  id: totrans-161
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1表示头部未被`masked`。
+- en: 0 indicates the head is `masked`.
+  id: totrans-162
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 0表示头部被`masked`。
+- en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  id: totrans-163
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_attentions` (`bool`，*可选*) — 是否返回所有注意力层的注意力张量。有关更多详细信息，请查看返回张量下的 `attentions`。'
+- en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  id: totrans-164
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_hidden_states` (`bool`，*可选*) — 是否返回所有层的隐藏状态。有关更多详细信息，请查看返回张量下的 `hidden_states`。'
+- en: '`interpolate_pos_encoding` (`bool`, *optional*) — Whether to interpolate the
+    pre-trained position encodings.'
+  id: totrans-165
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`interpolate_pos_encoding` (`bool`, *可选*) — 是否插值预训练位置编码。'
+- en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  id: totrans-166
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`，*可选*) — 是否返回 [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    而不是普通元组。'
+- en: '`bool_masked_pos` (`torch.BoolTensor` of shape `(batch_size, num_patches)`)
+    — Boolean masked positions. Indicates which patches are masked (1) and which aren’t
+    (0).'
+  id: totrans-167
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`bool_masked_pos` (`torch.BoolTensor`，形状为 `(batch_size, num_patches)`) — 布尔掩码位置。指示哪些补丁被掩盖（1）哪些不被掩盖（0）。'
+- en: Returns
+  id: totrans-168
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 返回
+- en: '`transformers.modeling_outputs.MaskedImageModelingOutput` or `tuple(torch.FloatTensor)`'
+  id: totrans-169
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`transformers.modeling_outputs.MaskedImageModelingOutput` 或 `tuple(torch.FloatTensor)`'
+- en: A `transformers.modeling_outputs.MaskedImageModelingOutput` or a tuple of `torch.FloatTensor`
+    (if `return_dict=False` is passed or when `config.return_dict=False`) comprising
+    various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  id: totrans-170
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个 `transformers.modeling_outputs.MaskedImageModelingOutput` 或一个 `torch.FloatTensor`
+    元组（如果传递了 `return_dict=False` 或当 `config.return_dict=False` 时），包含根据配置（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）和输入的不同元素。
+- en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `bool_masked_pos`
+    is provided) — Reconstruction loss.'
+  id: totrans-171
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`loss` (`torch.FloatTensor`，形状为 `(1,)`，*可选*，当提供 `bool_masked_pos` 时返回) — 重构损失。'
+- en: '`reconstruction` (`torch.FloatTensor` of shape `(batch_size, num_channels,
+    height, width)`) — Reconstructed / completed images.'
+  id: totrans-172
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`reconstruction` (`torch.FloatTensor`，形状为 `(batch_size, num_channels, height,
+    width)`) — 重构/完成的图像。'
+- en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or'
+  id: totrans-173
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(torch.FloatTensor)`，*可选*，当传递 `output_hidden_states=True`
+    时返回或'
+- en: '`when` `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor` (one
+    for the output of the embeddings, if the model has an embedding layer, + one for
+    the output of each stage) of shape `(batch_size, sequence_length, hidden_size)`.
+    Hidden-states (also called feature maps) of the model at the output of each stage.'
+  id: totrans-174
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`when` `config.output_hidden_states=True`) — 形状为 `(batch_size, sequence_length,
+    hidden_size)` 的 `torch.FloatTensor` 元组（如果模型具有嵌入层，则为嵌入的输出 + 每个阶段的输出）。模型在每个阶段输出的隐藏状态（也称为特征图）。'
+- en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when'
+  id: totrans-175
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`attentions` (`tuple(torch.FloatTensor)`，*可选*，当传递 `output_attentions=True`
+    时返回或'
+- en: '`config.output_attentions=True):` Tuple of `torch.FloatTensor` (one for each
+    layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`. Attentions
+    weights after the attention softmax, used to compute the weighted average in the
+    self-attention heads.'
+  id: totrans-176
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`config.output_attentions=True):` 形状为 `(batch_size, num_heads, patch_size,
+    sequence_length)` 的 `torch.FloatTensor` 元组（每层一个）。注意力 softmax 后的注意力权重，用于计算自注意力头中的加权平均值。'
+- en: The [ViTForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForMaskedImageModeling)
+    forward method, overrides the `__call__` special method.
+  id: totrans-177
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[ViTForMaskedImageModeling](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForMaskedImageModeling)
+    的前向方法，覆盖了 `__call__` 特殊方法。'
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  id: totrans-178
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然前向传递的步骤需要在此函数内定义，但应该在此之后调用 `Module` 实例，而不是在此处调用，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
+- en: 'Examples:'
+  id: totrans-179
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例：
+- en: '[PRE11]'
+  id: totrans-180
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE11]'
+- en: ViTForImageClassification
+  id: totrans-181
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: ViTForImageClassification
+- en: '### `class transformers.ViTForImageClassification`'
+  id: totrans-182
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.ViTForImageClassification`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L741)'
+  id: totrans-183
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L741)'
+- en: '[PRE12]'
+  id: totrans-184
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE12]'
+- en: Parameters
+  id: totrans-185
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`config` ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  id: totrans-186
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`config` ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — 模型配置类，包含模型的所有参数。使用配置文件初始化不会加载与模型相关的权重，只加载配置。查看 [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
+    方法以加载模型权重。'
+- en: ViT Model transformer with an image classification head on top (a linear layer
+    on top of the final hidden state of the [CLS] token) e.g. for ImageNet.
+  id: totrans-187
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ViT 模型变压器，顶部带有图像分类头（在 [CLS] 标记的最终隐藏状态之上的线性层），例如用于 ImageNet。
+- en: Note that it’s possible to fine-tune ViT on higher resolution images than the
+    ones it has been trained on, by setting `interpolate_pos_encoding` to `True` in
+    the forward of the model. This will interpolate the pre-trained position embeddings
+    to the higher resolution.
+  id: totrans-188
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，可以通过在模型的前向传递中将 `interpolate_pos_encoding` 设置为 `True`，在比模型训练时更高分辨率的图像上对 ViT
+    进行微调。这将对预训练的位置嵌入进行插值以适应更高分辨率。
+- en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
+    for all matter related to general usage and behavior.
+  id: totrans-189
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个模型是一个 PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
+    子类。将其用作常规的 PyTorch 模块，并参考 PyTorch 文档以获取有关一般用法和行为的所有信息。
+- en: '#### `forward`'
+  id: totrans-190
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '#### `forward`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L769)'
+  id: totrans-191
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_vit.py#L769)'
+- en: '[PRE13]'
+  id: totrans-192
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE13]'
+- en: Parameters
+  id: totrans-193
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_channels, height,
+    width)`) — Pixel values. Pixel values can be obtained using [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  id: totrans-194
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pixel_values`（形状为 `(batch_size, num_channels, height, width)` 的 `torch.FloatTensor`）—
+    像素值。像素值可以使用 [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)
+    获取。有关详细信息，请参阅 [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
+- en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
+    *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
+    values selected in `[0, 1]`:'
+  id: totrans-195
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`head_mask`（形状为 `(num_heads,)` 或 `(num_layers, num_heads)` 的 `torch.FloatTensor`，*可选*）—
+    用于使自注意力模块中的选定头部失效的掩码。掩码值选定在 `[0, 1]` 中：'
+- en: 1 indicates the head is `not masked`,
+  id: totrans-196
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1 表示头部未被 `masked`，
+- en: 0 indicates the head is `masked`.
+  id: totrans-197
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 0 表示头部被 `masked`。
+- en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail.'
+  id: totrans-198
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*）— 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回的张量下的 `attentions`。'
+- en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail.'
+  id: totrans-199
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*）— 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回的张量下的 `hidden_states`。'
+- en: '`interpolate_pos_encoding` (`bool`, *optional*) — Whether to interpolate the
+    pre-trained position encodings.'
+  id: totrans-200
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`interpolate_pos_encoding`（`bool`，*可选*）— 是否插值预训练位置编码。'
+- en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple.'
+  id: totrans-201
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*）— 是否返回 [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    而不是普通元组。'
+- en: '`labels` (`torch.LongTensor` of shape `(batch_size,)`, *optional*) — Labels
+    for computing the image classification/regression loss. Indices should be in `[0,
+    ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is
+    computed (Mean-Square loss), If `config.num_labels > 1` a classification loss
+    is computed (Cross-Entropy).'
+  id: totrans-202
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`labels`（形状为 `(batch_size,)` 的 `torch.LongTensor`，*可选*）— 用于计算图像分类/回归损失的标签。索引应在
+    `[0, ..., config.num_labels - 1]` 中。如果 `config.num_labels == 1`，则计算回归损失（均方损失），如果
+    `config.num_labels > 1`，则计算分类损失（交叉熵）。'
+- en: Returns
+  id: totrans-203
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 返回
+- en: '[transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    or `tuple(torch.FloatTensor)`'
+  id: totrans-204
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    或 `tuple(torch.FloatTensor)`'
+- en: A [transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  id: totrans-205
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个 [transformers.modeling_outputs.ImageClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.ImageClassifierOutput)
+    或一个 `torch.FloatTensor` 元组（如果传递了 `return_dict=False` 或当 `config.return_dict=False`
+    时）包括根据配置（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）和输入的不同元素。
+- en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-206
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`loss`（形状为 `(1,)` 的 `torch.FloatTensor`，*可选*，当提供 `labels` 时返回）— 分类（如果 `config.num_labels==1`
+    则为回归）损失。'
+- en: '`logits` (`torch.FloatTensor` of shape `(batch_size, config.num_labels)`) —
+    Classification (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-207
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`logits`（形状为 `(batch_size, config.num_labels)` 的 `torch.FloatTensor`）— 分类（如果
+    `config.num_labels==1` 则为回归）分数（SoftMax 之前）。'
+- en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
+    (one for the output of the embeddings, if the model has an embedding layer, +
+    one for the output of each stage) of shape `(batch_size, sequence_length, hidden_size)`.
+    Hidden-states (also called feature maps) of the model at the output of each stage.'
+  id: totrans-208
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递 `output_hidden_states=True`
+    或当 `config.output_hidden_states=True` 时返回）— 形状为 `(batch_size, sequence_length,
+    hidden_size)` 的 `torch.FloatTensor` 元组（如果模型有嵌入层，则为嵌入的输出 + 每个阶段的输出）的隐藏状态（也称为特征图）。'
+- en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
+    (one for each layer) of shape `(batch_size, num_heads, patch_size, sequence_length)`.'
+  id: totrans-209
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递 `output_attentions=True` 或当
+    `config.output_attentions=True` 时返回）— 形状为 `(batch_size, num_heads, patch_size,
+    sequence_length)` 的 `torch.FloatTensor` 元组（每层一个）。'
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  id: totrans-210
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 在自注意力头中用于计算加权平均值的注意力 softmax 后的注意力权重。
+- en: The [ViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForImageClassification)
+    forward method, overrides the `__call__` special method.
+  id: totrans-211
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[ViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTForImageClassification)
+    的前向方法，覆盖了 `__call__` 特殊方法。'
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  id: totrans-212
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 尽管前向传递的步骤需要在此函数内定义，但应该在此之后调用`Module`实例，而不是调用此函数，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
+- en: 'Example:'
+  id: totrans-213
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例：
+- en: '[PRE14]'
+  id: totrans-214
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE14]'
+- en: TensorFlowHide TensorFlow content
+  id: totrans-215
+  prefs: []
+  type: TYPE_NORMAL
+  zh: TensorFlow隐藏TensorFlow内容
+- en: TFViTModel
+  id: totrans-216
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: TFViTModel
+- en: '### `class transformers.TFViTModel`'
+  id: totrans-217
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.TFViTModel`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L740)'
+  id: totrans-218
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L740)'
+- en: '[PRE15]'
+  id: totrans-219
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE15]'
+- en: Parameters
+  id: totrans-220
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`config` ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  id: totrans-221
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`config`（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）-
+    模型配置类，包含模型的所有参数。使用配置文件初始化不会加载与模型相关的权重，只加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)方法以加载模型权重。'
+- en: The bare ViT Model transformer outputting raw hidden-states without any specific
+    head on top.
+  id: totrans-222
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 裸ViT模型变换器输出原始隐藏状态，没有特定的头部在顶部。
+- en: This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  id: totrans-223
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此模型继承自[TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel)。查看超类文档以获取库为所有模型实现的通用方法（例如下载或保存、调整输入嵌入、修剪头等）。
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  id: totrans-224
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 此模型也是[tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)子类。将其用作常规的TF
+    2.0 Keras模型，并参考TF 2.0文档以获取与一般用法和行为相关的所有事项。
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  id: totrans-225
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`transformers`中的TensorFlow模型和层接受两种格式的输入：'
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  id: totrans-226
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将所有输入作为关键字参数（类似于PyTorch模型），或者
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  id: totrans-227
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将所有输入作为列表、元组或字典放在第一个位置参数中。
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  id: totrans-228
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 支持第二种格式的原因是Keras方法在向模型和层传递输入时更喜欢这种格式。由于有这种支持，当使用`model.fit()`等方法时，应该“只需工作” -
+    只需以`model.fit()`支持的任何格式传递输入和标签！但是，如果您想在Keras方法之外使用第二种格式，例如在使用Keras`Functional`
+    API创建自己的层或模型时，有三种可能性可用于收集第一个位置参数中的所有输入张量：
+- en: 'a single Tensor with `pixel_values` only and nothing else: `model(pixel_values)`'
+  id: totrans-229
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 仅使用`pixel_values`作为单个张量，没有其他内容：`model(pixel_values)`
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([pixel_values, attention_mask])` or `model([pixel_values,
+    attention_mask, token_type_ids])`'
+  id: totrans-230
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一个长度不定的列表，其中包含一个或多个输入张量，按照文档字符串中给定的顺序：`model([pixel_values, attention_mask])`或`model([pixel_values,
+    attention_mask, token_type_ids])`
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"pixel_values": pixel_values, "token_type_ids":
+    token_type_ids})`'
+  id: totrans-231
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '一个字典，其中包含一个或多个与文档字符串中给定的输入名称相关联的输入张量：`model({"pixel_values": pixel_values,
+    "token_type_ids": token_type_ids})`'
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  id: totrans-232
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，当使用[子类化](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)创建模型和层时，您无需担心这些问题，因为您可以像对待其他Python函数一样传递输入！
+- en: '#### `call`'
+  id: totrans-233
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '#### `call`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L750)'
+  id: totrans-234
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L750)'
+- en: '[PRE16]'
+  id: totrans-235
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE16]'
+- en: Parameters
+  id: totrans-236
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`pixel_values` (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str, tf.Tensor]`
+    or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    num_channels, height, width)`) — Pixel values. Pixel values can be obtained using
+    [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  id: totrans-237
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pixel_values`（`np.ndarray`，`tf.Tensor`，`List[tf.Tensor]` ``Dict[str, tf.Tensor]`或`Dict[str,
+    np.ndarray]`，每个示例的形状必须为`(batch_size, num_channels, height, width)`) - 像素值。可以使用[AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)获取像素值。有关详细信息，请参阅[ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
+- en: '`head_mask` (`np.ndarray` or `tf.Tensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  id: totrans-238
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`head_mask`（形状为`(num_heads,)`或`(num_layers, num_heads)`的`np.ndarray`或`tf.Tensor`，*可选*）
+    - 用于使自注意力模块的选定头部失效的掩码。掩码值选定为`[0, 1]`：'
+- en: 1 indicates the head is `not masked`,
+  id: totrans-239
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1表示头部“未屏蔽”,
+- en: 0 indicates the head is `masked`.
+  id: totrans-240
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 0表示头部“已屏蔽”。
+- en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  id: totrans-241
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_attentions` (`bool`, *可选*) — 是否返回所有注意力层的注意力张量。有关更多详细信息，请参见返回张量下的`attentions`。此参数仅在急切模式下可用，在图模式下将使用配置中的值。'
+- en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  id: totrans-242
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_hidden_states` (`bool`, *可选*) — 是否返回所有层的隐藏状态。有关更多详细信息，请参见返回张量下的`hidden_states`。此参数仅在急切模式下可用，在图模式下将使用配置中的值。'
+- en: '`interpolate_pos_encoding` (`bool`, *optional*) — Whether to interpolate the
+    pre-trained position encodings.'
+  id: totrans-243
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`interpolate_pos_encoding` (`bool`, *可选*) — 是否插值预训练位置编码。'
+- en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple. This argument can be used in eager mode, in graph mode
+    the value will always be set to True.'
+  id: totrans-244
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *可选*) — 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。此参数可在急切模式下使用，在图模式下该值将始终设置为True。'
+- en: '`training` (`bool`, *optional*, defaults to `False“) — Whether or not to use
+    the model in training mode (some modules like dropout modules have different behaviors
+    between training and evaluation).'
+  id: totrans-245
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`training` (`bool`, *可选*, 默认为`False“) — 是否在训练模式下使用模型（一些模块如dropout模块在训练和评估之间有不同的行为）。'
+- en: Returns
+  id: totrans-246
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 返回
+- en: '[transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling)
+    or `tuple(tf.Tensor)`'
+  id: totrans-247
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling)或`tf.Tensor`元组'
+- en: A [transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  id: totrans-248
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个[transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFBaseModelOutputWithPooling)或一个`tf.Tensor`元组（如果传递`return_dict=False`或`config.return_dict=False`）包含各种元素，取决于配置（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）和输入。
+- en: '`last_hidden_state` (`tf.Tensor` of shape `(batch_size, sequence_length, hidden_size)`)
+    — Sequence of hidden-states at the output of the last layer of the model.'
+  id: totrans-249
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`last_hidden_state` (`tf.Tensor`，形状为`(batch_size, sequence_length, hidden_size)`)
+    — 模型最后一层的隐藏状态序列。'
+- en: '`pooler_output` (`tf.Tensor` of shape `(batch_size, hidden_size)`) — Last layer
+    hidden-state of the first token of the sequence (classification token) further
+    processed by a Linear layer and a Tanh activation function. The Linear layer weights
+    are trained from the next sentence prediction (classification) objective during
+    pretraining.'
+  id: totrans-250
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pooler_output` (`tf.Tensor`，形状为`(batch_size, hidden_size)`) — 序列第一个标记（分类标记）的最后一层隐藏状态，经过线性层和Tanh激活函数进一步处理。线性层的权重是在预训练期间从下一个句子预测（分类）目标中训练的。'
+- en: This output is usually *not* a good summary of the semantic content of the input,
+    you’re often better with averaging or pooling the sequence of hidden-states for
+    the whole input sequence.
+  id: totrans-251
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 该输出通常*不是*输入语义内容的良好摘要，通常最好对整个输入序列的隐藏状态进行平均或池化。
+- en: '`hidden_states` (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  id: totrans-252
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(tf.Tensor)`, *可选*, 当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回)
+    — 形状为`(batch_size, sequence_length, hidden_size)`的`tf.Tensor`元组（一个用于嵌入的输出 + 一个用于每层的输出）。'
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  id: totrans-253
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 模型在每一层的输出的隐藏状态加上初始嵌入输出。
+- en: '`attentions` (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-254
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`attentions` (`tuple(tf.Tensor)`, *可选*, 当传递`output_attentions=True`或`config.output_attentions=True`时返回)
+    — 形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`tf.Tensor`元组（每层一个）。'
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  id: totrans-255
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 注意力softmax后的注意力权重，用于计算自注意力头中的加权平均值。
+- en: The [TFViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.TFViTModel)
+    forward method, overrides the `__call__` special method.
+  id: totrans-256
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[TFViTModel](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.TFViTModel)前向方法，覆盖`__call__`特殊方法。'
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  id: totrans-257
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然前向传递的方法需要在此函数内定义，但应该在此之后调用`Module`实例，而不是在此处调用，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
+- en: 'Example:'
+  id: totrans-258
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例：
+- en: '[PRE17]'
+  id: totrans-259
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE17]'
+- en: TFViTForImageClassification
+  id: totrans-260
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: TFViTForImageClassification
+- en: '### `class transformers.TFViTForImageClassification`'
+  id: totrans-261
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.TFViTForImageClassification`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L819)'
+  id: totrans-262
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L819)'
+- en: '[PRE18]'
+  id: totrans-263
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE18]'
+- en: Parameters
+  id: totrans-264
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`config` ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    — Model configuration class with all the parameters of the model. Initializing
+    with a config file does not load the weights associated with the model, only the
+    configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)
+    method to load the model weights.'
+  id: totrans-265
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`config`（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）—
+    具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型相关的权重，只会加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained)方法以加载模型权重。'
+- en: ViT Model transformer with an image classification head on top (a linear layer
+    on top of the final hidden state of the [CLS] token) e.g. for ImageNet.
+  id: totrans-266
+  prefs: []
+  type: TYPE_NORMAL
+  zh: ViT模型变压器，顶部带有一个图像分类头（在[CLS]标记的最终隐藏状态之上的线性层），例如用于ImageNet。
+- en: Note that it’s possible to fine-tune ViT on higher resolution images than the
+    ones it has been trained on, by setting `interpolate_pos_encoding` to `True` in
+    the forward of the model. This will interpolate the pre-trained position embeddings
+    to the higher resolution.
+  id: totrans-267
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，可以通过在模型的前向传递中将`interpolate_pos_encoding`设置为`True`来在比其训练时更高分辨率的图像上微调ViT。这将对预训练的位置嵌入进行插值到更高分辨率。
+- en: This model inherits from [TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel).
+    Check the superclass documentation for the generic methods the library implements
+    for all its model (such as downloading or saving, resizing the input embeddings,
+    pruning heads etc.)
+  id: totrans-268
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个模型继承自[TFPreTrainedModel](/docs/transformers/v4.37.2/en/main_classes/model#transformers.TFPreTrainedModel)。查看超类文档以获取库为所有模型实现的通用方法（如下载或保存、调整输入嵌入、修剪头等）。
+- en: This model is also a [tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)
+    subclass. Use it as a regular TF 2.0 Keras Model and refer to the TF 2.0 documentation
+    for all matter related to general usage and behavior.
+  id: totrans-269
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 这个模型也是一个[tf.keras.Model](https://www.tensorflow.org/api_docs/python/tf/keras/Model)子类。将其用作常规的TF
+    2.0 Keras模型，并参考TF 2.0文档以获取与一般用法和行为相关的所有内容。
+- en: 'TensorFlow models and layers in `transformers` accept two formats as input:'
+  id: totrans-270
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '`transformers`中的TensorFlow模型和层接受两种格式的输入：'
+- en: having all inputs as keyword arguments (like PyTorch models), or
+  id: totrans-271
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将所有输入作为关键字参数（类似于PyTorch模型），或
+- en: having all inputs as a list, tuple or dict in the first positional argument.
+  id: totrans-272
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 将所有输入作为列表、元组或字典放在第一个位置参数中。
+- en: 'The reason the second format is supported is that Keras methods prefer this
+    format when passing inputs to models and layers. Because of this support, when
+    using methods like `model.fit()` things should “just work” for you - just pass
+    your inputs and labels in any format that `model.fit()` supports! If, however,
+    you want to use the second format outside of Keras methods like `fit()` and `predict()`,
+    such as when creating your own layers or models with the Keras `Functional` API,
+    there are three possibilities you can use to gather all the input Tensors in the
+    first positional argument:'
+  id: totrans-273
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 支持第二种格式的原因是，当将输入传递给模型和层时，Keras方法更喜欢这种格式。由于有了这种支持，当使用`model.fit()`等方法时，你应该可以“轻松使用”
+    - 只需以`model.fit()`支持的任何格式传递输入和标签即可！然而，如果你想在Keras方法之外使用第二种格式，比如在使用Keras`Functional`API创建自己的层或模型时，有三种可能性可以用来收集所有输入张量放在第一个位置参数中：
+- en: 'a single Tensor with `pixel_values` only and nothing else: `model(pixel_values)`'
+  id: totrans-274
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一个只有`pixel_values`的单个张量，没有其他内容：`model(pixel_values)`
+- en: 'a list of varying length with one or several input Tensors IN THE ORDER given
+    in the docstring: `model([pixel_values, attention_mask])` or `model([pixel_values,
+    attention_mask, token_type_ids])`'
+  id: totrans-275
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 一个长度不定的列表，其中包含一个或多个输入张量，按照文档字符串中给定的顺序：`model([pixel_values, attention_mask])`或`model([pixel_values,
+    attention_mask, token_type_ids])`
+- en: 'a dictionary with one or several input Tensors associated to the input names
+    given in the docstring: `model({"pixel_values": pixel_values, "token_type_ids":
+    token_type_ids})`'
+  id: totrans-276
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '一个字典，其中包含一个或多个与文档字符串中给定的输入名称相关联的输入张量：`model({"pixel_values": pixel_values,
+    "token_type_ids": token_type_ids})`'
+- en: Note that when creating models and layers with [subclassing](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+    then you don’t need to worry about any of this, as you can just pass inputs like
+    you would to any other Python function!
+  id: totrans-277
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 请注意，当使用[子类化](https://keras.io/guides/making_new_layers_and_models_via_subclassing/)创建模型和层时，你不需要担心这些问题，因为你可以像对待其他Python函数一样传递输入！
+- en: '#### `call`'
+  id: totrans-278
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '#### `call`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L849)'
+  id: totrans-279
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_tf_vit.py#L849)'
+- en: '[PRE19]'
+  id: totrans-280
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE19]'
+- en: Parameters
+  id: totrans-281
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
+- en: '`pixel_values` (`np.ndarray`, `tf.Tensor`, `List[tf.Tensor]` ``Dict[str, tf.Tensor]`
+    or `Dict[str, np.ndarray]` and each example must have the shape `(batch_size,
+    num_channels, height, width)`) — Pixel values. Pixel values can be obtained using
+    [AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor).
+    See [ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
+    for details.'
+  id: totrans-282
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`pixel_values`（`np.ndarray`、`tf.Tensor`、`List[tf.Tensor]`、`Dict[str, tf.Tensor]`或`Dict[str,
+    np.ndarray]`，每个示例的形状必须为`(batch_size, num_channels, height, width)`）— 像素值。可以使用[AutoImageProcessor](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoImageProcessor)获取像素值。有关详细信息，请参阅[ViTImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
+- en: '`head_mask` (`np.ndarray` or `tf.Tensor` of shape `(num_heads,)` or `(num_layers,
+    num_heads)`, *optional*) — Mask to nullify selected heads of the self-attention
+    modules. Mask values selected in `[0, 1]`:'
+  id: totrans-283
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`head_mask`（形状为`(num_heads,)`或`(num_layers, num_heads)`的`np.ndarray`或`tf.Tensor`，*可选*）—
+    用于使自注意力模块中选择的头部失效的掩码。掩码值选在`[0, 1]`之间：'
+- en: 1 indicates the head is `not masked`,
+  id: totrans-284
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 1表示头部未被`masked`，
+- en: 0 indicates the head is `masked`.
+  id: totrans-285
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: 0表示头部被`masked`。
+- en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
+    tensors of all attention layers. See `attentions` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  id: totrans-286
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_attentions` (`bool`, *可选*) — 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量下的 `attentions`。此参数仅在急切模式下可用，在图模式下将使用配置中的值。'
+- en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
+    hidden states of all layers. See `hidden_states` under returned tensors for more
+    detail. This argument can be used only in eager mode, in graph mode the value
+    in the config will be used instead.'
+  id: totrans-287
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`output_hidden_states` (`bool`, *可选*) — 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量下的 `hidden_states`。此参数仅在急切模式下可用，在图模式下将使用配置中的值。'
+- en: '`interpolate_pos_encoding` (`bool`, *optional*) — Whether to interpolate the
+    pre-trained position encodings.'
+  id: totrans-288
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`interpolate_pos_encoding` (`bool`, *可选*) — 是否插值预训练的位置编码。'
+- en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    instead of a plain tuple. This argument can be used in eager mode, in graph mode
+    the value will always be set to True.'
+  id: totrans-289
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *可选*) — 是否返回 [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
+    而不是普通元组。此参数仅在急切模式下可用，在图模式下该值将始终设置为 True。'
+- en: '`training` (`bool`, *optional*, defaults to `False“) — Whether or not to use
+    the model in training mode (some modules like dropout modules have different behaviors
+    between training and evaluation).'
+  id: totrans-290
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`training` (`bool`, *可选*, 默认为 `False“) — 是否在训练模式下使用模型（一些模块如dropout模块在训练和评估之间有不同的行为）。'
+- en: '`labels` (`tf.Tensor` or `np.ndarray` of shape `(batch_size,)`, *optional*)
+    — Labels for computing the image classification/regression loss. Indices should
+    be in `[0, ..., config.num_labels - 1]`. If `config.num_labels == 1` a regression
+    loss is computed (Mean-Square loss), If `config.num_labels > 1` a classification
+    loss is computed (Cross-Entropy).'
+  id: totrans-291
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`labels` (`tf.Tensor` 或形状为 `(batch_size,)` 的 `np.ndarray`，*可选*) — 用于计算图像分类/回归损失的标签。索引应在
+    `[0, ..., config.num_labels - 1]` 中。如果 `config.num_labels == 1`，则计算回归损失（均方损失），如果
+    `config.num_labels > 1`，则计算分类损失（交叉熵）。'
+- en: Returns
+  id: totrans-292
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 返回
+- en: '[transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or `tuple(tf.Tensor)`'
+  id: totrans-293
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    或 `tuple(tf.Tensor)`'
+- en: A [transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    or a tuple of `tf.Tensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
+    comprising various elements depending on the configuration ([ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig))
+    and inputs.
+  id: totrans-294
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 一个 [transformers.modeling_tf_outputs.TFSequenceClassifierOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_tf_outputs.TFSequenceClassifierOutput)
+    或一个 `tf.Tensor` 元组（如果传递 `return_dict=False` 或 `config.return_dict=False`）包含根据配置（[ViTConfig](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.ViTConfig)）和输入的不同元素。
+- en: '`loss` (`tf.Tensor` of shape `(batch_size, )`, *optional*, returned when `labels`
+    is provided) — Classification (or regression if config.num_labels==1) loss.'
+  id: totrans-295
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`loss` (`tf.Tensor`，形状为 `(batch_size, )`，*可选*，当提供 `labels` 时返回) — 分类（如果 `config.num_labels==1`
+    则为回归）损失。'
+- en: '`logits` (`tf.Tensor` of shape `(batch_size, config.num_labels)`) — Classification
+    (or regression if config.num_labels==1) scores (before SoftMax).'
+  id: totrans-296
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`logits` (`tf.Tensor`，形状为 `(batch_size, config.num_labels)`) — 分类（如果 `config.num_labels==1`
+    则为回归）得分（SoftMax之前）。'
+- en: '`hidden_states` (`tuple(tf.Tensor)`, *optional*, returned when `output_hidden_states=True`
+    is passed or when `config.output_hidden_states=True`) — Tuple of `tf.Tensor` (one
+    for the output of the embeddings + one for the output of each layer) of shape
+    `(batch_size, sequence_length, hidden_size)`.'
+  id: totrans-297
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`hidden_states` (`tuple(tf.Tensor)`，*可选*，当传递 `output_hidden_states=True` 或
+    `config.output_hidden_states=True` 时返回） — 形状为 `(batch_size, sequence_length, hidden_size)`
+    的 `tf.Tensor` 元组（一个用于嵌入输出，一个用于每一层的输出）。'
+- en: Hidden-states of the model at the output of each layer plus the initial embedding
+    outputs.
+  id: totrans-298
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态以及初始嵌入输出。
+- en: '`attentions` (`tuple(tf.Tensor)`, *optional*, returned when `output_attentions=True`
+    is passed or when `config.output_attentions=True`) — Tuple of `tf.Tensor` (one
+    for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-299
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+  zh: '`attentions` (`tuple(tf.Tensor)`，*可选*，当传递 `output_attentions=True` 或 `config.output_attentions=True`
+    时返回） — 形状为 `(batch_size, num_heads, sequence_length, sequence_length)` 的 `tf.Tensor`
+    元组（每层一个）。'
+- en: Attentions weights after the attention softmax, used to compute the weighted
+    average in the self-attention heads.
+  id: totrans-300
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+  zh: 注意力softmax后的注意力权重，用于计算自注意力头中的加权平均值。
+- en: The [TFViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.TFViTForImageClassification)
+    forward method, overrides the `__call__` special method.
+  id: totrans-301
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[TFViTForImageClassification](/docs/transformers/v4.37.2/en/model_doc/vit#transformers.TFViTForImageClassification)
+    的前向方法，覆盖了 `__call__` 特殊方法。'
+- en: Although the recipe for forward pass needs to be defined within this function,
+    one should call the `Module` instance afterwards instead of this since the former
+    takes care of running the pre and post processing steps while the latter silently
+    ignores them.
+  id: totrans-302
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 虽然前向传递的配方需要在此函数内定义，但应该在此之后调用 `Module` 实例，而不是这个，因为前者负责运行预处理和后处理步骤，而后者会默默地忽略它们。
+- en: 'Example:'
+  id: totrans-303
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 示例：
+- en: '[PRE20]'
+  id: totrans-304
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE20]'
+- en: JAXHide JAX content
+  id: totrans-305
+  prefs: []
+  type: TYPE_NORMAL
+  zh: JAXHide JAX 内容
+- en: FlaxVitModel
+  id: totrans-306
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+  zh: FlaxVitModel
+- en: '### `class transformers.FlaxViTModel`'
+  id: totrans-307
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '### `class transformers.FlaxViTModel`'
+- en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_flax_vit.py#L552)'
+  id: totrans-308
+  prefs: []
+  type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/vit/modeling_flax_vit.py#L552)'
+- en: '[PRE21]'
+  id: totrans-309
+  prefs: []
+  type: TYPE_PRE
+  zh: '[PRE21]'
+- en: Parameters
+  id: totrans-310
+  prefs: []
+  type: TYPE_NORMAL
+  zh: 参数
