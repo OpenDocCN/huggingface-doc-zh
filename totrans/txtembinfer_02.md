@@ -1,0 +1,33 @@
+# 文本嵌入推断
+
+> 原始文本：[https://huggingface.co/docs/text-embeddings-inference/index](https://huggingface.co/docs/text-embeddings-inference/index)
+
+文本嵌入推断（TEI）是一个全面的工具包，旨在有效部署和提供开源文本嵌入模型。它实现了对最流行模型的高性能提取，包括FlagEmbedding、Ember、GTE和E5。
+
+TEI提供了多种功能，旨在优化部署过程并增强整体性能。
+
+**主要特点：**
+
++   **简化部署：** TEI消除了模型图编译步骤的需要，实现更高效的部署过程。
+
++   **资源利用效率高：** 受益于小型Docker镜像和快速启动时间，实现真正的无服务器能力。
+
++   **动态批处理：** TEI包含基于标记的动态批处理，从而在推断过程中优化资源利用。
+
++   **优化推断：** TEI利用[Flash Attention](https://github.com/HazyResearch/flash-attention)、[Candle](https://github.com/huggingface/candle)和[cuBLASLt](https://docs.nvidia.com/cuda/cublas/#using-the-cublaslt-api)，通过使用经过优化的transformers代码进行推断。
+
++   **Safetensors权重加载：** TEI加载[Safetensors](https://github.com/huggingface/safetensors)权重，以实现张量并行性。
+
++   **生产就绪：** TEI支持通过Open Telemetry和Prometheus指标进行分布式跟踪。
+
+**基准测试**
+
+在NVIDIA A10上对[BAAI/bge-base-en-v1.5](https://hf.co/BAAI/bge-large-en-v1.5)进行基准测试，序列长度为512个标记：
+
+![批量大小为1时的延迟比较](../Images/e6750e035fb2bc7b7101ae271c72e9b5.png) ![批量大小为1时的吞吐量比较](../Images/415b7acba9a0a287166646493d086977.png)
+
+![批量大小为32时的延迟比较](../Images/2e474d86a47b081240bf1445d61ecead.png) ![批量大小为32时的吞吐量比较](../Images/077e11f720e151d587efe4e9967a3f68.png)
+
+**入门指南：**
+
+要开始使用TEI，请查看[快速入门](quick_tour)指南。
