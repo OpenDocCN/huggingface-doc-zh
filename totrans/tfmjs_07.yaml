@@ -1,305 +1,438 @@
 - en: Building a Vanilla JavaScript Application
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 构建一个原生JavaScript应用程序
 - en: 'Original text: [https://huggingface.co/docs/transformers.js/tutorials/vanilla-js](https://huggingface.co/docs/transformers.js/tutorials/vanilla-js)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers.js/tutorials/vanilla-js](https://huggingface.co/docs/transformers.js/tutorials/vanilla-js)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: In this tutorial, you’ll build a simple web application that detects objects
     in images using Transformers.js! To follow along, all you need is a code editor,
     a browser, and a simple server (e.g., VS Code Live Server).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本教程中，您将使用Transformers.js构建一个简单的Web应用程序，用于检测图像中的对象！要跟随本教程，您只需要一个代码编辑器、一个浏览器和一个简单的服务器（例如VS
+    Code Live Server）。
 - en: 'Here’s how it works: the user clicks “Upload image” and selects an image using
     an input dialog. After analysing the image with an object detection model, the
     predicted bounding boxes are overlaid on top of the image, like this:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 它的工作原理是：用户点击“上传图像”，然后使用输入对话框选择图像。在使用目标检测模型分析图像后，预测的边界框将叠加在图像上，就像这样：
 - en: '![Demo](../Images/8e870417c611226e6f69a9e332776a4e.png)'
+  id: totrans-5
   prefs: []
   type: TYPE_IMG
+  zh: '![演示](../Images/8e870417c611226e6f69a9e332776a4e.png)'
 - en: 'Useful links:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 有用的链接：
 - en: '[Demo site](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector)'
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[演示站点](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector)'
 - en: '[Interactive code walk-through (scrim)](https://scrimba.com/scrim/cKm9bDAg)'
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[交互式代码演练（scrim）](https://scrimba.com/scrim/cKm9bDAg)'
 - en: '[Source code](https://github.com/xenova/transformers.js/tree/main/examples/vanilla-js)'
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[源代码](https://github.com/xenova/transformers.js/tree/main/examples/vanilla-js)'
 - en: 'Step 1: HTML and CSS setup'
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第一步：HTML和CSS设置
 - en: 'Before we start building with Transformers.js, we first need to lay the groundwork
     with some markup and styling. Create an `index.html` file with a basic HTML skeleton,
     and add the following `<main>` tag to the `<body>`:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始使用Transformers.js构建之前，我们首先需要通过一些标记和样式来奠定基础。创建一个带有基本HTML框架的`index.html`文件，并将以下`<main>`标记添加到`<body>`中：
 - en: '[PRE0]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: <details data-svelte-h="svelte-m0rku7"><summary>Click here to see a breakdown
     of this markup.</summary>
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: <details data-svelte-h="svelte-m0rku7"><summary>单击此处查看此标记的详细信息。</summary>
 - en: We’re adding an `<input>` element with `type="file"` that accepts images. This
     allows the user to select an image from their local file system using a popup
     dialog. The default styling for this element looks quite bad, so let’s add some
     styling. The easiest way to achieve this is to wrap the `<input>` element in a
     `<label>`, hide the input, and then style the label as a button.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们添加了一个带有`type="file"`的`<input>`元素，用于接受图像。这允许用户使用弹出对话框从其本地文件系统中选择图像。此元素的默认样式看起来相当糟糕，因此让我们添加一些样式。实现这一点的最简单方法是将`<input>`元素包装在`<label>`中，隐藏输入，然后将标签样式设置为按钮。
 - en: We’re also adding an empty `<div>` container for displaying the image, plus
     an empty `<p>` tag that we’ll use to give status updates to the user while we
     download and run the model, since both of these operations take some time.</details>
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还添加了一个空的`<div>`容器用于显示图像，以及一个空的`<p>`标记，我们将在下载和运行模型时使用它向用户提供状态更新，因为这两个操作都需要一些时间。
 - en: 'Next, add the following CSS rules in a `style.css` file and and link it to
     the HTML:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，在`style.css`文件中添加以下CSS规则，并将其链接到HTML中：
 - en: '[PRE1]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Here’s how the UI looks at this point:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 此时UI的外观如下：
 - en: '![Demo](../Images/8b9eb54c5ffe79961986480e9ea6b7ea.png)'
+  id: totrans-19
   prefs: []
   type: TYPE_IMG
+  zh: '![演示](../Images/8b9eb54c5ffe79961986480e9ea6b7ea.png)'
 - en: 'Step 2: JavaScript setup'
+  id: totrans-20
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第二步：JavaScript设置
 - en: 'With the *boring* part out of the way, let’s start writing some JavaScript
     code! Create a file called `index.js` and link to it in `index.html` by adding
     the following to the end of the `<body>`:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 完成*无聊*的部分后，让我们开始编写一些JavaScript代码！创建一个名为`index.js`的文件，并通过将以下内容添加到`<body>`的末尾来将其链接到`index.html`：
 - en: '[PRE2]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: The `type="module"` attribute is important, as it turns our file into a [JavaScript
     module](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules),
     meaning that we’ll be able to use imports and exports.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '`type="module"`属性很重要，因为它将我们的文件转换为[JavaScript模块](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)，这意味着我们将能够使用导入和导出。'
 - en: 'Moving into `index.js`, let’s import Transformers.js by adding the following
     line to the top of the file:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 进入`index.js`，让我们通过在文件顶部添加以下行来导入Transformers.js：
 - en: '[PRE3]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Since we will be downloading the model from the Hugging Face Hub, we can skip
     the local model check by setting:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于我们将从Hugging Face Hub下载模型，我们可以通过设置来跳过本地模型检查：
 - en: '[PRE4]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Next, let’s create references to the various DOM elements we will access later:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，让我们创建对稍后将访问的各种DOM元素的引用：
 - en: '[PRE5]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Step 3: Create an object detection pipeline'
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第三步：创建一个目标检测流水线
 - en: We’re finally ready to create our object detection pipeline! As a reminder,
     a [pipeline](./pipelines). is a high-level interface provided by the library to
     perform a specific task. In our case, we will instantiate an object detection
     pipeline with the `pipeline()` helper function.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们终于准备好创建我们的目标检测流水线了！作为提醒，[流水线](./pipelines)是库提供的用于执行特定任务的高级接口。在我们的情况下，我们将使用`pipeline()`辅助函数实例化一个目标检测流水线。
 - en: Since this can take some time (especially the first time when we have to download
     the ~40MB model), we first update the `status` paragraph so that the user knows
     that we’re about to load the model.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于这可能需要一些时间（特别是第一次需要下载约40MB的模型时），我们首先更新`status`段落，以便用户知道我们即将加载模型。
 - en: '[PRE6]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: To keep this tutorial simple, we’ll be loading and running the model in the
     main (UI) thread. This is not recommended for production applications, since the
     UI will freeze when we’re performing these actions. This is because JavaScript
     is a single-threaded language. To overcome this, you can use a [web worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
     to download and run the model in the background. However, we’re not going to do
     cover that in this tutorial…
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了使本教程简单，我们将在主（UI）线程中加载和运行模型。这在生产应用程序中不推荐，因为在执行这些操作时，UI将会冻结。这是因为JavaScript是单线程语言。为了克服这个问题，您可以使用[web
+    worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)在后台下载和运行模型。但是，在本教程中我们不会涉及到这一点...
 - en: 'We can now call the `pipeline()` function that we imported at the top of our
     file, to create our object detection pipeline:'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们可以调用我们在文件顶部导入的`pipeline()`函数，以创建我们的目标检测流水线：
 - en: '[PRE7]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'We’re passing two arguments into the `pipeline()` function: (1) task and (2)
     model.'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将两个参数传递给`pipeline()`函数：（1）任务和（2）模型。
 - en: The first tells Transformers.js what kind of task we want to perform. In our
     case, that is `object-detection`, but there are many other tasks that the library
     supports, including `text-generation`, `sentiment-analysis`, `summarization`,
     or `automatic-speech-recognition`. See [here](https://huggingface.co/docs/transformers.js/pipelines#tasks)
     for the full list.
+  id: totrans-38
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 第一个告诉Transformers.js我们想要执行什么样的任务。在我们的情况下，那就是`object-detection`，但库支持许多其他任务，包括`text-generation`，`sentiment-analysis`，`summarization`或`automatic-speech-recognition`。请参阅[这里](https://huggingface.co/docs/transformers.js/pipelines#tasks)获取完整列表。
 - en: The second argument specifies which model we would like to use to solve the
     given task. We will use [`Xenova/detr-resnet-50`](https://huggingface.co/Xenova/detr-resnet-50),
     as it is a relatively small (~40MB) but powerful model for detecting objects in
     an image.
+  id: totrans-39
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 第二个参数指定我们想要使用哪个模型来解决给定的任务。我们将使用[`Xenova/detr-resnet-50`](https://huggingface.co/Xenova/detr-resnet-50)，因为它是一个相对较小（~40MB）但功能强大的模型，用于检测图像中的对象。
 - en: Once the function returns, we’ll tell the user that the app is ready to be used.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 函数返回后，我们将告诉用户应用程序已准备好使用。
 - en: '[PRE8]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Step 4: Create the image uploader'
+  id: totrans-42
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第四步：创建图像上传器
 - en: The next step is to support uploading/selection of images. To achieve this,
     we will listen for “change” events from the `fileUpload` element. In the callback
     function, we use a `FileReader()` to read the contents of the image if one is
     selected (and nothing otherwise).
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 下一步是支持上传/选择图像。为了实现这一点，我们将监听`fileUpload`元素的“change”事件。在回调函数中，如果选择了图像（否则什么也不做），我们使用`FileReader()`来读取图像的内容。
 - en: '[PRE9]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Once the image has been loaded into the browser, the `reader.onload` callback
     function will be invoked. In it, we append the new `<img>` element to the `imageContainer`
     to be displayed to the user.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦图像被加载到浏览器中，`reader.onload`回调函数将被调用。在其中，我们将新的`<img>`元素附加到`imageContainer`中，以供用户查看。
 - en: 'Don’t worry about the `detect(image)` function call (which is commented out)
     - we will explain it later! For now, try to run the app and upload an image to
     the browser. You should see your image displayed under the button like this:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 不要担心`detect(image)`函数调用（已注释掉）-我们稍后会解释！现在，尝试运行应用程序并将图像上传到浏览器。您应该看到您的图像显示在按钮下方，就像这样：
 - en: '![Demo](../Images/cb7cca9d3c88a5511c333c6583724936.png)'
+  id: totrans-47
   prefs: []
   type: TYPE_IMG
+  zh: '![演示](../Images/cb7cca9d3c88a5511c333c6583724936.png)'
 - en: 'Step 5: Run the model'
+  id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第五步：运行模型
 - en: 'We’re finally ready to start interacting with Transformers.js! Let’s uncomment
     the `detect(image)` function call from the snippet above. Then we’ll define the
     function itself:'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们终于准备好开始与Transformers.js交互了！让我们取消上面片段中的`detect(image)`函数调用的注释。然后我们将定义函数本身：
 - en: '[PRE10]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'NOTE: The `detect` function needs to be asynchronous, since we’ll `await` the
     result of the the model.'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意：`detect`函数需要是异步的，因为我们将等待模型的结果。
 - en: Once we’ve updated the `status` to “Analysing”, we’re ready to perform *inference*,
     which simply means to run the model with some data. This is done via the `detector()`
     function that was returned from `pipeline()`. The first argument we’re passing
     is the image data (`img.src`).
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦我们将`status`更新为“分析中”，我们就准备好执行*推理*，这只是意味着用一些数据运行模型。这是通过从`pipeline()`返回的`detector()`函数完成的。我们传递的第一个参数是图像数据（`img.src`）。
 - en: 'The second argument is an options object:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二个参数是一个选项对象：
 - en: We set the `threshold` property to `0.5`. This means that we want the model
     to be at least 50% confident before claiming it has detected an object in the
     image. The lower the threshold, the more objects it’ll detect (but may misidentify
     objects); the higher the threshold, the fewer objects it’ll detect (but may miss
     objects in the scene).
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我们将`threshold`属性设置为`0.5`。这意味着我们希望模型至少有50%的信心才能声称在图像中检测到一个对象。阈值越低，检测到的对象就越多（但可能会误识别对象）；阈值越高，检测到的对象就越少（但可能会错过场景中的对象）。
 - en: 'We also specify `percentage: true`, which means that we want the bounding box
     for the objects to be returned as percentages (instead of pixels).'
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '我们还指定`percentage: true`，这意味着我们希望对象的边界框以百分比形式返回（而不是像素）。'
 - en: 'If you now try to run the app and upload an image, you should see the following
     output logged to the console:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您现在尝试运行该应用程序并上传图像，您应该看到以下输出记录到控制台：
 - en: '![Demo](../Images/3b9d7bad794acec4f02358c5e5494057.png)'
+  id: totrans-57
   prefs: []
   type: TYPE_IMG
+  zh: '![演示](../Images/3b9d7bad794acec4f02358c5e5494057.png)'
 - en: In the example above, we uploaded an image of two elephants, so the `output`
     variable holds an array with two objects, each containing a `label` (the string
     “elephant”), a `score` (indicating the model’s confidence in its prediction) and
     a `box` object (representing the bounding box of the detected entity).
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 在上面的示例中，我们上传了一张两只大象的图像，所以`output`变量包含一个包含两个对象的数组，每个对象包含一个`label`（字符串“elephant”），一个`score`（表示模型对其预测的信心）和一个`box`对象（表示检测到的实体的边界框）。
 - en: 'Step 6: Render the boxes'
+  id: totrans-59
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第六步：渲染框
 - en: The final step is to display the `box` coordinates as rectangles around each
     of the elephants.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后一步是将`box`坐标显示为围绕每只大象的矩形。
 - en: At the end of our `detect()` function, we’ll run the `renderBox` function on
     each object in the `output` array, using `.forEach()`.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们的`detect()`函数的末尾，我们将在`output`数组中的每个对象上运行`renderBox`函数，使用`.forEach()`。
 - en: '[PRE11]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Here’s the code for the `renderBox()` function with comments to help you understand
     what’s going on:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是带有注释的`renderBox()`函数的代码，以帮助您理解正在发生的事情：
 - en: '[PRE12]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'The bounding box and label span also need some styling, so add the following
     to the `style.css` file:'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 边界框和标签跨度还需要一些样式，因此将以下内容添加到`style.css`文件中：
 - en: '[PRE13]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '**And that’s it!**'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: '**就是这样！**'
 - en: 'You’ve now built your own fully-functional AI application that detects objects
     in images, which runns completely in your browser: no external server, APIs, or
     build tools. Pretty cool! 🥳'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 您现在已经构建了一个完全功能的AI应用程序，可以在浏览器中检测图像中的对象：没有外部服务器、API或构建工具。非常酷！🥳
 - en: '![Demo](../Images/483cc54122437ce4a480746160152d3d.png)'
+  id: totrans-69
   prefs: []
   type: TYPE_IMG
+  zh: '![演示](../Images/483cc54122437ce4a480746160152d3d.png)'
 - en: 'The app is live at the following URL: [https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector)'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 该应用程序已在以下网址上线：[https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector](https://huggingface.co/spaces/Scrimba/vanilla-js-object-detector)
