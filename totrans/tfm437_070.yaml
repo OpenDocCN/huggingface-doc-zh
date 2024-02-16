@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 多GPU上的高效训练
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_many](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_many)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_many](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_gpu_many)
 - en: null
   id: totrans-2
   prefs: []
@@ -22,6 +24,7 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果在单个GPU上训练模型太慢或者模型的权重无法适应单个GPU的内存，则过渡到多GPU设置可能是一个可行的选择。在进行此过渡之前，彻底探索[在单个GPU上进行高效训练的方法和工具](perf_train_gpu_one)中涵盖的所有策略，因为它们普遍适用于任意数量的GPU上的模型训练。一旦您采用了这些策略并发现它们在单个GPU上不足以满足您的情况时，请考虑转移到多个GPU。
 - en: Transitioning from a single GPU to multiple GPUs requires the introduction of
     some form of parallelism, as the workload must be distributed across the resources.
     Multiple techniques can be employed to achieve parallelism, such as data parallelism,
@@ -31,89 +34,107 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 从单个GPU过渡到多个GPU需要引入某种形式的并行性，因为工作负载必须分布在资源之间。可以采用多种技术来实现并行性，例如数据并行性，张量并行性和管道并行性。重要的是要注意，没有一种大小适合所有的解决方案，最佳设置取决于您正在使用的特定硬件配置。
 - en: This guide offers an in-depth overview of individual types of parallelism, as
     well as guidance on ways to combine
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 本指南提供了对各种并行性类型的深入概述，以及有关如何组合的指导
 - en: techniques and choosing an appropriate approach. For step-by-step tutorials
     on distributed training, please refer to the [🤗 Accelerate documentation](https://huggingface.co/docs/accelerate/index).
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 技术和选择适当的方法。有关分布式训练的逐步教程，请参考[🤗加速文档](https://huggingface.co/docs/accelerate/index)。
 - en: While the main concepts discussed in this guide are likely applicable across
     frameworks, here we focus on PyTorch-based implementations.
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管本指南讨论的主要概念可能适用于各种框架，但在这里我们专注于基于PyTorch的实现。
 - en: Before diving deeper into the specifics of each technique, let’s go over the
     rough decision process when training large models on a large infrastructure.
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 在深入研究每种技术的具体细节之前，让我们回顾一下在大型基础设施上训练大型模型时的大致决策过程。
 - en: Scalability strategy
   id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 可扩展性策略
 - en: Begin by estimating how much vRAM is required to train your model. For models
     hosted on the 🤗 Hub, use our [Model Memory Calculator](https://huggingface.co/spaces/hf-accelerate/model-memory-usage),
     which gives you accurate calculations within a few percent margin.
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先估算训练模型所需的vRAM量。对于托管在🤗 Hub上的模型，请使用我们的[模型内存计算器](https://huggingface.co/spaces/hf-accelerate/model-memory-usage)，该计算器可以在几个百分点的范围内给出准确的计算结果。
 - en: '**Parallelization strategy for a single Node / multi-GPU setup**'
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '**单节点/多GPU设置的并行化策略**'
 - en: 'When training a model on a single node with multiple GPUs, your choice of parallelization
     strategy can significantly impact performance. Here’s a breakdown of your options:'
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 在单节点上使用多个GPU训练模型时，您选择的并行化策略可能会显著影响性能。以下是您的选择：
 - en: '**Case 1: Your model fits onto a single GPU**'
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '**情况1：您的模型适合单个GPU**'
 - en: 'If your model can comfortably fit onto a single GPU, you have two primary options:'
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的模型可以轻松适应单个GPU，则有两个主要选项：
 - en: DDP - Distributed DataParallel
   id: totrans-15
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: DDP - 分布式数据并行
 - en: ZeRO - depending on the situation and configuration used, this method may or
     may not be faster, however, it’s worth experimenting with it.
   id: totrans-16
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: ZeRO - 根据所使用的情况和配置，这种方法可能会更快，但是，值得尝试一下。
 - en: '**Case 2: Your model doesn’t fit onto a single GPU:**'
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: '**情况2：您的模型不适合单个GPU：**'
 - en: 'If your model is too large for a single GPU, you have several alternatives
     to consider:'
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的模型太大而无法适应单个GPU，您有几种替代方案可考虑：
 - en: PipelineParallel (PP)
   id: totrans-19
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: PipelineParallel（PP）
 - en: ZeRO
   id: totrans-20
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: ZeRO
 - en: TensorParallel (TP)
   id: totrans-21
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: TensorParallel（TP）
 - en: With very fast inter-node connectivity (e.g., NVLINK or NVSwitch) all three
     strategies (PP, ZeRO, TP) should result in similar performance. However, without
     these, PP will be faster than TP or ZeRO. The degree of TP may also make a difference.
@@ -122,42 +143,51 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 具有非常快的节点间连接（例如NVLINK或NVSwitch）时，所有三种策略（PP，ZeRO，TP）应该会产生类似的性能。但是，如果没有这些，PP将比TP或ZeRO更快。
+    TP的程度也可能会有所不同。最好根据您的特定设置进行实验，以确定最合适的策略。
 - en: TP is almost always used within a single node. That is TP size <= GPUs per node.
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: TP几乎总是在单个节点内使用。即TP大小<=每个节点的GPU数。
 - en: '**Case 3: Largest layer of your model does not fit onto a single GPU**'
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: '**情况3：您的模型最大层不适合单个GPU**'
 - en: If you are not using ZeRO, you have to use TensorParallel (TP), because PipelineParallel
     (PP) alone won’t be sufficient to accommodate the large layer.
   id: totrans-25
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如果您没有使用ZeRO，则必须使用TensorParallel（TP），因为仅使用PipelineParallel（PP）将无法容纳大层。
 - en: If you are using ZeRO, additionally adopt techniques from the [Methods and tools
     for efficient training on a single GPU](perf_train_gpu_one).
   id: totrans-26
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如果您使用ZeRO，另外采用来自[在单个GPU上进行高效训练的方法和工具](perf_train_gpu_one)的技术。
 - en: '**Parallelization strategy for a multi-Node / multi-GPU setup**'
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '**多节点/多GPU设置的并行化策略**'
 - en: 'When you have fast inter-node connectivity (e.g., NVLINK or NVSwitch) consider
     using one of these options:'
   id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当您具有快速的节点间连接（例如NVLINK或NVSwitch）时，请考虑使用以下选项之一：
 - en: ZeRO - as it requires close to no modifications to the model
   id: totrans-29
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: ZeRO - 因为它几乎不需要对模型进行修改
 - en: A combination of PipelineParallel(PP) with TensorParallel(TP) and DataParallel(DP)
     - this approach will result in fewer communications, but requires significant
     changes to the model
@@ -166,11 +196,13 @@
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将PipelineParallel（PP）与TensorParallel（TP）和DataParallel（DP）结合使用-这种方法将减少通信量，但需要对模型进行重大更改
 - en: 'When you have slow inter-node connectivity and still low on GPU memory:'
   id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当您的节点间连接速度慢且 GPU 内存不足时：
 - en: Employ a combination of DataParallel(DP) with PipelineParallel(PP), TensorParallel(TP),
     and ZeRO.
   id: totrans-32
@@ -178,16 +210,19 @@
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用 DataParallel(DP) 与 PipelineParallel(PP)、TensorParallel(TP) 和 ZeRO 的组合。
 - en: In the following sections of this guide we dig deeper into how these different
     parallelism methods work.
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南的后续部分中，我们将深入探讨这些不同的并行方法是如何工作的。
 - en: Data Parallelism
   id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数据并行
 - en: Even with only 2 GPUs, you can readily leverage the accelerated training capabilities
     offered by PyTorch’s built-in features, such as `DataParallel` (DP) and `DistributedDataParallel`
     (DDP). Note that [PyTorch documentation](https://pytorch.org/docs/master/generated/torch.nn.DataParallel.html)
@@ -197,37 +232,46 @@
   id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 即使只有 2 个 GPU，您也可以充分利用 PyTorch 内置功能提供的加速训练能力，例如 `DataParallel` (DP) 和 `DistributedDataParallel`
+    (DDP)。请注意，[PyTorch 文档](https://pytorch.org/docs/master/generated/torch.nn.DataParallel.html)建议优先选择
+    `DistributedDataParallel` (DDP) 而不是 `DataParallel` (DP) 用于多 GPU 训练，因为它适用于所有模型。让我们看看这两种方法是如何工作的以及它们之间的区别。
 - en: DataParallel vs DistributedDataParallel
   id: totrans-36
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: DataParallel vs DistributedDataParallel
 - en: 'To understand the key differences in inter-GPU communication overhead between
     the two methods, let’s review the processes per batch:'
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了了解这两种方法之间的 GPU 间通信开销的关键差异，让我们回顾每批的过程：
 - en: '[DDP](https://pytorch.org/docs/master/notes/ddp.html):'
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DDP](https://pytorch.org/docs/master/notes/ddp.html):'
 - en: At the start time the main process replicates the model once from GPU 0 to the
     rest of GPUs
   id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在开始时，主进程将模型从 GPU 0 复制到其他 GPU
 - en: 'Then for each batch:'
   id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 然后对于每批：
 - en: Each GPU directly consumes its mini-batch of data.
   id: totrans-41
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 每个 GPU 直接消耗其数据的小批量。
 - en: During `backward`, once the local gradients are ready, they are averaged across
     all processes.
   id: totrans-42
@@ -235,44 +279,53 @@
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在 `backward` 过程中，一旦本地梯度准备就绪，它们将在所有进程中进行平均。
 - en: '[DP](https://pytorch.org/docs/master/generated/torch.nn.DataParallel.html):'
   id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: '[DP](https://pytorch.org/docs/master/generated/torch.nn.DataParallel.html):'
 - en: 'For each batch:'
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于每批：
 - en: GPU 0 reads the batch of data and then sends a mini-batch to each GPU.
   id: totrans-45
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: GPU 0 读取数据批次，然后将一个小批量发送到每个 GPU。
 - en: The up-to-date model is replicated from GPU 0 to each GPU.
   id: totrans-46
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 最新的模型从 GPU 0 复制到每个 GPU。
 - en: '`forward` is executed, and output from each GPU is sent to GPU 0 to compute
     the loss.'
   id: totrans-47
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`forward` 被执行，每个 GPU 的输出被发送到 GPU 0 来计算损失。'
 - en: The loss is distributed from GPU 0 to all GPUs, and `backward` is run.
   id: totrans-48
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 损失从 GPU 0 分发到所有 GPU，并运行 `backward`。
 - en: Gradients from each GPU are sent to GPU 0 and averaged.
   id: totrans-49
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 每个 GPU 的梯度被发送到 GPU 0 并进行平均。
 - en: 'Key differences include:'
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 关键差异包括：
 - en: DDP performs only a single communication per batch - sending gradients, while
     DP performs five different data exchanges per batch. DDP copies data using [torch.distributed](https://pytorch.org/docs/master/distributed.html),
     while DP copies data within the process via Python threads (which introduces limitations
@@ -282,52 +335,64 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: DDP 每批只执行一次通信 - 发送梯度，而 DP 每批执行五次不同的数据交换。DDP 使用 [torch.distributed](https://pytorch.org/docs/master/distributed.html)
+    复制数据，而 DP 通过 Python 线程在进程内复制数据（这会引入与 GIL 相关的限制）。因此，**`DistributedDataParallel`
+    (DDP) 通常比 `DataParallel` (DP) 更快**，除非您的 GPU 卡之间的连接速度很慢。
 - en: Under DP, GPU 0 performs significantly more work than other GPUs, resulting
     in GPU under-utilization.
   id: totrans-52
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在 DP 下，GPU 0 执行的工作明显多于其他 GPU，导致 GPU 利用率不足。
 - en: DDP supports distributed training across multiple machines, whereas DP does
     not.
   id: totrans-53
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: DDP 支持跨多台机器的分布式训练，而 DP 不支持。
 - en: This is not an exhaustive list of differences between DP and DDP, however, other
     nuances are out of scope of this guide. You can get a deeper understanding of
     these methods by reading this [article](https://www.telesens.co/2019/04/04/distributed-data-parallel-training-using-pytorch-on-aws/).
   id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 这并不是 DP 和 DDP 之间的所有差异的详尽列表，然而，其他细微差别超出了本指南的范围。您可以通过阅读这篇[文章](https://www.telesens.co/2019/04/04/distributed-data-parallel-training-using-pytorch-on-aws/)来更深入地了解这些方法。
 - en: 'Let’s illustrate the differences between DP and DDP with an experiment. We’ll
     benchmark the differences between DP and DDP with an added context of NVLink presence:'
   id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们通过一个实验来说明 DP 和 DDP 之间的差异。我们将基准测试 DP 和 DDP 之间的差异，并增加 NVLink 存在的背景：
 - en: 'Hardware: 2x TITAN RTX 24GB each + NVlink with 2 NVLinks (`NV2` in `nvidia-smi
     topo -m`).'
   id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 硬件：2x TITAN RTX 24GB 每个 + 带有 2 个 NVLink 的 NVlink（`nvidia-smi topo -m` 中的 `NV2`）。
 - en: 'Software: `pytorch-1.8-to-be` + `cuda-11.0` / `transformers==4.3.0.dev0`.'
   id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 软件：`pytorch-1.8-to-be` + `cuda-11.0` / `transformers==4.3.0.dev0`。
 - en: To disable the NVLink feature on one of the benchmarks, we use `NCCL_P2P_DISABLE=1`.
   id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了在其中一个基准测试中禁用 NVLink 功能，我们使用 `NCCL_P2P_DISABLE=1`。
 - en: 'Here is the benchmarking code and outputs:'
   id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里是基准测试代码和输出：
 - en: '**DP**'
   id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '**DP**'
 - en: '[PRE0]'
   id: totrans-61
   prefs: []
@@ -337,6 +402,7 @@
   id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: '**DDP w/ NVlink**'
 - en: '[PRE1]'
   id: totrans-63
   prefs: []
@@ -346,6 +412,7 @@
   id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: '**DDP w/o NVlink**'
 - en: '[PRE2]'
   id: totrans-65
   prefs: []
@@ -355,26 +422,32 @@
   id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里是为方便起见在表格中收集的相同基准测试结果：
 - en: '| Type | NVlink | Time |'
   id: totrans-67
   prefs: []
   type: TYPE_TB
+  zh: '| 类型 | NVlink | 时间 |'
 - en: '| :-- | --- | --: |'
   id: totrans-68
   prefs: []
   type: TYPE_TB
+  zh: '| :-- | --- | --: |'
 - en: '| 2:DP | Y | 110s |'
   id: totrans-69
   prefs: []
   type: TYPE_TB
+  zh: '| 2:DP | Y | 110秒 |'
 - en: '| 2:DDP | Y | 101s |'
   id: totrans-70
   prefs: []
   type: TYPE_TB
+  zh: '| 2:DDP | Y | 101秒 |'
 - en: '| 2:DDP | N | 131s |'
   id: totrans-71
   prefs: []
   type: TYPE_TB
+  zh: '| 2:DDP | N | 131秒 |'
 - en: As you can see, in this case DP is ~10% slower than DDP with NVlink, but ~15%
     faster than DDP without NVlink. The real difference will depend on how much data
     each GPU needs to sync with the others - the more there is to sync, the more a
@@ -382,20 +455,25 @@
   id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 如您所见，在这种情况下，DP 比 DDP with NVlink 慢约 10%，但比 DDP without NVlink 快约 15%。真正的差异取决于每个
+    GPU 需要与其他 GPU 同步多少数据 - 同步的数据越多，慢速链接就会阻碍整体运行时间。
 - en: ZeRO Data Parallelism
   id: totrans-73
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ZeRO 数据并行
 - en: ZeRO-powered data parallelism (ZeRO-DP) is illustrated in the following diagram
     from this [blog post](https://www.microsoft.com/en-us/research/blog/zero-deepspeed-new-system-optimizations-enable-training-models-with-over-100-billion-parameters/).
   id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: ZeRO 动力数据并行（ZeRO-DP）在这篇[博文](https://www.microsoft.com/en-us/research/blog/zero-deepspeed-new-system-optimizations-enable-training-models-with-over-100-billion-parameters/)中有详细说明。
 - en: '![DeepSpeed-Image-1](../Images/61da03a3a1a0e2c5e704642f87f2f216.png)'
   id: totrans-75
   prefs: []
   type: TYPE_IMG
+  zh: '![DeepSpeed-Image-1](../Images/61da03a3a1a0e2c5e704642f87f2f216.png)'
 - en: While it may appear complex, it is a very similar concept to `DataParallel`
     (DP). The difference is that instead of replicating the full model parameters,
     gradients and optimizer states, each GPU stores only a slice of it. Then, at run-time
@@ -563,6 +641,7 @@
   id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，当数据从第0层移动到第3层时，与常规前向传递没有区别。然而，将数据从第3层传递到第4层需要将其从GPU0移动到GPU1，引入了通信开销。如果参与的GPU在同一计算节点上（例如同一台物理机器），这种复制是快速的，但如果GPU分布在不同的计算节点上（例如多台机器），通信开销可能会大大增加。
 - en: Following that, layers 4 to 7 work as they would in the original model. Upon
     completion of the 7th layer, there is often a need to send the data back to layer
     0 where the labels are (or alternatively send the labels to the last layer). Now
@@ -570,10 +649,12 @@
   id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，第4到第7层的工作方式与原始模型中的工作方式相同。在完成第7层后，通常需要将数据发送回第0层，那里有标签（或者将标签发送到最后一层）。现在可以计算损失并让优化器开始工作。
 - en: 'Naive Model Parallelism comes several shortcomings:'
   id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 天真的模型并行存在一些缺点：
 - en: '**All but one GPU are idle at any given moment**: if 4 GPUs are used, it’s
     nearly identical to quadrupling the amount of memory of a single GPU, and ignoring
     the rest of the hardware.'
@@ -581,6 +662,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**除了一个GPU外，任何时刻都有空闲的GPU**：如果使用4个GPU，几乎等同于将单个GPU的内存量增加四倍，并忽略其他硬件。'
 - en: '**Overhead in data transfer between devices**: E.g. 4x 6GB cards will be able
     to accommodate the same size as 1x 24GB card using naive MP, but a single 24GB
     card will complete the training faster, because it doesn’t have the data copying
@@ -590,12 +672,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**设备之间数据传输的开销**：例如，使用天真的MP，4张6GB的卡片可以容纳与1张24GB卡片相同大小的模型，但是单张24GB卡片会更快地完成训练，因为它没有数据复制的开销。但是，假设您有40GB的卡片，需要适应一个45GB的模型，您可以使用4张40GB的卡片（但是可能很勉强，因为梯度和优化器状态）。'
 - en: '**Copying shared embeddings**: Shared embeddings may need to get copied back
     and forth between GPUs.'
   id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**复制共享的嵌入**：共享的嵌入可能需要在GPU之间来回复制。'
 - en: Now that you are familiar with how the naive approach to model parallelism works
     and its shortcomings, let’s look at Pipeline Parallelism (PP). PP is almost identical
     to a naive MP, but it solves the GPU idling problem by chunking the incoming batch
@@ -604,15 +688,18 @@
   id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经了解了模型并行的天真方法以及其缺点，让我们来看看管道并行（PP）。PP几乎与天真的MP相同，但通过将传入的批次分成微批次并人为地创建一个管道来解决GPU空闲问题，这允许不同的GPU同时参与计算过程。
 - en: 'The following illustration from the [GPipe paper](https://ai.googleblog.com/2019/03/introducing-gpipe-open-source-library.html)
     shows the naive MP on the top, and PP on the bottom:'
   id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下来自[GPipe论文](https://ai.googleblog.com/2019/03/introducing-gpipe-open-source-library.html)的插图显示了顶部的天真MP和底部的PP：
 - en: '![MP vs PP](../Images/ba7b60c4785caa5f69f0731aec905196.png)'
   id: totrans-108
   prefs: []
   type: TYPE_IMG
+  zh: '![MP vs PP](../Images/ba7b60c4785caa5f69f0731aec905196.png)'
 - en: At the bottom of the diagram, you can observe that the Pipeline Parallelism
     (PP) approach minimizes the number of idle GPU zones, referred to as ‘bubbles’.
     Both parts of the diagram show a parallelism level of degree 4, meaning that 4
@@ -622,6 +709,7 @@
   id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 在图表底部，您可以观察到管道并行（PP）方法最小化了空闲GPU区域的数量，称为“气泡”。图表的两部分显示了并行度为4的水平，意味着有4个GPU参与了管道。您可以看到有一个由4个管道阶段（F0、F1、F2和F3）组成的前向路径，然后是一个反向路径，顺序相反（B3、B2、B1和B0）。
 - en: PP introduces a new hyperparameter to tune - `chunks`, which determines how
     many data chunks are sent in a sequence through the same pipe stage. For example,
     in the bottom diagram you can see `chunks=4`. GPU0 performs the same forward path
@@ -632,12 +720,14 @@
   id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: PP引入了一个新的超参数来调整 - `chunks`，它确定通过同一管道阶段连续发送多少数据块。例如，在底部图表中，您可以看到`chunks=4`。GPU0在块0、1、2和3（F0,0、F0,1、F0,2、F0,3）上执行相同的前向路径，然后等待其他GPU完成它们的工作。只有当其他GPU开始完成它们的工作时，GPU0才开始再次工作，为块3、2、1和0（B0,3、B0,2、B0,1、B0,0）执行反向路径。
 - en: Note that this is the same concept as gradient accumulation steps. PyTorch uses
     `chunks`, while DeepSpeed refers to the same hyperparameter as gradient accumulation
     steps.
   id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，这与梯度累积步骤的概念相同。PyTorch使用`chunks`，而DeepSpeed将同一超参数称为梯度累积步骤。
 - en: 'Because of the chunks, PP introduces the notion of micro-batches (MBS). DP
     splits the global data batch size into mini-batches, so if you have a DP degree
     of 4, a global batch size of 1024 gets split up into 4 mini-batches of 256 each

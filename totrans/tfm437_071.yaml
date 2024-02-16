@@ -1,23 +1,15 @@
 - en: Fully Sharded Data Parallel
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/fsdp](https://huggingface.co/docs/transformers/v4.37.2/en/fsdp)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: '[Fully Sharded Data Parallel (FSDP)](https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/)
@@ -29,16 +21,21 @@
     FSDP is integrated with the Accelerate, a library for easily managing training
     in distributed environments, which means it is available for use from the [Trainer](/docs/transformers/v4.37.2/en/main_classes/trainer#transformers.Trainer)
     class.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: Before you start, make sure Accelerate is installed and at least PyTorch 2.1.0
     or newer.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: FSDP configuration
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -46,54 +43,67 @@
     command to create a configuration file for your training environment. Accelerate
     uses this configuration file to automatically setup the correct training environment
     based on your selected training options in `accelerate config`.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: When you run `accelerate config`, you’ll be prompted with a series of options
     to configure your training environment. This section covers some of the most important
     FSDP options. To learn more about the other available FSDP options, take a look
     at the [fsdp_config](https://huggingface.co/docs/transformers/main_classes/trainer#transformers.TrainingArguments.fsdp_config)
     parameters.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
 - en: Sharding strategy
+  id: totrans-10
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'FSDP offers a number of sharding strategies to select from:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: '`FULL_SHARD` - shards model parameters, gradients and optimizer states across
     workers; select `1` for this option'
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`SHARD_GRAD_OP`- shard gradients and optimizer states across workers; select
     `2` for this option'
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`NO_SHARD` - don’t shard anything (this is equivalent to DDP); select `3` for
     this option'
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`HYBRID_SHARD` - shard model parameters, gradients and optimizer states within
     each worker where each worker also has a full copy; select `4` for this option'
+  id: totrans-15
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`HYBRID_SHARD_ZERO2` - shard gradients and optimizer states within each worker
     where each worker also has a full copy; select `5` for this option'
+  id: totrans-16
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: This is enabled by the `fsdp_sharding_strategy` flag.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: CPU offload
+  id: totrans-18
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -101,9 +111,11 @@
     the CPU to save even more GPU memory and help you fit large models where even
     FSDP may not be sufficient. This is enabled by setting `fsdp_offload_params: true`
     when running `accelerate config`.'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: Wrapping policy
+  id: totrans-20
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -114,14 +126,17 @@
     select `fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP` to wrap a Transformer layer
     and `fsdp_transformer_layer_cls_to_wrap` to specify which layer to wrap (for example
     `BertLayer`).'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: 'Otherwise, you can choose a size-based wrapping policy where FSDP is applied
     to a layer if it exceeds a certain number of parameters. This is enabled by setting
     `fsdp_wrap_policy: SIZE_BASED_WRAP` and `min_num_param` to the desired size threshold.'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: Checkpointing
+  id: totrans-23
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -130,78 +145,119 @@
     time and often results in `NCCL Timeout` errors due to indefinite hanging during
     broadcasting. You can resume training with the sharded state dicts with the [load_state](https://huggingface.co/docs/accelerate/v0.26.1/en/package_reference/accelerator#accelerate.Accelerator.load_state)`
     method.'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: '中间检查点应该使用`fsdp_state_dict_type: SHARDED_STATE_DICT`保存，因为在rank 0上使用CPU卸载保存完整状态字典需要很长时间，并且经常由于广播期间的无限挂起而导致`NCCL
+    Timeout`错误。您可以使用[load_state](https://huggingface.co/docs/accelerate/v0.26.1/en/package_reference/accelerator#accelerate.Accelerator.load_state)`方法恢复训练。'
 - en: '[PRE2]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: However, when training ends, you want to save the full state dict because sharded
     state dict is only compatible with FSDP.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，当训练结束时，您希望保存完整状态字典，因为分片状态字典仅与FSDP兼容。
 - en: '[PRE3]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: TPU
+  id: totrans-28
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: TPU
 - en: '[PyTorch XLA](https://pytorch.org/xla/release/2.1/index.html) supports FSDP
     training for TPUs and it can be enabled by modifying the FSDP configuration file
     generated by `accelerate config`. In addition to the sharding strategies and wrapping
     options specified above, you can add the parameters shown below to the file.'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PyTorch XLA](https://pytorch.org/xla/release/2.1/index.html)支持TPU的FSDP训练，可以通过修改`accelerate
+    config`生成的FSDP配置文件来启用。除了上面指定的分片策略和包装选项之外，您还可以向文件中添加下面显示的参数。'
 - en: '[PRE4]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: The [`xla_fsdp_settings`](https://github.com/pytorch/xla/blob/2e6e183e0724818f137c8135b34ef273dea33318/torch_xla/distributed/fsdp/xla_fully_sharded_data_parallel.py#L128)
     allow you to configure additional XLA-specific parameters for FSDP.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`xla_fsdp_settings`](https://github.com/pytorch/xla/blob/2e6e183e0724818f137c8135b34ef273dea33318/torch_xla/distributed/fsdp/xla_fully_sharded_data_parallel.py#L128)允许您配置FSDP的额外XLA特定参数。'
 - en: Launch training
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 启动训练
 - en: 'An example FSDP configuration file may look like:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个示例的FSDP配置文件可能如下所示：
 - en: '[PRE5]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: To launch training, run the [`accelerate launch`](https://huggingface.co/docs/accelerate/package_reference/cli#accelerate-launch)
     command and it’ll automatically use the configuration file you previously created
     with `accelerate config`.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 启动训练，请运行[`accelerate launch`](https://huggingface.co/docs/accelerate/package_reference/cli#accelerate-launch)命令，它将自动使用您之前使用`accelerate
+    config`创建的配置文件。
 - en: '[PRE6]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '[PRE7]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Next steps
+  id: totrans-38
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 下一步
 - en: 'FSDP can be a powerful tool for training really large models and you have access
     to more than one GPU or TPU. By sharding the model parameters, optimizer and gradient
     states, and even offloading them to the CPU when they’re inactive, FSDP can reduce
     the high cost of large-scale training. If you’re interested in learning more,
     the following may be helpful:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: FSDP可以是训练非常大模型的强大工具，如果您有多个GPU或TPU可用。通过对模型参数、优化器和梯度状态进行分片，甚至在它们不活动时将它们卸载到CPU上，FSDP可以减少大规模训练的高成本。如果您有兴趣了解更多，以下内容可能有所帮助：
 - en: Follow along with the more in-depth Accelerate guide for [FSDP](https://huggingface.co/docs/accelerate/usage_guides/fsdp).
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 按照更详细的[FSDP](https://huggingface.co/docs/accelerate/usage_guides/fsdp)加速指南进行操作。
 - en: Read the [Introducing PyTorch Fully Sharded Data Parallel (FSDP) API](https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/)
     blog post.
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 阅读[介绍PyTorch Fully Sharded Data Parallel (FSDP) API](https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/)博文。
 - en: Read the [Scaling PyTorch models on Cloud TPUs with FSDP](https://pytorch.org/blog/scaling-pytorch-models-on-cloud-tpus-with-fsdp/)
     blog post.
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 阅读[使用FSDP在Cloud TPU上扩展PyTorch模型](https://pytorch.org/blog/scaling-pytorch-models-on-cloud-tpus-with-fsdp/)博文。
