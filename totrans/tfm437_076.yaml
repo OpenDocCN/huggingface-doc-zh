@@ -1,66 +1,82 @@
 - en: Custom hardware for training
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 用于训练的定制硬件
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_hardware](https://huggingface.co/docs/transformers/v4.37.2/en/perf_hardware)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_hardware](https://huggingface.co/docs/transformers/v4.37.2/en/perf_hardware)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: The hardware you use to run model training and inference can have a big effect
     on performance. For a deep dive into GPUs make sure to check out Tim Dettmer’s
     excellent [blog post](https://timdettmers.com/2020/09/07/which-gpu-for-deep-learning/).
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 您用于运行模型训练和推理的硬件可能会对性能产生重大影响。要深入了解GPU，请务必查看Tim Dettmer的优秀[博客文章](https://timdettmers.com/2020/09/07/which-gpu-for-deep-learning/)。
 - en: Let’s have a look at some practical advice for GPU setups.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看一些关于GPU设置的实用建议。
 - en: GPU
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: GPU
 - en: 'When you train bigger models you have essentially three options:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您训练更大的模型时，您基本上有三个选择：
 - en: bigger GPUs
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 更大的GPU
 - en: more GPUs
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 更多的GPU
 - en: more CPU and NVMe (offloaded to by [DeepSpeed-Infinity](main_classes/deepspeed#nvme-support))
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 更多的CPU和NVMe（由[DeepSpeed-Infinity](main_classes/deepspeed#nvme-support)卸载）
 - en: Let’s start at the case where you have a single GPU.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从只有一个GPU的情况开始。
 - en: Power and Cooling
+  id: totrans-11
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 电源和冷却
 - en: If you bought an expensive high end GPU make sure you give it the correct power
     and sufficient cooling.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您购买了昂贵的高端GPU，请确保为其提供正确的电源和足够的冷却。
 - en: '**Power**:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '**电源**：'
 - en: Some high end consumer GPU cards have 2 and sometimes 3 PCI-E 8-Pin power sockets.
     Make sure you have as many independent 12V PCI-E 8-Pin cables plugged into the
     card as there are sockets. Do not use the 2 splits at one end of the same cable
@@ -68,145 +84,222 @@
     2 PCI-E 8-Pin cables going from your PSU to the card and not one that has 2 PCI-E
     8-Pin connectors at the end! You won’t get the full performance out of your card
     otherwise.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些高端消费级GPU卡有2个甚至3个PCI-E 8针电源插座。确保您有与插座数量相同的独立12V PCI-E 8针电缆插入卡中。不要使用同一电缆末端的2个分裂（也称为猪尾电缆）。也就是说，如果GPU上有2个插座，您希望从PSU到卡的有2个PCI-E
+    8针电缆，而不是一个末端有2个PCI-E 8针连接器的电缆！否则，您将无法充分发挥卡的性能。
 - en: Each PCI-E 8-Pin power cable needs to be plugged into a 12V rail on the PSU
     side and can supply up to 150W of power.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个PCI-E 8针电源电缆需要插入PSU侧的12V电源线，可以提供高达150W的功率。
 - en: Some other cards may use a PCI-E 12-Pin connectors, and these can deliver up
     to 500-600W of power.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些其他卡可能使用PCI-E 12针连接器，这些连接器可以提供高达500-600W的功率。
 - en: Low end cards may use 6-Pin connectors, which supply up to 75W of power.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 低端卡可能使用6针连接器，提供高达75W的功率。
 - en: Additionally you want the high-end PSU that has stable voltage. Some lower quality
     ones may not give the card the stable voltage it needs to function at its peak.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，您需要具有稳定电压的高端PSU。一些质量较低的PSU可能无法为卡提供所需的稳定电压以使其在峰值状态下运行。
 - en: And of course the PSU needs to have enough unused Watts to power the card.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，PSU需要有足够的未使用瓦特数来为卡供电。
 - en: '**Cooling**:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '**冷却**：'
 - en: When a GPU gets overheated it will start throttling down and will not deliver
     full performance and it can even shutdown if it gets too hot.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 当GPU过热时，它将开始降频，并且不会提供完整的性能，甚至在温度过高时可能会关闭。
 - en: It’s hard to tell the exact best temperature to strive for when a GPU is heavily
     loaded, but probably anything under +80C is good, but lower is better - perhaps
     70-75C is an excellent range to be in. The throttling down is likely to start
     at around 84-90C. But other than throttling performance a prolonged very high
     temperature is likely to reduce the lifespan of a GPU.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 很难确定GPU在负载严重时应该追求的确切最佳温度，但可能在+80C以下是好的，但更低更好 - 也许70-75C是一个很好的范围。降频很可能会在84-90C左右开始。但除了降低性能外，长时间处于非常高的温度下可能会缩短GPU的寿命。
 - en: 'Next let’s have a look at one of the most important aspects when having multiple
     GPUs: connectivity.'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来让我们看看拥有多个GPU时最重要的一个方面：连接性。
 - en: Multi-GPU Connectivity
+  id: totrans-24
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 多GPU连接
 - en: 'If you use multiple GPUs the way cards are inter-connected can have a huge
     impact on the total training time. If the GPUs are on the same physical node,
     you can run:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您使用多个GPU，卡的互连方式对总训练时间有很大影响。如果GPU在同一物理节点上，您可以运行：
 - en: '[PRE0]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'and it will tell you how the GPUs are inter-connected. On a machine with dual-GPU
     and which are connected with NVLink, you will most likely see something like:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 它将告诉您GPU是如何互连的。在具有双GPU且通过NVLink连接的机器上，您很可能会看到类似以下的内容：
 - en: '[PRE1]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'on a different machine w/o NVLink we may see:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 在没有NVLink的不同机器上，我们可能会看到：
 - en: '[PRE2]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'The report includes this legend:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 该报告包括此图例：
 - en: '[PRE3]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: So the first report `NV2` tells us the GPUs are interconnected with 2 NVLinks,
     and the second report `PHB` we have a typical consumer-level PCIe+Bridge setup.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，第一个报告`NV2`告诉我们GPU是通过2个NVLink互连的，而第二个报告`PHB`则是典型的消费级PCIe+Bridge设置。
 - en: Check what type of connectivity you have on your setup. Some of these will make
     the communication between cards faster (e.g. NVLink), others slower (e.g. PHB).
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 检查您的设置上有什么类型的连接性。其中一些将使卡之间的通信更快（例如NVLink），而其他一些则更慢（例如PHB）。
 - en: Depending on the type of scalability solution used, the connectivity speed could
     have a major or a minor impact. If the GPUs need to sync rarely, as in DDP, the
     impact of a slower connection will be less significant. If the GPUs need to send
     messages to each other often, as in ZeRO-DP, then faster connectivity becomes
     super important to achieve faster training.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据所使用的可扩展性解决方案的类型，连接速度可能会产生重大或轻微影响。如果GPU需要很少同步，如DDP，较慢连接的影响将不那么显著。如果GPU需要经常互发消息，如ZeRO-DP，则更快的连接变得非常重要以实现更快的训练。
 - en: NVlink
+  id: totrans-36
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: NVlink
 - en: '[NVLink](https://en.wikipedia.org/wiki/NVLink) is a wire-based serial multi-lane
     near-range communications link developed by Nvidia.'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '[NVLink](https://en.wikipedia.org/wiki/NVLink)是由Nvidia开发的基于线的串行多通道近距离通信链路。'
 - en: 'Each new generation provides a faster bandwidth, e.g. here is a quote from
     [Nvidia Ampere GA102 GPU Architecture](https://www.nvidia.com/content/dam/en-zz/Solutions/geforce/ampere/pdf/NVIDIA-ampere-GA102-GPU-Architecture-Whitepaper-V1.pdf):'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 每一代新产品都提供更快的带宽，例如，这里是来自[Nvidia Ampere GA102 GPU Architecture](https://www.nvidia.com/content/dam/en-zz/Solutions/geforce/ampere/pdf/NVIDIA-ampere-GA102-GPU-Architecture-Whitepaper-V1.pdf)的一句话：
 - en: Third-Generation NVLink® GA102 GPUs utilize NVIDIA’s third-generation NVLink
     interface, which includes four x4 links, with each link providing 14.0625 GB/sec
     bandwidth in each direction between two GPUs. Four links provide 56.25 GB/sec
     bandwidth in each direction, and 112.5 GB/sec total bandwidth between two GPUs.
     Two RTX 3090 GPUs can be connected together for SLI using NVLink. (Note that 3-Way
     and 4-Way SLI configurations are not supported.)
+  id: totrans-39
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 第三代NVLink® GA102 GPU利用了NVIDIA的第三代NVLink接口，其中包括四个x4链接，每个链接在两个GPU之间的每个方向提供14.0625
+    GB/sec的带宽。四个链接在每个方向提供56.25 GB/sec的带宽，两个GPU之间总共提供112.5 GB/sec的带宽。两个RTX 3090 GPU可以使用NVLink连接在一起进行SLI。（请注意，不支持3路和4路SLI配置。）
 - en: So the higher `X` you get in the report of `NVX` in the output of `nvidia-smi
     topo -m` the better. The generation will depend on your GPU architecture.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以在`nvidia-smi topo -m`的输出中，`NVX`报告中的`X`值越高越好。这取决于您的GPU架构。
 - en: Let’s compare the execution of a gpt2 language model training over a small sample
     of wikitext.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们比较在wikitext的小样本上训练gpt2语言模型的执行。
 - en: 'The results are:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 结果是：
 - en: '| NVlink | Time |'
+  id: totrans-43
   prefs: []
   type: TYPE_TB
+  zh: '| NVlink | 时间 |'
 - en: '| --- | --: |'
+  id: totrans-44
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --: |'
 - en: '| Y | 101s |'
+  id: totrans-45
   prefs: []
   type: TYPE_TB
+  zh: '| Y | 101秒 |'
 - en: '| N | 131s |'
+  id: totrans-46
   prefs: []
   type: TYPE_TB
+  zh: '| N | 131秒 |'
 - en: You can see that NVLink completes the training ~23% faster. In the second benchmark
     we use `NCCL_P2P_DISABLE=1` to tell the GPUs not to use NVLink.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以看到，NVLink完成训练速度比快约23%。在第二个基准测试中，我们使用`NCCL_P2P_DISABLE=1`告诉GPU不要使用NVLink。
 - en: 'Here is the full benchmark code and outputs:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是完整的基准测试代码和输出：
 - en: '[PRE4]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Hardware: 2x TITAN RTX 24GB each + NVlink with 2 NVLinks (`NV2` in `nvidia-smi
     topo -m`) Software: `pytorch-1.8-to-be` + `cuda-11.0` / `transformers==4.3.0.dev0`'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 硬件：每个2x TITAN RTX 24GB + 2个NVLink的NVlink（在`nvidia-smi topo -m`中为`NV2`） 软件：`pytorch-1.8-to-be`
+    + `cuda-11.0` / `transformers==4.3.0.dev0`

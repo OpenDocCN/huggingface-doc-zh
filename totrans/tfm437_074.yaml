@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用TensorFlow在TPU上训练
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_tpu_tf](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_tpu_tf)'
   id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 原始文本：[https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_tpu_tf](https://huggingface.co/docs/transformers/v4.37.2/en/perf_train_tpu_tf)
 - en: null
   id: totrans-2
   prefs: []
@@ -17,11 +19,13 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您不需要长篇解释，只想要TPU代码示例来开始使用，请查看[我们的TPU示例笔记本！](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)
 - en: What is a TPU?
   id: totrans-4
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 什么是TPU？
 - en: A TPU is a **Tensor Processing Unit.** They are hardware designed by Google,
     which are used to greatly speed up the tensor computations within neural networks,
     much like GPUs. They can be used for both network training and inference. They
@@ -30,6 +34,8 @@
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: TPU是**张量处理单元**。它们是由Google设计的硬件，用于大大加速神经网络中的张量计算，类似于GPU。它们可用于网络训练和推断。通常通过Google的云服务访问，但也可以通过Google
+    Colab和Kaggle Kernels直接免费访问小型TPU。
 - en: Because [all TensorFlow models in 🤗 Transformers are Keras models](https://huggingface.co/blog/tensorflow-philosophy),
     most of the methods in this document are generally applicable to TPU training
     for any Keras model! However, there are a few points that are specific to the
@@ -38,17 +44,20 @@
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为[🤗 Transformers中的所有TensorFlow模型都是Keras模型](https://huggingface.co/blog/tensorflow-philosophy)，因此本文档中的大多数方法通常适用于任何Keras模型的TPU训练！但是，有一些点是特定于HuggingFace生态系统（hug-o-system？）的Transformers和Datasets，当我们到达这些点时，我们将确保标记它们。
 - en: What kinds of TPU are available?
   id: totrans-7
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 有哪些类型的TPU可用？
 - en: New users are often very confused by the range of TPUs, and the different ways
     to access them. The first key distinction to understand is the difference between
     **TPU Nodes** and **TPU VMs.**
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 新用户经常对各种TPU和访问方式感到困惑。要理解的第一个关键区别是**TPU节点**和**TPU VM**之间的区别。
 - en: When you use a **TPU Node**, you are effectively indirectly accessing a remote
     TPU. You will need a separate VM, which will initialize your network and data
     pipeline and then forward them to the remote node. When you use a TPU on Google
@@ -56,6 +65,8 @@
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您使用**TPU节点**时，实际上是间接访问远程TPU。您将需要一个单独的VM，该VM将初始化您的网络和数据管道，然后将它们转发到远程节点。当您在Google
+    Colab上使用TPU时，您是以**TPU节点**样式访问它。
 - en: Using TPU Nodes can have some quite unexpected behaviour for people who aren’t
     used to them! In particular, because the TPU is located on a physically different
     system to the machine you’re running your Python code on, your data cannot be
@@ -66,12 +77,16 @@
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于不习惯使用TPU的人来说，使用TPU节点可能会产生一些意想不到的行为！特别是，因为TPU位于与运行Python代码的机器物理上不同的系统上，您的数据不能是本地的
+    - 从您机器的内部存储加载的任何数据管道将完全失败！相反，数据必须存储在Google Cloud Storage中，您的数据管道仍然可以访问它，即使管道在远程TPU节点上运行。
 - en: If you can fit all your data in memory as `np.ndarray` or `tf.Tensor`, then
     you can `fit()` on that data even when using Colab or a TPU Node, without needing
     to upload it to Google Cloud Storage.
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您可以将所有数据存储在内存中作为`np.ndarray`或`tf.Tensor`，那么即使在使用Colab或TPU节点时，也可以在该数据上进行`fit()`，而无需将其上传到Google
+    Cloud Storage。
 - en: '**🤗Specific Hugging Face Tip🤗:** The methods `Dataset.to_tf_dataset()` and
     its higher-level wrapper `model.prepare_tf_dataset()` , which you will see throughout
     our TF code examples, will both fail on a TPU Node. The reason for this is that
@@ -83,6 +98,7 @@
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '**🤗具体的Hugging Face提示🤗：**`Dataset.to_tf_dataset()`方法及其更高级别的包装器`model.prepare_tf_dataset()`，您将在我们的TF代码示例中看到，都会在TPU节点上失败。原因是即使它们创建了一个`tf.data.Dataset`，它也不是“纯粹”的`tf.data`管道，并且使用`tf.numpy_function`或`Dataset.from_generator()`从底层HuggingFace`Dataset`中流式传输数据。这个HuggingFace`Dataset`由存储在本地磁盘上的数据支持，远程TPU节点将无法读取。'
 - en: The second way to access a TPU is via a **TPU VM.** When using a TPU VM, you
     connect directly to the machine that the TPU is attached to, much like training
     on a GPU VM. TPU VMs are generally easier to work with, particularly when it comes
@@ -90,6 +106,8 @@
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二种访问TPU的方式是通过**TPU VM**。在使用TPU VM时，您直接连接到TPU连接的机器，就像在GPU VM上进行训练一样。TPU VM通常更容易使用，特别是在处理数据管道时。所有上述警告不适用于TPU
+    VM！
 - en: 'This is an opinionated document, so here’s our opinion: **Avoid using TPU Node
     if possible.** It is more confusing and more difficult to debug than TPU VMs.
     It is also likely to be unsupported in future - Google’s latest TPU, TPUv4, can
@@ -101,11 +119,15 @@
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一份主观的文件，所以这是我们的意见：**尽量避免使用TPU Node。**它比TPU VM更令人困惑，更难以调试。未来也可能不受支持 - 谷歌最新的TPU，TPUv4，只能作为TPU
+    VM访问，这表明TPU Node越来越可能成为“传统”访问方法。但是，我们了解到唯一免费的TPU访问是在Colab和Kaggle Kernels上，它们使用TPU
+    Node - 因此，如果必须使用，我们将尝试解释如何处理！查看[TPU示例笔记本](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/tpu_training-tf.ipynb)以获取更详细的代码示例。
 - en: What sizes of TPU are available?
   id: totrans-15
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 可用的TPU尺寸是多少？
 - en: A single TPU (a v2-8/v3-8/v4-8) runs 8 replicas. TPUs exist in **pods** that
     can run hundreds or thousands of replicas simultaneously. When you use more than
     a single TPU but less than a whole pod (for example, a v3-32), your TPU fleet
@@ -113,15 +135,19 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 单个TPU（v2-8/v3-8/v4-8）运行8个副本。TPU存在于可以同时运行数百或数千个副本的**pod**中。当您使用多个TPU但少于整个pod时（例如v3-32），您的TPU群被称为**pod
+    slice**。
 - en: When you access a free TPU via Colab, you generally get a single v2-8 TPU.
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您通过Colab访问免费的TPU时，通常会获得一个v2-8 TPU。
 - en: I keep hearing about this XLA thing. What’s XLA, and how does it relate to TPUs?
   id: totrans-18
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 我一直听说这个XLA。XLA是什么，它与TPU有什么关系？
 - en: XLA is an optimizing compiler, used by both TensorFlow and JAX. In JAX it is
     the only compiler, whereas in TensorFlow it is optional (but mandatory on TPU!).
     The easiest way to enable it when training a Keras model is to pass the argument
@@ -130,6 +156,7 @@
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: XLA是一个优化编译器，被TensorFlow和JAX同时使用。在JAX中，它是唯一的编译器，而在TensorFlow中是可选的（但在TPU上是强制的！）。在训练Keras模型时启用它的最简单方法是将参数`jit_compile=True`传递给`model.compile()`。如果没有出现任何错误且性能良好，那么这是一个很好的迹象，表明您已准备好转移到TPU！
 - en: Debugging on TPU is generally a bit harder than on CPU/GPU, so we recommend
     getting your code running on CPU/GPU with XLA first before trying it on TPU. You
     don’t have to train for long, of course - just for a few steps to make sure that
@@ -137,12 +164,15 @@
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 在TPU上进行调试通常比在CPU/GPU上更困难，因此我们建议在尝试在TPU上运行之前，先在CPU/GPU上使用XLA使您的代码能够运行。当然，您不必训练很长时间
+    - 只需进行几个步骤，以确保您的模型和数据流水线按照您的预期工作。
 - en: XLA compiled code is usually faster - so even if you’re not planning to run
     on TPU, adding `jit_compile=True` can improve your performance. Be sure to note
     the caveats below about XLA compatibility, though!
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: XLA编译的代码通常更快 - 因此，即使您不打算在TPU上运行，添加`jit_compile=True`也可以提高性能。但是，请注意下面关于XLA兼容性的注意事项！
 - en: '**Tip born of painful experience:** Although using `jit_compile=True` is a
     good way to get a speed boost and test if your CPU/GPU code is XLA-compatible,
     it can actually cause a lot of problems if you leave it in when actually training
@@ -151,17 +181,20 @@
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '**基于痛苦经验的提示：**虽然使用`jit_compile=True`是获得速度提升并测试您的CPU/GPU代码是否与XLA兼容的好方法，但如果在实际在TPU上训练时保留它，可能会导致许多问题。XLA编译将在TPU上隐式发生，因此在实际在TPU上运行代码之前，请记得删除那行！'
 - en: How do I make my model XLA compatible?
   id: totrans-23
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 如何使我的模型与XLA兼容？
 - en: 'In many cases, your code is probably XLA-compatible already! However, there
     are a few things that work in normal TensorFlow that don’t work in XLA. We’ve
     distilled them into three core rules below:'
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 在许多情况下，您的代码可能已经与XLA兼容！但是，有一些在普通TensorFlow中有效但在XLA中无效的事情。我们将它们概括为以下三条核心规则：
 - en: '**🤗Specific HuggingFace Tip🤗:** We’ve put a lot of effort into rewriting our
     TensorFlow models and loss functions to be XLA-compatible. Our models and loss
     functions generally obey rule #1 and #2 by default, so you can skip over them
@@ -170,16 +203,19 @@
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: '**🤗具体的HuggingFace提示🤗：**我们已经付出了很多努力，将我们的TensorFlow模型和损失函数重写为XLA兼容。我们的模型和损失函数通常默认遵守规则＃1和＃2，因此如果您使用`transformers`模型，则可以跳过它们。但是，在编写自己的模型和损失函数时，请不要忘记这些规则！'
 - en: 'XLA Rule #1: Your code cannot have “data-dependent conditionals”'
   id: totrans-26
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: XLA规则＃1：您的代码不能具有“数据相关条件”
 - en: What that means is that any `if` statement cannot depend on values inside a
     `tf.Tensor`. For example, this code block cannot be compiled with XLA!
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着任何`if`语句都不能依赖于`tf.Tensor`内部的值。例如，此代码块无法使用XLA编译！
 - en: '[PRE0]'
   id: totrans-28
   prefs: []
@@ -193,6 +229,7 @@
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 这一开始可能看起来非常受限制，但大多数神经网络代码不需要这样做。您通常可以通过使用`tf.cond`（请参阅[此处](https://www.tensorflow.org/api_docs/python/tf/cond)的文档）或通过删除条件并找到一个巧妙的数学技巧来绕过此限制，例如：
 - en: '[PRE1]'
   id: totrans-30
   prefs: []
@@ -203,11 +240,13 @@
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 这段代码与上面的代码具有完全相同的效果，但通过避免条件语句，我们确保它将在XLA中编译而无问题！
 - en: 'XLA Rule #2: Your code cannot have “data-dependent shapes”'
   id: totrans-32
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: XLA规则＃2：您的代码不能具有“数据相关形状”
 - en: What this means is that the shape of all of the `tf.Tensor` objects in your
     code cannot depend on their values. For example, the function `tf.unique` cannot
     be compiled with XLA, because it returns a `tensor` containing one instance of
@@ -217,6 +256,7 @@
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着代码中所有的`tf.Tensor`对象的形状不能依赖于它们的值。例如，函数`tf.unique`不能与XLA一起编译，因为它返回一个包含输入中每个唯一值的`tensor`。这个输出的形状显然会根据输入`Tensor`的重复程度而不同，因此XLA拒绝处理它！
 - en: 'In general, most neural network code obeys rule #2 by default. However, there
     are a few common cases where it becomes a problem. One very common one is when
     you use **label masking**, setting your labels to a negative value to indicate
@@ -226,6 +266,7 @@
   id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 一般来说，大多数神经网络代码默认遵守规则＃2。但是，在一些常见情况下，这可能会成为一个问题。一个非常常见的情况是当您使用**标签屏蔽**时，将标签设置为负值以指示在计算损失时应忽略这些位置。如果您查看支持标签屏蔽的NumPy或PyTorch损失函数，您经常会看到类似于使用[布尔索引](https://numpy.org/doc/stable/user/basics.indexing.html#boolean-array-indexing)的代码：
 - en: '[PRE2]'
   id: totrans-35
   prefs: []
@@ -239,6 +280,8 @@
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 这段代码在NumPy或PyTorch中完全正常，但在XLA中会出错！为什么？因为`masked_outputs`和`masked_labels`的形状取决于有多少位置被屏蔽
+    - 这使其成为**数据相关形状。**然而，就像规则＃1一样，我们通常可以重写这段代码，以产生完全相同的输出，而不涉及任何数据相关形状。
 - en: '[PRE3]'
   id: totrans-37
   prefs: []
@@ -254,12 +297,15 @@
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们通过为每个位置计算损失，但在计算均值时将被屏蔽的位置在分子和分母中归零，从而获得与第一个块完全相同的结果，同时保持XLA兼容性。请注意，我们使用与规则＃1相同的技巧
+    - 将`tf.bool`转换为`tf.float32`并将其用作指示变量。这是一个非常有用的技巧，所以如果您需要将自己的代码转换为XLA，请记住它！
 - en: 'XLA Rule #3: XLA will need to recompile your model for every different input
     shape it sees'
   id: totrans-39
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: XLA规则＃3：XLA将需要为每个不同的输入形状重新编译您的模型
 - en: This is the big one. What this means is that if your input shapes are very variable,
     XLA will have to recompile your model over and over, which will create huge performance
     problems. This commonly arises in NLP models, where input texts have variable
@@ -268,6 +314,7 @@
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个重要的规则。这意味着如果您的输入形状非常不同，XLA将不得不一遍又一遍地重新编译您的模型，这将导致巨大的性能问题。这在NLP模型中经常出现，因为输入文本在标记化后长度不同。在其他模态中，静态形状更常见，这个规则就不是那么大的问题了。
 - en: 'How can you get around rule #3? The key is **padding** - if you pad all your
     inputs to the same length, and then use an `attention_mask`, you can get the same
     results as you’d get from variable shapes, but without any XLA issues. However,
@@ -277,6 +324,8 @@
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 如何避开规则＃3？关键是**填充** - 如果您将所有输入填充到相同的长度，然后使用`attention_mask`，您可以获得与可变形状相同的结果，但没有任何XLA问题。然而，过度填充也会导致严重的减速
+    - 如果您将所有样本填充到整个数据集中的最大长度，您可能会得到由无尽填充标记组成的批次，这将浪费大量计算和内存！
 - en: There isn’t a perfect solution to this problem. However, you can try some tricks.
     One very useful trick is to **pad batches of samples up to a multiple of a number
     like 32 or 64 tokens.** This often only increases the number of tokens by a small
@@ -286,6 +335,7 @@
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决这个问题并没有完美的方法。但是，你可以尝试一些技巧。一个非常有用的技巧是**将样本批次填充到32或64个标记的倍数。**这通常只会增加少量标记的数量，但会大大减少唯一输入形状的数量，因为现在每个输入形状都必须是32或64的倍数。更少的唯一输入形状意味着更少的XLA编译！
 - en: '**🤗Specific HuggingFace Tip🤗:** Our tokenizers and data collators have methods
     that can help you here. You can use `padding="max_length"` or `padding="longest"`
     when calling tokenizers to get them to output padded data. Our tokenizers and
@@ -294,11 +344,13 @@
   id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: '**🤗HuggingFace专属提示🤗：**我们的分词器和数据整理器有助于解决这个问题的方法。在调用分词器时，您可以使用`padding="max_length"`或`padding="longest"`来获取填充数据。我们的分词器和数据整理器还有一个`pad_to_multiple_of`参数，可以减少您看到的唯一输入形状的数量！'
 - en: How do I actually train my model on TPU?
   id: totrans-44
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 我如何在TPU上实际训练我的模型？
 - en: Once your training is XLA-compatible and (if you’re using TPU Node / Colab)
     your dataset has been prepared appropriately, running on TPU is surprisingly easy!
     All you really need to change in your code is to add a few lines to initialize
