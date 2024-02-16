@@ -1,23 +1,17 @@
 - en: Multi Adapter RL (MARL) - a single base model for everything
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 多适配器强化学习（MARL）- 一个用于所有的单一基础模型
 - en: 'Original text: [https://huggingface.co/docs/trl/multi_adapter_rl](https://huggingface.co/docs/trl/multi_adapter_rl)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en: 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原始文本：[https://huggingface.co/docs/trl/multi_adapter_rl](https://huggingface.co/docs/trl/multi_adapter_rl)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Here we present an approach that uses a single base model for the entire PPO
@@ -25,23 +19,33 @@
     logits and the rewards. This feature is experimental as we did not tested the
     convergence of the approach. We encourage the community to let us know if they
     potentially face into any issue.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里我们介绍了一种方法，该方法使用单个基础模型来执行整个PPO算法 - 包括检索参考logits、计算活跃logits和奖励。这个功能是实验性的，因为我们没有测试这种方法的收敛性。我们鼓励社区告诉我们是否可能遇到任何问题。
 - en: Requirements
+  id: totrans-4
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 要求
 - en: You just need to install `peft` and optionally install `bitsandbytes` as well
     if you want to go for 8bit base models, for more memory efficient finetuning.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 您只需要安装`peft`，如果您想要更加内存高效的微调，还可以选择安装`bitsandbytes`。
 - en: Summary
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 摘要
 - en: 'You need to address this approach in three stages that we summarize as follows:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 您需要按照以下三个阶段来处理这种方法：
 - en: 1- Train a base model on the target domain (e.g. `imdb` dataset) - this is the
     Supervised Fine Tuning stage - it can leverage the `SFTTrainer` from TRL. 2- Train
     a reward model using `peft`. This is required in order to re-use the adapter during
@@ -49,62 +53,91 @@
     `RewardTrainer` from TRL in [this example](https://github.com/huggingface/trl/tree/main/examples/scripts/reward_modeling.py)
     3- Fine tune new adapters on the base model using PPO and the reward adapter.
     (“0 abstraction RL”)
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 1- 在目标领域（例如`imdb`数据集）上训练一个基础模型 - 这是监督微调阶段 - 可以利用TRL中的`SFTTrainer`。2- 使用`peft`训练一个奖励模型。这是为了在RL优化过程中重复使用适配器所必需的（下面的第3步）。我们在[此示例](https://github.com/huggingface/trl/tree/main/examples/scripts/reward_modeling.py)中展示了如何利用TRL中的`RewardTrainer`。3-
+    使用PPO和奖励适配器在基础模型上微调新的适配器。（“0抽象RL”）
 - en: Make sure to use the same model (i.e. same architecture and same weights) for
     the stages 2 & 3.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保在阶段2和3中使用相同的模型（即相同的架构和相同的权重）。
 - en: Quickstart
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 快速开始
 - en: 'Let us assume you have trained your reward adapter on `llama-7b` model using
     `RewardTrainer` and pushed the weights on the hub under `trl-lib/llama-7b-hh-rm-adapter`.
     When doing PPO, before passing the model to `PPOTrainer` create your model as
     follows:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您已经使用`RewardTrainer`在`llama-7b`模型上训练了您的奖励适配器，并将权重推送到了hub下的`trl-lib/llama-7b-hh-rm-adapter`。在进行PPO之前，将您的模型创建如下：
 - en: '[PRE0]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Then inside your PPO training loop, call the `compute_reward_score` method by
     accessing to the `model` attribute from `PPOTrainer`.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后在您的PPO训练循环中，通过访问`PPOTrainer`的`model`属性调用`compute_reward_score`方法。
 - en: '[PRE1]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Advanced usage
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 高级用法
 - en: Control on the adapter name
+  id: totrans-16
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 对适配器名称的控制
 - en: If you are familiar with the `peft` library, you know that you can use multiple
     adapters inside the same model. What you can do is to train multiple adapters
     on the same base model to fine-tune on different policies. In this case, you want
     to have a control on the adapter name you want to activate back, after retrieving
     the reward. For that, simply pass the appropriate `adapter_name` to `ppo_adapter_name`
     argument when calling `compute_reward_score`.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您熟悉`peft`库，您就知道可以在同一个模型中使用多个适配器。您可以在同一个基础模型上训练多个适配器，以便在不同策略上进行微调。在这种情况下，您希望在检索奖励后激活要激活的适配器名称。为此，只需在调用`compute_reward_score`时将适当的`adapter_name`传递给`ppo_adapter_name`参数。
 - en: '[PRE2]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Using 4-bit and 8-bit base models
+  id: totrans-19
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用4位和8位基础模型
 - en: 'For more memory efficient fine-tuning, you can load your base model in 8-bit
     or 4-bit while keeping the adapters in the default precision (float32). Just pass
     the appropriate arguments (i.e. `load_in_8bit=True` or `load_in_4bit=True`) to
     `AutoModelForCausalLMWithValueHead.from_pretrained` as follows (assuming you have
     installed `bitsandbytes`):'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了更加内存高效的微调，您可以将基础模型加载为8位或4位，同时保持适配器的默认精度（float32）。只需将适当的参数（即`load_in_8bit=True`或`load_in_4bit=True`）传递给`AutoModelForCausalLMWithValueHead.from_pretrained`，如下所示（假设您已安装`bitsandbytes`）：
 - en: '[PRE3]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
