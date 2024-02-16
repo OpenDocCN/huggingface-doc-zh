@@ -1,4 +1,5 @@
 +   [Accelerate 0.27.2 中文文档](docs/acc_0.27/README.md)
++   [Accelerate 0.27.2 中文文档](docs/aud-crs/README.md)
 +   [AutoTrain 中文文档](docs/autotrain/README.md)
 +   [AWS 中文文档](docs/aws/README.md)
 +   [竞赛中文文档](docs/cmpt/README.md)
