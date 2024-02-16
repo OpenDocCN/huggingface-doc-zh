@@ -1,41 +1,38 @@
 - en: TVP
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: TVP
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/tvp](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/tvp)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/tvp](https://huggingface.co/docs/transformers/v4.37.2/en/model_doc/tvp)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: Overview
+  id: totrans-3
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 概述
 - en: The text-visual prompting (TVP) framework was proposed in the paper [Text-Visual
     Prompting for Efficient 2D Temporal Video Grounding](https://arxiv.org/abs/2303.04995)
     by Yimeng Zhang, Xin Chen, Jinghan Jia, Sijia Liu, Ke Ding.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 文本视觉提示（TVP）框架是由Yimeng Zhang，Xin Chen，Jinghan Jia，Sijia Liu，Ke Ding在论文[Text-Visual
+    Prompting for Efficient 2D Temporal Video Grounding](https://arxiv.org/abs/2303.04995)中提出的。
 - en: 'The abstract from the paper is the following:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 论文的摘要如下：
 - en: '*In this paper, we study the problem of temporal video grounding (TVG), which
     aims to predict the starting/ending time points of moments described by a text
     sentence within a long untrimmed video. Benefiting from fine-grained 3D visual
@@ -54,8 +51,13 @@
     boosts the performance of 2D TVG (e.g., 9.79% improvement on Charades-STA and
     30.77% improvement on ActivityNet Captions) and achieves 5× inference acceleration
     over TVG using 3D visual features.*'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '*在本文中，我们研究了时间视频定位（TVG）问题，旨在预测长视频中由文本句子描述的时刻的起始/结束时间点。由于精细的3D视觉特征，TVG技术近年来取得了显著进展。然而，3D卷积神经网络（CNNs）的高复杂性使得提取密集的3D视觉特征耗时，需要大量内存和计算资源。为了实现高效的TVG，我们提出了一种新颖的文本-视觉提示（TVP）框架，将优化的扰动模式（我们称之为“提示”）集成到TVG模型的视觉输入和文本特征中。与3D
+    CNN形成鲜明对比，我们展示了TVP允许我们在2D TVG模型中有效地共同训练视觉编码器和语言编码器，并且仅使用低复杂度的稀疏2D视觉特征改善了跨模态特征融合的性能。此外，我们提出了一种用于高效学习TVG的时间距离IoU（TDIoU）损失。对两个基准数据集Charades-STA和ActivityNet
+    Captions数据集的实验经验表明，所提出的TVP显著提升了2D TVG的性能（例如，在Charades-STA上提高了9.79%，在ActivityNet
+    Captions上提高了30.77%），并且相比使用3D视觉特征的TVG实现了5倍的推理加速。*'
 - en: This research addresses temporal video grounding (TVG), which is the process
     of pinpointing the start and end times of specific events in a long video, as
     described by a text sentence. Text-visual prompting (TVP), is proposed to enhance
@@ -67,653 +69,960 @@
     detail, they are also more time-consuming to process. The use of 2D inputs with
     the prompting method aims to provide similar levels of context and accuracy more
     efficiently.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 这项研究解决了时间视频定位（TVG）问题，即在长视频中准确定位特定事件的开始和结束时间，如文本句子所描述。文本-视觉提示（TVP）被提出以增强TVG。TVP涉及将专门设计的模式（称为“提示”）集成到TVG模型的视觉（基于图像）和文本（基于单词）输入组件中。这些提示提供额外的时空上下文，提高了模型准确确定视频中事件时间的能力。该方法使用2D视觉输入代替3D输入。虽然3D输入提供更多的时空细节，但处理起来也更耗时。使用2D输入与提示方法旨在更有效地提供类似水平的上下文和准确性。
 - en: '![drawing](../Images/2b0ade26768ecda5ef11dfd6c2da9b20.png) TVP architecture.
     Taken from the [original paper.](https://arxiv.org/abs/2303.04995)'
+  id: totrans-8
   prefs: []
   type: TYPE_IMG
+  zh: '![drawing](../Images/2b0ade26768ecda5ef11dfd6c2da9b20.png) TVP架构。摘自[原始论文](https://arxiv.org/abs/2303.04995)'
 - en: This model was contributed by [Jiqing Feng](https://huggingface.co/Jiqing).
     The original code can be found [here](https://github.com/intel/TVP).
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型由[Jiqing Feng](https://huggingface.co/Jiqing)贡献。原始代码可以在[这里](https://github.com/intel/TVP)找到。
 - en: Usage tips and examples
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用提示和示例
 - en: Prompts are optimized perturbation patterns, which would be added to input video
     frames or text features. Universal set refers to using the same exact set of prompts
     for any input, this means that these prompts are added consistently to all video
     frames and text features, regardless of the input’s content.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示是经过优化的扰动模式，将添加到输入视频帧或文本特征中。通用集指的是对于任何输入使用完全相同的提示集，这意味着这些提示被一致地添加到所有视频帧和文本特征中，而不考虑输入的内容。
 - en: TVP consists of a visual encoder and cross-modal encoder. A universal set of
     visual prompts and text prompts to be integrated into sampled video frames and
     textual features, respectively. Specially, a set of different visual prompts are
     applied to uniformly-sampled frames of one untrimmed video in order.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: TVP包括一个视觉编码器和跨模态编码器。一个通用的视觉提示集和文本提示集分别集成到采样的视频帧和文本特征中。特别地，一组不同的视觉提示被应用于一个未修剪视频的均匀采样帧中。
 - en: The goal of this model is to incorporate trainable prompts into both visual
     inputs and textual features to temporal video grounding(TVG) problems. In principle,
     one can apply any visual, cross-modal encoder in the proposed architecture.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 该模型的目标是将可训练的提示集成到视觉输入和文本特征中，以解决时间视频定位（TVG）问题。原则上，可以在提出的架构中应用任何视觉、跨模态编码器。
 - en: The [TvpProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpProcessor)
     wraps [BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer)
     and [TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor)
     into a single instance to both encode the text and prepare the images respectively.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '[TvpProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpProcessor)
+    将 [BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer)
+    和 [TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor)
+    包装成一个单一实例，分别对文本进行编码和准备图像。'
 - en: The following example shows how to run temporal video grounding using [TvpProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpProcessor)
     and [TvpForVideoGrounding](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpForVideoGrounding).
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下示例展示了如何使用 [TvpProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpProcessor)
+    和 [TvpForVideoGrounding](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpForVideoGrounding)
+    运行时间视频定位。
 - en: '[PRE0]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Tips:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 提示：
 - en: This implementation of TVP uses [BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer)
     to generate text embeddings and Resnet-50 model to compute visual embeddings.
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: TVP 的这个实现使用 [BertTokenizer](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizer)
+    生成文本嵌入和 Resnet-50 模型计算视觉嵌入。
 - en: Checkpoints for pre-trained [tvp-base](https://huggingface.co/Intel/tvp-base)
     is released.
+  id: totrans-19
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 已发布预训练 [tvp-base](https://huggingface.co/Intel/tvp-base) 的检查点。
 - en: Please refer to [Table 2](https://arxiv.org/pdf/2303.04995.pdf) for TVP’s performance
     on Temporal Video Grounding task.
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 请参考 [Table 2](https://arxiv.org/pdf/2303.04995.pdf) 了解 TVP 在时间视频定位任务上的性能。
 - en: TvpConfig
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TvpConfig
 - en: '### `class transformers.TvpConfig`'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.TvpConfig`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/configuration_tvp.py#L32)'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/configuration_tvp.py#L32)'
 - en: '[PRE1]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Parameters
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`backbone_config` (`PretrainedConfig` or `dict`, *optional*) — The configuration
     of the backbone model.'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`backbone_config` (`PretrainedConfig` or `dict`, *optional*) — 骨干模型的配置。'
 - en: '`distance_loss_weight` (`float`, *optional*, defaults to 1.0) — The weight
     of distance loss.'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`distance_loss_weight` (`float`, *optional*, defaults to 1.0) — 距离损失的权重。'
 - en: '`duration_loss_weight` (`float`, *optional*, defaults to 0.1) — The weight
     of duration loss.'
+  id: totrans-28
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`duration_loss_weight` (`float`, *optional*, defaults to 0.1) — 持续时间损失的权重。'
 - en: '`visual_prompter_type` (`str`, *optional*, defaults to `"framepad"`) — Visual
     prompt type. The type of padding. Framepad means padding on each frame. Should
     be one of “framepad” or “framedownpad”'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`visual_prompter_type` (`str`, *optional*, defaults to `"framepad"`) — 视觉提示类型。填充的类型。Framepad
+    表示在每个帧上填充。应为“framepad”或“framedownpad”之一。'
 - en: '`visual_prompter_apply` (`str`, *optional*, defaults to `"replace"`) — The
     way of applying visual prompt. Replace means use the value of prompt to change
     the original value in visual inputs. Should be one of “replace”, or “add”, or
     “remove”.'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`visual_prompter_apply` (`str`, *optional*, defaults to `"replace"`) — 应用视觉提示的方式。Replace
+    表示使用提示的值来更改视觉输入中的原始值。应为“replace”、“add”或“remove”之一。'
 - en: '`visual_prompt_size` (`int`, *optional*, defaults to 96) — The size of visual
     prompt.'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`visual_prompt_size` (`int`, *optional*, defaults to 96) — 视觉提示的大小。'
 - en: '`max_img_size` (`int`, *optional*, defaults to 448) — The maximum size of frame.'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_img_size` (`int`, *optional*, defaults to 448) — 帧的最大尺寸。'
 - en: '`num_frames` (`int`, *optional*, defaults to 48) — The number of frames extracted
     from a video.'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_frames` (`int`, *optional*, defaults to 48) — 从视频中提取的帧数。'
 - en: '`vocab_size` (`int`, *optional*, defaults to 30522) — Vocabulary size of the
     Tvp text model. Defines the number of different tokens that can be represented
     by the `inputs_ids` passed when calling [TvpModel](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpModel).'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`vocab_size` (`int`, *optional*, defaults to 30522) — Tvp 文本模型的词汇量。定义了在调用 [TvpModel](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpModel)
+    时可以由 `inputs_ids` 表示的不同标记的数量。'
 - en: '`hidden_size` (`int`, *optional*, defaults to 768) — Dimensionality of the
     encoder layers.'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_size` (`int`, *optional*, defaults to 768) — 编码器层的维度。'
 - en: '`intermediate_size` (`int`, *optional*, defaults to 3072) — Dimensionality
     of the “intermediate” (i.e., feed-forward) layer in the Transformer encoder.'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`intermediate_size` (`int`, *optional*, defaults to 3072) — Transformer 编码器中“中间”（即前馈）层的维度。'
 - en: '`num_hidden_layers` (`int`, *optional*, defaults to 12) — Number of hidden
     layers in the Transformer encoder.'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_hidden_layers` (`int`, *optional*, defaults to 12) — Transformer 编码器中的隐藏层数。'
 - en: '`num_attention_heads` (`int`, *optional*, defaults to 12) — Number of attention
     heads for each attention layer in the Transformer encoder.'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`num_attention_heads` (`int`, *optional*, defaults to 12) — Transformer 编码器中每个注意力层的注意力头数。'
 - en: '`max_position_embeddings` (`int`, *optional*, defaults to 512) — The maximum
     sequence length that this model might ever be used with. Typically set this to
     something large just in case (e.g., 512 or 1024 or 2048).'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_position_embeddings` (`int`, *optional*, defaults to 512) — 模型可能使用的最大序列长度。通常将其设置为一个较大的值以防万一（例如512、1024或2048）。'
 - en: '`max_grid_col_position_embeddings` (`int`, *optional*, defaults to 100) — The
     largest number of horizontal patches from a video frame.'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_grid_col_position_embeddings` (`int`, *optional*, defaults to 100) — 从视频帧中提取的水平补丁的最大数量。'
 - en: '`max_grid_row_position_embeddings` (`int`, *optional*, defaults to 100) — The
     largest number of vertical patches from a video frame.'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`max_grid_row_position_embeddings` (`int`, *optional*, defaults to 100) — 从视频帧中提取的垂直补丁的最大数量。'
 - en: '`hidden_dropout_prob` (`float`, *optional*, defaults to 0.1) — The dropout
     probability of hidden layers.'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_dropout_prob` (`float`, *optional*, defaults to 0.1) — 隐藏层的丢失概率。'
 - en: '`hidden_act` (`str` or `function`, *optional*, defaults to `"gelu"`) — The
     non-linear activation function (function or string) in the encoder and pooler.
     If string, `"gelu"`, `"relu"`, `"selu"` and `"gelu_new"` ``"quick_gelu"` are supported.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_act` (`str` or `function`, *optional*, defaults to `"gelu"`) — 编码器和池化器中的非线性激活函数（函数或字符串）。如果是字符串，支持
+    `"gelu"`、`"relu"`、`"selu"` 和 `"gelu_new"` `"quick_gelu"`。'
 - en: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-12) — The epsilon used
     by the layer normalization layers.'
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`layer_norm_eps` (`float`, *optional*, defaults to 1e-12) — 层归一化层使用的 epsilon。'
 - en: '`initializer_range` (`float`, *optional*, defaults to 0.02) — The standard
     deviation of the truncated_normal_initializer for initializing all weight matrices.'
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`initializer_range` (`float`，*可选*，默认为0.02) — 用于初始化所有权重矩阵的截断正态初始化器的标准差。'
 - en: '`attention_probs_dropout_prob` (`float`, *optional*, defaults to 0.1) — The
     dropout probability of attention layers.'
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_probs_dropout_prob` (`float`，*可选*，默认为0.1) — 注意力层的丢失概率。'
 - en: This is the configuration class to store the configuration of a [TvpModel](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpModel).
     It is used to instantiate an Tvp model according to the specified arguments, defining
     the model architecture. Instantiating a configuration with the defaults will yield
     a similar configuration to that of the Tvp [Intel/tvp-base](https://huggingface.co/Intel/tvp-base)
     architecture.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个配置类，用于存储[TvpModel](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpModel)的配置。它用于根据指定的参数实例化一个Tvp模型，定义模型架构。使用默认值实例化配置将产生类似于[Tvp
+    Intel/tvp-base](https://huggingface.co/Intel/tvp-base)架构的配置。
 - en: Configuration objects inherit from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     and can be used to control the model outputs. Read the documentation from [PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)
     for more information.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置对象继承自[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)，可用于控制模型输出。阅读来自[PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig)的文档以获取更多信息。
 - en: '#### `from_backbone_config`'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `from_backbone_config`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/configuration_tvp.py#L152)'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/configuration_tvp.py#L152)'
 - en: '[PRE2]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Parameters
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`backbone_config` ([PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig))
     — The backbone configuration.'
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`backbone_config` ([PretrainedConfig](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig))
+    — 骨干配置。'
 - en: Returns
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[TvpConfig](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpConfig)'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: '[TvpConfig](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpConfig)'
 - en: An instance of a configuration object
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置对象的一个实例
 - en: Instantiate a [TvpConfig](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpConfig)
     (or a derived class) from a pre-trained backbone model configuration.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 从预训练的骨干模型配置实例化一个[TvpConfig](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpConfig)（或派生类）。
 - en: '#### `to_dict`'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `to_dict`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/configuration_tvp.py#L164)'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/configuration_tvp.py#L164)'
 - en: '[PRE3]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Returns
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '`Dict[str, any]`'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Dict[str, any]`'
 - en: Dictionary of all the attributes that make up this configuration instance,
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含构成此配置实例的所有属性的字典，
 - en: Serializes this instance to a Python dictionary. Override the default [to_dict()](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig.to_dict).
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 将此实例序列化为Python字典。覆盖默认[to_dict()](/docs/transformers/v4.37.2/en/main_classes/configuration#transformers.PretrainedConfig.to_dict)。
 - en: TvpImageProcessor
+  id: totrans-65
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TvpImageProcessor
 - en: '### `class transformers.TvpImageProcessor`'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.TvpImageProcessor`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/image_processing_tvp.py#L83)'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/image_processing_tvp.py#L83)'
 - en: '[PRE4]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Parameters
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`do_resize` (`bool`, *optional*, defaults to `True`) — Whether to resize the
     image’s (height, width) dimensions to the specified `size`. Can be overridden
     by the `do_resize` parameter in the `preprocess` method.'
+  id: totrans-70
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_resize` (`bool`，*可选*，默认为`True`) — 是否将图像的（高度，宽度）尺寸调整为指定的`size`。可以被`preprocess`方法中的`do_resize`参数覆盖。'
 - en: '`size` (`Dict[str, int]` *optional*, defaults to `{"longest_edge" -- 448}`):
     Size of the output image after resizing. The longest edge of the image will be
     resized to `size["longest_edge"]` while maintaining the aspect ratio of the original
     image. Can be overriden by `size` in the `preprocess` method.'
+  id: totrans-71
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`size` (`Dict[str, int]` *可选*，默认为`{"longest_edge" -- 448}`)：调整大小后的输出图像大小。图像的最长边将被调整为`size["longest_edge"]`，同时保持原始图像的纵横比。可以被`preprocess`方法中的`size`覆盖。'
 - en: '`resample` (`PILImageResampling`, *optional*, defaults to `Resampling.BILINEAR`)
     — Resampling filter to use if resizing the image. Can be overridden by the `resample`
     parameter in the `preprocess` method.'
+  id: totrans-72
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`resample` (`PILImageResampling`，*可选*，默认为`Resampling.BILINEAR`) — 如果调整图像大小，则要使用的重采样滤波器。可以被`preprocess`方法中的`resample`参数覆盖。'
 - en: '`do_center_crop` (`bool`, *optional*, defaults to `True`) — Whether to center
     crop the image to the specified `crop_size`. Can be overridden by the `do_center_crop`
     parameter in the `preprocess` method.'
+  id: totrans-73
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_center_crop` (`bool`，*可选*，默认为`True`) — 是否将图像居中裁剪到指定的`crop_size`。可以被`preprocess`方法中的`do_center_crop`参数覆盖。'
 - en: '`crop_size` (`Dict[str, int]`, *optional*, defaults to `{"height" -- 448, "width":
     448}`): Size of the image after applying the center crop. Can be overridden by
     the `crop_size` parameter in the `preprocess` method.'
+  id: totrans-74
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`crop_size` (`Dict[str, int]`，*可选*，默认为`{"height" -- 448, "width": 448}`)：应用中心裁剪后的图像大小。可以被`preprocess`方法中的`crop_size`参数覆盖。'
 - en: '`do_rescale` (`bool`, *optional*, defaults to `True`) — Whether to rescale
     the image by the specified scale `rescale_factor`. Can be overridden by the `do_rescale`
     parameter in the `preprocess` method.'
+  id: totrans-75
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_rescale` (`bool`，*可选*，默认为`True`) — 是否按指定比例`rescale_factor`重新缩放图像。可以被`preprocess`方法中的`do_rescale`参数覆盖。'
 - en: '`rescale_factor` (`int` or `float`, *optional*, defaults to `1/255`) — Defines
     the scale factor to use if rescaling the image. Can be overridden by the `rescale_factor`
     parameter in the `preprocess` method.'
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`rescale_factor` (`int`或`float`，*可选*，默认为`1/255`) — 定义如果重新缩放图像要使用的比例因子。可以被`preprocess`方法中的`rescale_factor`参数覆盖。'
 - en: '`do_pad` (`bool`, *optional*, defaults to `True`) — Whether to pad the image.
     Can be overridden by the `do_pad` parameter in the `preprocess` method.'
+  id: totrans-77
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_pad` (`bool`，*可选*，默认为`True`) — 是否填充图像。可以被`preprocess`方法中的`do_pad`参数覆盖。'
 - en: '`pad_size` (`Dict[str, int]`, *optional*, defaults to `{"height" -- 448, "width":
     448}`): Size of the image after applying the padding. Can be overridden by the
     `pad_size` parameter in the `preprocess` method.'
+  id: totrans-78
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pad_size`（`Dict[str, int]`，*可选*，默认为`{"height" -- 448, "width": 448}`）：应用填充后图像的大小。可以被`preprocess`方法中的`pad_size`参数覆盖。'
 - en: '`constant_values` (`Union[float, Iterable[float]]`, *optional*, defaults to
     0) — The fill value to use when padding the image.'
+  id: totrans-79
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`constant_values`（`Union[float, Iterable[float]]`，*可选*，默认为0）— 在填充图像时使用的填充值。'
 - en: '`pad_mode` (`PaddingMode`, *optional*, defaults to `PaddingMode.CONSTANT`)
     — Use what kind of mode in padding.'
+  id: totrans-80
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pad_mode`（`PaddingMode`，*可选*，默认为`PaddingMode.CONSTANT`）— 在填充中使用什么样的模式。'
 - en: '`do_normalize` (`bool`, *optional*, defaults to `True`) — Whether to normalize
     the image. Can be overridden by the `do_normalize` parameter in the `preprocess`
     method.'
+  id: totrans-81
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_normalize`（`bool`，*可选*，默认为`True`）— 是否对图像进行归一化。可以被`preprocess`方法中的`do_normalize`参数覆盖。'
 - en: '`do_flip_channel_order` (`bool`, *optional*, defaults to `True`) — Whether
     to flip the color channels from RGB to BGR. Can be overridden by the `do_flip_channel_order`
     parameter in the `preprocess` method.'
+  id: totrans-82
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_flip_channel_order`（`bool`，*可选*，默认为`True`）— 是否将颜色通道从RGB翻转为BGR。可以被`preprocess`方法中的`do_flip_channel_order`参数覆盖。'
 - en: '`image_mean` (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_MEAN`)
     — Mean to use if normalizing the image. This is a float or list of floats the
     length of the number of channels in the image. Can be overridden by the `image_mean`
     parameter in the `preprocess` method.'
+  id: totrans-83
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_mean`（`float`或`List[float]`，*可选*，默认为`IMAGENET_STANDARD_MEAN`）— 如果对图像进行归一化，则使用的均值。这是一个浮点数或与图像通道数相同长度的浮点数列表。可以被`preprocess`方法中的`image_mean`参数覆盖。'
 - en: '`image_std` (`float` or `List[float]`, *optional*, defaults to `IMAGENET_STANDARD_STD`)
     — Standard deviation to use if normalizing the image. This is a float or list
     of floats the length of the number of channels in the image. Can be overridden
     by the `image_std` parameter in the `preprocess` method.'
+  id: totrans-84
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_std`（`float`或`List[float]`，*可选*，默认为`IMAGENET_STANDARD_STD`）— 如果对图像进行归一化，则使用的标准差。这是一个浮点数或与图像通道数相同长度的浮点数列表。可以被`preprocess`方法中的`image_std`参数覆盖。'
 - en: Constructs a Tvp image processor.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 构造一个Tvp图像处理器。
 - en: '#### `preprocess`'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `preprocess`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/image_processing_tvp.py#L337)'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/image_processing_tvp.py#L337)'
 - en: '[PRE5]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Parameters
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`videos` (`ImageInput` or `List[ImageInput]` or `List[List[ImageInput]]`) —
     Frames to preprocess.'
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`videos`（`ImageInput`或`List[ImageInput]`或`List[List[ImageInput]]`）— 要预处理的帧。'
 - en: '`do_resize` (`bool`, *optional*, defaults to `self.do_resize`) — Whether to
     resize the image.'
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_resize`（`bool`，*可选*，默认为`self.do_resize`）— 是否调整图像大小。'
 - en: '`size` (`Dict[str, int]`, *optional*, defaults to `self.size`) — Size of the
     image after applying resize.'
+  id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`size`（`Dict[str, int]`，*可选*，默认为`self.size`）— 调整大小后图像的大小。'
 - en: '`resample` (`PILImageResampling`, *optional*, defaults to `self.resample`)
     — Resampling filter to use if resizing the image. This can be one of the enum
     `PILImageResampling`, Only has an effect if `do_resize` is set to `True`.'
+  id: totrans-93
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`resample`（`PILImageResampling`，*可选*，默认为`self.resample`）— 如果调整图像大小，则使用的重采样滤波器。这可以是枚举`PILImageResampling`之一，仅在`do_resize`设置为`True`时有效。'
 - en: '`do_center_crop` (`bool`, *optional*, defaults to `self.do_centre_crop`) —
     Whether to centre crop the image.'
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_center_crop`（`bool`，*可选*，默认为`self.do_centre_crop`）— 是否对图像进行中心裁剪。'
 - en: '`crop_size` (`Dict[str, int]`, *optional*, defaults to `self.crop_size`) —
     Size of the image after applying the centre crop.'
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`crop_size`（`Dict[str, int]`，*可选*，默认为`self.crop_size`）— 应用中心裁剪后图像的大小。'
 - en: '`do_rescale` (`bool`, *optional*, defaults to `self.do_rescale`) — Whether
     to rescale the image values between [0 - 1].'
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_rescale`（`bool`，*可选*，默认为`self.do_rescale`）— 是否将图像值重新缩放在[0 - 1]之间。'
 - en: '`rescale_factor` (`float`, *optional*, defaults to `self.rescale_factor`) —
     Rescale factor to rescale the image by if `do_rescale` is set to `True`.'
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`rescale_factor`（`float`，*可选*，默认为`self.rescale_factor`）— 如果`do_rescale`设置为`True`，则重新缩放图像的重新缩放因子。'
 - en: '`do_pad` (`bool`, *optional*, defaults to `True`) — Whether to pad the image.
     Can be overridden by the `do_pad` parameter in the `preprocess` method.'
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_pad`（`bool`，*可选*，默认为`True`）— 是否填充图像。可以被`preprocess`方法中的`do_pad`参数覆盖。'
 - en: '`pad_size` (`Dict[str, int]`, *optional*, defaults to `{"height" -- 448, "width":
     448}`): Size of the image after applying the padding. Can be overridden by the
     `pad_size` parameter in the `preprocess` method.'
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pad_size`（`Dict[str, int]`，*可选*，默认为`{"height" -- 448, "width": 448}`）：应用填充后图像的大小。可以被`preprocess`方法中的`pad_size`参数覆盖。'
 - en: '`constant_values` (`Union[float, Iterable[float]]`, *optional*, defaults to
     0) — The fill value to use when padding the image.'
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`constant_values`（`Union[float, Iterable[float]]`，*可选*，默认为0）— 在填充图像时使用的填充值。'
 - en: '`pad_mode` (`PaddingMode`, *optional*, defaults to “PaddingMode.CONSTANT”)
     — Use what kind of mode in padding.'
+  id: totrans-101
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pad_mode`（`PaddingMode`，*可选*，默认为“PaddingMode.CONSTANT”）— 在填充中使用什么样的模式。'
 - en: '`do_normalize` (`bool`, *optional*, defaults to `self.do_normalize`) — Whether
     to normalize the image.'
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_normalize`（`bool`，*可选*，默认为`self.do_normalize`）— 是否对图像进行归一化。'
 - en: '`do_flip_channel_order` (`bool`, *optional*, defaults to `self.do_flip_channel_order`)
     — Whether to flip the channel order of the image.'
+  id: totrans-103
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`do_flip_channel_order`（`bool`，*可选*，默认为`self.do_flip_channel_order`）— 是否翻转图像的通道顺序。'
 - en: '`image_mean` (`float` or `List[float]`, *optional*, defaults to `self.image_mean`)
     — Image mean.'
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_mean`（`float`或`List[float]`，*可选*，默认为`self.image_mean`）— 图像均值。'
 - en: '`image_std` (`float` or `List[float]`, *optional*, defaults to `self.image_std`)
     — Image standard deviation.'
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_std`（`float`或`List[float]`，*可选*，默认为`self.image_std`）— 图像标准差。'
 - en: '`return_tensors` (`str` or `TensorType`, *optional*) — The type of tensors
     to return. Can be one of:'
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_tensors`（`str`或`TensorType`，*可选*）— 要返回的张量类型。可以是以下之一：'
 - en: 'Unset: Return a list of `np.ndarray`.'
+  id: totrans-107
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 取消：返回一个`np.ndarray`列表。
 - en: '`TensorType.TENSORFLOW` or `''tf''`: Return a batch of type `tf.Tensor`.'
+  id: totrans-108
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TensorType.TENSORFLOW`或`''tf''`：返回类型为`tf.Tensor`的批处理。'
 - en: '`TensorType.PYTORCH` or `''pt''`: Return a batch of type `torch.Tensor`.'
+  id: totrans-109
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TensorType.PYTORCH`或`''pt''`：返回类型为`torch.Tensor`的批处理。'
 - en: '`TensorType.NUMPY` or `''np''`: Return a batch of type `np.ndarray`.'
+  id: totrans-110
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TensorType.NUMPY` 或 `''np''`：返回类型为 `np.ndarray` 的批次。'
 - en: '`TensorType.JAX` or `''jax''`: Return a batch of type `jax.numpy.ndarray`.'
+  id: totrans-111
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TensorType.JAX` 或 `''jax''`：返回类型为 `jax.numpy.ndarray` 的批次。'
 - en: '`data_format` (`ChannelDimension` or `str`, *optional*, defaults to `ChannelDimension.FIRST`)
     — The channel dimension format for the output image. Can be one of:'
+  id: totrans-112
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`data_format` (`ChannelDimension` 或 `str`，*可选*，默认为 `ChannelDimension.FIRST`)
+    — 输出图像的通道维度格式。可以是以下之一：'
 - en: '`ChannelDimension.FIRST`: image in (num_channels, height, width) format.'
+  id: totrans-113
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`ChannelDimension.FIRST`：图像以 (num_channels, height, width) 格式。'
 - en: '`ChannelDimension.LAST`: image in (height, width, num_channels) format.'
+  id: totrans-114
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`ChannelDimension.LAST`：图像以 (height, width, num_channels) 格式。'
 - en: 'Unset: Use the inferred channel dimension format of the input image.'
+  id: totrans-115
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 未设置：使用输入图像的推断通道维度格式。
 - en: '`input_data_format` (`ChannelDimension` or `str`, *optional*) — The channel
     dimension format for the input image. If unset, the channel dimension format is
     inferred from the input image. Can be one of:'
+  id: totrans-116
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_data_format` (`ChannelDimension` 或 `str`，*可选*) — 输入图像的通道维度格式。如果未设置，则从输入图像中推断通道维度格式。可以是以下之一：'
 - en: '`"channels_first"` or `ChannelDimension.FIRST`: image in (num_channels, height,
     width) format.'
+  id: totrans-117
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"channels_first"` 或 `ChannelDimension.FIRST`：图像以 (num_channels, height, width)
+    格式。'
 - en: '`"channels_last"` or `ChannelDimension.LAST`: image in (height, width, num_channels)
     format.'
+  id: totrans-118
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"channels_last"` 或 `ChannelDimension.LAST`：图像以 (height, width, num_channels)
+    格式。'
 - en: '`"none"` or `ChannelDimension.NONE`: image in (height, width) format.'
+  id: totrans-119
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`"none"` 或 `ChannelDimension.NONE`：图像以 (height, width) 格式。'
 - en: Preprocess an image or batch of images.
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 预处理图像或图像批次。
 - en: TvpProcessor
+  id: totrans-121
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TvpProcessor
 - en: '### `class transformers.TvpProcessor`'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.TvpProcessor`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/processing_tvp.py#L24)'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/processing_tvp.py#L24)'
 - en: '[PRE6]'
+  id: totrans-124
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Parameters
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`image_processor` ([TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor),
     *optional*) — The image processor is a required input.'
+  id: totrans-126
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`image_processor` ([TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor),
+    *可选*) — 图像处理器是必需的输入。'
 - en: '`tokenizer` ([BertTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizerFast),
     *optional*) — The tokenizer is a required input.'
+  id: totrans-127
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`tokenizer` ([BertTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizerFast),
+    *可选*) — tokenizer 是必需的输入。'
 - en: Constructs an TVP processor which wraps a TVP image processor and a Bert tokenizer
     into a single processor.
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建一个 TVP 处理器，将 TVP 图像处理器和 Bert tokenizer 包装成一个单一处理器。
 - en: '[TvpProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpProcessor)
     offers all the functionalities of [TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor)
     and [BertTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizerFast).
     See the [**call**()](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpProcessor.__call__)
     and `decode()` for more information.'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: '[TvpProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpProcessor)
+    提供了 [TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor)
+    和 [BertTokenizerFast](/docs/transformers/v4.37.2/en/model_doc/bert#transformers.BertTokenizerFast)
+    的所有功能。查看 [**call**()](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpProcessor.__call__)
+    和 `decode()` 以获取更多信息。'
 - en: '#### `__call__`'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `__call__`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/processing_tvp.py#L50)'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/processing_tvp.py#L50)'
 - en: '[PRE7]'
+  id: totrans-132
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Parameters
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`text` (`str`, `List[str]`, `List[List[str]]`) — The sequence or batch of sequences
     to be encoded. Each sequence can be a string or a list of strings (pretokenized
     string). If the sequences are provided as list of strings (pretokenized), you
     must set `is_split_into_words=True` (to lift the ambiguity with a batch of sequences).'
+  id: totrans-134
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`text` (`str`, `List[str]`, `List[List[str]]`) — 要编码的序列或序列批次。每个序列可以是字符串或字符串列表（预分词字符串）。如果将序列提供为字符串列表（预分词），必须设置
+    `is_split_into_words=True`（以消除与序列批次的歧义）。'
 - en: '`videos` (`List[PIL.Image.Image]`, `List[np.ndarray]`, `List[torch.Tensor]`,
     `List[List[PIL.Image.Image]]`, `List[List[np.ndarrray]]`, — `List[List[torch.Tensor]]`):
     The video or batch of videos to be prepared. Each video should be a list of frames,
     which can be either PIL images or NumPy arrays. In case of NumPy arrays/PyTorch
     tensors, each frame should be of shape (H, W, C), where H and W are frame height
     and width, and C is a number of channels.'
+  id: totrans-135
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`videos` (`List[PIL.Image.Image]`, `List[np.ndarray]`, `List[torch.Tensor]`,
+    `List[List[PIL.Image.Image]]`, `List[List[np.ndarrray]]`, — `List[List[torch.Tensor]]`):
+    要准备的视频或视频批次。每个视频应该是一个帧列表，可以是 PIL 图像或 NumPy 数组。对于 NumPy 数组/PyTorch 张量，每个帧应该是形状为
+    (H, W, C) 的，其中 H 和 W 是帧的高度和宽度，C 是通道数。'
 - en: '`return_tensors` (`str` or [TensorType](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.TensorType),
     *optional*) — If set, will return tensors of a particular framework. Acceptable
     values are:'
+  id: totrans-136
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_tensors` (`str` 或 [TensorType](/docs/transformers/v4.37.2/en/internal/file_utils#transformers.TensorType),
+    *可选*) — 如果设置，将返回特定框架的张量。可接受的值为：'
 - en: '`''tf''`: Return TensorFlow `tf.constant` objects.'
+  id: totrans-137
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''tf''`：返回 TensorFlow `tf.constant` 对象。'
 - en: '`''pt''`: Return PyTorch `torch.Tensor` objects.'
+  id: totrans-138
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''pt''`：返回 PyTorch `torch.Tensor` 对象。'
 - en: '`''np''`: Return NumPy `np.ndarray` objects.'
+  id: totrans-139
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''np''`：返回 NumPy `np.ndarray` 对象。'
 - en: '`''jax''`: Return JAX `jnp.ndarray` objects.'
+  id: totrans-140
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`''jax''`：返回 JAX `jnp.ndarray` 对象。'
 - en: Returns
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)'
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: '[BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)'
 - en: 'A [BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)
     with the following fields:'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 具有以下字段的 [BatchEncoding](/docs/transformers/v4.37.2/en/main_classes/tokenizer#transformers.BatchEncoding)：
 - en: '`input_ids` — List of token ids to be fed to a model. Returned when `text`
     is not `None`.'
+  id: totrans-144
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids` — 要提供给模型的令牌 id 列表。当 `text` 不是 `None` 时返回。'
 - en: '`attention_mask` — List of indices specifying which tokens should be attended
     to by the model (when `return_attention_mask=True` or if *“attention_mask”* is
     in `self.model_input_names` and if `text` is not `None`).'
+  id: totrans-145
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask` — 指定哪些令牌应该被模型关注的索引列表（当 `return_attention_mask=True` 或 *“attention_mask”*
+    在 `self.model_input_names` 中，且 `text` 不是 `None` 时）。'
 - en: '`pixel_values` — Pixel values to be fed to a model. Returned when `videos`
     is not `None`.'
+  id: totrans-146
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pixel_values` — 要馈送给模型的像素值。当`videos`不为`None`时返回。'
 - en: Main method to prepare for the model one or several sequences(s) and image(s).
     This method forwards the `text` and `kwargs` arguments to BertTokenizerFast’s
     [**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
@@ -721,134 +1030,194 @@
     forwards the `videos` and `kwargs` arguments to TvpImageProcessor’s [**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
     if `videos` is not `None`. Please refer to the doctsring of the above two methods
     for more information.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 准备模型一个或多个序列和图像的主要方法。如果`text`不为`None`，则此方法将`text`和`kwargs`参数转发给BertTokenizerFast的[**call**()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)以对文本进行编码。要准备图像，如果`videos`不为`None`，则此方法将`videos`和`kwargs`参数转发给TvpImageProcessor的[**call**()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。有关更多信息，请参阅上述两种方法的文档。
 - en: TvpModel
+  id: totrans-148
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TvpModel
 - en: '### `class transformers.TvpModel`'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.TvpModel`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/modeling_tvp.py#L692)'
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/modeling_tvp.py#L692)'
 - en: '[PRE8]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Parameters
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([TvpConfig](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-153
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config` ([TvpConfig](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpConfig))
+    — 具有模型所有参数的模型配置类。使用配置文件初始化不会加载与模型关联的权重，只会加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: The bare Tvp Model transformer outputting BaseModelOutputWithPooling object
     without any specific head on top. This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 裸Tvp模型输出BaseModelOutputWithPooling对象，没有特定的头部。此模型是PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)子类。将其用作常规PyTorch模块，并参考PyTorch文档以获取有关一般用法和行为的所有相关信息。
 - en: '#### `forward`'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/modeling_tvp.py#L726)'
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/modeling_tvp.py#L726)'
 - en: '[PRE9]'
+  id: totrans-157
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Parameters
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
     Indices of input sequence tokens in the vocabulary. Indices can be obtained using
     [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
     for details. [What are input IDs?](../glossary#input-ids)'
+  id: totrans-159
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids` (`torch.LongTensor`，形状为`(batch_size, sequence_length)`) — 词汇表中输入序列标记的索引。可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)获取索引。有关详细信息，请参阅[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)和[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入ID？](../glossary#input-ids)'
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_frames, num_channels,
     height, width)`) — Pixel values. Pixel values can be obtained using [TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor).
     See [TvpImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
     for details.'
+  id: totrans-160
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pixel_values` (`torch.FloatTensor`，形状为`(batch_size, num_frames, num_channels,
+    height, width)`) — 像素值。可以使用[TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor)获取像素值。有关详细信息，请参阅[TvpImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-161
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask` (`torch.FloatTensor`，形状为`(batch_size, sequence_length)`，*optional*)
+    — 用于避免在填充标记索引上执行注意力的掩码。掩码值选在`[0, 1]`之间：'
 - en: 1 for tokens that are `not masked`,
+  id: totrans-162
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1表示`未被掩盖`的标记，
 - en: 0 for tokens that are `masked`. [What are attention masks?](../glossary#attention-mask)
+  id: totrans-163
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0表示`被掩盖`的标记。[什么是注意力掩码？](../glossary#attention-mask)
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-164
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`head_mask` (`torch.FloatTensor`，形状为`(num_heads,)`或`(num_layers, num_heads)`，*optional*)
+    — 用于使自注意力模块的选定头部失效的掩码。掩码值选在`[0, 1]`之间：'
 - en: 1 indicates the head is `not masked`,
+  id: totrans-165
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1表示头部`未被掩盖`，
 - en: 0 indicates the head is `masked`.
+  id: totrans-166
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0表示头部`被掩盖`。
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-167
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions` (`bool`, *optional*) — 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-168
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states` (`bool`, *optional*) — 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-169
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict` (`bool`, *optional*) — 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
 - en: Returns
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回
 - en: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
     or `tuple(torch.FloatTensor)`'
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: '[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)或`torch.FloatTensor`元组'
 - en: A [transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)
     or a tuple of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration (`<class 'transformers.models.tvp.configuration_tvp.TvpConfig'>`)
     and inputs.
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个[transformers.modeling_outputs.BaseModelOutputWithPooling](/docs/transformers/v4.37.2/en/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPooling)或一个`torch.FloatTensor`元组（如果传递`return_dict=False`或`config.return_dict=False`）包含根据配置（`<class
+    'transformers.models.tvp.configuration_tvp.TvpConfig'>`）和输入的各种元素。
 - en: '`last_hidden_state` (`torch.FloatTensor` of shape `(batch_size, sequence_length,
     hidden_size)`) — Sequence of hidden-states at the output of the last layer of
     the model.'
+  id: totrans-173
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`last_hidden_state`（形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`）—
+    模型最后一层的隐藏状态序列。'
 - en: '`pooler_output` (`torch.FloatTensor` of shape `(batch_size, hidden_size)`)
     — Last layer hidden-state of the first token of the sequence (classification token)
     after further processing through the layers used for the auxiliary pretraining
@@ -856,215 +1225,312 @@
     processing through a linear layer and a tanh activation function. The linear layer
     weights are trained from the next sentence prediction (classification) objective
     during pretraining.'
+  id: totrans-174
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pooler_output`（形状为`(batch_size, hidden_size)`的`torch.FloatTensor`）— 经过用于辅助预训练任务的层进一步处理后，序列第一个标记（分类标记）的最后一层隐藏状态。例如，对于BERT系列模型，这返回经过线性层和tanh激活函数处理后的分类标记。线性层的权重是在预训练期间从下一个句子预测（分类）目标中训练的。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
     one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.'
+  id: totrans-175
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）—
+    形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组。'
 - en: Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.
+  id: totrans-176
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 模型在每一层输出的隐藏状态以及可选的初始嵌入输出。
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-177
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）—
+    形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组。'
 - en: Attentions weights after the attention softmax, used to compute the weighted
     average in the self-attention heads.
+  id: totrans-178
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 注意力权重在注意力softmax之后，用于计算自注意力头中的加权平均值。
 - en: The [TvpModel](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpModel)
     forward method, overrides the `__call__` special method.
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: '[TvpModel](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpModel)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前向传递的方法需要在此函数内定义，但应该在此之后调用`Module`实例，而不是这个，因为前者负责运行预处理和后处理步骤，而后者会默默地忽略它们。
 - en: 'Examples:'
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE10]'
+  id: totrans-182
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: TvpForVideoGrounding
+  id: totrans-183
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TvpForVideoGrounding
 - en: '### `class transformers.TvpForVideoGrounding`'
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: '### `class transformers.TvpForVideoGrounding`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/modeling_tvp.py#L813)'
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/modeling_tvp.py#L813)'
 - en: '[PRE11]'
+  id: totrans-186
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Parameters
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`config` ([TvpConfig](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpConfig))
     — Model configuration class with all the parameters of the model. Initializing
     with a config file does not load the weights associated with the model, only the
     configuration. Check out the [from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)
     method to load the model weights.'
+  id: totrans-188
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`config`（[TvpConfig](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpConfig)）—
+    包含模型所有参数的模型配置类。使用配置文件初始化不会加载与模型相关的权重，只加载配置。查看[from_pretrained()](/docs/transformers/v4.37.2/en/main_classes/model#transformers.PreTrainedModel.from_pretrained)方法以加载模型权重。'
 - en: Tvp Model with a video grounding head on top computing IoU, distance, and duration
     loss.
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 具有视频定位头的Tvp模型，计算IoU、距离和持续时间损失。
 - en: This model is a PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)
     subclass. Use it as a regular PyTorch Module and refer to the PyTorch documentation
     for all matter related to general usage and behavior.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个模型是PyTorch [torch.nn.Module](https://pytorch.org/docs/stable/nn.html#torch.nn.Module)子类。将其用作常规PyTorch模块，并参考PyTorch文档以获取与一般用法和行为相关的所有事项。
 - en: '#### `forward`'
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: '#### `forward`'
 - en: '[< source >](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/modeling_tvp.py#L828)'
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: '[<来源>](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/tvp/modeling_tvp.py#L828)'
 - en: '[PRE12]'
+  id: totrans-193
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Parameters
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数
 - en: '`input_ids` (`torch.LongTensor` of shape `(batch_size, sequence_length)`) —
     Indices of input sequence tokens in the vocabulary. Indices can be obtained using
     [AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer).
     See [PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)
     and [PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)
     for details. [What are input IDs?](../glossary#input-ids)'
+  id: totrans-195
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`input_ids`（形状为`(batch_size, sequence_length)`的`torch.LongTensor`） — 词汇表中输入序列标记的索引。可以使用[AutoTokenizer](/docs/transformers/v4.37.2/en/model_doc/auto#transformers.AutoTokenizer)获取索引。有关详细信息，请参阅[PreTrainedTokenizer.encode()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.encode)和[PreTrainedTokenizer.`call`()](/docs/transformers/v4.37.2/en/internal/tokenization_utils#transformers.PreTrainedTokenizerBase.__call__)。[什么是输入ID？](../glossary#input-ids)'
 - en: '`pixel_values` (`torch.FloatTensor` of shape `(batch_size, num_frames, num_channels,
     height, width)`) — Pixel values. Pixel values can be obtained using [TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor).
     See [TvpImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)
     for details.'
+  id: totrans-196
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`pixel_values`（形状为`(batch_size, num_frames, num_channels, height, width)`的`torch.FloatTensor`）
+    — 像素值。可以使用[TvpImageProcessor](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpImageProcessor)获取像素值。有关详细信息，请参阅[TvpImageProcessor.`call`()](/docs/transformers/v4.37.2/en/model_doc/glpn#transformers.GLPNFeatureExtractor.__call__)。'
 - en: '`attention_mask` (`torch.FloatTensor` of shape `(batch_size, sequence_length)`,
     *optional*) — Mask to avoid performing attention on padding token indices. Mask
     values selected in `[0, 1]`:'
+  id: totrans-197
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attention_mask`（形状为`(batch_size, sequence_length)`的`torch.FloatTensor`，*可选*）
+    — 用于避免在填充标记索引上执行注意力的掩码。在`[0, 1]`中选择的掩码值：'
 - en: 1 for tokens that are `not masked`,
+  id: totrans-198
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于未被屏蔽的标记，返回1，
 - en: 0 for tokens that are `masked`. [What are attention masks?](../glossary#attention-mask)
+  id: totrans-199
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于被屏蔽的标记返回0。[什么是注意力掩码？](../glossary#attention-mask)
 - en: '`head_mask` (`torch.FloatTensor` of shape `(num_heads,)` or `(num_layers, num_heads)`,
     *optional*) — Mask to nullify selected heads of the self-attention modules. Mask
     values selected in `[0, 1]`:'
+  id: totrans-200
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`head_mask`（形状为`(num_heads,)`或`(num_layers, num_heads)`的`torch.FloatTensor`，*可选*）
+    — 用于使自注意力模块中的选定头部失效的掩码。在`[0, 1]`中选择的掩码值：'
 - en: 1 indicates the head is `not masked`,
+  id: totrans-201
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 1表示头部未被屏蔽，
 - en: 0 indicates the head is `masked`.
+  id: totrans-202
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 0表示头部被屏蔽。
 - en: '`output_attentions` (`bool`, *optional*) — Whether or not to return the attentions
     tensors of all attention layers. See `attentions` under returned tensors for more
     detail.'
+  id: totrans-203
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_attentions`（`bool`，*可选*） — 是否返回所有注意力层的注意力张量。有关更多详细信息，请参阅返回张量下的`attentions`。'
 - en: '`output_hidden_states` (`bool`, *optional*) — Whether or not to return the
     hidden states of all layers. See `hidden_states` under returned tensors for more
     detail.'
+  id: totrans-204
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`output_hidden_states`（`bool`，*可选*） — 是否返回所有层的隐藏状态。有关更多详细信息，请参阅返回张量下的`hidden_states`。'
 - en: '`return_dict` (`bool`, *optional*) — Whether or not to return a [ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)
     instead of a plain tuple.'
+  id: totrans-205
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`return_dict`（`bool`，*可选*） — 是否返回[ModelOutput](/docs/transformers/v4.37.2/en/main_classes/output#transformers.utils.ModelOutput)而不是普通元组。'
 - en: '`labels` (`torch.FloatTensor` of shape `(batch_size, 3)`, *optional*) — The
     labels contains duration, start time, and end time of the video corresponding
     to the text.'
+  id: totrans-206
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`labels`（形状为`(batch_size, 3)`的`torch.FloatTensor`，*可选*） — 标签包含视频的持续时间、开始时间和结束时间，与文本对应。'
 - en: Returns
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回值
 - en: '`transformers.models.tvp.modeling_tvp.TvpVideoGroundingOutput` or `tuple(torch.FloatTensor)`'
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: '`transformers.models.tvp.modeling_tvp.TvpVideoGroundingOutput`或`tuple(torch.FloatTensor)`'
 - en: A `transformers.models.tvp.modeling_tvp.TvpVideoGroundingOutput` or a tuple
     of `torch.FloatTensor` (if `return_dict=False` is passed or when `config.return_dict=False`)
     comprising various elements depending on the configuration (`<class 'transformers.models.tvp.configuration_tvp.TvpConfig'>`)
     and inputs.
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个`transformers.models.tvp.modeling_tvp.TvpVideoGroundingOutput`或一个`torch.FloatTensor`元组（如果传递了`return_dict=False`或`config.return_dict=False`时）包含根据配置（`<class
+    'transformers.models.tvp.configuration_tvp.TvpConfig'>`）和输入的不同元素。
 - en: '`loss` (`torch.FloatTensor` of shape `(1,)`, *optional*, returned when `return_loss`
     is `True`) — Temporal-Distance IoU loss for video grounding.'
+  id: totrans-210
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`loss`（形状为`(1,)`的`torch.FloatTensor`，*可选*，当`return_loss`为`True`时返回） — 视频定位的时间距离IoU损失。'
 - en: '`logits` (`torch.FloatTensor` of shape `(batch_size, 2)`) — Contains start_time/duration
     and end_time/duration. It is the time slot of the videos corresponding to the
     input texts.'
+  id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`logits`（形状为`(batch_size, 2)`的`torch.FloatTensor`） — 包含开始时间/持续时间和结束时间/持续时间。这是与输入文本对应的视频的时间段。'
 - en: '`hidden_states` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_hidden_states=True`
     is passed or when `config.output_hidden_states=True`) — Tuple of `torch.FloatTensor`
     (one for the output of the embeddings, if the model has an embedding layer, +
     one for the output of each layer) of shape `(batch_size, sequence_length, hidden_size)`.
     Hidden-states of the model at the output of each layer plus the optional initial
     embedding outputs.'
+  id: totrans-212
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`hidden_states`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_hidden_states=True`或`config.output_hidden_states=True`时返回）
+    — 形状为`(batch_size, sequence_length, hidden_size)`的`torch.FloatTensor`元组（如果模型有嵌入层，则为嵌入输出的输出+每层的输出）。模型在每一层输出的隐藏状态加上可选的初始嵌入输出。'
 - en: '`attentions` (`tuple(torch.FloatTensor)`, *optional*, returned when `output_attentions=True`
     is passed or when `config.output_attentions=True`) — Tuple of `torch.FloatTensor`
     (one for each layer) of shape `(batch_size, num_heads, sequence_length, sequence_length)`.'
+  id: totrans-213
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`attentions`（`tuple(torch.FloatTensor)`，*可选*，当传递`output_attentions=True`或`config.output_attentions=True`时返回）
+    — 形状为`(batch_size, num_heads, sequence_length, sequence_length)`的`torch.FloatTensor`元组（每层一个）。'
 - en: The [TvpForVideoGrounding](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpForVideoGrounding)
     forward method, overrides the `__call__` special method.
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: '[TvpForVideoGrounding](/docs/transformers/v4.37.2/en/model_doc/tvp#transformers.TvpForVideoGrounding)的前向方法，覆盖了`__call__`特殊方法。'
 - en: Although the recipe for forward pass needs to be defined within this function,
     one should call the `Module` instance afterwards instead of this since the former
     takes care of running the pre and post processing steps while the latter silently
     ignores them.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管前向传播的配方需要在这个函数内定义，但应该在此之后调用`Module`实例，而不是调用此函数，因为前者会负责运行预处理和后处理步骤，而后者会默默地忽略它们。
 - en: 'Examples:'
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例：
 - en: '[PRE13]'
+  id: totrans-217
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
