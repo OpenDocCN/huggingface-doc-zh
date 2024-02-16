@@ -1,26 +1,17 @@
 - en: Optimizing LLMs for Speed and Memory
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 优化LLMs的速度和内存
 - en: 'Original text: [https://huggingface.co/docs/transformers/v4.37.2/en/llm_tutorial_optimization](https://huggingface.co/docs/transformers/v4.37.2/en/llm_tutorial_optimization)'
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
-- en:  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  zh: 原文链接：[https://huggingface.co/docs/transformers/v4.37.2/en/llm_tutorial_optimization](https://huggingface.co/docs/transformers/v4.37.2/en/llm_tutorial_optimization)
+- en: null
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: 'Large Language Models (LLMs) such as GPT3/4, [Falcon](https://huggingface.co/tiiuae/falcon-40b),
@@ -28,40 +19,54 @@
     in their ability to tackle human-centric tasks, establishing themselves as essential
     tools in modern knowledge-based industries. Deploying these models in real-world
     tasks remains challenging, however:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 诸如GPT3/4、[Falcon](https://huggingface.co/tiiuae/falcon-40b)和[Llama](https://huggingface.co/meta-llama/Llama-2-70b-hf)等大型语言模型（LLMs）正在快速发展，能够处理以人类为中心的任务，成为现代知识型产业中不可或缺的工具。然而，在实际任务中部署这些模型仍然具有挑战性：
 - en: To exhibit near-human text understanding and generation capabilities, LLMs currently
     require to be composed of billions of parameters (see [Kaplan et al](https://arxiv.org/abs/2001.08361),
     [Wei et. al](https://arxiv.org/abs/2206.07682)). This consequently amplifies the
     memory demands for inference.
+  id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 为了展示接近人类文本理解和生成能力，目前LLMs需要由数十亿参数组成（参见[Kaplan等人](https://arxiv.org/abs/2001.08361)，[Wei等人](https://arxiv.org/abs/2206.07682)）。这进一步增加了推断的内存需求。
 - en: In many real-world tasks, LLMs need to be given extensive contextual information.
     This necessitates the model’s capability to manage very long input sequences during
     inference.
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在许多现实世界的任务中，LLMs需要提供广泛的上下文信息。这要求模型在推断过程中能够处理非常长的输入序列。
 - en: The crux of these challenges lies in augmenting the computational and memory
     capabilities of LLMs, especially when handling expansive input sequences.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些挑战的关键在于增强LLMs的计算和内存能力，特别是在处理庞大的输入序列时。
 - en: 'In this guide, we will go over the effective techniques for efficient LLM deployment:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，我们将介绍高效LLM部署的有效技术：
 - en: '**Lower Precision:** Research has shown that operating at reduced numerical
     precision, namely [8-bit and 4-bit](./main_classes/quantization.md) can achieve
     computational advantages without a considerable decline in model performance.'
+  id: totrans-8
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '**低精度：**研究表明，以降低的数值精度，即[8位和4位](./main_classes/quantization.md)可以在不显著降低模型性能的情况下实现计算优势。'
 - en: '**Flash Attention:** Flash Attention is a variation of the attention algorithm
     that not only provides a more memory-efficient approach but also realizes increased
     efficiency due to optimized GPU memory utilization.'
+  id: totrans-9
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '**快闪注意力：**快闪注意力是注意力算法的一种变体，不仅提供了更节省内存的方法，还通过优化GPU内存利用率实现了增加的效率。'
 - en: '**Architectural Innovations:** Considering that LLMs are always deployed in
     the same way during inference, namely autoregressive text generation with a long
     input context, specialized model architectures have been proposed that allow for
@@ -69,218 +74,318 @@
     hereby are [Alibi](https://arxiv.org/abs/2108.12409), [Rotary embeddings](https://arxiv.org/abs/2104.09864),
     [Multi-Query Attention (MQA)](https://arxiv.org/abs/1911.02150) and [Grouped-Query-Attention
     (GQA)]((https://arxiv.org/abs/2305.13245)).'
+  id: totrans-10
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '**架构创新：**考虑到LLMs在推断过程中始终以相同方式部署，即具有长输入上下文的自回归文本生成，已经提出了专门的模型架构，允许更高效的推断。在模型架构方面最重要的进展是[Alibi](https://arxiv.org/abs/2108.12409)、[Rotary
+    embeddings](https://arxiv.org/abs/2104.09864)、[多查询注意力（MQA）](https://arxiv.org/abs/1911.02150)和[分组查询注意力（GQA）](https://arxiv.org/abs/2305.13245)。'
 - en: Throughout this guide, we will offer an analysis of auto-regressive generation
     from a tensor’s perspective. We delve into the pros and cons of adopting lower
     precision, provide a comprehensive exploration of the latest attention algorithms,
     and discuss improved LLM architectures. While doing so, we run practical examples
     showcasing each of the feature improvements.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，我们将从张量的角度对自回归生成进行分析。我们深入探讨采用低精度的利弊，全面探索最新的注意力算法，并讨论改进的LLM架构。在此过程中，我们运行实际示例展示每个功能改进。
 - en: 1\. Lower Precision
+  id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 1. 低精度
 - en: Memory requirements of LLMs can be best understood by seeing the LLM as a set
     of weight matrices and vectors and the text inputs as a sequence of vectors. In
     the following, the definition *weights* will be used to signify all model weight
     matrices and vectors.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过将LLM视为一组权重矩阵和向量，将文本输入视为一系列向量，可以更好地理解LLMs的内存需求。在接下来的内容中，定义*权重*将用于表示所有模型权重矩阵和向量。
 - en: 'At the time of writing this guide, LLMs consist of at least a couple billion
     parameters. Each parameter thereby is made of a decimal number, e.g. `4.5689`
     which is usually stored in either [float32](https://en.wikipedia.org/wiki/Single-precision_floating-point_format),
     [bfloat16](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format), or [float16](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
     format. This allows us to easily compute the memory requirement to load the LLM
     into memory:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 在撰写本指南时，LLMs至少包含数十亿参数。因此，每个参数由一个十进制数组成，例如`4.5689`，通常以[float32](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)、[bfloat16](https://en.wikipedia.org/wiki/Bfloat16_floating-point_format)或[float16](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)格式存储。这使我们能够轻松计算加载LLM到内存所需的内存量：
 - en: '*Loading the weights of a model having X billion parameters requires roughly
     4* X GB of VRAM in float32 precision*'
+  id: totrans-15
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: '*加载具有X十亿参数的模型的权重大约需要4*X GB的VRAM，精度为float32*'
 - en: 'Nowadays, models are however rarely trained in full float32 precision, but
     usually in bfloat16 precision or less frequently in float16 precision. Therefore
     the rule of thumb becomes:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 如今，模型很少以完整的float32精度进行训练，而通常以bfloat16精度或更少的float16精度进行训练。因此，经验法则变为：
 - en: '*Loading the weights of a model having X billion parameters requires roughly
     2* X GB of VRAM in bfloat16/float16 precision*'
+  id: totrans-17
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: '*加载具有X十亿参数的模型的权重大约需要2*X GB的VRAM，精度为bfloat16/float16*'
 - en: For shorter text inputs (less than 1024 tokens), the memory requirement for
     inference is very much dominated by the memory requirement to load the weights.
     Therefore, for now, let’s assume that the memory requirement for inference is
     equal to the memory requirement to load the model into the GPU VRAM.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于较短的文本输入（少于1024个标记），推理的内存需求主要受加载权重的内存需求支配。因此，现在让我们假设推理的内存需求等于将模型加载到GPU VRAM中的内存需求。
 - en: 'To give some examples of how much VRAM it roughly takes to load a model in
     bfloat16:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 举例说明加载 bfloat16 模型大致需要多少 VRAM：
 - en: '**GPT3** requires 2 * 175 GB = **350 GB** VRAM'
+  id: totrans-20
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: GPT3 需要 2 * 175 GB = 350 GB VRAM
 - en: '[**Bloom**](https://huggingface.co/bigscience/bloom) requires 2 * 176 GB =
     **352 GB** VRAM'
+  id: totrans-21
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Bloom](https://huggingface.co/bigscience/bloom) 需要 2 * 176 GB = 352 GB VRAM'
 - en: '[**Llama-2-70b**](https://huggingface.co/meta-llama/Llama-2-70b-hf) requires
     2 * 70 GB = **140 GB** VRAM'
+  id: totrans-22
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Llama-2-70b](https://huggingface.co/meta-llama/Llama-2-70b-hf) 需要 2 * 70 GB
+    = 140 GB VRAM'
 - en: '[**Falcon-40b**](https://huggingface.co/tiiuae/falcon-40b) requires 2 * 40
     GB = **80 GB** VRAM'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[Falcon-40b](https://huggingface.co/tiiuae/falcon-40b) 需要 2 * 40 GB = 80 GB
+    VRAM'
 - en: '[**MPT-30b**](https://huggingface.co/mosaicml/mpt-30b) requires 2 * 30 GB =
     **60 GB** VRAM'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[MPT-30b](https://huggingface.co/mosaicml/mpt-30b) 需要 2 * 30 GB = 60 GB VRAM'
 - en: '[**bigcode/starcoder**](https://huggingface.co/bigcode/starcoder) requires
     2 * 15.5 = **31 GB** VRAM'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[bigcode/starcoder](https://huggingface.co/bigcode/starcoder) 需要 2 * 15.5 =
+    31 GB VRAM'
 - en: As of writing this document, the largest GPU chip on the market is the A100
     & H100 offering 80GB of VRAM. Most of the models listed before require more than
     80GB just to be loaded and therefore necessarily require [tensor parallelism](https://huggingface.co/docs/transformers/perf_train_gpu_many#tensor-parallelism)
     and/or [pipeline parallelism](https://huggingface.co/docs/transformers/perf_train_gpu_many#naive-model-parallelism-vertical-and-pipeline-parallelism).
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 截至撰写本文时，市场上最大的GPU芯片是 A100 & H100，提供 80GB 的 VRAM。之前列出的大多数模型需要超过 80GB 的内存才能加载，因此必然需要张量并行处理和/或管道并行处理。
 - en: 🤗 Transformers does not support tensor parallelism out of the box as it requires
     the model architecture to be written in a specific way. If you’re interested in
     writing models in a tensor-parallelism-friendly way, feel free to have a look
     at [the text-generation-inference library](https://github.com/huggingface/text-generation-inference/tree/main/server/text_generation_server/models/custom_modeling).
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 🤗 Transformers不支持张量并行处理，因为它要求模型架构以特定方式编写。如果您有兴趣以张量并行友好的方式编写模型，请随时查看[文本生成推理库](https://github.com/huggingface/text-generation-inference/tree/main/server/text_generation_server/models/custom_modeling)。
 - en: Naive pipeline parallelism is supported out of the box. For this, simply load
     the model with `device="auto"` which will automatically place the different layers
     on the available GPUs as explained [here](https://huggingface.co/docs/accelerate/v0.22.0/en/concept_guides/big_model_inference).
     Note, however that while very effective, this naive pipeline parallelism does
     not tackle the issues of GPU idling. For this more advanced pipeline parallelism
     is required as explained [here](https://huggingface.co/docs/transformers/en/perf_train_gpu_many#naive-model-parallelism-vertical-and-pipeline-parallelism).
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 天真的管道并行处理是开箱即用的。为此，只需使用 `device="auto"` 加载模型，它将自动将不同的层放置在可用的GPU上，如此处所述。请注意，尽管非常有效，但这种天真的管道并行处理并未解决GPU空闲的问题。为此，需要更高级的管道并行处理，如此处所述。
 - en: If you have access to an 8 x 80GB A100 node, you could load BLOOM as follows
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您可以访问一个 8 x 80GB A100 节点，您可以按照以下方式加载 BLOOM
 - en: '[PRE0]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '[PRE1]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: By using `device_map="auto"` the attention layers would be equally distributed
     over all available GPUs.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过使用 `device_map="auto"`，注意力层将均匀分布在所有可用的GPU上。
 - en: In this guide, we will use [bigcode/octocoder](https://huggingface.co/bigcode/octocoder)
     as it can be run on a single 40 GB A100 GPU device chip. Note that all memory
     and speed optimizations that we will apply going forward, are equally applicable
     to models that require model or tensor parallelism.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本指南中，我们将使用[bigcode/octocoder](https://huggingface.co/bigcode/octocoder)，因为它可以在单个
+    40 GB A100 GPU 设备芯片上运行。请注意，我们将要应用的所有内存和速度优化都同样适用于需要模型或张量并行处理的模型。
 - en: Since the model is loaded in bfloat16 precision, using our rule of thumb above,
     we would expect the memory requirement to run inference with `bigcode/octocoder`
     to be around 31 GB VRAM. Let’s give it a try.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于模型以 bfloat16 精度加载，根据我们上面的经验法则，我们预计使用 `bigcode/octocoder` 运行推理的内存需求约为 31 GB
+    VRAM。让我们试一试。
 - en: We first load the model and tokenizer and then pass both to Transformers’ [pipeline](https://huggingface.co/docs/transformers/main_classes/pipelines)
     object.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们首先加载模型和分词器，然后将两者传递给Transformers的[管道](https://huggingface.co/docs/transformers/main_classes/pipelines)对象。
 - en: '[PRE2]'
+  id: totrans-36
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '[PRE3]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '**Output**:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE4]python\ndef bytes_to_giga_bytes(bytes):\n    return bytes / 1024 / 1024
     / 1024\n[PRE5]'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE4]python\ndef bytes_to_giga_bytes(bytes):\n    return bytes / 1024 / 1024
+    / 1024\n[PRE5]'
 - en: Nice, we can now directly use the result to convert bytes into Gigabytes.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 很好，我们现在可以直接使用结果将字节转换为千兆字节。
 - en: '[PRE6]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Let’s call [`torch.cuda.max_memory_allocated`](https://pytorch.org/docs/stable/generated/torch.cuda.max_memory_allocated.html)
     to measure the peak GPU memory allocation.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们调用[`torch.cuda.max_memory_allocated`](https://pytorch.org/docs/stable/generated/torch.cuda.max_memory_allocated.html)来测量GPU内存分配的峰值。
 - en: '[PRE7]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '**Output**:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE8]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Close enough to our back-of-the-envelope computation! We can see the number
     is not exactly correct as going from bytes to kilobytes requires a multiplication
     of 1024 instead of 1000\. Therefore the back-of-the-envelope formula can also
     be understood as an “at most X GB” computation. Note that if we had tried to run
     the model in full float32 precision, a whopping 64 GB of VRAM would have been
     required.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 接近我们粗略计算的结果！我们可以看到数字并不完全正确，因为从字节到千字节需要乘以1024而不是1000。因此，粗略计算公式也可以理解为“最多XGB”的计算。请注意，如果我们尝试以完整的float32精度运行模型，将需要64GB的VRAM。
 - en: Almost all models are trained in bfloat16 nowadays, there is no reason to run
     the model in full float32 precision if [your GPU supports bfloat16](https://discuss.pytorch.org/t/bfloat16-native-support/117155/5).
     Float32 won’t give better inference results than the precision that was used to
     train the model.
+  id: totrans-47
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 几乎所有模型现在都是在bfloat16中训练的，如果[您的GPU支持bfloat16](https://discuss.pytorch.org/t/bfloat16-native-support/117155/5)，就没有理由以完整的float32精度运行模型。Float32不会比用于训练模型的精度提供更好的推断结果。
 - en: If you are unsure in which format the model weights are stored on the Hub, you
     can always look into the checkpoint’s config under `"torch_dtype"`, *e.g.* [here](https://huggingface.co/meta-llama/Llama-2-7b-hf/blob/6fdf2e60f86ff2481f2241aaee459f85b5b0bbb9/config.json#L21).
     It is recommended to set the model to the same precision type as written in the
     config when loading with `from_pretrained(..., torch_dtype=...)` except when the
     original type is float32 in which case one can use both `float16` or `bfloat16`
     for inference.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您不确定模型权重以哪种格式存储在Hub上，您可以随时查看检查点的配置，在`"torch_dtype"`下，例如[这里](https://huggingface.co/meta-llama/Llama-2-7b-hf/blob/6fdf2e60f86ff2481f2241aaee459f85b5b0bbb9/config.json#L21)。建议在使用`from_pretrained(...,
+    torch_dtype=...)`加载模型时，将模型设置为与配置中写入的相同精度类型，除非原始类型为float32，此时可以在推断中使用`float16`或`bfloat16`。
 - en: Let’s define a `flush(...)` function to free all allocated memory so that we
     can accurately measure the peak allocated GPU memory.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们定义一个`flush(...)`函数来释放所有分配的内存，以便我们可以准确地测量分配的GPU内存峰值。
 - en: '[PRE9]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Let’s call it now for the next experiment.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们为下一个实验调用它。
 - en: '[PRE10]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: In the recent version of the accelerate library, you can also use an utility
     method called `release_memory()`
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 在最近的accelerate库版本中，您还可以使用一个名为`release_memory()`的实用方法
 - en: '[PRE11]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Now what if your GPU does not have 32 GB of VRAM? It has been found that model
     weights can be quantized to 8-bit or 4-bits without a significant loss in performance
     (see [Dettmers et al.](https://arxiv.org/abs/2208.07339)). Model can be quantized
     to even 3 or 2 bits with an acceptable loss in performance as shown in the recent
     [GPTQ paper](https://arxiv.org/abs/2210.17323) 🤯.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么如果您的GPU没有32GB的VRAM怎么办？已经发现模型权重可以量化为8位或4位而不会显著降低性能（参见[Dettmers等人](https://arxiv.org/abs/2208.07339)）。正如最近的[GPTQ论文](https://arxiv.org/abs/2210.17323)所示，模型可以量化为3位或2位，性能损失是可以接受的🤯。
 - en: Without going into too many details, quantization schemes aim at reducing the
     precision of weights while trying to keep the model’s inference results as accurate
     as possible (*a.k.a* as close as possible to bfloat16). Note that quantization
@@ -289,29 +394,39 @@
     of the next token *logit* distribution. All that matters is that the next token
     *logit* distribution stays roughly the same so that an `argmax` or `topk` operation
     gives the same results.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 不深入细节，量化方案旨在降低权重的精度，同时尽可能保持模型推断结果的准确性（即尽可能接近bfloat16）。请注意，量化在文本生成方面特别有效，因为我们只关心选择*最可能的下一个标记集*，并不真正关心下一个标记*logit*分布的确切值。重要的是下一个标记*logit*分布保持大致相同，以便`argmax`或`topk`操作给出相同的结果。
 - en: 'There are various quantization techniques, which we won’t discuss in detail
     here, but in general, all quantization techniques work as follows:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 有各种量化技术，我们这里不会详细讨论，但总的来说，所有量化技术的工作方式如下：
 - en: Quantize all weights to the target precision
+  id: totrans-58
   prefs:
   - PREF_UL
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将所有权重量化为目标精度
 - en: Load the quantized weights, and pass the input sequence of vectors in bfloat16
     precision
+  id: totrans-59
   prefs:
   - PREF_UL
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 加载量化的权重，并以bfloat16精度传递输入序列的向量
 - en: Dynamically dequantize weights to bfloat16 to perform the computation with their
     input vectors in bfloat16 precision
+  id: totrans-60
   prefs:
   - PREF_UL
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 动态将权重去量化为bfloat16，以bfloat16精度执行计算
 - en: 'In a nutshell, this means that *inputs-weight matrix* multiplications, with<math><semantics><mrow><mi>X</mi></mrow>
     <annotation encoding="application/x-tex">X</annotation></semantics></math> X being
     the *inputs*,<math><semantics><mrow><mi>W</mi></mrow> <annotation encoding="application/x-tex">W</annotation></semantics></math>
@@ -320,165 +435,256 @@
     <math display="block"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>X</mi><mo>∗</mo><mi>W</mi></mrow>
     <annotation encoding="application/x-tex">Y = X * W</annotation></semantics></math>
     Y=X∗W'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 简而言之，这意味着*输入-权重矩阵*乘法，其中<math><semantics><mrow><mi>X</mi></mrow> <annotation
+    encoding="application/x-tex">X</annotation></semantics></math> X是*输入*，<math><semantics><mrow><mi>W</mi></mrow>
+    <annotation encoding="application/x-tex">W</annotation></semantics></math> W是权重矩阵，<math><semantics><mrow><mi>Y</mi></mrow>
+    <annotation encoding="application/x-tex">Y</annotation></semantics></math> Y是输出：<math
+    display="block"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>X</mi><mo>∗</mo><mi>W</mi></mrow>
+    <annotation encoding="application/x-tex">Y = X * W</annotation></semantics></math>
+    Y=X∗W
 - en: are changed to <math display="block"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>X</mi><mo>∗</mo><mtext>dequantize</mtext><mo
     stretchy="false">(</mo><mi>W</mi><mo stretchy="false">)</mo></mrow> <annotation
     encoding="application/x-tex">Y = X * \text{dequantize}(W)</annotation></semantics></math>
     Y=X∗dequantize(W)
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 被改变为<math display="block"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>X</mi><mo>∗</mo><mtext>dequantize</mtext><mo
+    stretchy="false">(</mo><mi>W</mi><mo stretchy="false">)</mo></mrow> <annotation
+    encoding="application/x-tex">Y = X * \text{dequantize}(W)</annotation></semantics></math>
+    Y=X∗dequantize(W)
 - en: for every matrix multiplication. Dequantization and re-quantization is performed
     sequentially for all weight matrices as the inputs run through the network graph.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于每个矩阵乘法。当输入通过网络图时，权重矩阵的反量化和重新量化是按顺序执行的。
 - en: Therefore, inference time is often **not** reduced when using quantized weights,
     but rather increases. Enough theory, let’s give it a try! To quantize the weights
     with Transformers, you need to make sure that the [`bitsandbytes`](https://github.com/TimDettmers/bitsandbytes)
     library is installed.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，当使用量化权重时，推理时间通常**不会**减少，而是增加。足够的理论，让我们试一试！要使用Transformers量化权重，您需要确保已安装[`bitsandbytes`](https://github.com/TimDettmers/bitsandbytes)库。
 - en: '[PRE12]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: We can then load models in 8-bit quantization by simply adding a `load_in_8bit=True`
     flag to `from_pretrained`.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，我们可以通过简单地在`from_pretrained`中添加`load_in_8bit=True`标志来加载8位量化的模型。
 - en: '[PRE13]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Now, let’s run our example again and measure the memory usage.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，让我们再次运行我们的示例并测量内存使用情况。
 - en: '[PRE14]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '**Output**:'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE15]python\ndef bytes_to_giga_bytes(bytes):\n    return bytes / 1024 / 1024
     / 1024\n[PRE16]'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE15]python\ndef bytes_to_giga_bytes(bytes):\n    return bytes / 1024 / 1024
+    / 1024\n[PRE16]'
 - en: Nice, we’re getting the same result as before, so no loss in accuracy! Let’s
     look at how much memory was used this time.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 很好，我们得到了与之前相同的结果，因此在准确性上没有损失！让我们看看这次使用了多少内存。
 - en: '[PRE17]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: '**Output**:'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE18]'
+  id: totrans-75
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Significantly less! We’re down to just a bit over 15 GBs and could therefore
     run this model on consumer GPUs like the 4090. We’re seeing a very nice gain in
     memory efficiency and more or less no degradation to the model’s output. However,
     we can also notice a slight slow-down during inference.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 显著减少！我们只剩下略高于15GB，因此可以在像4090这样的消费级GPU上运行此模型。我们在内存效率上获得了非常好的收益，几乎没有对模型输出的降级。但是，在推理过程中我们也可以注意到略微减速。
 - en: We delete the models and flush the memory again.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们删除模型并再次清空内存。
 - en: '[PRE19]'
+  id: totrans-78
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: '[PRE20]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Let’s see what peak GPU memory consumption 4-bit quantization gives. Quantizing
     the model to 4-bit can be done with the same API as before - this time by passing
     `load_in_4bit=True` instead of `load_in_8bit=True`.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看4位量化对GPU内存消耗的峰值。将模型量化为4位可以通过与之前相同的API完成 - 这次是通过传递`load_in_4bit=True`而不是`load_in_8bit=True`来完成。
 - en: '[PRE21]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '**Output**:'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE22]\ndef bytes_to_gigabytes(bytes):\n    return bytes / 1024 / 1024 / 1024\n[PRE23]'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PRE22]\ndef bytes_to_gigabytes(bytes):\n    return bytes / 1024 / 1024 / 1024\n[PRE23]'
 - en: We’re almost seeing the same output text as before - just the `python` is missing
     just before the code snippet. Let’s see how much memory was required.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们几乎看到与之前相同的输出文本 - 只是在代码片段之前缺少了`python`。让我们看看需要多少内存。
 - en: '[PRE24]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: '**Output**:'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE25]'
+  id: totrans-87
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: Just 9.5GB! That’s really not a lot for a >15 billion parameter model.
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 只有9.5GB！对于一个超过15亿参数的模型来说，这真的不多。
 - en: While we see very little degradation in accuracy for our model here, 4-bit quantization
     can in practice often lead to different results compared to 8-bit quantization
     or full `bfloat16` inference. It is up to the user to try it out.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然我们在这里看到模型准确性几乎没有下降，但实际上，4位量化通常会导致与8位量化或完整的`bfloat16`推理相比产生不同的结果。这取决于用户是否尝试。
 - en: Also note that inference here was again a bit slower compared to 8-bit quantization
     which is due to the more aggressive quantization method used for 4-bit quantization
     leading to<math><semantics><mrow><mtext>quantize</mtext></mrow> <annotation encoding="application/x-tex">\text{quantize}</annotation></semantics></math>
     quantize and<math><semantics><mrow><mtext>dequantize</mtext></mrow> <annotation
     encoding="application/x-tex">\text{dequantize}</annotation></semantics></math>
     dequantize taking longer during inference.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 还要注意，与8位量化相比，这里的推理速度再次稍慢一些，这是因为4位量化使用了更激进的量化方法，导致在推理过程中<math><semantics><mrow><mtext>量化</mtext></mrow></semantics></math>和<math><semantics><mrow><mtext>反量化</mtext></mrow></semantics></math>过程需要更长的时间。
 - en: '[PRE26]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: '[PRE27]'
+  id: totrans-92
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: Overall, we saw that running OctoCoder in 8-bit precision reduced the required
     GPU VRAM from 32G GPU VRAM to only 15GB and running the model in 4-bit precision
     further reduces the required GPU VRAM to just a bit over 9GB.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 总的来说，我们发现在8位精度下运行OctoCoder将所需的GPU VRAM从32G GPU VRAM减少到仅15GB，并且在4位精度下运行模型进一步将所需的GPU
+    VRAM减少到略高于9GB。
 - en: 4-bit quantization allows the model to be run on GPUs such as RTX3090, V100,
     and T4 which are quite accessible for most people.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 4位量化使模型可以在RTX3090、V100和T4等GPU上运行，这对大多数人来说非常容易获得。
 - en: For more information on quantization and to see how one can quantize models
     to require even less GPU VRAM memory than 4-bit, we recommend looking into the
     [`AutoGPTQ`](https://huggingface.co/docs/transformers/main/en/main_classes/quantization#autogptq-integration%60)
     implementation.
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关量化的更多信息以及如何将模型量化以便比4位更少地使用GPU VRAM内存，我们建议查看[`AutoGPTQ`](https://huggingface.co/docs/transformers/main/en/main_classes/quantization#autogptq-integration%60)实现。
 - en: As a conclusion, it is important to remember that model quantization trades
     improved memory efficiency against accuracy and in some cases inference time.
+  id: totrans-96
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 最后，重要的是要记住，模型量化在内存效率和准确性之间进行了权衡，并且在某些情况下会增加推理时间。
 - en: If GPU memory is not a constraint for your use case, there is often no need
     to look into quantization. However many GPUs simply can’t run LLMs without quantization
     methods and in this case, 4-bit and 8-bit quantization schemes are extremely useful
     tools.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果GPU内存对您的用例不是限制，通常不需要考虑量化。但是许多GPU无法在没有量化方法的情况下运行LLMs，在这种情况下，4位和8位量化方案是非常有用的工具。
 - en: For more in-detail usage information, we strongly recommend taking a look at
     the [Transformers Quantization Docs](https://huggingface.co/docs/transformers/main_classes/quantization#general-usage).
     Next, let’s look into how we can improve computational and memory efficiency by
     using better algorithms and an improved model architecture.
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关更详细的使用信息，我们强烈建议查看[Transformers量化文档](https://huggingface.co/docs/transformers/main_classes/quantization#general-usage)。接下来，让我们看看如何通过使用更好的算法和改进的模型架构来提高计算和内存效率。
 - en: 2\. Flash Attention
+  id: totrans-99
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 2\. 闪光关注
 - en: Today’s top-performing LLMs share more or less the same fundamental architecture
     that consists of feed-forward layers, activation layers, layer normalization layers,
     and most crucially, self-attention layers.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 今天表现最佳的LLMs基本上共享相同的基本架构，包括前馈层、激活层、层归一化层，以及最关键的自注意力层。
 - en: Self-attention layers are central to Large Language Models (LLMs) in that they
     enable the model to understand the contextual relationships between input tokens.
     However, the peak GPU memory consumption for self-attention layers grows *quadratically*
@@ -488,8 +694,11 @@
     While this is not really noticeable for shorter input sequences (of up to 1000
     input tokens), it becomes a serious problem for longer input sequences (at around
     16000 input tokens).
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 自注意力层对于大型语言模型（LLMs）至关重要，因为它们使模型能够理解输入标记之间的上下文关系。然而，自注意力层的峰值GPU内存消耗随着输入标记数量（也称为*序列长度*）的增加呈二次增长，我们在下文中用<math><semantics><mrow><mi>N</mi></mrow>
+    <annotation encoding="application/x-tex">N</annotation></semantics></math> N 表示。虽然对于较短的输入序列（最多1000个输入标记）这并不明显，但对于较长的输入序列（大约16000个输入标记）则成为一个严重问题。
 - en: 'Let’s take a closer look. The formula to compute the output<math><semantics><mrow><mi
     mathvariant="bold">O</mi></mrow> <annotation encoding="application/x-tex">\mathbf{O}</annotation></semantics></math>
     O of a self-attention layer for an input<math><semantics><mrow><mi mathvariant="bold">X</mi></mrow>
@@ -522,8 +731,38 @@
     QKT being of size<math><semantics><mrow><msup><mi>N</mi><mn>2</mn></msup></mrow>
     <annotation encoding="application/x-tex">N^2</annotation></semantics></math> N2
     .'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们仔细看看。计算自注意力层对于长度为<math><semantics><mrow><mi>N</mi></mrow> <annotation encoding="application/x-tex">N</annotation></semantics></math>
+    N 的输入<math><semantics><mrow><mi mathvariant="bold">X</mi></mrow> <annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math>
+    X 的输出<math><semantics><mrow><mi mathvariant="bold">O</mi></mrow> <annotation encoding="application/x-tex">\mathbf{O}</annotation></semantics></math>
+    O 的公式是：<math display="block"><semantics><mrow><mtext mathvariant="bold">O</mtext><mo>=</mo><mtext>Attn</mtext><mo
+    stretchy="false">(</mo><mi mathvariant="bold">X</mi><mo stretchy="false">)</mo><mo>=</mo><mi
+    mathvariant="bold">V</mi><mo>×</mo><mtext>Softmax</mtext><mo stretchy="false">(</mo><msup><mrow><mi
+    mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup><mo
+    stretchy="false">)</mo><mtext> with </mtext><mi mathvariant="bold">Q</mi><mo>=</mo><msub><mi
+    mathvariant="bold">W</mi><mi>q</mi></msub><mi mathvariant="bold">X</mi><mo separator="true">,</mo><mi
+    mathvariant="bold">V</mi><mo>=</mo><msub><mi mathvariant="bold">W</mi><mi>v</mi></msub><mi
+    mathvariant="bold">X</mi><mo separator="true">,</mo><mi mathvariant="bold">K</mi><mo>=</mo><msub><mi
+    mathvariant="bold">W</mi><mi>k</mi></msub><mi mathvariant="bold">X</mi></mrow>
+    <annotation encoding="application/x-tex">\textbf{O} = \text{Attn}(\mathbf{X})
+    = \mathbf{V} \times \text{Softmax}(\mathbf{QK}^T) \text{ with } \mathbf{Q} = \mathbf{W}_q
+    \mathbf{X}, \mathbf{V} = \mathbf{W}_v \mathbf{X}, \mathbf{K} = \mathbf{W}_k \mathbf{X}</annotation></semantics></math>
+    O=Attn(X)=V×Softmax(QKT) with Q=Wq​X,V=Wv​X,K=Wk​X <math><semantics><mrow><mi
+    mathvariant="bold">X</mi><mo>=</mo><mo stretchy="false">(</mo><msub><mi mathvariant="bold">x</mi><mn>1</mn></msub><mo
+    separator="true">,</mo><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi
+    mathvariant="normal">.</mi><msub><mi mathvariant="bold">x</mi><mi>N</mi></msub><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">\mathbf{X}
+    = (\mathbf{x}_1, ... \mathbf{x}_{N})</annotation></semantics></math> X=(x1​,...xN​)
+    是注意力层的输入序列。投影<math><semantics><mrow><mi mathvariant="bold">Q</mi></mrow> <annotation
+    encoding="application/x-tex">\mathbf{Q}</annotation></semantics></math> Q 和<math><semantics><mrow><mi
+    mathvariant="bold">K</mi></mrow> <annotation encoding="application/x-tex">\mathbf{K}</annotation></semantics></math>
+    K 将分别包含<math><semantics><mrow><mi>N</mi></mrow> <annotation encoding="application/x-tex">N</annotation></semantics></math>
+    N 个向量，导致<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
+    QKT 的大小为<math><semantics><mrow><msup><mi>N</mi><mn>2</mn></msup></mrow> <annotation
+    encoding="application/x-tex">N^2</annotation></semantics></math> N2 。
 - en: LLMs usually have multiple attention heads, thus doing multiple self-attention
     computations in parallel. Assuming, the LLM has 40 attention heads and runs in
     bfloat16 precision, we can calculate the memory requirement to store the<math><semantics><mrow><mi
@@ -541,25 +780,47 @@
     mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
     <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
     QKT matrices.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: LLMs通常具有多个注意力头，因此可以并行进行多个自注意力计算。假设LLM有40个注意力头并且以bfloat16精度运行，我们可以计算存储<math><semantics><mrow><mi
+    mathvariant="bold">Q</mi><msup><mi mathvariant="bold">K</mi><mi mathvariant="bold">T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">\mathbf{QK^T}</annotation></semantics></math>
+    QKT 矩阵所需的内存为<math><semantics><mrow><mn>40</mn><mo>∗</mo><mn>2</mn><mo>∗</mo><msup><mi>N</mi><mn>2</mn></msup></mrow>
+    <annotation encoding="application/x-tex">40 * 2 * N^2</annotation></semantics></math>
+    40∗2∗N2 字节。对于<math><semantics><mrow><mi>N</mi><mo>=</mo><mn>1000</mn></mrow> <annotation
+    encoding="application/x-tex">N=1000</annotation></semantics></math> N=1000，只需要大约50MB的VRAM，然而，对于<math><semantics><mrow><mi>N</mi><mo>=</mo><mn>16000</mn></mrow>
+    <annotation encoding="application/x-tex">N=16000</annotation></semantics></math>
+    N=16000，我们将需要19GB的VRAM，而对于<math><semantics><mrow><mi>N</mi><mo>=</mo><mn>100</mn><mo
+    separator="true">,</mo><mn>000</mn></mrow> <annotation encoding="application/x-tex">N=100,000</annotation></semantics></math>
+    N=100,000，我们将需要近1TB的VRAM来存储<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi
+    mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow> <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
+    QKT 矩阵。
 - en: Long story short, the default self-attention algorithm quickly becomes prohibitively
     memory-expensive for large input contexts.
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 长话短说，对于大型输入上下文来说，默认的自注意力算法很快变得内存消耗过高。
 - en: As LLMs improve in text comprehension and generation, they are applied to increasingly
     complex tasks. While models once handled the translation or summarization of a
     few sentences, they now manage entire pages, demanding the capability to process
     extensive input lengths.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 随着LLMs在文本理解和生成方面的改进，它们被应用于越来越复杂的任务。虽然模型曾经处理几句话的翻译或总结，现在它们可以处理整页的内容，需要处理广泛的输入长度。
 - en: How can we get rid of the exorbitant memory requirements for large input lengths?
     We need a new way to compute the self-attention mechanism that gets rid of the<math><semantics><mrow><mi>Q</mi><msup><mi>K</mi><mi>T</mi></msup></mrow>
     <annotation encoding="application/x-tex">QK^T</annotation></semantics></math>
     QKT matrix. [Tri Dao et al.](https://arxiv.org/abs/2205.14135) developed exactly
     such a new algorithm and called it **Flash Attention**.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们如何摆脱大型输入长度的过高内存需求？我们需要一种新的方式来计算自注意力机制，摆脱<math><semantics><mrow><mi>Q</mi><msup><mi>K</mi><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">QK^T</annotation></semantics></math>
+    QKT 矩阵。[Tri Dao等人](https://arxiv.org/abs/2205.14135)开发了一种全新的算法，称之为**Flash Attention**。
 - en: 'In a nutshell, Flash Attention breaks the <math><semantics><mrow><mi mathvariant="bold">V</mi><mo>×</mo><mtext>Softmax</mtext><mo
     stretchy="false">(</mo><msup><mrow><mi mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow><annotation
     encoding="application/x-tex">\mathbf{V} \times \text{Softmax}(\mathbf{QK}^T</annotation></semantics></math>V×Softmax(QKT)
@@ -574,8 +835,21 @@
     encoding="application/x-tex">\textbf{O}_i \leftarrow s^a_{ij} * \textbf{O}_i +
     s^b_{ij} * \mathbf{V}_{j} \times \text{Softmax}(\mathbf{QK}^T_{i,j}) \text{ for
     multiple } i, j \text{ iterations}</annotation></semantics></math> Oi​←sija​∗Oi​+sijb​∗Vj​×Softmax(QKi,jT​) for multiple i,j iterations'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 简而言之，Flash Attention将<math><semantics><mrow><mi mathvariant="bold">V</mi><mo>×</mo><mtext>Softmax</mtext><mo
+    stretchy="false">(</mo><msup><mrow><mi mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow><annotation
+    encoding="application/x-tex">\mathbf{V} \times \text{Softmax}(\mathbf{QK}^T</annotation></semantics></math>V×Softmax(QKT)计算分开，而是通过迭代多个softmax计算步骤来计算输出的较小块：<math
+    display="block"><semantics><mrow><msub><mtext mathvariant="bold">O</mtext><mi>i</mi></msub><mo>←</mo><msubsup><mi>s</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>a</mi></msubsup><mo>∗</mo><msub><mtext
+    mathvariant="bold">O</mtext><mi>i</mi></msub><mo>+</mo><msubsup><mi>s</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>b</mi></msubsup><mo>∗</mo><msub><mi
+    mathvariant="bold">V</mi><mi>j</mi></msub><mo>×</mo><mtext>Softmax</mtext><mo
+    stretchy="false">(</mo><msubsup><mrow><mi mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mrow><mi>i</mi><mo
+    separator="true">,</mo><mi>j</mi></mrow><mi>T</mi></msubsup><mo stretchy="false">)</mo><mtext> for multiple </mtext><mi>i</mi><mo
+    separator="true">,</mo><mi>j</mi><mtext> iterations</mtext></mrow> <annotation
+    encoding="application/x-tex">\textbf{O}_i \leftarrow s^a_{ij} * \textbf{O}_i +
+    s^b_{ij} * \mathbf{V}_{j} \times \text{Softmax}(\mathbf{QK}^T_{i,j}) \text{ for
+    multiple } i, j \text{ iterations}</annotation></semantics></math> Oi​←sija​∗Oi​+sijb​∗Vj​×Softmax(QKi,jT​) for multiple i,j iterations
 - en: with<math><semantics><mrow><msubsup><mi>s</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>a</mi></msubsup></mrow>
     <annotation encoding="application/x-tex">s^a_{ij}</annotation></semantics></math>
     sija​ and<math><semantics><mrow><msubsup><mi>s</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>b</mi></msubsup></mrow>
@@ -584,253 +858,380 @@
     every<math><semantics><mrow><mi>i</mi></mrow> <annotation encoding="application/x-tex">i</annotation></semantics></math>
     i and<math><semantics><mrow><mi>j</mi></mrow> <annotation encoding="application/x-tex">j</annotation></semantics></math>
     j .
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 其中<math><semantics><mrow><msubsup><mi>s</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>a</mi></msubsup></mrow>
+    <annotation encoding="application/x-tex">s^a_{ij}</annotation></semantics></math>和<math><semantics><mrow><msubsup><mi>s</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>b</mi></msubsup></mrow>
+    <annotation encoding="application/x-tex">s^b_{ij}</annotation></semantics></math>是一些需要为每个<math><semantics><mrow><mi>i</mi></mrow>
+    <annotation encoding="application/x-tex">i</annotation></semantics></math>和<math><semantics><mrow><mi>j</mi></mrow>
+    <annotation encoding="application/x-tex">j</annotation></semantics></math>重新计算的softmax归一化统计量。
 - en: Please note that the whole Flash Attention is a bit more complex and is greatly
     simplified here as going in too much depth is out of scope for this guide. The
     reader is invited to take a look at the well-written [Flash Attention paper](https://arxiv.org/abs/2205.14135)
     for more details.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，整个Flash Attention有点复杂，在这里大大简化了，因为深入讨论超出了本指南的范围。读者可以查看写得很好的[Flash Attention论文](https://arxiv.org/abs/2205.14135)以获取更多详细信息。
 - en: 'The main takeaway here is:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里的主要要点是：
 - en: By keeping track of softmax normalization statistics and by using some smart
     mathematics, Flash Attention gives **numerical identical** outputs compared to
     the default self-attention layer at a memory cost that only increases linearly
     with<math><semantics><mrow><mi>N</mi></mrow> <annotation encoding="application/x-tex">N</annotation></semantics></math>
     N .
+  id: totrans-111
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 通过跟踪softmax归一化统计量，并使用一些智能数学，Flash Attention给出了与默认自注意力层**数值相同**的输出，而内存成本仅随<math><semantics><mrow><mi>N</mi></mrow>
+    <annotation encoding="application/x-tex">N</annotation></semantics></math>线性增加。
 - en: Looking at the formula, one would intuitively say that Flash Attention must
     be much slower compared to the default self-attention formula as more computation
     needs to be done. Indeed Flash Attention requires more FLOPs compared to normal
     attention as the softmax normalization statistics have to constantly be recomputed
     (see [paper](https://arxiv.org/abs/2205.14135) for more details if interested)
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 从公式来看，人们直觉地会说Flash Attention必须比默认的自注意力公式慢得多，因为需要进行更多的计算。事实上，与普通注意力相比，Flash Attention需要更多的FLOPs，因为softmax归一化统计量必须不断重新计算（如果感兴趣，请参阅[论文](https://arxiv.org/abs/2205.14135)获取更多详细信息）
 - en: However, Flash Attention is much faster in inference compared to default attention
     which comes from its ability to significantly reduce the demands on the slower,
     high-bandwidth memory of the GPU (VRAM), focusing instead on the faster on-chip
     memory (SRAM).
+  id: totrans-113
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 然而，与默认注意力相比，Flash Attention在推理速度上要快得多，这是因为它能够显著减少对GPU（VRAM）较慢、高带宽内存的需求，而是专注于更快的片上内存（SRAM）。
 - en: Essentially, Flash Attention makes sure that all intermediate write and read
     operations can be done using the fast *on-chip* SRAM memory instead of having
     to access the slower VRAM memory to compute the output vector<math><semantics><mrow><mi
     mathvariant="bold">O</mi></mrow> <annotation encoding="application/x-tex">\mathbf{O}</annotation></semantics></math>
     O .
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 基本上，Flash Attention确保所有中间写入和读取操作都可以使用快速的*片上*SRAM内存来完成，而无需访问较慢的VRAM内存来计算输出向量<math><semantics><mrow><mi
+    mathvariant="bold">O</mi></mrow> <annotation encoding="application/x-tex">\mathbf{O}</annotation></semantics></math>。
 - en: In practice, there is currently absolutely no reason to **not** use Flash Attention
     if available. The algorithm gives mathematically the same outputs, and is both
     faster and more memory-efficient.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 实际上，如果可用，目前绝对没有理由**不**使用Flash Attention。该算法在数学上给出相同的输出，而且速度更快，内存效率更高。
 - en: Let’s look at a practical example.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一个实际的例子。
 - en: Our OctoCoder model now gets a significantly longer input prompt which includes
     a so-called *system prompt*. System prompts are used to steer the LLM into a better
     assistant that is tailored to the users’ task. In the following, we use a system
     prompt that will make OctoCoder a better coding assistant.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们的OctoCoder模型现在得到了一个明显更长的输入提示，其中包括所谓的*系统提示*。系统提示用于引导LLM成为一个更好的助手，专门为用户的任务定制。接下来，我们使用一个系统提示，将使OctoCoder成为一个更好的编码助手。
 - en: '[PRE28]'
+  id: totrans-118
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'For demonstration purposes, we duplicate the system prompt by ten so that the
     input length is long enough to observe Flash Attention’s memory savings. We append
     the original text prompt `"Question: Please write a function in Python that transforms
     bytes to Giga bytes.\n\nAnswer: Here"`'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了演示目的，我们将系统提示复制十次，以便输入长度足够长，以观察Flash Attention的内存节省。我们附加原始文本提示`"问题：请用Python编写一个将字节转换为千兆字节的函数。\n\n答案：在这里"`
 - en: '[PRE29]'
+  id: totrans-120
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: We instantiate our model again in bfloat16 precision.
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们再次以bfloat16精度实例化我们的模型。
 - en: '[PRE30]'
+  id: totrans-122
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: Let’s now run the model just like before *without Flash Attention* and measure
     the peak GPU memory requirement and inference time.
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们像之前一样运行模型*不使用Flash Attention*，并测量GPU内存需求的峰值和推理时间。
 - en: '[PRE31]'
+  id: totrans-124
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: '**Output**:'
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE32]'
+  id: totrans-126
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: We’re getting the same output as before, however this time, the model repeats
     the answer multiple times until it’s 60 tokens cut-off. This is not surprising
     as we’ve repeated the system prompt ten times for demonstration purposes and thus
     cued the model to repeat itself.
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们得到了与之前相同的输出，但是这一次，模型会重复答案多次，直到达到60个标记的截止。这并不奇怪，因为我们为演示目的重复了系统提示十次，从而提示模型重复自己。
 - en: '**Note** that the system prompt should not be repeated ten times in real-world
     applications - one time is enough!'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: '**请注意**，在实际应用中，系统提示不应重复十次-一次就足够了！'
 - en: Let’s measure the peak GPU memory requirement.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们测量GPU内存需求的峰值。
 - en: '[PRE33]'
+  id: totrans-130
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: '**Output**:'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE34]'
+  id: totrans-132
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: As we can see the peak GPU memory requirement is now significantly higher than
     in the beginning, which is largely due to the longer input sequence. Also the
     generation takes a little over a minute now.
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们所看到的，峰值GPU内存需求现在比一开始显着更高，这在很大程度上是由于更长的输入序列。此外，生成现在需要一分钟多一点。
 - en: We call `flush()` to free GPU memory for our next experiment.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们调用`flush()`来释放GPU内存，以便进行下一个实验。
 - en: '[PRE35]'
+  id: totrans-135
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: For comparison, let’s run the same function, but enable Flash Attention instead.
     To do so, we convert the model to [BetterTransformer](https://huggingface.co/docs/optimum/bettertransformer/overview)
     and by doing so enabling PyTorch’s [SDPA self-attention](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention)
     which in turn is able to use Flash Attention.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了进行比较，让我们运行相同的函数，但启用Flash Attention。为此，我们将模型转换为[BetterTransformer](https://huggingface.co/docs/optimum/bettertransformer/overview)，从而启用PyTorch的[SDPA自注意力](https://pytorch.org/docs/master/generated/torch.nn.functional.scaled_dot_product_attention)，进而能够使用Flash
+    Attention。
 - en: '[PRE36]'
+  id: totrans-137
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: Now we run the exact same code snippet as before and under the hood Transformers
     will make use of Flash Attention.
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们运行与之前完全相同的代码片段，在底层Transformers将利用Flash Attention。
 - en: '[PRE37]'
+  id: totrans-139
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: '**Output**:'
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE38]'
+  id: totrans-141
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: We’re getting the exact same result as before, but can observe a very significant
     speed-up thanks to Flash Attention.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们得到了与之前完全相同的结果，但由于Flash Attention，我们可以观察到非常显著的加速。
 - en: Let’s measure the memory consumption one last time.
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们最后一次测量内存消耗。
 - en: '[PRE39]'
+  id: totrans-144
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: '**Output**:'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE40]'
+  id: totrans-146
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: And we’re almost back to our original 29GB peak GPU memory from the beginning.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们几乎回到了最初的29GB GPU内存峰值。
 - en: We can observe that we only use roughly 100MB more GPU memory when passing a
     very long input sequence with Flash Attention compared to passing a short input
     sequence as done in the beginning.
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以观察到，与一开始传递短输入序列相比，使用Flash Attention传递非常长的输入序列时，我们只使用了大约多100MB的GPU内存。
 - en: '[PRE41]'
+  id: totrans-149
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: For more information on how to use Flash Attention, please have a look at [this
     doc page](https://huggingface.co/docs/transformers/en/perf_infer_gpu_one#flashattention-2).
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关如何使用Flash Attention的更多信息，请查看[此文档页面](https://huggingface.co/docs/transformers/en/perf_infer_gpu_one#flashattention-2)。
 - en: 3\. Architectural Innovations
+  id: totrans-151
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 3. 架构创新
 - en: 'So far we have looked into improving computational and memory efficiency by:'
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我们已经研究了通过以下方式提高计算和内存效率：
 - en: Casting the weights to a lower precision format
+  id: totrans-153
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将权重转换为较低精度格式
 - en: Replacing the self-attention algorithm with a more memory- and compute efficient
     version
+  id: totrans-154
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用更节省内存和计算资源的版本替换自注意力算法
 - en: 'Let’s now look into how we can change the architecture of an LLM so that it
     is most effective and efficient for task that require long text inputs, *e.g.*:'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们看看如何改变LLM的架构，使其对需要长文本输入的任务最有效和高效，例如：
 - en: Retrieval augmented Questions Answering,
+  id: totrans-156
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 检索增强问答，
 - en: Summarization,
+  id: totrans-157
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 总结，
 - en: Chat
+  id: totrans-158
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 聊天
 - en: Note that *chat* not only requires the LLM to handle long text inputs, but it
     also necessitates that the LLM is able to efficiently handle the back-and-forth
     dialogue between user and assistant (such as ChatGPT).
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，*chat*不仅要求LLM处理长文本输入，还要求LLM能够有效地处理用户和助手之间的来回对话（例如ChatGPT）。
 - en: Once trained, the fundamental LLM architecture is difficult to change, so it
     is important to make considerations about the LLM’s tasks beforehand and accordingly
     optimize the model’s architecture. There are two important components of the model
     architecture that quickly become memory and/or performance bottlenecks for large
     input sequences.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦训练完成，基本的LLM架构很难改变，因此在事先考虑LLM的任务并相应地优化模型架构非常重要。模型架构的两个重要组件很快成为大型输入序列的内存和/或性能瓶颈。
 - en: The positional embeddings
+  id: totrans-161
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 位置嵌入
 - en: The key-value cache
+  id: totrans-162
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 键-值缓存
 - en: Let’s go over each component in more detail
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们更详细地讨论每个组件
 - en: 3.1 Improving positional embeddings of LLMs
+  id: totrans-164
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 3.1 改进LLM的位置嵌入
 - en: 'Self-attention puts each token in relation to each other’s tokens. As an example,
     the<math><semantics><mrow><mtext>Softmax</mtext><mo stretchy="false">(</mo><msup><mrow><mi
     mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup><mo
     stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">\text{Softmax}(\mathbf{QK}^T)</annotation></semantics></math>
     Softmax(QKT) matrix of the text input sequence *“Hello”, “I”, “love”, “you”* could
     look as follows:'
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 自注意力将每个标记与其他标记相关联。例如，文本输入序列的Softmax(QKT)矩阵*“Hello”, “I”, “love”, “you”*可能如下所示：
 - en: '![](../Images/a42237d68d8acd5442beddab2228c8d5.png)'
+  id: totrans-166
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/a42237d68d8acd5442beddab2228c8d5.png)'
 - en: Each word token is given a probability mass at which it attends all other word
     tokens and, therefore is put into relation with all other word tokens. E.g. the
     word *“love”* attends to the word *“Hello”* with 5%, to *“I”* with 30%, and to
     itself with 65%.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个单词标记都被赋予一个概率质量，用于关注所有其他单词标记，因此与所有其他单词标记相关联。例如，单词*“love”*关注单词*“Hello”*的概率为5%，关注*“I”*的概率为30%，自身的概率为65%。
 - en: A LLM based on self-attention, but without position embeddings would have great
     difficulties in understanding the positions of the text inputs to each other.
     This is because the probability score computed by<math><semantics><mrow><msup><mrow><mi
@@ -843,14 +1244,24 @@
     the LLM without position embeddings each token appears to have the same distance
     to all other tokens, *e.g.* differentiating between *“Hello I love you”* and *“You
     love I hello”* would be very challenging.
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 基于自注意力的LLM，但没有位置嵌入，将在理解文本输入之间的位置方面遇到很大困难。这是因为由<math><semantics><mrow><msup><mrow><mi
+    mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
+    QKT 计算的概率分数将每个单词标记与其他单词标记在<math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo
+    stretchy="false">)</mo></mrow> <annotation encoding="application/x-tex">O(1)</annotation></semantics></math>
+    O(1) 计算中相关联，而不考虑它们之间的相对位置距离。因此，对于没有位置嵌入的LLM，每个标记似乎与所有其他标记具有相同的距离，例如，区分“你好 我爱你”和“你爱我
+    你好”将会非常具有挑战性。
 - en: For the LLM to understand sentence order, an additional *cue* is needed and
     is usually applied in the form of *positional encodings* (or also called *positional
     embeddings*). Positional encodings, encode the position of each token into a numerical
     presentation that the LLM can leverage to better understand sentence order.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了让LLM理解句子顺序，需要额外的*提示*，通常以*位置编码*（也称为*位置嵌入*）的形式应用。位置编码将每个标记的位置编码为LLM可以利用的数值表示，以更好地理解句子顺序。
 - en: The authors of the [*Attention Is All You Need*](https://arxiv.org/abs/1706.03762)
     paper introduced sinusoidal positional embeddings<math><semantics><mrow><mi mathvariant="bold">P</mi><mo>=</mo><msub><mi
     mathvariant="bold">p</mi><mn>1</mn></msub><mo separator="true">,</mo><mo>…</mo><mo
@@ -872,19 +1283,42 @@
     mathvariant="bold">p</mi><mi>N</mi></msub></mrow> <annotation encoding="application/x-tex">\mathbf{x}_1
     + \mathbf{p}_1, \ldots, \mathbf{x}_N + \mathbf{p}_N</annotation></semantics></math>
     x1​+p1​,…,xN​+pN​ thereby cueing the model to better learn sentence order.
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: '[*注意力机制就是你所需要的*](https://arxiv.org/abs/1706.03762)论文的作者们引入了正弦位置嵌入<math><semantics><mrow><mi
+    mathvariant="bold">P</mi><mo>=</mo><msub><mi mathvariant="bold">p</mi><mn>1</mn></msub><mo
+    separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi mathvariant="bold">p</mi><mi>N</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{P} = \mathbf{p}_1, \ldots, \mathbf{p}_N</annotation></semantics></math>
+    P=p1​,…,pN​ 。其中每个向量<math><semantics><mrow><msub><mi mathvariant="bold">p</mi><mi>i</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{p}_i</annotation></semantics></math>
+    pi​ 是根据其位置<math><semantics><mrow><mi>i</mi></mrow> <annotation encoding="application/x-tex">i</annotation></semantics></math>
+    i 计算的正弦函数。然后将位置编码简单地添加到输入序列向量中<math><semantics><mrow><mover accent="true"><mi
+    mathvariant="bold">X</mi><mo>^</mo></mover><mo>=</mo><msub><mover accent="true"><mi
+    mathvariant="bold">x</mi><mo>^</mo></mover><mn>1</mn></msub><mo separator="true">,</mo><mo>…</mo><mo
+    separator="true">,</mo><msub><mover accent="true"><mi mathvariant="bold">x</mi><mo>^</mo></mover><mi>N</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{\hat{X}} = \mathbf{\hat{x}}_1,
+    \ldots, \mathbf{\hat{x}}_N</annotation></semantics></math> X^=x^1​,…,x^N​ =<math><semantics><mrow><msub><mi
+    mathvariant="bold">x</mi><mn>1</mn></msub><mo>+</mo><msub><mi mathvariant="bold">p</mi><mn>1</mn></msub><mo
+    separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi mathvariant="bold">x</mi><mi>N</mi></msub><mo>+</mo><msub><mi
+    mathvariant="bold">p</mi><mi>N</mi></msub></mrow> <annotation encoding="application/x-tex">\mathbf{x}_1
+    + \mathbf{p}_1, \ldots, \mathbf{x}_N + \mathbf{p}_N</annotation></semantics></math>
+    x1​+p1​,…,xN​+pN​ 从而提示模型更好地学习句子顺序。'
 - en: Instead of using fixed position embeddings, others (such as [Devlin et al.](https://arxiv.org/abs/1810.04805))
     used learned positional encodings for which the positional embeddings<math><semantics><mrow><mi
     mathvariant="bold">P</mi></mrow> <annotation encoding="application/x-tex">\mathbf{P}</annotation></semantics></math>
     P are learned during training.
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 其他人（例如[Devlin等人](https://arxiv.org/abs/1810.04805)）使用了学习的位置编码，而不是固定的位置嵌入，这些位置嵌入在训练期间进行学习。
 - en: 'Sinusoidal and learned position embeddings used to be the predominant methods
     to encode sentence order into LLMs, but a couple of problems related to these
     positional encodings were found:'
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 正弦和学习位置嵌入曾经是将句子顺序编码到LLM中的主要方法，但发现了与这些位置编码相关的一些问题：
 - en: Sinusoidal and learned position embeddings are both absolute positional embeddings,
     *i.e.* encoding a unique embedding for each position id:<math><semantics><mrow><mn>0</mn><mo
     separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><mi>N</mi></mrow>
@@ -894,36 +1328,54 @@
     poor LLM performance for long text inputs. For long text inputs, it is advantageous
     if the model learns the relative positional distance input tokens have to each
     other instead of their absolute position.
+  id: totrans-173
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 正弦和学习位置嵌入都是绝对位置嵌入，即为每个位置id编码一个唯一的嵌入：<math><semantics><mrow><mn>0</mn><mo separator="true">,</mo><mo>…</mo><mo
+    separator="true">,</mo><mi>N</mi></mrow> <annotation encoding="application/x-tex">0,
+    \ldots, N</annotation></semantics></math> 0,…,N。正如[Huang等人](https://arxiv.org/abs/2009.13658)和[苏等人](https://arxiv.org/abs/2104.09864)所示，绝对位置嵌入导致长文本输入的LLM性能较差。对于长文本输入，如果模型学习输入标记之间的相对位置距离而不是它们的绝对位置，将是有利的。
 - en: When using learned position embeddings, the LLM has to be trained on a fixed
     input length<math><semantics><mrow><mi>N</mi></mrow> <annotation encoding="application/x-tex">N</annotation></semantics></math>
     N, which makes it difficult to extrapolate to an input length longer than what
     it was trained on.
+  id: totrans-174
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 当使用学习位置嵌入时，LLM必须在固定的输入长度<math><semantics><mrow><mi>N</mi></mrow> <annotation
+    encoding="application/x-tex">N</annotation></semantics></math> N上进行训练，这使得难以推广到比其训练长度更长的输入。
 - en: 'Recently, relative positional embeddings that can tackle the above mentioned
     problems have become more popular, most notably:'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 最近，能够解决上述问题的相对位置嵌入变得更加流行，其中最著名的是：
 - en: '[Rotary Position Embedding (RoPE)](https://arxiv.org/abs/2104.09864)'
+  id: totrans-176
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[旋转位置嵌入（RoPE）](https://arxiv.org/abs/2104.09864)'
 - en: '[ALiBi](https://arxiv.org/abs/2108.12409)'
+  id: totrans-177
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[ALiBi](https://arxiv.org/abs/2108.12409)'
 - en: Both *RoPE* and *ALiBi* argue that it’s best to cue the LLM about sentence order
     directly in the self-attention algorithm as it’s there that word tokens are put
     into relation with each other. More specifically, sentence order should be cued
     by modifying the<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi
     mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow> <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
     QKT computation.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: '*RoPE*和*ALiBi*都认为最好直接在自注意力算法中提示LLM关于句子顺序，因为在那里单词标记彼此关联。更具体地说，句子顺序应该通过修改<math><semantics><mrow><msup><mrow><mi
+    mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
+    QKT计算来提示。'
 - en: 'Without going into too many details, *RoPE* notes that positional information
     can be encoded into query-key pairs, *e.g.*<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>i</mi></msub></mrow>
     <annotation encoding="application/x-tex">\mathbf{q}_i</annotation></semantics></math>
@@ -949,8 +1401,30 @@
     <annotation encoding="application/x-tex">\theta</annotation></semantics></math>
     θ is *not* learned during training, but instead set to a pre-defined value that
     depends on the maximum input sequence length during training.'
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 不详细讨论，*RoPE*指出位置信息可以被编码到查询-键对中，例如：<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>i</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{q}_i</annotation></semantics></math>
+    和<math><semantics><mrow><msub><mi mathvariant="bold">x</mi><mi>j</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{x}_j</annotation></semantics></math>
+    ，通过将每个向量旋转一个角度<math><semantics><mrow><mi>θ</mi><mo>∗</mo><mi>i</mi></mrow> <annotation
+    encoding="application/x-tex">\theta * i</annotation></semantics></math> 和<math><semantics><mrow><mi>θ</mi><mo>∗</mo><mi>j</mi></mrow>
+    <annotation encoding="application/x-tex">\theta * j</annotation></semantics></math>
+    ，其中<math><semantics><mrow><mi>i</mi><mo separator="true">,</mo><mi>j</mi></mrow>
+    <annotation encoding="application/x-tex">i, j</annotation></semantics></math>
+    描述每个向量的句子位置：<math display="block"><semantics><mrow><msubsup><mover accent="true"><mi
+    mathvariant="bold">q</mi><mo>^</mo></mover><mi>i</mi><mi>T</mi></msubsup><msub><mover
+    accent="true"><mi mathvariant="bold">x</mi><mo>^</mo></mover><mi>j</mi></msub><mo>=</mo><msubsup><mi
+    mathvariant="bold">q</mi><mi>i</mi><mi>T</mi></msubsup><msub><mi mathvariant="bold">R</mi><mrow><mi>θ</mi><mo
+    separator="true">,</mo><mi>i</mi><mo>−</mo><mi>j</mi></mrow></msub><msub><mi mathvariant="bold">x</mi><mi>j</mi></msub><mi
+    mathvariant="normal">.</mi></mrow> <annotation encoding="application/x-tex">\mathbf{\hat{q}}_i^T
+    \mathbf{\hat{x}}_j = \mathbf{{q}}_i^T \mathbf{R}_{\theta, i -j} \mathbf{{x}}_j.</annotation></semantics></math>
+    q^​iT​x^j​=qiT​Rθ,i−j​xj​。 <math><semantics><mrow><msub><mi mathvariant="bold">R</mi><mrow><mi>θ</mi><mo
+    separator="true">,</mo><mi>i</mi><mo>−</mo><mi>j</mi></mrow></msub></mrow> <annotation
+    encoding="application/x-tex">\mathbf{R}_{\theta, i - j}</annotation></semantics></math>
+    Rθ,i−j​代表一个旋转矩阵。<math><semantics><mrow><mi>θ</mi></mrow> <annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+    θ在训练过程中*不会*被学习，而是设置为一个预定义的值，该值取决于训练过程中的最大输入序列长度。
 - en: By doing so, the propability score between<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>i</mi></msub></mrow>
     <annotation encoding="application/x-tex">\mathbf{q}_i</annotation></semantics></math>
     qi​ and<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>j</mi></msub></mrow>
@@ -962,51 +1436,86 @@
     i−j regardless of each vector’s specific positions<math><semantics><mrow><mi>i</mi></mrow>
     <annotation encoding="application/x-tex">i</annotation></semantics></math> i and<math><semantics><mrow><mi>j</mi></mrow>
     <annotation encoding="application/x-tex">j</annotation></semantics></math> j .
+  id: totrans-180
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 通过这样做，<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>i</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{q}_i</annotation></semantics></math>
+    和<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>j</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{q}_j</annotation></semantics></math>
+    之间的概率分数只有在<math><semantics><mrow><mi>i</mi><mo mathvariant="normal">≠</mo><mi>j</mi></mrow>
+    <annotation encoding="application/x-tex">i \ne j</annotation></semantics></math>
+    时才会受到影响，并且仅取决于相对距离<math><semantics><mrow><mi>i</mi><mo>−</mo><mi>j</mi></mrow>
+    <annotation encoding="application/x-tex">i - j</annotation></semantics></math>
+    ，而不考虑每个向量的具体位置<math><semantics><mrow><mi>i</mi></mrow> <annotation encoding="application/x-tex">i</annotation></semantics></math>
+    和<math><semantics><mrow><mi>j</mi></mrow> <annotation encoding="application/x-tex">j</annotation></semantics></math>
+    。
 - en: '*RoPE* is used in multiple of today’s most important LLMs, such as:'
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: '*RoPE*被用在当今一些最重要的LLM中，例如：'
 - en: '[**Falcon**](https://huggingface.co/tiiuae/falcon-40b)'
+  id: totrans-182
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**猎鹰**](https://huggingface.co/tiiuae/falcon-40b)'
 - en: '[**Llama**](https://arxiv.org/abs/2302.13971)'
+  id: totrans-183
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**大羊驼**](https://arxiv.org/abs/2302.13971)'
 - en: '[**PaLM**](https://arxiv.org/abs/2204.02311)'
+  id: totrans-184
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**PaLM**](https://arxiv.org/abs/2204.02311)'
 - en: As an alternative, *ALiBi* proposes a much simpler relative position encoding
     scheme. The relative distance that input tokens have to each other is added as
     a negative integer scaled by a pre-defined value `m` to each query-key entry of
     the<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
     <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
     QKT matrix right before the softmax computation.
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为一种替代方案，*ALiBi* 提出了一种更简单的相对位置编码方案。输入令牌之间的相对距离被添加为负整数，乘以预定义值 `m`，并添加到 softmax
+    计算之前的<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
+    QKT 矩阵的每个查询-键条目中。
 - en: '![](../Images/b4adb6fd6b6aaa790ed5e4200191e405.png)'
+  id: totrans-186
   prefs: []
   type: TYPE_IMG
+  zh: '![](../Images/b4adb6fd6b6aaa790ed5e4200191e405.png)'
 - en: As shown in the [ALiBi](https://arxiv.org/abs/2108.12409) paper, this simple
     relative positional encoding allows the model to retain a high performance even
     at very long text input sequences.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如[ALiBi](https://arxiv.org/abs/2108.12409) 论文所示，这种简单的相对位置编码使模型能够在非常长的文本输入序列中保持高性能。
 - en: '*ALiBi* is used in multiple of today’s most important LLMs, such as:'
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: '*ALiBi* 在当今一些最重要的 LLM 中使用，例如：'
 - en: '[**MPT**](https://huggingface.co/mosaicml/mpt-30b)'
+  id: totrans-189
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**MPT**](https://huggingface.co/mosaicml/mpt-30b)'
 - en: '[**BLOOM**](https://huggingface.co/bigscience/bloom)'
+  id: totrans-190
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**BLOOM**](https://huggingface.co/bigscience/bloom)'
 - en: Both *RoPE* and *ALiBi* position encodings can extrapolate to input lengths
     not seen during training whereas it has been shown that extrapolation works much
     better out-of-the-box for *ALiBi* as compared to *RoPE*. For ALiBi, one simply
@@ -1019,39 +1528,58 @@
     <annotation encoding="application/x-tex">\theta</annotation></semantics></math>
     θ, thereby allowing *RoPE* position embeddings to work well for extrapolated text
     input sequences (see [here](https://github.com/huggingface/transformers/pull/24653)).
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: '*RoPE* 和 *ALiBi* 位置编码都可以外推到训练中未见过的输入长度，然而已经证明相对于 *RoPE*，外推对于 *ALiBi* 来说更容易。对于
+    ALiBi，只需增加下三角位置矩阵的值以匹配输入序列的长度。对于 *RoPE*，保持训练期间使用的相同<math><semantics><mrow><mi>θ</mi></mrow>
+    <annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+    θ，在传递比训练期间看到的文本输入长得多的文本输入时会导致结果不佳，*参见* [Press 等人](https://arxiv.org/abs/2108.12409)。然而，社区已经发现了一些有效的技巧，可以调整<math><semantics><mrow><mi>θ</mi></mrow>
+    <annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+    θ，从而使 *RoPE* 位置嵌入适用于外推的文本输入序列（参见[这里](https://github.com/huggingface/transformers/pull/24653)）。'
 - en: 'Both RoPE and ALiBi are relative positional embeddings that are *not* learned
     during training, but instead are based on the following intuitions:'
+  id: totrans-192
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: RoPE 和 ALiBi 都是相对位置嵌入，它们在训练期间 *不* 被学习，而是基于以下直觉：
 - en: ''
+  id: totrans-193
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
 - en: Positional cues about the text inputs should be given directly to the<math><semantics><mrow><mi>Q</mi><msup><mi>K</mi><mi>T</mi></msup></mrow>
     <annotation encoding="application/x-tex">QK^T</annotation></semantics></math>
     QKT matrix of the self-attention layer
+  id: totrans-194
   prefs:
   - PREF_BQ
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 关于文本输入的位置提示应直接提供给自注意力层的<math><semantics><mrow><mi>Q</mi><msup><mi>K</mi><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">QK^T</annotation></semantics></math>
+    QKT 矩阵
 - en: The LLM should be incentivized to learn a constant *relative* distance positional
     encodings have to each other
+  id: totrans-195
   prefs:
   - PREF_BQ
   - PREF_UL
   type: TYPE_NORMAL
+  zh: LLM 应该被激励学习常数 *相对* 距离位置编码之间的关系
 - en: The further text input tokens are from each other, the lower the probability
     of their query-value probability. Both RoPE and ALiBi lower the query-key probability
     of tokens far away from each other. RoPE by decreasing their vector product by
     increasing the angle between the query-key vectors. ALiBi by adding large negative
     numbers to the vector product
+  id: totrans-196
   prefs:
   - PREF_BQ
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 文本输入令牌之间的距离越远，它们的查询-值概率就越低。RoPE 和 ALiBi 都降低了远离彼此的令牌的查询-键概率。RoPE 通过增加查询-键向量之间的角度来减少它们的向量积。ALiBi
+    通过向向量积添加大的负数
 - en: In conclusion, LLMs that are intended to be deployed in tasks that require handling
     large text inputs are better trained with relative positional embeddings, such
     as RoPE and ALiBi. Also note that even if an LLM with RoPE and ALiBi has been
@@ -1062,47 +1590,75 @@
     like<math><semantics><mrow><msub><mi>N</mi><mn>2</mn></msub><mo>=</mo><mn>8192</mn><mo>></mo><msub><mi>N</mi><mn>1</mn></msub></mrow>
     <annotation encoding="application/x-tex">N_2 = 8192 > N_1</annotation></semantics></math>
     N2​=8192>N1​ by extrapolating the positional embeddings.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: 总之，用于处理大文本输入的任务的 LLM 最好使用相对位置嵌入进行训练，例如 RoPE 和 ALiBi。还要注意，即使一个带有 RoPE 和 ALiBi
+    的 LLM 只在固定长度的数据上进行了训练，比如<math><semantics><mrow><msub><mi>N</mi><mn>1</mn></msub><mo>=</mo><mn>2048</mn></mrow>
+    <annotation encoding="application/x-tex">N_1 = 2048</annotation></semantics></math>
+    N1​=2048，它仍然可以在实践中用于比<math><semantics><mrow><msub><mi>N</mi><mn>1</mn></msub></mrow>
+    <annotation encoding="application/x-tex">N_1</annotation></semantics></math> N1​更大的文本输入，比如<math><semantics><mrow><msub><mi>N</mi><mn>2</mn></msub><mo>=</mo><mn>8192</mn><mo>></mo><msub><mi>N</mi><mn>1</mn></msub></mrow>
+    <annotation encoding="application/x-tex">N_2 = 8192 > N_1</annotation></semantics></math>
+    N2​=8192>N1​，通过外推位置嵌入。
 - en: 3.2 The key-value cache
+  id: totrans-198
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 3.2 关键-值缓存
 - en: Auto-regressive text generation with LLMs works by iteratively putting in an
     input sequence, sampling the next token, appending the next token to the input
     sequence, and continuing to do so until the LLM produces a token that signifies
     that the generation has finished.
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: LLMs的自回归文本生成通过迭代地输入一个序列，抽样下一个标记，将下一个标记附加到输入序列中，并继续这样做，直到LLM生成一个表示生成结束的标记。
 - en: Please have a look at [Transformer’s Generate Text Tutorial](https://huggingface.co/docs/transformers/llm_tutorial#generate-text)
     to get a more visual explanation of how auto-regressive generation works.
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 请查看[Transformer生成文本教程](https://huggingface.co/docs/transformers/llm_tutorial#generate-text)，以获得更直观的自回归生成工作原理解释。
 - en: Let’s run a quick code snippet to show how auto-regressive works in practice.
     We will simply take the most likely next token via `torch.argmax`.
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们运行一个快速的代码片段，展示自回归在实践中是如何工作的。我们将简单地通过`torch.argmax`获取最有可能的下一个标记。
 - en: '[PRE42]'
+  id: totrans-202
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: '**Output**:'
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE43]'
+  id: totrans-204
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: As we can see every time we increase the text input tokens by the just sampled
     token.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们所看到的，每次我们通过刚刚抽样的标记增加文本输入标记。
 - en: With very few exceptions, LLMs are trained using the [causal language modeling
     objective](https://huggingface.co/docs/transformers/tasks/language_modeling#causal-language-modeling)
     and therefore mask the upper triangle matrix of the attention score - this is
     why in the two diagrams above the attention scores are left blank (*a.k.a* have
     0 probability). For a quick recap on causal language modeling you can refer to
     the [*Illustrated Self Attention blog*](https://jalammar.github.io/illustrated-gpt2/#part-2-illustrated-self-attention).
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了极少数例外，LLMs是使用[因果语言建模目标](https://huggingface.co/docs/transformers/tasks/language_modeling#causal-language-modeling)进行训练的，因此会屏蔽注意力分数的上三角矩阵
+    - 这就是为什么在上述两个图表中，注意力分数留空（*也就是*概率为0）。关于因果语言建模的快速回顾，您可以参考[*Illustrated Self Attention
+    blog*](https://jalammar.github.io/illustrated-gpt2/#part-2-illustrated-self-attention)。
 - en: As a consequence, tokens *never* depend on previous tokens, more specifically
     the<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>i</mi></msub></mrow>
     <annotation encoding="application/x-tex">\mathbf{q}_i</annotation></semantics></math>
@@ -1121,28 +1677,53 @@
     < i}, \mathbf{v}_{m < i} \text{ , for } m \in \{0, \ldots i - 1\}</annotation></semantics></math>
     km<i​,vm<i​ , for m∈{0,…i−1}. In order to reduce unnecessary computation, one
     can therefore cache each layer’s key-value vectors for all previous timesteps.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，标记*永远*不依赖于先前的标记，更具体地说，<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>i</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{q}_i</annotation></semantics></math>
+    qi​向量永远不会与任何键、值向量<math><semantics><mrow><msub><mi mathvariant="bold">k</mi><mi>j</mi></msub><mo
+    separator="true">,</mo><msub><mi mathvariant="bold">v</mi><mi>j</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{k}_j, \mathbf{v}_j</annotation></semantics></math>
+    kj​,vj​相关联，如果<math><semantics><mrow><mi>j</mi><mo>></mo><mi>i</mi></mrow> <annotation
+    encoding="application/x-tex">j > i</annotation></semantics></math> j>i。相反，<math><semantics><mrow><msub><mi
+    mathvariant="bold">q</mi><mi>i</mi></msub></mrow> <annotation encoding="application/x-tex">\mathbf{q}_i</annotation></semantics></math>
+    qi​只关注先前的键-值向量<math><semantics><mrow><msub><mi mathvariant="bold">k</mi><mrow><mi>m</mi><mo><</mo><mi>i</mi></mrow></msub><mo
+    separator="true">,</mo><msub><mi mathvariant="bold">v</mi><mrow><mi>m</mi><mo><</mo><mi>i</mi></mrow></msub><mtext> , for </mtext><mi>m</mi><mo>∈</mo><mo
+    stretchy="false">{</mo><mn>0</mn><mo separator="true">,</mo><mo>…</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo
+    stretchy="false">}</mo></mrow> <annotation encoding="application/x-tex">\mathbf{k}_{m
+    < i}, \mathbf{v}_{m < i} \text{ , for } m \in \{0, \ldots i - 1\}</annotation></semantics></math>
+    km<i​,vm<i​ , for m∈{0,…i−1}。为了减少不必要的计算，可以为每一层缓存所有先前时间步的键-值向量。
 - en: In the following, we will tell the LLM to make use of the key-value cache by
     retrieving and forwarding it for each forward pass. In Transformers, we can retrieve
     the key-value cache by passing the `use_cache` flag to the `forward` call and
     can then pass it with the current token.
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们将告诉LLM利用键-值缓存，通过在每次前向传递中检索并转发它。在Transformers中，我们可以通过向`forward`调用传递`use_cache`标志来检索键-值缓存，然后可以将其与当前标记一起传递。
 - en: '[PRE44]'
+  id: totrans-209
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: '**Output**:'
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE45]'
+  id: totrans-211
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: As one can see, when using the key-value cache the text input tokens are *not*
     increased in length, but remain a single input vector. The length of the key-value
     cache on the other hand is increased by one at every decoding step.
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如大家所看到的，当使用键-值缓存时，文本输入标记的长度*不会*增加，而是保持为单个输入向量。另一方面，键-值缓存的长度在每个解码步骤都会增加一个。
 - en: Making use of the key-value cache means that the<math><semantics><mrow><msup><mrow><mi
     mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
     <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
@@ -1152,57 +1733,85 @@
     <annotation encoding="application/x-tex">\mathbf{q}_c</annotation></semantics></math>
     qc​ being the query projection of the currently passed input token which is *always*
     just a single vector.
+  id: totrans-213
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 利用键值缓存意味着<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi
+    mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow> <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
+    QKT基本上被简化为<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>c</mi></msub><msup><mi
+    mathvariant="bold">K</mi><mi>T</mi></msup></mrow> <annotation encoding="application/x-tex">\mathbf{q}_c\mathbf{K}^T</annotation></semantics></math>
+    qc​KT，其中<math><semantics><mrow><msub><mi mathvariant="bold">q</mi><mi>c</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{q}_c</annotation></semantics></math>
+    qc​是当前传递的输入令牌的查询投影，它*始终*只是一个单一向量。
 - en: 'Using the key-value cache has two advantages:'
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用键值缓存有两个优点：
 - en: Significant increase in computational efficiency as less computations are performed
     compared to computing the full<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi
     mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow> <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
     QKT matrix. This leads to an increase in inference speed
+  id: totrans-215
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 与计算完整的QKT矩阵相比，计算效率显著提高，因为进行的计算较少。这导致推理速度增加。
 - en: The maximum required memory is not increased quadratically with the number of
     generated tokens, but only increases linearly.
+  id: totrans-216
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所需的最大内存并不是随着生成的令牌数量的平方增加，而是线性增加。
 - en: One should *always* make use of the key-value cache as it leads to identical
     results and a significant speed-up for longer input sequences. Transformers has
     the key-value cache enabled by default when making use of the text pipeline or
     the [`generate` method](https://huggingface.co/docs/transformers/main_classes/text_generation).
+  id: totrans-217
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 应该*始终*利用键值缓存，因为它会产生相同的结果，并且对于较长的输入序列会显著加快速度。当使用文本管道或[`generate`方法](https://huggingface.co/docs/transformers/main_classes/text_generation)时，Transformers默认启用键值缓存。
 - en: Note that, despite our advice to use key-value caches, your LLM output may be
     slightly different when you use them. This is a property of the matrix multiplication
     kernels themselves — you can read more about it [here](https://github.com/huggingface/transformers/issues/25420#issuecomment-1775317535).
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，尽管我们建议使用键值缓存，但当您使用它们时，您的LLM输出可能会略有不同。这是矩阵乘法核心本身的属性 — 您可以在[这里](https://github.com/huggingface/transformers/issues/25420#issuecomment-1775317535)了解更多信息。
 - en: 3.2.1 Multi-round conversation
+  id: totrans-219
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 3.2.1 多轮对话
 - en: The key-value cache is especially useful for applications such as chat where
     multiple passes of auto-regressive decoding are required. Let’s look at an example.
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 键值缓存在需要多次自回归解码的应用程序中特别有用，让我们看一个例子。
 - en: '[PRE46]'
+  id: totrans-221
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: 'In this chat, the LLM runs auto-regressive decoding twice:'
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个对话中，LLM会自回归解码两次：
 - en: 'The first time, the key-value cache is empty and the input prompt is `"User:
     How many people live in France?"` and the model auto-regressively generates the
     text `"Roughly 75 million people live in France"` while increasing the key-value
     cache at every decoding step.'
+  id: totrans-223
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 第一次，键值缓存为空，输入提示是`"用户：法国有多少人口？"`，模型会自回归生成文本`"法国大约有7500万人口"，同时在每个解码步骤中增加键值缓存。
 - en: 'The second time the input prompt is `"User: How many people live in France?
     \n Assistant: Roughly 75 million people live in France \n User: And how many in
     Germany?"`. Thanks to the cache, all key-value vectors for the first two sentences
@@ -1213,39 +1822,55 @@
     auto-regressively generated with the key-value cache consisting of encoded key-value
     vectors of `"User: How many people live in France? \n Assistant: Roughly 75 million
     people live in France \n User: And how many are in Germany?"`.'
+  id: totrans-224
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 第二次输入提示是`"用户：法国有多少人口？\n助手：法国大约有7500万人口\n用户：德国有多少人口？"`。由于缓存的存在，前两个句子的所有键值向量已经计算完毕。因此，输入提示只包括`"用户：德国有多少人口？"`。在处理缩短的输入提示时，它的计算键值向量会与第一次解码的键值缓存连接起来。然后第二个助手的回答`"德国大约有8100万居民"`会根据编码的键值向量`"用户：法国有多少人口？\n助手：法国大约有7500万人口\n用户：德国有多少人口？"`进行自回归生成。
 - en: 'Two things should be noted here:'
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里有两点需要注意：
 - en: Keeping all the context is crucial for LLMs deployed in chat so that the LLM
     understands all the previous context of the conversation. E.g. for the example
     above the LLM needs to understand that the user refers to the population when
     asking `"And how many are in Germany"`.
+  id: totrans-226
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 对于部署在聊天中的LLM来说，保留所有上下文对于LLM理解对话的先前上下文至关重要。例如，对于上面的例子，LLM需要理解用户在询问`"德国有多少人口？"`时指的是人口。
 - en: The key-value cache is extremely useful for chat as it allows us to continuously
     grow the encoded chat history instead of having to re-encode the chat history
     again from scratch (as e.g. would be the case when using an encoder-decoder architecture).
+  id: totrans-227
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 键值缓存对于聊天非常有用，因为它允许我们持续增加编码的聊天历史，而不必重新从头开始重新编码聊天历史（例如，当使用编码器-解码器架构时会发生这种情况）。
 - en: In `transformers`, a `generate` call will return `past_key_values` when `return_dict_in_generate=True`
     is passed, in addition to the default `use_cache=True`. Note that it is not yet
     available through the `pipeline` interface.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 在`transformers`中，当传递`return_dict_in_generate=True`时，`generate`调用将返回`past_key_values`，除了默认的`use_cache=True`。请注意，这还不适用于`pipeline`接口。
 - en: '[PRE47]'
+  id: totrans-229
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: '**Output**:'
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE48]'
+  id: totrans-231
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: Great, no additional time is spent recomputing the same key and values for the
     attention layer! There is however one catch. While the required peak memory for
     the<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
@@ -1258,58 +1883,91 @@
     stretchy="false">}</mo></mrow> <annotation encoding="application/x-tex">\mathbf{x}_i
     \text{, for } i \in \{1, \ldots, c - 1\}</annotation></semantics></math> xi​, for i∈{1,…,c−1}
     for all self-attention layers and for all attention heads.
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 太好了，不需要额外的时间来重新计算注意力层的相同键和值！然而，有一个问题。虽然<math><semantics><mrow><msup><mrow><mi
+    mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
+    QKT 矩阵所需的峰值内存显著减少，但在内存中保持键值缓存可能会对长输入序列或多轮对话非常昂贵。请记住，键值缓存需要存储所有先前输入向量的键值向量<math><semantics><mrow><msub><mi
+    mathvariant="bold">x</mi><mi>i</mi></msub><mtext>, for </mtext><mi>i</mi><mo>∈</mo><mo
+    stretchy="false">{</mo><mn>1</mn><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><mi>c</mi><mo>−</mo><mn>1</mn><mo
+    stretchy="false">}</mo></mrow> <annotation encoding="application/x-tex">\mathbf{x}_i
+    \text{, for } i \in \{1, \ldots, c - 1\}</annotation></semantics></math> xi​, for i∈{1,…,c−1}
+    对于所有自注意力层和所有注意力头部。
 - en: 'Let’s compute the number of float values that need to be stored in the key-value
     cache for the LLM `bigcode/octocoder` that we used before. The number of float
     values amounts to two times the sequence length times the number of attention
     heads times the attention head dimension and times the number of layers. Computing
     this for our LLM at a hypothetical input sequence length of 16000 gives:'
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们计算之前使用的LLM `bigcode/octocoder` 需要存储在键值缓存中的浮点值的数量。浮点值的数量等于序列长度乘以注意力头数乘以注意力头维度乘以层数的两倍。对于我们的LLM，在假设输入序列长度为16000时计算如下：
 - en: '[PRE49]'
+  id: totrans-234
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: '**Output**:'
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: '**输出**：'
 - en: '[PRE50]'
+  id: totrans-236
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: Roughly 8 billion float values! Storing 8 billion float values in `float16`
     precision requires around 15 GB of RAM which is circa half as much as the model
     weights themselves! Researchers have proposed two methods that allow to significantly
     reduce the memory cost of storing the key-value cache, which are explored in the
     next subsections.
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 大约80亿个浮点值！以`float16`精度存储80亿个浮点值需要大约15 GB的内存，这大约是模型权重本身的一半！研究人员提出了两种方法，可以显著减少存储键值缓存的内存成本，这将在接下来的小节中探讨。
 - en: 3.2.2 Multi-Query-Attention (MQA)
+  id: totrans-238
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 3.2.2 多查询注意力（MQA）
 - en: '[Multi-Query-Attention](https://arxiv.org/abs/1911.02150) was proposed in Noam
     Shazeer’s *Fast Transformer Decoding: One Write-Head is All You Need* paper. As
     the title says, Noam found out that instead of using `n_head` key-value projections
     weights, one can use a single head-value projection weight pair that is shared
     across all attention heads without that the model’s performance significantly
     degrades.'
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Multi-Query-Attention](https://arxiv.org/abs/1911.02150) 是Noam Shazeer在*Fast
+    Transformer Decoding: One Write-Head is All You Need*论文中提出的。正如标题所说，Noam 发现，可以使用一个单一的头值投影权重对，而不是使用`n_head`个键值投影权重，这个对在所有注意力头部之间共享，而不会显著降低模型的性能。'
 - en: By using a single head-value projection weight pair, the key value vectors<math><semantics><mrow><msub><mi
     mathvariant="bold">k</mi><mi>i</mi></msub><mo separator="true">,</mo><msub><mi
     mathvariant="bold">v</mi><mi>i</mi></msub></mrow> <annotation encoding="application/x-tex">\mathbf{k}_i,
     \mathbf{v}_i</annotation></semantics></math> ki​,vi​ have to be identical across
     all attention heads which in turn means that we only need to store 1 key-value
     projection pair in the cache instead of `n_head` ones.
+  id: totrans-240
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 通过使用单个头值投影权重对，键值向量<math><semantics><mrow><msub><mi mathvariant="bold">k</mi><mi>i</mi></msub><mo
+    separator="true">,</mo><msub><mi mathvariant="bold">v</mi><mi>i</mi></msub></mrow>
+    <annotation encoding="application/x-tex">\mathbf{k}_i, \mathbf{v}_i</annotation></semantics></math>
+    ki​,vi​ 在所有注意力头部之间必须是相同的，这意味着我们只需要在缓存中存储1个键值投影对，而不是`n_head`个。
 - en: As most LLMs use between 20 and 100 attention heads, MQA significantly reduces
     the memory consumption of the key-value cache. For the LLM used in this notebook
     we could therefore reduce the required memory consumption from 15 GB to less than
     400 MB at an input sequence length of 16000.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于大多数LLM使用20到100个注意力头部，MQA显著减少了键值缓存的内存消耗。对于本笔记本中使用的LLM，因此我们可以将所需的内存消耗从15 GB减少到输入序列长度为16000时的不到400
+    MB。
 - en: In addition to memory savings, MQA also leads to improved computational efficiency
     as explained in the following. In auto-regressive decoding, large key-value vectors
     need to be reloaded, concatenated with the current key-value vector pair to be
@@ -1320,8 +1978,13 @@
     reducing the size of the key-value vectors less memory needs to be accessed, thus
     reducing the memory bandwidth bottleneck. For more detail, please have a look
     at [Noam’s paper](https://arxiv.org/abs/1911.02150).
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了节省内存外，MQA还提高了计算效率，如下所述。在自回归解码中，需要重新加载大的键值向量，将其与当前的键值向量对连接，然后将其馈送到每一步的<math><semantics><mrow><msub><mi
+    mathvariant="bold">q</mi><mi>c</mi></msub><msup><mi mathvariant="bold">K</mi><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">\mathbf{q}_c\mathbf{K}^T</annotation></semantics></math>
+    qc​KT 计算中。对于自回归解码，常量重新加载所需的内存带宽可能成为严重的时间瓶颈。通过减小键值向量的大小，可以减少访问的内存量，从而减少内存带宽瓶颈。更详细的信息，请参阅[Noam的论文](https://arxiv.org/abs/1911.02150)。
 - en: The important part to understand here is that reducing the number of key-value
     attention heads to 1 only makes sense if a key-value cache is used. The peak memory
     consumption of the model for a single forward pass without key-value cache stays
@@ -1329,36 +1992,55 @@
     attention head still has a different<math><semantics><mrow><msup><mrow><mi mathvariant="bold">Q</mi><mi
     mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow> <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
     QKT matrix.
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里需要理解的重要部分是，将关键值注意力头的数量减少到1只有在使用关键值缓存时才有意义。模型在没有关键值缓存的单次前向传递中的峰值内存消耗保持不变，因为每个注意力头仍然具有唯一的查询向量，因此每个注意力头仍然具有不同的<math><semantics><mrow><msup><mrow><mi
+    mathvariant="bold">Q</mi><mi mathvariant="bold">K</mi></mrow><mi>T</mi></msup></mrow>
+    <annotation encoding="application/x-tex">\mathbf{QK}^T</annotation></semantics></math>
+    QKT 矩阵。
 - en: 'MQA has seen wide adoption by the community and is now used by many of the
     most popular LLMs:'
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: MQA已经被社区广泛采用，现在许多最受欢迎的LLM都在使用：
 - en: '[**Falcon**](https://huggingface.co/tiiuae/falcon-40b)'
+  id: totrans-245
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**Falcon**](https://huggingface.co/tiiuae/falcon-40b)'
 - en: '[**PaLM**](https://arxiv.org/abs/2204.02311)'
+  id: totrans-246
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**PaLM**](https://arxiv.org/abs/2204.02311)'
 - en: '[**MPT**](https://huggingface.co/mosaicml/mpt-30b)'
+  id: totrans-247
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**MPT**](https://huggingface.co/mosaicml/mpt-30b)'
 - en: '[**BLOOM**](https://huggingface.co/bigscience/bloom)'
+  id: totrans-248
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[**BLOOM**](https://huggingface.co/bigscience/bloom)'
 - en: Also, the checkpoint used in this notebook - `bigcode/octocoder` - makes use
     of MQA.
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，本笔记中使用的检查点`bigcode/octocoder`使用了MQA。
 - en: 3.2.3 Grouped-Query-Attention (GQA)
+  id: totrans-250
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 3.2.3 分组查询注意力（GQA）
 - en: '[Grouped-Query-Attention](https://arxiv.org/abs/2305.13245), as proposed by
     Ainslie et al. from Google, found that using MQA can often lead to quality degradation
     compared to using vanilla multi-key-value head projections. The paper argues that
@@ -1368,37 +2050,50 @@
     `n` to a significantly smaller value than `n_head`, such as 2,4 or 8 almost all
     of the memory and speed gains from MQA can be kept while sacrificing less model
     capacity and thus arguably less performance.'
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: '[分组查询注意力](https://arxiv.org/abs/2305.13245)，由谷歌的Ainslie等人提出，发现使用MQA与使用普通的多键值头投影相比，通常会导致质量下降。该论文认为，通过减少查询头投影权重的数量，可以保留更多的模型性能。不要仅使用单个键值投影权重，应使用`n
+    < n_head`个键值投影权重。通过选择`n`为远小于`n_head`的值，例如2、4或8，几乎可以保留来自MQA的所有内存和速度增益，同时牺牲较少的模型容量，因此可以说是性能更好。'
 - en: Moreover, the authors of GQA found out that existing model checkpoints can be
     *uptrained* to have a GQA architecture with as little as 5% of the original pre-training
     compute. While 5% of the original pre-training compute can still be a massive
     amount, GQA *uptraining* allows existing checkpoints to be useful for longer input
     sequences.
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: '此外，GQA的作者发现，现有的模型检查点可以通过仅使用原始预训练计算量的5%进行*更新训练*，以实现GQA架构。虽然原始预训练计算量的5%仍然是一个巨大的数量，但GQA的*更新训练*使现有的检查点可以用于更长的输入序列。 '
 - en: GQA was only recently proposed which is why there is less adoption at the time
     of writing this notebook. The most notable application of GQA is [Llama-v2](https://huggingface.co/meta-llama/Llama-2-70b-hf).
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: GQA是最近提出的，因此在撰写本笔记时采用的情况较少。GQA最显著的应用是[Llama-v2](https://huggingface.co/meta-llama/Llama-2-70b-hf)。
 - en: As a conclusion, it is strongly recommended to make use of either GQA or MQA
     if the LLM is deployed with auto-regressive decoding and is required to handle
     large input sequences as is the case for example for chat.
+  id: totrans-254
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 总之，强烈建议在LLM部署自回归解码并需要处理大型输入序列的情况下使用GQA或MQA。
 - en: Conclusion
+  id: totrans-255
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 结论
 - en: The research community is constantly coming up with new, nifty ways to speed
     up inference time for ever-larger LLMs. As an example, one such promising research
     direction is [speculative decoding](https://arxiv.org/abs/2211.17192) where “easy
     tokens” are generated by smaller, faster language models and only “hard tokens”
     are generated by the LLM itself. Going into more detail is out of the scope of
     this notebook, but can be read upon in this [nice blog post](https://huggingface.co/blog/assisted-generation).
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: 研究界不断提出新的巧妙方法来加快越来越大的LLM的推理时间。例如，一个有前途的研究方向是[推测解码](https://arxiv.org/abs/2211.17192)，其中较小、更快的语言模型生成“简单标记”，只有LLM本身生成“困难标记”。更详细的内容超出了本笔记的范围，但可以在这篇[不错的博客文章](https://huggingface.co/blog/assisted-generation)中阅读。
 - en: The reason massive LLMs such as GPT3/4, Llama-2-70b, Claude, PaLM can run so
     quickly in chat-interfaces such as [Hugging Face Chat](https://huggingface.co/chat/)
     or ChatGPT is to a big part thanks to the above-mentioned improvements in precision,
@@ -1406,5 +2101,7 @@
     etc… will only get faster and allow for more memory, but one should nevertheless
     always make sure to use the best available algorithms and architectures to get
     the most bang for your buck 🤗
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 大型LLM（如GPT3/4、Llama-2-70b、Claude、PaLM）能够在[Hugging Face Chat](https://huggingface.co/chat/)或ChatGPT等聊天界面中运行如此迅速，这在很大程度上要归功于上述精度、算法和架构的改进。未来，像GPU、TPU等加速器将会变得更快，允许更多的内存，但仍然应始终确保使用最佳的可用算法和架构，以获得最大的性价比🤗
