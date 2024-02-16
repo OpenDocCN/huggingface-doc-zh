@@ -1,0 +1,6 @@
++   [SageMaker 中文文档](README.md)
++   [在 Amazon SageMaker 上的 Hugging Face](sgmkr_1.md)
++   [在 Amazon SageMaker 上训练和部署 Hugging Face](sgmkr_2.md)
++   [在 Amazon SageMaker 上运行训练](sgmkr_3.md)
++   [将模型部署到 Amazon SageMaker](sgmkr_4.md)
++   [参考](sgmkr_5.md)
